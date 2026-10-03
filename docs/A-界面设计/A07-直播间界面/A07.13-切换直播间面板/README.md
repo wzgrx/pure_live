@@ -1,11 +1,51 @@
-# A07.13 切换直播间面板：设计（第 1 版）
+# A07.13 切换直播间面板：设计（第 1 版，按建议定稿，已开发，待真机）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：直播间的“切换直播间”——竖屏右上角菜单、横屏全屏和竖屏全屏顶栏的 ⇄、未开播和出错状态里的按钮，三个入口打开的同一个面板；横屏全屏和竖屏全屏画面上的四宫格菜单去掉栏上已有的项
 - 来源：用户的问题 06（“竖屏点击右上角 切换直播间，弹出的切换直播间的ui不太行，需要重新设计优化”）、问题 08（“横屏……切换直播间……和……最右边的功能图标……功能重合……还要考虑和竖屏的联系”）；GitHub issue #37（“感觉旧版那种小的好看看的还多，新版就变了，加个新旧切换开关吧”）；审查报告 A-06、A-08（[docs/V-需求和反馈/V03-审查和调研/V03.1-全面审查/README.md](../../../V-需求和反馈/V03-审查和调研/V03.1-全面审查/README.md)）；云端任务 [A07.13](brief.md)
 - 面板位置照 [A07.6](../A07.6-直播间弹窗/README.md) 的统一规则（录制、弹幕设置同一套）；换台走 [A07.2](../A07.2-竖屏流和竖屏全屏/README.md) A07.3 上下滑换台的同一条路
 - 评审页：本机 `~/ref/design/compare/U.2m.html`（`python3 tools/ui/mock/page.py docs/A-界面设计/A07-直播间界面/A07.13-切换直播间面板/page.json`）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 src/gen.py --counts` 打印下面的卡片数表）
+- 旧编号：U.2m、B05、T05h.2；相关决定 D-022（默认 3.x 的小卡片网格，可以切换成列表并记住）、D-003（X1～X5 按建议 A）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `zh.json`）；“现在”是 4.0.0；画面、封面和头像是示意图片
+
+## 界面清点表
+
+| 编号 | 界面 | 从哪打开 | 形态 | 状态 |
+|---|---|---|---|---|
+| A07.13-a | 切换直播间面板（`RoomPanelKind.switchRoom`） | 竖屏右上角四宫格菜单第一项；横屏全屏顶栏 ⇄；竖屏全屏顶栏第二行 ⇄；未开播、出错、受限状态里的“切换直播间” | 竖屏普通布局（画面下方）、竖屏流三档面板里、竖屏全屏（底部 60%）、横屏全屏和平板（右侧 360 全高） | 网格、列表；四个分组；筛选中；空；读取失败；刷新中、刷新失败 |
+| A07.13-b | 画面上的四宫格菜单（横屏全屏、竖屏全屏） | 全屏顶栏右上角 | 横屏、竖屏全屏 | 去掉栏上已有的项 |
+| A07.13-c | 长按一张卡片 | 面板里长按 | 居中对话框（房间卡片的同一个，A09.1） | 已关注、未关注 |
+
+## 3.x 的样子和问题
+
+`git show v3.2.11:lib/modules/live_play/dialogs/play_other.dart`，大小在 `widgets/content_first_panel_layout.dart`。
+
+- **弹法**：竖屏菜单（`live_play_menu_button.dart:88-94`）和全屏 ⇄（`video_controller_panel.dart:394-410`）都是 `showDialog`：靠右的圆角 16 对话框，宽是可用宽度的一半（至少 280），高最多 720；背后压暗。竖屏手机上是 280×720，横屏 852×393 上是 418×377，平板 1280×800 上是 620×720。
+- **头部** 48 高：`video_library_rounded` 17、“切换直播间”（titleSmall 加粗）、刷新、关闭。刷新时顶上一条 2 高的进度条，没有时间，失败不提示。
+- **分组** 48 高：“已开播”（`sensors_rounded`）、“录播”（`fiber_smart_record_rounded`）、“观看记录”（`history_rounded`），12 号字。已开播和录播按人数排（`compareAudienceRanking`）。
+- **小卡片**（`_RoomSwitchCard`）：网格内边距 6、间距 5；列数 `resolveRoomHistoryColumns`：内容宽减 12 后够 168×2+5 就 2 列，否则 1 列（**最多 2 列**）；卡高 `resolveRoomHistoryCardHeight`：16:9 封面加 36 的底栏，2 列时压到两行能放下（不低于 112）。封面右上平台名，左下渐变上写人数（观看记录写“YYYY-MM-DD HH:mm 观看”）；底栏标题一行加粗、人形图标和主播名、右箭头。
+- **点一张**：关掉对话框，`controller.switchRoom(room)` 在同一页换台（`live_play_controller.dart:884-930`）。
+
+**4.0.0 的样子和问题**（设计时，行号是当时的）
+
+`apps/pure_live/lib/features/live_play/dialogs/room_switcher.dart`：70% 高的底部表单，三个标签（已开播 / 关注的回放 / 观看记录），普通 `ListTile`（头像、主播名、“平台 · 标题”、在播的加一个电视图标）。
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| S1 | 没有封面、人数；观看记录看不出谁在播；没有搜索；看不到当前房间；空列表也占 70%；刷新失败不提示 | `room_switcher.dart:61`、`:153-186` |
+| S2 | 点一个直播间整页替换（`offAndToRoomDetail` → `pushReplacement`）：退出全屏；新页先初始化、旧页后释放，用不上保留的播放器（C02.1）；来源列表（A07.3）丢了 | `room_switcher.dart:183`、`routes/app_navigator.dart` |
+| S3 | 横屏全屏也是底部表单，393 高的 70% 只露两三行，还压在画面中间 | `room_switcher.dart:17-22` |
+| S4 | 横屏顶栏有 ⇄，右上角菜单里又有“切换直播间”；投屏、画面比例也在栏上和菜单里各一份；竖屏全屏第二行的 ⇄、投屏同样重复。393 高的横屏上菜单要滚动 | `player_controls.dart` `_trailing(switchRoom: true)` + `_roomActions()`；`room_menu_button.dart` `roomMenuGroups` |
+| S5 | （v3）竖屏对话框只有 280 宽、1 列，一屏 3 张；盖住画面并压暗 | `content_first_panel_layout.dart:24-50` |
+| S6 | （v3）最多 2 列：平板上卡片很大，竖屏平板一屏只有 8 张 | `content_first_panel_layout.dart:294-310` |
+
+必须保留的操作习惯（[specs/UI.md](../../../specs/UI.md) 附录 A）：第 7 条（返回先关面板）、第 14 条（卡片长按 = 操作菜单，面板里的卡片也是）；3.x 的 `switchRoom` 是在同一页换台（`controllers/live_play_controller.dart:884-930`），c2 照它恢复。
+
+## 各版的经过
+
+| 版 | 内容 | 用户意见 |
+|---|---|---|
+| 第 1 版 | 一个面板各布局只换位置；网格（v3 小卡片）和列表两种样式；分组、筛选、正在观看、刷新；一屏卡片数对照；去掉全屏菜单里的重复入口；五处选择 | 2026-10-02 按建议定稿（用户已授权“所有决定你选择”，X1～X5 按建议 A，D-003），直接开发；评审页没有发布到 claude.ai（本机 `~/ref/design/compare/U.2m.html`） |
 
 ## 对比页（按章节导出）
 
@@ -24,38 +64,7 @@
 | [now-menu-landscape.jpg](now-menu-landscape.jpg)、[v4-menu-landscape.jpg](v4-menu-landscape.jpg) | 横屏菜单：现在重复三项 / 新设计去掉 |
 | [v4-portrait-n.jpg](v4-portrait-n.jpg)、[v4-landscape-n.jpg](v4-landscape-n.jpg)、[v4-menu-landscape-n.jpg](v4-menu-landscape-n.jpg) | 按钮编号示意图 |
 
-## 界面清点表
-
-| 编号 | 界面 | 从哪打开 | 形态 | 状态 |
-|---|---|---|---|---|
-| A07.13-a | 切换直播间面板（`RoomPanelKind.switchRoom`） | 竖屏右上角四宫格菜单第一项；横屏全屏顶栏 ⇄；竖屏全屏顶栏第二行 ⇄；未开播、出错、受限状态里的“切换直播间” | 竖屏普通布局（画面下方）、竖屏流三档面板里、竖屏全屏（底部 60%）、横屏全屏和平板（右侧 360 全高） | 网格、列表；四个分组；筛选中；空；读取失败；刷新中、刷新失败 |
-| A07.13-b | 画面上的四宫格菜单（横屏全屏、竖屏全屏） | 全屏顶栏右上角 | 横屏、竖屏全屏 | 去掉栏上已有的项 |
-| A07.13-c | 长按一张卡片 | 面板里长按 | 居中对话框（房间卡片的同一个，A09.1） | 已关注、未关注 |
-
-## v3 的样子
-
-`lib/modules/live_play/dialogs/play_other.dart`，大小在 `widgets/content_first_panel_layout.dart`。
-
-- **弹法**：竖屏菜单（`live_play_menu_button.dart:88-94`）和全屏 ⇄（`video_controller_panel.dart:394-410`）都是 `showDialog`：靠右的圆角 16 对话框，宽是可用宽度的一半（至少 280），高最多 720；背后压暗。竖屏手机上是 280×720，横屏 852×393 上是 418×377，平板 1280×800 上是 620×720。
-- **头部** 48 高：`video_library_rounded` 17、“切换直播间”（titleSmall 加粗）、刷新、关闭。刷新时顶上一条 2 高的进度条，没有时间，失败不提示。
-- **分组** 48 高：“已开播”（`sensors_rounded`）、“录播”（`fiber_smart_record_rounded`）、“观看记录”（`history_rounded`），12 号字。已开播和录播按人数排（`compareAudienceRanking`）。
-- **小卡片**（`_RoomSwitchCard`）：网格内边距 6、间距 5；列数 `resolveRoomHistoryColumns`：内容宽减 12 后够 168×2+5 就 2 列，否则 1 列（**最多 2 列**）；卡高 `resolveRoomHistoryCardHeight`：16:9 封面加 36 的底栏，2 列时压到两行能放下（不低于 112）。封面右上平台名，左下渐变上写人数（观看记录写“YYYY-MM-DD HH:mm 观看”）；底栏标题一行加粗、人形图标和主播名、右箭头。
-- **点一张**：关掉对话框，`controller.switchRoom(room)` 在同一页换台（`live_play_controller.dart:884-930`）。
-
-## 4.0.0 现在的样子和问题
-
-`apps/pure_live/lib/features/live_play/dialogs/room_switcher.dart`：70% 高的底部表单，三个标签（已开播 / 关注的回放 / 观看记录），普通 `ListTile`（头像、主播名、“平台 · 标题”、在播的加一个电视图标）。
-
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| S1 | 没有封面、人数；观看记录看不出谁在播；没有搜索；看不到当前房间；空列表也占 70%；刷新失败不提示 | `room_switcher.dart:61`、`:153-186` |
-| S2 | 点一个直播间整页替换（`offAndToRoomDetail` → `pushReplacement`）：退出全屏；新页先初始化、旧页后释放，用不上保留的播放器（C02.1）；来源列表（A07.3）丢了 | `room_switcher.dart:183`、`routes/app_navigator.dart` |
-| S3 | 横屏全屏也是底部表单，393 高的 70% 只露两三行，还压在画面中间 | `room_switcher.dart:17-22` |
-| S4 | 横屏顶栏有 ⇄，右上角菜单里又有“切换直播间”；投屏、画面比例也在栏上和菜单里各一份；竖屏全屏第二行的 ⇄、投屏同样重复。393 高的横屏上菜单要滚动 | `player_controls.dart` `_trailing(switchRoom: true)` + `_roomActions()`；`room_menu_button.dart` `roomMenuGroups` |
-| S5 | （v3）竖屏对话框只有 280 宽、1 列，一屏 3 张；盖住画面并压暗 | `content_first_panel_layout.dart:24-50` |
-| S6 | （v3）最多 2 列：平板上卡片很大，竖屏平板一屏只有 8 张 | `content_first_panel_layout.dart:294-310` |
-
-## 新设计
+## 新设计（第 1 版的内容）
 
 同一个面板，屏幕大小只决定放在哪（A07.6 统一规则）：
 
@@ -139,7 +148,7 @@
 | 电视 | 不适用（电视用上下键换台，pure_live_TV 的做法） |
 | 苹果平台 | 同宽屏 |
 
-## 待选和决定（按建议 A）
+## 待选和决定（按建议 A 定稿）
 
 - X1 打开时停在哪个分组：**A** 有来源列表时停在来源列表，否则关注在播；同一页面里记住上次选的。B 总是关注在播。
 - X2 列数：**A** 按最小卡宽 168 算（手机上和 v3 一样，宽的地方多列，平板竖屏一屏 16 张）。B 照 v3 最多 2 列（平板竖屏一屏只有 4 张完整，比 v3 的 8 张少）。
@@ -153,3 +162,34 @@
 - 分组列表在关注、观看记录变化时算一次（排序、去掉当前房间），筛选只在输入时算；不按帧重建。
 - 面板只在打开时构建；“X 分钟前”每分钟重画一次头部的那个按钮。
 - 换台复用播放器，不建新页面（A07.3 的同一条路）。
+
+## 实现和验证
+
+**实现**（详见 [record.md](record.md)；2026-10-02，合并提交 `531fcd0ba`“Merge B05: the room switcher is one panel everywhere, v3's small-card grid by default, switching in place”；登记表记的是 `4a09a48bc`（面板改用 A02.2 的统一部件和记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/live_play/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | `layout/room_panel.dart:11` 的 `RoomPanelKind.switchRoom`；面板 `switch_room/room_switch_panel.dart:75` 的 `RoomSwitchPanel`（`RoomSidePanel`，头部是 A02.2 的 `PanelHeader`，52 高、标题 17 号）；位置由页面的 `_panelLayer` 决定（竖屏画面下方、竖屏流三档面板里、竖屏全屏底部 60%、横屏全屏和平板右侧 360） |
+| c2 | ✅ | `live_play_page.dart:342` 的 `_pickRoom(room, group)`：所选分组（去掉已下线平台）变成竖屏全屏上下滑的列表，再调 `_switchRoom`（`:360`）；平台已下线时提示“该平台已下线” |
+| c3 | ✅（偏差 2） | `logic/room_switch.dart:60` 的 `roomSwitchColumns`（最小卡宽 168，525 宽以内和 v3 的 `resolveRoomHistoryColumns` 完全一样，更宽时多列，X2 A）、`:70` 的 `roomSwitchCardHeight`（16:9 封面 + 名字行，两列时压到两行放得下，最低 96） |
+| c4 | ✅ | 新设置 `roomSwitcherLayout`（`packages/live_store/lib/src/settings/settings.dart:394`，`grid` / `list`，默认 `grid`，只在面板头部改）；按钮图标是切过去的样式 |
+| c5 | ✅ | `logic/room_switch.dart:10` 的 `RoomSwitchGroup`、`:134` 的 `roomSwitchLists`：在播和回放按人数排（`AudiencePolicy.rank`）；来源列表原样顺序，从关注进来时不显示（X3 A）；打开时停在上次选的，否则来源列表，否则关注在播（X1 A） |
+| c6 | ✅ | `switch_room/room_switch_panel.dart:529` 的 `_WatchingLine`（36 高，跟着房间信息更新）；各分组不再列出当前房间 |
+| c7 | ✅ | 头部搜索按钮出搜索框，`logic/room_switch.dart:172` 的 `filterByStreamer`（不分大小写） |
+| c8 | ✅ | `switch_room/room_switch_panel.dart:409` 的 `_RefreshButton`：带时间（“5 分钟前”“刚刚”，`switch_room/room_switch_tiles.dart:13` 的 `agoText`，每分钟更新）；刷新中转圈不能再点；失败变红写“刷新失败”并弹 `AppToast`“N 个直播间刷新失败，显示的是上次的状态”带“重试”（X5 A）；时间和失败数由 `apps/pure_live/lib/app/app.dart:86` 接上的 `FollowsRefresher`（`room_switch_panel.dart:22`）给 |
+| c9 | ✅ | 封面压 54% 黑，网格写在封面左上、列表写在第三行；观看记录里关注的直播间用关注的最新状态 |
+| c10 | ✅ | 长按卡片：`room_switch_panel.dart:227` 调 `shared/rooms/room_menu.dart` 的 `showRoomMenu` |
+| c11 | ✅ | 每个分组一句话；筛选没结果“没有名字包含“X”的主播”；读取出错“列表读取失败”加“重试”（`_PanelMessage` `:576`） |
+| c12 | ✅（偏差 3） | `buttons/room_menu_button.dart:188` 的 `menuEntriesOnBars(landscape:, cast:)`：横屏去掉切换直播间、投屏、画面比例；竖屏全屏去掉切换直播间、投屏，**画面比例留着**（竖屏全屏下栏只有“画面模式”，去掉就没入口）；投屏只在支持投屏的平台算栏上已有 |
+| c13 | ✅ | 三个入口都调 `showRoomSwitchPanel`（`room_switch_panel.dart:39`）：菜单 `buttons/room_menu_button.dart:241`、全屏 ⇄ `player/player_controls.dart:398`、状态里的按钮 `player/player_status.dart:198` |
+
+- 根因（记录）：①4.0.0 的切换直播间是 70% 高的底部表单加普通 `ListTile`（`dialogs/room_switcher.dart`，已删），没有封面和人数、看不到当前房间、刷新失败不提示，横屏全屏 393 高只露两三行、压在画面中间；②选中后 `AppNavigator.offAndToRoomDetail`（`pushReplacement`）整页替换：退出全屏、新页先初始化旧页后释放（用不上保留的播放器）、来源列表丢失；③横屏顶栏 ⇄、投屏、下栏画面比例和右上角菜单重复。
+- 偏差（记录）：①打开时停在来源列表（X1 A）；②宽处多于 v3 的 2 列（照抄的话竖着拿的平板一屏只有 4 张，少于 v3 的 8 张）；③竖屏全屏菜单留着“画面比例”；④卡片底下只写主播名，标题移到封面下沿（矮 10，同样高度放得更多）；⑤改了任务书可改目录以外的 `packages/live_store`（新设置）、`app/app.dart`（刷新接线）、翻译、`tools/gate/ui_baseline.json`（删掉旧表单里的一个图标，`live_play` 从 8 降到 7）。
+- 新翻译键 26 个（`room_switch_*`）；删掉旧表单用的 `live_play_switch_empty`、`live_play_switch_replays`。`live_ui` 只加了 6 个图标。
+- 没有发布的：评审页在本机 `~/ref/design/compare/U.2m.html`，要给用户看时按 PROCESS 第 4.1 节第 4 步发布。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/live_play/room_switch_test.dart`（新，17 个）：逻辑 6 个（各手机宽度下列数和 v3 一样、宽处多列；六种布局一屏卡片数不少于 v3；卡高；分组；筛选和时间；菜单去重）；面板 11 个（竖屏从画面下沿升起、列数、正在观看、数量；横屏全屏 ⇄ 在右侧 360、点一个原地换台：同一个播放器、同一个页面、还在全屏；竖屏全屏底部 60%、换台后上下滑列表换成所选分组；平板右侧 360；状态里的按钮；网格和列表切换并记住；来源列表和分组记忆；未开播压暗和长按菜单；筛选、空状态、没有结果；刷新时间、转圈、失败变红和提示；全屏菜单去重）。改了 `room_extras_test.dart`、`live_play_layouts_test.dart`（全屏菜单少了栏上已有的项）、`packages/live_store/test/stores_test.dart`（+1）。当时 `apps/pure_live` 797 个、`live_store` 46 个、`live_ui` 148 个全部通过。
+- 真机：待真机，步骤见 [verify.md](verify.md)（从记录的“要在 K90 上看的”九条整理）。S02.3 当时看的是 4.0.0 之后、本任务之前的菜单（有“切换直播间”），不算本任务的验证。
+- 留下的问题和去向：没有必须决定的；想要“打开时总在关注在播”（X1 B）或“v3 那样最多两列”（X2 B）各是一两行的改动；issue #37 的回复已由维护者在 GitHub 上做（V02.4）。

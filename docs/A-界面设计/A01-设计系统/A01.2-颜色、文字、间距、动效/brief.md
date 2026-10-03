@@ -46,6 +46,7 @@
 1. `AGENTS.md`、`docs/PROCESS.md`（第 5 节分阶段、第 8 节合并审查、第 14 节规则）。
 2. `docs/specs/ENGINEERING.md`；`docs/specs/UI.md` 第 8 节、第 10 节。
 3. 本文件夹的 `README.md`；[子分类页](../README.md)的代码地图和已知问题；`packages/live_ui/lib/src/theme/live_theme.dart`、`text_styles.dart`、`live_colors.dart`、`motion.dart`；`tools/gate/check_ui_structure.py`。
+4. 常量命名可以参考之前从零写的版本：`git show v4-archive:packages/live_ui/lib/src/metrics.dart`（`Space`、`Radii`、`Sizes`）。**数值不能照搬**：它的对话框圆角 28、按钮全圆，3.x 和规范是 24、12。
 
 ## 范围
 

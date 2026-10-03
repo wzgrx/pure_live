@@ -895,12 +895,14 @@ old = ["U.3c", "T07i.2"]
 
 [[task]]
 id = "A06.5"
-title = "首页的状态栏和导航栏颜色和 3.x 核对（3.x 启动时全局设透明，v4 没有对应代码）"
+title = "状态栏和导航栏样式和 3.x 核对：3.x 启动时全局设透明，v4 启动页留下黑色导航栏和浅色导航栏图标"
 type = "界面"
 status = "未开始"
 size = "小"
 tier = 2
-note = "上一次（没留下来的）核对记下“首页导航栏是主题色、3.x 是透明”，要在 K90 上确认是不是有意改的"
+stages = ["K90 截图核对", "启动时按主题设系统栏，启动页不再带黑色导航栏"]
+done = 0
+note = "读代码（V03.3）：3.x 的 MobileManager.initialize 启动时设透明、分隔线透明、导航栏图标固定深色；v4 没有对应代码，启动页的 AnnotatedRegion 用 Flutter 的 SystemUiOverlayStyle.light/dark（带黑色导航栏、浅色图标），首页不改回。先在 K90 截图确认（上一次没留下来的核对记过“首页导航栏是主题色、3.x 是透明”），没有差别就只改清点"
 from = "V03.3 功能清点 F-APP-23"
 
 [[task]]
@@ -1046,6 +1048,9 @@ type = "界面"
 status = "未开始"
 size = "小"
 tier = 3
+stages = ["出图和评审", "沉浸背景和暗封面用 JdLiveRoom.background"]
+done = 0
+note = "平台层的模糊图 JdLiveRoom.background 已有（E02.9），应用没读；3.x 进房后的封面就是这张模糊图，直播间背景用它。没见过卡片时 v4 的背景只有渐变"
 from = "UPGRADES 28-3（V03.3 核对）"
 
 [[task]]
@@ -1208,6 +1213,9 @@ type = "界面"
 status = "未开始"
 size = "小"
 tier = 3
+stages = ["列出受影响的来源，出图和评审", "卡片第二行显示简介"]
+done = 0
+note = "平台层的 introduction 已有（E03.3）；现在卡片两行都是频道名。CHZZK 频道搜索也是标题等于主播名，规则通用时一起受影响"
 from = "UPGRADES 11-5（V03.3 核对；E06.1 第 3 条 c2 没做）"
 
 [[task]]
@@ -1540,6 +1548,8 @@ type = "功能"
 status = "未开始"
 size = "小"
 tier = 2
+stages = ["规则搬到 live_core，录制改调它", "直播间和多画面用新规则，进房时提示一次"]
+done = 0
 note = "和 E06.2 的“实际清晰度”阶段改同一处，最好一起做"
 from = "H01.3 记录“没做的”第 1 条（V03.3 核对）"
 
@@ -2289,6 +2299,8 @@ type = "平台"
 status = "未开始"
 size = "小"
 tier = 2
+stages = ["打开 flvFirst，核对默认档", "录制任务旧画质 id 换算"]
+done = 0
 from = "UPGRADES 6-1（V03.3 核对）"
 
 [[task]]
@@ -2446,6 +2458,7 @@ type = "功能"
 status = "未开始"
 size = "小"
 tier = 3
+note = "进度数据 RecordTask.mergeProgress 在 H01.3 已有；改 recording_notice.dart、recording_platform.dart 和原生 RecorderForegroundService.kt（和 H05.2 同一个原生文件）"
 from = "H01.3 记录“没做的”第 2 条（V03.3 核对）"
 
 [[task]]
@@ -2766,6 +2779,8 @@ type = "功能"
 status = "未开始"
 size = "小"
 tier = 3
+stages = ["K90 上逐平台测两种构建", "按结果改默认值"]
+done = 0
 from = "UPGRADES 附录 B-2（V03.3 核对）"
 
 [[task]]

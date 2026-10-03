@@ -21,7 +21,7 @@ HTTP 和 WebSocket、请求头、压缩、代理和镜像、原生 HTTP 通道�
 
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
-| [Q03.1](Q03-原生HTTP和WebSocket/README.md) 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 未开始 | 第三档 | — |
+| [Q03.1](Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md) 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 未开始 | 第三档 | 0/2：下一阶段“K90 上逐平台测两种构建” |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
 

@@ -1,11 +1,13 @@
-# A08.1 直播间的四个标签：设计（第 1 版）
+# A08.1 弹幕列表和弹幕设置页：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；真机只在 S02.2 冒烟里看过一部分，见“实现和验证”）
+- 旧编号：U.2e、T06d.1（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：直播间画面和信息行下面的四个标签（宽屏时在右侧聊天栏里）：弹幕列表、醒目留言、弹幕设置、屏蔽管理，以及它们的各种状态
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a081)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a081)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a081)（A08.1-01～05）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a081)、[inventory/V3_UI.md](../../../inventory/V3_UI.md) 第 5 节；相关决定 D-003（E1～E4 按建议 A）
 - 已确认、这里不再改的：弹幕紧凑行和“卡片”样式设置、系统消息小标签（[A07.1](../../A07-直播间界面/A07.1-竖屏普通布局/README.md) 选择 A）；长按弹幕面板、弹幕设置的内容和分组（[A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)）。弹幕设置标签显示的就是 A07.6 的那个组件
-- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；画面、头像、醒目留言的人和颜色是示意数据（颜色用哔哩哔哩醒目留言的档位色）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -19,7 +21,9 @@
 | A08.1-06 | 提示条 | 双击复制、发送本地弹幕、添加空关键词、删除 | — | “已复制到剪贴板”“发送成功，将在 2 秒后同步显示”“请输入关键词”；新：“已移除‘…’ · 撤销” |
 | 相关 | 长按弹幕面板、屏蔽关键词输入框 | 长按或右键弹幕 | — | A07.6 已定 |
 
-## v3 的样子
+## 3.x 的样子和问题
+
+### 3.x 的样子
 
 文件都在 `lib/modules/live_play/` 下（另注的除外）。
 
@@ -57,7 +61,29 @@
 
 **手势和快捷键**：标签左右滑；弹幕长按、右键、双击；醒目留言内容双击、可选中；输入框回车提交。没有专门的快捷键。
 
-## v4 现在的偏差（`apps/pure_live/lib/features/live_play/danmaku/chat_panel.dart`）
+### 问题
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| L1 | 列表还没有弹幕时看不出状态（连接中、没人说话、连接失败、网易 CC 不连弹幕都一样）；失败后没有“重新连接” | `danmaku_list_view.dart:327-349`、`controllers/danmaku_controller.dart:172`、`:330` |
+| L2 | “显示弹幕”关闭时只有一句话，没有按钮，也不说开关在哪 | `danmaku_tab.dart:28-35`、`settings/pages/video_settings_page.dart:266-271` |
+| L3 | “N 条新弹幕”固定白字，深色主题下约 1.7:1 | `danmaku_list_view.dart:363-367` |
+| S1 | 新的醒目留言在最下面 | `live_play_controller.dart:365-369`、`super_chat_page.dart:37-52` |
+| S2 | 卡片字色按亮度 0.55 分界，￥100 档金黄底配白字约 1.9:1 | `super_chat_card.dart:79-85` |
+| S3 | 平台不提供醒目留言时也说“会显示在这里” | `super_chat_page.dart:12-34`、`core/site/douyin/douyin_site.dart:867-869` |
+| S4 | 每张卡片一个每秒计时器；卡片带阴影 | `super_chat_card.dart:44-50`、`:118-125` |
+| D1 | 弹幕设置标签和画面上的面板两种样子、两套内容 | `danmaku_settings_page.dart:19-30`、`:67-86`、`:416-420`、`video_controller_panel.dart:2206` |
+| D2 | 小窗弹幕数值不带单位 | `settings/pages/pip_danmaku_settings_page.dart:207`、`:235`、`:281` |
+| K1 | 关键词输入框在两组过滤开关下面，键盘弹出后几乎看不到列表 | `keyword_block_page.dart:73-146` |
+| K2 | 重复关键词没反应，还清空了输入框 | `keyword_block_page.dart:43-55`、`favorite_room_controller.dart:446-455` |
+| K3 | 没有关键词、没有屏蔽用户时整节不显示 | `keyword_block_page.dart:160-161` |
+| K4 | 一个关键词一整行；设置页里同一份列表是小标签 | `keyword_block_page.dart:246-274`、`shield/danmu_shield_page.dart:76-125` |
+| K5 | 删除没有撤销 | `keyword_block_page.dart:176-186` |
+| K6 | 相似过滤关闭时滑块消失（A07.6 定的是变灰） | `keyword_block_page.dart:97` |
+
+### 设计时 v4 的偏差（实现时已改掉）
+
+v4 当时的文件是 `apps/pure_live/lib/features/live_play/danmaku/chat_panel.dart`：
 
 - 弹幕设置标签最上面是“在聊天列表显示礼物”“弹幕列表样式”，后面是 v4 自己的设置面板（`shared/danmaku/danmaku_settings.dart`），混进了相似过滤、平台过滤，**没有小窗弹幕**。
 - 屏蔽管理只有输入框和两组小标签，**没有平台弹幕过滤和相似弹幕过滤**；点标签本身就删除，没有撤销。
@@ -68,7 +94,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 四个标签的对比、各种状态、按钮用法、四处待选 | 待评审 |
+| 第 1 版 | 四个标签的对比、各种状态、按钮用法、四处待选 | 用户 2026-10-01 确认全部设计；E1～E4 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -105,27 +131,9 @@
 | [v3-wide.jpg](v3-wide.jpg)、[v4-wide.jpg](v4-wide.jpg)、[v4-wide-block.jpg](v4-wide-block.jpg) | 宽屏 1280×800：醒目留言、屏蔽管理 |
 | [v3-land.jpg](v3-land.jpg)、[v4-land.jpg](v4-land.jpg) | 手机横屏不是全屏 852×393：弹幕列表 |
 
-## v3 的问题
+## 确认的改动
 
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| L1 | 列表还没有弹幕时看不出状态（连接中、没人说话、连接失败、网易 CC 不连弹幕都一样）；失败后没有“重新连接” | `danmaku_list_view.dart:327-349`、`controllers/danmaku_controller.dart:172`、`:330` |
-| L2 | “显示弹幕”关闭时只有一句话，没有按钮，也不说开关在哪 | `danmaku_tab.dart:28-35`、`settings/pages/video_settings_page.dart:266-271` |
-| L3 | “N 条新弹幕”固定白字，深色主题下约 1.7:1 | `danmaku_list_view.dart:363-367` |
-| S1 | 新的醒目留言在最下面 | `live_play_controller.dart:365-369`、`super_chat_page.dart:37-52` |
-| S2 | 卡片字色按亮度 0.55 分界，￥100 档金黄底配白字约 1.9:1 | `super_chat_card.dart:79-85` |
-| S3 | 平台不提供醒目留言时也说“会显示在这里” | `super_chat_page.dart:12-34`、`core/site/douyin/douyin_site.dart:867-869` |
-| S4 | 每张卡片一个每秒计时器；卡片带阴影 | `super_chat_card.dart:44-50`、`:118-125` |
-| D1 | 弹幕设置标签和画面上的面板两种样子、两套内容 | `danmaku_settings_page.dart:19-30`、`:67-86`、`:416-420`、`video_controller_panel.dart:2206` |
-| D2 | 小窗弹幕数值不带单位 | `settings/pages/pip_danmaku_settings_page.dart:207`、`:235`、`:281` |
-| K1 | 关键词输入框在两组过滤开关下面，键盘弹出后几乎看不到列表 | `keyword_block_page.dart:73-146` |
-| K2 | 重复关键词没反应，还清空了输入框 | `keyword_block_page.dart:43-55`、`favorite_room_controller.dart:446-455` |
-| K3 | 没有关键词、没有屏蔽用户时整节不显示 | `keyword_block_page.dart:160-161` |
-| K4 | 一个关键词一整行；设置页里同一份列表是小标签 | `keyword_block_page.dart:246-274`、`shield/danmu_shield_page.dart:76-125` |
-| K5 | 删除没有撤销 | `keyword_block_page.dart:176-186` |
-| K6 | 相似过滤关闭时滑块消失（A07.6 定的是变灰） | `keyword_block_page.dart:97` |
-
-## 改动（待确认）
+用户 2026-10-01 确认（第 1 版的“改动（待确认）”原样）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -182,14 +190,14 @@
 | 电视 | 没有弹幕列表和醒目留言（pure_live_TV 也没有）；弹幕设置和“弹幕关键词过滤”在播放设置侧面板，同一组件的电视样式，A17.4 出图 |
 | 苹果平台差异 | iPhone：键盘弹出时输入框保持可见，避开主屏指示条；iPad、macOS 同宽屏 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- E1 “弹幕列表”“小窗弹幕”两组：A 放在组件末尾，标签和画面上的面板完全一样；B 只放在标签里，面板保持 A07.6 定稿。
-- E2 醒目留言顺序：A 新的在上；B 照 v3 新的在下。
-- E3 屏蔽管理顺序：A 关键词、已屏蔽用户在前；B 照 v3 过滤开关在前。
-- E4 设置里的“弹幕关键词屏蔽”页（A08.3）：A 用这里的同一个组件；B A08.3 另外设计。
+- E1 “弹幕列表”“小窗弹幕”两组：A 放在组件末尾，标签和画面上的面板完全一样；B 只放在标签里，面板保持 A07.6 定稿。**用了 A**（D-003）。设置里的弹幕页（A08.5）因为不能引用 `features/live_play` 没放这两组，补齐在 [A08.6](../README.md)。
+- E2 醒目留言顺序：A 新的在上；B 照 v3 新的在下。**用了 A**。
+- E3 屏蔽管理顺序：A 关键词、已屏蔽用户在前；B 照 v3 过滤开关在前。**用了 A**。
+- E4 设置里的“弹幕关键词屏蔽”页（A08.3）：A 用这里的同一个组件；B A08.3 另外设计。**用了 A**，组件是 `shared/danmaku/block_manager.dart` 的 `DanmakuBlockManager`，A08.3 开发时直接用。
 
-## 拿不准的地方
+### 设计时拿不准的地方和后来的结论
 
 1. 手机横屏但不是全屏（852×393）时的排法属于 A07.4、A07.5；这里照 A07.5 第 1 版（宽度 840 以上分栏）出图，只确认标签区在 300 宽的矮栏里能用（信息行放不下热度时只留在线和时长，这一条也要 A07.5 确认）。
 2. 哪些平台提供醒目留言：按 v3 代码只有哔哩哔哩、虎牙（接口和弹幕流）、斗鱼（弹幕流）；其余平台的 `getSuperChatMessage` 返回空（默认实现 `core/interface/live_site.dart:256-258`），弹幕流里也没有醒目留言。做“平台不提供”的说明需要一个平台能力标记，现在没有。
@@ -198,6 +206,31 @@
 5. “小窗显示弹幕”关闭时子项收起（v3 同），没有照 A07.6 的“变灰不消失”：一组 11 项全变灰太长。如果要统一成变灰，在评审时说。
 6. “在聊天列表显示礼物”是 v4 加的（v3 没有），这里随 E1 放在“弹幕列表”一组。
 
-## 需要改工具的地方
+结论：第 1 条照 A07.5 实现（宽 840 以上分栏，标签区在右栏，`live_play_tabs_test.dart` 固定 852×393 和 1280×800）；第 2 条加了平台能力标记 `LiveSite.hasSuperChats`（只有哔哩哔哩、虎牙、斗鱼为真）；第 3 条：网易 CC 在 4.x 同样没有弹幕协议（`packages/live_danmaku/lib/src/sites/` 里没有 CC），房间进入“平台不提供”状态（`ChatConnection.unsupported`，`apps/pure_live/lib/features/live_play/logic/room_controller.dart:817`），列表中间写“{平台}的直播间没有弹幕 / 醒目留言、弹幕设置、屏蔽管理照常可用”；第 5 条照设计（收起）；第 6 条照 E1 放在“弹幕列表”一组。
+
+### 需要改工具的地方
 
 - 无。（`render.py` 的 `--dark` 只能整体加，这次对两张图单独跑了一次。）
+
+## 实现和验证
+
+- 实现：c1～c17 都做了（c17 中“信息行放不下时只留在线和时长”属于 A07.5 的排法，没在这里改）。逐条对照、偏差和测试见 [record.md](record.md)。要点：
+  - c2 的连接状态来自 `LiveRoomController.chatConnection`（空闲、连接中、已连接、超时、失败、平台不提供），“重新连接”调 `reconnectDanmaku()`；连接失败（不是超时）时标题用最后一条系统消息，也给“重新连接”（设计图只画了超时）。现在的代码：`apps/pure_live/lib/features/live_play/danmaku/chat_list.dart:253-296`（`_emptyState`）、`:848`（`ChatListState`）。
+  - c3：“开启弹幕显示”直接打开 `enableDanmakuDisplay`（`chat_list.dart:384-392`）。c4：“N 条新弹幕”用 `onPrimary`（`:450-472`）。
+  - c5～c7：`features/live_play/danmaku/super_chats.dart`（新的在上，`InkOnColor.contrastOn` 至少 4.5:1，一个 `Timer.periodic` `:75`，平台不提供 `:88-93`）；平台能力 `packages/live_core/lib/src/live_site.dart:64`、`:70`。
+  - c8～c10：`RoomDanmakuSettings(inTab: true)`、`PipDanmakuSettings`（`features/live_play/danmaku/danmaku_settings_panel.dart:76`、`:143`）；`PanelGroupTitle` 加了右侧说明；小窗数值“12.0 px”“90 px/s”“0.35 秒”，帧率跟随时手动帧率变灰并显示实际帧率（`resolvedDanmakuFps` 的 `pip`，`shared/danmaku/danmaku_templates.dart:210`）。
+  - c11～c16：`shared/danmaku/block_manager.dart`（`DanmakuBlockManager` `:29`、`BlockChip` `:402`）；弹幕设置的行组件挪到 `shared/danmaku/setting_rows.dart`，两处共用。
+- 偏差（记录“和设计的偏差”）：统一弹幕颜色另做了一个小对话框 `shared/danmaku/danmaku_color_dialog.dart`（设置的颜色对话框在 `features/settings`，不能引用）；醒目留言的金色图标用新语义色 `LiveSemanticColors.superChatGold`（`#FFC107`）；连接失败也给“重新连接”。
+- 新文字（中英各加）：`danmaku_display_disabled_title/desc`、`danmaku_display_enable`、`live_play_chat_empty/_desc`、`live_play_chat_timeout/_desc`、`live_play_chat_reconnect`、`live_play_chat_unsupported/_desc`、`super_chat_unsupported`、`keyword_already_blocked`、`pip_danmaku_interval_seconds`、`pip_danmaku_fps_follow_desc`。没有新设置（小窗弹幕 12 项都是 3.x 已有的键）。
+- 门禁：`live_play` 直接写的颜色和图标（和 A07.7 合计）9 → 8，`tools/gate/ui_baseline.json` 改为 8。
+- 提交：代码 `23f9a1fbc`（`feat(live_core, live_ui): super chat capability, picture state view and U.2e/U.2g icons`）、`f3838b7ff`（`feat(live_play): U.2e chat states, super chats, settings tab and block list`）、测试 `c54db41d8`；合并 `381ff16f1`（2026-10-01）；登记表写的是记录提交 `05793a4c8`。
+- 后来的变化（以现在的代码为准）：
+  - A07.11（B09 c9）把四个标签换成 `live_ui` 的 `TabLabel`（`ece6f3764`），从全屏回来记住标签和列表位置（`RoomViewMemory`）。
+  - D04.1（`7541bfdbf`）：聊天列表改成倒序、每帧最多刷新一次、名字颜色保证 4.5:1（`chat_list.dart:55`）。
+  - A07.12、A07.11 c8：长按弹幕面板改成 `features/live_play/danmaku/message_panel.dart` 的 `RoomMessagePanel`，屏蔽关键词是面板的第二页；记录里提到的 `showChatMessageActions` 现在叫 `showRoomMessageActions`（`message_panel.dart:20`）。
+  - D01.32：哔哩哔哩访客昵称提示条 `ChatNameHintBar`（`chat_list.dart:529`）放在列表上面；D02.1：屏蔽管理顶上一次性说明打码昵称清理。
+  - A08.3：撤销放回原来的位置（`restoreBlockEntry`，`block_manager.dart:392`），直播间标签一起变。
+  - A08.2：本地弹幕行和输入框接上（`ChatLineView` 的本地分支 `chat_list.dart:609`、`LocalComposerBelow`）。
+- 自动测试：`apps/pure_live/test/features/live_play/live_play_tabs_test.dart`（13 个，见记录“测试”）；`live_core` 1 个（`hasSuperChats`）、`live_ui` 1 个（对比度选墨）。合并时 `apps/pure_live` 310 个通过。照实改的旧断言：`live_play_room_test`（第一条之前显示状态、`ensureVisible` 后再点“卡片”）、`live_play_more_page_test`（礼物开关）。
+- 真机：没有单独的 `verify.md`。S02.2 冒烟（2026-10-02，K90，`288fec0ec` 的 arm64 profile）“进直播间：……四个标签、系统提示、本地弹幕输入框”通过（[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)）；连接超时、平台不提供、醒目留言卡片、屏蔽管理的撤销、设置标签的小窗弹幕在真机上没有记录，对应 [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 2 节第 1、4、5、7 条。
+- 留下的问题：设置的弹幕页缺“弹幕列表”“小窗弹幕”两组 → [A08.6](../README.md)；直播间的统一弹幕颜色仍是居中对话框 → [A08.7](../README.md)；电视（A17.4）。

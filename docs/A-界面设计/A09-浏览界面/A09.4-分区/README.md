@@ -1,11 +1,13 @@
-# A09.4 分区：设计（第 1 版）
+# A09.4 分区：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；S02.3 在 K90 上看过分区，见“实现和验证”）
+- 旧编号：U.4d、T07c.2（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：首页“分区”页（平台标签、分类标签、分区网格、“关注分区”按钮）和分区卡片；分区里的房间在 [A09.5](../A09.5-分区房间/README.md)，关注分区和平台显示在 [A09.6](../A09.6-热门分区、关注的分区/README.md)
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a094)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a094)
-- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/A-界面设计/A09-浏览界面/A09.4-分区/src/gen.py && python3 tools/ui/mock/render.py docs/A-界面设计/A09-浏览界面/A09.4-分区/src --annotate`）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a094)（A09.4-01、02）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a094)；功能点 F-BRW-04、F-BRW-06、F-BRW-08（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；分区目录和图片的逻辑在 [I03](../../../I-浏览和发现/I03-分区/README.md)；相关决定 D-003（X1、X2、X4 按建议 A，X3 由协调员改成对话框）、D-009、D-011
+- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/A-界面设计/A09-浏览界面/A09.4-分区/src/gen.py && python3 tools/ui/mock/render.py docs/A-界面设计/A09-浏览界面/A09.4-分区/src --annotate`）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；分区图片是示意图片，B 站分类和分区名是示意数据
-- 和 A09.1 的关系：这一页没有房间卡片；分区卡片的长按菜单用和房间卡片（A09.1）同一种小菜单，A09.1 改了卡片菜单的样子，这里跟着改。顶栏的菜单和搜索按钮、底部导航和侧边栏属于 A06.1、A06.2，照 v3 画作背景
+- 和 A09.1 的关系：这一页没有房间卡片；分区卡片的长按设计时画成小菜单，开工后协调员按规范第 3 节第 7 条改成和房间卡片（A09.1）同一个居中对话框（见“待选和决定”X3）。顶栏的菜单和搜索按钮、底部导航和侧边栏属于 A06.1、A06.2，照 v3 画作背景
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -16,11 +18,48 @@
 | A09.4-03 | 分区卡片的长按菜单（新） | 长按或右键分区卡片 | 竖屏、宽屏 | 未关注：“关注分区”；已关注：“取消关注”（再弹 A09.5 的确认框） |
 | — | 回到顶部、回到底部小按钮，移动流量提示 | 列表共用的 `BasePageView` | 同上 | 照 v3，属于 A02.1 |
 
+（A09.4-03 设计时是小菜单，实现是居中对话框 `CardDialog`，见 X3。）
+
+## 3.x 的样子和问题
+
+### 3.x 的样子（标签 `v3.2.11`，路径从 `lib/` 起，用 `git show v3.2.11:<路径>` 看）
+
+页面：`lib/modules/areas/areas_page.dart`、`areas_grid_view.dart`、`areas_controller.dart`、`areas_list_controller.dart`；卡片：`areas/widgets/area_card.dart`；列表外壳：`common/base/base_page_view.dart`、`base_page_view_extension.dart`、`desktop_components.dart`。
+
+- **顶栏**（`areas_page.dart:21-33`）：`AppBar` 居中；整屏宽度 ≤680 时（`Get.width`，:19）左边菜单按钮 `Icons.menu_rounded`、右边搜索菜单 `Remix.menu_search_line`（A06.1），宽屏时两个都没有。**标题位置是平台标签**（`ScrollableTabBar`，可横向滚动，电脑上滚轮可滚）：平台和顺序来自“平台显示”（默认 34 个，`core/sites.dart:217-266`），第一次打开选中“首选直播平台”（默认哔哩哔哩，`areas_controller.dart:92-97`）。平台之间不能左右滑页面，只能点标签（:34-40）。
+- **标签样式**（主题 `common/style/theme.dart:122-130`，平台和分类同一个）：15 号，选中主色半粗、未选 onSurfaceVariant 80%；指示条 2 像素、只在文字下面；没有分隔线；放得下时居中，放不下时从左排起。
+- **分类标签**（`areas_grid_view.dart:180-191`）：平台的一级分类（B 站：网游、手游、单机游戏……），可以点，也可以在网格上左右滑（:211-213）。抖音不分分类，所有分区一个网格（:13、:136-155）。
+- **网格**（`areas_grid_view.dart:259-288`）：父组件宽度 >1280 九列、>960 七列、>640 五列、其余三列；外边距 6，行列间距来自设置（默认 6）；卡片高 = 卡片宽 + 72（`area_card.dart:17-25`）；底部留 80。
+- **分区卡片**（`area_card.dart:88-147`）：`Card`（表面容器低，圆角 15，无阴影）；正方形图片（白底，圆角 15，铺满裁切）；图片加载中是浅底加 30% 灰的 `Icons.live_tv_rounded`（:63-68），失败是 `Icons.broken_image_rounded`（:69-72），没有图片地址是白底黑色 `Icons.live_tv_rounded` 38（:121-123）。下面是紧凑的 `ListTile`，左右内边距 10：分区名 12 号 600 字重（空名写“未命名分区”）、父分类名 12 号 500 字重（空写“无数据”）；CC 官方入口第二行是“使用系统浏览器打开”、右边 `Icons.open_in_new_rounded` 16（:136-142）。
+- **点卡片**：网络电视的频道组直接进直播间（:94-107）；CC 官方入口用系统浏览器打开（`routes/app_navigation.dart:18-37`）；其余进分区房间（A09.5）。**没有长按和右键。**
+- **“关注分区”按钮**（`areas_page.dart:42-82`）：右下角浮动；表面色 95% 底、圆角 16、主色 15% 描边、淡阴影；`Remix.heart_add_2_line` 16 加“关注分区”（12 号粗体主色、字距 0.5）；最小高 48；宽屏时离底部多 24。点了打开关注分区页（A09.6）。
+- **状态**：加载中是一个转圈，没有分类行（`base_page_view.dart:170`）；出错是 `Icons.wifi_off_rounded`、“网络请求失败”、错误信息、“重试”（:215-224）；平台没有分区是 `Remix.apps_2_line`、“未发现分区”“请点击上方按钮切换平台”、“刷新”（`areas_grid_view.dart:167-173`）；某个分类是空的，同样文字、没有按钮（:223-240）；有内容时刷新，顶部 2.5 像素进度条（`base_page_view.dart:180-198`）；CC 刷新失败时内容上方显示出错条（`areas_list_controller.dart:19`、`base_page_view.dart:103-132`）。
+- **电脑**（宽度 >680 且不是手机系统，`base_page_view.dart:57`）：底部翻页条（`desktop_components.dart:94-188`）：刷新、上一页、页码、下一页、每页（默认 20）、跳转至 _ 页；← → 键翻页（`base_page_view_extension.dart:7-41`）。手机和 Android 平板下拉刷新、一次显示整个分类。
+- **回到顶部、回到底部**：滚过 400 出现的两个小圆按钮，在右下（`base_page_view_extension.dart:64-99`，设置可关）。
+- **其他**：回到前台超过 15 秒刷新当前平台（`areas_controller.dart:165-170`）；平台显示列表变了就重建平台标签（:24、:40-52）；看一个平台 800 毫秒后预加载下一个平台（:148-163）。
+
+### 问题
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| A1 | 平台标签和分类标签是同一个样式（15 号、主色、同样的指示条），两行叠在一起分不出哪行是平台、哪行是分类 | `theme.dart:122-130`、`areas_page.dart:26`、`areas_grid_view.dart:182` |
+| A2 | 卡片第二行是父分类名，和选中的分类标签一样：“网游”标签下每张卡都写“网游”。Picarto、SHOWROOM 只有一个分类，平台名在平台标签、分类标签和每张卡上重复三次 | `area_card.dart:136-141`；`core/site/bilibili/bilibili_site.dart:80`、`picarto/picarto_site.dart:33-49` |
+| A3 | 平台只有一个分类时也显示一行分类标签，只有一个可选 | `areas_grid_view.dart:180-191` |
+| A4 | 列数按固定断点 3/5/7/9，宽屏判断又读整屏宽度：窗口从 680 拉到 700，导航换成侧边栏、内容区变窄，从 5 列退回 3 列，卡片从 129 跳到 198；拖窗口时卡片忽大忽小 | `areas_grid_view.dart:263`、`areas_page.dart:19` |
+| A5 | 在分区页不能关注分区：卡片没有长按和右键，要先进分区再点右下角按钮；也看不出哪些分区已经关注 | `area_card.dart:91-111` |
+| A6 | 宽屏时分类标签放得下就居中，平台标签放不下从左排，两行不对齐；换平台时分类行随数量在居中和靠左之间跳 | `theme.dart:125` |
+| A7 | 电脑上“关注分区”按钮压在翻页条右端 | `areas_page.dart:42-44`、`base_page_view_extension.dart:26-37` |
+| A8 | 加载中只有一个转圈，看不出页面结构，加载完整页跳动 | `base_page_view.dart:170` |
+
+### 设计时 v4 的偏差（参考）
+
+`apps/pure_live/lib/features/areas/`：分类行右边多了筛选和刷新按钮；抖音改成分了分类；“关注分区”按钮带数量；长按卡片直接关注或取消（没有菜单）；已关注显示心形；电脑上没有翻页条。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 竖屏、横屏手机、宽屏对比；加载、出错、空、只有一个分类、不分分类；长按菜单；列数表 | 待评审 |
+| 第 1 版 | 竖屏、横屏手机、宽屏对比；加载、出错、空、只有一个分类、不分分类；长按菜单；列数表 | 用户确认；X1、X2、X4 按建议 A（D-003）；X3 由协调员 2026-10-01 改为对话框 |
 
 ## 对比页（按章节导出）
 
@@ -48,36 +87,9 @@
 | [v3-states.jpg](v3-states.jpg)、[v4-states.jpg](v4-states.jpg) | 加载中、出错、没有分区 |
 | [v3-flat.jpg](v3-flat.jpg)、[v4-flat.jpg](v4-flat.jpg) | 只有一个分类（Picarto）、不分分类（抖音） |
 
-## v3 的样子
+## 确认的改动
 
-页面：`lib/modules/areas/areas_page.dart`、`areas_grid_view.dart`、`areas_controller.dart`、`areas_list_controller.dart`；卡片：`areas/widgets/area_card.dart`；列表外壳：`common/base/base_page_view.dart`、`base_page_view_extension.dart`、`desktop_components.dart`。
-
-- **顶栏**（`areas_page.dart:21-33`）：`AppBar` 居中；整屏宽度 ≤680 时（`Get.width`，:19）左边菜单按钮 `Icons.menu_rounded`、右边搜索菜单 `Remix.menu_search_line`（A06.1），宽屏时两个都没有。**标题位置是平台标签**（`ScrollableTabBar`，可横向滚动，电脑上滚轮可滚）：平台和顺序来自“平台显示”（默认 34 个，`core/sites.dart:217-266`），第一次打开选中“首选直播平台”（默认哔哩哔哩，`areas_controller.dart:92-97`）。平台之间不能左右滑页面，只能点标签（:34-40）。
-- **标签样式**（主题 `common/style/theme.dart:122-130`，平台和分类同一个）：15 号，选中主色半粗、未选 onSurfaceVariant 80%；指示条 2 像素、只在文字下面；没有分隔线；放得下时居中，放不下时从左排起。
-- **分类标签**（`areas_grid_view.dart:180-191`）：平台的一级分类（B 站：网游、手游、单机游戏……），可以点，也可以在网格上左右滑（:211-213）。抖音不分分类，所有分区一个网格（:13、:136-155）。
-- **网格**（`areas_grid_view.dart:259-288`）：父组件宽度 >1280 九列、>960 七列、>640 五列、其余三列；外边距 6，行列间距来自设置（默认 6）；卡片高 = 卡片宽 + 72（`area_card.dart:17-25`）；底部留 80。
-- **分区卡片**（`area_card.dart:88-147`）：`Card`（表面容器低，圆角 15，无阴影）；正方形图片（白底，圆角 15，铺满裁切）；图片加载中是浅底加 30% 灰的 `Icons.live_tv_rounded`（:63-68），失败是 `Icons.broken_image_rounded`（:69-72），没有图片地址是白底黑色 `Icons.live_tv_rounded` 38（:121-123）。下面是紧凑的 `ListTile`，左右内边距 10：分区名 12 号 600 字重（空名写“未命名分区”）、父分类名 12 号 500 字重（空写“无数据”）；CC 官方入口第二行是“使用系统浏览器打开”、右边 `Icons.open_in_new_rounded` 16（:136-142）。
-- **点卡片**：网络电视的频道组直接进直播间（:94-107）；CC 官方入口用系统浏览器打开（`routes/app_navigation.dart:18-37`）；其余进分区房间（A09.5）。**没有长按和右键。**
-- **“关注分区”按钮**（`areas_page.dart:42-82`）：右下角浮动；表面色 95% 底、圆角 16、主色 15% 描边、淡阴影；`Remix.heart_add_2_line` 16 加“关注分区”（12 号粗体主色、字距 0.5）；最小高 48；宽屏时离底部多 24。点了打开关注分区页（A09.6）。
-- **状态**：加载中是一个转圈，没有分类行（`base_page_view.dart:170`）；出错是 `Icons.wifi_off_rounded`、“网络请求失败”、错误信息、“重试”（:215-224）；平台没有分区是 `Remix.apps_2_line`、“未发现分区”“请点击上方按钮切换平台”、“刷新”（`areas_grid_view.dart:167-173`）；某个分类是空的，同样文字、没有按钮（:223-240）；有内容时刷新，顶部 2.5 像素进度条（`base_page_view.dart:180-198`）；CC 刷新失败时内容上方显示出错条（`areas_list_controller.dart:19`、`base_page_view.dart:103-132`）。
-- **电脑**（宽度 >680 且不是手机系统，`base_page_view.dart:57`）：底部翻页条（`desktop_components.dart:94-188`）：刷新、上一页、页码、下一页、每页（默认 20）、跳转至 _ 页；← → 键翻页（`base_page_view_extension.dart:7-41`）。手机和 Android 平板下拉刷新、一次显示整个分类。
-- **回到顶部、回到底部**：滚过 400 出现的两个小圆按钮，在右下（`base_page_view_extension.dart:64-99`，设置可关）。
-- **其他**：回到前台超过 15 秒刷新当前平台（`areas_controller.dart:165-170`）；平台显示列表变了就重建平台标签（:24、:40-52）；看一个平台 800 毫秒后预加载下一个平台（:148-163）。
-
-## v3 的问题
-
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| A1 | 平台标签和分类标签是同一个样式（15 号、主色、同样的指示条），两行叠在一起分不出哪行是平台、哪行是分类 | `theme.dart:122-130`、`areas_page.dart:26`、`areas_grid_view.dart:182` |
-| A2 | 卡片第二行是父分类名，和选中的分类标签一样：“网游”标签下每张卡都写“网游”。Picarto、SHOWROOM 只有一个分类，平台名在平台标签、分类标签和每张卡上重复三次 | `area_card.dart:136-141`；`core/site/bilibili/bilibili_site.dart:80`、`picarto/picarto_site.dart:33-49` |
-| A3 | 平台只有一个分类时也显示一行分类标签，只有一个可选 | `areas_grid_view.dart:180-191` |
-| A4 | 列数按固定断点 3/5/7/9，宽屏判断又读整屏宽度：窗口从 680 拉到 700，导航换成侧边栏、内容区变窄，从 5 列退回 3 列，卡片从 129 跳到 198；拖窗口时卡片忽大忽小 | `areas_grid_view.dart:263`、`areas_page.dart:19` |
-| A5 | 在分区页不能关注分区：卡片没有长按和右键，要先进分区再点右下角按钮；也看不出哪些分区已经关注 | `area_card.dart:91-111` |
-| A6 | 宽屏时分类标签放得下就居中，平台标签放不下从左排，两行不对齐；换平台时分类行随数量在居中和靠左之间跳 | `theme.dart:125` |
-| A7 | 电脑上“关注分区”按钮压在翻页条右端 | `areas_page.dart:42-44`、`base_page_view_extension.dart:26-37` |
-| A8 | 加载中只有一个转圈，看不出页面结构，加载完整页跳动 | `base_page_view.dart:170` |
-
-## 改动（待确认）
+用户确认（第 1 版的“改动（待确认）”原样；c6 的“小菜单”实现时按 X3 的决定换成居中对话框）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -127,21 +139,45 @@
 | 电视 | 这个任务不出图。电视的分区页在 A17.3（pure_live_TV `modules/live/areas/*`），用同一个分区卡片的电视样式（焦点放大加描边），确认键打开，长按确认键等于长按菜单 |
 | 苹果平台 | iPhone 同 Android 手机（避开灵动岛和主屏指示条）；iPad 同平板；macOS 同 Windows（翻页条、右键菜单）；没有别的差异 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- X1 分类标签样式：A 次级样式（14 号、铺满的指示条、分隔线）；B 照 v3，和平台标签一样。
-- X2 分区页卡片第二行：A 去掉（分类标签已经写了）；B 照 v3 保留父分类。
-- X3 长按分区卡片：A 弹小菜单（关注 / 取消关注），已关注的显示心形；B 照 v3 不加，只能进分区后关注。
-- X4 列数：A 按公式连续变化（手机 3 列、1280 宽 7 列不变，中间宽度不再跳）；B 照 v3 的断点。
+- X1 分类标签样式：A 次级样式（14 号、铺满的指示条、分隔线）；B 照 v3，和平台标签一样。**用了 A**（D-003）。
+- X2 分区页卡片第二行：A 去掉（分类标签已经写了）；B 照 v3 保留父分类。**用了 A**。
+- X3 长按分区卡片：A 弹小菜单（关注 / 取消关注），已关注的显示心形；B 照 v3 不加，只能进分区后关注。**用了 A 的功能，但弹法改成和房间卡片同一个居中对话框**（协调员 2026-10-01 按规范第 3 节第 7 条“同一个操作各处同一个组件”改；同时 A09.1 的 A1 定了卡片长按用对话框）。
+- X4 列数：A 按公式连续变化（手机 3 列、1280 宽 7 列不变，中间宽度不再跳）；B 照 v3 的断点。**用了 A**。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 - 分区卡片的最小宽度 110、130、150 是我定的：计划书 5.3 只写了房间卡片的 160、180、200，照搬会让手机变成 2 列。
 - “网络”平台（网络电视）在分区页把频道分组当分区、卡片点了直接播放（`area_card.dart:94-107`），图片是频道台标，这里没有单独出图。
 - 横屏手机左侧挖孔的安全区没有画。
-- E04.1 默认 `Card` 颜色和 `ListTile` 文字颜色按 `ColorScheme.fromSeed(Colors.blue)` 推算，没有在真机上对照。
+- M3（Material 3）默认 `Card` 颜色和 `ListTile` 文字颜色按 `ColorScheme.fromSeed(Colors.blue)` 推算，没有在真机上对照。
 - 平台很多（默认 34 个）时只能横向滑动找平台；要不要在平台标签末尾加“管理平台”入口，属于平台标签这个共用部件，留给 A09.2（热门）一起定。
 
-## v4 现在的偏差（参考）
+结论：分区卡片的最小宽度 110 / 130 / 150 写进了 `GridColumns.areaMinWidth`（`packages/live_ui/lib/src/theme/grid_columns.dart:66`）；“管理平台”入口随 A09.2 的“全部平台”定在热门页，分区页没有加。
 
-`apps/pure_live/lib/features/areas/`：分类行右边多了筛选和刷新按钮；抖音改成分了分类；“关注分区”按钮带数量；长按卡片直接关注或取消（没有菜单）；已关注显示心形；电脑上没有翻页条。
+### 性能要点（评审页）
+
+- 网格用固定行高（卡片宽 + 40，抖音 + 72），不逐个测量；只建看得见的卡片。
+- 图片按显示宽度解码（v3 已有 160–512 的上限），不做淡入。
+- 列数只用父组件给的宽度算；拖窗口时只改列数，不重建页面、不重新请求。
+- 骨架屏是静态灰块，不做扫光动画。
+- 心形标记按分区订阅关注列表，关注或取消时只刷新那一张卡。
+- 照 v3 只加载当前平台，800 毫秒后预加载下一个平台；分类之间切换不再请求。
+
+## 实现和验证
+
+- 实现：c1～c8 都做了（逐条见 [record.md](record.md)）。现在的代码（`apps/pure_live/lib/features/areas/`）：
+  - `areas_page.dart`：`AreasPage`（`:24`）、`AreasView`（`:40`，平台标签在标题位置，左右按钮看 `showsHomeBarButtons` `:149-156`）、`_FollowedAreasButton`（`:204`，“关注分区”，去掉了 v4 加的数量；宽屏判断 `width > homeTabletBreakpoint` `:214`）。
+  - `platform_areas_view.dart`：`areasButtonClearance` 80（`:15`）、`PlatformAreasView`（`:24`，次级分类标签、只有一个分类不显示标签也不显示分类名）、`_AreasSkeleton`（`:287`）。
+  - `area_card.dart`：`AreaCaption`（`:13`）、`AreaCard`（`:29`，一行时卡片高 = 宽 + 40、两行 + 72，随字体放大；CC 官方入口第二行“使用系统浏览器打开”和外链图标）、`AreaGridSkeleton`（`:155`）、`AreaGrid`（`:227`，`GridColumns.areas`）。
+  - `areas_common.dart`：`showAreaDialog`（`:50`，`CardDialog`：标题分区名、下面“平台 · 分类”、按钮“关注分区”或“取消关注”）、`openArea`（`:82`）、`toggleAreaFollow`（`:107`）、`confirmUnfollow`（`:131`，按钮写“取消关注”）。
+  - 电脑翻页栏是 v4 之前没有的，这次补上（本地分页）；“关注分区”按钮在翻页栏上方。
+- 和设计 / v4 不一样（记录）：去掉了 v4 分类行右边的“筛选”和“刷新”（`filterAreas` 还在 `area_catalog.dart:114`，没有入口）；X3 改成对话框。
+- 合并后的修改：抖音分区改回分类标签（`427334723`，2026-10-01）：设计照 v3 把抖音合成一个网格，但 C-12 之后“游戏”下约 156 个分区，一个网格两三百张卡片；现在抖音和其他平台一样每个分类一个标签，卡片只写分区名，分区筛选照设计不加回。
+- 没有新设置。门禁：`areas` 直接写的颜色和图标 21 → 0（`area_artwork.dart` 的图标也换成 `AppIcons`）。跨功能引用：`areas -> home/home_menu.dart`、`areas -> home/menu_button.dart` 仍在基线里（`tools/gate/ui_baseline.json`）。
+- 提交：代码 `8b66eed6b`（`feat(ui): U.4d areas, U.4e area rooms, U.4f followed areas and platform display`）、`427334723`；合并 `0e46099b2`（2026-10-01）；登记表写的是记录提交 `7daeb3805`。
+- 后来的变化：A03.2（`14e8eb6f6`）分类标签页翻页手感；D-011（`e320e0e72`）分区标题居中。
+- 自动测试：`apps/pure_live/test/features/areas/areas_test.dart`（现在 14 个用例声明，A09.4～A09.6 共用）：次级分类标签、卡片只写名字、长按出对话框（分区名、“虎牙 · 分类”、关注分区）、已关注时“取消关注”先确认且按钮写“取消关注”、关注分区按钮不带数量；只有一个分类不显示标签；列数表在 `packages/live_ui/test/live_room_card_test.dart`。
+- 真机：没有单独的 `verify.md`。S02.3（2026-10-02，K90，`288fec0ec`）“分区、分区房间（平台 · 大类、关注按钮）”通过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)）；长按分区卡片的对话框、心形、电脑翻页栏没有记录，对应 [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 4 条。
+- 留下的问题：`filterAreas` 删或恢复入口（[子分类页](../README.md)“已知问题”）；跨功能引用 `areas -> home/*`；电视（A17.3）；分区页在电脑上 Esc 不返回（首页页面，返回链从外壳走，A05.1 核对）。

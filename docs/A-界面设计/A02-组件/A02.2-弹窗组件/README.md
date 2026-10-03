@@ -47,7 +47,7 @@
 - 重置小窗位置和大小（Windows，`video_settings_page.dart:526-556`）：标题 16 号粗体，正文 14 号“确定要清除已保存的小窗位置和大小吗？”，“取消”（灰色）“重置”（红色实心）；完成后提示条“已清除保存的小窗位置和大小”。
 - 其他：清空历史、删除一条是红色“清除 / 删除”（A09.9）；取消关注是“取消”“确认”两个文字按钮（A07.1、A09.1）；口令导入圆角 16（A06.3）。
 
-**小菜单**（`PopupMenuButton`，E04.1 默认：表面容器色、圆角 4、阴影、每行 48、上下留 8）
+**小菜单**（`PopupMenuButton`，Material 3 默认：表面容器色、圆角 4、阴影、每行 48、上下留 8）
 - 首页左上（`menu_button.dart:14-84`）：圆角 8、按钮下方右移 12；每行图标 24 次要色 + 12 + 字 12 号（`labelMedium`）。
 - 首页右上（`common_appbar_actions.dart:13-68`）：圆角 14、下移 10；图标 20 主色 + 字 14 号。
 - 清晰度、线路（`resolution_selector.dart:24-80`）：表面容器最高色、圆角 8、下移 5；字 11 号（`labelSmall`），当前项只变主色（A07.6 已改）。
@@ -59,7 +59,7 @@
 
 **提示条**
 - `ToastUtil.show`（`common/utils/toast_util.dart`，225 处）：`SmartDialog.showToast`，配置显示 3 秒、间隔 0.1 秒（`common/global/initialized.dart:170-175`）；同一句 3 秒内不重复（:13-18）。样子是 flutter_smart_dialog 5.3.0 默认（`toast_widget.dart:13-21`、`view_utils.dart:79-87`）：黑底（深色主题 #606060）、圆角 20、内边距 25/10、白字、底部居中、离屏幕边 30 / 底 50、淡入 0.2 秒；不能带按钮。
-- `SnackBar`（11 个文件 21 处，如 `web_dav_help.dart:295`、`version_page.dart:470`、`version_history.dart:449`、`download_apk_dialog.dart:486`）：主题没设，E04.1 默认贴底整条、反色底、13 号；Cookie 编辑器用浮起样式（`account_cookie_editor.dart:108-109`）。
+- `SnackBar`（11 个文件 21 处，如 `web_dav_help.dart:295`、`version_page.dart:470`、`version_history.dart:449`、`download_apk_dialog.dart:486`）：主题没设，Material 3 默认贴底整条、反色底、13 号；Cookie 编辑器用浮起样式（`account_cookie_editor.dart:108-109`）。
 
 **按钮名称提示**：Flutter 默认 `Tooltip`：浅色主题深灰 90%、深色主题白 90%，圆角 4；电脑 12 号、悬停出现；手机 14 号、长按出现。
 

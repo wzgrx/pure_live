@@ -61,7 +61,7 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 
 **设置行**（`widget_extensions.dart`）
 - 内容最宽 960 居中（:8-18）。组标题 12 号粗体、主色 65%、字距 0.5、左 8 下 8（:21-36）。卡片：`surfaceContainerHighest` 15% 底、圆角 20、5% 细边；行之间 0.5 的分隔线（5%），首尾行自动圆角——靠类型名猜哪些是行（:38-112）。
-- 开关行 `buildSwitchTile`：左图标 22 主色，标题 15 号 600，说明 12 号提示色 75%（默认一行省略，`isLong` 时多行），E04.1 默认开关（开着主色底白滑块），整行可点；`enabled: false` 整行变灰（:114-152）。出错时调用处把说明换成错误色（`video_settings_page.dart:180-181`）。
+- 开关行 `buildSwitchTile`：左图标 22 主色，标题 15 号 600，说明 12 号提示色 75%（默认一行省略，`isLong` 时多行），Material 3 默认开关（开着主色底白滑块），整行可点；`enabled: false` 整行变灰（:114-152）。出错时调用处把说明换成错误色（`video_settings_page.dart:180-181`）。
 - 跳转 / 值行 `buildTile`：同上的图标和文字；右边默认 ›（提示色 40%、20 号，:227）；给了 `trailing` 就不显示 ›；`stackTrailingOnNarrow` 时宽 <360 或字体放大 >1.5 倍把右边换到标题下面（:235-257）。
 - 选择：`buildMenuTile`（值 14 号提示色 + ›，弹出单选对话框，:260-350）代码里没有调用；实际的选择行是 `buildTile` 加值文字（视频设置：主色 600，一行默认字号、一行 13 号，`video_settings_page.dart:133-136`、`:148-151`），点了各页自己写单选对话框（A02.2）。
 - 滑块行 `buildSliderTile`：图标 22，标题 16 号 600，右边数值小块（主色 10% 底、圆角 6、13 号粗体），放不下时换行；Syncfusion 滑块（主色，未激活主色 15%）（:352-454）。
@@ -125,7 +125,7 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 ### 第 1 版拿不准的地方
 
 1. v3 的“加载样式”默认圆环是 `ShaderMask` 加扫掠渐变，图里用圆锥渐变近似；其余 50 多种加载动画没画。
-2. E04.1 默认 `TextButton`、`ListTile`、`TabBar` 的悬停、焦点、按下叠层透明度按 Flutter 默认（8% / 10% / 10%）画，v3 主题关了水波，按下时只有底色——没有在真机上看。
+2. Material 3 默认 `TextButton`、`ListTile`、`TabBar` 的悬停、焦点、按下叠层透明度按 Flutter 默认（8% / 10% / 10%）画，v3 主题关了水波，按下时只有底色——没有在真机上看。
 3. Windows 标题栏在 v3 是 `DesktopManager.buildWithTitleBar` 自绘的，这里画的是示意（A16.1 定）。
 4. `buildMenuTile` 没有调用处是按 `grep` 得出的（`lib/` 下只有定义）；如果 3.x 里有动态调用，请指出。
 5. 二维码是示意图案（有定位块，但不是真码）；真码的模块数随内容变。
@@ -187,7 +187,7 @@ INVENTORY 把 `standardTile`（`widget_extensions.dart:309`）记成对话框，
 | c11 | 修改 | 二维码一个组件；状态盖在原位置；深色也白底 | P10 |
 | c12 | 增强 | 标签栏的数量、角标、“全部平台”⌄、二级标签 | — |
 | c13 | 修改 | 标签芯片一种：36 高、圆角 8、选中次色容器加勾 | P11 |
-| c14 | 修改 | 开关一种（E04.1 默认），去掉 8 处 `activeThumbColor` | P14 |
+| c14 | 修改 | 开关一种（Material 3 默认），去掉 8 处 `activeThumbColor` | P14 |
 | c15 | 修改 | 设置配色：组标题 13/600 主色不透明、说明次要色、卡片表面容器低圆角 16 | P12、P13 |
 | c16 | 修改 | 一个行组件，标题 15（字重 C3）、说明 12 | P17 |
 | c17 | 修改 | 选择行：值 + ⌄，弹选项对话框；跳转行：›（C2） | P15、P16 |

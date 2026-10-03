@@ -1,11 +1,14 @@
-# A09.6 热门分区、关注的分区：设计（第 1 版）
+# A09.6 热门分区、关注的分区：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.4f、T07c.4（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：两个页面。**关注分区**（v3 `FavoriteAreasPage`，分区页右下角“关注分区”打开）和**平台显示**（v3 `HotAreasPage`，任务名里的“热门分区”：代码叫 hot_areas，界面标题是“平台显示”，从“设置 → 平台显示与授权 → 平台显示”打开，管理热门、分区等页面显示哪些平台和顺序）
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a096)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a096)
-- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区/src/gen.py && python3 tools/ui/mock/render.py docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区/src --annotate`）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a096)（A09.6-01、02）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a096)；功能点 F-BRW-06、F-BRW-07（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；关注分区的存取和平台显示的规则在 [I03](../../../I-浏览和发现/I03-分区/README.md)；相关决定 D-003（Z1～Z3 按建议 A）
+- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（`python3 docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区/src/gen.py && python3 tools/ui/mock/render.py docs/A-界面设计/A09-浏览界面/A09.6-热门分区、关注的分区/src --annotate`）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；分区图片是示意图片，关注的分区是示意数据；平台图标取自 `packages/live_ui/assets/platforms/`
-- 和其他任务的关系：分区卡片、长按菜单和网格列数照 [A09.4](../A09.4-分区/README.md)；点卡片打开的分区房间和取消关注确认框在 [A09.5](../A09.5-分区房间/README.md)；这两页没有房间卡片，房间卡片照 A09.1（正在同时设计）
+- 和其他任务的关系：分区卡片、长按和网格列数照 [A09.4](../A09.4-分区/README.md)；点卡片打开的分区房间和取消关注确认框在 [A09.5](../A09.5-分区房间/README.md)；这两页没有房间卡片
+- 文件夹名带顿号“、”（`tools/docs/docs.py` 的 `safe()` 不去掉它），建好后不再改（PROCESS 第 1 节）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -15,11 +18,52 @@
 | A09.6-02 | 关注分区卡片的长按菜单（新） | 长按或右键卡片 | 同上 | “取消关注”，再弹 A09.5 的确认框；取消后卡片消失 |
 | A09.6-03 | 平台显示页：说明、平台列表（开关、拖动排序） | 设置 → 平台显示与授权 → 平台显示（`platform_settings_page.dart:17-22`） | 竖屏（长列表）、宽屏 | 显示、隐藏、拖动中、只剩一个显示时（关不掉，提示条“请至少保留一个可见直播平台。”）、窄屏或字体放大 1.5 倍以上时开关换到名字下面 |
 
+（A09.6-02 设计时是小菜单，实现是和房间卡片同一个居中对话框，同 A09.4 的 X3。）
+
+## 3.x 的样子和问题
+
+### 3.x 的样子（标签 `v3.2.11`，路径从 `lib/` 起）
+
+#### 关注分区（`lib/modules/areas/favorite_areas_page.dart`、`favorite_areas_controller.dart`）
+
+- **顶栏**：返回、标题“关注分区”（20 号半粗居中，:18）。
+- **平台标签**（:97-104）：“全部”加“平台显示”里的全部平台（默认 34 个，`Sites().availableSites(containsAll: true)`，:20）；样式同分区页的标签（15 号，选中主色半粗，指示条在文字下，放得下居中、放不下从左排）；可以左右滑切换（:106-112）；记住上次选的平台（:35-43、`favorite_areas_controller.dart:11-14`）。
+- **网格**（:118-139）：瀑布流 `WaterfallFlow`，按页面宽度 >1280 九列、>960 七列、>640 五列、其余三列（:15-16）；外边距 6，间距来自设置；卡片是分区页同一个 `AreaCard`（第二行是父分类名）。
+- **点卡片**进分区房间（A09.5）；**没有长按、右键**。要取消关注只能点进分区，再点右下角的分区小图。
+- **空**（:140）：`Remix.apps_2_line`、“未发现分区”，没有说明和按钮；“全部”空和单个平台空一样。
+
+#### 平台显示（`lib/modules/hot_areas/hot_areas_page.dart`、`hot_areas_controller.dart`）
+
+- **顶栏**：返回、标题“平台显示”（:13）。
+- **说明条**（:107-131）：主色 5% 底、圆角 16、内边距 16/12；`Remix.information_line` 18（主色 80%）；13 号次要色、行高 1.4：“长按右侧图标并上下拖动，即可自定义主页直播平台的展示顺序。”换行“请至少保留一个可见直播平台。”
+- **小标题**“平台显示”（:20，12 号粗体主色 65%，字距 0.5；`widget_extensions.dart:21-36`，限宽 960 居中）。
+- **列表**（:25-99）：表面容器最高 15% 底、圆角 20、5% 描边；每行 `ListTile`（内边距 16/6）：平台图标 24、平台名 15 号 600 字重、右边开关；平台是显示的、而且显示的不止一个时，开关右边多一个拖动把手 `RemixIcons.sort_asc` 20（48 见方，悬停提示同说明第一句，:52-65）。按住把手立刻就能拖（`ReorderableDragStartListener`），只在显示的平台之间排（`hot_areas_controller.dart:69-86`）。宽度 <360 或字体放大 1.5 倍以上时，开关和把手换到名字下面（:80-92）。
+- **规则**（`hot_areas_controller.dart`）：顺序 = 保存的显示列表 + 其余平台（:8-24）；关掉的平台移到列表底部（:53-65）；关最后一个显示的平台不让关，弹提示条（:40-44）；首选平台被关掉时改成第一个显示的平台（:48-51）。这个列表决定热门、分区、关注、关注分区和搜索里的平台（`popular_controller.dart:148`、`areas_controller.dart:41`、`favorite_controller.dart:70`、`search_controller.dart:19`）。
+
+### 问题
+
+| 编号 | 问题 | 位置 |
+|---|---|---|
+| F1 | 关注分区页不能取消关注：卡片没有长按、右键，要点进分区再点右下角的小图 | `favorite_areas_page.dart:136-138`、`area_card.dart:91-111` |
+| F2 | “全部”里不同平台的同名分区看起来一样（两个“英雄联盟”），卡片第二行只写父分类，不写平台 | `area_card.dart:136-141` |
+| F3 | 平台标签列出所有显示的平台（默认 34 个），关注的分区只在两三个平台上时，大多数标签点开是空的 | `favorite_areas_page.dart:20` |
+| F4 | 一个都没关注时只写“未发现分区”，不说怎么关注，也没有去分区页的按钮 | `favorite_areas_page.dart:140` |
+| F5 | 用瀑布流（逐个测量高度），和分区页的固定行高网格是两种排法；列数按固定断点 | `favorite_areas_page.dart:16`、`:124-133` |
+| H1 | 宽屏时小标题限宽 960 居中，说明条和列表却铺满整个窗口，小标题和列表左边不对齐 | `widget_extensions.dart:12-18`、`hot_areas_page.dart:14-33` |
+| H2 | 说明写“长按右侧图标并上下拖动”，实际按住把手马上就能拖，不用长按 | `hot_areas_page.dart:56-63`、`:121` |
+| H3 | 拖动把手用的是“升序排序”图标 `sort_asc`，看起来像排序按钮，不像把手 | `hot_areas_page.dart:61` |
+| H4 | 显示和隐藏的平台在一个列表里没有分开；关掉一个平台它就跳到列表底部，看不出去了哪里 | `hot_areas_controller.dart:53-65` |
+| H5 | 没说这个列表影响哪里：入口副标题写“管理首页直播平台排序”，实际热门、分区、关注、关注分区、搜索都用它 | `hot_areas_page.dart:121`、`platform_settings_page.dart:19-20` |
+
+### 设计时 v4 的偏差（参考）
+
+`apps/pure_live/lib/features/areas/favorite_areas_view.dart`：平台标签带数量；“全部”里卡片左上角显示平台图标；长按直接取消关注（没有菜单）。`features/hot_areas/hot_areas_page.dart` 另行实现，未逐项对照。
+
 ## 各版的经过
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 关注分区竖屏、宽屏、长按菜单、空；平台显示完整长图、宽屏 | 待评审 |
+| 第 1 版 | 关注分区竖屏、宽屏、长按菜单、空；平台显示完整长图、宽屏 | 用户确认；Z1～Z3 按建议 A（D-003）；c2 的小菜单由协调员改成对话框（同 A09.4 X3） |
 
 ## 对比页（按章节导出）
 
@@ -46,40 +90,9 @@
 | [v3-platforms.jpg](v3-platforms.jpg)、[v4-platforms.jpg](v4-platforms.jpg)、[v4-platforms-n.jpg](v4-platforms-n.jpg) | 平台显示竖屏完整内容（长图） |
 | [v3-platforms-wide.jpg](v3-platforms-wide.jpg)、[v4-platforms-wide.jpg](v4-platforms-wide.jpg)、[v4-platforms-wide-n.jpg](v4-platforms-wide-n.jpg) | 平台显示宽屏 1280×800（新设计是正在拖动“虎牙”） |
 
-## v3 的样子
+## 确认的改动
 
-### 关注分区（`lib/modules/areas/favorite_areas_page.dart`、`favorite_areas_controller.dart`）
-
-- **顶栏**：返回、标题“关注分区”（20 号半粗居中，:18）。
-- **平台标签**（:97-104）：“全部”加“平台显示”里的全部平台（默认 34 个，`Sites().availableSites(containsAll: true)`，:20）；样式同分区页的标签（15 号，选中主色半粗，指示条在文字下，放得下居中、放不下从左排）；可以左右滑切换（:106-112）；记住上次选的平台（:35-43、`favorite_areas_controller.dart:11-14`）。
-- **网格**（:118-139）：瀑布流 `WaterfallFlow`，按页面宽度 >1280 九列、>960 七列、>640 五列、其余三列（:15-16）；外边距 6，间距来自设置；卡片是分区页同一个 `AreaCard`（第二行是父分类名）。
-- **点卡片**进分区房间（A09.5）；**没有长按、右键**。要取消关注只能点进分区，再点右下角的分区小图。
-- **空**（:140）：`Remix.apps_2_line`、“未发现分区”，没有说明和按钮；“全部”空和单个平台空一样。
-
-### 平台显示（`lib/modules/hot_areas/hot_areas_page.dart`、`hot_areas_controller.dart`）
-
-- **顶栏**：返回、标题“平台显示”（:13）。
-- **说明条**（:107-131）：主色 5% 底、圆角 16、内边距 16/12；`Remix.information_line` 18（主色 80%）；13 号次要色、行高 1.4：“长按右侧图标并上下拖动，即可自定义主页直播平台的展示顺序。”换行“请至少保留一个可见直播平台。”
-- **小标题**“平台显示”（:20，12 号粗体主色 65%，字距 0.5；`widget_extensions.dart:21-36`，限宽 960 居中）。
-- **列表**（:25-99）：表面容器最高 15% 底、圆角 20、5% 描边；每行 `ListTile`（内边距 16/6）：平台图标 24、平台名 15 号 600 字重、右边开关；平台是显示的、而且显示的不止一个时，开关右边多一个拖动把手 `RemixIcons.sort_asc` 20（48 见方，悬停提示同说明第一句，:52-65）。按住把手立刻就能拖（`ReorderableDragStartListener`），只在显示的平台之间排（`hot_areas_controller.dart:69-86`）。宽度 <360 或字体放大 1.5 倍以上时，开关和把手换到名字下面（:80-92）。
-- **规则**（`hot_areas_controller.dart`）：顺序 = 保存的显示列表 + 其余平台（:8-24）；关掉的平台移到列表底部（:53-65）；关最后一个显示的平台不让关，弹提示条（:40-44）；首选平台被关掉时改成第一个显示的平台（:48-51）。这个列表决定热门、分区、关注、关注分区和搜索里的平台（`popular_controller.dart:148`、`areas_controller.dart:41`、`favorite_controller.dart:70`、`search_controller.dart:19`）。
-
-## v3 的问题
-
-| 编号 | 问题 | 位置 |
-|---|---|---|
-| F1 | 关注分区页不能取消关注：卡片没有长按、右键，要点进分区再点右下角的小图 | `favorite_areas_page.dart:136-138`、`area_card.dart:91-111` |
-| F2 | “全部”里不同平台的同名分区看起来一样（两个“英雄联盟”），卡片第二行只写父分类，不写平台 | `area_card.dart:136-141` |
-| F3 | 平台标签列出所有显示的平台（默认 34 个），关注的分区只在两三个平台上时，大多数标签点开是空的 | `favorite_areas_page.dart:20` |
-| F4 | 一个都没关注时只写“未发现分区”，不说怎么关注，也没有去分区页的按钮 | `favorite_areas_page.dart:140` |
-| F5 | 用瀑布流（逐个测量高度），和分区页的固定行高网格是两种排法；列数按固定断点 | `favorite_areas_page.dart:16`、`:124-133` |
-| H1 | 宽屏时小标题限宽 960 居中，说明条和列表却铺满整个窗口，小标题和列表左边不对齐 | `widget_extensions.dart:12-18`、`hot_areas_page.dart:14-33` |
-| H2 | 说明写“长按右侧图标并上下拖动”，实际按住把手马上就能拖，不用长按 | `hot_areas_page.dart:56-63`、`:121` |
-| H3 | 拖动把手用的是“升序排序”图标 `sort_asc`，看起来像排序按钮，不像把手 | `hot_areas_page.dart:61` |
-| H4 | 显示和隐藏的平台在一个列表里没有分开；关掉一个平台它就跳到列表底部，看不出去了哪里 | `hot_areas_controller.dart:53-65` |
-| H5 | 没说这个列表影响哪里：入口副标题写“管理首页直播平台排序”，实际热门、分区、关注、关注分区、搜索都用它 | `hot_areas_page.dart:121`、`platform_settings_page.dart:19-20` |
-
-## 改动（待确认）
+用户确认（第 1 版的“改动（待确认）”原样；c2 的“小菜单”实现时换成居中对话框）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -116,18 +129,35 @@
 | 电视 | 这个任务不出图。电视的关注分区在 A17.3（pure_live_TV `modules/live/favorite_areas/`），用同一个分区卡片的电视样式，长按确认键等于长按菜单；平台显示在电视设置（A17.9）里，遥控器排序用“上移、下移”代替拖动 |
 | 苹果平台 | iPhone 同 Android 手机，左边缘滑动返回；iPad 同平板；macOS 同 Windows。没有别的差异 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- Z1 关注分区的平台标签：A 只列“全部”和有关注分区的平台；B 照 v3 列出所有显示的平台。
-- Z2 平台显示分组：A 分“显示”“隐藏”两组；B 照 v3 一个列表，关掉的沉到底部。
-- Z3 拖动把手图标：A 换成六点把手；B 照 v3 的 `sort_asc`。
+- Z1 关注分区的平台标签：A 只列“全部”和有关注分区的平台；B 照 v3 列出所有显示的平台。**用了 A**（D-003）。
+- Z2 平台显示分组：A 分“显示”“隐藏”两组；B 照 v3 一个列表，关掉的沉到底部。**用了 A**。
+- Z3 拖动把手图标：A 换成六点把手；B 照 v3 的 `sort_asc`。**用了 A**（`AppIcons.dragHandle`）。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 - v3 的开关写了 `activeThumbColor: primary`（`hot_areas_page.dart:49`，v3 别的设置页也这样写），按 Flutter 代码看，打开时滑块和底色同为主色、滑块可能看不出来；效果图照 A07.6 的画法画成白滑块，需要在手机上的 3.x 对照。如果属实，属于设置行组件（A02.1）统一修。
 - 电视上平台排序用什么操作（上移、下移按钮还是长按后方向键移动），放到 A17.9 定。
 - 关注分区页宽屏用 8 列是按 A09.4 的分区卡片最小宽度（大 150）算的，跟着 A09.4 的 X4 选择走。
 
-## v4 现在的偏差（参考）
+结论：第 1 条按协调员要求用 `live_ui` 的开关（主题默认的 `Switch`），没有自己改颜色（跨任务待同步 A09.6 → A02.1）；第 2 条留给 A17.9；第 3 条照 A09.4 的 X4（1280 宽 8 列）。
 
-`apps/pure_live/lib/features/areas/favorite_areas_view.dart`：平台标签带数量；“全部”里卡片左上角显示平台图标；长按直接取消关注（没有菜单）。`features/hot_areas/hot_areas_page.dart` 另行实现，未逐项对照。
+### 性能要点（评审页）
+
+- 关注分区用和分区页同一个固定行高网格，不再用瀑布流逐个测量；图片按显示宽度解码。
+- 关注列表变化（取消关注）只删掉那一张卡，不整页重建；平台标签只在有关注的平台集合变化时重建。
+- 平台显示一共 34 行，拖动只移动被拖的那一行，松手后才保存；保存后热门、分区的平台标签按新顺序重建，当前打开的平台不变。
+
+## 实现和验证
+
+- 实现：c1～c10、Z1～Z3 都做了（逐条见 [record.md](record.md)）。现在的代码：
+  - 关注分区：`apps/pure_live/lib/features/areas/favorite_areas_view.dart`（`favoriteAreaTabs` `:31`：“全部”加有关注分区的平台，顺序照“平台显示”，其余排后面；`FavoriteAreasView` `:49`），路由 `RoutePath.kFavoriteAreas`（`routes/route_path.dart:14`，`app_router.dart:66` 打开 `AreasPage` 的关注分区视图）；卡片和长按对话框同分区页（`area_card.dart`、`areas_common.dart:50`），“全部”里第二行“平台 · 分类”（`areaPlatformAndCategory`，`areas_common.dart:42`），去掉了 v4 “全部”里卡片左上角的平台图标和标签上的数量；没关注时“未发现分区”、说明、“去分区”（从分区页打开时返回分区页，否则打开分区页）。
+  - 平台显示：`apps/pure_live/lib/features/hot_areas/hot_areas_page.dart`（`toggleHotArea` `:13`、`reorderHotAreas` `:25`、`preferredAfter` `:35`、`hotAreasMaxWidth` 720 `:39`、`HotAreasPage` `:55`；说明 `hot-areas-note` `:179`、“显示”组 `:222`、“隐藏”组 `:236`、六点把手 `AppIcons.dragHandle` `:124`），路由 `RoutePath.kSettingsHotAreas`（`app_router.dart:63`）。
+- 保留的 v4 内容：“恢复默认”按钮（v4 加的，在“显示”组标题右边，`hot-areas-reset` `:212`，确认框 `:79-85`）：设计没画也没列为偏差，所以留着；不要的话删掉这一个按钮。
+- 偏差：“记住上次的平台”只在页面存在期间（v4 原样）。
+- 没有新设置（`hotAreasList`、`preferPlatform` 照旧）。门禁：`hot_areas` 直接写的颜色和图标 3 → 0（关注分区计入 `areas`，见 A09.4）。
+- 提交：代码 `8b66eed6b`（`feat(ui): U.4d areas, U.4e area rooms, U.4f followed areas and platform display`）；合并 `0e46099b2`（2026-10-01）；登记表写的是记录提交 `7daeb3805`。
+- 自动测试：`apps/pure_live/test/features/areas/areas_test.dart`：关注分区的标签只列有关注的平台、“虎牙 · 分类”；没关注时的说明和“去分区”；平台显示限宽 720、六点把手只在显示组、开关对齐、新说明；原有的开关测试照实改了组标题文字。
+- 真机：**没有记录**（S02.2、S02.3 都没看关注分区和平台显示；没有 `verify.md`）。要看的：分区页右下“关注分区”打开、只列有关注的平台、长按“取消关注”先确认后卡片消失；设置 → 平台显示与授权 → 平台显示：关掉一个平台它移到“隐藏”组、按住把手拖动排序、关最后一个时提示“请至少保留一个可见直播平台。”、热门和分区的平台标签跟着变（[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 4 条）。登记表问题见[子分类页](../README.md)“已知问题”。
+- 留下的问题：“恢复默认”去留（维护者看一眼）；电视的平台排序（A17.9）；电脑上 Esc 不返回（A05.1）。

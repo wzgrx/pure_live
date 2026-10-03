@@ -19,13 +19,23 @@
 - 3.x 的 Picarto 搜索（`git show v3.2.11:lib/core/site/picarto/picarto_api.dart:189-235` 的 `searchProfiles`）：资料里没有直播标题，`LiveRoom` 不填 `title`（`:220-232`），只有 `nick` = 频道名，简介 `bio` 不读。卡片（3.x `lib/common/widgets/room_card.dart:1172-1221` 的信息区：标题一行、主播名一行）的标题行是空的。
 - 问题：P1 标题行空着（3.x）；P2 v4 平台层把标题改成了频道名（11-5 的前半），结果两行都是频道名，简介（`bio`）读了却没地方显示。
 
-## v4 现在
+### v4 现在（2026-10-03 核对）
 
 - 平台层：`packages/live_core/lib/src/sites/picarto/picarto_api.dart:295-331` 的 `searchRooms`：`title: name`、`nick: name`、`introduction: bio`（解码 HTML 字符、去首尾空白，空的不填）。样本 `fixtures/picarto/S03-search` 的 20 个结果里 8 个有简介（E03.3 记录）。
 - 卡片数据：`apps/pure_live/lib/shared/rooms/room_cards.dart:82-99` 的 `cardOf`：`title`、`anchorName`（主播名，在播时后面加“· 已播 N”）……没有简介。
 - 卡片：`packages/live_ui/lib/src/widgets/room_card.dart:44` 的 `RoomCardData`（没有简介字段）；`packages/live_ui/lib/src/widgets/live_room_card.dart:309-330` 的 `title()`（一行，600）和 `anchorName()`（一行，500，`onSurfaceVariant`）。
 - 搜索页：`apps/pure_live/lib/features/search/search_view.dart:569` 用 `RoomGridCard`，经 `shared/rooms/room_grid.dart:131` 调 `cardOf`。
-- 其他平台也有“标题等于主播名、带简介”的卡片：已确认 CHZZK 的频道搜索（`packages/live_core/lib/src/sites/chzzk/chzzk_api.dart:725-730`：`nick`、`title` 都是频道名，`introduction` 是频道说明）；其余平台待查（brief 第 1 阶段在 `packages/live_core/lib/src/sites/` 里列出所有 `title` 取主播名的地方）。
+- 其他平台也有“标题等于主播名”的卡片。2026-10-03 在 `packages/live_core/lib/src/sites/` 里按“`LiveRoom(` 里 `nick:` 和 `title:` 是同一个表达式”粗查了一遍（只查了字面相同的，`title` 由别的变量拼出主播名的没查到，brief 第 1 阶段要再核一遍、并确认这些房间会不会出现在卡片列表里）：
+
+| 平台 | 位置 | 有没有简介 | 规则通用时 |
+|---|---|---|---|
+| Picarto | `picarto/picarto_api.dart:313`（`searchRooms`，`nick`/`title` `:317-318`，`introduction` `:325`） | 有（`bio`） | 本任务的目标 |
+| CHZZK | `chzzk/chzzk_api.dart:721`（`channelCard`，`:725-726`，`introduction` `:730`） | 有（频道说明） | 受影响（频道搜索卡片） |
+| 快手 | `kuaishou/kuaishou_api.dart:196`（`_searchRoom` `:190`，`:200-201`，`introduction` `:206`） | 有（`author['description']`） | 受影响（主播搜索结果） |
+| SHOWROOM | `showroom/showroom_api.dart:496`（`room` `:493`，`:500-501`，`introduction` `:509`） | 有（`profile.description`） | 受影响（看 `room` 用在哪些列表） |
+| 映客 | `inke/inke_api.dart:359`（`_card` `:353`，`:363-364`） | 没有 | 不受影响（没有简介照旧显示主播名） |
+| PandaTV | `pandalive/pandalive_api.dart:685`（`profileCard` `:676`，`:689-690`，`introduction: ''` `:696`） | 空 | 不受影响 |
+| 微博 | `weibo/weibo_api.dart:292`（`recommendations` `:280`，`:296-297`） | 没有 | 不受影响 |
 
 ## 各版的经过
 
@@ -66,8 +76,9 @@
 
 ## 待选和决定
 
-- X1：规则只认 Picarto 还是通用。A（建议）通用规则“标题等于主播名且有简介”，所有平台一样（UI.md 第 3 节第 6 条：同一件事一种做法）；B 只对 `platform == 'picarto'`。
+- X1：规则只认 Picarto 还是通用。A（建议）通用规则“标题等于主播名且有简介”，所有平台一样（UI.md 第 3 节第 6 条：同一件事一种做法）；B 只对 `platform == 'picarto'`。**需要维护者决定**（单元 1 已提出）：选 A 时，上面粗查到的 CHZZK 频道搜索、快手主播搜索、SHOWROOM 的卡片第二行也会变成简介，评审页要把这几个平台各画一张。
 - X2：简介放哪一行。A（建议）替换重复的主播名行；B 加第三行（所有卡片高度不齐，不建议）。
+- 判断放在哪一层：建议在应用层的 `cardOf`（`apps/pure_live/lib/shared/rooms/room_cards.dart:82`）里比较标题和主播名、取简介第一行，`live_ui` 的卡片和平台层都不改（单元 1 的建议“在应用层取数据”）。
 
 ## 实现和验证（开发后补）
 

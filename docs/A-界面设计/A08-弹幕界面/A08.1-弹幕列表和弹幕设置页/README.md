@@ -225,7 +225,7 @@ v4 当时的文件是 `apps/pure_live/lib/features/live_play/danmaku/chat_panel.
 - 门禁：`live_play` 直接写的颜色和图标（和 A07.7 合计）9 → 8，`tools/gate/ui_baseline.json` 改为 8。
 - 提交：代码 `23f9a1fbc`（`feat(live_core, live_ui): super chat capability, picture state view and U.2e/U.2g icons`）、`f3838b7ff`（`feat(live_play): U.2e chat states, super chats, settings tab and block list`）、测试 `c54db41d8`；合并 `381ff16f1`（2026-10-01）；登记表写的是记录提交 `05793a4c8`。
 - 后来的变化（以现在的代码为准）：
-  - A07.11（B09 c9）把四个标签换成 `live_ui` 的 `TabLabel`（`ece6f3764`），从全屏回来记住标签和列表位置（`RoomViewMemory`）。
+  - A07.11 c9 把四个标签换成 `live_ui` 的 `TabLabel`（`ece6f3764`），从全屏回来记住标签和列表位置（`RoomViewMemory`）。
   - D04.1（`7541bfdbf`）：聊天列表改成倒序、每帧最多刷新一次、名字颜色保证 4.5:1（`chat_list.dart:55`）。
   - A07.12、A07.11 c8：长按弹幕面板改成 `features/live_play/danmaku/message_panel.dart` 的 `RoomMessagePanel`，屏蔽关键词是面板的第二页；记录里提到的 `showChatMessageActions` 现在叫 `showRoomMessageActions`（`message_panel.dart:20`）。
   - D01.32：哔哩哔哩访客昵称提示条 `ChatNameHintBar`（`chat_list.dart:529`）放在列表上面；D02.1：屏蔽管理顶上一次性说明打码昵称清理。

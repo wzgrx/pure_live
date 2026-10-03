@@ -115,7 +115,8 @@
 | 平台显示页“显示”组标题右边的“恢复默认”是 v4 加的，设计没画也没列为偏差 | `features/hot_areas/hot_areas_page.dart:54`、`:79-84`（`_reset`，确认框“恢复默认”） | 设计和实现不一致（小） | A09.6 记录“保留的 v4 内容”，维护者看一眼，不要就删这一个按钮 |
 | 分区、关注分区、平台显示、标签管理、分区房间在电脑上按 Esc 不返回（只有搜索、网页搜索、观看记录处理了） | `features/search/search_view.dart`、`web_search_view.dart`、`history/history_page.dart` 用 `EscapeBack`；其余页面没有 | 规范 5.4 的 Esc 返回链不全 | A05.1 c3 |
 | 电视的卡片是另一个组件 `TvRoomCard`，不是 `LiveRoomCard` 的电视样式 | `apps/pure_live/lib/tv/widgets/tv_room_grid.dart:126` | 违反“同一功能各客户端同一组件” | A17.3 |
-| Picarto、CHZZK 频道搜索的卡片两行都是频道名，简介没地方显示 | `shared/rooms/room_cards.dart:82-99` | 已批准升级 11-5 只做了一半 | A09.11 |
+| Picarto 搜索、CHZZK 频道搜索（还有快手主播搜索、SHOWROOM，见 A09.11 的粗查表）的卡片两行都是主播名，平台给的简介没地方显示 | `shared/rooms/room_cards.dart:82-99` | 已批准升级 11-5 只做了一半 | A09.11 |
+| 规范第 7 节表里“卡片长按（v3 是居中对话框，A09.1 的 A1 待定）”没跟着 A09.1 的决定改 | `docs/specs/UI.md:174` | 规范和实现不一致的说法 | 写进本单元报告（规范不在本单元范围） |
 | 代码注释里还用旧编号（`U.4a c15`、`U.5a c12`、`U.4c c6` 等），本子分类的文件里约 74 处；`search_widgets.dart:16` 的注释里还有一个换坏的路径“docs/TASKS.md/ U.5a c12” | `shared/rooms/room_grid.dart:25`、`features/favorite/favorite_page.dart:29` 等 | 按注释找文档要先查 [MAPPING.md](../../MAPPING.md) | Z 组一次性替换（单元 2 已建议） |
 | `inventory/V3_UI.md` 第 2、3、4 节有几处和 3.x 代码对不上（空状态原文、录播标、默认不标平台、卡片圆角 20、分页不止回到顶部、关注列数等），A09.1～A09.3 的 README 写了更正，清点文件本身没改 | `docs/inventory/V3_UI.md` 第 2～4 节 | 只看清点会被误导 | Z 组（文档维护）照各任务 README 的“更正”改清点 |
 

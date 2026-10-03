@@ -33,9 +33,9 @@
 **v4 现在**
 
 - 没有 3.x `MobileManager` 那样的启动时全局设置（全 `apps/pure_live/lib` 搜 `setSystemUIOverlayStyle` 只有首页一处）。
-- 启动页 `apps/pure_live/lib/features/splash/splash_page.dart:95-98`：`AnnotatedRegion<SystemUiOverlayStyle>`，值是 `SystemUiOverlayStyle.light`（深色主题）或 `.dark`（浅色主题）`.copyWith(statusBarColor: 透明)`。Flutter 的这两个常量（`flutter/lib/src/services/system_chrome.dart:316-330`）都带 `systemNavigationBarColor: Color(0xFF000000)` 和 `systemNavigationBarIconBrightness: Brightness.light`，所以启动页期间导航栏是黑底、浅色图标，浅色主题也一样。
+- 启动页 `apps/pure_live/lib/features/splash/splash_page.dart:95-98`：`AnnotatedRegion<SystemUiOverlayStyle>`，值是 `SystemUiOverlayStyle.light`（深色主题）或 `.dark`（浅色主题）`.copyWith(statusBarColor: 透明)`。Flutter 的这两个常量（Flutter SDK 3.47.5 的 `packages/flutter/lib/src/services/system_chrome.dart:316-330`）都带 `systemNavigationBarColor: Color(0xFF000000)` 和 `systemNavigationBarIconBrightness: Brightness.light`，所以启动页期间导航栏是黑底、浅色图标，浅色主题也一样。
 - 首页 `apps/pure_live/lib/features/home/home_page.dart:58-67`：照 3.x 设状态栏透明、导航栏颜色取 `navigationBarTheme.backgroundColor`（v4 的主题同样没设，是 null），然后 `edgeToEdge`。导航栏图标深浅没人设，启动页留下的“浅色图标”可能一直保留。
-- 页面的 `AppBar` 按自己的底色设状态栏图标（Flutter `app_bar.dart:886-900`，只管状态栏，不管导航栏）。
+- 页面的 `AppBar` 按自己的底色设状态栏图标（Flutter SDK 的 `packages/flutter/lib/src/material/app_bar.dart:886-900`，只管状态栏，不管导航栏）。
 - 直播间全屏：`apps/pure_live/lib/features/live_play/live_play_page.dart:550`、`:571` 进 `immersiveSticky`，`:595-606` 的 `_restoreSystemUi` 退回 `edgeToEdge`，不碰样式。
 - 原生 `apps/pure_live/android/app/src/main/res/values/styles.xml:17`、`values-night/styles.xml:17` 同 3.x（导航栏透明）。
 

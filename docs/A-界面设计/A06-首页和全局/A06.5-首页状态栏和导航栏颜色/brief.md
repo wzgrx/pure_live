@@ -17,9 +17,9 @@
 
 ## 现状（读代码得出，写文件:行）
 
-- `apps/pure_live/lib/features/splash/splash_page.dart:95-98`：`AnnotatedRegion<SystemUiOverlayStyle>(value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark).copyWith(statusBarColor: colors.surface.withValues(alpha: 0)))`。Flutter 的常量见 `flutter/lib/src/services/system_chrome.dart:316-330`：两者都是 `systemNavigationBarColor: Color(0xFF000000)`、`systemNavigationBarIconBrightness: Brightness.light`。
+- `apps/pure_live/lib/features/splash/splash_page.dart:95-98`：`AnnotatedRegion<SystemUiOverlayStyle>(value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark).copyWith(statusBarColor: colors.surface.withValues(alpha: 0)))`。Flutter 的常量见 Flutter SDK 3.47.5 的 `packages/flutter/lib/src/services/system_chrome.dart:316-330`：两者都是 `systemNavigationBarColor: Color(0xFF000000)`、`systemNavigationBarIconBrightness: Brightness.light`。
 - `apps/pure_live/lib/features/home/home_page.dart:58-67`：第一帧后 `SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(statusBarColor: 透明, systemNavigationBarColor: Theme.of(context).navigationBarTheme.backgroundColor))`（主题没设 `navigationBarTheme`，这里是 null），再 `setEnabledSystemUIMode(SystemUiMode.edgeToEdge)`。全应用只有这一处调 `setSystemUIOverlayStyle`。
-- `AppBar` 自己按底色设状态栏图标（Flutter `material/app_bar.dart:886-900`，不含导航栏）。
+- `AppBar` 自己按底色设状态栏图标（Flutter SDK 的 `packages/flutter/lib/src/material/app_bar.dart:886-900`，不含导航栏）。
 - 直播间：`apps/pure_live/lib/features/live_play/live_play_page.dart:550`、`:571` 进全屏（`immersiveSticky`）；`:595-606` 的 `_restoreSystemUi` 退出时回 `edgeToEdge`。
 - 主题：`apps/pure_live/lib/app/app.dart` 的 `MaterialApp`（主题由 `packages/live_ui` 给出；设置项 `themeMode`、`themeColorSwitch`、`pureBlackTheme`）。
 - 原生：`apps/pure_live/android/app/src/main/res/values/styles.xml:17`、`values-night/styles.xml:17` 的 `android:navigationBarColor` 透明；`apps/pure_live/android/app/build.gradle.kts` 的 `targetSdk = 37`（Android 15 起强制边到边，导航栏底色设置不生效，图标深浅和 `systemNavigationBarContrastEnforced` 仍生效）。

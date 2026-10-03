@@ -1,11 +1,13 @@
-# A09.9 观看历史：设计（第 1 版）
+# A09.9 观看历史：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；S02.3 写明“观看记录没在真机上看”，见“实现和验证”）
+- 旧编号：U.5c、T07g.2（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：观看记录页（列表、刷新、筛选、空）、保留数量对话框、清空和删除一条的确认框
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a099)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a099)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a099)（A09.9-01～04）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a099)；功能点 F-HIS-01、F-HIS-02（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；刷新、分组、筛选的规则在 [I06](../../../I-浏览和发现/I06-观看历史/README.md)（I06.1 做的“v4 新增”部分）；相关决定 D-003（Z1～Z3 按建议 A）、D-011（观看记录标题居中）
+- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；封面和头像是示意图片
-- 卡片：画的是 v3 的卡片原样（`room_card.dart`，`dense: true`、`showDelete: true`）；**卡片的新样子跟 A09.1 走**
+- 卡片：设计图画的是 v3 的卡片原样（`room_card.dart`，`dense: true`、`showDelete: true`）；**卡片的新样子跟 A09.1 走**（实现时用 `LiveRoomCard`）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -18,7 +20,9 @@
 | — | 卡片长按菜单 | 长按或右键卡片 | — | 在 A09.1 |
 | v4 新增 | 分组标题、筛选框、刷新进度线、刷新结果提示、改小数量的提醒 | I06.1 | 竖屏、横屏、宽屏 | 这一版都保留 |
 
-## v3 的样子
+## 3.x 的样子和问题
+
+### 3.x 的样子（`git show v3.2.11:lib/modules/history/history_page.dart`，407 行；保留数量在 `lib/common/services/settings/history_controller.dart`）
 
 - **顶栏**：返回（`BackButton`）；标题居中“历史记录 (18/50)”（20 号 600，数量 / 上限，不限时写“不限”）；右边 `Icons.settings_rounded`“观看记录保留数量”、`Icons.delete_forever`“清空历史”（没有记录时不显示）（`history_page.dart:166-192`）。
 - **列表**：`EasyRefresh` 下拉刷新每个直播间的开播状态（并发数跟设置，每个 12 秒，`:26-72`）；`WaterfallFlow` 外边距 6，间距跟设置（默认 6）；列数 >1280 五列、>960 四列、>640 三列、其余两列（`:193-233`）；卡片 `RoomCard(dense: true, showDelete: true)`：封面右上角一个黑底圆形删除按钮（`Remix.delete_bin_line` 16，`room_card.dart:1150-1169`）。最新的在前，观看时间存在 `lastWatchedAt` 但不显示（`history_controller.dart:24-37`）。
@@ -27,7 +31,7 @@
 - **确认框**（`:125-163`）：清空——“清空历史”/“确定清空这 18 条历史记录吗？此操作不可撤销。”/ 取消、红底“清除”；删除一条——“删除”/“要从观看记录中删除“晚风电台｜深夜点歌”吗？仅删除这一条记录。”/ 取消、红底“删除”。
 - **按宽度分支**：只有列数。
 
-## v3 的问题
+### 问题
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -40,9 +44,15 @@
 | H7 | 记录多了找不到，没有筛选 | `history_page.dart:193-233` |
 | H8 | 列数按固定宽度跳 | `history_page.dart:199-200` |
 
-## v4 现在的偏差
+### 设计时 v4 的偏差
 
 I06.1 已经加了：按今天 / 昨天 / 近 7 天 / 更早分组、筛选、刷新按钮和进度线、刷新结果提示、改小数量的提醒、卡片菜单里的观看时间和“从观看记录删除”、空状态说明。标题仍是“历史记录 (18/50)”。这一版全部保留，标题改名并把数量放到第二行（Z1）。
+
+## 各版的经过
+
+| 版 | 内容 | 用户意见 |
+|---|---|---|
+| 第 1 版 | 竖屏、空、刷新和筛选、三个对话框、横屏、宽屏；8 个问题、8 条改动、三处待选 | 用户确认；Z1～Z3 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -69,7 +79,9 @@ I06.1 已经加了：按今天 / 昨天 / 近 7 天 / 更早分组、筛选、�
 | [v3-history-land.jpg](v3-history-land.jpg)、[v4-history-land.jpg](v4-history-land.jpg) | 手机横屏 852×393 |
 | [v3-history-wide.jpg](v3-history-wide.jpg)、[v4-history-wide.jpg](v4-history-wide.jpg)、[v4-history-wide-n.jpg](v4-history-wide-n.jpg) | 宽屏 1280×800 |
 
-## 改动（待确认）
+## 确认的改动
+
+用户确认（第 1 版的“改动（待确认）”原样）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -105,14 +117,33 @@ I06.1 已经加了：按今天 / 昨天 / 近 7 天 / 更早分组、筛选、�
 | 电视 | 在 A17.3（pure_live_TV 的观看记录有清空和保留数量）；内容和顺序对齐本页 |
 | 苹果平台差异 | iOS 滑动返回；iPad、macOS 用 Cmd 快捷键 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- Z1 页面名：A “观看记录”；B 照 v3 “历史记录”。
-- Z2 顶栏四个按钮：A 都直接放；B 保留数量和清空收进 ⋮ 菜单。
-- Z3 观看时间：A 按日期分组；B 卡片上写时间（归 A09.1）。
+- Z1 页面名：A “观看记录”；B 照 v3 “历史记录”。**用了 A**（D-003）；首页菜单的入口名字由 I（A06.1）一起改。
+- Z2 顶栏四个按钮：A 都直接放；B 保留数量和清空收进 ⋮ 菜单。**用了 A**（顺序：筛选、刷新、保留数量、清空）。
+- Z3 观看时间：A 按日期分组；B 卡片上写时间（归 A09.1）。**用了 A**；长按对话框里另有观看时间一行（A09.1 c10）。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 - v3 下拉刷新的头部样子（`appRefreshIndicators`）是公用组件，图里没画；新设计照公用组件（A02.1）。
 - 从旧版本导入、没有观看时间的记录放进“更早”（v4 现在的做法）。
 - 改名“观看记录”要同时改首页菜单的入口（I 的范围）。
+
+### 性能要点（评审页）
+
+- 网格懒加载，分组只是在网格之间插标题，不另建列表。
+- 刷新按设置的并发数一个个查，进度线只重绘自己；查完一次写入，不是每查一个就刷新整页。
+- 筛选在本机做，输入时只重建网格。
+
+## 实现和验证
+
+- 实现：c1～c8、Z1～Z3 都做了（逐条见 [record.md](record.md)）。现在的代码（`apps/pure_live/lib/features/history/`）：
+  - `history_page.dart`（434 行）：`HistoryPage`（`:44`）；Esc 和返回键先关筛选（`EscapeBack` `:229`）；标题 `PageTitle`“观看记录”加“18 / 50 条”（不限时“18 条 / 不限”），现在居中（`:234-238`，见“后来的变化”）；顶栏筛选、刷新、保留数量、清空（键 `history-filter` `:247`、`history-refresh` `:255`、`history-limit` `:264`、`history-clear` `:271`，清空只在有记录时）；空状态“无观看历史记录 / 看过的直播间会按观看时间出现在这里”（`history-empty` `:285`）；骨架（`:306`）；刷新进度线 2 像素（`:317`）；筛选框（`history-filter-field` `:341`，主色 2 像素边框、圆角 22、右边条数）；分组标题（`history-section-*` `:399`，主色 13 号半粗加条数）；卡片 `LiveRoomCard`（`:411`，`showDelete`，混有多个平台时标平台）；长按菜单里“从观看记录删除”（`history-menu-remove` `:208`，图标和卡片删除按钮同一个 `AppIcons.delete`）。
+  - `history_limit_dialog.dart`（194 行）：`unlimitedHistoryLimit`（`:11`）、`historyLimitLabel`（`:14`）、`showHistoryLimitDialog`（`:20`）、`HistoryLimitDialog`（`:32`，恢复 3.x 的整宽“应用”按钮，和输入框同宽、高 48）。
+  - 刷新和分组照旧（`history_refresh.dart`、`history_sections.dart`，I06.1）。
+- 没有新设置（保留数量照旧读写 3.x 的 `historyLimit`）。门禁：`history` 直接写的颜色和图标 11 → 0，`ui_baseline.json` 去掉这一项；没有跨功能引用。
+- 提交：`cbd96fcc6`（`feat(app): U.5c watch history as designed`，登记表写的是这个）；合并 `f294308a3`（2026-10-02）。
+- 后来的变化：D-011（`e320e0e72`，2026-10-02）：观看记录的标题按 3.x 实际运行的样子改成居中（记录写的是“靠左”，那是 D-011 之前的做法）；A03.1（`a048ea540`）下拉刷新用 `AppRefreshView`。
+- 自动测试：`apps/pure_live/test/features/history/history_page_test.dart`（17 个，原 9 个）：标题和第二行条数、四个按钮的顺序、图标和提示、卡片带删除按钮并标平台；393×852、852×393、1280×800 的列数和边距（2 / 4 / 6）；Esc 和返回键先关筛选；附录 A 第 14 条（右键 = 长按，菜单里有“从观看记录删除”）；空页面的说明、没有清空、刷新不可点；保留数量对话框的“应用”按钮。照实改的旧断言：标题“历史记录 (4/50)”改为“观看记录”加“4 / 50 条”（不限时“22 条 / 不限”）；`RoomCard` 改为 `LiveRoomCard`。
+- 真机：**没有记录**。S02.3（2026-10-02，K90）写明“观看记录、账号页：没在真机上看（有组件测试）”。要看的：看过的直播间按今天 / 昨天 / 近 7 天 / 更早分组；筛选；刷新开播状态的进度和结果提示；删除一条、清空先确认；保留数量改小时提醒删几条（[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 5 条）。登记表问题见[子分类页](../README.md)“已知问题”。
+- 留下的问题：真机（上一条）；电视的观看记录（A17.3）；没在 profile 模式看帧时间。

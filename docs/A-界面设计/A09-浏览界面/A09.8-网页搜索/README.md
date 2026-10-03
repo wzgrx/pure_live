@@ -1,10 +1,12 @@
-# A09.8 网页搜索：设计（第 1 版）
+# A09.8 网页搜索：设计（第 1 版，已定稿并实现）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；功能清点 F-SRC-04 是“没验证”，真机交给 S02.6，见“实现和验证”）
+- 旧编号：U.5b、T07f.3（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：网页搜索页（应用内网页、认出直播间、加载失败、系统浏览器页）
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a098)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a098)；入口在 [A09.7](../A09.7-搜索/README.md)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a098)（A09.8-01）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a098)；入口在 [A09.7](../A09.7-搜索/README.md)；功能点 F-SRC-04（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；应用内网页组件 `apps/pure_live/lib/shared/in_app_web.dart` 是 O03.1 的；认出直播间的规则在 E04（链接解析）；相关决定 D-003（Y1～Y3 按建议 A）
+- 评审页：claude.ai 私有页面；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；网页是示意网页，不是任何平台的真实页面
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -15,7 +17,9 @@
 | — | 提示条 | 获取直播间信息失败,请重新获取；系统浏览器未打开，请检查默认浏览器设置 | 全部 | — |
 | — | 开发者工具按钮 | 只在调试版（`kDebugMode`） | — | 用户看不到，不出图 |
 
-## v3 的样子
+## 3.x 的样子和问题
+
+### 3.x 的样子（`git show v3.2.11:lib/modules/search/`：`web_search_page.dart` 215 行、`web_search_controller.dart`、`web_search_room_parser.dart`）
 
 - **顶栏**：标题“网页搜索”居中（主题 `centerTitle`），左边 `BackButton`（先在网页里后退，退到第一页才关闭，`web_search_controller.dart:407-434`），右边 `Icons.close`“关闭”（直接关闭）；调试版多一个 `Icons.bug_report`“打开网页开发者工具”（`web_search_page.dart:33-49`）。
 - **网页**：`InAppWebView` 占满；固定用 Windows Chrome 的 User-Agent、`useWideViewPort`、`loadWithOverviewMode`，所以手机上也是缩小的电脑版网页（`web_search_controller.dart:141-144`、`web_search_page.dart:60-94`）；只放行 http(s)，拒绝不受信任的证书（`:297-310`、`:281-289`）。
@@ -25,7 +29,7 @@
 - **Linux**：不建网页，显示 `Icons.open_in_browser_rounded` 48（主色）、“Linux 版使用系统浏览器继续网页搜索；应用内原生搜索、直播详情和播放功能保持可用。”、`FilledButton.icon` `open_in_new_rounded`“使用系统浏览器打开”（打开中转圈，`web_search_page.dart:119-156`）。从搜索页点进来时 Linux 直接打开浏览器，不经过这一页（`search_controller.dart:541-545`）。
 - **按宽度分支**：没有。
 
-## v3 的问题
+### 问题
 
 | 编号 | 问题 | 位置 |
 |---|---|---|
@@ -37,9 +41,15 @@
 | W6 | 进入直播间后网页搜索被替换，返回回不到网页 | `web_search_controller.dart:523-525` |
 | W7 | Linux 页没说找到直播间后怎么回来 | `web_search_page.dart:119-156` |
 
-## v4 现在的偏差
+### 设计时 v4 的偏差
 
 v4（I05.1、O03.1）：有应用内网页时打开 `InAppWebPage`，顶栏去掉了 ✕、加了“使用系统浏览器打开”；认出直播间的对话框标题改为“这个网页是一个直播间，要进入吗？”、内容是网址；进入时不替换网页。没有应用内网页时显示系统浏览器页（说明怎么粘贴回来）。这一版：✕ 加回来（v3 有），对话框改成底部提示条（Y1）。
+
+## 各版的经过
+
+| 版 | 内容 | 用户意见 |
+|---|---|---|
+| 第 1 版 | 竖屏加载、认出直播间（提示条）、加载失败、横屏、宽屏、不能在应用里打开时；7 个问题、8 条改动、三处待选 | 用户确认；Y1～Y3 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -65,7 +75,9 @@ v4（I05.1、O03.1）：有应用内网页时打开 `InAppWebPage`，顶栏去�
 | [v3-web-wide.jpg](v3-web-wide.jpg)、[v4-web-wide.jpg](v4-web-wide.jpg) | 宽屏 1280×800 |
 | [v3-web-linux.jpg](v3-web-linux.jpg)、[v4-web-linux.jpg](v4-web-linux.jpg) | 不能在应用里打开时（Linux） |
 
-## 改动（待确认）
+## 确认的改动
+
+用户确认（第 1 版的“改动（待确认）”原样）：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -99,14 +111,38 @@ v4（I05.1、O03.1）：有应用内网页时打开 `InAppWebPage`，顶栏去�
 | 电视 | 不适用 |
 | 苹果平台差异 | 用系统网页组件；iOS 左边缘滑动等于返回 |
 
-## 待选（A 是建议）
+## 待选和决定
 
-- Y1 认出直播间时：A 底部提示条；B 照 v3 弹对话框但写清平台和房间号。
-- Y2 从直播间返回：A 回到网页；B 照 v3 回到搜索页。
-- Y3 手机上的网页：A 照 v3 用电脑版；B 用手机版。
+- Y1 认出直播间时：A 底部提示条；B 照 v3 弹对话框但写清平台和房间号。**用了 A**（D-003）。
+- Y2 从直播间返回：A 回到网页；B 照 v3 回到搜索页。**用了 A**。
+- Y3 手机上的网页：A 照 v3 用电脑版；B 用手机版。**用了 A**。
 
-## 拿不准的地方
+### 设计时拿不准的地方
 
 - v3 固定用电脑版 User-Agent 的原因代码里没写；推测是避开手机网页跳 App 和让房间链接格式统一（Y3 的说明按这个写）。
 - 提示条里只能写平台和房间号（从网址认出来的），拿不到直播间标题，除非再请求一次房间信息；这一版不请求。
 - 新文字（“这是一个直播间”、标题第二行）定稿后要加进翻译。
+
+结论：提示条只写平台和房间号，不额外请求直播间标题；新文字（“这是一个直播间”、标题第二行）加进了翻译。
+
+### 性能要点（评审页）
+
+- 网页组件只在这一页存在，关闭时先停止加载再释放（v3 已是）。
+- 进度条只重绘自己；提示条是盖在网页上的小部件，不重建网页。
+- 认出房间号在网址变化时做，不读网页内容。
+
+## 实现和验证
+
+- 实现：c1～c8、Y1～Y3 都做了（逐条见 [record.md](record.md)）。现在的代码：
+  - `apps/pure_live/lib/features/search/web_search_view.dart`（452 行）：`WebSearchRequest`（`:15`，3.x 的 `{url, platform}` 照旧可用，新的可选 `keyword`）、`WebSearchView`（`:65`）：Esc 返回（`EscapeBack` `:163`）、两行标题 `PageTitle`“网页搜索 / 平台 · 关键词”靠左（`:167-169`）、应用内网页 `InAppWebPage(desktopSite: true)`（`:197`）；`WebSearchRoomBar`（`:264`，平台标志、“这是一个直播间”、“平台 · 房间号 N”、“进入”、✕；竖屏左右 12、离底 16；页宽 600 起靠右宽 420；1200 起右下角 24、宽 440；翻到不是直播间的网页时收起；✕ 后这个房间不再提示）；`WebSearchFailure`（`:346`，错误色断网图标、“网页搜索暂不可用”、说明、“重试”实心、下面“使用系统浏览器打开”文字按钮）；`_StateBody`（`:382`）。地址无效时照 v3：“网页搜索地址无效，请返回搜索页后重试。”和“关闭”。
+  - `apps/pure_live/lib/shared/in_app_web.dart`：`desktopUserAgent`（`:37`，v3 的 Windows Chrome User-Agent）、`InAppWebPage`（`:45`，`desktopSite` `:73`；返回先 `canGoBack` 后退 `:93`，退不了用 `Navigator.pop` `:96-98`；`desktopSite` 时 `useShouldOverrideUrlLoading: true` `:106`，只放行 http(s) 才真正生效）。
+  - 系统浏览器页（没有应用内网页时：Linux、Windows 缺 WebView2 选了系统浏览器）：进页立刻打开一次系统浏览器，按钮可再开、打开中转圈；顶栏没有“使用系统浏览器打开”。
+- 修的问题（根因，记录“修的问题”）：
+  1. 网页第一页按返回会一直转：`InAppWebPage` 用 `PopScope(canPop: false)` 接返回，退不了时调 `maybePop()`，又被同一个 `PopScope` 拦下，没有尽头；改为 `Navigator.pop()`。哔哩哔哩网页登录也用这个组件，一起受益。
+  2. “只放行 http(s)”之前没生效：要 `useShouldOverrideUrlLoading: true` 才会调 `shouldOverrideUrlLoading`；网页搜索打开了，哔哩哔哩登录没动。
+- 和设计 / v3 不一样（记录）：提示条只写平台和房间号；记录当时建议哔哩哔哩网页登录成功后改用 `pop(true)`——已经改了（`d2ec7bbfc`，`apps/pure_live/lib/features/account/bilibili_web_login.dart:123-125`）。
+- 没有新设置。门禁：`search` 的直接颜色和图标在 A09.7 一起降到 0；`shared/` 不计入门禁。
+- 提交：`773f31fa5`（`feat(app): U.5b web search as designed`，登记表写的是这个）；合并 `f294308a3`（2026-10-02）。
+- 自动测试：新文件 `apps/pure_live/test/features/search/web_search_test.dart`（记录写 6 个；现在 4 个用例声明，有的按 393 / 852 / 1280 循环）：3.x 的参数、无效参数和关键词的读取（无效地址页的文字和“关闭”）；系统浏览器页（进页立刻打开一次、两行标题靠左、说明和网址、顶栏没有外开按钮、按钮再开）；提示条在 393 / 852 / 1280 宽的位置和宽度、从左到右的顺序、“进入”和 ✕；失败页的“重试”和“使用系统浏览器打开”。应用内网页本身（平台视图）测试里跑不起来，没有覆盖。
+- 真机：**没验证**。功能清点 F-SRC-04（网页搜索，应用内浏览器认出直播间后问是否进入）是“没验证”，交给 [S02.6](../../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md)（[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 3 条）；Windows 上的 `useShouldOverrideUrlLoading` 和 WebView2 缺失时的流程留给 [S03.1](../../../S-质量和验证/S03-统一验证/S03.1-统一验证/README.md)。登记表却是“完成”（见[子分类页](../README.md)“已知问题”）。
+- 留下的问题：真机（上一条）；电视不适用。

@@ -109,6 +109,7 @@
 |---|---|---|---|
 | 设置的弹幕页没有直播间的“弹幕列表”“小窗弹幕”两组：这两组写在 `features/live_play` 里，设置不能引用 | `features/live_play/danmaku/danmaku_settings_panel.dart:97-133`、`:143`；`features/settings/danmaku_page.dart:62` | 同一个设置两处不一样（A08.1 E1 的“完全一样”没做到） | A08.6 |
 | 直播间里“统一弹幕颜色”是居中对话框，全屏时压在画面中间（全屏里最后一个） | `danmaku_settings_panel.dart:193-209`、`shared/danmaku/danmaku_color_dialog.dart:66` | 违反规范第 7 节“直播间里设置用面板”；A07.11 c8 的遗留 | A08.7 |
+| 小窗弹幕的设置有两份实现、顺序不同：直播间的 `PipDanmakuSettings` 照 3.x 顺序（A08.1 c9），设置的“小窗弹幕”页是目录行、按 A11.3 c14 分组（透明度、速度、字号……在前）；3.x 两处是同一个 `PipDanmakuSettingsSection` | `features/live_play/danmaku/danmaku_settings_panel.dart:143`；`features/settings/settings_catalog.dart:1085-1234`、`playback_tiles.dart:604` | 同一组设置两处顺序不同 | A08.6 的待选 G3 |
 | 两个小窗弹幕颜色选择器：直播间是 `showDanmakuColorDialog`（10 个色块 + 十六进制），设置的小窗弹幕页是 `showColorDialog`（`LiveColorPicker`） | `shared/danmaku/danmaku_color_dialog.dart:66`；`features/settings/playback_tiles.dart:510-538`（`PipColorTile`）、`settings_dialogs.dart:317`（`showColorDialog`） | 同一个设置两种选色方式 | A08.7 一起定（统一成一个面板式选择） |
 | A08.3、A08.4 登记为“完成”，记录里没有 K90 结果；A08.1 的列表状态（超时、平台不提供、醒目留言卡片）只在 S02.2 冒烟里看过“四个标签、系统提示” | 各任务 `record.md`；[S02.2 记录](../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md) | 不符合 PROCESS 3.2“完成必须有真机结果” | 写进本单元报告；建议这些检查并入 S02.6 或改回“待真机” |
 | 本地互动的礼物和徽章 emoji 是 COLRv1 字体，Windows 10 的 DirectWrite 可能画成空白 | `local_interaction/local_interaction_scope.dart:58`（`_bundledEmoji`：除 iOS、macOS 外都用自带字体） | Windows 10 上礼物图案看不见 | 没在 Windows 上看过；X01（Windows）验证，不行时让 Windows 用系统 emoji |
@@ -157,8 +158,8 @@
 | A08.3 | 弹幕屏蔽页 | 界面 | 完成 | 2026-10-01 | 5ba728803 | [设计或说明](A08.3-弹幕屏蔽页/README.md)、[记录](A08.3-弹幕屏蔽页/record.md)、[评审页](A08.3-弹幕屏蔽页/page/01-说明.jpg) |
 | A08.4 | 画面弹幕点按和长按：复制、屏蔽此用户、屏蔽关键词 | 功能 | 完成 | 2026-10-02 | b8462638a | [设计或说明](A08.4-画面弹幕点按和长按/README.md)、[记录](A08.4-画面弹幕点按和长按/record.md) |
 | A08.5 | 设置里的弹幕页和直播间同一个组件；“录制已停止”通知定位到任务 | 功能 | 待真机 | 2026-10-02 | ec7a27261 | [设计或说明](A08.5-设置里的弹幕页/README.md)、[任务书](A08.5-设置里的弹幕页/brief.md)、[记录](A08.5-设置里的弹幕页/record.md)、[真机验证](A08.5-设置里的弹幕页/verify.md) |
-| A08.6 | 设置的弹幕页补上“弹幕列表”“小窗弹幕”两组 | 界面 | 未开始 | — | — | — |
-| A08.7 | 小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框） | 界面 | 未开始 | — | — | — |
+| A08.6 | 设置的弹幕页补上“弹幕列表”“小窗弹幕”两组 | 界面 | 未开始 | — | — | [设计或说明](A08.6-设置的弹幕页补两组/README.md)、[任务书](A08.6-设置的弹幕页补两组/brief.md) |
+| A08.7 | 小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框） | 界面 | 未开始 | — | — | [设计或说明](A08.7-小窗弹幕颜色改成面板/README.md)、[任务书](A08.7-小窗弹幕颜色改成面板/brief.md) |
 
 ## 还没完成的
 

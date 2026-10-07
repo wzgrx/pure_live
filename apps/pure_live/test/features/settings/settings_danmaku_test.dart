@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/danmaku_page.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/routes/app_router.dart';
@@ -101,7 +102,7 @@ void main() {
     await searchSettingsFor(tester, '点击 弹幕');
     expect(settingsRow('danmaku_tap'), findsOneWidget);
     expect(
-      find.descendant(of: settingsRow('danmaku_tap'), matching: find.text('控制条显示时点按画面上的弹幕打开操作面板')),
+      find.descendant(of: settingsRow('danmaku_tap'), matching: find.text(withoutOrphan('控制条显示时点按画面上的弹幕打开操作面板'))),
       findsOneWidget,
     );
   });

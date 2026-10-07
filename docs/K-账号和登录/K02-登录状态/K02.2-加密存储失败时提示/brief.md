@@ -22,9 +22,9 @@
 ## 现状（读代码得出，写文件:行）
 
 - 存储：`packages/live_store/lib/src/secrets.dart:152-196`：`writeAll` → `_writeAll` 先逐个 `_cipher.seal`（`:166-169`），任何一个抛错整批不写；`setCookie`（`:199`）。Android：`apps/pure_live/lib/platform/secret_cipher.dart:28-32`（`AndroidKeystoreCipher.seal`，返回空 → `StateError`；原生失败 → `PlatformException`）。
-- 账号动作：`apps/pure_live/lib/features/account/account_services.dart`：`save`（`:100-105`）、`signOut`（`:116-124`，`writeAll` 置空、清 `bilibiliUid`、斗鱼保存时间）、斗鱼 `saveDouyu`（`:136-147`）。
+- 账号动作：`apps/pure_live/lib/features/account/account_services.dart`：`save`（`:101-105`）、`signOut`（`:116-124`，`writeAll` 置空、清 `bilibiliUid`、斗鱼保存时间）、斗鱼 `saveDouyu`（`:136-147`）。
 - 编辑框：`features/account/cookie_editor.dart:219-240` `_save`（`:234-239` 只有 `try/finally`）、`_signOut`（`:242` 起）。用它的：`platform_cookie_view.dart:163`（`_save` `:95-125`：联网时先 `setState(() => _check = const AccountChecking())`（`:105`），核验后 `await _actions.save(...)`（`:113`））、`douyu_cookie_view.dart:194`。
-- 扫码：`features/account/bilibili_qr_login.dart`：`BilibiliQrPhase`（`:17-40`）、`load`（`:89-109`）、`_poll`（`:117-162`：`confirmed` 分支 `:136-145`，`on Object` `:151-161`）、`_fail`（`:164-170`）；页面的 `_complete`（`:214-238`，`_actions.save` 在 `:225`）。
+- 扫码：`features/account/bilibili_qr_login.dart`：`BilibiliQrPhase`（`:17-40`）、`load`（`:90-110`）、`_poll`（`:118-161`：`confirmed` 分支 `:136-145`，`on Object` `:151-161`）、`_fail`（`:163-169`）；页面的 `_complete`（`:214-238`，`_actions.save` 在 `:225`）。
 - 网页登录：`features/account/bilibili_web_login.dart`：`_cleared = _clearCookies()`（`:55`）、`_domains`（`:61-65`）、`_clearCookies`（`:67-77`）、`_page`（`:79-100`）、`_complete`（`:105-127`，`actions.save` `:117`）。
 - 文字：`apps/pure_live/assets/translations/zh.json` 的 `account_saved_signed_in`（`:30`）、`account_saved_unverified`（`:31`）、`qr_*`（`:1326-1340`）；没有“保存失败”的键。
 - 测试：`apps/pure_live/test/features/account/account_page_test.dart`；假的加密 `FakeCipher`（`apps/pure_live/test/support.dart` 或 `packages/live_store/test/support.dart`）。

@@ -2924,6 +2924,7 @@ status = "待真机"
 size = "小"
 tier = 1
 date = "2026-10-08"
+commit = "25d794210"
 stages = ["c1：退出时先竖屏再放开（直播间、多画面）", "c2 或 c3（K90 上 c1 不够时）"]
 done = 1
 note = "c1 做完：自动旋转关着时退出先 portraitUp、3 秒后放开，开着时直接放开（原生只读 ACCELEROMETER_ROTATION）；user_rotation 能不能回到 0 要在 K90 上看，不够再做第 2 阶段"

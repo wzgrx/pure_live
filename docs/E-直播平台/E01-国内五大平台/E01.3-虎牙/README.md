@@ -2,10 +2,10 @@
 
 - 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 类型：平台
-- 来源：3.x 平台逐个重构（D-001）；之后的升级落地（2026-09-29，UPGRADES 3-1 回放）、国内平台完善（2026-10-01）和附录 C 落地都记在 [record.md](record.md)
+- 来源：3.x 平台逐个重构（D-001）；升级落地（2026-09-29，[UPGRADES](../../../specs/UPGRADES.md) 3-1 回放，另按统一原则填开播时间和受限类型）；国内平台完善（2026-10-01，加“优先 H.264”）和附录 C 落地（C-9～C-11，C-9、C-10 改在弹幕包）。过程都记在 [record.md](record.md)
 - 旧编号：M4.03、M4.U.3、T02a.3
-- 相关：模型 [E05.1](../../E05-平台框架和模型/README.md)、[E05.2](../../E05-平台框架和模型/README.md)；链接 [E04.1](../../E04-链接解析和分享口令/README.md)；弹幕 D01.4（复用这里的 Tars 编解码）；回放点播的播放在 G 组；巡检 [E01.6](../E01.6-国内五大平台巡检和修复/README.md)；决定 D-001、D-017、D-018
-- 代码：`packages/live_core/lib/src/sites/huya/`（`huya_api.dart` 1307 行解析、签名和 Tars 载荷，`huya_site.dart` 853 行请求编排）；通用 Tars 编解码 `packages/live_core/lib/src/tars.dart`（448 行）；样本 `fixtures/huya/`（26 组）
+- 相关：模型 [E05.1](../../E05-平台框架和模型/E05.1-基础模型与接口/README.md)、[E05.2](../../E05-平台框架和模型/E05.2-模型扩展/README.md)；链接 [E04.1](../../E04-链接解析和分享口令/E04.1-平台框架与链接解析/README.md)；弹幕 [D01.4](../../../D-弹幕/D01-平台弹幕协议/D01.4-虎牙弹幕/README.md)（复用这里的 Tars 编解码）；回放点播的播放在 G 组（G02.1 点播会话），直播间按点播播放在 C01.1；巡检 [E01.6](../E01.6-国内五大平台巡检和修复/README.md)；决定 D-001、D-017、D-018（见 [DECISIONS.md](../../../DECISIONS.md)）
+- 代码：`packages/live_core/lib/src/sites/huya/`（`huya_api.dart` 1307 行解析、签名和 Tars 载荷，`huya_site.dart` 853 行请求编排）；通用 Tars 编解码 `packages/live_core/lib/src/tars.dart`（448 行）；应用里在 `apps/pure_live/lib/app/platforms.dart:148` 建 `HuyaSite`，启动时 `apps/pure_live/lib/app/bootstrap.dart:255` 读播放 UA；样本 `fixtures/huya/`（25 组接口样本；另有 `danmaku/` 下 6 组弹幕样本归 D01.4）
 
 ## 目标
 
@@ -20,10 +20,10 @@
 | 搜索 | `search.cdn.huya.com/`（房间、主播），必须带 User-Agent（不带回 403，2026-10-01 修）；接口返回 `start + rows` 条，第 2 页跳过前 `start` 条 | `:237`、`:251`、`:268` |
 | 详情 | `mp.huya.com/cache.php?do=profileRoom`（毫秒 `_` 绕过约 30 秒的公共缓存，`showSecret=1`）；422 是不存在或字母别名，报 `NotFound` | `:286-300`、`:348` |
 | 匿名身份 | `udblgn.huya.com/web/anonymousLogin` | `:789` |
-| 签名 | FLV 先取原生 WUP 凭据（`wup.huya.com`，`getCdnTokenInfoEx`），失败再走房间模板或网页 WUP；HLS 只用自己的 AntiCode；各线路并行签名，一条失败只丢这一条；`seqid` 的毫秒严格递增；AntiCode 按原始拼写切分 | `:443`、`:759`；`huya_api.dart` |
-| 线路和租期 | 线路编号 `CDN|格式|native/web`，带 UA、Origin、房间 Referer、登录 Cookie；原生 FLV 约 300 秒不断开，HLS 约 120 秒会断开 | `:492`、`:500` |
-| 恢复和录制 | 恢复时重新取 `profileRoom` 再签（`:454`）；录制逐线路取（`:473`）；所有线路因 AntiCode 过期失败时重新取一次详情 | |
-| 播放 UA | `loadPlayUserAgent()` 用 `raceJson` 竞速 GitHub 镜像读 `assets/play_config.json` 的 `huya.user_agent`，只读一次，读不到用内置 HYSDK UA；应用启动时调用，取流不等它 | `:397`、`:402` |
+| 签名 | FLV 先取原生 WUP 凭据（`wup.huya.com`，`getCdnTokenInfoEx`），失败再走房间模板或网页 WUP；HLS 只用自己的 AntiCode；各线路并行签名，一条失败只丢这一条；`seqid` 的毫秒严格递增；AntiCode 按原始拼写切分 | 签名 `:645`，原生令牌 `:703`、`:759`，网页令牌 `:716` |
+| 线路和租期 | 线路编号 `CDN|格式|native/web`，带 UA、Origin、房间 Referer、登录 Cookie；原生 FLV 约 300 秒不断开，HLS 约 120 秒会断开 | 线路 `:615`；租期查询 `:492`、`:500`；`huya_api.dart:905` |
+| 恢复和录制 | 恢复时重新取 `profileRoom` 再签；录制逐线路取；所有线路因 AntiCode 过期失败时重新取一次详情 | `:454`、`:473` |
+| 播放 UA | `loadPlayUserAgent()` 用 `raceJson` 竞速 GitHub 镜像读 `assets/play_config.json` 的 `huya.user_agent`，只读一次，读不到用内置 HYSDK UA；应用启动时调用（`bootstrap.dart:255`），取流不等它 | `:397`、`:402` |
 | 醒目留言 | WUP 读头条留言板（`messageBoard(topSid)`），topSid 用最近一次详情记下的值 | `:366`、`:373` |
 | 回放 | REPLAY 的 `liveData.hls`（没有时 `hlsUrl`）是上一场录像（点播 m3u8，不签名不过期）；清晰度另请求 `liveapi.huya.com/moment/getMomentContent?videoId=` | `:410-423` |
 | 优先 H.264 | `HuyaSite(preferH264:)`，关时 FLV 线路请求 `codec=265`（平台没有 H.265 转码就退回 H.264，`codec` 标未知），HLS 仍是 264 | `app/platforms.dart:148` 传入 |
@@ -50,18 +50,19 @@
 - 首次重构（2026-09-28，提交 `c1a82891f`；当天另有 `9c8da06e1` 把 REPLAY 保持为回放）：21 个 3.x 问题和处理见 record.md“审查发现的 v3 问题”，15 条有意差异见“与 v3 的有意差异”。保留 3.x 的做法：回放显示为回放（上游电视版改成未开播，会改变关注分组，没有采用）、房间号保持请求时的号码、线路顺序按服务端、Cookie 照 3.x 发给列表、详情、网页 WUP 和媒体请求、主播搜索和开播状态查询。
 - 升级落地（2026-09-29，`dc2080a18`）：回放有录像就播放录像（`getMomentContent` 列出 1080P 源、720P、360P，源叫“原画”）；开播时间取 `liveData.startTime`；受限类型按网页播放器的读法（`isRoomPay` → `paid`，`isSecret` 1 → `password`），受限的直播取流报 `StreamUnavailable` 且不请求令牌。直播画质名字不改（3.x 的画质偏好按名字精确匹配）。
 - 国内平台完善（2026-10-01，`ce7de2d01`）：真实接口检查发现搜索全部 403，根因是 `IoLiveHttp` 不设默认 UA 而搜索请求没带，已修；28 条线路全部可拉；加了“优先 H.264”开关；弹幕礼物上报。附录 C（`5a9fa6a5e`）：头条通知直接解析留言板面板、下播通知结束弹幕连接（弹幕层）。
-- 测试：`packages/live_core/test/sites/huya_api_test.dart` 66 个 `test(` 写法、`huya_site_test.dart` 35 个（record.md 统计为 94、37 个用例，部分循环生成）；弹幕 `packages/live_danmaku/test/huya_test.dart` 57 个。
+- 测试：`packages/live_core/test/sites/huya_api_test.dart` 66 个 `test(` 写法、`huya_site_test.dart` 35 个（record.md 最后统计为 94、37 个用例，样本对照是循环生成的）；弹幕测试 `packages/live_danmaku/test/huya_test.dart` 36 个 `test(` 写法（record.md 统计 57 个用例，归 D01.4）。
 
 ## 验证
 
 - 自动测试：样本逐键对照 3.x；3.x 的签名向量、`seqid`、Tars/WUP 字节向量（原生、网页短 Cookie 和长 Cookie）逐字节一致；回放录像、受限房、优先 H.264、搜索的 UA 断言都有用例。
 - 真实接口：2026-10-01 跑了推荐两页、分类（343 个分区）、分区、搜索、3 个在播和 1 个未开播房间的详情、28 条线路（每条读开头 64 KB）、两个房间各 120 秒弹幕；附录 C 时 55 个房间 8 分钟录到 3 条下播通知（record.md“真实环境检查”“附录 C 落地”）。
-- 真机：播放和弹幕 K90 看过（2026-10-01，[FEATURES.md](../../../inventory/FEATURES.md) 第 14 节）；回放点播的进度条和拖动要在直播间界面里看（C、G 组）。
+- 真机：播放和弹幕 K90 看过（2026-10-01 两轮真机测试，[FEATURES.md](../../../inventory/FEATURES.md) 第 14 节虎牙一行：播放、弹幕“完成，K90 看过”，登录“Cookie”，搜索“只搜直播中、主播”）；回放点播（进度条、拖动）和关掉“优先 H.264”后的 HEVC 线路没有在 K90 上专门看过。
 
 ## 留下的问题
 
-- 付费房、私密房没有真实样本（2026-09-29 扫了推荐 75 页 8874 个房间，`isRoomPay` 全是 0），按网页代码实现；已购买的登录用户能不能取到流没验证。
-- 贵族开通、续费通知（附录 C 的 C-11，uri 1001）没录到，没做。
-- 关掉“优先 H.264”时 HLS 仍是 264（网页的 HEVC HLS 是另一个地址，没实测）。
-- 播放 UA 依赖 GitHub 镜像上的 `assets/play_config.json`，镜像都不通时用内置 UA。
-- 接口会变：定期巡检归 [E01.6](../E01.6-国内五大平台巡检和修复/README.md)。
+- 付费房、私密房没有真实样本（2026-09-29 扫了推荐 75 页 8874 个房间，`isRoomPay` 全是 0），按网页播放器代码实现，测试用合成数据；已购买的登录用户能不能取到付费直播的流没验证，现在一律报 `StreamUnavailable`。没有任务管，有样本时由 [E01.6](../E01.6-国内五大平台巡检和修复/README.md) 巡检调整。
+- 贵族开通、续费通知（附录 C 的 C-11，uri 1001，受阻）：两次共 12 分钟、55 个房间没录到，没做。UPGRADES 写“录到样本后再做（未排）”，没有任务管；录到后归弹幕任务 D01.4。
+- 关掉“优先 H.264”时 HLS 仍是 `codec=264`（网页的 HEVC HLS 是另一个地址，没实测）；HEVC 能不能在高通真机上硬解，归 G01.2（默认编码的真机评估）。
+- 播放 UA 依赖 GitHub 镜像上的 `assets/play_config.json`，镜像都不通时用内置 HYSDK UA；镜像地址变了要跟着改，没有任务管。
+- 回放房间不给弹幕参数（同 3.x），回放录像从头播放，没有“跳到上次位置”：照 3-1 的决定，不是缺口。
+- 接口会变（本平台已经出过一次：搜索接口开始拒绝不带 UA 的请求）：定期巡检归 [E01.6](../E01.6-国内五大平台巡检和修复/README.md)。

@@ -123,5 +123,5 @@ INVENTORY 里 F-REC-13 写 v3“界面显示百分比”，实际 v3 只发事�
 ## 留下的问题
 
 - 直播间播放遇到“确认的编号不在列表里”仍显示“原画?”（`packages/live_core/lib/src/live_site.dart` 的 `resolveAppliedPlayQuality` 不变，`features/live_play/logic/room_controller.dart` 不在本任务目录）；要和录制一致时在直播间取清晰度处用同样的规则，归 G/E 组，尚未登记。
-- 录制通知在合并时不显示进度（`app/recording_notice.dart` 只写“正在整理录像”），没有登记任务；需要时在 H05 开。
-- 真机检查没有归属的任务：建议维护者把它并进 H01.4，或把本任务改回“待真机”并加 `verify.md`。
+- 录制通知在合并时不显示进度（`app/recording_notice.dart` 只写“正在整理录像”）：V03.3 核对时登记为 [H05.3](../../H05-录制通知/H05.3-录制通知显示合并进度/README.md)（未开始，第三档）。
+- 真机检查：[H01.4](../H01.4-录制余项/README.md) 的 README 和任务书已把这两条列进去（验收 6、7，真机步骤 1、4）；登记表 H01.4 的标题和说明还只写四项，H01.3 的状态仍是“完成”，请维护者决定是否改回“待真机”（写进 v2 单元报告）。

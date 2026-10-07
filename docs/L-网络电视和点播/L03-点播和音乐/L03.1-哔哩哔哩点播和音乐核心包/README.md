@@ -1,7 +1,7 @@
 # L03.1 哔哩哔哩点播和音乐核心包
 
 - 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 类型：平台（新包 `packages/live_vod`，带真实接口样本）
+- 类型：功能（新包 `packages/live_vod`；按平台任务的做法带了真实接口样本）
 - 来源：模块重构计划 M14.0（电视版的点播和音乐搬进 4.x，先做没有界面的核心）；参考 pure_live_TV `b9d2f739`（本机 `~/ref/pure_live_TV`）
 - 旧编号：M14.0、T11c.1
 - 相关：复用 E01.1（`BilibiliSite.wbiSign`、`BilibiliApi.wbiKeys`、`buvid`、`userAgent`）、Q01.1（`LiveHttp`）、J02.1（`CookieVault` 的 Cookie）、G01.1（`LivePlayLine` 的线路回退和租期）；之后的界面 A17.6（电视点播）、A17.7（电视音乐，第三档）；记录 [record.md](record.md)

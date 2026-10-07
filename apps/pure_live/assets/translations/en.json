@@ -1471,6 +1471,7 @@
     "recorder_input_open_failed": "The recorder could not open this live CDN route. It will refresh the URL and try the next route or quality.",
     "recorder_input_tail_discarded": "Some input was not fully received when stopping and was skipped. The recording may be missing content.",
     "recorder_last_error": "Last failure ({stage}): {error}",
+    "recorder_merge_failed": "The segments could not be joined into an MP4; they are kept in the recording folder",
     "recorder_open_folder": "Open Folder",
     "recorder_polling_off": "\"Live check\" is off, so waiting tasks will not start by themselves.",
     "recorder_resolve_failed": "{name}: {error}",

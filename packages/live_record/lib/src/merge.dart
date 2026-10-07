@@ -25,6 +25,9 @@ enum MergeFailure {
 
   /// Cancelled.
   cancelled,
+
+  /// Every segment of the attempt is empty: nothing was recorded.
+  empty,
 }
 
 /// The outcome of joining one attempt.
@@ -54,6 +57,12 @@ final class MergeResult {
 /// a clean exit with a non-empty file and no damage in the log renames it,
 /// then the segments and journal are deleted. A damaged attempt is refused
 /// up front so its source survives.
+///
+/// Empty (or vanished) segments at the end of an attempt are skipped with
+/// their journal rows: FFmpeg cut off before writing into the next segment
+/// leaves them (H01.5). An empty segment before a non-empty one still fails
+/// the journal check; an attempt of only empty segments is
+/// [MergeFailure.empty].
 final class RecordMerger {
   /// Creates a merger running [runner].
   const new(this.runner);
@@ -66,7 +75,8 @@ final class RecordMerger {
   /// [damaged] refuses the join; [cancelled] is checked between steps.
   /// [onProgress] gets the join's progress from FFmpeg's statistics
   /// ([mergeProgress]): rising only, at most 0.99 while FFmpeg runs, and 1
-  /// once the MP4 is committed.
+  /// once the MP4 is committed. The skipped empty tail is deleted with the
+  /// joined segments.
   Future<MergeResult> merge({
     required String directory,
     required String filePrefix,
@@ -93,19 +103,39 @@ final class RecordMerger {
         // Rotated away during the listing.
       }
     }
-    final segments = selectAttemptSegments(candidates, filePrefix: filePrefix, allowLegacy: allowLegacy)
+    final all = selectAttemptSegments(candidates, filePrefix: filePrefix, allowLegacy: allowLegacy)
       ..sort((left, right) => p.basename(left.path).compareTo(p.basename(right.path)));
-    if (segments.isEmpty) return const MergeResult.failed(MergeFailure.noSegments);
+    if (all.isEmpty) return const MergeResult.failed(MergeFailure.noSegments);
+    int size(File file) {
+      try {
+        return file.lengthSync();
+      } on FileSystemException {
+        return 0;
+      }
+    }
+
+    var kept = all.length;
+    while (kept > 0 && size(all[kept - 1]) <= 0) {
+      kept--;
+    }
+    if (kept == 0) return const MergeResult.failed(MergeFailure.empty);
+    final segments = all.sublist(0, kept);
+    final tail = all.sublist(kept);
     final journal = File(p.join(directory, SegmentClock.journalName(filePrefix)));
     final usesClock =
-        segments.any((file) => file.path.toLowerCase().endsWith(SegmentClock.segmentSuffix)) || journal.existsSync();
+        all.any((file) => file.path.toLowerCase().endsWith(SegmentClock.segmentSuffix)) || journal.existsSync();
     final String manifest;
     if (usesClock) {
       try {
         if (segments.any((file) => file.lengthSync() <= 0)) {
           throw const FormatException('Recording clock empty segment');
         }
-        manifest = (await SegmentClock.read(journal, prefix: filePrefix, segments: segments)).toConcatManifest();
+        manifest = (await SegmentClock.read(
+          journal,
+          prefix: filePrefix,
+          segments: segments,
+          ignoredTail: tail,
+        )).toConcatManifest();
       } on FileSystemException {
         return const MergeResult.failed(MergeFailure.segmentClock);
       } on FormatException {
@@ -167,7 +197,7 @@ final class RecordMerger {
       onProgress?.call(1);
       if (deleteSources) {
         var removedAll = true;
-        for (final segment in segments) {
+        for (final segment in all) {
           try {
             if (segment.existsSync()) await segment.delete();
           } on FileSystemException {

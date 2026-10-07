@@ -42,6 +42,25 @@ void main() {
     expect(failure.detail, 'Connection refused');
   });
 
+  test('a failed join says in Chinese that the segments are kept, the diagnostic below (H01.5)', () {
+    final task =
+        RecordTask(
+            taskId: 'bilibili_1',
+            roomId: '1',
+            platform: 'bilibili',
+            title: 't',
+            nick: '主播甲',
+            avatar: '',
+            cover: '',
+            createTime: DateTime(2026),
+          )
+          ..lastErrorStage = 'merge'
+          ..lastError = 'Joining the recording failed';
+    final failure = recordFailureText(task);
+    expect(failure.summary, '最近失败（文件合并）：分段没能合成 MP4，原始分段保留在录制文件夹里');
+    expect(failure.detail, 'Joining the recording failed');
+  });
+
   test('a limited quality is said like the player says it', () {
     final task = RecordTask(
       taskId: 'bilibili_1',

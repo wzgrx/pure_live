@@ -20,6 +20,7 @@ import 'package:live_record/src/settings.dart';
 import 'package:live_record/src/storage.dart';
 import 'package:live_record/src/task.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 /// Keeps the process alive while recordings run (3.x
 /// `RecorderBackgroundService`: Android's foreground service). The app
@@ -738,7 +739,7 @@ final class Recorder {
   }) async {
     final rt = _rt(task);
     try {
-      _queueCurrentAttempt(task, damaged: damaged);
+      await _queueCurrentAttempt(task, damaged: damaged);
       if (_closing) return;
       final stopped = manual || task.wasStoppedByUser;
       if (failed && shouldRetry && task.autoReconnect && !stopped) {
@@ -852,13 +853,31 @@ final class Recorder {
     }());
   }
 
-  void _queueCurrentAttempt(RecordTask task, {bool allowLegacy = false, bool damaged = false}) {
+  /// Queues the attempt that just ended for joining; one that recorded
+  /// nothing leaves no files instead (3.x's legacy segments of a
+  /// recovery, [allowLegacy], are never touched).
+  Future<void> _queueCurrentAttempt(RecordTask task, {bool allowLegacy = false, bool damaged = false}) async {
     final directory = task.outputDir?.trim() ?? '';
     if (directory.isEmpty) return;
     final prefix = task.recordingFilePrefix;
-    if (!SegmentMeter.hasSegments(directory, prefix, allowLegacy: allowLegacy)) return;
+    if (!SegmentMeter.hasSegments(directory, prefix, allowLegacy: allowLegacy)) {
+      if (!allowLegacy) await _discardEmptyAttempt(directory, prefix);
+      return;
+    }
     task.queuePendingAttempt(directoryPath: directory, filePrefix: prefix, inputIntegrityError: damaged);
     _update(task);
+  }
+
+  /// [discardEmptyAttempt], only inside the recording directory: an
+  /// attempt path from an old task list never reaches anything else.
+  Future<void> _discardEmptyAttempt(String directory, String prefix) async {
+    try {
+      final root = p.normalize(p.absolute((await storage.recordDirectory()).path));
+      if (!p.isWithin(root, p.normalize(p.absolute(directory)))) return;
+    } on Object {
+      return;
+    }
+    discardEmptyAttempt(directory, prefix);
   }
 
   /// Joins [task]'s attempts. [RecordTask.mergeProgress] follows the join,
@@ -907,7 +926,13 @@ final class Recorder {
           onProgress: (progress) => onProgress(index, progress),
         );
         if (!_owns(task)) return false;
-        if (result.ok) {
+        if (result.failure == MergeFailure.empty) {
+          // Nothing was recorded: the attempt is dropped, not failed.
+          task.removePendingAttempt(attempt);
+          await _discardEmptyAttempt(attempt.directoryPath, attempt.filePrefix);
+          onProgress(index, 1);
+          _update(task);
+        } else if (result.ok) {
           task.lastOutputPath = result.outputPath;
           final output = File(result.outputPath!);
           final finalized = output.existsSync() ? output.lengthSync() : 0;
@@ -1334,7 +1359,7 @@ final class Recorder {
   }
 
   Future<void> _recover(RecordTask task) async {
-    _queueCurrentAttempt(task, allowLegacy: true);
+    await _queueCurrentAttempt(task, allowLegacy: true);
     if (!_owns(task) || task.pendingAttempts.isEmpty) return;
     task.status = RecordStatus.processing;
     _update(task);

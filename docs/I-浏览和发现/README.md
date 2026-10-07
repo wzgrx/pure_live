@@ -1,8 +1,58 @@
 # I 浏览和发现
 
-首页外壳和全局、热门、分区、关注、搜索、观看历史、标签和分组、小页面的功能和逻辑。界面在 A06、A09、A15。
+用户“找直播间”的那一整条路背后的逻辑：应用怎么启动、首页怎么切、热门和分区怎么取数翻页、关注怎么核验刷新、搜索怎么并发去重、观看记录怎么存和刷新、标签怎么管，以及工具箱、启动页、关于这几个小页面。排在 H 录制之后：这些页面已经全部重构完成、天天在用，眼下没有未完成的任务，接下来的工作是补真机证据和读代码发现的小问题；界面层面的改动都在 A 组。
 
-> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+## 范围
+
+- 管什么：
+  - 应用底座：入口和启动（`apps/pure_live/lib/main.dart`、`lib/app/bootstrap.dart`、`services.dart`、`startup.dart`、`app.dart`、`launch_args.dart`、`data_root.dart`）、路由（`lib/routes/`）、首页外壳的行为（`lib/features/home/`）、多语言（`lib/i18n/`）、字体、日志、下载服务（`lib/app/fonts.dart`、`app_log.dart`、`downloads.dart`）→ I01。
+  - 浏览列表的数据：热门（`features/popular/`）和热门、分区共用的取数（`shared/rooms/room_feed.dart` 的 `RoomFeed`）、列表规则（`shared/rooms/room_cards.dart` 的 `cannotPlayHere`、`AudiencePolicy`，`room_texts.dart` 的错误说明，`paging.dart` 的翻页规则）→ I02；分区目录、借图、分区房间、关注分区、平台显示（`features/areas/`、`area_rooms/`、`hot_areas/`）→ I03。
+  - 关注的分组、排序、核验和刷新（`features/favorite/`）→ I04；搜索（`features/search/`）→ I05；观看记录（`features/history/`）→ I06；标签管理和给直播间设标签（`features/tags/`、`shared/rooms/room_tags_dialog.dart`、`room_menu.dart` 的 `editRoomTags`）、设置里弹幕屏蔽页的入口（`features/shield/`）→ I07；工具箱、启动页、关于（`features/toolbox/`、`splash/`、`about/`、`shared/links/`）→ I08。
+- 不管什么：
+  - **长什么样**：首页外壳、启动页、全局弹窗 → [A06](../A-界面设计/A06-首页和全局/README.md)；房间卡片、热门、关注、分区、分区房间、搜索、网页搜索、观看记录、标签管理 → [A09](../A-界面设计/A09-浏览界面/README.md)；工具箱、关于和版本 → [A15](../A-界面设计/A15-小页面/README.md)。分工的规矩：A 组的任务管“长什么样、怎么点、各状态怎么说”，I 组管“数据从哪来、什么时候取、怎么排、出错怎么办”；`shared/rooms/` 里 `room_grid.dart`、`paging.dart` 的 `PaginationBar`、`room_menu.dart` 的对话框样子归 A09，`room_feed.dart`、`room_cards.dart`、`room_texts.dart` 的规则归这里。两边都要动的各开一个任务、互相写“相关”。
+  - 平台的接口（推荐、分区、搜索、房间详情、链接解析）→ [E](../E-直播平台/README.md)；关注、历史、标签、屏蔽词的存储和 3.x 导入 → [J](../J-设置和数据/README.md)（J02、J06）；屏蔽规则 → [D02](../D-弹幕/D02-过滤和屏蔽/README.md)。
+  - `lib/app/` 里别的组的文件：`desktop/` → A16、X01；`intake/` → O03；`iptv_*` → L01；`recording*.dart` → H；`network.dart` → Q04（`MobileDataNotice` 在列表里的用法归 I02）。`lib/platform/` 各文件 → O04、O05、Q03、R02、H02、J02、O03（见 [I01 说明](I01-首页外壳和全局/README.md)）。
+  - 版本检查和更新下载 → [Y02](../Y-发布和运营/Y02-更新通道/README.md)；设备同步 → [J05](../J-设置和数据/J05-设备同步/README.md)（I08.1 做了第一版）；电视的浏览页面 → [X03](../X-多端客户端/X03-电视/README.md)。
+
+## 子分类怎么分
+
+| 子分类 | 管什么 | 和其他子分类、其他组的关系 |
+|---|---|---|
+| [I01 首页外壳和全局](I01-首页外壳和全局/README.md) | 启动、服务、路由、首页外壳的行为、多语言、启动后的后台工作、字体日志下载 | 所有页面都经它取服务（provider）；界面在 A06；首帧后开始 I04 的核验、2 秒后 Y02 的更新检查 |
+| [I02 热门](I02-热门/README.md) | 每个平台的推荐怎么取、排、隐藏；`RoomFeed` | I03 的分区房间也用 `RoomFeed`；界面在 A09.2 |
+| [I03 分区](I03-分区/README.md) | 分区目录、借图、分区房间、关注分区、平台显示 | “平台显示”决定 I02、I03、I05 的平台列表；界面在 A09.4～A09.6 |
+| [I04 关注](I04-关注/README.md) | 三组、排序、核验和四种刷新、合并写回 | 直播间“看其他”（A07.13）用它刷新；按 I07 的标签筛选；界面在 A09.3 |
+| [I05 搜索](I05-搜索/README.md) | 并发搜索、翻页、去重、能力表、历史、粘贴链接、网页搜索 | 链接解析在 E04；应用内网页在 O03.1；界面在 A09.7、A09.8 |
+| [I06 观看历史](I06-观看历史/README.md) | 历史的上限、分组、筛选、刷新、删除 | 记录由直播间写（C01）；“看其他”、多画面、桌面快捷方式读它；界面在 A09.9 |
+| [I07 标签和分组](I07-标签和分组/README.md) | 标签增删改排序、设标签、屏蔽页入口 | 关注页按标签筛选（I04）；屏蔽规则在 D02、屏蔽页界面在 A08.3；界面在 A09.10 |
+| [I08 小页面](I08-小页面/README.md) | 工具箱、启动页、关于 | 版本和更新归 Y02、设备同步归 J05；界面在 A15、A06.4 |
+
+## 现状（2026-10-07）
+
+- 做到哪：登记的 10 个任务（I01.1～I01.3、I02.1～I08.1，都是 2026-10-01 的模块重构）全部“完成”，组进度 100%。之后的界面重做（A06、A09、A15）、共用模块合并（I01.2）、插件接入（O03.1）改了其中很多文件，各子分类说明已按 2026-10-07 的代码重写。
+- 真机：这些任务的记录都写“本次没装机”，按 [PROCESS.md](../PROCESS.md) 第 3.2 节“完成必须有真机结果”不够严格。实际的真机证据来自 S02.2、S02.3（冷启动、首页、热门、关注核验和下拉、分区、搜索、观看记录、工具箱进房），网页搜索归 S02.6，应用内更新、字体、本地网络权限、设备同步归 S02.4；移动网络提示、关注的定时和回到前台刷新、标签管理、观看记录的刷新和保留数量、工具箱的“获取直链”没有归属（各子分类“已知问题”里写了建议）。
+- 和 3.x 比：功能都在；多了搜索历史、主播搜索、粘贴链接进房、关注页和分区页的数量、观看记录分组和筛选、刷新失败保留旧列表并说原因、隐藏不能播放的直播；去掉了分区筛选按钮（A09.4 照 3.x）。
+- 主要的代码：`lib/app/`（启动和服务）、`lib/routes/`、`lib/features/home/`；`lib/features/` 下的 popular、areas、area_rooms、hot_areas、favorite、search、history、tags、shield、toolbox、splash、about；`lib/shared/rooms/`（共用的取数、卡片规则、文字）。测试在 `apps/pure_live/test/features/` 对应目录（热门 19、分区 14、关注 16、搜索 31、观看记录 17、标签 7、工具箱 10、启动页 7、首页 15）和 `test/shared/`。
+
+## 当前重点和顺序
+
+没有登记的未完成任务。建议的顺序（都不是新功能，等维护者决定是否登记）：
+
+1. 补真机证据：把各子分类“已知问题”里没有归属的真机步骤并入 S02.6 第 3 阶段或 S02.4（见本单元报告）。
+2. 读代码发现的小问题，适合一个第三档任务一起改（约 1～2 小时）：`RoomFeed` 第一次打开不做断网检查和移动网络提示、加载更多重试只取一块（I02）；分区目录切首页标签重新请求、借图写回的竞态、分区房间只读一次隐藏设置（I03）；关注里平台没有适配器时不进冷却（I04）；历史刷新把已下线平台算失败（I06）；标签长度上限写两份（I07）。
+3. 过时注释（`lib/pages/`、M13）随 Z 组一次性清理。
+
+## 风险和注意
+
+- 平台接口变了时，列表页出错的说明靠 `describeLoadError` 的错误类型（`shared/rooms/room_texts.dart:140`），平台适配器要抛对类型（E05 的 `SiteError`），否则用户只看到“未知错误”。
+- 关注核验和刷新会给每个关注发请求：关注多（几百个）时一轮要一两分钟，并发上限（默认 4）和 5 分钟冷却是为了不被平台风控；改刷新逻辑时不要去掉冷却。
+- 热门和分区的停止条件（每次最多 20 个请求、连续两块没有新房间）是防止平台返回重复页时无限翻页；改 `RoomFeed` 时保留。
+- 规则：测试不访问真实平台、定时器至少 1 秒（D-017）；3.x 的设置键不改（D-018：`hotAreasList`、`preferPlatform`、`showUnplayableInDiscover`、`autoRefreshFavorite`、`historyLimit`、`savedMenuIds` 等）；功能目录之间不互相引用，共用的放 `shared/`（[specs/ENGINEERING.md](../specs/ENGINEERING.md) 第 7 节）；用户看得到的文字中文、中英文一起加（D-005）。
+
+## 相关
+
+- 规范：[specs/ENGINEERING.md](../specs/ENGINEERING.md)、[specs/UI.md](../specs/UI.md)（附录 A 第 14、15、17、18 条）、[specs/UPGRADES.md](../specs/UPGRADES.md)。决定：D-001、D-005、D-009、D-017、D-018、D-021、D-022。
+- 其他组：[A06](../A-界面设计/A06-首页和全局/README.md)、[A09](../A-界面设计/A09-浏览界面/README.md)、[A15](../A-界面设计/A15-小页面/README.md)、[E](../E-直播平台/README.md)、[J](../J-设置和数据/README.md)、[O03](../O-Android系统集成/O03-分享接收和快捷方式/README.md)、[S02 真机清单](../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1、4 节。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 

@@ -20,7 +20,7 @@
 
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
-| [K02.1](K02-登录状态/README.md) Cookie 和密码加密存储在真机上验证 | 未开始 | 第二档 | — |
+| [K02.1](K02-登录状态/K02.1-Cookie和密码加密存储验证/README.md) Cookie 和密码加密存储在真机上验证 | 未开始 | 第二档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
 

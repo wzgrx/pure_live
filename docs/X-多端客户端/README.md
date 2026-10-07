@@ -23,10 +23,10 @@ Windows、Linux、电视、苹果平台的客户端专属工作（打包、原�
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
 | [X01.1](X01-Windows/X01.1-键盘鼠标操作核对/README.md) 键盘鼠标操作核对 | 未开始 | 第三档 | — |
-| [X01.2](X01-Windows/README.md) Windows 专属功能（功能清点第 13 节的 14 项） | 未开始 | 第三档 | — |
-| [X01.3](X01-Windows/README.md) Windows 安装包和自动更新 | 未开始 | 第三档 | — |
-| [X02.1](X02-Linux/README.md) Linux 构建和打包 | 未开始 | 第三档 | — |
-| [X04.1](X04-iOS和iPadOS/README.md) 苹果平台的构建和签名 | 未开始 | 第三档 | — |
+| [X01.2](X01-Windows/X01.2-Windows专属功能/README.md) Windows 专属功能（功能清点第 13 节的 14 项） | 未开始 | 第三档 | — |
+| [X01.3](X01-Windows/X01.3-Windows安装包和自动更新/README.md) Windows 安装包和自动更新 | 未开始 | 第三档 | — |
+| [X02.1](X02-Linux/X02.1-Linux构建和打包/README.md) Linux 构建和打包 | 未开始 | 第三档 | — |
+| [X04.1](X04-iOS和iPadOS/X04.1-苹果平台的构建和签名/README.md) 苹果平台的构建和签名 | 未开始 | 第三档 | — |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
 

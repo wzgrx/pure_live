@@ -17,7 +17,7 @@
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | W01.1 | 2026-10-03 上游对照：pure_live 271 个、pure_live_TV 167 个、media_core 66 个提交 | 工程 | 完成 | 2026-10-03 | d54772d54 | [设计或说明](W01.1-2026-10-03上游对照/README.md) |
-| W01.2 | 上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 W01 的对照记录 | 工程 | 未开始 | — | — | — |
+| W01.2 | 上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 W01 的对照记录 | 工程 | 未开始 | — | — | [设计或说明](W01.2-上游跟踪/README.md) |
 
 ## 还没完成的
 

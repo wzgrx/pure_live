@@ -5,6 +5,7 @@
 - 对应：[TASKS.md](../../../TASKS.md)（A18.2，依赖 A16.1）；A16.1（Windows、Linux 的标题栏、托盘、关闭时的选择）还没有设计，这里以 v3 的 Windows 做法和已经设计的宽屏页面为对照；INVENTORY 和 TASK_FILES 里没有 X 的条目
 - 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
 - 图片：项目历史上没有在 Mac 上跑过的 v3，v3 的图按 `v3.2.11` 代码（`macos/` 工程和 `lib/` 里的 macOS 分支）推出来；新设计直接用 A06.2、A07.5、A07.4 的生成脚本画，只加平台需要的部分。画面、头像、桌面是示意图片；菜单栏、菜单、窗口按钮是系统画的，图里是示意
+- 旧编号：U.17b、T19b.1。设计确认：2026-10-01（确认记录 `62391fdd2`“U.1c-d, U.13, U.14, U.15d-e, U.17a-b confirmed”），待选 K1～K4 按建议 A（D-003）。下面正文里“改动（待确认）”“待评审”等是定稿前的字样，正文没有改。还没开发，任务书见 [brief.md](brief.md)
 
 ## 界面清点表
 
@@ -162,3 +163,11 @@
 | [v3-mac-tray.jpg](v3-mac-tray.jpg)、[v4-mac-tray.jpg](v4-mac-tray.jpg) | 菜单栏图标：v3 / 新设计（录制中） |
 | [v3-mac-close.jpg](v3-mac-close.jpg)、[v4-mac-quit.jpg](v4-mac-quit.jpg) | v3 点关闭按钮的对话框 / 新设计录制中按 ⌘Q 的确认 |
 | [v4-mac-full.jpg](v4-mac-full.jpg) | 全屏空间，指针移到顶端 |
+
+## 实现和验证
+
+- 实现：**还没开发**（登记表“已确认”，第三档，没有阶段记录）。按 D-004，苹果平台排在所有客户端最后，[specs/UI.md](../../../specs/UI.md) 第 5.6 节“暂时只设计、不构建”。开发的要求、阶段、测试和真机步骤都在 [brief.md](brief.md)；前提是苹果平台的工程（[X04](../../../X-多端客户端/X04-iOS和iPadOS/README.md)、[X05](../../../X-多端客户端/X05-macOS/README.md)）。
+- 现在的代码：4.x 没有 `macos/` 工程（X05 还没有任务）；桌面外壳只在 Windows 启用（`apps/pure_live/lib/app/desktop/desktop_window.dart:257`，注释“macOS is U.17b”）；桌面小窗在 macOS 隐藏标题栏（`app/desktop/mini_window.dart:166-199`）；没有 `PlatformMenuBar`；更新下载对话框没有“在访达中显示”。
+- 开发前要知道的：正文写“A16.1 还没有设计”，现在 A16.1 已完成，Mac 的关闭和托盘要和 `app/desktop/` 现在的做法对齐；“交给其他任务的”里 A12.6 的 macOS 正式版权限文件缺 `com.apple.security.network.server`（3.x 就缺）、A11.4 的“登录时打开”都要在建 macOS 工程时一起处理。
+- 验证：没有自动测试，也没有设备结果（项目里没有苹果设备）。
+- 留下的问题和去向：见[子分类页](../README.md)“已知问题”。

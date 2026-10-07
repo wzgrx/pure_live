@@ -3,7 +3,7 @@
 - 状态：以登记表为准，见[子分类页](../../A06-首页和全局/README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：关于页、版本更新页（含下载源对话框、获取失败）、版本历史页（手机列表和详情对话框、宽屏左右分栏、下载确认）、启动时的新版本提示
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a152)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a152)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；版本号、日期、大小、下载次数、更新日志是示例；项目地址（含账号名）和 18 个镜像地址换成了占位；作者头像用默认图标
 
 ## 界面清点表
@@ -154,3 +154,14 @@
 ## 需要改工具的地方
 
 - 无。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，N1～N3 按建议 A（“历史记录”改名“版本历史”、下载源收起、按父组件 840 分栏）。
+- 实现：c1～c13 做到，c14 有偏差，详见 [record.md](record.md)。`apps/pure_live/lib/features/about/about_page.dart`（顶栏只有返回、图标回到 3.x、“新版本 v…”标签、声明的信息图标、Logo 不弹跳）、`features/version/version_page.dart`（本平台的包和“本机”、“下载并安装”、下载源对话框三个按钮）、`features/version/release_history_view.dart`（从 `about/` 挪来，列表“发布于”和“最新”“当前”、按父组件 840 分栏、详情关闭在右上角、下载先确认并在应用内下载）、`update_feed.dart` 加 `foundUpdate`。启动时的新版本提示也改为下载本机的包（原来固定取第一个 arm64 包）。
+- 偏差：c14 新版本提示照任务书用 A06.3 已做好的 `NewVersionDialog`，设计图的“项目主页 / 以后再说 / 去更新”三个按钮和“发布于”没照做（需要维护者定以哪个为准）；“本机”按应用自己的架构 `Abi.current()`（设计写按设备 ABI 列表第一个）；获取失败用 `AppStatusView`。
+- 新文字：中英各 9 条（`version_history`、`about_new_version`、`update_choose_source`、`update_native_package`、`version_latest_badge`、`version_current_badge`、`update_download_package_title`、`update_download_confirm_named`、`update_download_action`）；没有新设置；`live_ui` 加 12 个 `AppIcons`。
+- 提交：`dd2e8cbfb`，在 `6f13ced71` 合并（2026-10-02）。`about` 16 → 0、`version` 11 → 0；跨功能引用 `about -> version/markdown_text.dart` 去掉。
+- 测试：`apps/pure_live/test/features/version/version_page_test.dart` 9 → 18 个（关于页、新版本标签、版本更新页的包和下载源、版本历史的标签和分栏、详情、下载确认）；`update_dialogs_test.dart` 9 个照旧通过。
+- 真机：没有单独记录。登记表已是“完成”，建议按 CHECKLIST 第 5 节第 4 条（装一个低版本测试包，版本页“下载并安装”）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看。
+- 留下的问题：新版本对话框以 A06.3 还是本任务的设计为准（没有登记）；同版本换包收不到提示（Y02.1）；macOS 菜单栏的“关于”在 A18.2。

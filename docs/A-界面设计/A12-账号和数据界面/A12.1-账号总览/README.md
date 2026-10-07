@@ -102,3 +102,14 @@
 
 - v3 设置页的入口文字是“三方认证 / 管理主流平台的绑定授权”，如果 K1 选 A，入口在 A11.4（平台显示与授权）跟着改名；这条我没法改别的任务，记在报告里。
 - CC 的 Cookie 现在还不用于请求，状态写“暂未用于请求”；等 C-22 验证后改成正常状态。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，K1～K3 按建议 A（标题“平台账号”分两组、哔哩哔哩没登录直接进扫码页、不要“退出全部账号”）。
+- 实现：c1～c8 和 K3 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/account/account_list_view.dart`（列表、退出、提醒卡）、`account_state.dart`（状态文字和颜色，和 A12.2 的状态卡共用 `accountStatus`）、`account_widgets.dart`（退出确认照 3.x 文字）、`account_platforms.dart`（九个平台的顺序和名字）；`routes/app_navigator.dart` 的 `toBiliBiliLogin` 直接进扫码页，“请选择登陆方式”对话框去掉。
+- 偏差：斗鱼“登录态已失效”现在也有退出按钮（存了 Cookie 就有）；标题居中由页面自己设。
+- 新文字：`account_title`、`account_site_soop`、`account_site_cc`、`account_status_saved`；删 v4 自加的三条“退出全部账号”。没有新设置，Cookie 存储照旧。
+- 提交：`587ccc3c7`（和 A12.2 一起），在 `59248e0b9` 合并（2026-10-01）。`account` 的直接颜色和图标 25 → 0（两个任务合计）。
+- 测试：`apps/pure_live/test/features/account/account_page_test.dart` 中本任务 6 个（两组九个平台、状态文字和颜色、退出按钮 ≥48、点平台进页面、列表退出、启动核验失效、读不出的提醒、1280 宽 ≤720）。
+- 真机：没有看过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)写明“账号页没在真机上看”）。登记表已是“完成”，建议随 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 或 [K02.1](../../../K-账号和登录/K02-登录状态/README.md) 补看。
+- 留下的问题：设置里入口改名“平台账号”当时交给 A11.4，A11.1 已一并做了；账号页的“网易 CC”和平台列表的写法后来统一成“网易CC”、“Soop”统一成“SOOP”（[A07.9 记录](../../A07-直播间界面/A07.9-已合并界面任务的收尾/record.md)第 4 节，提交 `6d90f6649`）。

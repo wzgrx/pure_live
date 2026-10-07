@@ -3,7 +3,7 @@
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：备份与恢复页（列表、进行中、空、出错）、恢复预览对话框、备份文件菜单、同步电视的扫码页和输入地址对话框、提示条
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a124)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a124)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；相机画面是示意图片；路径、地址、文件名都是示例
 
 ## 界面清点表
@@ -152,3 +152,13 @@ I01.1 已经做了：去掉 Firebase 行；组的顺序改成本地备份在前�
 ## 需要改工具的地方
 
 - 无。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，Q1～Q3 按建议 A（日志管理移到设置、手机点“同步TV数据”直接扫码、目录中的备份全部列出）。
+- 实现：c1～c11 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/backup/backup_page.dart`（四组、一次只做一件事、文件行小菜单、选目录）、`tv_sync.dart`（扫码后发送、输入地址）、`log_page.dart`（从设置搬来，路由 `RoutePath.kLogs`）；恢复预览、备份文件、数据范围搬到 `shared/backup/`（WebDAV、设备同步共用）；扫码页 `shared/qr_scan.dart`（手电筒三态、切换相机、取景框、四种状态，相机是接口 `QrCamera`，图标颜色跟主题）。
+- 偏差：行用 A11.1 的统一设置行（标题 15 号 600，设计图写常规）；为了能编译，`features/settings/settings_catalog.dart` 的“日志管理”改成路由（两行）。
+- 提交：`ccf5c3c93`，和 A10.2、A12.5、A12.6 一起在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`backup` 的直接颜色和图标 22 → 0，`settings` 126 → 119；跨功能引用 `backup -> search/search_history.dart` 去掉。
+- 测试：`apps/pure_live/test/features/backup/backup_page_test.dart` 7 → 18 个（四组九行、创建后列出、恢复时其他操作变灰、小菜单、删除确认、读不了目录、选目录、手机扫码 / 电脑输入地址、横屏和宽屏；扫码页 4 个）；新增假相机 `test/shared/fake_qr_camera.dart`。四个任务一起跑时 `apps/pure_live` 497 个中 496 个通过，唯一失败的网络电视时间测试已在之后把同步时间接到固定时钟（`iptvClockProvider`）。
+- 真机：没有看过。登记表已是“完成”，建议按 [S02 的 CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 1 条（创建完整备份、恢复 3.x 备份）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看，扫码同步电视要有电视端（A17.9）。
+- 留下的问题：电视端接收页的设计在 A17.9（网页遥控、同步页）。

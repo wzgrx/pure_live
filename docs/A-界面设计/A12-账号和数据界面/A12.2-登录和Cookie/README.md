@@ -127,3 +127,14 @@
 - 哔哩哔哩网页登录要内置浏览器（`flutter_inappwebview`），v4 现在没有；没加之前“网页登录”这一项先不显示。
 - Ctrl+S 保存是新加的快捷键，v3 没有；如果不想要可以去掉。
 - v3 的说明横幅字色是 `onSurfaceVariant` 80%，按 kit 的颜色画，和真机可能略有差别。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，L1～L3 按建议 A（已存 Cookie 照原文显示、扫码页下面“扫不了？”、页内退出用设计图的文字）。
+- 实现：c1～c15 做到，详见 [record.md](record.md)。通用 Cookie 页 `apps/pure_live/lib/features/account/platform_cookie_view.dart` + 框架 `cookie_editor.dart`（粘贴、清空、格式错误、去“Cookie:”前缀、没改动时保存变灰、先核验再存、舍弃确认、Ctrl+S / Cmd+S）；斗鱼 `douyu_cookie_view.dart`；扫码 `bilibili_qr_login.dart`（二维码 200、宽屏 220，六种覆盖层，位置不动）；网页登录 `bilibili_web_login.dart`（盖层和底部红条照 v3）。
+- 偏差：网页登录在手机上显示（设计写“v4 没有内置浏览器、先不显示”，但 O03.1 已接入 `flutter_inappwebview`）；页内退出确认当时照图写“退出虎牙？”，合并后的收尾（[A07.9 记录](../../A07-直播间界面/A07.9-已合并界面任务的收尾/record.md)第 3 节，提交 `8f6a925b6`）改成和列表同一个 `confirmSignOut`（3.x 的“退出登录 / 确定退出“{name}”账号吗？”），`confirmPageSignOut` 和它的两条文字已删；斗鱼到期时间沿用 `yyyy-MM-dd HH:mm`；哔哩哔哩 Cookie 页去掉标题栏的“二维码登录”。网页登录成功后改成直接 `pop(true)`（A09.8 修了共用浏览器的死循环后，这里不再用 `maybePop`）。
+- 新文字：`account_status_none_hint`、`account_qr_cannot_scan`、`qr_scanned`、`douyu_open_passport` 等 10 条（其中 `account_sign_out_title`、`account_sign_out_message` 后来随收尾删掉），改 16 条。没有新设置（`douyuForceRenew` 原有）。测试和截图只用假 Cookie。
+- 提交：`587ccc3c7`，在 `59248e0b9` 合并（2026-10-01）；二维码深色主题的定位点修在 `dc5abab12`；收尾 `8f6a925b6`（同一套退出确认）、`6d90f6649`（平台名统一成“SOOP”“网易CC”）、`d2ec7bbfc`（网页登录存好 Cookie 后关闭），在 `a88f26dfc` 合并（2026-10-02）。
+- 测试：`account_page_test.dart` 中本任务 13 个（Cookie 页的顺序和各状态、页内退出、剪贴板和 Ctrl+S、先核验再存和核验失败照存、网易 CC、斗鱼各部分、扫码覆盖层和刷新、平台拒绝不存、“扫不了？”、手机网页登录在前、宽屏、没有内置浏览器的提醒）。
+- 真机：没有看过。登记表已是“完成”，建议按 [S02 的 CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 6～8 条（扫码登录、网页登录、登录后原画）补看，Cookie 加密在真机上的读写归 [K02.1](../../../K-账号和登录/K02-登录状态/README.md)。
+- 留下的问题：哔哩哔哩多账号（V01.2 提议）。

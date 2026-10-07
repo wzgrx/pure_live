@@ -142,3 +142,13 @@
 - A11.3：自动助眠时长对话框随 Y2（已在 A11.3 按 A 画）。
 - A16.1：关窗口时的询问对话框本身；Linux、macOS 是否也有开机启动、关闭窗口时、新建独立播放窗口。
 - A08.2：本地用户与互动页。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，Y1～Y4 按建议 A。一并处理的跨任务待同步：A16.1（“关闭窗口时”三选一、开机窗口尺寸默认 1280 × 720 和范围、“新建独立播放窗口”的说明）、A18.1（界面刷新率 iPhone Pro 也显示）、A18.2（Mac 上不显示“关闭窗口时”，没做，见下）。
+- 实现：d1～d14 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/settings/settings_catalog.dart`（通用、平台、刷新、网络各节）、`settings_editors.dart`（`RefreshRateTile`、`StartupTile`、`WindowSizeTile`、`CloseWindowTile`、`AutoExitTile`、`PreferPlatformTile`、`ProxyEditorTile`）、`settings_tiles.dart` 的 `SettingCounterTile`。“关闭窗口时”照旧写 `dontAskExit` + `exitChoose` 两个键；代理输入停 0.5 秒后保存、端口不在 1～65535 时红字不保存。
+- 偏差：平台页多一组 v4 自己的“发现与列表”（显示不可播放的直播、Twitch 语言筛选、斗鱼登录后强制续期，UPGRADES 已批准）；刷新页末尾保留观看记录上限（3.x 的 `historyLimit`）；iOS 的刷新率说明用系统报告的刷新率；macOS 的“登录时打开”没做。
+- 提交：同 A11.3（`6b87e96f9`，合并 `ccd54d3c7`，记录 `e9e41d557`，2026-10-02）。
+- 测试：`apps/pure_live/test/features/settings/settings_general_test.dart` 记录时 9 个（手机通用页、刷新率对话框、定时退出、Windows 五组和窗口尺寸、iOS 高刷、平台页搜索、刷新页、计数按住、网络页窄屏和宽屏）。
+- 真机：没有单独记录；刷新率一行属于 R02.2（待真机）的范围。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看通用、平台、刷新、网络四页；Windows 的窗口项等 X01 开工。
+- 留下的问题：macOS 的“登录时打开”、Mac 上隐藏“关闭窗口时”（A18.2）；Linux、macOS 的开机启动和关窗口选择是否加（A16.1 的后续，X 组）。

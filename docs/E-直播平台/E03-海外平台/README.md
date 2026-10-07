@@ -16,11 +16,11 @@ SOOP、Twitch、Picarto、TwitCasting、niconico、SHOWROOM、CHZZK、LiveMe、T
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| E03.1 | SOOP | 平台 | 完成 | 2026-09-28 | 71fbb1982 | [记录](E03.1-SOOP/record.md) |
-| E03.2 | Twitch | 平台 | 完成 | 2026-09-28 | a312c7267 | [记录](E03.2-Twitch/record.md) |
-| E03.3 | Picarto | 平台 | 完成 | 2026-09-28 | b8bcd1eb3 | [记录](E03.3-Picarto/record.md) |
-| E03.4 | TwitCasting | 平台 | 完成 | 2026-09-28 | 2badf4756 | [记录](E03.4-TwitCasting/record.md) |
-| E03.5 | niconico | 平台 | 完成 | 2026-09-28 | 5442c7303 | [记录](E03.5-niconico/record.md) |
+| E03.1 | SOOP | 平台 | 完成 | 2026-09-28 | 71fbb1982 | [设计或说明](E03.1-SOOP/README.md)、[记录](E03.1-SOOP/record.md) |
+| E03.2 | Twitch | 平台 | 完成 | 2026-09-28 | a312c7267 | [设计或说明](E03.2-Twitch/README.md)、[记录](E03.2-Twitch/record.md) |
+| E03.3 | Picarto | 平台 | 完成 | 2026-09-28 | b8bcd1eb3 | [设计或说明](E03.3-Picarto/README.md)、[记录](E03.3-Picarto/record.md) |
+| E03.4 | TwitCasting | 平台 | 完成 | 2026-09-28 | 2badf4756 | [设计或说明](E03.4-TwitCasting/README.md)、[记录](E03.4-TwitCasting/record.md) |
+| E03.5 | niconico | 平台 | 完成 | 2026-09-28 | 5442c7303 | [设计或说明](E03.5-niconico/README.md)、[记录](E03.5-niconico/record.md) |
 | E03.6 | SHOWROOM | 平台 | 完成 | 2026-09-28 | eaca04cc0 | [记录](E03.6-SHOWROOM/record.md) |
 | E03.7 | CHZZK | 平台 | 完成 | 2026-09-28 | be431b915 | [记录](E03.7-CHZZK/record.md) |
 | E03.8 | LiveMe | 平台 | 完成 | 2026-09-28 | 6fe261aa8 | [记录](E03.8-LiveMe/record.md) |

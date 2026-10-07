@@ -1,13 +1,15 @@
 # H01.3 录制合并进度（附：录制清晰度标签）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 档位：可以以后；规模：小
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（建立时：可以以后，规模小）
+- 类型：功能
+- 旧编号：F.3a、T08a.3
+- 相关：H01.1（`mergeProgress` 留给后续）、A07.6 录制面板和 A10.1 录制中心（同一张状态卡）、H01.4（建议顺带做本任务的真机检查）；提交 `bf4e0b16d`（合并进度）、`a5870d018`（清晰度标签），登记的合并提交 `d145aa930`
 - 功能点：F-REC-13（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）；附带 S02.2 发现的问题第 1 条（录制的清晰度标签）
 - 涉及代码：`packages/live_record`（`resolver.dart`、`recorder.dart`、`merge.dart`、`task.dart`）、`shared/record/`、`features/recorder/`
 - 依赖：A10.2（录制设置）合并后
 - 来源：H01.1“留给后续”（`mergeProgress`）；[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)“发现的问题”第 1 条
 - 评审页：按授权直接开发（界面照 A07.6 录制面板“整理文件”、A10.1 的状态卡）
-- 记录：[records/F.3a.md](record.md)（开发后）
+- 记录：[record.md](record.md)
 
 ## 一、录制清晰度标签
 
@@ -101,3 +103,25 @@ INVENTORY 里 F-REC-13 写 v3“界面显示百分比”，实际 v3 只发事�
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；并入 S02.2 发现的录制清晰度标签问题；INVENTORY 的 F-REC-13 改正（v3 界面没显示进度） |
 | 2026-10-02 | 开发完成（录制记平台实际给的清晰度、受限时提示一次；合并进度在状态卡上），待 K90 验证 |
+
+## 结果
+
+- 做到了 c1～c5（逐条对照见 [record.md](record.md)），提交 `a5870d018`、`bf4e0b16d`，登记的合并提交 `d145aa930`（2026-10-02）：
+  - c1：`packages/live_record/lib/src/resolver.dart:334` 的 `RecordStreamResolver.servedQuality`：平台确认的编号在列表里用那一项，不在列表里按平台的编号命名（哔哩哔哩 250 = 超清）算确认，没确认时写请求的名字加“?”（`ResolvedRecordStream.qualityLabel`，`:118`）；任务的 `selectedQuality` 取它（`recorder.dart:449`），重试的游标仍是请求的编号。
+  - c2：`RecordNoticeKind.qualityLimited`（`recorder.dart:57-59`），FFmpeg 开始写之后发，每次录制只发一次（`_Runtime.qualityNoticed`，`:480-483`）；文字键 `record_quality_limited_to`。
+  - c3：`RecordMerger.merge(onProgress:)` 读 FFmpeg 统计，`mergeProgress` 照 3.x 算（`merge.dart:137-151`、`:203-219`），0～0.99 只增不减，改名成功后报 1。
+  - c4：`RecordTask.mergeProgress`（`task.dart:308`，只在内存、不进 JSON）；`_mergePending`（`recorder.dart:821-839`）按各尝试源文件字节加权合成，整数百分比变了才通知界面，结束清成 null。
+  - c5：`apps/pure_live/lib/shared/record/record_status_card.dart` 的“正在整理文件”：标题右边百分比、下面一条进度条（`:445`），FFmpeg 还没报进度时进度条来回走。
+- 偏差：无（“需要选的”按 A 做）。直播间播放遇到“确认的编号不在列表里”仍显示“原画?”，不在本任务目录，见下。
+- 测试：`live_record` 新增 9 个（`applied_quality_test.dart` 6、`merge_progress_test.dart` 3，共 43 个）；应用新增 1 个、改 3 个，当时全部 692 个通过。
+
+## 验证
+
+- 自动测试：`packages/live_record/test/applied_quality_test.dart`（游客样本走解析器是超清并算受限；列表只有原画、平台给 250 时记超清——改之前失败；没确认是“原画?”；整个录制器跑一遍只提示一次、重连不再提示）；`test/merge_progress_test.dart`（进度公式、单调到 1、任务上的进度结束清掉）；应用 `test/features/recorder/recorder_centre_test.dart` 和录制面板测试里“整理文件”的百分比和进度条。
+- 真机：**没有结果**。[record.md](record.md)“要在 K90 上看的”两条（游客录哔哩哔哩的清晰度和提示；长录制停止后的合并进度）没做。H01.4 只登记了 F-REC-06、07、10、11 四项，这两条建议在 [H01.4](../H01.4-录制余项/README.md) 的真机验证里顺带看（任务书最后“顺带”一节）。登记表写的是“完成”，按 [PROCESS.md](../../../PROCESS.md) 第 3.2 节应是“待真机”。
+
+## 留下的问题
+
+- 直播间播放遇到“确认的编号不在列表里”仍显示“原画?”（`packages/live_core/lib/src/live_site.dart` 的 `resolveAppliedPlayQuality` 不变，`features/live_play/logic/room_controller.dart` 不在本任务目录）；要和录制一致时在直播间取清晰度处用同样的规则，归 G/E 组，尚未登记。
+- 录制通知在合并时不显示进度（`app/recording_notice.dart` 只写“正在整理录像”），没有登记任务；需要时在 H05 开。
+- 真机检查没有归属的任务：建议维护者把它并进 H01.4，或把本任务改回“待真机”并加 `verify.md`。

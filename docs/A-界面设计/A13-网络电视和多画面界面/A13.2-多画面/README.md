@@ -187,3 +187,14 @@ v4 现在已有、v3 没有的：恢复上次的提示、进入直播间、播�
 3. “上次看了 N 个直播间，要恢复吗？”提示照 v4 保留（格子上方），图里没画。
 4. 选台的“正在直播”照 v3 用绿点；全应用的直播标记等 A09.1 定。
 5. 电脑 1+3 超过 4 格时，宽屏右边既有小格一列又有右栏，两列并排是否太挤，要在 1920 宽上再看。
+
+## 实现和验证
+
+- 定稿：用户确认，W1～W4 按建议 A（1+3 大画面控制条只在沉浸和全屏、清晰度线路是两个小菜单按钮、已在格子里的直播间标“第 N 格”并排最后等）。
+- 实现：c1～c15 做到，详见 [record.md](record.md)。页面重做：`apps/pure_live/lib/features/multiview/multiview_page.dart`（三种排法、选中和选台目标、面板、返回链）、`widgets/`（`toolbar.dart`、`wall.dart`、`cell_view.dart`、`cell_controls.dart`、`focus_bar.dart`、`room_picker.dart`）、`logic/multiview_geometry.dart`（格数按设备、16:9 格子位置）、控制器加 `setOffscreen`（看不见的格停视频解码）。先把直播间 A07.6 的组件移到共用位置（`StreamMenuButton` 到 `live_ui`，`RoomSidePanel` 到 `shared/panels/side_panel.dart`，弹幕设置内容到 `shared/danmaku/danmaku_settings_content.dart`），直播间的样子不变。
+- 偏差：格子菜单变成选中格的控制（普通模式长按 = 选中，沉浸 / 全屏长按 = 格子面板）；去掉 v4 格子右上角的“更多”和未开播格子里的“重新检查”、3.x 1+3 大格左下角的清晰度入口；横屏手机选台连续进行；1+3 按大格面积选“小格在下”或“小格在右”；“正在直播”的绿点用语义色。当时按钮 40、开关 38 小于 48——收尾时补成 48 的点击区域（圆的大小不变，[A07.9 记录](../../A07-直播间界面/A07.9-已合并界面任务的收尾/record.md)第 2 节，提交 `ef295adfc`）。
+- 新文字：中英各 11 条（`multiview_close_this_cell`、`multiview_pick_title`、`multiview_saver_mark` 等）。没有新设置，`roomVolumes`、`multiview.session` 不变。
+- 提交：`2428a2e47`（共用组件移动）、`a4dc4e453`（多画面），合并 `2770573cc`，记录 `b601b444e`（2026-10-01）；点击区域 `ef295adfc`，在 `a88f26dfc` 合并（2026-10-02）。`multiview` 的直接颜色和图标 71 → 0。
+- 测试：多画面 15 个（原 7 个）：`multiview_page_test.dart` 5 个大用例覆盖竖屏、竖屏 1+3、横屏手机、宽屏、格子状态，收尾又加“tap targets”一个；`multiview_geometry_test.dart` 4 个；`multiview_controller_test.dart` 新增看不见的格只有声音。当时 `apps/pure_live` 286 个通过。
+- 真机：没有看过（S02.3“没测的”里有多画面）。登记表已是“完成”，建议按 CHECKLIST 第 1 节第 16 条（2×2 放 4 个国内直播、点格子切声音、沉浸和全屏进退、返回安全退出）在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看，同时看 4 路解码的帧时间。
+- 留下的问题：“按格子尺寸自动降清晰度”没做（需要先定阈值和默认开关，没有登记任务）。

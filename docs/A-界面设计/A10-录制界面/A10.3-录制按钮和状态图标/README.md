@@ -145,3 +145,14 @@ v3 未录本来就是中性色空心圈；4.0.0 的 A07.1 改动 13 把中心点
 - X2 排队中（名额满）的图形：A（已做）同等待开播的小钟；B 同准备中转圈。
 - X3 失败在顶栏：A（已做）圆环右下角“!”；B 同未录。
 - X4 “录制已停止”提醒的小图标、准备中和合成中的前台通知文字：A（建议）另做“!”小图标、通知按状态写字（要改 `RecorderForegroundService.kt` 和 `app/recording_notice.dart`，超出 A10.3 范围，交维护者）；B 维持现状。
+
+## 实现和验证
+
+- 定稿：用户授权“所有决定你选择”，X1～X3 按建议 A 做（横屏录制中时间在按钮右边、排队中用小钟、失败圆环右下角“!”），没有单独评审；X4（通知小图标和按状态写字）超出本任务范围，维护者随后补做（H05.1，提交 `79ecb5d2b`）。
+- 实现：c1～c11 做到，详见 [record.md](record.md)。`packages/live_ui/lib/src/widgets/record_glyph.dart` 改成 `CustomPainter` 画的七种状态（`RecordGlyphState`）和三种角标；新文件 `apps/pure_live/lib/shared/record/record_look.dart` 从卡片状态映射图形、按钮提示和角标，不再用 `RecordStatus.isActive`；顶栏按钮 `features/live_play/buttons/record_button.dart` 横屏录制中带时间；角标 `features/live_play/player/recording_badge.dart`；状态卡卡片头（录制面板和录制中心同一张）；通知小图标 `android/app/src/main/res/drawable/ic_stat_recording.xml`。
+- 偏差：状态卡里等待开播、准备中、合成中的图标从主色改成中性色（已保存的绿勾不变）；准备中不显示画面角标；横屏全屏录制中控制栏下面不再重复角标。
+- 新文字：`record_badge_reconnecting`（重连中）、`record_badge_processing`（合成中）。没有新设置。
+- 提交：`82f3a60b7`（图形）、`5bab804b0`（顶栏、角标、卡片、通知），合并 `40086fafa`，记录 `2e6c6f5ab`（2026-10-02）；X4 补做 `79ecb5d2b`。
+- 测试：新写 7 个（`live_ui` 4 个：七种状态的颜色和只有录制中有红色、画面上的色调、呼吸和转圈及减少动态效果、角标三种状态；`pure_live` 3 个：顶栏七种状态和横屏带时间、卡片状态到图形和角标的映射、录制中心九张卡片头），改 2 个、删 `live_ui` 旧的 3 个；当时 `live_ui` 100 个、`apps/pure_live` 743 个全部通过，debug APK 构建通过（新通知图标能编译）。
+- 真机：待真机，步骤见 [verify.md](verify.md)。
+- 留下的问题：记录里说电视卡片 `tv_room_card.dart` 也用 `isActive` 判断录制中——查过 master，那里的 `isActive` 是跑马灯计时器，电视卡片不显示录制状态，不用改；和 A07.13 都改顶栏按钮（`record_button.dart`、`player_controls.dart`），A07.13 已合并（待真机），没有冲突遗留。

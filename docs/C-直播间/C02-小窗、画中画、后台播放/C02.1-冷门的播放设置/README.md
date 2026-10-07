@@ -1,13 +1,16 @@
 # C02.1 冷门的播放设置
 
-- 状态：以登记表为准，见[子分类页](../../../A-界面设计/A07-直播间界面/README.md)和 [STATUS.md](../../../STATUS.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（下面“档位：可以以后”是当时旧任务表的写法）
+- 类型：功能
+- 旧编号：F.1d、T05j.2
+- 相关：决定 D-018（3.x 的设置键不变）；依赖 A11.3、G04.1；真机核对归 [C01.3](../../C01-进房和房间逻辑/C01.3-直播间功能余项/README.md)
 - 档位：可以以后；规模：中
 - 功能点：F-ROOM-21、F-PORT-05、F-PORT-06、F-MINI-04、F-APP-17、F-ROOM-25（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）
 - 涉及代码：`features/live_play/`（`live_play_page.dart`、`logic/room_runtime.dart`、新 `logic/player_standby.dart`、`logic/mini_window.dart`、`mini/`、`player/`）、`app/app.dart`；设置行已在 `features/settings/settings_catalog.dart`（A11.3）
 - 依赖：A11.3（已完成）
 - 来源：I01.3（`useHardStopOnExit`）、J01.1（小窗弹幕预览）、C01.2 第 4 项、M13.17 任务说明第 5、8、9 项
 - 评审页：X1 用户已定 A；其余只把 v3 的行为补回来
-- 记录：[records/F.1d.md](record.md)
+- 记录：[record.md](record.md)
 
 ## v3 的行为（`~/ref/v3ref/lib`，v3.2.11）
 
@@ -76,3 +79,21 @@
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；F-MINI-04 已由 A11.3 做完，清点那一行改成完成 |
 | 2026-10-02 | 开发完成（c1～c6），待 K90 验证 |
+
+## 结果
+
+- 提交：代码 `df6e2cf2a`（`feat(live_play): portrait hint, Kuaishou app link, switcher refresh, back, player standby (F.1b-F.1d)`），合并 `d53df6d71`（2026-10-02）；登记表写的 `7b37e6f5f` 是记录的提交。逐条见 [record.md](record.md)。
+- c1～c6 都做到。偏差：c3 不显示 3.x 的置信度、稳定次数、时间（4.x 的竖屏识别没有这些）。
+- 现在的位置（`apps/pure_live/lib/` 下）：`features/live_play/logic/player_standby.dart`（c1，页面里 `live_play_page.dart:228` 取、`:491-496` 留）；`features/live_play/logic/mini_window.dart:83` 的 `miniPictureSize`（c2，用在 `mini/room_mini_window.dart:106`、`mini/floating_window.dart:125`）；`features/live_play/player/portrait_diagnostics.dart`（c3，`player/player_view.dart:557`、`:711`）；`features/settings/playback_tiles.dart:690`（c4，A11.3 做的）；`app/app.dart:116`、`:261` 的 `releaseImageMemory`（c5）；`features/live_play/live_play_page.dart:750-753` 的媒体键（c6）。
+- 默认行为变了：离开直播间（不转小窗）原来立即释放播放器，现在照 3.x 默认留 45 秒。记录里说的“换房间时新页面先建好、旧页面后关，这一种不复用”已经过时：A07.13 之后换房间在同一个页面里进行，直接接着用同一个会话（`_switchRoom`，`live_play_page.dart:360`），不经过 `PlayerStandby`。
+- 测试：新增 `apps/pure_live/test/features/live_play/room_extras_test.dart` 的“F.1d”组 7 个；`live_play_mini_window_test.dart` 改了 2 处断言（离开后 45 秒才释放）。没有新设置，新翻译键 `portrait_evidence_decoder`、`portrait_evidence_platform`。
+
+## 验证
+
+- 自动测试：`room_extras_test.dart` 的“F.1d”组（c1 留给下一个房间 / 开关打开立即释放 / 配置变了换新的；c2 两个；c3 两个；c5；c6）。
+- 真机：登记表是“完成”，但记录里“要在 K90 上看的”四项（播放器复用和 45 秒后内存回落、竖屏画面进画中画和应用内小窗的比例、识别状态的“平台预判 / 解码尺寸”、外接键盘媒体键）都**没有真机结果**。归 [C01.3](../../C01-进房和房间逻辑/C01.3-直播间功能余项/brief.md) 的真机步骤第 2、3、6、7 步。
+
+## 留下的问题
+
+- 真机没看（上面），归 C01.3。
+- 多画面（`features/multiview/`）和电视的直播间不经过 `PlayerStandby`，各自离开时立即释放（`PlayerStandby` 只有直播间页面在用）；要不要也留给下一个房间不在本任务范围。

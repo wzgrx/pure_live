@@ -4,7 +4,7 @@
 - 范围：电视直播间的播放、信息栏、控制栏、飞行弹幕、左侧直播间列表（含切换直播间）、右侧播放设置（清晰度、线路、画面比例、弹幕、屏蔽、录制……）、各种状态。下面的界面清点表是这一批出图的清单
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a174)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a174)；计划书 [specs/UI.md](../../../specs/UI.md) 第 5.5 节
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/modules/live/playback/`），不是 v3；同一功能用手机版的同一个组件：小菜单、弹幕设置、录制面板照 [A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（已确认），全屏按钮照 [A07.4](../../A07-直播间界面/A07.4-横屏全屏/README.md)，屏蔽管理照 [A08.1](../../A08-弹幕界面/A08.1-弹幕列表和弹幕设置页/README.md)，状态照 [A07.7](../../A07-直播间界面/A07.7-直播间的状态/README.md)，信息照 [A07.1](../../A07-直播间界面/A07.1-竖屏普通布局/README.md)
-- 评审页：`page.json` 生成（`tools/ui/mock/page.py`），待发布；效果图源文件 [src/gen.py](src/gen.py)（电视的公共样式在 [src/tvkit.py](src/tvkit.py)，A17.5 也用）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认），由 `page.json` 生成（`tools/ui/mock/page.py`）；效果图源文件 [src/gen.py](src/gen.py)（电视的公共样式在 [src/tvkit.py](src/tvkit.py)，A17.5 也用）
 - 图片：pure_live_TV 按代码还原，尺寸是它的 1920×1080 设计像素折半画在 960×540 上（出图 1920 宽）；文字取自 pure_live_TV 的 `assets/translations/zh.json`（`i18nOr` 的键也查了）；画面和头像是示意图片
 
 ## 界面清点表

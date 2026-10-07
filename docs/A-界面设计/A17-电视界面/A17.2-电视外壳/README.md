@@ -3,7 +3,7 @@
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：电视首页外壳（左侧导航栏、时钟、模式按钮、各目的地、设置）、选择模式、退出确认、新版本提示（含下载进度）、协议页（使用须知）、启动解锁（选择账号、输入解锁密码）；首页右边的页面本身在 [A17.3](../A17.3-电视直播浏览/README.md)
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a172)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a172)；部件和焦点样子在 [A17.1](../A17.1-电视设计系统和通用组件/README.md)；手机的新版本对话框在 [A06.3](../../A06-首页和全局/A06.3-全局弹窗/README.md)
-- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [../U.15a/src/tvkit.py](../A17.1-电视设计系统和通用组件/src/tvkit.py)）
+- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [A17.1/src/tvkit.py](../A17.1-电视设计系统和通用组件/src/tvkit.py)）
 - 图片：基线是 pure_live_TV（`~/ref/pure_live_TV`，提交 `b9d2f739`），文字取自它的 `zh.json`；画布 960×540，pure_live_TV 的尺寸按设计稿减半画（见 A17.1）；封面、头像、捐赠二维码是示意图片；新版本号和更新内容：pure_live_TV 图用它 `assets/version.json` 的 3.0.7，新设计图用手机 A06.3 的 3.2.11（电视和手机是同一个应用）
 
 ## 界面清点表

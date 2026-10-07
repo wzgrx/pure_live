@@ -3,7 +3,7 @@
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：设备同步页（本机、发现的设备、手动输入、各种状态）、对方请求、配对码、发送确认、接收预览、扫码后选方向、扫码页、提示条
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a126)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a126)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；地址、配对码、二维码都是编的；相机画面是示意图片
 
 ## 界面清点表
@@ -137,3 +137,13 @@
 ## 需要改工具的地方
 
 - 无。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，S1、S2 按建议 A（接收先预览再写入、宽屏两列）。
+- 实现：c1～c11 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/remote_receiver/remote_receiver_page.dart`（三块、组标题在卡片外、设备卡片按平台图标和“地址 · 版本”、按钮“接收（描边）· 发送（实心）”、配对码六个格子、接收预览、对方请求写名字且不能点外面关、拿不到地址写原因、宽 ≥840 且不是横屏手机时两列最宽 1120）；服务拆成 `fetch` 和 `apply`（`remote_sync_service.dart`，协议不变）；扫码用 A12.4 的 `shared/qr_scan.dart`。
+- 没做：macOS 正式版的 `com.apple.security.network.server` 权限（A18.2 → A12.6 的待同步）——v4 没有 macOS 工程，等 X04.1 建工程时加。
+- 提交：`69f67d54e`，在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`remote_receiver` 的直接颜色和图标 11 → 0。
+- 测试：`apps/pure_live/test/features/remote_receiver/remote_sync_test.dart` 4 → 12 个（说明和组标题、设备卡片、拿不到地址和停止、发送、接收先预览、对方请求、扫码和选方向、宽屏两列、横屏一列）；页面测试用记录发送和拉取的假服务。
+- 真机：没有看过（要两台设备）。登记表已是“完成”，建议按 CHECKLIST 第 5 节第 3 条（互相发现、扫码、发送和接收）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看；Android 17 的本地网络权限见 O04.1。
+- 留下的问题：同步前选内容（V01.6 提议）；服务分不清“没网络”和“没权限”（J05）。

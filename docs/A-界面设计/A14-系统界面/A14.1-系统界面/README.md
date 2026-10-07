@@ -216,3 +216,13 @@
 - A10.1：录制中心接住通知上的“停止录制”和“录制已停止”提醒（点开定位到那条任务）；第一次录制时的通知说明（c14）。
 - A07.8：画中画的暂停按钮和三种小窗同一套（c7）。
 - A16.1：Windows 窗口在第一帧前的底色（c5 已写）。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，X1～X4 按建议 A（录制通知加“停止录制 / 全部停止”和“录制中心”、新类别“录制提醒”、长按图标三个快捷方式、单色层）。这一轮只做 Android；c16（Windows、Linux 照 v3 不加系统通知）本来不用改。
+- 实现：c1～c15 做到，详见 [record.md](record.md)，和 O03.2（权限、分享接收、剪贴板口令、播放代理，[O03.2 记录](../../../O-Android系统集成/O03-分享接收和快捷方式/O03.2-接回半成品/record.md)）一起做。主要文件：`apps/pure_live/lib/features/live_play/logic/background_playback.dart`（小图标、中文按钮、画中画暂停 / 播放，只加不改原逻辑）、`apps/pure_live/lib/app/recording_notice.dart`（录制通知文字）、`apps/pure_live/lib/platform/recording_platform.dart`（有变化才发）、`apps/pure_live/lib/shared/permission_prompts.dart`（权限说明）、`apps/pure_live/lib/app/intake/`（分享提示）；原生 `MainActivity.kt`（画中画动作、`setSplashTheme`）、`RecorderForegroundService.kt`（通知重写）、`RecorderPlugin.kt`（`update`、`alert`、`stopAll`）、`ShareIntakePlugin.kt`（动态快捷方式）；资源：小图标、单色层、前景内缩 16% → 2%、12 起的启动画面主题、`raw/keep.xml` 留住只在 Dart 里按名字用的资源。
+- 偏差：c5“录制已停止”点开当时只到录制中心——后来 A08.5（提交 `6a599edee`）做了定位到那条任务；c9 自选主题色、纯黑时系统启动画面仍是默认底色；c11 提示条没有转圈、3 秒后自己消失；c15 直播间快捷方式没有主播头像、是动态快捷方式（开发包包名不同，静态的写不了）。合并后 H05.1（提交 `79ecb5d2b`）把单个直播间的通知标题按状态写，“录制已停止”换成自己的小图标 `ic_stat_record_stopped`。
+- 提交：`02085e8dd`（应用）、`def02145b`（测试）、`1d98ecc04`（Android），在 `dad6c96fc` 合并，记录 `8cf3c21b7`（2026-10-02）。`flutter build apk --debug` 通过。
+- 测试：`apps/pure_live/test/platform/system_surfaces_test.dart` 记录时 9 个（录制通知文字、保活、“录制已停止”、媒体按钮中文、画中画按钮、资源文件）；分享、权限、快捷方式的测试在 O03.2 的 `intake_test.dart`、`permission_prompts_test.dart`。
+- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)（2026-10-02，提交 `288fec0ec` 的 arm64 profile）：后台播放通知标题是直播间标题、正文是主播名、按钮“暂停”“停止”是中文，通过（c6）；录制通知“正在录制 · 主播名”、正文“标题 · 清晰度”、按钮“停止录制”“录制中心”，通过（c3、c4）。[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)：画中画进入通过、分享链接直接进直播间通过。记录里“要在 K90 上看的”第 1 条的小图标形状、第 3 条“录制已停止”、第 4 条画中画的暂停按钮、第 5 条桌面图标和快捷方式、第 6 条系统启动画面没有逐项写结果——第 3 条随 [A10.3 的 verify.md](../../A10-录制界面/A10.3-录制按钮和状态图标/verify.md) 第 13 条看，其余建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补。
+- 留下的问题：快捷方式头像、提示条转圈（都没有登记）；从画中画回来控制条卡住（O02.1）。

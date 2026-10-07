@@ -4,7 +4,7 @@
 - 范围：电视的 IPTV 设置（订阅源、导入、自动同步、请求头、节目单源）、订阅源管理、导入和请求头对话框、删除确认、网络电视直播间的节目单、“链接放映”页（INVENTORY 的 `MoviePlaybackPage`，导航名“链接放映”）。下面的界面清点表是这一批出图的清单
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a175)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a175)；计划书 [specs/UI.md](../../../specs/UI.md) 第 5.5 节
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/modules/live/iptv/`、`modules/live/movie_playback/`）。手机上同样的功能：v3 的 IPTV 设置页和订阅源管理（`modules/iptv/iptv_page.dart`、`iptv_manage.dart`；手机版 [A13.1](../../A13-网络电视和多画面界面/A13.1-网络电视管理/README.md) 未开始）、工具箱的链接解析（`modules/toolbox/toolbox_page.dart`；[A15.1](../../A15-小页面/A15.1-工具箱/README.md) 未开始）、节目单（[A07.7](../../A07-直播间界面/A07.7-直播间的状态/README.md)）。电视直播间的其余部分见 [A17.4](../A17.4-电视直播间/README.md)
-- 评审页：`page.json` 生成（`tools/ui/mock/page.py`），待发布；效果图源文件 [src/gen.py](src/gen.py)（电视公共样式在 [../U.15d/src/tvkit.py](../A17.4-电视直播间/src/tvkit.py)）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认），由 `page.json` 生成（`tools/ui/mock/page.py`）；效果图源文件 [src/gen.py](src/gen.py)（电视公共样式在 [A17.4/src/tvkit.py](../A17.4-电视直播间/src/tvkit.py)）
 - 图片：pure_live_TV 按代码还原（1920×1080 设计像素折半画在 960×540 上）；文字取自 pure_live_TV 和 v3 的 `zh.json`；画面、二维码是示意
 
 ## 界面清点表

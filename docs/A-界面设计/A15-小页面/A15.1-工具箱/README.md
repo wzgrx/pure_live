@@ -3,7 +3,7 @@
 - 状态：以登记表为准，见[子分类页](../../A06-首页和全局/README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：链接解析页（输入、进行中、支持列表）、选择清晰度和选择线路对话框、自动填充提示和结果提示
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a151)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a151)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；直播流地址是占位；平台标签的图标是示意（首字 + 颜色），开发时用 `PlatformLogo`
 
 ## 界面清点表
@@ -121,3 +121,13 @@
 ## 需要改工具的地方
 
 - 无。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，Y1、Y2 按建议 A（一个输入框、两个按钮并排；支持列表单独一张、默认收起）。一并处理 A17.5 → A15.1：链接放映和工具箱用同一份“支持解析列表”。
+- 实现：c1～c9 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/toolbox/toolbox_page.dart`（组标题在卡片外、粘贴 / 清除切换、“链接跳转”实心和“获取直链”浅色各 48 高、进行中写在做什么、选择对话框标题 20 号每项 ≥56、最宽 720、横屏手机顶栏 48）；支持列表挪到 `apps/pure_live/lib/shared/links/supported_platforms.dart`（`linkPlatforms`、`SupportedPlatformsCard`）；控制器 `toolbox_actions.dart` 的逻辑没改。
+- 偏差：无；“共 N 个平台”按实际注册的平台数，不是设计图写的 45。
+- 提交：`b164796dc`，和 A15.2、A09.10 等一起在 `6f13ced71` 合并（2026-10-02）。`toolbox` 的直接颜色和图标 7 → 0；没有新文字和新设置；`live_ui` 加 `AppIcons.linkJump`。
+- 测试：`apps/pure_live/test/features/toolbox/toolbox_page_test.dart` 6 → 9 个（竖屏、进行中和对话框、852×393 和 1280×800）。
+- 真机：没有单独记录。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看（粘贴一个哔哩哔哩链接，跳转和获取直链各一次）。
+- 留下的问题：电视的链接放映（A17.5）开发时用 `SupportedPlatformsCard`。

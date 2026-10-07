@@ -3,7 +3,7 @@
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：WebDAV 页（文件列表、路径、各种状态、上传）、服务器抽屉、顶栏菜单和文件菜单、配置对话框、恢复和删除确认、使用帮助页、提示条
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a125)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a125)
-- 评审页：claude.ai 私有页面（待发布）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）。服务器名、地址、用户名都是占位；帮助页里 v3 写的坚果云地址（`web_dav_help.dart:19`、帮助文字里的官网和服务器地址）换成了占位或“坚果云官网”；坚果云网页截图用灰块代替
 
 ## 界面清点表
@@ -156,3 +156,13 @@
 ## 需要改工具的地方
 
 - 效果图工具没有 Material Icons Outlined 字体（`tools/ui/mock/fonts.txt`），v3 的 `*_outlined` 图标只能用填充版近似；建议加上。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，R1～R4 按建议 A（顶栏服务器和刷新、点备份文件预览后恢复、上传按钮带文字、子目录里按返回直接离开）。一并把中英文的“WebDav”统一成“WebDAV”。
+- 实现：c1～c13 和 R4 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/web_dav/web_dav_page.dart`（两行标题写当前服务器、⋮ 小菜单、路径从左排、文件行“时间 · 大小”和备份文件图标、点文件预览后恢复、出错写原因加“编辑配置”、空目录说明、上传和删除失败带“重试”、抽屉）、`web_dav_config_dialog.dart`（标题前的图标、编辑时名称不能改）、`web_dav_help.dart`（内容照 v3，换卡片样式）；去掉了 v4 的“返回先回上一级”。
+- 偏差：无（设计的每一条都照做）。
+- 提交：`2c6563bb1`，在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`web_dav` 的直接颜色和图标 36 → 0；三条到 `backup/` 的跨功能引用改引 `shared/backup/`。
+- 测试：`apps/pure_live/test/features/web_dav/web_dav_page_test.dart` 3 → 9 个（顶栏、⋮ 菜单和帮助页、路径、文件行、三种打开菜单的方式、出错、抽屉、上传失败重试、返回直接离开、宽屏 720）；只用 `dav.test`、`example.com` 这类假地址。
+- 真机：没有看过。登记表已是“完成”，建议按 CHECKLIST 第 5 节第 2 条（坚果云：测试连接、上传、恢复）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看。
+- 留下的问题：无。

@@ -164,3 +164,14 @@
 2. Android 上“打开文件夹”打开某个子目录，各机型的系统文件管理器是否都支持（v4 现在只对公共目录有效），要在 K90 上看。
 3. “播放”只能放最近一次合成的文件（v4 的 `lastOutputPath`），同一房间更早的录像从文件夹找。
 4. v3 人数一行在录制任务里是轮询时更新的（`live_record_task.dart:212-228`），开播检测关着时可能是很久以前的数字；新设计照 v3 显示。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，U1～U3 按建议 A（筛选一行五个带数量、删除进卡片右上角的更多菜单、已保存卡片是播放 / 打开文件夹 / 再录一次）。
+- 实现：c1～c11 做到，P1～P11 都修了，详见 [record.md](record.md)。先把 A07.6 直播间录制面板的状态卡搬到共用的 `apps/pure_live/lib/shared/record/record_status_card.dart`（加紧凑尺寸参数，直播间样子不变）、九种状态的判断搬到 `shared/record/record_state.dart`、按钮动作搬到 `shared/record/record_actions.dart`；页面在 `features/recorder/recorder_page.dart`、卡片在 `recorder_task_card.dart`、筛选和列数在 `features/recorder/logic/recorder_view.dart`（列数 = ⌊(宽 + 12) ÷ 412⌋，1～4 列）。排队中的“启动”去掉（v3 点了没反应，P4）。
+- 偏差：左上角菜单只看是不是首页标签，不再读整屏宽度（顺带去掉 `recorder -> home/home_menu.dart` 的跨功能引用）；筛选格高 48（效果图 44，守 48 的点击区域）；空状态用 `AppStatusView`（圆和图标比效果图大）；紧凑按钮内边距 8（三个按钮一行放得下）；开播检测关着的提示在“全部”和“等待开播”都出现。
+- 新文字：中英各 7 条（`recorder_delete_task`、`recorder_filter_active`、`recorder_polling_off` 等）；`AppIcons` 加 7 个（`recordFolder`、`recordSettings`、`more`、`enterRoom`、`delete` 等）。没有新设置。
+- 提交：`220825af9`，合并 `d389bc6d6`，记录 `83b1de999`（2026-10-01）。`recorder` 的直接颜色和图标 36 → 0。
+- 测试：新增 `apps/pure_live/test/features/recorder/recorder_centre_test.dart` 14 个（顶栏、筛选和数量、九种状态卡、更多菜单三种打开方式、删除、开播检测提示、横屏两列、宽屏三列、逻辑）；A07.6 的 20 个弹窗测试断言不改全部通过；当时 `apps/pure_live` 291 个通过。
+- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：停止录制后录制中心显示“已保存”卡片（时长、大小、播放、打开文件夹、再录一次），通过；[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md) 录一场 5 分钟以上、两段合成一个 MP4，通过。筛选、更多菜单、删除没有逐项记录。
+- 留下的问题：卡片头的状态图形后来由 A10.3 换成统一的七种图形；iOS 的“打开文件夹”交给 A18.1；从通知定位到任务的高亮（`RecorderTaskHighlight`）是 A08.5 加的，只录一个直播间时点前台通知不定位见 H05.2。

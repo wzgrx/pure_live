@@ -181,3 +181,14 @@
 1. “优先录制原画轨道”和“默认录制清晰度”同时设置时谁优先，没在代码里确认，说明照 v3 保留。
 2. 3.x 存的切片时长不是整分钟时显示“5.5 分钟”，拖动后才变整分钟。
 3. v4 现在的目录行是输入路径的对话框（有“使用默认目录”），新设计照 v3 写“选文件夹”，实现时按平台选。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，V1～V4 按建议 A（“缓存”改叫“录制文件”、最大任务数行内加减、切片按整分钟、“打开文件夹”在目录行右边）。
+- 实现：c1～c14 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/record_settings/record_settings_page.dart`（五组 21 行，用 A11.1 的设置行和 `SettingsPageList` 最宽 720）、`record_settings_dialogs.dart`（单选当前项主色加勾、上限对话框、清空确认写清删多少、没有系统选择器时的目录对话框）、`record_settings_texts.dart`（中文单位、GB）。“改上限”带参数 `max-tasks` 打开本页，滚到“最大同时录制任务数”并高亮 2 秒。
+- 偏差和范围外的改动：有系统文件夹选择器时点目录行直接打开选择器（照 v3），没有时仍是输入路径的对话框；为了 c9，直播间录制面板和录制中心的“改上限”各改了一行，改调 `openRecordLimit()`（`shared/record/record_actions.dart`）。3.x 存的不是整分钟的切片时长显示“5.5 分钟”，拖动后才变整分钟。
+- 新文字：改名用新键（旧键 `cache_management` 等没动）、不能写入的提示新键；`live_ui` 设置行加 `subtitleMaxLines`（只做添加）；`AppIcons` 加 21 个。没有新设置，存储键一个没改（D-018）。
+- 提交：`fc8a12db6`，和 A12.4～A12.6 一起在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`record_settings` 的直接颜色和图标 28 → 0，跨功能引用 `record_settings -> recorder/recorder_texts.dart` 去掉。
+- 测试：新增 `apps/pure_live/test/features/record_settings/record_settings_page_test.dart` 12 个（文字和单位、21 行的顺序和图标、依赖项变灰、3.x 的值、行内加减、“改上限”高亮、三种对话框、清空确认、选目录、横屏和宽屏 720）；`recorder_page_test.dart` 删掉 2 个和新设计冲突的旧用例。
+- 真机：没有单独记录（S02 的 CHECKLIST 第 3 节第 6 条“录制目录换到 `Download/`”没做）。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看目录选择、清空和“改上限”。
+- 留下的问题：“优先录制原画轨道”和“默认录制清晰度”同时设置时谁优先，说明照 v3 保留，没在代码里确认（归 H03）；iOS 的目录行交给 A18.1。

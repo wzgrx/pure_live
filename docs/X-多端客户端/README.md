@@ -22,7 +22,7 @@ Windows、Linux、电视、苹果平台的客户端专属工作（打包、原�
 
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
-| [X01.1](X01-Windows/README.md) 键盘鼠标操作核对 | 未开始 | 第三档 | — |
+| [X01.1](X01-Windows/X01.1-键盘鼠标操作核对/README.md) 键盘鼠标操作核对 | 未开始 | 第三档 | — |
 | [X01.2](X01-Windows/README.md) Windows 专属功能（功能清点第 13 节的 14 项） | 未开始 | 第三档 | — |
 | [X01.3](X01-Windows/README.md) Windows 安装包和自动更新 | 未开始 | 第三档 | — |
 | [X02.1](X02-Linux/README.md) Linux 构建和打包 | 未开始 | 第三档 | — |

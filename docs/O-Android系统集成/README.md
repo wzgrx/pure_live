@@ -2,7 +2,60 @@
 
 Android 原生部分：通知和前台服务、画中画、分享接收、权限、方向和刷新率、返回手势。
 
-> 组说明还没写：照 [templates/group.md](../templates/group.md) 写。
+管 Flutter 够不到、必须由 Android 原生代码或系统设置决定的那一层。排在播放、录制、浏览、设置这些功能组之后：它本身不是用户直接要的功能，但通知、画中画、权限、返回手势出错时整个功能都没法用；当前只做 Android（D-004），所以这一组只有 Android。
+
+## 范围
+
+- 管什么：
+  - **原生代码**：`apps/pure_live/android/app/src/main/kotlin/com/mystyle/purelive/` 的 7 个文件（`MainActivity.kt`、`AppChannelsPlugin.kt`、`PermissionsPlugin.kt`、`SystemAccessPlugin.kt`、`ShareIntakePlugin.kt`、`RecorderPlugin.kt`、`RecorderForegroundService.kt`，共约 2500 行）、`AndroidManifest.xml`、`res/`（通知小图标、画中画按钮图标、快捷方式、启动画面主题）。
+  - **Dart 一侧的平台封装**：`apps/pure_live/lib/platform/`（显示模式、方向、系统权限、本地网络、分享通道、录制的前台服务、加密、原生 HTTP、插件钩子）。
+  - 用户看得到的系统行为：通知（媒体通知、录制通知、“录制已停止”提醒）和前台服务（O01）、系统画中画（O02）、系统分享和“打开方式”、剪贴板口令、桌面长按快捷方式、插件接入（O03）、通知 / 电池优化 / 存储 / 本地网络权限（O04）、屏幕方向、刷新率声明、屏幕常亮（O05）、返回手势和大屏（O06）。
+- 不管什么：
+  - 这些系统界面的样子（通知文字和图标、画中画窗口、分享提示、权限说明框）→ A14（A14.1 系统界面）；这里管通道、权限、生命周期。
+  - 直播间里调用画中画、后台播放、返回接管的 Dart 逻辑 → C02、C03；画中画回来后直播间控制条的状态 → C02（复验在 O02.1）。
+  - 刷新率**策略**（选哪个刷新率）→ R02；这里只管原生怎么声明（`MainActivity.applyRefreshRate`）。
+  - 录制本身 → H；网络请求、代理规则 → Q（原生 HTTP 通道 `pure_live/native_http` 的使用者是 Twitch、Kick，归 E03、Q）；加密存储的使用者是 J。
+  - Windows、Linux、电视、苹果平台的原生部分 → X（电视和手机是同一个 APK，电视界面归 X03、A17）。
+
+## 子分类怎么分
+
+| 子分类 | 管什么 | 和其他子分类、其他组的关系 |
+|---|---|---|
+| [O01 通知和前台服务](O01-通知和前台服务/README.md) | 直播间的媒体通知（audio_service 的 `mediaPlayback` 服务）、录制的前台服务（`dataSync`）、通知渠道和点通知打开哪里 | 通知外观 A14.1；录制通知的文字和提醒归 H05；直播间何时显示媒体通知 C02；录制何时启停 H02；通知权限 O04 |
+| [O02 画中画](O02-画中画/README.md) | `pure_live/pip` 通道：能不能用、进入、比例、自动进入、窗口按钮、系统关了画中画时去设置 | Dart 一侧和直播间布局 C02；窗口外观 A14.1 c7 |
+| [O03 分享接收和快捷方式](O03-分享接收和快捷方式/README.md) | 系统分享、“打开方式”、深链、桌面长按快捷方式、剪贴板口令、插件接入（share_plus 等） | 口令格式在 `shared/rooms/share_code.dart`；导入网络电视 L01；提示外观 A14.1、A06.3 |
+| [O04 权限](O04-权限/README.md) | 通知、电池优化、存储（所有文件访问）、安装未知应用、Android 17 本地网络 | 开关的说明框 A14.1 c12～c14；录制目录 H03；投屏 N02；设备同步 J05；Q04 也登记了“本地网络权限”，以原生和真机验证为主的归这里，网络层的判断（`isLocalNetworkProxyHost`）归 Q02、Q04 |
+| [O05 方向、刷新率、常亮](O05-方向、刷新率、常亮/README.md) | 横屏全屏的传感器方向、刷新率声明的原生部分、屏幕常亮 | 刷新率策略 R02；全屏逻辑 C01、A07.4；常亮的组件在 `packages/live_player`（G） |
+| [O06 返回手势、平板和折叠屏](O06-返回手势、平板和折叠屏/README.md) | 预测返回（`enableOnBackInvokedCallback`、`pure_live/predictive_back`）、厂商系统的返回、大屏的方向和窗口 | 直播间的返回链 C03；上游借鉴 W01 |
+
+## 现状（2026-10-03）
+
+- **做到哪**：登记的 7 个任务里 3 个完成（O03.1 插件接入和 Windows 外壳、O03.2 权限 / 分享 / 剪贴板 / 播放代理、O05.1 屏幕常亮），1 个待真机（O05.2 横屏全屏随手机翻转，issue #36），3 个未开始，都是验证任务（O02.1 画中画复验、O04.1 Android 17 本地网络权限、O06.1 ColorOS 14 预测返回）。O01 没有登记任务（媒体通知和录制通知在 C01.2、H02.1、A14.1 里做完）。
+- **真机**：K90（HyperOS，Android 17）上看过：媒体通知和中文按钮、录制通知、打开后台播放时的通知权限和电池优化流程（S02.2）、画中画进入、别的应用分享直播链接直接进房（S02.3）。没看过：画中画回来（O02.1）、本地网络权限（O04.1）、横屏全屏开着旋转锁翻转（O05.2，提交时只用 `dumpsys` 看了请求的方向）、剪贴板口令和分享 m3u、播放代理、划掉应用后继续录。
+- **和 3.x 比**：3.x 用 floating（本地 AGP 9 补丁）、share_handler（本地补丁）、permission_handler、volume_controller、screen_brightness、battery_plus、move_to_desktop 等插件做的事，4.x 都在自己的通道里做（`MainActivity.kt` 和三个插件类），不再维护补丁副本；多了画中画窗口的暂停按钮、系统关了画中画时的说明、桌面长按快捷方式（最近两个房间）、Android 13 启动画面跟随应用的深浅色、录制通知的“停止录制”按钮。
+- **主要代码**：原生 7 个文件见 O01～O06 的代码地图；`apps/pure_live/lib/platform/` 11 个文件约 2000 行；通道一览写在 `MainActivity.kt:56-87` 的类注释里。
+
+## 当前重点和顺序
+
+- **第二档**：
+  1. **O02.1 画中画复验**（小）：K90 上从画中画回来，看控制条是否还卡住；和 C01.3、S02.5 第一阶段同一次真机做。
+  2. **O06.1 预测返回在 ColorOS 14 上验证**（小）：上游 2026-10-01 因为 ColorOS 14 卡死关掉了预测返回（`a424399e6`）；4.x 也开着，要找 ColorOS 14 的设备实测，决定要不要照做。
+- **第三档**：O04.1 Android 17 本地网络权限。登记时写“要另找 Android 17 设备”，但术语表、做法和 V03.2 的实测都记 K90 是 Android 17（HyperOS OS4.0.0.33 beta），开工时先用 `getprop` 确认 K90 的 API 级别，是 37 就直接在 K90 上做。
+- **待真机**：O05.2 照 [verify.md](O05-方向、刷新率、常亮/O05.2-横屏全屏随手机方向翻转/verify.md) 看完就能改完成。
+
+## 风险和注意
+
+- **厂商系统**：HyperOS 的返回键仍走 `onBackPressed`（`MainActivity.kt:663-671` 专门接住）；ColorOS 14 的预测返回有系统问题（上游）；国产系统常把应用限制在 60 Hz（D-010 的提示）、要用户手动给电池“无限制”和后台弹出权限。改原生前先想清楚在 K90 以外的机型上会怎样，写进任务书的风险。
+- **Android 版本**：targetSdk 和 compileSdk 都是 37（`apps/pure_live/android/app/build.gradle.kts:32`、`:47`），minSdk 26。Android 13 起通知要运行时权限；Android 15 起 `dataSync` 前台服务每天累计 6 小时（`RecorderForegroundService.onTimeout`）；大屏（最短边 ≥600dp）上系统忽略应用的方向请求（发布说明 v4.0.0 写 Android 16 起，[specs/UI.md](../specs/UI.md) 第 5.3 节写 Android 17 起；targetSdk 37 时两种说法都覆盖）；Android 17 起局域网套接字要 `ACCESS_LOCAL_NETWORK`。
+- **请求码唯一**：每个插件的权限和 Activity 结果都会广播给所有监听者，请求码必须全应用唯一（`PermissionsPlugin` 20261001、20261002，`SystemAccessPlugin` 20261003，`RecorderPlugin` 20260907；`apps/pure_live/test/platform/system_surfaces_test.dart` 有检查）。
+- **构建和验证**：改了 Kotlin 或清单必须本机 `flutter build apk --debug` 通过，并在 K90 上用测试包 `com.mystyle.purelive.v4dev` 看（D-019：只点测试包，不碰正式包和 3.x）；单元测试只能测到通道的调用。不在门禁运行时构建正式包（PROCESS 第 8 节）。
+- **规则**：3.x 的设置键名和含义不变（D-018）；横屏全屏按传感器翻转（D-023）；刷新率只用数值不用类别（D-010，`MainActivity.kt:781-782` 的注释）；签名和密钥不进 git（D-006）。
+
+## 相关
+
+- 规范：[specs/ENGINEERING.md](../specs/ENGINEERING.md)、[specs/UI.md](../specs/UI.md) 第 5、9 节；清点：[inventory/FEATURES.md](../inventory/FEATURES.md) 第 2 节（AND）和第 14 节（平台能力表）；真机清单：[S02 的 CHECKLIST.md](../S-质量和验证/S02-真机验证/CHECKLIST.md)。
+- 决定：D-004（只做 Android）、D-006、D-010、D-018、D-019、D-023。
+- 其他组：A14（系统界面）、C02、C03（直播间里的调用）、H02（录制）、R02（刷新率）、W01（上游对照，O06.1 的来源）、X（其他客户端的原生部分）。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 

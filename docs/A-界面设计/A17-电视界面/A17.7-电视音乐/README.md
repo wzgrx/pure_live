@@ -4,7 +4,7 @@
 - 范围：电视“音乐”模式的全部界面：导航轨五项（正在播放、搜索、歌单、推荐、我的）及其标签（推荐：每日、动态、排行；我的：关注、UP主、最近、云端）、迷你播放条、播放器（歌词、控制栏、音质、播放内核、队列、设置）、歌单和歌单详情、同步的哔哩哔哩收藏夹、曲目列表（专辑详情）、导入歌单和各种对话框；见下面的界面清点表
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a177)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a177)；依赖 A17.2（外壳）、A17.1（设计系统）；卡片、控制栏、状态页、小菜单、对话框的写法在 [A17.6](../A17.6-电视点播/README.md) 定
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/modules/music`），手机版没有这个功能；v4 只有逻辑包 `packages/live_vod`
-- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [../U.15f/src/tvkit.py](../A17.6-电视点播/src/tvkit.py)）
+- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [A17.6/src/tvkit.py](../A17.6-电视点播/src/tvkit.py)）
 - 图片：还原图按 pure_live_TV 代码和默认深色主题、1920 设计稿画；新设计按计划书 5.5 节画在逻辑 960×540。封面和头像是示意图片，歌名、歌词、UP 名都是虚构的
 
 ## 界面清点表

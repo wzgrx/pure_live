@@ -192,3 +192,14 @@
 - A11.4：设置“退出不再询问”和记住的选择合成一项“关闭窗口时：询问 / 最小化到托盘 / 退出应用”；“开机窗口尺寸”对话框的默认值写成 1280 × 720（和代码一致），范围说明跟着最小 360×400 改；“新建独立播放窗口”的说明改成“首页菜单和直播间菜单里显示‘在新窗口打开’”。
 - A07.5、A07.6：直播间菜单（Windows、Linux）的“在新窗口打开”图标是 `add_to_photos`，在“在哔哩哔哩打开”后面；`AppIcons.newWindow` 跟着改（A01.3）。
 - A18.2：macOS 的窗口按钮、菜单栏和关闭行为。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，T1～T4 按建议 A（T3 新窗口和主窗口共用同一份关注、历史和设置）。
+- 实现：c1、c3～c11、c13～c15 做到；c2（Linux）代码完成但桌面外壳只在 Windows 启动、没有 `linux/` 运行器；c12 首页菜单完成、直播间菜单只交出接口。详见 [record.md](record.md)。主要文件：`apps/pure_live/lib/app/desktop/desktop_window.dart`（`DesktopShell`、`DesktopWindow`）、`title_bar.dart`、`close_dialog.dart`（新）、`tray.dart`、`shared_data.dart`（新）、`app/data_root.dart`、`app/launch_args.dart`；`live_store` 加共用打开和 `syncExternal()`；Windows 运行器 `windows/runner/main.cpp`、`win32_window.cpp`（按窗口属性找主窗口）。去掉了 3.x 的交接文件（`--config-file` 不再读）。
+- 偏差：窗口大小仍存在 3.x 的 `window_width` / `window_height`（下限 400×300），窗口拖到 360 宽时记成 400；从托盘退出和新窗口的对话框没有“不再询问”；托盘菜单录制中一行、没有红点（A18.2 写两行，没照做）；标题栏不随系统字体放大。
+- 新文字和记录：`open_in_new_window`“在新窗口打开”（直播间菜单还没用上）、关闭对话框和托盘的文字；`meta` 新加 `window.maximized`、`recorder.tasks.<窗口 id>`（不进备份）；没有新设置。
+- 提交：`b0ad47273`（一个数据库给多个窗口、标题栏图标和颜色）、`a44167dc2`（窗口、标题栏、托盘、关闭、新窗口），在 `86ffd56f2` 合并，记录 `99a8f8f53`（2026-10-01）；`flutter build apk --debug` 通过，Windows 没有构建。
+- 测试：新增 `apps/pure_live/test/desktop_window_test.dart` 26 个（标题栏 9、关闭对话框 5、关闭流程 6、托盘 1、窗口 3、共用数据 1、首页菜单 1，含附录 A 第 15 条）；`launch_args_test.dart` 删 2 加 1；`packages/live_store/test/shared_store_test.dart` 6 个；当时 `apps/pure_live` 413 个通过。
+- 真机：没有在 Windows 上看过（D-004 现在只做 Android）。记录里“没有在真机上看的”一节就是 Windows 的验证清单（系统窗口菜单、Alt+空格、最大化记忆和拔显示器、第二次启动找主窗口、托盘菜单、两个窗口同步、Windows 11 圆角），等 [X01.1](../../../X-多端客户端/X01-Windows/README.md) 开工时照着看。登记表是“完成”，但没有真机结果，和 PROCESS 第 3.2 节不符，建议维护者决定是否改回“待真机”。
+- 留下的问题：直播间菜单“在新窗口打开”仍按平台显示、用旧文字和图标（`features/live_play/buttons/room_menu_button.dart:173`、`:300`），没有登记任务；窗口大小下限、托盘行数、新窗口的录制任务进不了主窗口的录制中心（记录“需要决定的事”1～3）。

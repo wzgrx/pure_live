@@ -124,3 +124,14 @@
 - v3 卡片底色用的是 `theme.cardColor`，主题里没设，按 Flutter 默认画成白色；设置行副标题按 `hintColor`（Flutter 浅色默认 60% 黑）× 0.75 画。请对照手机上的 3.x。
 - v4 现在没有文件选择插件，“本地导入”是输入路径（L01.3“留给后续”）；新设计按 v3 用系统文件选择画，开发时要加依赖。
 - 频道数、更新时间 v3 的库里有没有（`lastRefresh`）以 v4 的 `live_iptv` 为准，图里的数是示意。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，H1～H4 按建议 A（两页合一、一栏最宽 720、卡片上没有“使用”按钮、删除留在卡片上）。
+- 实现：c1～c17 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/iptv/iptv_page.dart`（一页四组、全部同步、各状态）、`iptv_cards.dart`（卡片、标签、统计、同步进度、状态卡、静态骨架）、`iptv_import.dart`（导入方式照 3.x 的顺序、网络导入的失败原因和“重试”、同名替换、粘贴文本）、`iptv_settings.dart`（同步间隔、请求头）；叫法统一成“播放列表”“节目单”；`platform/plugins.dart` 改了文件选择框的标题（一行）。`live_ui` 只做添加：IPTV 一组 `AppIcons`、暖色容器 `LiveSemanticColors.warmContainer`、`ReadableContent`。
+- 偏差：标题居中由本页自己设（后来 D-011 定了哪些页居中，本页照 3.x 居中，符合）；默认节目单导入失败的状态沿用 v4 的读取失败卡（设计没画）；卡片本身不可点，所以没有整卡悬停。
+- 新文字：中英各加 18 条、改 22 条、删 4 条 v4 自己加的键；3.x 的键都没删。没有新设置，存储键不变。
+- 提交：`7c6d685cb`，和 A12.1～A12.3 一起在 `59248e0b9` 合并（2026-10-01）；二维码和提示卡按钮的小修 `dc5abab12`。`iptv` 的直接颜色和图标 38 → 0。
+- 测试：`apps/pure_live/test/features/iptv/iptv_page_test.dart` 8 → 16 个（布局、状态、对话框、操作、340 宽 1.3 倍字号）；`live_ui` 47 个。记录时有一个用例依赖真实时间（过零点会失败），之后把导入时间也接到了固定时钟 `iptvClockProvider`（`features/iptv/iptv_data.dart:15`）。
+- 真机：没有看过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)“没测的”里有网络电视）。登记表已是“完成”，建议按 CHECKLIST 第 1 节第 17 条（导入 m3u、播放、节目单和回看）在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看。
+- 留下的问题：电视的网络电视页（A17.5）。

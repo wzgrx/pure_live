@@ -1,13 +1,16 @@
 # C03.1 直播间小项：快手 App 跳转、切换直播间刷新、预测返回
 
-- 状态：以登记表为准，见[子分类页](../../../A-界面设计/A07-直播间界面/README.md)和 [STATUS.md](../../../STATUS.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（下面“档位：应该”是当时旧任务表的写法）
+- 类型：功能
+- 旧编号：F.1c、T05g.3
+- 相关：原生通道在 I01.1 搬的 `MainActivity.kt`；切换直播间后来由 A07.13 改成面板；真机核对归 [C01.3](../../C01-进房和房间逻辑/C01.3-直播间功能余项/README.md)；返回在厂商系统上的验证归 [O06.1](../../../O-Android系统集成/O06-返回手势、平板和折叠屏/O06.1-预测返回在ColorOS14/README.md)
 - 档位：应该；规模：小
 - 功能点：F-RT-05、F-RT-07、F-AND-08（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）
 - 涉及代码：`features/live_play/buttons/room_menu_button.dart`、`dialogs/room_switcher.dart`、`live_play_page.dart`、`logic/`（新 `predictive_back.dart`）；`app/app.dart`（接上关注的刷新）
 - 依赖：—
 - 来源：C01.2“留给后续”第 6、7 项，M13.17 任务说明第 4、6、8 项
 - 评审页：按授权直接开发（只把 v3 的行为补回来，没有要选的）
-- 记录：[records/F.1c.md](record.md)
+- 记录：[record.md](record.md)
 
 ## v3 的行为（`~/ref/v3ref/lib`，v3.2.11）
 
@@ -61,3 +64,22 @@
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；`liveStreamId` 已在 `live_core`，c1 不改平台层 |
 | 2026-10-02 | 开发完成（c1～c3），待 K90 验证 |
+
+## 结果
+
+- 提交：代码 `df6e2cf2a`（`feat(live_play): portrait hint, Kuaishou app link, switcher refresh, back, player standby (F.1b-F.1d)`），合并 `d53df6d71`（2026-10-02）；登记表写的 `7b37e6f5f` 是记录的提交。逐条见 [record.md](record.md)。
+- c1～c3 都做到，没有偏差。原生没有改（通道、`onBackPressed`、`PRIORITY_OVERLAY` 注册在 I01.1 时就在 `MainActivity.kt` 里）。
+- 现在的位置（`apps/pure_live/lib/` 下）：c1 在 `features/live_play/buttons/room_menu_button.dart:55-83`（`externalRoomTarget` 的快手分支、`kuaishouStreamId`、`kuaishouAppLink`）；c2 当时在 `dialogs/room_switcher.dart`，A07.13 把切换直播间改成面板后，刷新在 `features/live_play/switch_room/room_switch_panel.dart` 的 `FollowsRefresher`（:22）、`RoomSwitchPanel.follows`（:110）、`_RefreshButton`（:409，另显示上次刷新时间和失败数，B05），`app/app.dart:86` 接到关注的 `refreshAll(visible: false)`；c3 在 `features/live_play/logic/predictive_back.dart` 和 `live_play_page.dart:262`（持有）、`:451`（放开）、`:646`（`_nativeBack`）。
+- 记录里“换房间时新页面先打开、旧页面后关闭”的情况：A07.13 之后换房间在同一个页面里进行，持有者不变；从别处（例如通知）打开另一个直播间时仍是新页面先持有、旧页面后放开，`release` 只放自己持有的，照样成立。
+- 测试：`apps/pure_live/test/features/live_play/room_extras_test.dart` 的“F.1c”组 4 个（记录写 5 个，其中刷新按钮的部分后来随 A07.13 搬进 `room_switch_test.dart`）。
+
+## 验证
+
+- 自动测试：`room_extras_test.dart`“F.1c”组；`room_switch_test.dart` 的刷新按钮用例。
+- 真机：S02.3（2026-10-02，K90）看过“返回逐级退出：先关菜单和面板，再离开直播间，回到上一页”，通过（见 [S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)）。**没有结果的**：快手直播间“在快手打开”跳到 App、切换直播间点刷新、HyperOS 的返回键（`onBackPressed` 路径）。归 C01.3 真机第 4、5 步；返回键在 O06.1 一起看。
+
+## 留下的问题
+
+- 上面没看的真机项，归 C01.3。
+- `_nativeBack` 没有 3.x `_handlingBack` 那样的防重入（`live_play_page.dart:646-658`），很快连按两次返回可能连退两层；读代码得出，没复现。在 O06.1 的真机步骤里看。
+- 上游 pure_live `a424399e6` 在 ColorOS 14 上关掉了预测返回（GetX 路由卡死）；4.x 是否受影响由 O06.1 验证。

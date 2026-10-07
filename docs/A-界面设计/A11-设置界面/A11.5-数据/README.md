@@ -119,3 +119,13 @@
 - A11.1：设置总览右上角“配置预览”入口。
 - A02.2：统一提示条的样子（这里只要求无标题、跟主题配色、不用模糊）。
 - A12.4：备份与恢复页（e12 的入口指向它）。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，Z1～Z3 按建议 A；A12.4 的 Q1（日志管理移到设置）按 A 一并做。
+- 实现：e1～e12 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/settings/data_tools.dart`（缓存大小、清空确认写出现在多大、刷新缩略图、下载目录写实际路径和“默认 / 自定义”、恢复默认目录一直显示、配置预览 `ConfigPreviewPage`）、`packages/live_ui/lib/src/widgets/json_tree.dart`（`JsonTreeSliver` 和页面一起滚动，只建屏幕上的行）；总览“数据”组最后一行“日志管理”。
+- 偏差：去掉 v4 自加的“恢复全部默认设置”和配置预览的“复制全部”；Android 选公共目录缺权限时只提示、不打开系统设置（当时没有打开系统设置页的插件，归 A14.1）；日志页当时没有路由、从总览直接推一页——现在已有 `RoutePath.kLogs`，`SettingsSection.log` 已改成路由（`settings_model.dart`）。
+- 提交：同 A11.3（`6b87e96f9`，合并 `ccd54d3c7`，记录 `e9e41d557`，2026-10-02）。
+- 测试：`apps/pure_live/test/features/settings/settings_data_test.dart` 7 个（缓存页两组和行序、动作行没有箭头、清空红字和确认、下载目录、配置预览的概况四格和两层树、顶栏去备份、日志入口）；`live_ui` JSON 树 1 个。出错状态没有组件测试（内存存储读不出错）。
+- 真机：没有单独记录。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看清空缓存、换下载目录（含 Android 公共目录的权限提示）、配置预览。
+- 留下的问题：Android 选公共下载目录缺权限时仍只提示（`data_tools.dart:352`）；平台层的 `apps/pure_live/lib/platform/system_access.dart`、`system_permissions.dart` 现在只有安装、本地网络、通知、电池的入口，没有打开存储权限设置页的方法，这件事没有登记任务（建议在 [O04 权限](../../../O-Android系统集成/O04-权限/README.md) 下登记）。

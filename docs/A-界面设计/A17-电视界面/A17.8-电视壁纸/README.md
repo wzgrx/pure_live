@@ -4,7 +4,7 @@
 - 范围：电视界面背后的背景（壁纸）：背景设置页、壁纸库 / 随机壁纸 API / 分组 / 分类列表、壁纸网格（含纯色和视频壁纸）、预览、沉浸式、清除背景，以及设好以后在各页面后面的样子；见下面的界面清点表
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a178)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a178)；依赖 A17.2（外壳）；入口在电视设置（A17.9）；字号、焦点、子页面默认焦点见 [A17.6](../A17.6-电视点播/README.md)
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/features/wallpaper`、`services/background_config`），手机版没有这个功能；v4 电视外壳现在背景是纯色（`tv/tv_theme.dart` 的 `TvBackground`），导航轨里留了一个不显示的“壁纸”占位（`tv/home/tv_home_page.dart`）
-- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [../U.15f/src/tvkit.py](../A17.6-电视点播/src/tvkit.py)）
+- 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公共部分 [A17.6/src/tvkit.py](../A17.6-电视点播/src/tvkit.py)）
 - 图片：还原图按 pure_live_TV 代码和默认值（等比覆盖、遮罩 35% 黑、不模糊，`background_config_model.dart:12-16`）画；壁纸是示意图片，壁纸库的来源和分类名是示意（远端目录，代码里没有）
 
 ## 界面清点表

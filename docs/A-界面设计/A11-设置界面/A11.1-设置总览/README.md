@@ -125,3 +125,13 @@ v4 现在的偏差（J01.1 时自行设计）：十个分区加“关于”，�
 
 - A11.3：“视频”页里“小窗弹幕”那一行去掉（设置首页已有入口）；“播放器内核”页里的“网络代理设置”和“自定义网络代理”页的“播放器内核代理”是同一项，留一个入口。
 - A11.3、A11.4、A11.5、A10.2：子页用本任务的设置行组件；子页里的“恢复默认”统一先确认（见 A11.2）。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，S1～S4 按建议 A。开发时一并处理了跨任务待同步：小窗弹幕只留总览一个入口、“视频”“通用”说明对上页面、横屏手机顶栏 48 高、配置预览挪进“数据”组（A11.3～A11.5）；说明对比度（A12.2）；开关滑块颜色（A09.6）；“三方认证”改名“平台账号”（A12.1）。
+- 实现：c1～c10 做到，详见 [record.md](record.md)。总览、搜索、两栏在 `apps/pure_live/lib/features/settings/settings_page.dart`，目录在 `settings_model.dart`、`settings_section_view.dart`；A02.1 的设置行在 `packages/live_ui/lib/src/widgets/settings_row.dart`（跳转、开关、滑块、计数、选项五种，按下 / 悬停 / 键盘焦点 / 不能用 / 处理中，1.5 倍字体或宽 <360 时值换到标题下，电视样式 `SettingsRowStyle(tv: true)`）。
+- 偏差：当时“弹幕”行打开设置里原有的弹幕页、“本地互动体验”打开“还在开发”的空页——后来 A08.5 把弹幕页换成直播间同一个组件（`features/settings/danmaku_page.dart`），本地互动接到了 `RoutePath.kLocalInteraction`；去掉了 v4 自加的“关于”分区、每个分区的恢复默认和改动数角标、“录制中心”“WebDAV”两个链接；搜索结果的分组标题整行主色。
+- 提交：`6a61ef4f2`（和 A11.2 一起），合并 `5e77cca15`，记录 `3f53f8123`（2026-10-01）。翻译中英各加 77 条（两个任务合计）；`settings` 的直接颜色和图标 209 → 126（后续各任务降到 0）。
+- 测试：`apps/pure_live/test/features/settings/settings_page_test.dart` 当时 25 个（总览、返回链、两栏、一栏 720、跨 840 缩放、搜索、Ctrl+F 和 Esc），`packages/live_ui/test/settings_row_test.dart` 16 个（含四个种子色、深浅两套的对比度）；当时 `apps/pure_live` 290 个、`live_ui` 61 个、`live_store` 36 个通过。
+- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：设置总览通过。两栏、搜索在平板或 Windows 上没有看过。
+- 留下的问题：设置项逐条核对归 J01.2；宽屏两栏等 X01 开工时在 Windows 上看。

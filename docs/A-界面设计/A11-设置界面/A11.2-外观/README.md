@@ -181,3 +181,14 @@ v4 现在的偏差（J01.1 时自行设计）：外观摊在设置的“外观�
 - A09.1：卡片的“显示平台徽章”“卡片布局”“圆角大小”在这里设置，卡片设计改了的话这里的预览跟着改。
 - A17.9：电视只有深色，外观页去掉“主题模式”，保留“纯黑背景”。
 - A01.2：选 C-3、C-4 后，`live_ui` 的颜色角色加品牌蓝（fidelity）和纯黑两套。
+
+## 实现和验证
+
+- 定稿：用户确认第 1 版，T1～T4 按建议 A（C-3 品牌蓝 #2E6FE0 + fidelity 配色、3.x 默认蓝迁移；C-4 纯黑背景默认关；C-7 “文字大小”为主、五个字号留在子页；间距用计数行）。
+- 实现：c1～c15 做到，详见 [record.md](record.md)；同时修了 v3 的页码跳转不生效、字体缩放替换系统字号、默认色块和界面不一致、分页设置按整屏宽度、多画面开关只有 Windows。主要文件：`apps/pure_live/lib/features/settings/appearance_pages.dart`（外观四组的行、间距、文字大小、加载动画页、房间卡片页、导航栏）、`font_manager_page.dart`、`settings_dialogs.dart` 的颜色对话框、`packages/live_ui/lib/src/widgets/color_picker.dart`（补回分页、色阶、调色盘和透明度）。
+- 范围外的改动：主题和文字大小在 `apps/pure_live/lib/app/app.dart` 生成（fidelity、纯黑、`AppTextScaler`）；`live_store` 改了 `themeColorSwitch` 的默认值（`FF2196F3` → `FF2E6FE0`）并加一次性迁移（导入 3.x 数据、恢复 3.x 备份时换成品牌蓝，已导入过的安装只迁移一次）；新设置 `pureBlackTheme`（默认关，进备份）。
+- 偏差：字体卡片的名字用本字体显示只对本次已加载的字体生效（为显示名字去加载每款几十 MB 的字体太占内存）。
+- 提交：`6a61ef4f2`，合并 `5e77cca15`，记录 `3f53f8123`（2026-10-01）。`AppIcons` 加 54 个，颜色进 `LivePureBlack`、`LivePalettes`。
+- 测试：`settings_page_test.dart` 里外观部分 11 个（行序和值、对话框、纯黑变灰、颜色预览和取消恢复、间距、分页设置、字号、加载动画 3 列、房间卡片、导航栏）；`live_ui` 颜色选择器 3 个、主题 3 个；`packages/live_store/test/theme_color_test.dart` 4 个（默认值、迁移规则、3.x 数据和备份、只迁移一次）。字体页没有组件测试。
+- 真机：没有单独记录（S02 的 CHECKLIST 第 5 节第 5 条“下载一个字体设为应用字体，重启”归 S02.4，还没做）。登记表已是“完成”，建议在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 和 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看颜色、纯黑、文字大小。
+- 留下的问题：电视设置的颜色列表还是 3.x 的蓝、电视去掉“主题模式”（A17.9）。

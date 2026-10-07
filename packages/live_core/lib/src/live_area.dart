@@ -133,7 +133,7 @@ final class LiveAnchorItem {
 @immutable
 final class LivePlayQuality {
   /// Creates a quality.
-  const new({required this.quality, this.data, this.id, this.sort = 0, this.isPlaybackUnconfirmed = false});
+  const new({required this.quality, this.data, this.id, this.sort = 0, this.isPlaybackUnconfirmed = false, this.codec});
 
   /// Label shown to the user.
   final String quality;
@@ -153,10 +153,24 @@ final class LivePlayQuality {
   /// the label is shown as unconfirmed rather than renamed.
   final bool isPlaybackUnconfirmed;
 
+  /// The video codec of this quality (`avc`, `hevc`), filled only by
+  /// platforms that know it before any URL is resolved. A hint, not part of
+  /// the identity ([selectionId]); the codec actually played is the line's
+  /// (`LivePlayLine.codec`). "优先 H.264" uses it to pass over an HEVC
+  /// quality when choosing where a room starts (G01.3).
+  final String? codec;
+
   /// A copy with [isPlaybackUnconfirmed] set to [unconfirmed].
   LivePlayQuality withPlaybackUnconfirmed({required bool unconfirmed}) => unconfirmed == isPlaybackUnconfirmed
       ? this
-      : LivePlayQuality(quality: quality, data: data, id: id, sort: sort, isPlaybackUnconfirmed: unconfirmed);
+      : LivePlayQuality(
+          quality: quality,
+          data: data,
+          id: id,
+          sort: sort,
+          isPlaybackUnconfirmed: unconfirmed,
+          codec: codec,
+        );
 
   /// The identity of this option: [id], or the label for adapters without
   /// one. Never derived from [data].

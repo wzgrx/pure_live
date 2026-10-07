@@ -54,6 +54,24 @@ void main() {
     await store.close();
   });
 
+  test('G01.3: with 优先 H.264 a cell skips the HEVC quality named like the preference', () async {
+    final store = await memoryStore();
+    final site = RoomsSite()
+      ..qualities = const [
+        LivePlayQuality(quality: 'FLV', id: 'flv', codec: 'avc'),
+        LivePlayQuality(quality: '原画', id: 'origin', sort: 1, codec: 'hevc'),
+      ];
+    final controller = multiviewController(store, site);
+    await controller.start();
+    await controller.assign(0, pickRoom('1'));
+    expect(controller.cells[0].qualityIndex, 0);
+    await store.settings.set(Settings.preferH264, false);
+    await controller.assign(1, pickRoom('2'));
+    expect(controller.cells[1].qualityIndex, 1);
+    controller.dispose();
+    await store.close();
+  });
+
   test('offline rooms, failed rooms, retry and removing a cell', () async {
     final store = await memoryStore();
     final site = RoomsSite()

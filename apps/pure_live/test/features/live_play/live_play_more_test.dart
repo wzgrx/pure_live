@@ -243,6 +243,144 @@ void main() {
     controller.dispose();
   });
 
+  group('C01.5: a room the app left', () {
+    final notices = <String>[];
+
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      notices.clear();
+      RoomMediaNotification.debugLog = notices.add;
+    });
+
+    tearDown(() => RoomMediaNotification.debugLog = null);
+
+    RoomBackgroundPolicy policyFor(LiveRoomController controller) => RoomBackgroundPolicy(
+      controller: controller,
+      settings: store.settings,
+      hiddenPauseDelay: const Duration(seconds: 1),
+    )..start();
+
+    for (final background in [false, true]) {
+      test('offline when it left, it does not start in the background; it starts when the app is back '
+          '(background play ${background ? 'on' : 'off'})', () async {
+        await store.settings.set(Settings.enableBackgroundPlay, background);
+        final site = FakeSite(liveRoom(status: LiveStatus.offline));
+        final controller = controllerFor(site);
+        final policy = policyFor(controller);
+        await controller.start();
+        await settle();
+        policy.onHidden();
+        expect(controller.stage, RoomStage.offline);
+
+        site.room = liveRoom();
+        await controller.refreshDetail();
+        await settle();
+        expect(engine.opens, isEmpty, reason: 'no sound while nobody looks');
+        expect(controller.stage, RoomStage.offline);
+        expect(controller.room.title, '今晚开黑', reason: 'the fresh detail is kept');
+        expect(controller.room.liveStatus, LiveStatus.live);
+        expect(notices, isEmpty, reason: 'nothing is started from the background');
+
+        policy.onResumed();
+        await until(() => controller.stage == RoomStage.playing);
+        expect(engine.opens, hasLength(1));
+        expect(controller.takeStartWhenBack(), isFalse, reason: 'used once');
+        policy.dispose();
+        controller.dispose();
+      });
+    }
+
+    test('in picture-in-picture an offline room still starts when it comes on air', () async {
+      // Background play on: no pause timer races the test.
+      await store.settings.set(Settings.enableBackgroundPlay, true);
+      final site = FakeSite(liveRoom(status: LiveStatus.offline));
+      final controller = controllerFor(site);
+      final policy = policyFor(controller);
+      await controller.start();
+      await settle();
+      policy.onHidden();
+      expect(policy.mayStartInBackground, isFalse, reason: 'not playing when it left');
+      PictureInPicture.active.value = true;
+      addTearDown(() => PictureInPicture.active.value = false);
+      expect(policy.mayStartInBackground, isTrue);
+
+      site.room = liveRoom();
+      await controller.refreshDetail();
+      await until(() => controller.stage == RoomStage.playing);
+      expect(engine.opens, hasLength(1));
+      policy.dispose();
+      controller.dispose();
+    });
+
+    test('playing when it left with background play on: it reloads, ends and comes back in the background; '
+        'the media notification stays, paused in between', () async {
+      await store.settings.set(Settings.enableBackgroundPlay, true);
+      final site = FakeSite(liveRoom());
+      final controller = controllerFor(site);
+      final policy = policyFor(controller);
+      await controller.start();
+      await settle();
+      expect(notices, ['show true']);
+      policy.onHidden();
+      expect(policy.mayStartInBackground, isTrue);
+
+      // The broadcast ends (a reload finds it offline): the session stops.
+      site.room = liveRoom(status: LiveStatus.offline);
+      await controller.load();
+      await settle();
+      expect(controller.stage, RoomStage.offline);
+      expect(notices, ['show true', 'update false'], reason: 'kept, paused');
+
+      // On air again: it starts by itself (B-24) and shows playing.
+      site.room = liveRoom();
+      await controller.refreshDetail();
+      await until(() => controller.stage == RoomStage.playing);
+      await settle();
+      expect(engine.opens, hasLength(2));
+      expect(notices, ['show true', 'update false', 'update true']);
+
+      policy.dispose();
+      await settle();
+      expect(notices.last, 'hide');
+      controller.dispose();
+    });
+
+    test('background play switched off while away removes the notification', () async {
+      await store.settings.set(Settings.enableBackgroundPlay, true);
+      final controller = controllerFor(FakeSite(liveRoom()));
+      final policy = policyFor(controller);
+      await controller.start();
+      await settle();
+      policy.onHidden();
+      await store.settings.set(Settings.enableBackgroundPlay, false);
+      await settle();
+      expect(notices, ['show true', 'hide']);
+      expect(policy.mayStartInBackground, isFalse);
+      policy
+        ..onResumed()
+        ..dispose();
+      controller.dispose();
+    });
+
+    test('back in the app a room that does not play loses the notification, as before', () async {
+      await store.settings.set(Settings.enableBackgroundPlay, true);
+      final site = FakeSite(liveRoom());
+      final controller = controllerFor(site);
+      final policy = policyFor(controller);
+      await controller.start();
+      await settle();
+      policy.onHidden();
+      site.room = liveRoom(status: LiveStatus.offline);
+      await controller.load();
+      await settle();
+      policy.onResumed();
+      await settle();
+      expect(notices, ['show true', 'update false', 'hide']);
+      policy.dispose();
+      controller.dispose();
+    });
+  });
+
   test('danmaku templates: 3.x presets, a saved template round-trips, a damaged one is refused', () async {
     final (_, comfort) = DanmakuTemplate.presets[1];
     await comfort.apply(store.settings);

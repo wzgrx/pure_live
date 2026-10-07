@@ -12,6 +12,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/desktop/title_bar.dart';
 import 'package:pure_live/app/fonts.dart';
+import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
@@ -180,6 +181,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
       strings: _strings.ui,
       loadingStyle: watchSetting(ref, Settings.loadingStyle),
       loadingColor: parseThemeColorOrNull(watchSetting(ref, Settings.loadingStyleColorSwitch)),
+      imageCacheManager: AppImageCache.manager,
       imageHeaders: networkImageHeaders,
       imageCacheEpoch: imageCacheEpoch.value,
     );

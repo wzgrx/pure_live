@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/misc.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:pure_live/app/image_cache.dart';
+import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/backup/backup_page.dart';
 import 'package:pure_live/features/backup/log_page.dart';
 import 'package:pure_live/features/iptv/iptv_import.dart';
@@ -24,9 +26,10 @@ import 'package:share_plus/share_plus.dart';
 /// this once before the first frame.
 ///
 /// - the room menu's share sheet ([SystemShare.sheet], share_plus);
-/// - the disk part of the image cache ([ImageCacheTools.clearDisk],
-///   flutter_cache_manager's default manager, which cached_network_image
-///   and live_ui's images use);
+/// - the image cache ([AppImageCache], flutter_cache_manager downloading
+///   through the app proxy of [services]; Q02.1), which live_ui's images,
+///   the flying emoticons and [ImageCacheTools.clearDisk] use, and once
+///   emptying the default manager's cache that earlier versions filled;
 /// - opening local files ([AppNavigator.openFile], open_filex on Android);
 /// - opening the recording folder in Android's file manager
 ///   ([RecordFolderOpener.android], android_intent_plus);
@@ -34,9 +37,11 @@ import 'package:share_plus/share_plus.dart';
 ///   mobile_scanner with the bundled ML Kit model, no Play services);
 /// - the in-app browser ([InAppWeb.available], flutter_inappwebview;
 ///   Windows needs the WebView2 runtime).
-void installPluginHooks() {
+void installPluginHooks(AppServices services) {
   SystemShare.sheet = shareText;
-  ImageCacheTools.clearDisk = () => DefaultCacheManager().emptyCache();
+  final images = AppImageCache.install(() => appImageCacheConfig(services.proxy));
+  ImageCacheTools.clearDisk = images.emptyCache;
+  unawaited(AppImageCache.clearLegacyOnce(services.store.meta, () => DefaultCacheManager().emptyCache()));
   AppNavigator.openFile = openLocalFile;
   if (Platform.isAndroid) RecordFolderOpener.android = openAndroidFolder;
   if (Platform.isAndroid || Platform.isIOS) QrScan.camera = MobileQrCamera.new;

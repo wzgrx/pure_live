@@ -303,6 +303,11 @@ abstract final class RoomMediaNotification {
   /// Whether this platform shows it.
   static bool get available => !kIsWeb && Platform.isAndroid;
 
+  /// Sees every [show] (`show true`), [update] (`update false`) and [hide]
+  /// (`hide`), also where [available] is false.
+  @visibleForTesting
+  static void Function(String event)? debugLog;
+
   static Future<_RoomAudioHandler?> _ensure() => _handler ??= () async {
     try {
       return await audio.AudioService.init(
@@ -331,6 +336,7 @@ abstract final class RoomMediaNotification {
     required Future<void> Function() pause,
     required Future<void> Function() stop,
   }) async {
+    debugLog?.call('show $playing');
     if (!available) return;
     _owner = owner;
     final handler = await _ensure();
@@ -348,11 +354,16 @@ abstract final class RoomMediaNotification {
         artUri: cover != null && cover.hasScheme && cover.scheme.startsWith('http') ? cover : null,
       ),
     );
-    update(owner: owner, playing: playing);
+    _publish(owner, playing: playing);
   }
 
   /// Shows [playing] on the notification of [owner].
   static void update({required Object owner, required bool playing}) {
+    debugLog?.call('update $playing');
+    _publish(owner, playing: playing);
+  }
+
+  static void _publish(Object owner, {required bool playing}) {
     if (!available || !identical(_owner, owner)) return;
     unawaited(
       _ensure().then((handler) {
@@ -371,6 +382,7 @@ abstract final class RoomMediaNotification {
 
   /// Removes the notification of [owner].
   static Future<void> hide(Object owner) async {
+    debugLog?.call('hide');
     if (!available || !identical(_owner, owner)) return;
     _owner = null;
     final handler = await _ensure();
@@ -406,9 +418,11 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
 
   Timer? _pauseTimer;
   bool _hidden = false;
+  bool _playingWhenHidden = false;
   bool _pausedByUs = false;
   bool _started = false;
   StreamSubscription<PlaybackState>? _states;
+  StreamSubscription<bool>? _backgroundSetting;
 
   PlaybackSession get _session => controller.session;
 
@@ -417,26 +431,45 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     sleepSessionActive: controller.sleepSessionActive,
   );
 
+  /// Whether the room may start playing by itself now (C01.5;
+  /// [LiveRoomController.mayAutoStart]): on screen or in picture-in-picture,
+  /// or away from the app when it was playing as the app left and may go on
+  /// in the background. A room that was offline, failed or restricted when
+  /// the app left waits until the app is back.
+  bool get mayStartInBackground => !_hidden || PictureInPicture.active.value || (_playingWhenHidden && _continues);
+
+  bool _mayStart() => mayStartInBackground;
+
   /// Starts following the app's lifecycle and the room's playback.
   void start() {
     if (_started) return;
     _started = true;
+    controller.mayAutoStart = _mayStart;
     WidgetsBinding.instance.addObserver(this);
     _states = _session.states.listen((_) => _syncNotification());
     controller.addListener(_syncNotification);
+    _backgroundSetting = settings.watch(Settings.enableBackgroundPlay).skip(1).listen((_) => _syncNotification());
   }
 
   bool _notified = false;
+
+  /// What the notification shows now; repeats are not sent again.
+  bool? _shownPlaying;
 
   void _syncNotification() {
     final status = _session.state.status;
     final active = status == PlaybackStatus.playing || status == PlaybackStatus.buffering;
     PictureInPicture.bindPlayback(owner: this, playing: active, play: _session.resume, pause: _session.pause);
-    final wanted = (active || status == PlaybackStatus.paused) && _continues;
+    final continues = _continues;
+    final wanted = (active || status == PlaybackStatus.paused) && continues;
     if (wanted && !_notified) {
-      // Only shown from the foreground or while already shown.
+      // Only first shown from the foreground: Android 12 and later refuse
+      // to start the media notification's foreground service from the
+      // background, and a room that did not play when the app left does
+      // not start there (C01.5).
       if (_hidden) return;
       _notified = true;
+      _shownPlaying = active;
       unawaited(
         RoomMediaNotification.show(
           owner: this,
@@ -448,11 +481,23 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
         ),
       );
     } else if (wanted) {
-      RoomMediaNotification.update(owner: this, playing: active);
-    } else if (!wanted && _notified && status != PlaybackStatus.opening) {
+      _show(playing: active);
+    } else if (_notified && _hidden && continues) {
+      // Reloading or between broadcasts while it plays in the background:
+      // kept, shown paused, so it is there when the room plays again and the
+      // service is never started anew from the background (C01.5).
+      _show(playing: false);
+    } else if (_notified && status != PlaybackStatus.opening) {
       _notified = false;
+      _shownPlaying = null;
       unawaited(RoomMediaNotification.hide(this));
     }
+  }
+
+  void _show({required bool playing}) {
+    if (_shownPlaying == playing) return;
+    _shownPlaying = playing;
+    RoomMediaNotification.update(owner: this, playing: playing);
   }
 
   @override
@@ -472,6 +517,9 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
   void onHidden() {
     if (_hidden) return;
     _hidden = true;
+    final status = _session.state.status;
+    _playingWhenHidden =
+        status == PlaybackStatus.opening || status == PlaybackStatus.buffering || status == PlaybackStatus.playing;
     _session.setPresentationVisible(visible: false);
     if (_continues) {
       unawaited(BackgroundKeepAlive.set(enabled: true));
@@ -501,6 +549,8 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
       _pausedByUs = false;
       unawaited(_session.resume());
     }
+    // Came on air while the app was away (C01.5).
+    if (controller.takeStartWhenBack()) unawaited(controller.load());
     _syncNotification();
   }
 
@@ -509,6 +559,8 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     _pauseTimer?.cancel();
     if (_started) WidgetsBinding.instance.removeObserver(this);
     controller.removeListener(_syncNotification);
+    if (controller.mayAutoStart == _mayStart) controller.mayAutoStart = null;
+    unawaited(_backgroundSetting?.cancel());
     unawaited(_states?.cancel());
     unawaited(BackgroundKeepAlive.set(enabled: false));
     unawaited(RoomMediaNotification.hide(this));

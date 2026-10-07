@@ -540,8 +540,11 @@ class MultiviewController extends ChangeNotifier {
     unawaited(_save());
   }
 
-  int _normalQuality(MultiviewCell cell) =>
-      defaultQualityIndex(cell.qualities, store.settings.get(Settings.preferResolution));
+  int _normalQuality(MultiviewCell cell) => defaultQualityIndex(
+    cell.qualities,
+    store.settings.get(Settings.preferResolution),
+    preferH264: store.settings.get(Settings.preferH264),
+  );
 
   void _fail(MultiviewCell cell, Object error) {
     cell

@@ -159,14 +159,16 @@ abstract final class InkeApi {
 
   static final RegExp _tabKey = RegExp(r'^[a-zA-Z0-9]{1,64}$');
 
-  /// 3.x's one quality: the Wangsu FLV, an H.264 transcode.
-  static const LivePlayQuality flv = LivePlayQuality(quality: 'FLV', id: 'flv');
+  /// 3.x's one quality: the Wangsu FLV, an H.264 transcode (codec hint
+  /// `avc`, G01.3).
+  static const LivePlayQuality flv = LivePlayQuality(quality: 'FLV', id: 'flv', codec: 'avc');
 
   /// The anchor's original stream, the Zego FLV (HEVC, FLV codec id 12;
   /// REG-INKE-002), when the app gives it (UPGRADES 14-5). Ranked above
   /// [flv]; which of the two comes first is the "优先 H.264" setting's
-  /// choice (`InkeSite`).
-  static const LivePlayQuality original = LivePlayQuality(quality: '原画', id: 'origin', sort: 1);
+  /// choice (`InkeSite`). Its codec hint `hevc` keeps "优先 H.264" from
+  /// starting a room on it by name (G01.3).
+  static const LivePlayQuality original = LivePlayQuality(quality: '原画', id: 'origin', sort: 1, codec: 'hevc');
 
   /// Line id of the Wangsu CDN (`live-pull-ws`).
   static const String lineId = 'ws';

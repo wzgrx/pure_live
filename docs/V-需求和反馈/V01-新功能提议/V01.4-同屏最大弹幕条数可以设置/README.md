@@ -1,3 +1,44 @@
 # V01.4 同屏最大弹幕条数可以设置
 
-v2 待写。
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 类型：功能（新功能提议）
+- 来源：上游 pure_live_TV `9a7bb104`（电视版弹幕设置加了“同屏最大弹幕条数”，0 表示按设备自动：弱机 40、富余 64，滑条 0～120、步长 5），W01.1 列为可借鉴的新功能；旧任务清单 T06e.5
+- 旧编号：T06e.5
+- 相关：决定 D-026、D-018；弹幕设置生效 [D05](../../../D-弹幕/D05-弹幕设置生效/README.md)；飞行弹幕引擎 [D03](../../../D-弹幕/D03-飞行弹幕引擎/README.md)；设置界面 [A08.1](../../../A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页/README.md)、[A08.5](../../../A-界面设计/A08-弹幕界面/A08.5-设置里的弹幕页/README.md)；任务书 [brief.md](brief.md)
+
+## 目标
+
+直播间画面上同时飞的弹幕现在最多 48 条（照 3.x 写死）。热门直播间弹幕多时，有人嫌挡画面想少一点，有人想看满屏；性能弱的机器少一点更流畅。提议：在弹幕设置“流畅度”一组加一项“同屏最大弹幕条数”，默认 48（和 3.x、现在一样，老用户感觉不到变化）。
+
+本文件是**评估初稿**，由执行者补完、出图、发评审页，**由用户决定做不做**（D-026）。
+
+## 3.x 和现状
+
+| 方面 | 3.x（`v3.2.11:lib/`） | 4.x 现在（`apps/pure_live/lib/`） | 上游电视版 | 提议 |
+|---|---|---|---|---|
+| 直播间画面 | `modules/live_play/widgets/video_player/video_controller_panel.dart:801`、`video_controller.dart:968`：`maxVisibleCount: 48` 写死 | `shared/danmaku/danmaku_overlay.dart:158`：`maxVisible = 48` 默认值；`features/live_play/player/player_view.dart:469` 没传，用默认；到上限时新的在队列里等（`_place` `:466`），队列最多 120 条（`maxPending` `:213`）、最多等 5 秒（`maxPendingAge` `:216`） | `lib/player/danmaku_config_builder.dart:65`：用户设了非 0 就用它，0 按设备（弱机 40、富余 64）；设置页滑条 0～120、步长 5（`features/settings/pages/danmaku_settings_section.dart:236-247`） | 新设置，默认 48；滑条 10～120、步长 2（或 5） |
+| 多画面 | `modules/multiview/multiview_page.dart:1309`：48 | `features/multiview/multiview_page.dart:878` 的 `DanmakuOverlay` 没传，48 | — | 是否跟着这个设置走，要用户选（格子小，建议另算：设置值 × 格子面积比例，或保持 48） |
+| 小窗、画中画 | `pipDanmakuMaxVisibleCount`（小窗弹幕设置里有，3.x 也有） | 同：`packages/live_store/lib/src/settings/settings.dart:567`（默认 6、最少 1），`features/live_play/mini/compact_danmaku.dart:195` | — | 不变（已经能设） |
+| 设置界面 | 没有 | 弹幕设置正文 `shared/danmaku/danmaku_settings_content.dart`，“流畅度”一组在 `:236` 起（弹幕帧率等） | 有 | 在“流畅度”一组加一行 |
+
+## 方案（评估初稿）
+
+| 编号 | 改什么 | 目标组 |
+|---|---|---|
+| c1 | 新设置 `danmakuMaxVisibleCount`（整数，默认 48，范围 10～120；新键，3.x 没有，D-018 只加不改） | D05、J01 |
+| c2 | 直播间画面的 `DanmakuOverlay` 传这个值（`player_view.dart:469`）；改了立即生效（已经在飞的不受影响，新进的按新上限） | D05 |
+| c3 | 设置行：弹幕设置“流畅度”组加“同屏最大弹幕条数”，说明“画面上同时显示的弹幕最多几条，少一些更清楚、更省电”；直播间的弹幕设置标签、画面上的弹幕设置面板、设置 → 弹幕三处同一个组件（A08.1 E1 的规则） | A08 |
+| c4 | 多画面：按用户的选择（跟设置 / 保持 48 / 按格子比例） | N01 |
+
+规模：小（一个设置、一行界面、两三个测试）。不需要效果图（照现有设置行的样子），评审页可以只放一张设置截图和说明。
+
+不做：电视版的“0 = 按设备自动”（手机机型差别小，3.x 也没有）；电视版同一组的“高峰排队上限”“排队超时丢弃”（4.x 是常量 120 条、5 秒，没有用户反馈要改）。
+
+## 验证（做了以后怎么验证）
+
+- 自动测试：`apps/pure_live/test/shared/danmaku_overlay_test.dart` 现在没有上限的用例，要加“满 N 条后新的排队、有一条飞出后再进”“上限从设置读、改了以后新进的按新上限”；设置页测试加这一行（三处一样、搜索“同屏”能找到）。
+- 真机：热门直播间把上限改成 10 和 120 各看 30 秒，画面上弹幕数量明显不同；改回 48。
+
+## 留下的问题
+
+- 需要用户决定：做不做；范围和步长；多画面跟不跟（c4）。

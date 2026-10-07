@@ -20,7 +20,8 @@
 - `packages/live_core/lib/src/live_site.dart:223-239` 的 `resolveAppliedPlayQuality({qualities, requested, resolution})`：`appliedId` 在 `qualities` 里 → 那一项；等于 `resolution.appliedQuality` 的编号 → 它；否则 `requested.withPlaybackUnconfirmed(unconfirmed: resolution.qualityUnconfirmed || (appliedId != null && matched == null))`。
 - `packages/live_record/lib/src/resolver.dart:334-350` 的 `RecordStreamResolver.servedQuality({platform, qualities, requested, resolution})`：先调上面的函数；结果未确认、平台确认了编号且编号不在列表里时，返回 `LivePlayQuality(quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id), data: id, id: id)`。
 - 直播间：`apps/pure_live/lib/features/live_play/logic/room_controller.dart:462` 的 `_openQuality(index, epoch, {userChoice})`；`:491` 调 `resolveAppliedPlayQuality`；`:492-494` 找实际档在列表里的位置；`:495-497` 只在 `userChoice && playing != index` 时 `toast(i18n('quality_limited_to', …))`，然后 `_qualities[playing] = applied`；`:546` 的 `_refreshPlan`（E06.2 要改的）。
-- 多画面：`apps/pure_live/lib/features/multiview/logic/multiview_controller.dart:592-593`，同样调 `resolveAppliedPlayQuality`。
+- 多画面：`apps/pure_live/lib/features/multiview/logic/multiview_controller.dart:592-597`，同样调 `resolveAppliedPlayQuality`，只在 `manual` 时提示（`:595-597`），然后 `cell._qualities[playing] = applied`。
+- 文字：`quality_limited_to` = “平台实际返回 {quality}，已按真实画质播放”（`apps/pure_live/assets/translations/zh.json:1344`）；录制的是 `record_quality_limited_to`（`:1423`）。“?”只是菜单里拼出来的，没有翻译键。
 - 菜单：`apps/pure_live/lib/features/live_play/buttons/stream_menu.dart:51`：未确认的名字后面加“?”。
 
 ## 3.x 基线
@@ -64,7 +65,8 @@
 ## 风险和注意
 
 - `_qualities[playing]` 被替换成列表外的一项后，用户再从菜单选别的档要正常（`selectionId` 比较）。
-- 可能冲突的文件：`room_controller.dart`、`multiview_controller.dart`（E06.2 的“实际清晰度”阶段也改 `_refreshPlan` 附近）。
+- 可能冲突的文件：`room_controller.dart`、`multiview_controller.dart`（E06.2 的“实际清晰度”阶段也改 `_refreshPlan` 附近，`room_controller.dart:546`）。E06.2 现在“暂停”，半成品在工作区 `worktree-agent-af6f5e80c4e19804f`（未提交）；开工前 `git -C <那个工作区> diff --stat` 看它有没有改这两个文件，有就先和维护者商量谁先合并。
+- 除了直播间和多画面，调 `resolveAppliedPlayQuality` 的只有录制（`packages/live_record/lib/src/resolver.dart:340`），改函数签名时三处一起改；电视直播间（`apps/pure_live/lib/tv/room/tv_live_play_page.dart:139`）用的也是 `LiveRoomController`，清晰度菜单（`tv_room_overlays.dart:214`）读 `controller.qualities`，改完控制器后电视自动跟着显示“超清”，不用另改，但要在测试或真机上顺带看一眼。
 
 ## 环境和提交
 

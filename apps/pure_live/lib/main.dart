@@ -81,7 +81,7 @@ Future<({AppServices services, AppStrings strings, FontLibrary fonts})> _prepare
 }
 
 Future<({AppServices services, AppStrings strings, FontLibrary fonts})> _finish(AppServices services) async {
-  installPluginHooks();
+  installPluginHooks(services);
   final settings = services.store.settings;
   // Extra windows share the data folder (U.13 c14) but write their own log.
   final launch = services.launch;

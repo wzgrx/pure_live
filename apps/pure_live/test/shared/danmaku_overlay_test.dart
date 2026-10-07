@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
+import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
@@ -21,6 +24,44 @@ const LiveMessage _local = LiveMessage(
   isLocal: true,
   style: LiveMessageStyle(fontSize: 16, baseSpeed: 100, fontWeight: 500, showStroke: true, strokeWidth: 1),
 );
+
+/// Answers every image request with [bytes] and keeps the addresses.
+final class _ImageService extends FileService {
+  new(this.bytes);
+
+  final List<int> bytes;
+  final List<String> urls = [];
+
+  @override
+  Future<FileServiceResponse> get(String url, {Map<String, String>? headers}) async {
+    urls.add(url);
+    return _ImageResponse(bytes);
+  }
+}
+
+final class _ImageResponse implements FileServiceResponse {
+  new(this.bytes);
+
+  final List<int> bytes;
+
+  @override
+  Stream<List<int>> get content => Stream.value(bytes);
+
+  @override
+  int get contentLength => bytes.length;
+
+  @override
+  String? get eTag => null;
+
+  @override
+  String get fileExtension => '.png';
+
+  @override
+  int get statusCode => 200;
+
+  @override
+  DateTime get validTill => DateTime.now().add(const Duration(days: 1));
+}
 
 final class _Layer {
   new(this.tester);
@@ -288,6 +329,30 @@ void main() {
     }
     expect(layer.rect(picture).width, greaterThan(textOnly + 16), reason: 'the picture, 1.3 × the font size');
     await layer.close();
+  });
+
+  testWidgets("Q02.1: a network emoticon loads through the app's image cache (the app proxy)", (tester) async {
+    final previous = AppImageCache.manager;
+    addTearDown(() => AppImageCache.manager = previous);
+    final png = File('assets/emo/images/bilibili/dog.png').readAsBytesSync();
+    final service = _ImageService(png);
+    AppImageCache.manager = CacheManager(
+      Config('test', repo: NonStoringObjectProvider(), fileSystem: MemoryCacheSystem(), fileService: service),
+    );
+    const url = 'https://emotes.example/dog.png';
+    final layer = _Layer(tester);
+    await layer.pump(emotes: EmoteTable.of(const {'[dog]': (asset: '', url: url)}));
+    final picture = _chat('好[dog]');
+    layer.messages.add(picture);
+    for (var i = 0; i < 20 && layer.state.rectOf(picture) == null; i++) {
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+      await tester.pump();
+    }
+    expect(service.urls, [url]);
+    expect(layer.state.rectOf(picture), isNotNull, reason: 'the picture arrived and the danmaku flies');
+    await layer.close();
+    // flutter_cache_manager's clean-up after a lookup, 10 s later.
+    await tester.pump(const Duration(seconds: 11));
   });
 
   testWidgets('c9: the danmaku at a point; held, everything stands and nothing new enters', (tester) async {

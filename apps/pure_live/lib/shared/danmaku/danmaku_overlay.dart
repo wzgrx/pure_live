@@ -3,11 +3,14 @@ import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/images.dart';
 
 /// How the flying danmaku look (3.x's danmaku settings).
 @immutable
@@ -870,6 +873,14 @@ final class _EmoteImages {
 
   static String _keyOf(ChatEmoteSegment emote) => emote.asset.isNotEmpty ? emote.asset : emote.url;
 
+  /// A network emoticon through the app's image cache, so it follows the
+  /// app proxy as the chat list's pictures do (Q02.1); Flutter's own client
+  /// outside the app.
+  static ImageProvider _networkImage(String url) => switch (AppImageCache.manager) {
+    final manager? => CachedNetworkImageProvider(url, cacheManager: manager, headers: networkImageHeaders(url)),
+    null => NetworkImage(url),
+  };
+
   /// The picture of [emote]; null while it loads or when it failed.
   ui.Image? imageOf(ChatSegment emote) => emote is ChatEmoteSegment ? _done[_keyOf(emote)] : null;
 
@@ -889,7 +900,7 @@ final class _EmoteImages {
 
   void _load(String key, ChatEmoteSegment emote, {bool network = false}) {
     final asset = !network && emote.asset.isNotEmpty;
-    final provider = asset ? AssetImage(emote.asset) as ImageProvider : NetworkImage(emote.url);
+    final provider = asset ? AssetImage(emote.asset) as ImageProvider : _networkImage(emote.url);
     final stream = ResizeImage(provider, height: 96).resolve(ImageConfiguration.empty);
     late final ImageStreamListener listener;
     void finish(ui.Image? image) {

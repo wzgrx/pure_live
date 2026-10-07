@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:pure_live/app/downloads.dart';
+import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
@@ -22,14 +22,14 @@ import 'package:pure_live/shared/images.dart';
 /// The cover and avatar cache (3.x `CacheController`): its size on disk and
 /// clearing it.
 ///
-/// The files belong to cached_network_image's cache manager, which keeps
-/// an index next to them; deleting the files alone would leave the index
-/// pointing at nothing, so the disk part is cleared through [clearDisk],
-/// which the app sets to the manager's `emptyCache` (M12.3).
+/// The files belong to the app's cache manager ([AppImageCache]), which
+/// keeps an index next to them; deleting the files alone would leave the
+/// index pointing at nothing, so the disk part is cleared through
+/// [clearDisk], which the app sets to the manager's `emptyCache` (M12.3,
+/// Q02.1).
 abstract final class ImageCacheTools {
-  /// The folder cached_network_image's default manager stores files in.
-  static Future<Directory> Function() folder = () async =>
-      Directory(p.join((await getTemporaryDirectory()).path, 'libCachedImageData'));
+  /// The folder the app's cache manager stores files in.
+  static Future<Directory> Function() folder = () async => appImageCacheFolder(await getTemporaryDirectory());
 
   /// Clears the disk cache; null until the app provides it.
   static Future<void> Function()? clearDisk;

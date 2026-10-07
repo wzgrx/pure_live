@@ -66,13 +66,13 @@
 | `socket_test.dart` 没有 `plainUserAgent` 的用例（Q03.1 的旧说明以为有） | `packages/live_net/test/socket_test.dart:141-146` | 清空 UA 的行为没有测试 | Q03.1 补用例（本机回环服务器检查收到的 `user-agent`） |
 | 原生通道的 `open` 不是流式，最多 8 MiB | `native_http.dart:83-92`、`AppChannelsPlugin.kt:197` | 只给 Twitch GraphQL、Kick 接口用，够用 | 不做 |
 | 原生通道、Twitch 令牌只在 Android；Windows 上 Kick 没有登记 | `platforms.dart:172`；`TwitchWebViewHttp.isAvailable` | Windows 看不了 Kick | X01.2（WinHTTP） |
-| F-AND-09（原生通道）、F-NET-04（Twitch 令牌）没有真机验证 | [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 7 条 | — | S02.4 |
+| F-AND-09（原生通道）、F-NET-04（Twitch 令牌）没有真机验证 | [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 7 条 | — | S02.4 |
 
 ## 相关决定和规范
 
 - D-017：WebSocket 测试用假连接器和本机回声服务器，不访问真实平台。
 - D-019：Q03.1 在 K90 上逐平台测。
-- [specs/UPGRADES.md](../../../specs/UPGRADES.md) 附录 B-2（握手 UA，Q03.1）、B-6（SOOP 弹幕跟随代理）、X-1（Kick 和原生通道）。
+- [specs/UPGRADES.md](../../specs/UPGRADES.md) 附录 B-2（握手 UA，Q03.1）、B-6（SOOP 弹幕跟随代理）、X-1（Kick 和原生通道）。
 
 ## 测试和验证
 

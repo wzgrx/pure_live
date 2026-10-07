@@ -76,14 +76,14 @@
 | 两个策略都不分平台：`routeFor(site, url)` 的 `site` 没用上，海外平台和国内平台同一条路线 | `platforms.dart:21-25`、`:43-47` | 开应用代理时国内平台也绕代理（照 3.x） | 照 3.x；“按平台代理”是新功能，先进 V01 提议 |
 | 两张镜像表不同（`GitHubMirror.rawPrefixes` 14 个、`downloadMirrorPrefixes` 17 个），都是写死的第三方镜像，会失效；没有定期检查 | `race.dart:107-122`、`update_feed.dart:273-291` | 某些镜像挂了时检查更新变慢（竞速会跳过）、下载要多试几个 | 照 3.x 两张表；Z 组定期维护时检查一次（PROCESS 第 12 节“每月”） |
 | 不读 Android 系统设置里的 HTTP 代理 | `dart:io` 的 `HttpClient` 默认 | 用户只在系统 Wi-Fi 设置里配了代理时应用不走 | 照 3.x；VPN 模式的工具透明生效；不做 |
-| F-NET-02 播放代理：媒体请求真的走代理没有真机验证 | [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 6 条 | — | S02.4（原 Q04.1 的验证并入） |
+| F-NET-02 播放代理：媒体请求真的走代理没有真机验证 | [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 6 条 | — | S02.4（原 Q04.1 的验证并入） |
 
 ## 相关决定和规范
 
 - D-018：`enableProxy`、`proxyHost`、`proxyPort`、`enableAppProxy`、`appProxyHost`、`appProxyPort`、`useGitHubOriginForUpdates` 键名和含义不变。
 - D-029：Q04.1 不做，缺的播放代理由 O03.2 做完。
 - D-015：`assets/version.json`、`assets/releases.json` 留在 master，镜像读的就是它们。
-- [specs/ENGINEERING.md](../../../specs/ENGINEERING.md) 第 4 节：`live_net` 不依赖设置，策略由应用注入。
+- [specs/ENGINEERING.md](../../specs/ENGINEERING.md) 第 4 节：`live_net` 不依赖设置，策略由应用注入。
 
 ## 测试和验证
 

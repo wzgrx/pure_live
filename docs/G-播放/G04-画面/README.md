@@ -79,12 +79,12 @@
 - D-003：G04.1 的 X1 按建议 A。
 - D-018：`portraitRoomOverrides`、`rememberPortraitRoomOverride`、`videoFitIndex` 键名和含义不变。
 - D-023：横屏全屏按传感器翻转（方向在 O05.2，本子分类只管画面形状的判断）。
-- [specs/UI.md](../../../specs/UI.md) 第 9.3 节：视频不圆角不裁剪、画面尺寸动画只做合成层变换。
+- [specs/UI.md](../../specs/UI.md) 第 9.3 节：视频不圆角不裁剪、画面尺寸动画只做合成层变换。
 
 ## 测试和验证
 
 - 自动测试：`cd packages/live_player && flutter test`（声明和解码的优先级、旋转）；`cd packages/live_core && dart test`（抖音样本）；`cd apps/pure_live && flutter test test/features/live_play/room_extras_test.dart`（布局）。缺的：TikTok 等其他平台没有声明（功能本身没做）。
-- 真机：[S02 的真机清单](../../../S-质量和验证/S02-真机验证/CHECKLIST.md)第 1 节第 8 条（进抖音竖屏主播，起播时不跳；横屏主播、游戏直播仍是横屏）、第 15 条（改画面比例立即生效）。
+- 真机：[S02 的真机清单](../../S-质量和验证/S02-真机验证/CHECKLIST.md)第 1 节第 8 条（进抖音竖屏主播，起播时不跳；横屏主播、游戏直播仍是横屏）、第 15 条（改画面比例立即生效）。
 
 ## 路线
 

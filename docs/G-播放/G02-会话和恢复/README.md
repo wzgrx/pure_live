@@ -59,7 +59,7 @@
 
 - `git show v3.2.11:lib/player/core/player_manager.dart`（5028 行，其中约 1800 行是会话和恢复）：时限 `:297-306`（打开 18 秒等）；缓冲看门狗 `_scheduleBufferingStallRecovery`（`:2610-2638`，“Playing/paused notifications do not prove media arrived”，一次缓冲一个期限）；画面停住 `video_frame_stall_timeout`（`:2538`）；恢复入口和错误代码到恢复类型的对照（`:2595-2596`、`:3847-3848`）；打开成功后按适配器真实状态补发（`:1920-1938`）；Windows 虎牙热备切换（`:216-226`、`:4170-4230`、`:4582-4597`，4.x 删除）。
 - `lib/player/global_player_service.dart:16`：全局单例（4.x 改成应用持有、每个播放器一个会话）。
-- 必须保留的行为（[specs/UI.md](../../../specs/UI.md) 附录 A 和 G02.1 记录“保留的 v3 行为”）：用户暂停不被自动继续；直播的意外暂停先让引擎播放再算失败；刷新第一次同一线路、第二次换线；不切断的租期不替换正在播的连接。
+- 必须保留的行为（[specs/UI.md](../../specs/UI.md) 附录 A 和 G02.1 记录“保留的 v3 行为”）：用户暂停不被自动继续；直播的意外暂停先让引擎播放再算失败；刷新第一次同一线路、第二次换线；不切断的租期不替换正在播的连接。
 
 ## 已知问题和限制
 
@@ -68,7 +68,7 @@
 | **缓冲标志卡住时会被当成卡住去重连**：会话只信引擎的 `buffering`，`_onPlaying(true)` 在 `_buffering` 为真时也只发缓冲（`session.dart:616-618`），`_onFrame` 不对账（`:679-682`），直播的位置事件被丢掉（`:572-573`），缓冲看门狗到点只看 `_buffering`（`:691`）。标志来自 media_kit：`START_FILE` 置真（`real.dart:1384`），之后要等 `core-idle` 或 `paused-for-cache` 的**变化**通知才清掉；mpv 只在属性值变化时通知，打开时第一个 `core-idle=1` 又被 `isBufferingStateChangeAllowed` 吞掉（`:240`、`:1407`），两者顺序不对时最后的值可能停在真。`MpvEngine.open` 末尾还会把这个值补发一次（`mpv_engine.dart:190`） | `packages/live_player/lib/src/session.dart:572-573`、`:609-628`、`:679-701`；`third_party/media_kit/lib/src/player/native/player/real.dart:1374-1427` | 画面在动却一直转圈，12 秒后刷新地址重开（画面闪一下），偶尔出现“正在重连（第 1 次）” | G02.2（上游 media_core `44710e1`、`2edc721` 修了同样的问题） |
 | Android 没有画面停住检测：只有 Windows 的引擎报画面帧（`mpv_engine.dart:100`），Android 上画面冻住、声音还在时不会被发现 | `mpv_engine.dart:99-100`、`session.dart:730-760` | 偶发的冻画面只能用户手动刷新 | G02.2 c5 评估（读 `estimated-frame-number` 之类的属性，每 2 秒最多一次） |
 | 恢复原因不进日志：`PlaybackState` 只有次数，错误只在 `status == error` 时保留；应用不记录恢复 | `state.dart:119`、`:187-188`；`room_controller.dart` | 真机上数不出“因为什么重连了几次”，G03.1 的测量也缺这个数 | G02.2 c4 |
-| 断网重连、纯音频切换、Windows 画面停住重建没有真机记录（S02.3 记“没测”） | [S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md) | G02.1 登记“完成”但关键恢复路径没有 K90 结果 | CHECKLIST 第 1 节第 3、9 条，建议并入 S02.6；Windows 在 X01 |
+| 断网重连、纯音频切换、Windows 画面停住重建没有真机记录（S02.3 记“没测”） | [S02.3 记录](../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md) | G02.1 登记“完成”但关键恢复路径没有 K90 结果 | CHECKLIST 第 1 节第 3、9 条，建议并入 S02.6；Windows 在 X01 |
 | 长时间暂停后继续：输入可能已经不可用（签名过期），`resume` 走 `retry` 重开，界面是“正在连接直播流…”而不是马上继续 | `session.dart:280-291` | 暂停很久再继续要等一次打开 | A07.10 已写进“留下的问题”，按现状接受 |
 | 代码注释里的旧编号（M7.2、B02、F.1b） | `session.dart`、`state.dart` | 找文档先查 MAPPING | Z 组统一替换 |
 
@@ -78,12 +78,12 @@
 - D-012（暂停后单击只切控制层）：会话的 `pause` 是用户暂停，不被任何看门狗恢复。
 - D-017：会话测试用假引擎和 `fake_async`，定时器至少 1 秒。
 - D-027：上游对照发现的问题开到目标组（G02.2 来自 W01.1）。
-- [specs/ENGINEERING.md](../../../specs/ENGINEERING.md) 第 4 节：会话是纯 Dart 逻辑，不引 Flutter（`session.dart`、`state.dart` 只引 `clock`、`meta`、`live_core`、`live_media`）。
+- [specs/ENGINEERING.md](../../specs/ENGINEERING.md) 第 4 节：会话是纯 Dart 逻辑，不引 Flutter（`session.dart`、`state.dart` 只引 `clock`、`meta`、`live_core`、`live_media`）。
 
 ## 测试和验证
 
 - 自动测试：`cd packages/live_player && flutter test test/session_test.dart`（21 个，假引擎，不需要 libmpv）；应用侧 `cd apps/pure_live && flutter test test/features/live_play/`。缺的：缓冲标志卡住、Android 画面停住（G02.2 补）；没有用真 mpv 的会话测试。
-- 真机：[S02 的真机清单](../../../S-质量和验证/S02-真机验证/CHECKLIST.md)第 1 节第 2 条（切清晰度和线路不退出，S02.2、S02.3 看过）、第 3 条（关 Wi-Fi 10 秒再开，显示正在重连、恢复后继续，没有结果）、第 9 条（纯音频）。A07.10 的 [verify.md](../../../A-界面设计/A07-直播间界面/A07.10-暂停状态/verify.md) 第 13～16 步也看会话的重连提示。
+- 真机：[S02 的真机清单](../../S-质量和验证/S02-真机验证/CHECKLIST.md)第 1 节第 2 条（切清晰度和线路不退出，S02.2、S02.3 看过）、第 3 条（关 Wi-Fi 10 秒再开，显示正在重连、恢复后继续，没有结果）、第 9 条（纯音频）。A07.10 的 [verify.md](../../A-界面设计/A07-直播间界面/A07.10-暂停状态/verify.md) 第 13～16 步也看会话的重连提示。
 
 ## 路线
 

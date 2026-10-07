@@ -83,12 +83,12 @@
 - D-003：R02.1 的 I1～I3 按建议 A。
 - D-016、D-024：清理翻译键前先列运行时拼出来的键（R02.2 恢复了被误删的三条档位说明）。
 - D-018：`refreshRateMode` 是 3.x 的含义（迁移自 `enableHighRefreshRate`）；`matchVideoFrameRate` 新加。
-- [specs/UI.md](../../../specs/UI.md) 第 9.1 节（刷新率，见上面的不一致）；[V03.2 调研](../../../V-需求和反馈/V03-审查和调研/V03.2-流畅度、刷新率、分辨率调研/README.md) 第 1 节。
+- [specs/UI.md](../../specs/UI.md) 第 9.1 节（刷新率，见上面的不一致）；[V03.2 调研](../../V-需求和反馈/V03-审查和调研/V03.2-流畅度、刷新率、分辨率调研/README.md) 第 1 节。
 
 ## 测试和验证
 
 - 自动测试：`cd apps/pure_live && flutter test test/features/live_play/room_refresh_rate_test.dart test/platform/display_mode_test.dart test/features/settings/refresh_rate_limited_test.dart test/features/settings/match_frame_rate_test.dart`；`cd packages/live_ui && flutter test test/widgets_test.dart`。Kotlin 没有单元测试，靠真机。
-- 真机：[R02.2 的 verify.md](R02.2-刷新率策略修正/verify.md)（开发者选项“显示刷新率”、`dumpsys SurfaceFlinger`、`dumpsys display`）；[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 18 条。
+- 真机：[R02.2 的 verify.md](R02.2-刷新率策略修正/verify.md)（开发者选项“显示刷新率”、`dumpsys SurfaceFlinger`、`dumpsys display`）；[CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 18 条。
 
 ## 路线
 
@@ -110,6 +110,6 @@
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | R02.1 | 刷新率和帧率匹配 | 性能 | 完成 | 2026-10-02 | b8462638a | [设计或说明](R02.1-刷新率和帧率匹配/README.md)、[记录](R02.1-刷新率和帧率匹配/record.md)、[评审页](R02.1-刷新率和帧率匹配/page/01-说明.jpg) |
-| R02.2 | 刷新率策略修正：播放中只用帧率声明、没有整数倍取最高、系统限速提示 | 性能 | 待真机 | 2026-10-02 | 584da6662 | [任务书](R02.2-刷新率策略修正/brief.md)、[记录](R02.2-刷新率策略修正/record.md) |
+| R02.2 | 刷新率策略修正：播放中只用帧率声明、没有整数倍取最高、系统限速提示 | 性能 | 待真机 | 2026-10-02 | 584da6662 | [设计或说明](R02.2-刷新率策略修正/README.md)、[任务书](R02.2-刷新率策略修正/brief.md)、[记录](R02.2-刷新率策略修正/record.md)、[真机验证](R02.2-刷新率策略修正/verify.md) |
 
 <!-- docs:生成结束 -->

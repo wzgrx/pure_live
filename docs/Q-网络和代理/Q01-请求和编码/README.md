@@ -88,13 +88,13 @@
 
 - D-017：网络测试在本机回环上起真实服务，不访问真实平台；定时器至少 1 秒。
 - D-018：网络设置（代理、镜像）的 3.x 键名不变（见 Q02）。
-- [specs/ENGINEERING.md](../../../specs/ENGINEERING.md) 第 4 节：`live_net` 只依赖 `meta` 和 `dart:io`（`tools/gate/check_deps.py`）；样本隐私（`fixtures/README.md` 的脱敏规则，门禁查）。
-- [specs/UPGRADES.md](../../../specs/UPGRADES.md) 附录 B-3（哔哩哔哩 protover 3，用 Q01.2 的解码器，完成）。
+- [specs/ENGINEERING.md](../../specs/ENGINEERING.md) 第 4 节：`live_net` 只依赖 `meta` 和 `dart:io`（`tools/gate/check_deps.py`）；样本隐私（`fixtures/README.md` 的脱敏规则，门禁查）。
+- [specs/UPGRADES.md](../../specs/UPGRADES.md) 附录 B-3（哔哩哔哩 protover 3，用 Q01.2 的解码器，完成）。
 
 ## 测试和验证
 
 - 自动测试：`cd packages/live_net && dart test`（84 个；Brotli 单独约 7 秒，坏数据各在独立 isolate 里跑、带 2 分钟总超时）。重新生成 Brotli 向量见 [Q01.2 记录](Q01.2-Brotli解码/record.md)“测试”。
-- 真机：没有单独的清单条目；网络层随 [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1、4 节的各平台请求一起验证（S02.2、S02.3 看过国内平台）；哔哩哔哩弹幕 protover 3 随第 2 节第 1 条。
+- 真机：没有单独的清单条目；网络层随 [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1、4 节的各平台请求一起验证（S02.2、S02.3 看过国内平台）；哔哩哔哩弹幕 protover 3 随第 2 节第 1 条。
 
 ## 路线
 
@@ -114,7 +114,7 @@
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| Q01.1 | 网络：HTTP 客户端、拦截器、请求头策略、代理路由、WebSocket | 功能 | 完成 | 2026-09-28 | 9b70c640d | [记录](Q01.1-网络/record.md) |
-| Q01.2 | Brotli 解码（猫耳弹幕、哔哩哔哩 protover 3） | 功能 | 完成 | 2026-09-29 | a2b5c0610 | [记录](Q01.2-Brotli解码/record.md) |
+| Q01.1 | 网络：HTTP 客户端、拦截器、请求头策略、代理路由、WebSocket | 功能 | 完成 | 2026-09-28 | 9b70c640d | [设计或说明](Q01.1-网络/README.md)、[记录](Q01.1-网络/record.md) |
+| Q01.2 | Brotli 解码（猫耳弹幕、哔哩哔哩 protover 3） | 功能 | 完成 | 2026-09-29 | a2b5c0610 | [设计或说明](Q01.2-Brotli解码/README.md)、[记录](Q01.2-Brotli解码/record.md) |
 
 <!-- docs:生成结束 -->

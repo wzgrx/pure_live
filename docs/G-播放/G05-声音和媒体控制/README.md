@@ -61,19 +61,19 @@
 | `defaultMobileVolume` 在直播间不起作用：手机上播放器音量固定 1（照 3.x 适配器），这个设置只被多画面读 | `room_controller.dart:555`、`multiview_controller.dart:778` | 设置页的“手机默认音量”只影响多画面，用户可能以为影响直播间 | 照 3.x（3.x 也是这样）；设置说明文字是否要写清，交给 A11.3 |
 | 纯音频时 mpv 仍在解码视频（Android 只关输出，`setVideoOutputEnabled(false)`） | `mpv_engine.dart:232-233` | 纯音频省电不如 `vid=no`；但切回视频不用重开、更快（3.x 的取舍） | 照 3.x；R05.1 测耗电时一起看纯音频 |
 | 媒体通知只在后台播放或助眠时显示，前台播放时耳机按键依赖 Flutter 的媒体键（C02.1 c6） | `background_playback.dart:393` 起 | 前台时蓝牙耳机按键能不能暂停要看系统把按键给谁 | 没有 K90 记录；建议并入 S02.6 |
-| 纯音频切换、媒体通知暂停和停止的真机结果：S02.2 看过通知内容和按钮（通过），纯音频（CHECKLIST 第 1 节第 9 条）没结果 | [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 9、10 条 | — | 并入 S02.6 |
+| 纯音频切换、媒体通知暂停和停止的真机结果：S02.2 看过通知内容和按钮（通过），纯音频（CHECKLIST 第 1 节第 9 条）没结果 | [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 9、10 条 | — | 并入 S02.6 |
 
 ## 相关决定和规范
 
 - D-001：音量键名、后台规则、纯音频行为照 3.x。
 - D-012：暂停状态的界面（纯音频已暂停）。
 - D-018：`room_vol_*`、`globalVolumeMute`、`defaultMobileVolume`、`defaultDesktopVolume`、`enableBackgroundPlay` 键名和含义不变。
-- [specs/UI.md](../../../specs/UI.md) 附录 A（返回链、手势）；U.14（媒体通知中文按钮、单色图标，见 A14）。
+- [specs/UI.md](../../specs/UI.md) 附录 A（返回链、手势）；U.14（媒体通知中文按钮、单色图标，见 A14）。
 
 ## 测试和验证
 
 - 自动测试：`cd packages/live_player && flutter test test/options_test.dart test/session_test.dart`；`cd apps/pure_live && flutter test test/features/live_play/`。缺的：音频焦点（功能没做）；媒体会话只测了按钮列表，没测处理器的回调（要 audio_service 的平台通道）。
-- 真机：[S02 的真机清单](../../../S-质量和验证/S02-真机验证/CHECKLIST.md)第 1 节第 9 条（纯音频、定时关闭、自动助眠）、第 10 条（后台播放和通知，S02.2 通过）、第 15 条（房间音量记住）；音频焦点做了以后加一条“播放中来电、拔耳机”。
+- 真机：[S02 的真机清单](../../S-质量和验证/S02-真机验证/CHECKLIST.md)第 1 节第 9 条（纯音频、定时关闭、自动助眠）、第 10 条（后台播放和通知，S02.2 通过）、第 15 条（房间音量记住）；音频焦点做了以后加一条“播放中来电、拔耳机”。
 
 ## 路线
 

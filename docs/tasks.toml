@@ -2613,6 +2613,15 @@ done = 3
 note = "上游 pure_live 2b9ffc7a3 修了同一个问题；另修了 K90 上手动停止也拿不到 MP4（停止时截断的最后一个 packet 被当成输入损坏）和开播检测在下播后排不上"
 from = "上游 pure_live 2b9ffc7a3（W01.1 对照）；正常下播不合并是 2026-10-07 写任务书时读代码发现的（c3b）"
 
+
+[[task]]
+id = "H01.6"
+title = "YY 等 HLS 直播每两秒报一次音频“Packet corrupt”，录制被当成损坏、一直拿不到 MP4"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 1
+from = "S02.5 K90 复测 H01.5（2026-10-08）"
 [[task]]
 id = "H02.1"
 title = "录制中心与录制设置（含录制接入）"

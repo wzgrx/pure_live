@@ -68,7 +68,6 @@ WebDavClient(LiveHttp, WebDavConfig)（web_dav_client.dart:76）
 | 只支持 MD5 / MD5-sess 的 Digest，不支持 SHA-256、`auth-int` | `web_dav_auth.dart:69` | 只给这两种的服务器报“账号或密码错误”（3.x 也不支持） | 不做 |
 | 每个客户端第一次请求多一次 401 往返 | `web_dav_client.dart:157` | 打开页面、换服务器、测试连接各多一次请求 | 照 3.x（J04.1 选择 1 的 A），不做 |
 | 走 http 代理（不是隧道）访问 http 地址时，请求行是完整地址，Digest 的 `uri` 仍写路径 | `web_dav_client.dart:104` | 常见服务器接受；个别严格检查的会拒绝 | 不做（J04.1 记录“合并时注意”） |
-| 帮助页没有 3.x 的截图 | `web_dav_help.dart` | 只有文字步骤 | 不做（J03.1） |
 
 ## 相关决定和规范
 

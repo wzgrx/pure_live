@@ -34,7 +34,7 @@
   - c3 搜索记录进完整备份（I05.1 留下的问题，理由：同属使用记录、体积小、不含账号）。
   - c4 WebDAV 页：服务器列表、目录浏览和面包屑、上传完整 / 仅关注、恢复、删除、帮助（3.x 的坚果云教程文字）、测试连接、显示密码；客户端 `WebDavClient`（PROPFIND、GET、PUT、DELETE，多状态回答的解析不依赖命名空间前缀）。
   - c5 修了 11 个 3.x 问题（record“v3 问题及处理”）。
-- 偏差：Digest 认证、系统文件选择器、扫码、WebDAV 帮助截图、日志管理当时没做——Digest 由 J04.1（`c168fdb99`）、选择器和扫码由 O03.1、日志页由 I01.3 做完；帮助截图没有补（帮助页只有文字）。之后 A12.4、A12.5（`965d41956`）按确认的设计重做了两个页面，逻辑没变；E06.1（`f8acb92b6`）让完整备份带上网络电视列表和多画面上次的画面。
+- 偏差：Digest 认证、系统文件选择器、扫码、WebDAV 帮助截图、日志管理当时没做——Digest 由 J04.1（`c168fdb99`）、选择器和扫码由 O03.1、日志页和帮助页的 7 张截图（`apps/pure_live/assets/webdav/`，`web_dav_help.dart:165` 起）由 I01.3（`4f55a8da2`）做完。之后 A12.4、A12.5（`965d41956`）按确认的设计重做了两个页面，逻辑没变；E06.1（`f8acb92b6`）让完整备份带上网络电视列表和多画面上次的画面。
 - 测试：当时 10 个（`backup_page_test.dart` 7、`web_dav_page_test.dart` 3）；现在 `test/features/backup/backup_page_test.dart` 18 个、`test/features/web_dav/web_dav_page_test.dart` 10 个、`test/shared/backup_extras_test.dart` 4 个。
 
 ## 验证
@@ -46,5 +46,4 @@
 
 - 真机：见上，S02.4 做完后把结果补进本节。
 - 同步到电视没对真的电视版试过 → 有电视盒子时顺带（J03 子分类页“已知问题”）。
-- WebDAV 帮助页没有截图（3.x `assets/webdav/*.png` 7 张）→ 不做，除非用户反馈看不懂。
 - “备份包含账号”（Cookie、WebDAV 密码）→ 不做：3.x 本地和 WebDAV 备份都不含账号，加了要先问用户。

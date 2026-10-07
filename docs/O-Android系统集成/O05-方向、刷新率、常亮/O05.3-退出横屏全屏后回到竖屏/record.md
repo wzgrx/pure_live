@@ -39,7 +39,7 @@
 - `live_play_layouts_test.dart` 新增 3 个（O05.3 组）：自动旋转关着时全屏按钮进、返回出，双击进、双击出，调用顺序都是 `[landscapeLeft, landscapeRight]` → `sensorLandscape` → `[portraitUp]` → 3 秒后 `[]`；开着时直接 `[]`；全屏里关掉直播间也先竖屏再放开。原有的“横屏全屏”胶囊测试不变、通过。
 - `multiview_page_test.dart` 新增 1 个：多画面全屏退出同样的顺序。
 - 先写测试、看到失败（直播间 2 个、多画面 1 个是 `[]` 而不是 `[portraitUp]`；单元测试是没有这些方法），再改代码。
-- 通过范围：见提交前的检查（`test/features/live_play`、`test/features/multiview`、`test/platform`，以及最后整个 `apps/pure_live` 的 `flutter test`）。
+- 通过范围：`test/features/live_play`、`test/features/multiview`、`test/platform` 311 个；连同 A08.9 一起跑的整个 `apps/pure_live` 的 `flutter test` 876 个全部通过。
 
 ## 真机上要看的
 

@@ -102,7 +102,7 @@ SecretStore（J02）── cookieFor / cookieChanges ──▶ StoreCookieVault�
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| K02.1 | Cookie 和密码加密存储在真机上验证 | 验证 | 未开始 | — | — | [设计或说明](K02.1-Cookie和密码加密存储验证/README.md) |
+| K02.1 | Cookie 和密码加密存储在真机上验证 | 验证 | 未开始 | — | — | [设计或说明](K02.1-Cookie和密码加密存储验证/README.md)、[任务书](K02.1-Cookie和密码加密存储验证/brief.md) |
 
 ## 还没完成的
 

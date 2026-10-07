@@ -112,16 +112,16 @@
 | E03.3 | Picarto | 平台 | 完成 | 2026-09-28 | b8bcd1eb3 | [设计或说明](E03.3-Picarto/README.md)、[记录](E03.3-Picarto/record.md) |
 | E03.4 | TwitCasting | 平台 | 完成 | 2026-09-28 | 2badf4756 | [设计或说明](E03.4-TwitCasting/README.md)、[记录](E03.4-TwitCasting/record.md) |
 | E03.5 | niconico | 平台 | 完成 | 2026-09-28 | 5442c7303 | [设计或说明](E03.5-niconico/README.md)、[记录](E03.5-niconico/record.md) |
-| E03.6 | SHOWROOM | 平台 | 完成 | 2026-09-28 | eaca04cc0 | [记录](E03.6-SHOWROOM/record.md) |
-| E03.7 | CHZZK | 平台 | 完成 | 2026-09-28 | be431b915 | [记录](E03.7-CHZZK/record.md) |
-| E03.8 | LiveMe | 平台 | 完成 | 2026-09-28 | 6fe261aa8 | [记录](E03.8-LiveMe/record.md) |
-| E03.9 | TikTok | 平台 | 完成 | 2026-09-28 | 1ea332247 | [记录](E03.9-TikTok/record.md) |
-| E03.10 | YouTube | 平台 | 完成 | 2026-09-28 | af6e14961 | [记录](E03.10-YouTube/record.md) |
-| E03.11 | BIGO LIVE | 平台 | 完成 | 2026-09-28 | b336f2d27 | [记录](E03.11-BIGOLIVE/record.md) |
-| E03.12 | PandaTV | 平台 | 完成 | 2026-09-28 | c33ee7611 | [记录](E03.12-PandaTV/record.md) |
-| E03.13 | FC2 LIVE | 平台 | 完成 | 2026-09-28 | eb7cd2497 | [记录](E03.13-FC2LIVE/record.md) |
-| E03.14 | Steam 直播 | 平台 | 完成 | 2026-09-28 | 9965e3c7f | [记录](E03.14-Steam直播/record.md) |
-| E03.15 | 17LIVE | 平台 | 完成 | 2026-09-28 | 0141660c6 | [记录](E03.15-17LIVE/record.md) |
-| E03.16 | Kick（恢复，仅 Android） | 平台 | 完成 | 2026-10-01 | 6c68f0010 | [记录](E03.16-Kick/record.md) |
+| E03.6 | SHOWROOM | 平台 | 完成 | 2026-09-28 | eaca04cc0 | [设计或说明](E03.6-SHOWROOM/README.md)、[记录](E03.6-SHOWROOM/record.md) |
+| E03.7 | CHZZK | 平台 | 完成 | 2026-09-28 | be431b915 | [设计或说明](E03.7-CHZZK/README.md)、[记录](E03.7-CHZZK/record.md) |
+| E03.8 | LiveMe | 平台 | 完成 | 2026-09-28 | 6fe261aa8 | [设计或说明](E03.8-LiveMe/README.md)、[记录](E03.8-LiveMe/record.md) |
+| E03.9 | TikTok | 平台 | 完成 | 2026-09-28 | 1ea332247 | [设计或说明](E03.9-TikTok/README.md)、[记录](E03.9-TikTok/record.md) |
+| E03.10 | YouTube | 平台 | 完成 | 2026-09-28 | af6e14961 | [设计或说明](E03.10-YouTube/README.md)、[记录](E03.10-YouTube/record.md) |
+| E03.11 | BIGO LIVE | 平台 | 完成 | 2026-09-28 | b336f2d27 | [设计或说明](E03.11-BIGOLIVE/README.md)、[记录](E03.11-BIGOLIVE/record.md) |
+| E03.12 | PandaTV | 平台 | 完成 | 2026-09-28 | c33ee7611 | [设计或说明](E03.12-PandaTV/README.md)、[记录](E03.12-PandaTV/record.md) |
+| E03.13 | FC2 LIVE | 平台 | 完成 | 2026-09-28 | eb7cd2497 | [设计或说明](E03.13-FC2LIVE/README.md)、[记录](E03.13-FC2LIVE/record.md) |
+| E03.14 | Steam 直播 | 平台 | 完成 | 2026-09-28 | 9965e3c7f | [设计或说明](E03.14-Steam直播/README.md)、[记录](E03.14-Steam直播/record.md) |
+| E03.15 | 17LIVE | 平台 | 完成 | 2026-09-28 | 0141660c6 | [设计或说明](E03.15-17LIVE/README.md)、[记录](E03.15-17LIVE/record.md) |
+| E03.16 | Kick（恢复，仅 Android） | 平台 | 完成 | 2026-10-01 | 6c68f0010 | [设计或说明](E03.16-Kick/README.md)、[记录](E03.16-Kick/record.md) |
 
 <!-- docs:生成结束 -->

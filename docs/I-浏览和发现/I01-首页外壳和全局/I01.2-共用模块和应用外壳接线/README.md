@@ -43,6 +43,6 @@
 
 ## 留下的问题
 
-- record.md“留给后续”现在的去向：`share_plus` 和 `flutter_cache_manager` → O03.1（已加，`apps/pure_live/pubspec.yaml:41`、`:74`）；卡片带开播时间和简介 → A09.1 和 I02.1 之后（`roomClockProvider`、卡片对话框里的简介）；工具箱、账号页各自 `i18n('site_$id')` 取平台名 → 现在已没有这种写法；直播间“看其他”用共用卡片 → A07.13（已合并，待真机）；热门的 `*_directory_scope` 说明改写 → 现在代码里已没有 `*_directory_scope` 这类键（热门页改成优先实时在线后不再需要，见 [I02](../../I02-热门/README.md)）。
+- record.md“留给后续”现在的去向：`share_plus` 和 `flutter_cache_manager` → O03.1（已加，`apps/pure_live/pubspec.yaml:41`、`:74`）；卡片带开播时间和简介 → A09.1 和 I02.1 之后（`roomClockProvider`、卡片对话框里的简介）；工具箱、账号页各自 `i18n('site_$id')` 取平台名 → 现在已没有这种写法；直播间“看其他”用共用卡片 → A07.13（已合并，待真机）；热门的 `*_directory_scope` 说明改写 → 热门页用改写过的 `popular_scope_<平台>`（20 个键，`features/popular/popular_grid.dart:14-18` 优先取它，没有才用平台的 `directoryNoticeKey` 原文）；20 个 `*_directory_scope` 原文还在，见 [I02](../../I02-热门/README.md)。
 - 菜单本身后来被 A09.1 换成居中对话框（`CardDialog`），本任务写的“一列操作”的样子已不是现在的样子；规则（先确认再撤销、未关注先问再设标签）保留。
 - 首帧后才开始关注核验（不是 3.x 的服务启动时）：I04.1 记录“留给后续”里的一条，已由本任务做掉（`app.dart:95-97`、`startup.dart:84`）。

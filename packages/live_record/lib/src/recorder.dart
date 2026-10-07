@@ -615,6 +615,7 @@ final class Recorder {
         rt.session = null;
         task
           ..inputCoverageIncomplete = task.inputCoverageIncomplete || ended.inputCoverageIncomplete
+          ..inputTailDiscarded = task.inputTailDiscarded || ended.inputTailDiscarded
           ..lastUpdate = now;
         final manual = ended.manualStop || task.wasStoppedByUser;
         final failed = !ended.complete;

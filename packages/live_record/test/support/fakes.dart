@@ -74,6 +74,9 @@ final class FakeFfmpeg implements FfmpegRunner {
   /// an empty journal (FFmpeg cut off before any data).
   int captureBytes = 1000;
 
+  /// A line a capture logs when it is cancelled (the input cut at a stop).
+  String? stopLog;
+
   /// Statistics a join reports, one per turn of the event loop, before it
   /// ends; none: it ends at once.
   List<FfmpegStatistics> joinStatistics = const [];
@@ -81,7 +84,7 @@ final class FakeFfmpeg implements FfmpegRunner {
   @override
   Future<FfmpegExecution> start(List<String> arguments) async {
     runs.add(arguments);
-    final execution = FakeExecution();
+    final execution = FakeExecution()..cancelLog = stopLog;
     executions.add(execution);
     if (arguments.contains('concat')) {
       final output = arguments.last;
@@ -123,6 +126,9 @@ final class FakeExecution implements FfmpegExecution {
   final _exit = Completer<int>();
   bool cancelled = false;
 
+  /// Logged by [cancel] before the end.
+  String? cancelLog;
+
   void finish(int code) {
     if (!_exit.isCompleted) _exit.complete(code);
   }
@@ -141,6 +147,8 @@ final class FakeExecution implements FfmpegExecution {
   @override
   void cancel() {
     cancelled = true;
+    final line = cancelLog;
+    if (line != null) log(line);
     finish(255);
   }
 }

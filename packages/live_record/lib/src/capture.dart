@@ -67,6 +67,7 @@ final class CaptureEnded extends CaptureEvent {
     this.silent = false,
     this.inputCoverageIncomplete = false,
     this.inputIntegrityError = false,
+    this.inputTailDiscarded = false,
     this.diagnostic = '',
   });
 
@@ -92,8 +93,12 @@ final class CaptureEnded extends CaptureEvent {
   /// FFmpeg reported skipped segments.
   final bool inputCoverageIncomplete;
 
-  /// FFmpeg reported damaged packets.
+  /// FFmpeg reported damaged packets while recording.
   final bool inputIntegrityError;
+
+  /// FFmpeg dropped a packet cut off by the stop or lease end (the input
+  /// ends mid-packet there): the recording lacks only that tail.
+  final bool inputTailDiscarded;
 
   /// Sanitized log tail.
   final String diagnostic;
@@ -161,6 +166,7 @@ final class RecordCapture {
   var _leaseRefresh = false;
   var _mediaStarted = false;
   var _packetError = false;
+  var _tailDiscarded = false;
   var _coverageGap = false;
   var _seconds = 0;
 
@@ -219,7 +225,17 @@ final class RecordCapture {
   void _log(String message) {
     final text = sanitizeFfmpegLog(message).trim();
     if (text.isEmpty) return;
-    _packetError = _packetError || FfmpegMediaIntegrity.hasPacketError(text);
+    if (FfmpegMediaIntegrity.hasPacketError(text)) {
+      // Ending the input at a stop or lease boundary can cut its last packet,
+      // which FFmpeg reports as corrupt and drops (`discardcorrupt`): that
+      // is the tail, not damage of what was recorded (3.x's relay finished
+      // at a tag boundary instead).
+      if (_stopRequested) {
+        _tailDiscarded = true;
+      } else {
+        _packetError = true;
+      }
+    }
     if (!_stopRequested && !_coverageGap && _missingHlsSegment.hasMatch(text)) {
       _coverageGap = true;
       _emit(CaptureCoverageGap(session));
@@ -289,7 +305,7 @@ final class RecordCapture {
   CaptureEnded _ended(int code) {
     final tail = _lines.join('\n');
     final diagnostic = tail.toLowerCase();
-    final integrity = _packetError || FfmpegMediaIntegrity.hasPacketError(tail);
+    final integrity = _packetError;
     if (_manualStop) {
       return CaptureEnded(
         session,
@@ -298,6 +314,7 @@ final class RecordCapture {
         manualStop: true,
         inputCoverageIncomplete: _coverageGap,
         inputIntegrityError: integrity,
+        inputTailDiscarded: _tailDiscarded,
       );
     }
     final eof = code == 0 || code == ffmpegEndOfFile;
@@ -312,6 +329,7 @@ final class RecordCapture {
         silent: true,
         inputCoverageIncomplete: _coverageGap,
         inputIntegrityError: integrity,
+        inputTailDiscarded: _tailDiscarded,
         diagnostic: diagnostic,
       );
     }
@@ -325,6 +343,7 @@ final class RecordCapture {
       retryable: failure.retryable,
       inputCoverageIncomplete: _coverageGap,
       inputIntegrityError: integrity,
+      inputTailDiscarded: _tailDiscarded,
       diagnostic: diagnostic.length > 1600 ? diagnostic.substring(diagnostic.length - 1600) : diagnostic,
     );
   }

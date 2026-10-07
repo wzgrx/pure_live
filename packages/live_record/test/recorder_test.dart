@@ -315,6 +315,18 @@ void main() {
       expect(task.lastError, isNull);
     });
 
+    test('a packet cut off by the stop is a discarded tail, not damage: the attempt joins', () async {
+      ffmpeg.stopLog = '[in#0/flv @ 0x1] Packet corrupt (stream = 0, dts = 13840), dropping it.';
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.running);
+      await recorder.stopTask(task);
+      expect(task.status, RecordStatus.stopped);
+      expect(task.lastError, isNull);
+      expect(task.pendingAttempts, isEmpty);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      expect(task.inputTailDiscarded, isTrue);
+    });
+
     test('a damaged attempt keeps its source and fails the join', () async {
       final task = (await recorder.addTask(room()))!;
       await until(() => task.status == RecordStatus.running);

@@ -1,13 +1,16 @@
 # O05.1 屏幕常亮跟随设置
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（下面“档位：必须”是当时旧任务表的写法）
+- 类型：功能
+- 旧编号：F.1a、T13e.1
+- 相关：决定 D-018（`enableScreenKeepOn` 键不变）；C01.1（当时把常亮交给了 media_kit）；真机归 [S02.6](../../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md) 第 1 阶段（原来归 C01.3，按 D-029 转过去）
 - 档位：必须；规模：小
 - 功能点：F-ROOM-13（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）
 - 涉及代码：`features/live_play/`（直播间、应用内小窗）、`packages/live_player`（`lib/src/video_view.dart`）
 - 依赖：—
 - 来源：C01.1“留给后续”、M13.17 任务说明第 8 项
 - 评审页：按授权直接开发（只把 v3 的行为补回来）
-- 记录：[records/F.1a.md](record.md)（开发后）
+- 记录：[record.md](record.md)
 
 ## v3 的行为（`~/ref/v3ref`，v3.2.11）
 
@@ -59,3 +62,22 @@
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比 |
 | 2026-10-02 | 开发完成（LiveVideoView 自己管常亮，直播间和应用内小窗按设置），待 K90 验证 |
+
+## 结果
+
+- 提交：合并 `b8462638a`（2026-10-02）；逐条见 [record.md](record.md)。c1、c2 都做到，没有偏差。
+- 现在的位置：`packages/live_player/lib/src/screen_wake.dart`（新，`ScreenWake` 全应用计数，`WakelockPlus.toggle`）；`packages/live_player/lib/src/video_view.dart`（`keepScreenOn` :28、`_syncWake` :77：播放或缓冲时才请求，media_kit `Video` 自带的常亮关掉）；`packages/live_player/pubspec.yaml` 加 `wakelock_plus`；直播间 `apps/pure_live/lib/features/live_play/player/player_view.dart:503-516`、应用内小窗 `mini/floating_window.dart:187` 传 `enableScreenKeepOn`。
+- 没有新设置、没有新翻译键。
+- 测试：`packages/live_player/test/frame_rate_test.dart` 2 个（:102 关时不请求、开时立即请求、销毁释放；:118 两个画面一个计数、暂停释放）；`apps/pure_live/test/features/live_play/live_play_page_test.dart` 1 个（:439，设置关了不请求，再开立即请求，离开释放）。
+
+## 验证
+
+- 自动测试：上面 3 个。
+- 真机：**没有结果**。登记表是“完成”，但记录写明 K90 没看（CHECKLIST 第 1 节第 7 条：开时播放 3 分钟不灭屏，关时按系统超时灭屏）；V03.3 把清点 F-ROOM-13 改成“没验证”，归 S02.6 第 1 阶段（原来归 C01.3，C01.3 按 D-029 改“不做”）。看的时候可以用 `adb shell dumpsys power | grep -i -A2 wake` 确认应用持有的唤醒锁，系统超时先临时改成 30 秒（`adb shell settings put system screen_off_timeout 30000`，测完改回原值）。
+
+## 留下的问题
+
+- 真机没看：S02.6 第 1 阶段。
+- 多画面（`features/multiview/widgets/cell_view.dart`）、电视（`tv/room/tv_live_play_page.dart`）没传 `keepScreenOn`，播放时总是常亮、不看设置：没有任务，要跟设置时各加一个参数。
+- 和 3.x 的差别（确认过）：暂停后不常亮。
+

@@ -48,7 +48,8 @@ dispose（live_play_page.dart:450）：转小窗（shouldFloatOnLeave）/ 交给
 - **晚到的回答**：每次 `load` 的 `_epoch`、每次连弹幕的 `_danmakuEpoch`；`_current(epoch)`（`:396`）不对就丢掉。
 - **刷新（B-24）**：`refreshDetail`（`:758`）优先用平台的轻量接口（`LiveSiteRoomRefresher.getRoomDetailForRefresh`），状态待定时不动；不在播而现在能播 → `load()`；播放出错且平台说已下播 → `load()`；弹幕连接已结束而主播还在播 → 重连；其余只更新标题和人数。
 - **弹幕**：首连超时 30 秒（`danmakuStartTimeout`，`:100`；3.x 20 秒，C01.1 问题 6）；连接状态 `ChatConnection` 给聊天列表的空状态用（A08.1）；哔哩哔哩游客的打码昵称提示 `ChatNameHint`（D02.1、D-013）。
-- **完成度**：功能清点第 8 节 8.1（ROOM，25 项）除 F-ROOM-24（不做）外都已实现。C01.1、C01.2 记录里“留给后续”的项已分别由 A07、A08、C02.1、C03.1、O03.1、O05.1 做完。C01.3 只剩真机核对、清点表更正和一个读代码发现的问题。
+- **完成度**：功能清点第 8 节 8.1（ROOM，25 项）除 F-ROOM-24（播放内核切换，不做，v4 只用 mpv）外都已实现；V03.3（2026-10-03）核对后清点表第 8 节没有“缺失”“有问题”，只有 F-ROOM-13 屏幕常亮是“没验证”（归 S02.6）。C01.1、C01.2 记录里“留给后续”的项已分别由 A07、A08、C02.1、C03.1、O03.1、O05.1 做完；C01.3（余项）因此按 D-029 改成“不做”。还没做的是 C01.4（清晰度显示平台实际给的档）和下面“已知问题”里四个没有任务的问题。
+- **清晰度的名字**：`_openQuality`（`logic/room_controller.dart:462`）按 `resolveAppliedPlayQuality`（`packages/live_core/lib/src/live_site.dart:224`）决定显示哪一档：平台确认的编号在列表里 → 那一档；平台说换成了哪档（`appliedQuality`）→ 那一档；否则显示请求的那档并标“未确认”，菜单里名字后面加“?”（`buttons/stream_menu.dart:51`）。录制已经改成按平台编号命名列表外的档（H01.3 的 `RecordStreamResolver.servedQuality`，`packages/live_record/lib/src/resolver.dart:334`），直播间还没跟上，归 C01.4。
 
 ## 代码地图
 
@@ -94,25 +95,28 @@ dispose（live_play_page.dart:450）：转小窗（shouldFloatOnLeave）/ 交给
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 后台时未开播的房间开播会自动开始播放：定时刷新在后台照跑，`refreshDetail` 直接 `load()`；后台策略只在离开应用那一刻决定是否暂停 | `logic/room_controller.dart:325-327`、`:775-777`；`logic/background_playback.dart:472-490` | 在未开播的直播间按 Home 或锁屏，主播开播后手机突然出声，通知栏也没有媒体通知可以停（读代码得出，未在真机确认） | C01.3 第 3 阶段 |
-| 功能清点第 8 节的统计行（“6 项缺失、1 项有问题”）和 F-ROOM-13、F-ROOM-21、F-ROOM-25、F-RT-05、F-RT-06、F-RT-07、F-PORT-05、F-PORT-06 的“依据”列还是做之前的写法；F-ROOM-25 两列填反 | `docs/inventory/FEATURES.md` 第 8 节 | 看清点会以为还缺 7 项 | C01.3 第 1 阶段 |
-| 定时刷新在后台也每 60 秒请求一次详情 | `logic/room_controller.dart:325` | 后台多一点流量和电（3.x 没有定时刷新） | 和上面第一条一起定：后台时暂停刷新还是只不自动开播 |
-| 从画中画回来后控制条卡住（K90 第二轮出现过，S02.1 做了防御性修改） | `player/player_view.dart:241-268` | 未复验 | O02.1 |
+| 后台时未开播的房间开播会自动开始播放：定时刷新在后台照跑，不在播而现在能播就 `load()`；后台策略 `onHidden` 只在离开应用后 1.5 秒判断一次，那时会话是 `idle`/`stopped` 就直接返回、不记“我们暂停的”，之后才开始的播放没人管；后台时也不会补出媒体通知（`_syncNotification` 在 `_hidden` 时直接返回） | `logic/room_controller.dart:325-327`（定时器）、`:775-778`（`load()`）；`logic/background_playback.dart:472-490`（`onHidden`）、`:431-440`（通知） | 在未开播的直播间按 Home 或锁屏，主播开播后手机突然出声，通知栏也没有媒体通知可以停（读代码得出，未在真机确认；3.x 没有定时刷新，没有这个问题） | **没有任务**。原来归 C01.3 第 3 阶段，C01.3 按 D-029 关掉后没有去处；建议在 C01 开新任务（第二档，小）：先写失败的测试（`live_play_more_test.dart`：未开播、`onHidden`、平台变成开播、刷新后会话不在播），方案二选一：A 后台策略对“离开以后才开始的播放”立即暂停并记成我们暂停的，回前台继续；B 控制器知道前后台，后台时 `refreshDetail` 只更新状态不 `load()` |
+| 定时刷新在后台也每 60 秒请求一次详情 | `logic/room_controller.dart:325` | 后台多一点流量和电（3.x 没有定时刷新） | 和上一条一起定：后台时暂停刷新还是只不自动开播 |
+| 主播换场后弹幕参数变了，直播间不重连，弹幕停在旧的一场（TwitCasting、克拉克拉、SHOWROOM）：刷新只在弹幕连接已经结束时重连（`danmaku.status == DanmakuStatus.closed`），不比较参数；这几个平台换场后旧连接不会自己结束（SHOWROOM 只剩 `ACK`）。而且刷新用的轻量接口不带弹幕参数（SHOWROOM `_detail(entry: false)`、克拉克拉 `profileDetail`），`LiveRoom.mergeFrom` 保留旧的 `danmakuData`，所以就算重连也是旧参数。只有播放出错且平台说已下播时才会整个 `load()`、顺带用新参数连弹幕 | `logic/room_controller.dart:785`；`packages/live_core/lib/src/live_room.dart:619`；`packages/live_core/lib/src/sites/showroom/showroom_site.dart:290-310`、`:320`；`packages/live_core/lib/src/sites/kilakila/kilakila_site.dart:331`；`packages/live_core/lib/src/sites/twitcasting/twitcasting_site.dart:259` | 人留在直播间时主播下播又开播、播放会话自己恢复了（没走 `load()`），聊天列表不再有新弹幕，要重新进房。3.x 这三个平台没有弹幕 | **没有任务**（D 组核对时发现，见 [D06](../../D-弹幕/D06-弹幕功能余项/README.md) 的余项表、[D01.16](../../D-弹幕/D01-平台弹幕协议/D01.16-SHOWROOM弹幕/README.md)、[D01.14](../../D-弹幕/D01-平台弹幕协议/D01.14-克拉克拉弹幕/README.md)）。建议开在 C01：刷新时发现“换了一场”（开播时间变了、或下播后又开播）就按进房详情重取 `danmakuData` 并 `_syncDanmaku(force: true)`；百度直播签名过期（[D01.27](../../D-弹幕/D01-平台弹幕协议/D01.27-百度直播弹幕/README.md)）是同一处 |
+| 改设置“YouTube 显示全部聊天”要重新进房才生效：这个设置只在建 YouTube 弹幕连接时读一次（`allChat:`），控制器只跟 `enableDanmakuDisplay`、`enablePipDanmaku` 两个设置重连 | `apps/pure_live/lib/app/platforms.dart:227`；`logic/room_controller.dart:313-315` | 在直播间里改了这个开关，聊天还是原来的模式，用户以为没生效 | **没有任务**（D 组发现，见 D06）。小改动：控制器对 YouTube 房间多跟一个设置，变了就重建连接；或者设置行写明“重新进入直播间后生效” |
+| 平台给的清晰度不在列表里时直播间显示“原画?”，同一路流录制显示“超清” | `logic/room_controller.dart:491-497`；`packages/live_record/lib/src/resolver.dart:334-350` | 同一路流两个说法 | [C01.4](C01.4-直播间清晰度显示实际档/README.md) |
+| 从画中画回来后控制条卡住（K90 第二轮出现过，S02.1 做了防御性修改） | `player/player_view.dart:241-268` | 未复验 | [O02.1](../../O-Android系统集成/O02-画中画/O02.1-画中画复验/README.md) |
 
 ## 相关决定和规范
 
-- D-001（3.x 是基线）、D-012（暂停后单击只显示控制层）、D-017（测试定时器）、D-018（3.x 设置键不变）、D-022（切换直播间）、D-023（横屏全屏翻转）。
+- D-001（3.x 是基线）、D-012（暂停后单击只显示控制层）、D-017（测试定时器）、D-018（3.x 设置键不变）、D-022（切换直播间）、D-023（横屏全屏翻转）、D-029（C01.3 不再单独做，真机核对并入 S02.4、S02.6）。
 - [specs/UI.md](../../specs/UI.md) 附录 A 第 7、9、10、11、12 条；[specs/UPGRADES.md](../../specs/UPGRADES.md) 的 B-24、C-4、14-3、19-4、28-2 等（C01.1 记录的“已批准的升级”表）。
 
 ## 测试和验证
 
-- 自动测试：`cd apps/pure_live && flutter test test/features/live_play/`。缺：后台时开播的行为（C01.3 补）；`refreshDetail` 和用户点“刷新”交错的竞态没有专门的用例。
-- 真机：[CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 1～5、9、14、15 条。S02.2、S02.3 看过第 1 条（七个国内平台能播）和第 5 条（全屏和返回）。
+- 自动测试：`cd apps/pure_live && flutter test test/features/live_play/`。缺：后台时开播的行为；刷新发现换场后弹幕参数变了的行为；`refreshDetail` 和用户点“刷新”交错的竞态没有专门的用例；平台给列表外清晰度时的显示（C01.4 补）。
+- 真机：[CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 1～5、9、14、15 条。S02.2、S02.3 看过第 1 条（七个国内平台能播）和第 5 条（全屏和返回）；第 3 条断网重连归 [S02.6](../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md)。C02.1 的播放器留给下一个房间（F-ROOM-21）、C03.1 的快手跳转（F-RT-05）和切换直播间刷新（F-RT-07）按 D-029 判为完成（关键部分不靠原生），没有专门的真机任务，日常回归时照第 1 节第 12、14 条看。
 
 ## 路线
 
-1. **C01.3**：在 K90 上核对清点第 8 节的余项（9 个功能点），更正清点表，修后台时开播自动出声（先写失败的测试）。
-2. 以后：G02.2（缓冲状态对账）合并后复看“正在重连”有没有误报；R03.1、R05.1 测内存和耗电时把直播间长时间播放作为主场景，结果可能回到这里开任务。
+1. **C01.4**（第二档，小，两个阶段）：清晰度按平台编号命名，和录制一致。和 E06.2 的“实际清晰度”阶段改同一段代码（`_openQuality`、`_refreshPlan`），最好一起做或紧接着做。
+2. 请维护者决定是否开任务（都在上面“已知问题”里，建议都开在 C01、第二档、小）：后台时开播不出声；换场后弹幕参数变了要重连（含百度签名过期）；“YouTube 显示全部聊天”不用重新进房。
+3. 以后：G02.2（缓冲状态对账）合并后复看“正在重连”有没有误报；R03.1、R05.1 测内存和耗电时把直播间长时间播放作为主场景，结果可能回到这里开任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -128,7 +132,7 @@ dispose（live_play_page.dart:450）：转小窗（shouldFloatOnLeave）/ 交给
 |---|---|---|---|---|---|---|
 | C01.1 | 直播间（主要流程） | 功能 | 完成 | 2026-10-01 | 0249e830e | [设计或说明](C01.1-直播间主要流程/README.md)、[记录](C01.1-直播间主要流程/record.md) |
 | C01.2 | 直播间（第二部分） | 功能 | 完成 | 2026-10-01 | 13bc7fac1 | [设计或说明](C01.2-直播间第二部分/README.md)、[记录](C01.2-直播间第二部分/record.md) |
-| C01.3 | 直播间功能余项：功能清点里直播间部分的 6 项缺失、1 项有问题 | 功能 | 不做 | — | — | [设计或说明](C01.3-直播间功能余项/README.md)、[任务书](C01.3-直播间功能余项/brief.md) |
+| C01.3 | 直播间功能余项：功能清点里直播间部分的 6 项缺失、1 项有问题 | 功能 | 不做 | — | — | [设计或说明](C01.3-直播间功能余项/README.md) |
 | C01.4 | 直播间清晰度显示平台实际给的档：确认的编号不在列表里时按平台编号命名（和录制一致） | 功能 | 未开始 | — | — | [设计或说明](C01.4-直播间清晰度显示实际档/README.md)、[任务书](C01.4-直播间清晰度显示实际档/brief.md) |
 
 ## 还没完成的

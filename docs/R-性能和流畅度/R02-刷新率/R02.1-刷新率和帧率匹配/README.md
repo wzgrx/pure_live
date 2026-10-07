@@ -178,3 +178,18 @@ K90（60/90/120 Hz）上看直播：
 - 列表等不播放的页面（Android 16 起）：均衡档触摸时改成“至少最高”的声明，效果应和窗口提示一样，要真机确认。
 - 最高档、省电档的行为不变。
 - 厂商限制检测只在用户操作时（按下或松手 1.5 秒内）计时：画面静止时系统本来就可能降频，不算限制。
+
+## 实现和验证
+
+- 实现（提交 `b8462638a`，2026-10-02，代码在 `c6def3c0b` 等；详见 [record.md](record.md)）：
+  - c1～c6 都做到了。c2 设置键 `matchVideoFrameRate`（`packages/live_store/lib/src/settings/settings.dart:73`，默认开，4.x 新加）；c3 `playbackRefreshRate`（`apps/pure_live/lib/platform/display_mode.dart:142`）；c4 `RoomRefreshRate`（`apps/pure_live/lib/features/live_play/logic/room_refresh_rate.dart:13`，只在播放或缓冲、开关开、前台或画中画时声明）和原生 `setVideoFrameRate`；c5 照 D03.1 c3；c6 开关变灰的文字。帧率来源：`MpvEngine` 打开后 2 秒读 `container-fps`，读不到（直播 FLV 常报 1000）每 2 秒读 `estimated-vf-fps`、两次相差 1% 以内才算，最多 4 次（`packages/live_player/lib/src/frame_rate.dart`）。
+  - 偏差：c4 只在 Android 12 起声明（设计写 11 起：11 的接口不能限定“只在无缝时切换”，可能黑一下），11 只改窗口的希望刷新率；设置行加在 `settings_catalog.dart`（任务书写 `settings_model.dart`）。
+  - I1～I3 按建议 A（D-003）。
+  - **后来被 R02.2 修订**（`584da6662`，见上面“4.0.x 修订”）：c3 在播放中改成只用画面上的帧率声明（窗口提示对已声明的画面无效）、没有整数倍时取设备最高、加了限制提示；c4 的原生方法合并成一个 `applyRefreshRate`（`MainActivity.kt:784`）。现在的行为以 [R02 子分类说明](../README.md)和 R02.2 为准。
+- 验证：
+  - 自动测试：当时新增 10 个（`room_refresh_rate_test.dart` 6、`match_frame_rate_test.dart` 1、`packages/live_player` 3），R02.2 又改写和新增了一批（见 R02.2 记录）；`flutter build apk --debug` 编译通过。
+  - 真机：**本任务没有自己的 K90 记录**（登记表写“完成”，记录“没验证的”列着 K90 支持的刷新率、声明和窗口提示的取舍、进出直播间闪不闪屏、耗电）。前两条由 V03.2 调研在 K90 上只读测过（只有 60/90/120 Hz；窗口提示对已声明的画面无效，这正是 R02.2 的起因）；后两条和 R02.2 一起看：[R02.2 的 verify.md](../R02.2-刷新率策略修正/verify.md)（进出直播间不闪屏、播放中的刷新率）；耗电在 [R05.1](../../R05-耗电/R05.1-耗电/README.md)。
+- 留下的问题：
+  - 真机结果并入 R02.2 的 verify；通过后在 [record.md](record.md) 补一句出处。
+  - “拿不准的地方”第 1、2 条已由 V03.2 调研回答（K90 只有 60/90/120；窗口提示无效）；第 3 条（嵌入用 SurfaceView）开发时确认是 SurfaceView；第 4 条（`estimated-vf-fps` 等多久）现在最多 2 + 8 秒，FLV 实际要几秒没量过（随 G03.1 的测量看）；第 5 条的新文字已加进 `zh.json`、`en.json`。
+

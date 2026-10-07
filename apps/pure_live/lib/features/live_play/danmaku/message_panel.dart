@@ -171,7 +171,7 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
             key: const ValueKey('live-play-block-user'),
             leading: const Icon(AppIcons.blockUser),
             title: Text(i18n('live_play_block_viewer')),
-            subtitle: Text(i18n('live_play_block_viewer_desc', args: {'name': name}), style: hint),
+            subtitle: Text(withoutOrphan(i18n('live_play_block_viewer_desc', args: {'name': name})), style: hint),
             onTap: () async {
               widget.onClose();
               await widget.controller.blockUser(name);
@@ -182,7 +182,7 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
           key: const ValueKey('live-play-block-keyword'),
           leading: const Icon(AppIcons.blockKeyword),
           title: Text(i18n('live_play_block_word')),
-          subtitle: Text(i18n('live_play_block_word_desc'), style: hint),
+          subtitle: Text(withoutOrphan(i18n('live_play_block_word_desc')), style: hint),
           onTap: () => setState(() => _keyword = true),
         ),
       ],

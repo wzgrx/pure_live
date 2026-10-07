@@ -241,6 +241,18 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
                         key: const ValueKey('live-play-block-input'),
                         controller: _input,
                         maxLength: blockKeywordMaxLength,
+                        // A01.4 c6: the count sits at the box's bottom-right
+                        // corner, not inset like the text (which left it
+                        // floating towards "添加").
+                        buildCounter: (context, {required currentLength, required isFocused, maxLength}) =>
+                            Transform.translate(
+                              key: const ValueKey('live-play-block-counter'),
+                              offset: Offset(Directionality.of(context) == TextDirection.rtl ? -14 : 14, 0),
+                              child: Text(
+                                '$currentLength/$maxLength',
+                                style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant).tabular,
+                              ),
+                            ),
                         textInputAction: TextInputAction.done,
                         onChanged: (_) {
                           if (_error != null) setState(() => _error = null);

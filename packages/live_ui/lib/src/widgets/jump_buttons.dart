@@ -5,7 +5,9 @@ import 'package:live_ui/src/widgets/focus_ring.dart';
 const double jumpButtonsThreshold = 400;
 
 /// "To top" and "to bottom" over a list once it scrolls (3.x
-/// `BasePageView`'s mini buttons, docs/A-界面设计/A02-组件/A02.1-通用组件 c20): "to top" past
+/// `BasePageView`'s mini buttons, docs/A-界面设计/A02-组件/A02.1-通用组件 c20): neither
+/// before the list first moves (3.x updated them only on a scroll;
+/// docs/A-界面设计/A09-浏览界面/A09.12-浏览界面真机对照修正 c2), then "to top" past
 /// [jumpButtonsThreshold], "to bottom" while more than that remains. Each
 /// looks 40 round on `surfaceContainerHighest` with a floating shadow and
 /// takes taps on 48 (3.x's 40 was too small); hover, press and the keyboard
@@ -40,10 +42,16 @@ class _ScrollJumpButtonsState extends State<ScrollJumpButtons> {
   bool _top = false;
   bool _bottom = false;
 
+  /// Whether the list has moved since the buttons came: a list that opens
+  /// at its top shows no "to bottom" until the user scrolls.
+  bool _scrolled = false;
+
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_sync);
+    widget.controller.addListener(_onScroll);
+    // A list that comes back already scrolled (a kept offset) counts as
+    // scrolled.
     WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
   }
 
@@ -51,15 +59,22 @@ class _ScrollJumpButtonsState extends State<ScrollJumpButtons> {
   void didUpdateWidget(ScrollJumpButtons oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.controller != widget.controller) {
-      oldWidget.controller.removeListener(_sync);
-      widget.controller.addListener(_sync);
+      oldWidget.controller.removeListener(_onScroll);
+      widget.controller.addListener(_onScroll);
+      _scrolled = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _sync());
     }
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_sync);
+    widget.controller.removeListener(_onScroll);
     super.dispose();
+  }
+
+  void _onScroll() {
+    _scrolled = true;
+    _sync();
   }
 
   void _sync() {
@@ -70,8 +85,9 @@ class _ScrollJumpButtonsState extends State<ScrollJumpButtons> {
       return;
     }
     final position = controller.position;
-    final top = position.pixels > jumpButtonsThreshold;
-    final bottom = position.maxScrollExtent - position.pixels > jumpButtonsThreshold;
+    if (!_scrolled && position.hasPixels && position.pixels > position.minScrollExtent) _scrolled = true;
+    final top = _scrolled && position.pixels > jumpButtonsThreshold;
+    final bottom = _scrolled && position.maxScrollExtent - position.pixels > jumpButtonsThreshold;
     if (top != _top || bottom != _bottom) {
       setState(() {
         _top = top;

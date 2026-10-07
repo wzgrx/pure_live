@@ -35,7 +35,7 @@ class PortraitDiagnosticsBadge extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
             child: Text(
               portraitDiagnosticsText(snapshot.data ?? session.state, orientation.value),
-              style: const TextStyle(color: OnVideoColors.foreground, fontSize: 11, decoration: TextDecoration.none),
+              style: const TextStyle(color: OnVideoColors.foreground, fontSize: 12, decoration: TextDecoration.none),
             ),
           ),
         ),

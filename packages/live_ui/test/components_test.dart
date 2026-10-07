@@ -56,7 +56,7 @@ void main() {
         expect(decoration.shape, BoxShape.circle);
       }
       expect(find.text('没有网络连接'), findsOneWidget);
-      expect(find.text('检查网络后重试；连上网络后会自动刷新'), findsOneWidget);
+      expect(find.text(withoutOrphan('检查网络后重试；连上网络后会自动刷新')), findsOneWidget);
 
       // The restricted state's button says what it does (C1, U.4e c6).
       await tester.pumpWidget(_app(AppStatusView(type: AppStatusType.restricted, onButtonPressed: () {})));
@@ -209,7 +209,7 @@ void main() {
       expect(ground('info'), colors.surfaceContainerLow);
       expect(ground('warning'), LiveSemanticColors.warningContainer(Brightness.light));
       expect(ground('error'), colors.errorContainer);
-      final words = tester.getRect(find.text('您当前正在使用移动蜂窝流量，请注意流量消耗。'));
+      final words = tester.getRect(find.text(withoutOrphan('您当前正在使用移动蜂窝流量，请注意流量消耗。')));
       expect(tester.getRect(find.byKey(const ValueKey('never'))).top, greaterThan(words.top));
       expect(tester.getSize(find.byKey(const ValueKey('status-banner-close'))), const Size(48, 48));
       await tester.tap(find.byKey(const ValueKey('never')));
@@ -494,7 +494,7 @@ void main() {
         final title = tester.widget<Text>(find.text('首选清晰度')).style!;
         expect(title.fontSize, 15);
         expect(title.fontWeight, FontWeight.w400);
-        final subtitle = tester.widget<Text>(find.text('当进入直播播放页，首选的视频清晰度')).style!;
+        final subtitle = tester.widget<Text>(find.text(withoutOrphan('当进入直播播放页，首选的视频清晰度'))).style!;
         expect(subtitle.fontSize, 12);
         expect(subtitle.color, colors.onSurfaceVariant);
         // 3.x: hint colour at 75 %, about 3.4:1 (TASKS §7 from U.10b).
@@ -545,7 +545,7 @@ void main() {
   });
 
   group('the list shell (c20) and Esc', () {
-    testWidgets('"to top" shows past 400; it looks 40 and takes 48', (tester) async {
+    testWidgets('"to top" shows past 400 once the list moves; it looks 40 and takes 48', (tester) async {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
@@ -574,7 +574,17 @@ void main() {
       );
       await tester.pumpAndSettle();
       final top = find.byKey(const ValueKey('jump-top'));
-      expect(tester.widget<AnimatedScale>(find.ancestor(of: top, matching: find.byType(AnimatedScale))).scale, 0);
+      final bottom = find.byKey(const ValueKey('jump-bottom'));
+      double scale(Finder button) =>
+          tester.widget<AnimatedScale>(find.ancestor(of: button, matching: find.byType(AnimatedScale))).scale;
+      // A09.12 c2: nothing before the list moves, though most of it lies
+      // below.
+      expect(scale(top), 0);
+      expect(scale(bottom), 0);
+      await tester.drag(find.byType(ListView), const Offset(0, -40));
+      await tester.pumpAndSettle();
+      expect(scale(top), 0);
+      expect(scale(bottom), 1);
       controller.jumpTo(500);
       await tester.pumpAndSettle();
       expect(tester.widget<AnimatedScale>(find.ancestor(of: top, matching: find.byType(AnimatedScale))).scale, 1);
@@ -582,6 +592,40 @@ void main() {
       await tester.tap(top);
       await tester.pumpAndSettle();
       expect(controller.offset, 0);
+    });
+
+    testWidgets('a list that comes back scrolled shows them at once', (tester) async {
+      final controller = ScrollController(initialScrollOffset: 800);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _app(
+          Stack(
+            children: [
+              ListView.builder(
+                controller: controller,
+                itemExtent: 100,
+                itemCount: 100,
+                itemBuilder: (_, i) => Text('$i'),
+              ),
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: ScrollJumpButtons(
+                  controller: controller,
+                  heroTag: 'test',
+                  topTooltip: '回到顶部',
+                  bottomTooltip: '到底部',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final key in ['jump-top', 'jump-bottom']) {
+        final button = find.byKey(ValueKey(key));
+        expect(tester.widget<AnimatedScale>(find.ancestor(of: button, matching: find.byType(AnimatedScale))).scale, 1);
+      }
     });
 
     testWidgets("EscapeBack: Esc does what Back does, or the page's own step first", (tester) async {

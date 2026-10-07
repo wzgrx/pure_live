@@ -162,6 +162,9 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
                 isScrollable: true,
                 tabAlignment: TabAlignment.center,
                 physics: const PureLiveBoundedScrollPhysics(),
+                // The last tab fades (A09.4 v4-phone; the same as popular's,
+                // A09.12 c1).
+                endFade: tabStripEndFade,
                 tabs: [
                   for (final id in ids)
                     TabLabel(label: platformName(id, fallback: ref.read(sitesProvider).of(id).name)),

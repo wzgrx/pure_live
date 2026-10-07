@@ -124,7 +124,7 @@ class LocalDanmakuPreview extends StatelessWidget {
                         Text(
                           i18n('local_danmaku_live_preview'),
                           style: Theme.of(context).textTheme.labelSmall?.regular
-                              .copyWith(fontSize: 11, color: OnVideoColors.secondary),
+                              .copyWith(fontSize: 12, color: OnVideoColors.secondary),
                         ),
                       ],
                     ),

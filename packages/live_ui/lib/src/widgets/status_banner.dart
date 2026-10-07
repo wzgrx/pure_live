@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
+import 'package:live_ui/src/theme/text_wrapping.dart';
 
 /// The colour of a [StatusBanner].
 enum StatusBannerKind {
@@ -131,7 +132,7 @@ class _StatusBannerState extends State<StatusBanner> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          widget.text,
+                          withoutOrphan(widget.text),
                           maxLines: folds && !_open ? 2 : null,
                           overflow: folds && !_open ? TextOverflow.ellipsis : null,
                           style: style,

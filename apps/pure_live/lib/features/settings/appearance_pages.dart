@@ -162,7 +162,7 @@ class LanguageTile extends ConsumerWidget {
     ];
     return SettingsLinkRow(
       key: entry.rowKey,
-      icon: AppIcons.settingsNetwork,
+      icon: AppIcons.settingsLanguage,
       title: entry.titleText,
       choice: true,
       subtitle: entry.descriptionText,

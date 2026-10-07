@@ -456,6 +456,24 @@ void main() {
     await _close(tester, services);
   });
 
+  testWidgets('A01.4 c5: a small empty cell says "点击选台" at 12 with a 20 icon, not shrunk to fit', (tester) async {
+    final (services, _) = await _pump(tester, const Size(393, 852));
+    await tester.tap(_key('multiview-layout-focus'));
+    await _wait(tester);
+    final hints = find.byKey(const ValueKey('multiview-cell-hint'));
+    expect(hints, findsNWidgets(3));
+    for (final hint in hints.evaluate()) {
+      final text = hint.widget as Text;
+      expect(text.style!.fontSize, 12);
+      // Drawn at its size: nothing scales it down.
+      expect(tester.getSize(find.byWidget(text)).height, greaterThanOrEqualTo(12));
+    }
+    expect(find.text('点击选台'), findsNWidgets(3));
+    final icons = find.descendant(of: _key('multiview-cell-2'), matching: find.byIcon(AppIcons.addCell));
+    expect(tester.getSize(icons).width, 20);
+    await _close(tester, services);
+  });
+
   testWidgets('landscape phone: toolbar in the app bar, the column on the right, the picker in turn', (tester) async {
     final (services, _) = await _pump(tester, const Size(852, 393));
     // c10: the toolbar joins the app bar.

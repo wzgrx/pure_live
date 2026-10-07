@@ -320,7 +320,7 @@ void main() {
       expect(tester.getTopLeft(find.text('关于')).dy, lessThan(tops.first));
       expect(tester.getTopLeft(find.text('项目')).dy, lessThan(tops[3]));
       expect(find.text('历史记录'), findsNothing);
-      expect(find.text('检查新版本并下载安装包'), findsOneWidget);
+      expect(find.text(withoutOrphan('检查新版本并下载安装包')), findsOneWidget);
       Finder icon(String key, IconData data) =>
           find.descendant(of: find.byKey(ValueKey(key)), matching: find.byIcon(data));
       expect(icon('about-online-update', AppIcons.onlineUpdate), findsOneWidget);

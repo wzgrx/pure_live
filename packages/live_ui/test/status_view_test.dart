@@ -17,7 +17,7 @@ void main() {
     await tester.pumpWidget(_app(const EmptyView()));
     await tester.pumpAndSettle();
     expect(find.text('暂无数据'), findsOneWidget);
-    expect(find.text('这里空空如也，什么都没有发现'), findsOneWidget);
+    expect(find.text(withoutOrphan('这里空空如也，什么都没有发现。')), findsOneWidget);
     expect(find.byIcon(Icons.live_tv_rounded), findsOneWidget);
     expect(find.byType(TextButton), findsNothing);
   });

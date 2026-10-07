@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
+import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_dialog.dart';
 import 'package:live_ui/src/widgets/app_toast.dart';
 import 'package:live_ui/src/widgets/loading_styles.dart';
@@ -193,14 +194,16 @@ class AppStatusView extends StatelessWidget {
           AppStatusType.restricted => words.restrictedTitle,
           AppStatusType.offline => words.offlineTitle,
         };
-    final finalSubtitle =
-        subtitle ??
-        switch (type) {
-          AppStatusType.empty || AppStatusType.loading => words.emptySubtitle,
-          AppStatusType.error => words.errorSubtitle,
-          AppStatusType.restricted => words.restrictedSubtitle,
-          AppStatusType.offline => words.offlineSubtitle,
-        };
+    // An explanation: no one-character last line (A01.4 c1).
+    final finalSubtitle = withoutOrphan(
+      subtitle ??
+          switch (type) {
+            AppStatusType.empty || AppStatusType.loading => words.emptySubtitle,
+            AppStatusType.error => words.errorSubtitle,
+            AppStatusType.restricted => words.restrictedSubtitle,
+            AppStatusType.offline => words.offlineSubtitle,
+          },
+    );
     final glyph = icon ?? defaultIcon(type);
 
     if (isMini) {

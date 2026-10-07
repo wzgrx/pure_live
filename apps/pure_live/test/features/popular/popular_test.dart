@@ -12,6 +12,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
+import 'package:pure_live/features/popular/popular_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
@@ -591,7 +592,9 @@ void main() {
     await tester.pumpAndSettle();
     // Phones: from the bottom.
     expect(find.byType(BottomSheet), findsOneWidget);
-    expect(find.text('2 个平台，点一个直接切过去；在“平台显示”里可以隐藏和排序'), findsOneWidget);
+    expect(find.text(withoutOrphan('点一个直接切过去；在“平台显示”里隐藏和排序')), findsOneWidget);
+    // Two platforms fit: the panel is as tall as they are.
+    expect(find.byKey(const ValueKey('panel-docked')), findsNothing);
     final selected = find.byKey(const ValueKey('popular-platform-selected'));
     expect(
       find.descendant(of: find.byKey(const ValueKey('popular-platform-huya')), matching: selected),
@@ -646,11 +649,89 @@ void main() {
     });
   }
 
+  group('A09.12 on a 393 phone', () {
+    const ids = [
+      SiteIds.bilibili,
+      SiteIds.douyu,
+      SiteIds.huya,
+      SiteIds.douyin,
+      SiteIds.kuaishou,
+      SiteIds.cc,
+      SiteIds.twitch,
+      SiteIds.soop,
+      SiteIds.yy,
+      SiteIds.acfun,
+      SiteIds.picarto,
+      SiteIds.twitcasting,
+      SiteIds.missevan,
+      SiteIds.inke,
+      SiteIds.kilakila,
+      SiteIds.xiaohongshu,
+      SiteIds.niconico,
+      SiteIds.weibo,
+      SiteIds.showroom,
+      SiteIds.chzzk,
+      SiteIds.kick,
+      SiteIds.liveMe,
+      SiteIds.tiktok,
+      SiteIds.youtube,
+    ];
+    Map<String, LiveSite> sites() => {
+      for (final id in ids)
+        id: _FakeSite(id, [
+          [for (var i = 0; i < 20; i++) _room(id, i, heat: 100 - i)],
+        ]),
+    };
+
+    testWidgets('c1, c2: the tab cut by ⌄ fades; no jump buttons before the list moves', (tester) async {
+      final services = await _pump(tester, sites(), width: 393, height: 852);
+      final strip = find.byKey(const ValueKey('popular-platform-tabs'));
+      expect(tester.state<ScrollableTabBarState>(strip).fadesEnd, isTrue);
+      expect(tester.getRect(find.byKey(const ValueKey('tab-strip-fade'))).right, tester.getRect(strip).right);
+      double scale(String key) => tester
+          .widget<AnimatedScale>(
+            find.ancestor(of: find.byKey(ValueKey(key)), matching: find.byType(AnimatedScale)).first,
+          )
+          .scale;
+      expect(scale('jump-bottom'), 0);
+      expect(scale('jump-top'), 0);
+      await tester.drag(find.byType(LiveRoomCard).first, const Offset(0, -300));
+      await tester.pumpAndSettle();
+      expect(scale('jump-bottom'), 1);
+      // At the strip's end nothing lies beyond: no fade.
+      await tester.drag(find.text('斗鱼'), const Offset(-3000, 0));
+      await tester.pumpAndSettle();
+      expect(tester.state<ScrollableTabBarState>(strip).fadesEnd, isFalse);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('c3: "all platforms" opens at the design height, drags up to the full height; the hint is one line', (
+      tester,
+    ) async {
+      final services = await _pump(tester, sites(), width: 393, height: 852);
+      await tester.tap(find.byKey(const ValueKey('popular-all-platforms')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('panel-docked')), findsOneWidget);
+      final sheet = find.byType(BottomSheet);
+      // A09.2 v4-phone-picker: the top at about 29% (3.x-era 85% cap: 15%).
+      expect(tester.getRect(sheet).top, closeTo(852 * (1 - platformPickerOpenHeight), 2));
+      final hint = find.byKey(const ValueKey('popular-platform-hint'));
+      expect(tester.getSize(hint).height, lessThan(13 * 2));
+      await tester.drag(find.byKey(const ValueKey('popular-platform-douyu')), const Offset(0, -500));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(sheet).top, lessThan(852 * 0.1));
+      await tester.tap(find.byKey(const ValueKey('popular-platform-douyu')));
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsNothing);
+      await tester.runAsync(services.close);
+    });
+  });
+
   testWidgets('U.4b c4: an empty platform says what to do; the button refreshes', (tester) async {
     final bilibili = _FakeSite(SiteIds.bilibili, [const []]);
     final services = await _pump(tester, {SiteIds.bilibili: bilibili});
     expect(find.text('未发现直播'), findsOneWidget);
-    expect(find.text('这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以下拉刷新'), findsOneWidget);
+    expect(find.text(withoutOrphan('这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以下拉刷新')), findsOneWidget);
     expect(find.byIcon(AppIcons.emptyPopular), findsOneWidget);
     await tester.tap(find.text('刷新'));
     await tester.pumpAndSettle();

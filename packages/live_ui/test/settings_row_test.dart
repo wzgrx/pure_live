@@ -72,7 +72,7 @@ void main() {
       expect(tester.getTopLeft(find.byType(Divider)).dx, 16 + 56);
     });
 
-    testWidgets('explanations: two lines, secondary colour above 4.5:1 on the card', (tester) async {
+    testWidgets('explanations: three lines (A01.4 c2), secondary colour above 4.5:1 on the card', (tester) async {
       await _pump(
         tester,
         SettingsGroup(
@@ -80,7 +80,8 @@ void main() {
         ),
       );
       final text = tester.widget<HighlightedText>(find.byType(HighlightedText).last);
-      expect(text.maxLines, 2);
+      expect(text.maxLines, 3);
+      expect(text.explanation, isTrue);
       for (final seed in [LiveTheme.brandBlue, LiveTheme.legacyBlue, Colors.orange, Colors.teal]) {
         for (final brightness in Brightness.values) {
           final scheme = ColorScheme.fromSeed(
@@ -173,7 +174,7 @@ void main() {
           onTap: () => taps++,
         ),
       );
-      expect(find.text('动态取色开着'), findsOneWidget);
+      expect(find.text(withoutOrphan('动态取色开着')), findsOneWidget);
       expect(find.text('切换软件的主题颜色'), findsNothing);
       expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0.38);
       await tester.tap(find.text('主题颜色'), warnIfMissed: false);
@@ -195,9 +196,15 @@ void main() {
       expect(tester.getTopLeft(find.text('跟随系统')).dy, lessThan(tester.getBottomLeft(find.text('主题模式')).dy + 20));
       expect(tester.getTopLeft(find.text('跟随系统')).dx, greaterThan(tester.getTopRight(find.text('主题模式')).dx));
       await _pump(tester, row(), textScale: 1.5);
-      expect(tester.getTopLeft(find.text('跟随系统')).dy, greaterThan(tester.getBottomLeft(find.text('切换系统/亮色/暗色模式')).dy));
+      expect(
+        tester.getTopLeft(find.text('跟随系统')).dy,
+        greaterThan(tester.getBottomLeft(find.text(withoutOrphan('切换系统/亮色/暗色模式'))).dy),
+      );
       await _pump(tester, row(), width: 340);
-      expect(tester.getTopLeft(find.text('跟随系统')).dy, greaterThan(tester.getBottomLeft(find.text('切换系统/亮色/暗色模式')).dy));
+      expect(
+        tester.getTopLeft(find.text('跟随系统')).dy,
+        greaterThan(tester.getBottomLeft(find.text(withoutOrphan('切换系统/亮色/暗色模式'))).dy),
+      );
     });
 
     testWidgets('a counter: − and + with names, the number opens its dialog, ends disable', (tester) async {

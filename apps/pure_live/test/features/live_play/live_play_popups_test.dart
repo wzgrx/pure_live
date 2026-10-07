@@ -944,9 +944,9 @@ void main() {
       'live-play-block-keyword',
     ]);
     expect(_in('live-play-block-user', find.text('屏蔽此用户')), findsOneWidget);
-    expect(_in('live-play-block-user', find.text('路人 的弹幕都不再显示')), findsOneWidget);
+    expect(_in('live-play-block-user', find.text(withoutOrphan('路人 的弹幕都不再显示'))), findsOneWidget);
     expect(_in('live-play-block-keyword', find.text('屏蔽关键词…')), findsOneWidget);
-    expect(_in('live-play-block-keyword', find.text('输入一个词，含这个词的弹幕都不再显示')), findsOneWidget);
+    expect(_in('live-play-block-keyword', find.text(withoutOrphan('输入一个词，含这个词的弹幕都不再显示'))), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('live-play-copy-message')));
     await tester.pumpAndSettle();

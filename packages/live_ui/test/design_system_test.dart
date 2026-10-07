@@ -188,7 +188,7 @@ void main() {
       (AppIcons.failed, Remix.error_warning_line),
       (AppIcons.webDav, Remix.cloud_line),
       (AppIcons.deviceSync, Remix.qr_scan_2_line),
-      (AppIcons.platformAccounts, Remix.accessibility_line),
+      (AppIcons.platformAccounts, Remix.account_box_line), // A01.4 c4
       // U.13: the title bar keeps 3.x's glyphs; a maximized window shows
       // "restore".
       (AppIcons.windowMinimize, Icons.remove),
@@ -197,7 +197,7 @@ void main() {
       (AppIcons.windowClose, Icons.close),
       // U.7b: 3.x record_settings_page.dart.
       (AppIcons.recordQuality, Remix.hd_line),
-      (AppIcons.recordPinyin, Remix.translate_2),
+      (AppIcons.recordPinyin, Remix.input_method_line), // A01.4 c4
       (AppIcons.recordDanmaku, Remix.chat_3_line),
       (AppIcons.recordSizeLimit, Remix.exchange_box_line),
       (AppIcons.recordSizeCap, Remix.database_2_line),
@@ -206,9 +206,9 @@ void main() {
       (AppIcons.recordBestStream, Remix.video_download_line),
       (AppIcons.recordTimeout, Remix.timer_flash_line),
       (AppIcons.recordQueue, Remix.speed_mini_line),
-      (AppIcons.recordSegment, Remix.film_line),
+      (AppIcons.recordSegment, Remix.scissors_cut_line), // A01.4 c4
       (AppIcons.recordMaxTasks, Remix.task_line),
-      (AppIcons.recordReconnect, Remix.refresh_line),
+      (AppIcons.recordReconnect, Remix.loop_right_line), // A01.4 c4
       (AppIcons.recordRetries, Remix.loop_left_line),
       (AppIcons.recordInterval, Remix.time_line),
       (AppIcons.recordPolling, Remix.radar_line),
@@ -523,5 +523,40 @@ void main() {
     final dark = theme.dark.colorScheme;
     expect(contrast(light.error, LiveSemanticColors.recordingNote(Brightness.light)), greaterThan(4.5));
     expect(contrast(dark.error, LiveSemanticColors.recordingNote(Brightness.dark)), greaterThan(4.5));
+  });
+
+  test('A01.4 c4: a settings icon means one thing', () {
+    // The two that read wrong on the phone.
+    expect(AppIcons.settingsPhoneVolume, Remix.volume_up_line);
+    expect(AppIcons.settingsAppProxy, AppIcons.settingsNetwork);
+    // Same meaning, same icon.
+    expect(AppIcons.settingsDesktopVolume, AppIcons.settingsPhoneVolume);
+    expect(AppIcons.settingsDanmakuFont, AppIcons.appFont);
+    expect(AppIcons.recordReconnect, AppIcons.recordReconnecting);
+    expect(AppIcons.settingsExitMinutes, AppIcons.settingsExitTimer);
+    // Different meanings, different icons.
+    final apart = <(IconData, IconData)>[
+      (AppIcons.settingsAppProxy, AppIcons.settingsPlatformList),
+      (AppIcons.settingsLanguage, AppIcons.settingsNetwork),
+      (AppIcons.recordPinyin, AppIcons.settingsLanguage),
+      (AppIcons.roomCardSettings, AppIcons.multiview),
+      (AppIcons.settingsAutoSleep, AppIcons.themeMode),
+      (AppIcons.settingsDanmakuStyle, AppIcons.themeColor),
+      (AppIcons.settingsDanmakuFont, AppIcons.fontSizes),
+      (AppIcons.recordSegment, AppIcons.settingsVideo),
+      (AppIcons.settingsAutoUpdate, AppIcons.settingsAutoRefresh),
+      (AppIcons.settingsDouyuRenew, AppIcons.settingsAutoRefresh),
+      (AppIcons.recordReconnect, AppIcons.settingsAutoRefresh),
+      (AppIcons.settingsDownloadReset, AppIcons.settingsAutoRefresh),
+      (AppIcons.resetLayout, AppIcons.settingsRefreshOnResume),
+      (AppIcons.settingsRefreshRate, AppIcons.settingsHardwareDecoding),
+      (AppIcons.settingsWindowSize, AppIcons.settingsVideoFit),
+      (AppIcons.portraitHeight, AppIcons.cardLayout),
+      (AppIcons.recordTimeout, AppIcons.settingsExitMinutes),
+      (AppIcons.platformAccounts, Remix.accessibility_line),
+    ];
+    for (final (index, (a, b)) in apart.indexed) {
+      expect(a, isNot(b), reason: 'pair $index');
+    }
   });
 }

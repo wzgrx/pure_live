@@ -42,6 +42,46 @@ void main() {
     }
   });
 
+  test('A01.4 c3: status page titles have no full stop; their explanations are sentences with one', () {
+    final zh = read('zh');
+    final en = read('en');
+    final titles = <String>{
+      for (final key in zh.keys)
+        if (key.endsWith('_empty_title')) key,
+    };
+    final explanations = <String>{'status_empty_subtitle'};
+    final call = RegExp(r'AppStatusView(?:\.\w+)?\(');
+    final title = RegExp(r"(?<!sub)title:\s*i18n\(\s*'([a-z0-9_]+)'");
+    final subtitle = RegExp(r"subtitle:\s*i18n\(\s*'([a-z0-9_]+)'");
+    for (final file in Directory('lib').listSync(recursive: true).whereType<File>()) {
+      if (!file.path.endsWith('.dart')) continue;
+      final source = file.readAsStringSync();
+      for (final match in call.allMatches(source)) {
+        // The call's arguments, up to its closing bracket.
+        var depth = 1;
+        var end = match.end;
+        while (end < source.length && depth > 0) {
+          final char = source[end++];
+          if (char == '(') depth++;
+          if (char == ')') depth--;
+        }
+        final arguments = source.substring(match.end, end);
+        titles.addAll(title.allMatches(arguments).map((found) => found.group(1)!));
+        explanations.addAll(subtitle.allMatches(arguments).map((found) => found.group(1)!));
+      }
+    }
+    expect(titles, containsAll(['tags_empty_title', 'empty_favorite_title', 'search_no_results']));
+    expect(explanations, containsAll(['empty_favorite_subtitle', 'search_start_desc']));
+    for (final key in titles) {
+      expect('${zh[key]}', isNot(endsWith('。')), reason: 'zh $key');
+      expect('${en[key]}', isNot(endsWith('.')), reason: 'en $key');
+    }
+    for (final key in explanations) {
+      expect('${zh[key]}', anyOf(endsWith('。'), endsWith('？'), endsWith('！')), reason: 'zh $key');
+      expect('${en[key]}', anyOf(endsWith('.'), endsWith('?'), endsWith('!')), reason: 'en $key');
+    }
+  });
+
   test('i18n reads the current language, fills named arguments and falls back', () async {
     await loadStrings();
     expect(i18n('favorites_title'), '关注');

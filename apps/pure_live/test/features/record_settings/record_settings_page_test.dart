@@ -216,9 +216,9 @@ void main() {
     // Values on the right, the meaning under the title (c5, c6).
     expect(find.descendant(of: _row('默认录制清晰度'), matching: find.text('原画')), findsOneWidget);
     expect(find.descendant(of: _row('录制读写超时'), matching: find.text('15 秒')), findsOneWidget);
-    expect(find.descendant(of: _row('录制读写超时'), matching: find.text('响应迅速 (推荐，适合稳定网络)')), findsOneWidget);
+    expect(find.descendant(of: _row('录制读写超时'), matching: find.text(withoutOrphan('响应迅速 (推荐，适合稳定网络)'))), findsOneWidget);
     expect(find.descendant(of: _row('输入缓冲队列'), matching: find.text('2048')), findsOneWidget);
-    expect(find.descendant(of: _row('输入缓冲队列'), matching: find.text('原画推荐 (1080P)')), findsOneWidget);
+    expect(find.descendant(of: _row('输入缓冲队列'), matching: find.text(withoutOrphan('原画推荐 (1080P)'))), findsOneWidget);
     expect(
       tester.getCenter(find.text('15 秒')).dx,
       greaterThan(tester.getCenter(find.text('录制读写超时')).dx),
@@ -261,7 +261,7 @@ void main() {
     expect(find.text('5.5 分钟'), findsOneWidget, reason: 'a 3.x value between minutes keeps its half (c11)');
     expect(find.descendant(of: _row('最大同时录制任务数'), matching: find.text('5')), findsOneWidget);
     expect(find.text('30 秒'), findsNWidgets(3));
-    expect(find.text('平衡模式 (兼顾稳定与重连速度)'), findsOneWidget);
+    expect(find.text(withoutOrphan('平衡模式 (兼顾稳定与重连速度)')), findsOneWidget);
 
     await _tap(tester, find.text('启用开播检测'));
     expect(harness.settings.enablePolling, isTrue);
@@ -333,7 +333,7 @@ void main() {
     expect(harness.settings.rwTimeout, 60);
     expect(find.byKey(const ValueKey('record-option-60')), findsNothing, reason: 'closed');
     expect(find.text('60 秒'), findsOneWidget);
-    expect(find.text('保守模式 (适合极端弱网环境)'), findsOneWidget);
+    expect(find.text(withoutOrphan('保守模式 (适合极端弱网环境)')), findsOneWidget);
 
     await _tap(tester, find.text('默认录制清晰度'));
     for (final quality in recordQualityPreferences) {

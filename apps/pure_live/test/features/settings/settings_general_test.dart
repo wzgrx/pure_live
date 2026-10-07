@@ -33,7 +33,7 @@ void main() {
       ]);
       expect(settingsRow('windows_display'), findsNothing);
       expect(_inRow('refresh_rate', _text('省电')), findsOneWidget);
-      expect(_inRow('refresh_rate', _text('当前 60 Hz，最高 60 Hz')), findsOneWidget);
+      expect(_inRow('refresh_rate', _text(withoutOrphan('当前 60 Hz，最高 60 Hz'))), findsOneWidget);
       // The dialog: each policy with its energy use and explanation.
       await tapSettings(tester, settingsRow('refresh_rate'));
       expect(_text('省电（默认） · 低耗电'), findsOneWidget);
@@ -79,7 +79,7 @@ void main() {
         ]);
         expect(settingsRow('dont_ask_exit'), findsNothing);
         expect(_inRow('close_window', _text('每次询问')), findsOneWidget);
-        expect(_inRow('new_window', _text('首页菜单和直播间菜单里显示“在新窗口打开”')), findsOneWidget);
+        expect(_inRow('new_window', _text(withoutOrphan('首页菜单和直播间菜单里显示“在新窗口打开”'))), findsOneWidget);
 
         // Closing the window: three options in 3.x's two keys (d5).
         await tapSettings(tester, settingsRow('close_window'));
@@ -161,7 +161,7 @@ void main() {
       ]);
       expect(_inRow('refresh_on_resume', _text('返回应用时刷新关注')), findsOneWidget);
       expect(_rowWidget(tester, 'refresh_interval').enabled, isFalse);
-      expect(_inRow('refresh_interval', _text('打开“开启关注自动刷新”后生效')), findsOneWidget);
+      expect(_inRow('refresh_interval', _text(withoutOrphan('打开“开启关注自动刷新”后生效'))), findsOneWidget);
       await tapSettings(tester, settingsRow('auto_refresh'));
       expect(_rowWidget(tester, 'refresh_interval').enabled, isTrue);
       await tapSettings(tester, settingsRow('refresh_interval'));

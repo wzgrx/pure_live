@@ -521,7 +521,7 @@ List<SettingsEntry> _build() {
       'multiview',
       'multiview_title',
       Settings.enableMultiView,
-      AppIcons.roomCardSettings,
+      AppIcons.multiview,
       desc: 'settings_nav_multiview_desc',
       keywords: ['多画面', 'multi'],
     )
@@ -890,8 +890,8 @@ List<SettingsEntry> _build() {
     ..add(
       'video_danmaku_font',
       'change_danmaku_font_family',
-      (context, entry) =>
-          FontFamilyTile(entry: entry, setting: Settings.danmakuFontFamilyName, icon: AppIcons.settingsDanmakuFont),
+      // The app font's icon (A01.4 c4: a font, whichever text it sets).
+      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.danmakuFontFamilyName),
       settings: [Settings.danmakuFontFamilyName, Settings.danmakuFontFamilyFileName],
       keywords: ['字体', 'font', '弹幕'],
       opens: true,

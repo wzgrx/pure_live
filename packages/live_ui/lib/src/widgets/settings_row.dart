@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_chip.dart';
 import 'package:live_ui/src/widgets/count_button.dart';
 
@@ -54,10 +55,11 @@ class SettingsHighlight extends InheritedWidget {
   bool updateShouldNotify(SettingsHighlight oldWidget) => oldWidget.words.join(' ') != words.join(' ');
 }
 
-/// [text] with [words] marked in a soft primary background.
+/// [text] with [words] marked in a soft primary background; an
+/// [explanation] never ends with a line of one character ([withoutOrphan]).
 class HighlightedText extends StatelessWidget {
   /// Creates the text.
-  const new(this.text, {required this.style, this.maxLines, this.words, super.key});
+  const new(this.text, {required this.style, this.maxLines, this.words, this.explanation = false, super.key});
 
   /// The text.
   final String text;
@@ -71,25 +73,35 @@ class HighlightedText extends StatelessWidget {
   /// Words to mark; [SettingsHighlight.of] when null.
   final List<String>? words;
 
+  /// Whether [text] is an explanation (no one-character last line).
+  final bool explanation;
+
   @override
   Widget build(BuildContext context) {
     final marks = words ?? SettingsHighlight.of(context);
     final overflow = maxLines == null ? null : TextOverflow.ellipsis;
+    final text = explanation ? withoutOrphan(this.text) : this.text;
     if (marks.isEmpty) return Text(text, style: style, maxLines: maxLines, overflow: overflow);
-    final lower = text.toLowerCase();
-    final marked = List<bool>.filled(text.length, false);
+    // The joiner is no letter: words match across it.
+    final lower = text.toLowerCase().replaceAll(wordJoiner, '\u0000');
+    final joined = lower.indexOf('\u0000');
+    final plain = joined < 0 ? lower : lower.replaceFirst('\u0000', '');
+    final found = List<bool>.filled(plain.length, false);
     for (final word in marks) {
       if (word.isEmpty) continue;
       var from = 0;
       while (true) {
-        final at = lower.indexOf(word, from);
-        if (at < 0 || at + word.length > text.length) break;
+        final at = plain.indexOf(word, from);
+        if (at < 0 || at + word.length > plain.length) break;
         for (var i = at; i < at + word.length; i++) {
-          marked[i] = true;
+          found[i] = true;
         }
         from = at + word.length;
       }
     }
+    final marked = joined < 0
+        ? found
+        : [...found.take(joined), found.length > joined && found[joined], ...found.skip(joined)];
     final background = Theme.of(context).colorScheme.primary.withValues(alpha: 0.22);
     final spans = <TextSpan>[];
     var start = 0;
@@ -245,7 +257,7 @@ class SettingsNote extends StatelessWidget {
     return Padding(
       padding: padding,
       child: Text(
-        text,
+        withoutOrphan(text),
         style: (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
           fontSize: SettingsRowStyle.tvOf(context) ? 14 : 12,
           height: 1.5,
@@ -279,7 +291,7 @@ class SettingsRow extends StatefulWidget {
     this.busyColor,
     this.selected = false,
     this.tooltip,
-    this.subtitleMaxLines = 2,
+    this.subtitleMaxLines = 3,
     this.keepTrailingWhileBusy = false,
     super.key,
   });
@@ -304,7 +316,7 @@ class SettingsRow extends StatefulWidget {
   /// A widget instead of [icon] (a live preview, a picture).
   final Widget? leading;
 
-  /// The explanation (at most two lines).
+  /// The explanation (at most three lines, A01.4 c2).
   final String? subtitle;
 
   /// The explanation's colour when it reports a problem (error red).
@@ -404,7 +416,12 @@ class _SettingsRowState extends State<SettingsRow> {
         if (subtitle != null && subtitle.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 2),
-            child: HighlightedText(subtitle, style: subtitleStyle, maxLines: widget.subtitleMaxLines),
+            child: HighlightedText(
+              subtitle,
+              style: subtitleStyle,
+              maxLines: widget.subtitleMaxLines,
+              explanation: true,
+            ),
           ),
       ],
     );
@@ -516,7 +533,7 @@ class SettingsLinkRow extends StatelessWidget {
     this.busy = false,
     this.selected = false,
     this.tooltip,
-    this.subtitleMaxLines = 2,
+    this.subtitleMaxLines = 3,
     super.key,
   });
 
@@ -650,7 +667,7 @@ class SettingsSwitchRow extends StatelessWidget {
     this.enabled = true,
     this.disabledReason,
     this.busy = false,
-    this.subtitleMaxLines = 2,
+    this.subtitleMaxLines = 3,
     super.key,
   });
 
@@ -901,7 +918,7 @@ class SettingsCounterRow extends StatefulWidget {
     this.valueKey,
     this.decreaseKey,
     this.increaseKey,
-    this.subtitleMaxLines = 2,
+    this.subtitleMaxLines = 3,
     super.key,
   });
 

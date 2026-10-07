@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/bootstrap.dart';
 import 'package:pure_live/app/launch_args.dart';
 import 'package:pure_live/app/services.dart';
@@ -68,3 +71,14 @@ Future<AppStrings> loadStrings([AppLanguage language = AppLanguage.zh]) async {
   currentStrings = strings;
   return strings;
 }
+
+/// Text that contains [words] once the line-break marks of explanations
+/// ([withoutOrphan], A01.4 c1) are left out.
+Finder findWords(String words) => find.byWidgetPredicate((widget) {
+  final text = switch (widget) {
+    Text(:final data?) => data,
+    Text(:final textSpan?) => textSpan.toPlainText(),
+    _ => null,
+  };
+  return text != null && text.replaceAll(wordJoiner, '').replaceAll('\u00A0', ' ').contains(words);
+}, description: 'text containing "$words"');

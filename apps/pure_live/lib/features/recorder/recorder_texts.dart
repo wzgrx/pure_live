@@ -81,6 +81,9 @@ String recordStreamErrorText(RecordStreamException error) =>
     meaning = i18n(error == 'timeout' ? 'recorder_background_time_limit' : 'recorder_background_unavailable');
   } else if (stage == 'room') {
     meaning = recordRestrictionText(restriction);
+  } else if (stage == 'merge') {
+    // The join's English diagnostic stays below as the detail.
+    meaning = i18n('recorder_merge_failed');
   }
   final summary = i18n(
     'recorder_last_error',

@@ -62,10 +62,20 @@ final class FakeFfmpeg implements FfmpegRunner {
   final runs = <List<String>>[];
   final executions = <FakeExecution>[];
 
+  /// The concat manifest of every join, read when it starts.
+  final joinManifests = <String>[];
+
   /// Code a capture ends with by itself after [captureSeconds]; null runs
   /// until cancelled.
   int? captureExit;
   Duration captureSeconds = Duration.zero;
+
+  /// Bytes of the segment a capture writes; 0 writes an empty segment and
+  /// an empty journal (FFmpeg cut off before any data).
+  int captureBytes = 1000;
+
+  /// A line a capture logs when it is cancelled (the input cut at a stop).
+  String? stopLog;
 
   /// Statistics a join reports, one per turn of the event loop, before it
   /// ends; none: it ends at once.
@@ -74,10 +84,11 @@ final class FakeFfmpeg implements FfmpegRunner {
   @override
   Future<FfmpegExecution> start(List<String> arguments) async {
     runs.add(arguments);
-    final execution = FakeExecution();
+    final execution = FakeExecution()..cancelLog = stopLog;
     executions.add(execution);
     if (arguments.contains('concat')) {
       final output = arguments.last;
+      joinManifests.add(File(arguments[arguments.indexOf('-i') + 1]).readAsStringSync());
       File(output).writeAsStringSync('mp4');
       final samples = List.of(joinStatistics);
       void next() {
@@ -99,8 +110,9 @@ final class FakeFfmpeg implements FfmpegRunner {
     final pattern = arguments.last;
     final journal = arguments[arguments.indexOf('-segment_list') + 1];
     final segment = pattern.replaceFirst('%06d', '000000');
-    File(segment).writeAsBytesSync(List.filled(1000, 1));
-    File(journal).writeAsStringSync('${segment.split(Platform.pathSeparator).last},0.000000,4.000000\n');
+    File(segment).writeAsBytesSync(List.filled(captureBytes, 1));
+    File(journal)
+        .writeAsStringSync(captureBytes > 0 ? '${segment.split(Platform.pathSeparator).last},0.000000,4.000000\n' : '');
     Timer.run(() => execution.stats.add(const FfmpegStatistics(time: 4000, videoFrame: 100)));
     final exit = captureExit;
     if (exit != null) Timer(captureSeconds, () => execution.finish(exit));
@@ -113,6 +125,9 @@ final class FakeExecution implements FfmpegExecution {
   final stats = StreamController<FfmpegStatistics>.broadcast();
   final _exit = Completer<int>();
   bool cancelled = false;
+
+  /// Logged by [cancel] before the end.
+  String? cancelLog;
 
   void finish(int code) {
     if (!_exit.isCompleted) _exit.complete(code);
@@ -132,6 +147,8 @@ final class FakeExecution implements FfmpegExecution {
   @override
   void cancel() {
     cancelled = true;
+    final line = cancelLog;
+    if (line != null) log(line);
     finish(255);
   }
 }

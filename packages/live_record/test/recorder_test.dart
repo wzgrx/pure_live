@@ -163,8 +163,8 @@ void main() {
       root.deleteSync(recursive: true);
     });
 
-    Future<void> until(bool Function() condition) async {
-      final deadline = DateTime.now().add(const Duration(seconds: 10));
+    Future<void> until(bool Function() condition, {Duration within = const Duration(seconds: 10)}) async {
+      final deadline = DateTime.now().add(within);
       while (!condition()) {
         if (DateTime.now().isAfter(deadline)) fail('timed out');
         await Future<void>.delayed(const Duration(milliseconds: 10));
@@ -207,12 +207,124 @@ void main() {
       expect(ffmpeg.runs.where((run) => run.contains('concat')), hasLength(2));
     }, timeout: const Timeout(Duration(seconds: 20)));
 
+    group('after the broadcast ends', () {
+      // The platform still says live and serves a URL, but every capture
+      // ends at once with an EOF (a closed or 404 signed stream).
+      setUp(() {
+        settings = RecordSettings(maxRetryCount: 1);
+        ffmpeg
+          ..captureExit = 0
+          ..captureSeconds = const Duration(seconds: 1);
+      });
+
+      List<List<String>> captures() => [
+        for (final run in ffmpeg.runs)
+          if (!run.contains('concat')) run,
+      ];
+      List<List<String>> joins() => [
+        for (final run in ffmpeg.runs)
+          if (run.contains('concat')) run,
+      ];
+
+      test(
+        'the fast retries stop at twice the limit, the attempts are joined and the task waits for the room',
+        () async {
+          final task = (await recorder.addTask(room()))!;
+          await until(() => task.status == RecordStatus.waitingLive, within: const Duration(seconds: 20));
+          expect(captures(), hasLength(2));
+          expect(joins(), hasLength(2));
+          expect(task.pendingAttempts, isEmpty);
+          expect(task.lastOutputPath, endsWith('.mp4'));
+          expect(File(task.lastOutputPath!).existsSync(), isTrue);
+          await Future<void>.delayed(const Duration(seconds: 3));
+          expect(captures(), hasLength(2));
+          expect(task.status, RecordStatus.waitingLive);
+        },
+        timeout: const Timeout(Duration(seconds: 40)),
+      );
+
+      test('开播自动录 off: the fast retries running out end the session saved, not failed', () async {
+        final task = (await recorder.addTask(room(), autoRecord: false))!;
+        await until(() => task.status.isFinished, within: const Duration(seconds: 20));
+        expect(task.status, RecordStatus.completed);
+        expect(task.lastError, isNull);
+        expect(task.pendingAttempts, isEmpty);
+        expect(task.lastOutputPath, endsWith('.mp4'));
+      }, timeout: const Timeout(Duration(seconds: 40)));
+
+      test('a network outage keeps reconnecting without using up the limit', () async {
+        final task = (await recorder.addTask(room()))!;
+        await until(() => task.status == RecordStatus.reconnecting);
+        site.detailError = Exception('offline network');
+        await until(() => task.retryCount > 2, within: const Duration(seconds: 20));
+        expect(task.status, RecordStatus.reconnecting);
+        expect(task.lastErrorStage, isNotNull);
+        site.detailError = null;
+        ffmpeg.captureExit = null;
+        await until(() => task.status == RecordStatus.running, within: const Duration(seconds: 20));
+        expect(captures(), hasLength(2));
+      }, timeout: const Timeout(Duration(seconds: 60)));
+
+      test('with the live check on, the task checks the room again after the join', () async {
+        settings = RecordSettings(maxRetryCount: 1, enablePolling: true, liveCheckInterval: 10);
+        final task = (await recorder.addTask(room()))!;
+        await until(() => task.status == RecordStatus.waitingLive, within: const Duration(seconds: 20));
+        expect(task.pendingAttempts, isEmpty);
+        ffmpeg.captureExit = null;
+        await until(
+          () => captures().length == 3 && task.status == RecordStatus.running,
+          within: const Duration(seconds: 20),
+        );
+      }, timeout: const Timeout(Duration(seconds: 60)));
+    });
+
+    test('when the room reports offline, the session is joined before it waits again', () async {
+      ffmpeg
+        ..captureExit = 0
+        ..captureSeconds = const Duration(seconds: 1);
+      final task = (await recorder.addTask(room(), autoRecord: true))!;
+      await until(() => task.status == RecordStatus.reconnecting);
+      expect(task.pendingAttempts, hasLength(1));
+      final statuses = <RecordStatus>[];
+      final subscription = recorder.changes.listen((_) => statuses.add(task.status));
+      addTearDown(subscription.cancel);
+      site.status = LiveStatus.offline;
+      await until(() => task.status == RecordStatus.waitingLive, within: const Duration(seconds: 20));
+      expect(statuses, contains(RecordStatus.processing));
+      expect(statuses.indexOf(RecordStatus.processing), lessThan(statuses.indexOf(RecordStatus.waitingLive)));
+      expect(task.pendingAttempts, isEmpty);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      expect(task.lastError, isNull);
+    }, timeout: const Timeout(Duration(seconds: 40)));
+
+    test('with the live check on, a room found offline by a start is checked again', () async {
+      settings = RecordSettings(enablePolling: true, liveCheckInterval: 10);
+      site.status = LiveStatus.offline;
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.waitingLive);
+      site.status = LiveStatus.live;
+      await until(() => task.status == RecordStatus.running, within: const Duration(seconds: 20));
+      expect(ffmpeg.runs, hasLength(1));
+    }, timeout: const Timeout(Duration(seconds: 40)));
+
     test('an offline room waits for the live check', () async {
       site.status = LiveStatus.offline;
       final task = (await recorder.addTask(room()))!;
       await until(() => task.status == RecordStatus.waitingLive);
       expect(ffmpeg.runs, isEmpty);
       expect(task.lastError, isNull);
+    });
+
+    test('a packet cut off by the stop is a discarded tail, not damage: the attempt joins', () async {
+      ffmpeg.stopLog = '[in#0/flv @ 0x1] Packet corrupt (stream = 0, dts = 13840), dropping it.';
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.running);
+      await recorder.stopTask(task);
+      expect(task.status, RecordStatus.stopped);
+      expect(task.lastError, isNull);
+      expect(task.pendingAttempts, isEmpty);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      expect(task.inputTailDiscarded, isTrue);
     });
 
     test('a damaged attempt keeps its source and fails the join', () async {

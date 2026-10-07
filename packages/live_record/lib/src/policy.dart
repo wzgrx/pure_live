@@ -33,12 +33,17 @@ abstract final class RecordPolicy {
   );
 
   /// Whether retries are used up and the task should wait for the room
-  /// again; never for a live EOF.
+  /// again. A live EOF (or 403/404) is retried quickly, but a streamer who
+  /// ended the broadcast keeps causing them: they get twice the budget
+  /// (upstream pure_live 2b9ffc7a3) instead of an unlimited one.
   static bool shouldEnterPollingAfterRetryLimit({
     required int retryCount,
     required int maximumRetries,
     required bool unexpectedEof,
-  }) => !unexpectedEof && retryCount >= maximumRetries.clamp(1, 100);
+  }) {
+    final limit = maximumRetries.clamp(1, 100);
+    return retryCount >= (unexpectedEof ? limit * 2 : limit);
+  }
 
   /// When to fetch the next URL before a lease's [refreshAt]: [lead]
   /// earlier, immediately when already late (after sleep or resume).

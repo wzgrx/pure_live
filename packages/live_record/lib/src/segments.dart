@@ -16,12 +16,31 @@ final class SegmentClock {
   /// segment, names in order, the first start at zero, strictly increasing
   /// starts, one directory, no control characters. Anything else fails
   /// closed rather than guessing a duration or dropping a tail.
-  factory parse(String csv, {required String prefix, required List<String> segments}) {
+  ///
+  /// [ignoredTail] names the empty segments dropped after the last of
+  /// [segments] (H01.5): rows beyond [segments] are left out only when they
+  /// are exactly the first of those names, in order, at the end.
+  factory parse(
+    String csv, {
+    required String prefix,
+    required List<String> segments,
+    Iterable<String> ignoredTail = const [],
+  }) {
     _checked(prefix);
     if (csv.length > maxBytes || segments.isEmpty || segments.length > maxSegments || !csv.endsWith('\n')) {
       throw const FormatException('Recording clock journal shape or unfinished row');
     }
-    final rows = const LineSplitter().convert(csv);
+    var rows = const LineSplitter().convert(csv);
+    final tail = [for (final name in ignoredTail) p.basename(name)];
+    final extra = rows.length - segments.length;
+    if (extra > 0 && extra <= tail.length) {
+      final dropped = rows.sublist(segments.length);
+      var matches = true;
+      for (var i = 0; i < extra; i++) {
+        if (dropped[i].split(',').first != tail[i]) matches = false;
+      }
+      if (matches) rows = rows.sublist(0, segments.length);
+    }
     if (rows.length != segments.length) throw const FormatException('Recording clock missing or extra segment');
     final starts = <int>[];
     final paths = <String>[];
@@ -80,14 +99,25 @@ final class SegmentClock {
     return prefix;
   }
 
-  /// Reads [file] (bounded) and validates it against [segments].
-  static Future<SegmentClock> read(File file, {required String prefix, required List<File> segments}) async {
+  /// Reads [file] (bounded) and validates it against [segments], leaving
+  /// out the rows of an [ignoredTail] ([SegmentClock.parse]).
+  static Future<SegmentClock> read(
+    File file, {
+    required String prefix,
+    required List<File> segments,
+    Iterable<File> ignoredTail = const [],
+  }) async {
     final bytes = <int>[];
     await for (final chunk in file.openRead()) {
       if (chunk.length > maxBytes - bytes.length) throw const FormatException('Recording clock journal budget');
       bytes.addAll(chunk);
     }
-    return SegmentClock.parse(utf8.decode(bytes), prefix: prefix, segments: [for (final file in segments) file.path]);
+    return SegmentClock.parse(
+      utf8.decode(bytes),
+      prefix: prefix,
+      segments: [for (final file in segments) file.path],
+      ignoredTail: [for (final file in ignoredTail) file.path],
+    );
   }
 
   static int _time(String value) {
@@ -137,6 +167,46 @@ List<File> selectAttemptSegments(Iterable<File> candidates, {required String fil
   return allowLegacy
       ? all.where((file) => !file.path.toLowerCase().endsWith(SegmentClock.segmentSuffix)).toList()
       : <File>[];
+}
+
+/// Deletes what attempt [prefix] in [directory] left without recording
+/// anything (H01.5): its empty segments, its journal when it is empty or
+/// names no segment that is still there, then the directory when nothing
+/// else is in it. Other attempts' files, chat XML and the user's files stay;
+/// a failed deletion is left for later, never thrown.
+void discardEmptyAttempt(String directory, String prefix) {
+  final dir = Directory(directory);
+  try {
+    if (!dir.existsSync()) return;
+    final journal = File(p.join(directory, SegmentClock.journalName(prefix)));
+    final matcher = RegExp('^${RegExp.escape(prefix)}_\\d{6,}(?:\\.clock-v1)?\\.ts\$', caseSensitive: false);
+    for (final entity in dir.listSync(followLinks: false)) {
+      if (entity is! File || !matcher.hasMatch(p.basename(entity.path))) continue;
+      try {
+        if (entity.lengthSync() == 0) entity.deleteSync();
+      } on FileSystemException {
+        // Left for later.
+      }
+    }
+    if (journal.existsSync()) {
+      final length = journal.lengthSync();
+      final rows = length == 0 || length > SegmentClock.maxBytes
+          ? const <String>[]
+          : const LineSplitter().convert(journal.readAsStringSync());
+      final named = [
+        for (final row in rows)
+          if (row.trim().isNotEmpty) p.basename(row.split(',').first),
+      ];
+      if (length <= SegmentClock.maxBytes && named.every((name) => !File(p.join(directory, name)).existsSync())) {
+        journal.deleteSync();
+      }
+    }
+    if (dir.listSync(followLinks: false).isEmpty) dir.deleteSync();
+  } on FileSystemException {
+    // Left for later.
+  } on FormatException {
+    // Not an attempt prefix: nothing of it is touched.
+  }
 }
 
 /// Ownership of a new clock-v1 output across FFmpeg's start (3.x

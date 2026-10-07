@@ -1470,6 +1470,7 @@
     "recorder_input_open_failed": "录制内核未能打开当前直播线路，将重新获取地址并尝试下一线路或清晰度。",
     "recorder_input_tail_discarded": "停止时部分输入未完整接收，已跳过；录像可能缺少相应内容。",
     "recorder_last_error": "最近失败（{stage}）：{error}",
+    "recorder_merge_failed": "分段没能合成 MP4，原始分段保留在录制文件夹里",
     "recorder_open_folder": "打开文件夹",
     "recorder_polling_off": "“开播检测”关着，等待开播的任务到时不会自动开始。",
     "recorder_resolve_failed": "{name}: {error}",

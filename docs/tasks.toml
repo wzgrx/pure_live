@@ -2982,10 +2982,16 @@ old = ["M1.1", "T03a.2"]
 id = "Q02.1"
 title = "封面和头像走应用代理（3.x 的 CustomImageCacheManager）"
 type = "功能"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 2
+date = "2026-10-08"
+commit = "97050a8e4"
 from = "docs v2 G、Q、R 组核对（Q02 说明“已知问题”；功能清点 F-NET-01 改“部分”）"
+note = "F-NET-01 改“没验证”；新加直接依赖 http、cached_network_image（原来就是间接依赖）"
+stages = ["c1～c4 应用的图片缓存管理器、清缓存、旧缓存清一次、弹幕层表情"]
+done = 1
+next = "K90 上按 record.md“真机上要看的”看（开着应用代理看 Twitch 封面）"
 
 [[task]]
 id = "Q03.1"

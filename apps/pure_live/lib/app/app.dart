@@ -12,6 +12,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/desktop/title_bar.dart';
 import 'package:pure_live/app/fonts.dart';
+import 'package:pure_live/app/page_toasts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/ui_mode.dart';
@@ -68,6 +69,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   // The one toast (docs/A-界面设计/A02-组件/A02.2-弹窗组件 c11–c13): the same words are not
   // repeated while they show (3.x `ToastUtil`; pure_live_TV the same).
   late final AppToaster _toaster = AppToaster(() => _messenger.currentState);
+  // A02.4 c3: an undo toast closes with its page.
+  VoidCallback? _stopPageToasts;
   late final FontLibrary _fonts;
 
   @override
@@ -75,6 +78,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     super.initState();
     currentStrings = _strings;
     AppNavigator.router = _router;
+    _stopPageToasts = closeToastsOnNewPage(_router, () => _messenger.currentState);
     AppNavigator.toast = (message) => _toaster.show(AppToast(message));
     AppNavigator.showToast = _toaster.show;
     imageCacheEpoch.addListener(_imagesCleared);
@@ -101,6 +105,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _stopPageToasts?.call();
     RoomSwitchPanel.follows = null;
     imageCacheEpoch.removeListener(_imagesCleared);
     _fonts.removeListener(_imagesCleared);
@@ -126,8 +131,10 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     _tv = tv;
     if (widget.router != null) return;
     final old = _router;
+    _stopPageToasts?.call();
     _router = tv ? buildTvRouter() : buildAppRouter();
     AppNavigator.router = _router;
+    _stopPageToasts = closeToastsOnNewPage(_router, () => _messenger.currentState);
     WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
   }
 

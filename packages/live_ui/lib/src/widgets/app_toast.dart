@@ -18,7 +18,8 @@ const double appToastMaxWidth = 560;
 ///
 /// It goes after [duration] (3 s like 3.x; 4 s with an action) unless it
 /// asks the user something ([persistent]: it stays, with ✕, until the
-/// action or ✕).
+/// action or ✕). With an accessibility service on, one with an action
+/// stays [accessibleActionDuration], with ✕ (A02.4).
 @immutable
 final class AppToast {
   /// Creates the toast.
@@ -29,6 +30,12 @@ final class AppToast {
 
   /// How long a toast with an action shows (U.1d c13).
   static const Duration actionDuration = Duration(seconds: 4);
+
+  /// How long a toast with an action shows with an accessibility service
+  /// on (A02.4 c2): time to reach the action without a screen reader
+  /// racing 4 s, yet not for good (any service, such as select-to-speak,
+  /// turns `accessibleNavigation` on).
+  static const Duration accessibleActionDuration = Duration(seconds: 30);
 
   /// The words.
   final String message;
@@ -51,25 +58,37 @@ final class AppToast {
   /// How long it shows.
   Duration get duration => actionLabel != null ? actionDuration : shortDuration;
 
+  /// Whether its action belongs to the page it was shown on ("撤销",
+  /// "重试"): a new page closes it ([closePageAppToast], A02.4 c3). One the
+  /// user has to answer ([persistent]) stays.
+  bool get belongsToPage => actionLabel != null && !persistent;
+
   /// The snack bar, [width] wide (centred) or across the screen less the
-  /// theme's margins. With a screen reader ([accessible]) a toast with an
-  /// action stays until it is used or closed (Flutter's rule for snack bar
-  /// actions).
-  SnackBar snackBar({double? width, bool accessible = false}) => SnackBar(
-    key: key,
-    width: width,
-    behavior: SnackBarBehavior.floating,
-    duration: persistent ? const Duration(days: 1) : duration,
-    persist: persistent || (accessible && actionLabel != null),
-    padding: EdgeInsetsDirectional.only(start: 16, end: actionLabel != null || closable || persistent ? 4 : 16),
-    content: _AppToastContent(toast: this),
-  );
+  /// theme's margins. With an accessibility service on ([accessible]) a
+  /// toast with an action stays [accessibleActionDuration] with ✕ (A02.4:
+  /// Flutter's rule kept it until used, and without ✕ it stayed for good).
+  SnackBar snackBar({double? width, bool accessible = false}) {
+    final longer = accessible && belongsToPage;
+    final close = closable || persistent || longer;
+    return SnackBar(
+      key: key,
+      width: width,
+      behavior: SnackBarBehavior.floating,
+      duration: persistent ? const Duration(days: 1) : (longer ? accessibleActionDuration : duration),
+      persist: persistent,
+      padding: EdgeInsetsDirectional.only(start: 16, end: actionLabel != null || close ? 4 : 16),
+      content: _AppToastContent(toast: this, close: close),
+    );
+  }
 }
 
 class _AppToastContent extends StatelessWidget {
-  const new({required this.toast});
+  const new({required this.toast, required this.close});
 
   final AppToast toast;
+
+  /// Shows ✕.
+  final bool close;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +118,7 @@ class _AppToastContent extends StatelessWidget {
             },
             child: Text(action),
           ),
-        if (toast.closable || toast.persistent)
+        if (close)
           IconButton(
             key: const ValueKey('app-toast-close'),
             tooltip: LiveUiScope.of(context).strings.close,
@@ -133,9 +152,24 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showAppToastOn(
 ) {
   final media = MediaQuery.of(messenger.context);
   messenger.clearSnackBars();
-  return messenger.showSnackBar(
+  final controller = messenger.showSnackBar(
     toast.snackBar(width: appToastWidth(media.size.width), accessible: media.accessibleNavigation),
   );
+  _shown[messenger] = toast;
+  controller.closed.then((_) {
+    if (identical(_shown[messenger], toast)) _shown[messenger] = null;
+  }).ignore();
+  return controller;
+}
+
+/// The toast each messenger shows ([closePageAppToast]).
+final Expando<AppToast> _shown = Expando('app toast');
+
+/// A new page is up (A02.4 c3): closes the toast [messenger] shows when its
+/// action belongs to the page left ([AppToast.belongsToPage]). Plain words
+/// run out as before (3.x's toasts outlived the page too).
+void closePageAppToast(ScaffoldMessengerState messenger) {
+  if (_shown[messenger]?.belongsToPage ?? false) messenger.hideCurrentSnackBar();
 }
 
 /// Shows the app's toasts through one messenger (the app's [show] for

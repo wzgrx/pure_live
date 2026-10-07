@@ -30,7 +30,7 @@
 
 ## 3.x 基线
 
-- `git show v3.2.11:lib/player/core/live_audio_handler.dart`：`_initSession`（`:98`）：`configure(const AudioSessionConfiguration.music())`（`:100`）；`interruptionEventStream`（`:103`）：开始 `pause` → `pauseForInterruption` 拿令牌（没有时直接暂停并记下原来在不在播），`duck` → 音量 × 0.2；结束 `pause` → 用令牌 `resumeFromInterruption`（或原来在播就播），`duck` → 恢复音量（`:131-158`）；`becomingNoisyEventStream`（`:163`）：清掉令牌、调暂停命令。所有事件排队按顺序执行（`_enqueueAudioEvent`，`:86-95`）。
+- `git show v3.2.11:lib/player/core/live_audio_handler.dart`：`_initSession`（`:98`）：`configure(const AudioSessionConfiguration.music())`（`:100`）；`interruptionEventStream`（`:103`）：开始 `pause` → `pauseForInterruption` 拿令牌（没有时直接暂停并记下原来在不在播），`duck` → 音量 × 0.2；结束 `pause` → 用令牌 `resumeFromInterruption`（或原来在播就播），`duck` → 恢复音量（`:131-158`）；`becomingNoisyEventStream`（`:163`）：清掉令牌、调暂停命令。所有事件排队按顺序执行（`_enqueueAudioEvent`，`:84-95`）。
 - `lib/player/core/live_audio_service.dart:142`：开播 `start` 时 `activateSession`（失败只记日志，不影响播放，`:143-149`）。
 - `lib/player/core/player_manager.dart:494-530`：`pauseForAudioInterruption` / `resumeFromAudioInterruption`（令牌：期间用户操作过就作废）。
 - `pubspec.yaml:76` `audio_session: ^0.2.3`。

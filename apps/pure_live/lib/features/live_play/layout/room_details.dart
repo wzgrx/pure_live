@@ -183,7 +183,8 @@ class _Content extends StatelessWidget {
           _Expandable(label: i18n('live_play_info_introduction'), text: introduction),
         const SizedBox(height: 4),
         _CopyRow(label: i18n('live_play_info_room_id'), value: room.roomId, keyName: 'room-id'),
-        if (link.isNotEmpty) _CopyRow(label: i18n('live_play_details_link'), value: link, keyName: 'link'),
+        if (link.isNotEmpty)
+          _CopyRow(label: i18n('live_play_details_link'), value: link, shown: linkWithoutScheme(link), keyName: 'link'),
         if (!iptv) ...[
           const SizedBox(height: 12),
           Wrap(
@@ -283,23 +284,36 @@ class _StreamerState extends State<_Streamer> {
                         key: const ValueKey('live-play-details-area'),
                         borderRadius: BorderRadius.circular(6),
                         onTap: room.platform == SiteIds.iptv ? null : () => unawaited(_openArea(area)),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(area, maxLines: 1, overflow: TextOverflow.ellipsis, style: secondary),
-                            ),
-                            if (_finding)
-                              Padding(
-                                padding: const EdgeInsets.only(left: 4),
-                                child: SizedBox.square(
-                                  dimension: 12,
-                                  child: CircularProgressIndicator(strokeWidth: 1.6, color: scheme.onSurfaceVariant),
+                        // One text with its mark, cut short as a whole in a
+                        // narrow column (a phone held sideways, A07.17 c2).
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: area),
+                              if (_finding)
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: SizedBox.square(
+                                      dimension: 12,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 1.6,
+                                        color: scheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              else if (room.platform != SiteIds.iptv)
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Icon(AppIcons.forward, size: 16, color: scheme.onSurfaceVariant),
                                 ),
-                              )
-                            else if (room.platform != SiteIds.iptv)
-                              Icon(AppIcons.forward, size: 16, color: scheme.onSurfaceVariant),
-                          ],
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: secondary,
                         ),
                       ),
                     ),
@@ -428,30 +442,42 @@ class _Figures extends StatelessWidget {
         ),
       ),
     );
-    final cells = [
-      for (final figure in figures)
-        cell(Text(figure.value.isEmpty ? '—' : readableAudience(figure.value)), audienceLabel(figure.type)),
-      if (startedAt != null)
-        cell(OnAirClock(startedAt: startedAt, now: controller.now, style: value), i18n('live_play_on_air')),
-    ];
+    final count = figures.length + (startedAt == null ? 0 : 1);
     return Padding(
       key: const ValueKey('live-play-details-figures'),
       padding: const EdgeInsets.only(top: 12, bottom: 4),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          border: Border.all(color: scheme.outlineVariant),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              for (final (index, child) in cells.indexed) ...[
-                if (index > 0) VerticalDivider(width: 1, color: scheme.outlineVariant),
-                child,
-              ],
-            ],
-          ),
-        ),
+      child: LayoutBuilder(
+        // The cells' width, for the time on air (the row's intrinsic height
+        // cannot ask a layout builder inside it).
+        builder: (context, constraints) {
+          final cellWidth = (constraints.maxWidth - 2 - (count - 1)) / count;
+          final cells = [
+            for (final figure in figures)
+              cell(Text(figure.value.isEmpty ? '—' : readableAudience(figure.value)), audienceLabel(figure.type)),
+            if (startedAt != null)
+              // A07.17 c6: `12:13` where `12 小时 13 分` does not fit the cell.
+              cell(
+                OnAirClock(startedAt: startedAt, now: controller.now, style: value, fitWidth: cellWidth),
+                i18n('live_play_on_air'),
+              ),
+          ];
+          return DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border.all(color: scheme.outlineVariant),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: IntrinsicHeight(
+              child: Row(
+                children: [
+                  for (final (index, child) in cells.indexed) ...[
+                    if (index > 0) VerticalDivider(width: 1, color: scheme.outlineVariant),
+                    child,
+                  ],
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -520,12 +546,17 @@ class _ExpandableState extends State<_Expandable> {
   }
 }
 
-/// A label, a value and a copy button.
+/// [link] as the details show it: without `https://` or `http://` (A07.17
+/// c6; the copy is still the whole address).
+String linkWithoutScheme(String link) => link.replaceFirst(RegExp('^https?://', caseSensitive: false), '');
+
+/// A label, a value (shown as [shown] when given) and a copy button.
 class _CopyRow extends StatelessWidget {
-  const new({required this.label, required this.value, required this.keyName});
+  const new({required this.label, required this.value, required this.keyName, this.shown});
 
   final String label;
   final String value;
+  final String? shown;
   final String keyName;
 
   @override
@@ -539,7 +570,12 @@ class _CopyRow extends StatelessWidget {
           child: Text(label, style: theme.textTheme.bodyMedium?.regular.copyWith(color: scheme.onSurfaceVariant)),
         ),
         Expanded(
-          child: Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyLarge?.regular),
+          child: Text(
+            shown ?? value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyLarge?.regular,
+          ),
         ),
         IconButton(
           key: ValueKey('live-play-details-copy-$keyName'),

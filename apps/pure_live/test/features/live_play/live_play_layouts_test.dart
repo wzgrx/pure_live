@@ -519,10 +519,11 @@ void main() {
       await _close(tester, room);
     });
 
-    testWidgets('under 480 high (a phone held sideways): split with the narrow chat column (U.2e c17)', (tester) async {
+    testWidgets('under 480 high (a phone held sideways): the picture and the chat list (A07.17 c2)', (tester) async {
       final room = await _pump(tester, width: 740, height: 360);
-      expect(_key('live-play-desktop-split'), findsOneWidget, reason: 'not the phone stack at 740');
-      expect(tester.getSize(_key('live-play-chat-box')).width, 300);
+      expect(_key('live-play-phone-landscape'), findsOneWidget, reason: 'not the phone stack at 740');
+      expect(_key('live-play-desktop-split'), findsNothing, reason: 'not the tablet split either');
+      expect(tester.getSize(_key('live-play-landscape-chat')).width, phoneLandscapeChatWidth);
       expect(find.byType(AppBar), findsOneWidget);
       await _close(tester, room);
     });
@@ -569,8 +570,8 @@ void main() {
       final immersive = await _pump(tester, portrait: true, settings: {Settings.portraitLayoutMode: 'immersive'});
       expect(
         tester.getSize(_key('live-play-portrait-sheet')).height,
-        portraitPanelLeast + portraitPanelComposer,
-        reason: '"沉浸": the lowest, with the local composer under the chat',
+        portraitPanelLeast,
+        reason: '"沉浸": the lowest; the local composer is a star on the chat (A07.17 c3)',
       );
       await _close(tester, immersive);
     });
@@ -1084,6 +1085,11 @@ void main() {
       expect(roomPageLayout(width: 839, height: 1000, portraitPanel: false), RoomPageLayout.phone);
       expect(roomPageLayout(width: 393, height: 852, portraitPanel: true), RoomPageLayout.portraitPanel);
       expect(roomPageLayout(width: 852, height: 393, portraitPanel: false), RoomPageLayout.landscape);
+      expect(
+        roomPageLayout(width: 852, height: 393, portraitPanel: false, mobile: false),
+        RoomPageLayout.wide,
+        reason: 'a short desktop window keeps the split (A07.17)',
+      );
       expect(roomPageLayout(width: 360, height: 400, portraitPanel: false), RoomPageLayout.phone);
       expect(roomPageLayout(width: 560, height: 400, portraitPanel: false), RoomPageLayout.phone);
       expect(

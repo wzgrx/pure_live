@@ -26,6 +26,7 @@ class LiveVideoView extends StatefulWidget {
     this.outputSize = false,
     this.fill = const Color(0xFF000000),
     this.keepScreenOn = true,
+    this.alignment = Alignment.center,
     super.key,
   });
 
@@ -44,6 +45,10 @@ class LiveVideoView extends StatefulWidget {
 
   /// Keep the screen on while it plays (the live room's "屏幕常亮").
   final bool keepScreenOn;
+
+  /// Where the video sits in a box of another shape: the middle, or the top
+  /// where a panel covers the lower part (the portrait room, A07.17 c3).
+  final Alignment alignment;
 
   @override
   State<LiveVideoView> createState() => _LiveVideoViewState();
@@ -125,6 +130,7 @@ class _LiveVideoViewState extends State<LiveVideoView> {
       controls: null,
       fit: widget.fit,
       fill: widget.fill,
+      alignment: widget.alignment,
       pauseUponEnteringBackgroundMode: false,
       // F.1a: [ScreenWake] keeps the screen on, as the setting says.
       wakelock: false,

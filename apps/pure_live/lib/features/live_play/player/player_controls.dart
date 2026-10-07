@@ -16,6 +16,7 @@ import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart
 import 'package:pure_live/features/live_play/dialogs/iptv_guide.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/stream_dialogs.dart';
+import 'package:pure_live/features/live_play/layout/room_info_bar.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -32,6 +33,12 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// How far the shade under a control bar reaches past the bar into the
 /// picture (U.2a change 3).
 const double controlShadeReach = 28;
+
+/// How far the inline bottom bar's shade reaches up where the picture goes
+/// on under the portrait room's panel (A07.17 c5): the bar sits on the
+/// picture's lit middle there, not its edge, and the short shade did not
+/// read on the phone.
+const double panelShadeReach = 56;
 
 /// The height of a control bar.
 const double controlBarHeight = 52;
@@ -133,6 +140,9 @@ final class PlayerBarActions {
     this.onReopen,
     this.onWindowFullscreen,
     this.wide,
+    this.onTitle,
+    this.pickersInBar = false,
+    this.overPanel = false,
     this.reduced = false,
   });
 
@@ -186,6 +196,19 @@ final class PlayerBarActions {
   /// The wide room's extras.
   final WideBarActions? wide;
 
+  /// A phone held sideways (A07.17 c2): the inline title is the room strip,
+  /// the title with the figures under it, and a tap on it opens or closes
+  /// the room details; null elsewhere.
+  final VoidCallback? onTitle;
+
+  /// The quality and line buttons in the inline bottom bar (a phone held
+  /// sideways has no strip for them, A07.17 c2).
+  final bool pickersInBar;
+
+  /// The picture goes on under the portrait room's panel: the inline bottom
+  /// bar's shade reaches further up ([panelShadeReach], A07.17 c5).
+  final bool overPanel;
+
   /// Nothing plays (loading, offline, failed, restricted): the top bar keeps
   /// the way out and the room's buttons, without audio only, cast and the
   /// mini window that need a picture (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态 c6).
@@ -209,6 +232,9 @@ final class PlayerBarActions {
     onReopen: onReopen,
     onWindowFullscreen: onWindowFullscreen,
     wide: wide,
+    onTitle: onTitle,
+    pickersInBar: pickersInBar,
+    overPanel: overPanel,
     reduced: true,
   );
 }
@@ -275,7 +301,11 @@ class PlayerTopBar extends StatelessWidget {
           children: [
             const SizedBox(width: 12),
             _RecordingMark(controller: actions.controller),
-            Expanded(child: _VideoTitle(controller: actions.controller)),
+            Expanded(
+              child: actions.onTitle == null
+                  ? _VideoTitle(controller: actions.controller)
+                  : _StripTitle(controller: actions.controller, onTap: actions.onTitle!),
+            ),
             ..._trailing(context, switchRoom: false),
             const SizedBox(width: 4),
           ],
@@ -512,6 +542,60 @@ class _VideoTitle extends StatelessWidget {
   }
 }
 
+/// A07.17 c2: the room strip folded into the picture's title on a phone held
+/// sideways: the title with "⌄", the figures under it ([AudienceStrip]); a
+/// tap opens or closes the room details over the chat list.
+class _StripTitle extends StatelessWidget {
+  const new({required this.controller, required this.onTap});
+
+  final LiveRoomController controller;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Tooltip(
+      message: i18n('live_play_details'),
+      child: InkWell(
+        key: const ValueKey('live-play-video-title-details'),
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Flexible(
+                    child: ListenableSelector<String>(
+                      listenable: controller,
+                      selector: () => roomLabel(controller.room),
+                      builder: (context, title, _) => Text(
+                        title,
+                        key: const ValueKey('live-play-video-title'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.emphasis.copyWith(
+                          color: OnVideoColors.foreground,
+                          shadows: OnVideoColors.shadows,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Icon(AppIcons.dropDown, size: 18),
+                ],
+              ),
+              AudienceStrip(controller: controller, onVideo: true),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _AudioOnlyButton extends StatelessWidget {
   const new({required this.controller, required this.onInteract});
 
@@ -647,6 +731,7 @@ class PlayerBottomBar extends ConsumerWidget {
         _InlineRow(
           left: [playPause, refresh, ...danmaku],
           right: [
+            if (actions.pickersInBar) streams,
             ?orientation,
             ?volume,
             if (actions.wide case final wide?)
@@ -781,7 +866,7 @@ class PlayerBottomBar extends ConsumerWidget {
     shadeKey: const ValueKey('live-play-bottom-shade'),
     edge: VerticalDirection.down,
     child: Padding(
-      padding: const EdgeInsets.only(top: controlShadeReach),
+      padding: EdgeInsets.only(top: actions.overPanel ? panelShadeReach : controlShadeReach),
       child: SafeArea(
         top: false,
         child: SizedBox(

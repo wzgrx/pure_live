@@ -20,10 +20,20 @@ export 'package:pure_live/features/live_play/danmaku/super_chats.dart' show Supe
 /// arrive are counted on "弹幕列表" until the list is looked at again.
 class ChatPanel extends StatefulWidget {
   /// Creates the panel.
-  const new({required this.controller, this.detailsOpen = false, this.memory, super.key});
+  const new({
+    required this.controller,
+    this.detailsOpen = false,
+    this.memory,
+    this.composerCollapsed = false,
+    super.key,
+  });
 
   /// The room.
   final LiveRoomController controller;
+
+  /// The local composer is a star on the list instead of a bar under it
+  /// (the portrait room's panel, A07.17 c3).
+  final bool composerCollapsed;
 
   /// Whether the room details cover the panel.
   final bool detailsOpen;
@@ -117,7 +127,13 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
             // U.2k-a: the local danmaku composer under the list (while the
             // local interaction is on).
             LocalComposerBelow(
-              child: ChatList(controller: widget.controller, onTouched: _seen, memory: widget.memory),
+              collapsed: widget.composerCollapsed,
+              child: ChatList(
+                controller: widget.controller,
+                onTouched: _seen,
+                memory: widget.memory,
+                buttonInset: widget.composerCollapsed ? LocalComposerBelow.starInset : 0,
+              ),
             ),
             // Rebuilt only when the super chats change; one clock inside
             // moves the times on (U.2e c6).

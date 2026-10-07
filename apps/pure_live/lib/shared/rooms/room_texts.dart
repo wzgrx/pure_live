@@ -75,6 +75,18 @@ String elapsedText(Duration elapsed) {
   );
 }
 
+/// [elapsedText] where it does not fit (the room strip and the details'
+/// cells, A07.17 c1, c6): under a day `6:45` (hours and minutes, at least
+/// `0:01`), then `1 天 2 时`.
+String shortElapsedText(Duration elapsed) {
+  final minutes = elapsed.inMinutes < 1 ? 1 : elapsed.inMinutes;
+  if (minutes < Duration.minutesPerDay) return '${minutes ~/ 60}:${(minutes % 60).toString().padLeft(2, '0')}';
+  return i18n(
+    'duration_days_short',
+    args: {'d': '${minutes ~/ Duration.minutesPerDay}', 'h': '${minutes % Duration.minutesPerDay ~/ 60}'},
+  );
+}
+
 /// How long the broadcast has been on: `已开播 1 小时 20 分` ([elapsedText]),
 /// `刚刚开播` under a minute.
 String startedAgo(DateTime startedAt, DateTime now) {

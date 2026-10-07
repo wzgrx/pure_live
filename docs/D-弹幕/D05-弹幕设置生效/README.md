@@ -6,7 +6,7 @@
 
 - 包括：
   - 换算函数：`apps/pure_live/lib/shared/danmaku/danmaku_settings.dart`（`danmakuLookOf`、`DanmakuPausedBehavior`、`danmakuRunning`）、`shared/danmaku/danmaku_templates.dart`（`DanmakuTemplate` 观看模板、`resolvedDanmakuFps`）、`features/live_play/logic/mini_window.dart`（`compactDanmakuFps`、`withoutEmoteCodes`、`CompactDanmakuMetrics`）。
-  - 各使用处读哪些设置、怎么传给弹幕层：直播间 `features/live_play/player/player_view.dart` 的 `build`（`:542` 起）、`_danmaku`、`_portraitLook`；小窗 `features/live_play/mini/compact_danmaku.dart`；多画面 `features/multiview/multiview_page.dart`；电视 `tv/room/tv_live_play_page.dart`。
+  - 各使用处读哪些设置、怎么传给弹幕层：直播间 `features/live_play/player/player_view.dart` 的 `build`（`:543` 起）、`_danmaku`、`_portraitLook`；小窗 `features/live_play/mini/compact_danmaku.dart`；多画面 `features/multiview/multiview_page.dart`；电视 `tv/room/tv_live_play_page.dart`。
   - 弹幕设置的键、默认值和范围（`packages/live_store/lib/src/settings/settings.dart` 的 `section: 'danmaku'` 一组）的含义要和 3.x 一致（D-018）。
 - 不包括（归哪里）：
   - 设置界面（直播间的弹幕设置面板和标签、设置里的弹幕页、观看模板的芯片、小窗弹幕一组）长什么样 → [A08](../../A-界面设计/A08-弹幕界面/README.md)（A08.1、A08.5、A08.6、A08.7）；设置里的“小窗弹幕”页 → A11.3。
@@ -22,7 +22,7 @@
 ```text
 SettingsStore（live_store）
   └─ watchSetting(ref, Settings.x)：只重建用到这一项的部件
-直播间 PlayerView.build（player_view.dart:542 起）
+直播间 PlayerView.build（player_view.dart:543 起）
   danmakuLookOf(ref)（danmaku_settings.dart:11）→ DanmakuLook（字号、字重、速度、透明度、区域、上下留白、描边、字体、纯文字）
   竖屏流：_portraitLook（:814）按 portraitDanmakuMode 改区域和字号；'hidden' 时 visible = false（:686）
   _danmaku（:457）：fps = resolvedDanmakuFps(automatic, configured, refreshRateMode, 设备最高, 当前)（danmaku_templates.dart:210）
@@ -42,9 +42,9 @@ SettingsStore（live_store）
 
 | 文件 | 职责 |
 |---|---|
-| `apps/pure_live/lib/shared/danmaku/danmaku_settings.dart`（53 行） | `danmakuLookOf`（`:11`：9 个样式设置 + 字体 `:12`、`:25` + 纯文字 `:26`）、`DanmakuPausedBehavior`（`:30`，`pause`、`continue`）、`danmakuRunning`（`:44`：播放中为真，暂停时看设置，打开、缓冲、出错、停止都为假） |
-| `apps/pure_live/lib/shared/danmaku/danmaku_templates.dart`（231） | `DanmakuTemplate`（`:8`，`of` `:26` 读当前设置、`presets` `:42`：最佳、舒适、密集、恢复默认；`encode`/保存格式 `:85` 起）、`resolvedDanmakuFps`（`:210`，`pip: true` 时下限 15、省电 30） |
-| `apps/pure_live/lib/features/live_play/player/player_view.dart` | `build` 读设置（`:542-560`：`hideDanmaku`、`enableDanmakuDisplay`、`enablePipDanmaku`、`portraitDanmakuMode`、`danmakuLookOf`、帧率三项、长按开关、`danmakuPausedBehavior`）；`_danmaku`（`:457`）；`_portraitLook`（`:814`）；`_FpsSettings`（`:823`） |
+| `apps/pure_live/lib/shared/danmaku/danmaku_settings.dart`（53 行） | `danmakuLookOf`（`:11`：9 个样式设置 + 字体 `:12`、`:25` + 纯文字 `:26`）、`DanmakuPausedBehavior`（`:31`，`pause`、`continue`）、`danmakuRunning`（`:44`：播放中为真，暂停时看设置，打开、缓冲、出错、停止都为假） |
+| `apps/pure_live/lib/shared/danmaku/danmaku_templates.dart`（231） | `DanmakuTemplate`（`:8`，`of` `:26` 读当前设置、`presets` `:42`：最佳、舒适、密集、恢复默认；保存格式 `encode` `:86`）、`resolvedDanmakuFps`（`:210`，`pip: true` 时下限 15、省电 30） |
+| `apps/pure_live/lib/features/live_play/player/player_view.dart` | `build` 读设置（`:543-560`：`hideDanmaku`、`enableDanmakuDisplay`、`enablePipDanmaku`、`portraitDanmakuMode`、`danmakuLookOf`、帧率三项、长按开关、`danmakuPausedBehavior`）；`_danmaku`（`:457`）；`_portraitLook`（`:814`）；`_FpsSettings`（`:824`） |
 | `apps/pure_live/lib/features/live_play/mini/compact_danmaku.dart`（220） | 小窗和画中画：读 19 项设置（`:153-173`）、纯文字去掉消息自带的表情代码（`:105`）、弹幕层（`:190`，`DanmakuLook` `:204-213` 没有字体） |
 | `apps/pure_live/lib/features/live_play/logic/mini_window.dart`（259） | `CompactDanmakuMetrics`（按窗口宽自动缩放字号、速度、轨道高）、`compactDanmakuFps`（`:232`）、`withoutEmoteCodes` |
 | `apps/pure_live/lib/features/multiview/multiview_page.dart` | 多画面的弹幕层（`:873-883`：`danmakuLookOf`、`danmakuRunning`，没有 `fps`） |
@@ -79,7 +79,7 @@ SettingsStore（live_store）
 | 小窗和画中画的弹幕不用弹幕字体；也不画自带表情图，“纯文字”只去掉消息自带的表情代码 | `features/live_play/mini/compact_danmaku.dart:204-213`、`:190`、`:105` | 和 3.x 不同（3.x 小窗用弹幕字体和同一个表情图集，`compact_danmaku_overlay.dart:35`、`:62`、`:86`） | 没有任务；建议开新任务（小窗传 `fontFamily` 和表情表，纯文字走 `DanmakuLook.textOnly`） |
 | 电视的弹幕层只传样式和显示开关，不跟帧率、不随暂停停 | `tv/room/tv_live_play_page.dart:464-469` | 电视（暂缓）上和手机不一致 | [A17.4](../../A-界面设计/A17-电视界面/A17.4-电视直播间/README.md) |
 | `compactDanmakuFps` 和 `resolvedDanmakuFps(pip: true)` 两份同样的规则 | `mini_window.dart:232`、`danmaku_templates.dart:210` | 改一处忘另一处 | 没有任务；下次改帧率规则时合成一个 |
-| `repeatedDanmakuWindowSeconds` 设置只限最小 1、没有最大值，靠过滤器使用时限到 30 | `packages/live_store/lib/src/settings/settings.dart:504`、`packages/live_danmaku/lib/src/filters/message_filter.dart:107` | 存进去大于 30 的值显示和生效不一致（3.x 同样在使用处限制） | 照 3.x，不做 |
+| `repeatedDanmakuWindowSeconds` 设置只限最小 1、没有最大值，靠过滤器使用时限到 30 | `packages/live_store/lib/src/settings/settings.dart:504`、`packages/live_danmaku/lib/src/filters/message_filter.dart:108` | 存进去大于 30 的值显示和生效不一致（3.x 同样在使用处限制） | 照 3.x，不做 |
 
 ## 相关决定和规范
 

@@ -209,7 +209,7 @@ v4 现在：
 
 ## 结果
 
-- 合并：2026-10-02，提交 `069be46e4`（登记表）；第 2、4 条的记录 [record-2.md](record-2.md)，第 1、3、5、6 条的记录 [record.md](record.md)。
+- 合并：2026-10-02。登记表的提交 `069be46e4` 是第 1、3、5、6 条的记录提交；第 2、4 条的代码在 `4f1a8b4a8`（快手标题、Twitch Cookie 被拒和编码）、`8d7da2dfc`（轮播视频、实际档、共用主列表读法、FC2 交出连接）。第 2、4 条的记录 [record-2.md](record-2.md)，第 1、3、5、6 条的记录 [record.md](record.md)。
 - 第 2 条（平台层、弹幕层）：c1 快手详情不再用简介当标题、`fillFromDetail` 取卡片标题（现在 `packages/live_core/lib/src/live_room.dart:652`）；c2 CC、百度未开播确认；c3 `LiveSiteCookieRefusals`（`live_site.dart:403`，Twitch `twitch_site.dart:196`）；c4 `LiveMessage.sourceRoomId`（`live_message.dart:357`）和酷狗 400305；c5 `LivePlayUrlResolution.appliedQuality`（`live_site.dart:185-190`）；c6、c11 哔哩哔哩游客轮播（`bilibili_site.dart:415-449`、`live_site.dart:194` 的 `start`）；c7 `nameColor`、`badges`、`LiveBadge`（`live_message.dart:257`、`:361`、`:365`）和 17LIVE；c8 `TwitchSite(codecs:)`（`twitch_site.dart:147`）。
 - 第 4 条（`live_core` 收尾）：c9 `HlsStreamInf`（`hls_master.dart:281`）给 YouTube、PandaTV 共用；c10 `Fc2LiveSite(probeControl:)`（`fc2live_site.dart:59-91`）；c12 LiveMe、TikTok 租期不改。
 - 第 1 条：UPGRADES 状态列回填 74 行（之后 V03.3 又逐条核对一次）。第 3 条：卡片“已播 N 分钟”共用时钟 `roomClockProvider`（`apps/pure_live/lib/shared/rooms/room_grid.dart`）、观看记录卡片标“轮播”“已封禁”、SHOWROOM 搜索翻页共用快照。第 5 条：完整备份带网络电视列表和多画面会话（`shared/backup/backup_iptv.dart`、`features/multiview/logic/multiview_session.dart`）、投屏标题“主播名 - 标题”（`packages/live_cast`）。第 6 条：20 个目录说明、20 个口径说明改成通俗文字，账号页和工具箱用 `platformName`，删了 zh、en 各 930 个不再引用的键（键名清单在 record.md 末尾）。

@@ -1,10 +1,12 @@
-# A13.2 多画面：设计（第 1 版）
+# A13.2 多画面：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.8、T12a.2（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：多画面页面（工具条、四种布局、格子的各种状态、选台、格子操作、每格的清晰度线路音量、弹幕和弹幕设置、沉浸和全屏）
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a132)（A13.2-01～08）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a132)；依赖 A07.6（清晰度和线路小菜单、弹幕设置面板、面板位置规则，已确认）
-- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a132)（A13.2-01～08）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a132)；功能点 F-MV-01～06（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；逻辑在 [N01](../../../N-多画面和投屏/N01-多画面/README.md)；依赖 [A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（清晰度和线路小菜单、弹幕设置面板、面板位置规则，已确认）；相关决定 D-003（W1～W4 按建议 A）、D-020
+- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；画面、头像是示意图片；格子里的清晰度名是平台给的（示例）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -61,7 +63,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 和直播间一样排（画面区在上 / 左，选中格的控制和选台在下 / 右）；清晰度、线路、弹幕设置用 A07.6 的组件；格子编号和状态补齐；沉浸和全屏退出按钮统一 | 待评审 |
+| 第 1 版 | 和直播间一样排（画面区在上 / 左，选中格的控制和选台在下 / 右）；清晰度、线路、弹幕设置用 A07.6 的组件；格子编号和状态补齐；沉浸和全屏退出按钮统一 | 用户 2026-10-01 确认；W1～W4 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -116,7 +118,7 @@
 | M13 | 暂停的格子没有标记 | `:1012-1052` |
 | M14 | 全屏退出按钮盖住第 1 格的房间名 | `multiview_fullscreen_surface.dart:30-37`；`:1038-1049` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -190,11 +192,35 @@ v4 现在已有、v3 没有的：恢复上次的提示、进入直播间、播�
 
 ## 实现和验证
 
-- 定稿：用户确认，W1～W4 按建议 A（1+3 大画面控制条只在沉浸和全屏、清晰度线路是两个小菜单按钮、已在格子里的直播间标“第 N 格”并排最后等）。
-- 实现：c1～c15 做到，详见 [record.md](record.md)。页面重做：`apps/pure_live/lib/features/multiview/multiview_page.dart`（三种排法、选中和选台目标、面板、返回链）、`widgets/`（`toolbar.dart`、`wall.dart`、`cell_view.dart`、`cell_controls.dart`、`focus_bar.dart`、`room_picker.dart`）、`logic/multiview_geometry.dart`（格数按设备、16:9 格子位置）、控制器加 `setOffscreen`（看不见的格停视频解码）。先把直播间 A07.6 的组件移到共用位置（`StreamMenuButton` 到 `live_ui`，`RoomSidePanel` 到 `shared/panels/side_panel.dart`，弹幕设置内容到 `shared/danmaku/danmaku_settings_content.dart`），直播间的样子不变。
-- 偏差：格子菜单变成选中格的控制（普通模式长按 = 选中，沉浸 / 全屏长按 = 格子面板）；去掉 v4 格子右上角的“更多”和未开播格子里的“重新检查”、3.x 1+3 大格左下角的清晰度入口；横屏手机选台连续进行；1+3 按大格面积选“小格在下”或“小格在右”；“正在直播”的绿点用语义色。当时按钮 40、开关 38 小于 48——收尾时补成 48 的点击区域（圆的大小不变，[A07.9 记录](../../A07-直播间界面/A07.9-已合并界面任务的收尾/record.md)第 2 节，提交 `ef295adfc`）。
-- 新文字：中英各 11 条（`multiview_close_this_cell`、`multiview_pick_title`、`multiview_saver_mark` 等）。没有新设置，`roomVolumes`、`multiview.session` 不变。
-- 提交：`2428a2e47`（共用组件移动）、`a4dc4e453`（多画面），合并 `2770573cc`，记录 `b601b444e`（2026-10-01）；点击区域 `ef295adfc`，在 `a88f26dfc` 合并（2026-10-02）。`multiview` 的直接颜色和图标 71 → 0。
-- 测试：多画面 15 个（原 7 个）：`multiview_page_test.dart` 5 个大用例覆盖竖屏、竖屏 1+3、横屏手机、宽屏、格子状态，收尾又加“tap targets”一个；`multiview_geometry_test.dart` 4 个；`multiview_controller_test.dart` 新增看不见的格只有声音。当时 `apps/pure_live` 286 个通过。
-- 真机：没有看过（S02.3“没测的”里有多画面）。登记表已是“完成”，建议按 CHECKLIST 第 1 节第 16 条（2×2 放 4 个国内直播、点格子切声音、沉浸和全屏进退、返回安全退出）在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看，同时看 4 路解码的帧时间。
-- 留下的问题：“按格子尺寸自动降清晰度”没做（需要先定阈值和默认开关，没有登记任务）。
+**实现**（详见 [record.md](record.md)；2026-10-01，开发提交 `2428a2e47`“refactor(ui): share the stream menu, side panel and danmaku settings (U.8)”（只做移动）、`a4dc4e453`“feat(multiview): U.8 multi-view laid out as the live room”，合并 `2770573cc`“Merge U.8: multiview”，登记表写的是记录提交 `b601b444e`；点击区域补到 48 的 `ef295adfc` 在 `a88f26dfc` 合并（2026-10-02））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/multiview/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 入口（首页“多画面”按钮，`enableMultiView` 打开时，`features/home/menu_button.dart:103`、`:118`）没动；四种布局、默认 2×2（`logic/multiview_controller.dart:19`）；点格子换声音（`_onCellTap` `multiview_page.dart:270`）、1+3 晋升（`promote` `logic/multiview_controller.dart:436`）；返回和 Esc 先退模式（`_onBack` `multiview_page.dart:417`、Esc `:380`）；弹幕只在声音来源格（`:873-878`）；格数上限按设备（`multiviewMaxCells` `logic/multiview_geometry.dart:10`）；房间音量记住（`_roomVolume` `logic/multiview_controller.dart:766`） |
+| c2 | ✅ | 竖屏 `_portraitBody`（`multiview_page.dart:547`）：格子 16:9 在上，最多占页面一半（`WallGeometry` `logic/multiview_geometry.dart:43`），下面控制在上、选台在下 |
+| c3 | ✅ | 排法按宽高（`_arrangementOf` `multiview_page.dart:437-442`：高 <480 且横向 → 横屏手机，宽 ≥840 → 宽屏）；横屏手机右栏宽 = 页面宽 − 画面区宽，夹在 256～360（`:575-604`，`_minColumnWidth` `:96`），平时控制、换台时选台；宽屏右栏 360 控制 + 选台（`_wideBody` `:606`）；收起把手（`_FoldHandle` `:908`，22×56，在画面区右边缘中间） |
+| c4 | ✅ | `MultiviewCellControls`（`widgets/cell_controls.dart:46`）：房间行和“原画 ⌄”“线路1 ⌄”（`_StreamButtons` `:248`，`live_ui` 的 `StreamMenuButton`）、五个按钮（`_Buttons` `:307`：暂停、刷新、换台、进入直播间、关闭这一格）、房间音量（`_VolumeRow` `:386`，拖动即时生效、松手保存到 `roomVolumes`） |
+| c5 | ✅ | “进入直播间”按钮（`cell_controls.dart:371`）→ `_openLiveRoom`（`multiview_page.dart:327`）：打开前暂停所有格，回来后继续 |
+| c6 | ✅ | `MultiviewCellView`（`widgets/cell_view.dart:15`）：编号、声音来源 2 像素描边（`:131`）和角标（`_CornerMarks` `:175`）、选台目标虚线框“正在为这一格选台”（`_DashedFrame` `:445`）；颜色 `OnVideoColors.accent`（`packages/live_ui/lib/src/theme/live_colors.dart:9`） |
+| c7 | ✅ | 空、解析中、未开播、出错都是黑底白字（`_Placeholder` `cell_view.dart:246`），深浅主题一样 |
+| c8 | ✅ | 暂停的格子压暗写“已暂停”（播放层 `_PlaybackLayer` `widgets/cell_view.dart:364`，文字 `:432`） |
+| c9 | ✅ | `pickerRooms`（`widgets/room_picker.dart:40`）把已在格子里的排最后，行上标“第 N 格”，点了选中那一格并提示“这个直播间已在第 N 格播放” |
+| c10 | ✅ | 工具条一行（`_toolbar` `multiview_page.dart:516`）：布局 `LayoutSegments`（`widgets/toolbar.dart:10`，手机只写文字、宽屏带图标）、`ToolbarToggles`（`:75`：弹幕、弹幕设置、全部静音，小格省流只在 1+3）；小格标“省流”（`cell_view.dart:117-123`）；横屏手机工具条并进顶栏 |
+| c11 | ✅ | `_danmakuPanel`（`multiview_page.dart:716-737`）：A07.6 的 `RoomSidePanel` + `DanmakuSettingsContent`，竖屏画面下方、横屏和宽屏右侧 360；标题旁“只在声音来源这一格显示 · 改动立即生效”；所有布局都能打开 |
+| c12 | ✅ | 沉浸和全屏同一个 `_ExitButton`（`multiview_page.dart:939`，左上角安全区内 12、48 圆形，`_bare` `:779-812`）；16:9 屏幕没有黑边时被盖住的格子把编号和名字右移（`nameInset`，`:850-864`） |
+| c13 | ✅ | 沉浸 / 全屏长按格子打开格子面板（`_overlayPanel` `:814-848`，横屏右侧、竖屏下方，浮在画面上时带圆角）；点空格时同一位置打开选台面板 |
+| c14 | ✅ | `FocusControlBar`（`widgets/focus_bar.dart:15`）只在沉浸 / 全屏的 1+3 大格出现（`multiview_page.dart:889`）：暂停、刷新、弹幕、弹幕设置、原画 ⌄、线路1 ⌄、音量（打开格子面板）、全屏，放不下横向滑动 |
+| c15 | ✅ | 页面和画面区都用 `LayoutBuilder`，按父组件宽高排（`multiview_page.dart:450-454`） |
+
+- 协调员补充（多格的播放器，记录同名一节）：格数按设备（手机 4；电脑 8 个处理器以上 9、6～7 个 6、更少 4）；看不见的格（1+3 小格滚出视野、应用被隐藏）`setOffscreen`（`logic/multiview_controller.dart:623`，页面 `_setOffscreen` `multiview_page.dart:343`、`_setAppHidden` `:352`）关视频解码只留声音；“小格自动降画质”按 3.x 的“小格省流”做。
+- 偏差（记录“和 v3 / v4 的差别”）：①长按菜单变成选中格的控制：普通模式长按 / 右键 = 选中这一格（不换声音），沉浸和全屏下长按打开格子面板；②去掉 v4 格子右上角的“更多”和未开播格子里的“重新检查”（点未开播格照 v3 重新选台，重新检查用“刷新”）；③去掉 3.x 1+3 大格左下角的清晰度入口；④按钮 40、开关 38 照设计图，比规范 5.4 的 48 小——A07.9 收尾（`ef295adfc`）在圆外补成 48 的点击区域（`cell_controls.dart:16-24`、`toolbar.dart:136-141`，圆的大小不变）；⑤横屏手机选台连续进行；⑥格子都满时选台目标是选中的格子，标题“第 N 格换台”；⑦普通下播写“该直播间未开播”，封禁、轮播、状态不明保留 v4 的说明；⑧1+3 按大格面积选“小格在下”或“小格在右”（1280×800 是小格在下）；“正在直播”的绿点用语义色成功绿（v3 的 `#31C24C` 白底上只有约 2.4:1）。
+- 移动的组件（记录同名一节）：`StreamMenuButton` 到 `packages/live_ui/lib/src/widgets/stream_menu_button.dart`；`RoomSidePanel`、`PanelLink` 等到 `apps/pure_live/lib/shared/panels/side_panel.dart`（`:24`、`:180`）；弹幕设置内容到 `shared/danmaku/danmaku_settings_content.dart`；`danmaku_templates.dart` 和 `resolvedDanmakuFps` 到 `shared/danmaku/`；旧 `DanmakuSettingsPanel` 删除。直播间的样子不变。
+- 后来的变化：A07.10（B02 c3）给多画面加了“暂停时的弹幕”行为（暂停的格子弹幕停住或照飞，`test/features/multiview/multiview_page_test.dart:296`）；A02.2（`fc5bcdd46`）提示条和面板统一；`e320e0e72`（D-011）多画面标题不再居中。
+- 新文字：中英各 11 条（`multiview_close_this_cell`、`multiview_danmaku_panel_hint`、`multiview_fold_column`、`multiview_unfold_column`、`multiview_opening`、`multiview_pick_hint`、`multiview_pick_target`、`multiview_pick_title`、`multiview_replace_hint`、`multiview_replace_title`、`multiview_saver_mark`）。没有新设置，`roomVolumes`、`multiview.session` 不变。
+- 门禁：`multiview` 直接写的颜色和图标 71 → 0；`live_ui` 只做添加（多画面 26 个图标用途、`OnVideoColors.error`、`OnVideoColors.accent`）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/multiview/multiview_page_test.dart`（现在 7 个；记录时 5 个，A07.9 收尾加“tap targets”，A07.10 加“暂停时的弹幕”）：竖屏（工具条、16:9 格子和编号、选台和声音、控制的按钮顺序和图标、“第 N 格”、清晰度小菜单、已暂停、关闭这一格、弹幕设置面板和返回、沉浸退出）；竖屏 1+3（大格在上、三小格一排、省流标、晋升、应用隐藏时停解码）；横屏手机（顶栏工具条、右栏宽度、连续选台、收起展开、全屏退出按钮不盖格子、长按面板在右侧 360、Esc 链）；宽屏（布局带图标、右栏 360、1+3 加到 9 格、滚出视野停解码、全屏大格控制条、Esc 链）；格子状态（深色主题下未开播和失败、点未开播重新选台、长按后刷新）；点击区 48（393、360、740×360、1280×800）。`multiview_geometry_test.dart`（4）：格数、可见范围、16:9 位置。`multiview_controller_test.dart`（6，本任务加 1：看不见的格只有声音、回来恢复）。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)“没测的”里有多画面）。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 16 条（首页 → 多画面 → 2×2 放 4 个国内直播、点格子切声音、沉浸和全屏进退、返回安全退出，F-MV-06），归 [S02.6](../../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md) 阶段 c2，顺带记 `adb shell dumpsys gfxinfo` 的掉帧数；另看横屏手机右栏的收起把手、全屏退出按钮在 K90（20:9）黑边里的位置。
+- 留下的问题和去向：多画面飞行弹幕不跟弹幕帧率设置（`multiview_page.dart:873-878` 的 `DanmakuOverlay` 没传 `fps`）→ [N01.2](../../../N-多画面和投屏/N01-多画面/N01.2-多画面弹幕跟随帧率设置/README.md)；“按格子尺寸自动降清晰度”没做，要先定阈值和默认开关 → 有需要走 V01 提议；电脑 1+3 超过 4 格在 1920 宽以上的排法 → X01（Windows）验证时看。

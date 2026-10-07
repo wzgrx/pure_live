@@ -18,7 +18,7 @@
 ## 现状（读代码得出，写文件:行）
 
 - 比较：`apps/pure_live/lib/features/version/update_feed.dart:88` `bool get isNewer => isNewerVersion(version, appVersion);`；`app_version.dart:34` `isNewerVersion` 逐段比数字；`app_version.dart:48` `compareVersions` 把 `+` 也当分隔符（`4.0.0+5002` 拆成 4、0、0、5002）。
-- 已安装的版本：`app_version.dart:15` `appVersion`（`flutter.appBuildName ?? pubspecVersion`）、`:18` `appBuild`（`flutter.appBuildNumber`，现在 5001；注意不是 Android 的 versionCode 7001）。
+- 已安装的版本：`app_version.dart:12` `appVersion`（`flutter.appBuildName ?? pubspecVersion`）、`:15` `appBuild`（`flutter.appBuildNumber`，现在 5001；注意不是 Android 的 versionCode 7001）。
 - 用到 `isNewer` 的地方：`update_feed.dart:23` `noteCheckedUpdate`（关于页角标的数据）；`update_prompt.dart:46`（启动检查）；`version_page.dart:306`（状态卡 `version-newer` / `version-latest`）；`features/about/about_page.dart:146`（“新版本 v…”角标 `_NewVersionBadge(update.version)`）。
 - 跳过：`update_prompt.dart:91-93` `_wanted`：`compareVersions(skippedUpdateVersion, info.version) != 0`；`:129` 对话框的勾选初值 `== widget.info.version`；`:136` 存 `info.version`。设置 `Settings.skippedUpdateVersion`（`packages/live_store/lib/src/settings/settings.dart:49`，`SettingScope.internal`，4.x 新加的，不是 3.x 的键）。
 - 测试：`apps/pure_live/test/features/version/version_page_test.dart:140-145`（读真实 `version.json`，`android.isNewer` 为假，因为 5001 == 5001）、`:168-171`（`isNewerVersion`）；`update_dialogs_test.dart:287`（“不再提醒这个版本”只跳过这个版本）。

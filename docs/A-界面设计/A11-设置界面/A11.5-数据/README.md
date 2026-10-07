@@ -1,8 +1,9 @@
-# A11.5 数据：设计（第 1 版）
+# A11.5 数据：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：缓存与数据管理、本地配置预览两页，以及清空缓存确认、操作结果提示、加载和出错状态
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a115)（A11.5-01～03）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a115)
+- 旧编号：U.6e、T09a.6（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（Z1～Z3 按建议 A）；记录 [record.md](record.md)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（共用部分 [src/smock.py](src/smock.py)，和 A11.3 同一份）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；配置预览里的数字（128、57、6）是示意
 - 和 A11.1、A02.2 的关系：行的样子同 A11.3、A11.4，统一行组件以 A11.1 为准；提示条用 A02.2 的统一提示条
@@ -71,7 +72,7 @@
 | E10 | 概况数字 12 号、名称 11 号；“backup v3”英文 | `local_config_preveiw.dart:213-295` |
 | E11 | 原始内容固定颜色，橙色布尔值对比度约 2.2:1，深色主题不变 | `local_config_preveiw.dart:121`；flutter_json `json_widget.dart:146-154` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -122,10 +123,32 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，Z1～Z3 按建议 A；A12.4 的 Q1（日志管理移到设置）按 A 一并做。
-- 实现：e1～e12 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/settings/data_tools.dart`（缓存大小、清空确认写出现在多大、刷新缩略图、下载目录写实际路径和“默认 / 自定义”、恢复默认目录一直显示、配置预览 `ConfigPreviewPage`）、`packages/live_ui/lib/src/widgets/json_tree.dart`（`JsonTreeSliver` 和页面一起滚动，只建屏幕上的行）；总览“数据”组最后一行“日志管理”。
-- 偏差：去掉 v4 自加的“恢复全部默认设置”和配置预览的“复制全部”；Android 选公共目录缺权限时只提示、不打开系统设置（当时没有打开系统设置页的插件，归 A14.1）；日志页当时没有路由、从总览直接推一页——现在已有 `RoutePath.kLogs`，`SettingsSection.log` 已改成路由（`settings_model.dart`）。
-- 提交：同 A11.3（`6b87e96f9`，合并 `ccd54d3c7`，记录 `e9e41d557`，2026-10-02）。
-- 测试：`apps/pure_live/test/features/settings/settings_data_test.dart` 7 个（缓存页两组和行序、动作行没有箭头、清空红字和确认、下载目录、配置预览的概况四格和两层树、顶栏去备份、日志入口）；`live_ui` JSON 树 1 个。出错状态没有组件测试（内存存储读不出错）。
-- 真机：没有单独记录。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看清空缓存、换下载目录（含 Android 公共目录的权限提示）、配置预览。
-- 留下的问题：Android 选公共下载目录缺权限时仍只提示（`data_tools.dart:352`）；平台层的 `apps/pure_live/lib/platform/system_access.dart`、`system_permissions.dart` 现在只有安装、本地网络、通知、电池的入口，没有打开存储权限设置页的方法，这件事没有登记任务（建议在 [O04 权限](../../../O-Android系统集成/O04-权限/README.md) 下登记）。
+**定稿**：用户确认第 1 版，Z1～Z3 按建议 A（D-003）；A12.4 的 Q1（日志管理移到设置）按 A 一并做。
+
+**实现**（详见 [record.md](record.md)；2026-10-02，和 A11.3、A11.4 同一批：提交 `4957cce83`（`live_ui` 的 JSON 树）、`6b87e96f9`，合并 `ccd54d3c7`“Merge U.6c-e: playback, general and data settings”；登记表记的是 `e9e41d557`（记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/settings/` 省略前缀） |
+|---|---|---|
+| e1 | ✅（偏差 1） | 缓存与数据管理 `settings_catalog.dart:1483`、本地配置预览 `ConfigPreviewPage`（`data_tools.dart:408`）；重新计算、刷新缩略图、清空、选下载目录、恢复默认目录都在；预览用 `BackupService(store).exportAll()`（`:427`），默认不含 Cookie 和 WebDAV；树默认显示两层 |
+| e2 | ✅ | 两组：缓存 `settings_catalog.dart:1484`、下载 `:1506`；立即执行的行是 `SettingActionTile`（`settings_tiles.dart:585`，没有箭头），清空红字；只有下载目录带箭头 |
+| e3 | ✅ | `CacheSizeTile`（`data_tools.dart:169`）：说明“点一下重新计算”，数值后面 20 号刷新图标（`:216`），计算中只有这一行转圈；`CacheSizeModel`（`:140`） |
+| e4 | ✅ | 提示全用 `AppNavigator.toast`（A02.2 的提示条）：“缓存已清除，释放 12.34 MB”；没清干净时“部分缓存文件正在使用，剩余缓存：1.20 MB” |
+| e5 | ✅ | `DownloadDirectoryTile`（`:334`）写实际路径（默认是 `defaultDownloadDirectory`），右边“默认 / 自定义”；组下说明 `settings_download_note`（`settings_catalog.dart:302`）：“下载目录用于安装包、下载的文件和字体；录制文件的位置在录制设置里。” |
+| e6 | ✅ | `DownloadResetTile`（`data_tools.dart:378`）一直显示，默认时变灰写“现在用的就是默认目录” |
+| e7 | ✅ | `ClearCacheTile`（`:228`）：确认框（`_clear` `:242-256`）末行“现在约 12.34 MB。”、红色“清除”；清除中说明“正在清除…”、红色转圈，其他行照常 |
+| e8 | ✅ | 出错时 `AppStatusView` 出错样子（`:458`）：“读取本地配置失败”、原始错误、“重新读取” |
+| e9 | ✅ | `CustomScrollView`（`:504`）里放 `JsonTreeSliver`（`packages/live_ui/lib/src/widgets/json_tree.dart:79`），只建屏幕上的行；点带箭头的键展开或收起 |
+| e10 | ✅ | `_PreviewBody`（`data_tools.dart:478`）：内容宽 ≥560 四列、否则两列（`:503`），数字 22 号、名称 12 号；说明“备份格式 v4；这里不显示账号 Cookie 和 WebDAV 设置。”（版本号照实际备份写，图里写的 v3） |
+| e11 | ✅ | `json_tree.dart:152-155`：键主色 600、数字成功绿、字符串 `tertiary`、布尔值警告黄、对象和数组次要色；深浅各一套（`LiveSemanticColors`） |
+| e12 | ✅ | 预览顶栏“备份与恢复”（`data_tools.dart:451`，`RoutePath.kBackup`） |
+| A12.4 Q1 | ✅（偏差 2） | 总览“数据”组最后一行“日志管理”（`SettingsSection.log`，`settings_model.dart:115`）；原来缓存页里的那一行去掉 |
+
+- 根因（记录，v3 的问题）：缓存页的行都带箭头、分不清哪些立即执行；当前大小不说能点；提示有标题、模糊背景；下载目录只写“默认”不写路径、恢复默认只在自定义时出现；清空不说多大；预览加载和出错没有标题、原始内容单独一个框滚动、颜色写死。
+- 偏差（记录）：①去掉 v4 自加的缓存页“恢复全部默认设置”和配置预览的“复制全部”（v3 和设计都没有）；Android 选公共目录缺权限时只提示（`download_directory_permission_hint`，`data_tools.dart:351-353`），不打开系统设置；②日志页当时没有路由、从总览直接推一页——后来有了 `RoutePath.kLogs`，`SettingsSection.log` 已改成 `route:`；③出错状态没有组件测试（内存存储读不出错）。
+- 新翻译键：和 A11.3、A11.4 合计（见 A11.3）；没有新设置。`live_ui` 加 `JsonTreeSliver`、`jsonTreeLines`、`jsonTreeOpenLevels`（只做添加）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/settings/settings_data_test.dart`（7 个用例声明）：缓存页两组和行序、动作行没有箭头、清空红字、下载目录默认 / 自定义、恢复默认变灰和原因、选目录和恢复的提示；清空确认的文字和取消；大小的写法；配置预览（有标题、概况四格、说明、树和页面一起滚动、两层、点键收起、不含 Cookie）；顶栏去备份；树的类型写法和展开；总览“数据”组最后是日志、打开日志页。`packages/live_ui/test/settings_playback_widgets_test.dart` 的 JSON 树一项（显示两层、展开后展平）。
+- 真机：记录里没有 K90 结果。登记表是“完成”，问题见[子分类页](../README.md)“已知问题”；建议 [S03.1](../../../S-质量和验证/S03-统一验证/S03.1-统一验证/README.md) 补看：设置 → 缓存与数据管理，点当前大小重新计算、清空缓存（确认框写大小、完成提示写释放多少）、把下载目录换到 `Download/` 下（缺权限时的提示）、恢复默认目录；本地配置预览滚动、展开收起、顶栏进备份与恢复。
+- 留下的问题和去向：Android 选公共下载目录缺权限时只提示，平台层（`apps/pure_live/lib/platform/system_access.dart`、`system_permissions.dart`）没有打开存储权限设置页的方法，这件事没有登记任务（建议在 [O04 权限](../../../O-Android系统集成/O04-权限/README.md) 下登记）；出错状态的组件测试不做（影响小）。

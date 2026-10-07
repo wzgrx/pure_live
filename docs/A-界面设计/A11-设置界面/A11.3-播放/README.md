@@ -1,8 +1,9 @@
-# A11.3 播放设置：设计（第 1 版）
+# A11.3 播放设置：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：视频设置、播放内核设置、MPV 驱动选项页、竖屏直播适配、小窗弹幕、观看数据与排行口径六页和它们弹出的对话框；A07.8 交来的小窗设置改名和“离开应用时自动画中画”开关
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a113)（A11.3-01～15）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a113)
+- 旧编号：U.6c、T09a.4（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（X1～X4 按建议 A）、D-018；记录 [record.md](record.md)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（共用部分 [src/smock.py](src/smock.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；平台图标取自 `packages/live_ui/assets/platforms/`
 - 和 A11.1 的关系：设置总览、统一的设置行组件在 A11.1 定。新设计先用 A07.6 已确认的弹幕设置那套行（`.sec`、`.grp`、`.swr`、`.sl`），A11.1 定下来后对齐（行首图标、行高、分组卡片的样子以 A11.1 为准）
@@ -109,7 +110,7 @@
 | P19 | 能给在线人数的 11 个平台不在列表里 | 同上；`live_room.dart` `audienceCapabilities` |
 | P20 | 平台说明是接口字段名；没有平台图标 | `zh.json` `audience_*_detail`；`audience_metric_settings_page.dart:144` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -164,10 +165,35 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，X1～X4 按建议 A。一并处理的跨任务待同步：A07.8（小窗的改名和“离开应用时自动画中画”）、A11.2（视频页不再有“小窗弹幕”、代理只留一处、弹幕字体用字体页）、A08.3（“弹幕屏蔽”改名）、A14.1（权限被拒的说明）、A18.1（iOS 也显示“后台播放”）。
-- 实现：c1～c15 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/settings/settings_catalog.dart`（视频、竖屏、观看数据、内核、小窗弹幕各节）、`playback_tiles.dart`（需要权限的开关 `GatedToggleTile`、内核行、代理跳转、MPV 驱动选项页、`RestoreDefaultsTile`、弹幕样式页、小窗弹幕页）、`audience_pages.dart`、`settings_dialogs.dart`（选项对话框改成“主色 + 勾”、时长对话框）；`live_ui` 只做添加（`valueBelow`、`footerWidget`、计数按住连续变、`PipDanmakuPreview`）。
-- 偏差：v4 全平台只用 mpv，“内核切换”固定显示“Mpv播放器”、不能点；视频页按较新的 A11.1 去掉“小窗弹幕”行；画质组多 v4 已批准的“优先 H.264 编码”“画面比例”两行；Android 解码器照设计图 9 个（去掉 `rkmpp`），打包的 libmpv 实际支持哪些没核对；行首图标用 v3 每行的图标（设计图没画）。
-- 提交：`4957cce83`（`live_ui`）、`6b87e96f9`（三个页面）、`5197ec628`（测试），合并 `ccd54d3c7`，记录 `e9e41d557`（2026-10-02）。三个任务合计翻译中英各新加 83 条，改 3 条；`settings` 的直接颜色和图标 126 → 32。
-- 测试：`apps/pure_live/test/features/settings/settings_playback_test.dart` 记录时 19 个（视频页六组、三种宽度行宽 ≤720、依赖项变灰、时长和选项对话框、弹幕样式同一组件、权限被拒、竖屏页、观看数据页、内核页、驱动选项、小窗弹幕页一栏和两栏）；`packages/live_ui/test/settings_playback_widgets_test.dart` 5 个。
-- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：“视频”页通过；打开“后台播放”的权限和电池说明流程通过（O03.2 接上了 `switchGateProvider` 的实现）。小窗弹幕页、内核页没有单独记录。
-- 留下的问题：libmpv 解码器清单（G01）；设置的弹幕页少两组（A08.6）。
+**定稿**：用户确认第 1 版，X1～X4 按建议 A（D-003）。一并处理的跨任务待同步：A07.8（小窗的改名和“离开应用时自动画中画”）、A11.2（视频页不再有“小窗弹幕”、播放代理只留一处、弹幕字体用字体页）、A08.3（“弹幕屏蔽”改名）、A14.1（权限被拒的说明）、A18.1（iOS 也显示“后台播放”）、A11.1（设置行、两栏、搜索）。
+
+**实现**（详见 [record.md](record.md)；2026-10-02，提交 `4957cce83`（`live_ui`）、`6b87e96f9`“feat(settings): playback, general, network and data pages (U.6c, U.6d, U.6e)”、`5197ec628`（测试），和 A11.4、A11.5 一起合并 `ccd54d3c7`“Merge U.6c-e: playback, general and data settings”；登记表记的是 `e9e41d557`（记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/settings/` 省略前缀） |
+|---|---|---|
+| c1 | ✅（偏差 2） | 六页：视频 `settings_catalog.dart:672`、竖屏（视频页的子页）`:909`、观看数据（子页）`:1042`、小窗弹幕 `:1085`、播放内核 `:1238`、MPV 驱动选项页 `MpvOptionPage`（`playback_tiles.dart:325`）；键都没改；内核行 `KernelTile`（`:209`）固定显示“Mpv播放器”、不能点 |
+| c2 | ✅（偏差 1、3） | 视频页六组：音频 `:673`、画质 `:706`（末尾多“优先 H.264 编码”`:729`、“画面比例”`:737`）、播放行为 `:743`、后台与助眠 `:776`（后台播放 Android 和 iOS，助眠只在 Android）、小窗 `:822`、弹幕 `:873`；没有“小窗弹幕”行 |
+| c3 | ✅ | “离开直播间时小窗播放”（`:825`，新键 `settings_leave_room_mini*`）、“小窗始终置顶”（`:841`，`PipOnTopTile` `playback_tiles.dart:158`，失败时红字退回）、记住 / 重置小窗位置和大小（`PipPositionResetTile` `settings_editors.dart:144`）；都去掉了“Windows”，3.x 键还在 |
+| c4 | ✅ | “离开应用时自动画中画”（`autoPipOnLeave`，`settings_catalog.dart:834`；A07.8 加的设置，这里改标题） |
+| c5 | ✅ | `SettingRequirement`（`settings_tiles.dart:22-45`）：自动助眠时长、竖屏自适应高度和布局、三个驱动、小窗弹幕全部行（`_pipOn` `settings_catalog.dart:90`）、统一弹幕颜色、小窗弹幕帧率、真实在线平台开关；“开启硬解码”被兼容模式或自定义驱动接管时写“由……接管”（`_hardwareDecodingFree` `:78`、`_customOutputFree` `:85`） |
+| c6 | ✅ | 竖屏页四个选项的值在说明下面（`SettingsLinkRow.valueBelow`）；小窗弹幕带单位（90 px/s、12.0 px、0.35 秒、30 FPS）；弹幕字体行用 A11.2 的 `FontFamilyTile`（`:894`，显示“系统默认”） |
+| c7 | ✅ | `showChoiceDialog`（`settings_dialogs.dart:107`）用 `SettingsChoiceRow`（`:64`，主色 + 勾、点了就关）；时长对话框 `showNumberDialog`（`:155`：快捷时长立即生效并关闭、当前值高亮、输入框预填、范围写在框下、超出变红），和 A11.4 定时退出同一个 |
+| c8 | ✅ | `RestoreDefaultsTile`（`playback_tiles.dart:437`，最后一行红字、先确认列出范围、红色按钮、完成提示）；范围表 `kernelSettings`（`settings_catalog.dart:1776`，首选清晰度不动）、`portraitSettings`（`:1760`，同时清除记住的直播间方向）、`pipDanmakuSettings`（`:1741`，含开关本身） |
+| c9 | ✅ | `PlayerProxyLinkTile`（`playback_tiles.dart:230`）：右边“已开启 / 未开启”，点了打开“网络与代理设置”并高亮“启用播放代理” |
+| c10 | ✅ | 内核页四组：内核 `settings_catalog.dart:1239`、解码 `:1254`、网络 `:1282`、MPV 高级设置 `:1292`；警告和“MPV 官方文档”链接是组尾说明（`settingsGroupFooters` `:307` → `MpvDocsNote` `playback_tiles.dart:400`）；恢复默认单独一组 `:1326` |
+| c11 | ✅（偏差 4） | `mpvOptionsFor`（`settings_editors.dart:91`）按平台列，默认项标“默认”；保存的值本平台没有时用默认（`effectiveMpvOption` `playback_tiles.dart:315`） |
+| c12 | ✅ | 弹幕组“弹幕样式”（`settings_catalog.dart:883`）打开 `DanmakuStylePage`（`playback_tiles.dart:484`），内容是直播间同一个 `DanmakuSettingsContent`（`shared/danmaku/`） |
+| c13 | ✅ | 各页最宽 720（`SettingsPageBody`）；小窗弹幕页 `PipDanmakuPage`（`playback_tiles.dart:604`）宽 ≥840，或高 <480 且宽 ≥560 时左右两栏（`:627`，预览宽 43%、240～520）；一栏时预览最高约 1/3 屏、下面的行单独滚动 |
+| c14 | ✅ | 小窗弹幕分组：开关单独一张卡 `settings_catalog.dart:1086` → 样式 `:1088` → 显示范围 `:1169` → 流畅度 `:1207` → 恢复默认 `:1224`；“根据小窗尺寸自动缩放”的说明写“小窗越小字越小，最小 10 px”（`:1138-1145`）；预览 `PipDanmakuPreview`（`packages/live_ui/lib/src/widgets/pip_danmaku_preview.dart:12`，深色 16:9、按帧率刷新、单独重绘层、减少动态效果时静止），接线 `PipDanmakuPreviewBinding`（`playback_tiles.dart:690`）；“最大同时显示数量”是计数行、按住连续变 |
+| c15 | ✅ | `audience_pages.dart`：平台按 `live_core` 的 `audienceCapabilities` 算，v3 的 19 个在前（`:18-33`）；显示模式（`:47`）；能开的平台带图标和“来源”（`:78`，“平台热度优先”时变灰写原因）；只有热度的平台一行（`:130`）；各平台口径说明页 `AudienceInfoPage`（`:177`，逐字保留 v3 的说明） |
+| 跨任务 A14.1 | ✅ | `GatedToggleTile`（`playback_tiles.dart:85`）打开前先问 `switchGateProvider`（`:72`）：转圈、被拒时说明变红、失败红字照 v3、开关保持关；当时只是接口，后来 O03.2 接上 Android 的通知权限和电池优化（`backgroundPermissionsProvider`） |
+
+- 根因（记录，v3 的问题）：视频页一长串、小窗弹幕在两处；依赖项关着时消失；当前值写在说明里、没有单位；三种不同的选项对话框；恢复默认有的在顶栏有的在行、不先确认；代理在内核页和网络页两处改；内核页的警告压在行里；驱动和解码器列出本平台用不了的；观看数据页每个平台一行、不支持的也有开关。
+- 偏差（记录）：①视频页没有“小窗弹幕”行（A11.1 c7 较新，和本任务 c2 / 按钮 14 冲突，按 A11.1 做）；②v4 全平台只用 mpv（G01.1），“内核切换”固定，没有“切换播放器”对话框和 Exo 分支；③画质组多 v4 已批准的“优先 H.264 编码”（UPGRADES 22-3）和 3.x 的“画面比例”；④Android 解码器照设计图 9 个（去掉 v4 原有的 `rkmpp`），打包的 libmpv 实际支持哪些没核对；⑤行首图标用 v3 每行的图标（设计图没画）；⑥当时总览“弹幕”行仍打开设置里旧的弹幕页，“显示弹幕”“更换弹幕字体”“屏蔽”在视频页和弹幕页各有一行——A08.5 之后弹幕页是直播间同一个组件，视频页这几行仍在（同一个设置，搜索会找到两处）。
+- 新翻译键：三个任务（A11.3～A11.5）合计中英各新加 83 条（`settings_*` 为主），改了 3 条已有的文字（`auto_pip_on_leave` 等）；没有新设置。`live_ui` 只做添加：`SettingsRow.titleColor`、`busyColor`，`SettingsLinkRow.valueBelow`，`SettingsGroup.footerWidget`，计数行按住 0.5 秒后每 100 毫秒连续变，`PipDanmakuPreview`，`AppIcons` 的 `settings*`、`portrait*`。门禁：`settings` 直接写的颜色和图标 126 → 32（三个任务合计）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/settings/settings_playback_test.dart`（当时 19 个，现在 20 个用例声明）：视频页六组和行序、图标、改名、没有小窗弹幕行、电脑上小窗三行没有“Windows”；852×393、1280×800、1920×1080 行宽 ≤720；全局静音图标；依赖项变灰写原因；时长对话框；选项对话框主色加勾；弹幕样式同一组件；屏蔽跳路由；后台播放权限被拒红字；竖屏页三组、变灰、恢复默认清除记住的方向；观看数据页；内核页四组、内核固定、接管和变灰、驱动选项 9 个解码器和“默认”、恢复默认不动首选清晰度、代理行跳网络页；小窗弹幕页一栏和两栏（740×360、1280×800）、计数、恢复默认。`packages/live_ui/test/settings_playback_widgets_test.dart` 5 个（长值在说明下、红色标题和转圈、按住连续变、预览 16:9 和关闭提示、JSON 树）。共用测试台 `settings_harness.dart`。`switchGateProvider` 的 Android 实现另在 `test/shared/permission_prompts_test.dart`（O03.2）。
+- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：“视频”页通过；打开“后台播放”的通知权限和电池说明流程通过。竖屏直播适配、观看数据、播放内核、驱动选项、小窗弹幕页没有记录（登记表是“完成”，问题见[子分类页](../README.md)“已知问题”）；建议 [S03.1](../../../S-质量和验证/S03-统一验证/S03.1-统一验证/README.md) 补看：小窗弹幕页的预览（改速度、字号即时变）、横屏两栏、内核页“恢复默认”的确认、驱动选项页的“默认”。
+- 留下的问题和去向：libmpv 解码器清单 → G01（G01.2 在 K90 上看硬解时一起看）；设置的弹幕页少两组、小窗弹幕设置两份实现 → A08.6；小窗弹幕颜色两种选法 → A08.7。

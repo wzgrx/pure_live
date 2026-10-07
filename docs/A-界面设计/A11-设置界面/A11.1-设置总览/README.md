@@ -1,8 +1,9 @@
-# A11.1 设置总览：设计（第 1 版）
+# A11.1 设置总览：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：设置的第一页（分组和入口）、搜索、宽屏两栏；所有设置页共用的“设置行”（A02.1 的设置行部分）
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a111)（A11.1-01）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a111)
+- 旧编号：U.6a、T09a.2（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（S1～S4 按建议 A）、D-018；记录 [record.md](record.md)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（设置行和两栏排法在 [src/skit.py](src/skit.py)，A11.2 也用）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；没有示意图片
 
@@ -77,7 +78,7 @@ v4 现在的偏差（J01.1 时自行设计）：十个分区加“关于”，�
 | P9 | 宽屏一栏最宽 960，子页整页进出 | `widget_extensions.dart:8-18` |
 | P10 | 读整屏宽度（<520、>640） | `settings_page.dart:23-26`、`:32` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -128,10 +129,31 @@ v4 现在的偏差（J01.1 时自行设计）：十个分区加“关于”，�
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，S1～S4 按建议 A。开发时一并处理了跨任务待同步：小窗弹幕只留总览一个入口、“视频”“通用”说明对上页面、横屏手机顶栏 48 高、配置预览挪进“数据”组（A11.3～A11.5）；说明对比度（A12.2）；开关滑块颜色（A09.6）；“三方认证”改名“平台账号”（A12.1）。
-- 实现：c1～c10 做到，详见 [record.md](record.md)。总览、搜索、两栏在 `apps/pure_live/lib/features/settings/settings_page.dart`，目录在 `settings_model.dart`、`settings_section_view.dart`；A02.1 的设置行在 `packages/live_ui/lib/src/widgets/settings_row.dart`（跳转、开关、滑块、计数、选项五种，按下 / 悬停 / 键盘焦点 / 不能用 / 处理中，1.5 倍字体或宽 <360 时值换到标题下，电视样式 `SettingsRowStyle(tv: true)`）。
-- 偏差：当时“弹幕”行打开设置里原有的弹幕页、“本地互动体验”打开“还在开发”的空页——后来 A08.5 把弹幕页换成直播间同一个组件（`features/settings/danmaku_page.dart`），本地互动接到了 `RoutePath.kLocalInteraction`；去掉了 v4 自加的“关于”分区、每个分区的恢复默认和改动数角标、“录制中心”“WebDAV”两个链接；搜索结果的分组标题整行主色。
-- 提交：`6a61ef4f2`（和 A11.2 一起），合并 `5e77cca15`，记录 `3f53f8123`（2026-10-01）。翻译中英各加 77 条（两个任务合计）；`settings` 的直接颜色和图标 209 → 126（后续各任务降到 0）。
-- 测试：`apps/pure_live/test/features/settings/settings_page_test.dart` 当时 25 个（总览、返回链、两栏、一栏 720、跨 840 缩放、搜索、Ctrl+F 和 Esc），`packages/live_ui/test/settings_row_test.dart` 16 个（含四个种子色、深浅两套的对比度）；当时 `apps/pure_live` 290 个、`live_ui` 61 个、`live_store` 36 个通过。
-- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：设置总览通过。两栏、搜索在平板或 Windows 上没有看过。
-- 留下的问题：设置项逐条核对归 J01.2；宽屏两栏等 X01 开工时在 Windows 上看。
+**定稿**：用户确认第 1 版，S1～S4 按建议 A（D-003）。开发时一并处理了跨任务待同步：小窗弹幕只留总览一个入口、“视频”“通用”说明对上页面、横屏手机顶栏 48 高、配置预览挪进“数据”组（A11.3～A11.5 → A11.1）；说明对比度（A12.2 → A02.1）；开关滑块颜色（A09.6 → A02.1）；“三方认证”改名“平台账号”（A12.1）。
+
+**实现**（详见 [record.md](record.md)；2026-10-01，提交 `6a61ef4f2`“feat(settings): U.6a overview, search and two panes; U.6b appearance”（和 A11.2 一起），合并 `5e77cca15`“Merge U.6a-b: settings overview and appearance”；登记表记的是 `3f53f8123`（记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/settings/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 入口照旧（首页 ≡ 菜单“设置”，`RoutePath.kSettings`）；每行图标 `AppIcons.settings*`（`settings_model.dart:35` 起的 `SettingsSection`），“弹幕”行用 3.x 的弹幕设置图片 `DanmakuIcon`（`settings_page.dart:332`） |
+| c2 | ✅ | `SettingsArea` 五组（`settings_model.dart:10`）、`SettingsSection`（`:35`；当时 16 行，A11.5 加“日志管理”后 17 行）；总览 `_Overview`（`settings_page.dart:303`）一组一张卡片 |
+| c3 | ✅ | “外观”（`settings_appearance`）；各行说明按页面内容重写（`settings_*_desc`），最多两行 |
+| c4 | ✅ | `packages/live_ui/lib/src/widgets/settings_row.dart`：`SettingsGroup`（`:118`，组名 13 号 600 主色，卡片 `surfaceContainerLow`、圆角 16）、`SettingsRow`（`:261`，按下 10%、悬停 6%、键盘焦点 2 像素主色框、不能用 38% 并用 `disabledReason` 替换说明、处理中转圈）；五种行：跳转 `:500`、开关 `:640`、滑块 `:720`、计数 `:886`、行内选项 `:994`；窄于 360 或 1.5 倍字号时值换到标题下（`:18`、`:21`）；电视样式 `SettingsRowStyle(tv: true)`（`:26`） |
+| c5 | ✅ | `SettingsSection.configPreview`（`settings_model.dart:106`）是“数据”组的一行，顶栏不再有按钮 |
+| c6 | ✅（偏差 1） | “弹幕”（`:61`）、“录制”（`:70`，`route: RoutePath.kRecordSettings`） |
+| c7 | ✅ | “小窗弹幕”只有总览一个入口（`:64`）；视频页那行由 A11.3 去掉 |
+| c8 | ✅ | 搜索框 `SettingsSearchField`（`settings_row.dart:1095`）；输入停 150 毫秒后过滤（`settings_page.dart:74-87`）；`searchSettings`（`settings_model.dart:291`，每个词都要出现）；结果 `_SearchResults`（`settings_page.dart:349`）按“页面 › 分组”分组、`SettingsHighlight` 标出关键词；跳转行进页并高亮 1.5 秒（`_reveal` `:109`、`settings_section_view.dart:85`）；Ctrl+F / Cmd+F / Esc（`settings_page.dart:237-239`，Esc 只在有字时清空 `:276`） |
+| c9 | ✅ | 分界 840（`:19`）、左栏 360（`:22`）；右栏是嵌套导航器（`_contentNavigator` `:132`），右栏里打开的页都在右栏、带返回，返回键先关右栏里的页；600～839 一栏最宽 720（`SettingsPageBody` `settings_tiles.dart:668`） |
+| c10 | ✅ | `LayoutBuilder` 只读自己的宽度（`settings_page.dart:166`）；跨过 840 时右栏的页和它上面的子页保留 |
+| 追加 | ✅ | 窗口高 <480 时所有设置页顶栏 48 高（`settingsAppBar` `settings_tiles.dart:645`；`live_ui` 的 `settingsPageAppBar` `settings_page_frame.dart:21` 同一规则） |
+
+- 根因（记录）：v3 总览是一个长列表、十几个组每组一两行，组名和说明对比度不够、说明只显示一行；“配置预览”在顶栏；没有搜索；按整屏宽度排、没有两栏；“小窗弹幕”在总览和视频页各一处。
+- 偏差（记录）：①当时“弹幕”行打开设置里原有的弹幕页、“本地互动体验”打开“还在开发”的空页——后来 A08.5 把弹幕页换成直播间同一个组件（`danmaku_page.dart`，`RoutePath.kDanmakuSettings`），本地互动接到 `RoutePath.kLocalInteraction`（`settings_model.dart:90`）；②去掉了 v4 自加的“关于”分区、每个分区的“恢复本分区默认值”和改动数角标、“录制中心”“WebDAV”两个链接；③搜索结果的分组标题整行主色（设计图“›”后是次要色）。
+- 新翻译键中英各 77 条（和 A11.2 合计，`settings_area_*`、`settings_*_desc` 等）；没有新设置。`live_ui` 只做添加（设置行一族、`SettingsHighlight`、`SettingsSearchField`）。门禁：`settings` 直接写的颜色和图标 209 → 126（和 A11.2 合计，后续 A11.3～A11.5 降到 32）。
+- 后来的变化：A11.5 加“日志管理”行（`settings_model.dart:115`，`RoutePath.kLogs`）；A08.5 的弹幕页；D-009 设置页两端用 Android 拉伸（`settings_page_test.dart` 第一个用例）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/settings/settings_page_test.dart`（当时 25 个，现在 26 个用例声明；原 13 个按新结构重写）：总览五组和行序、图标、两行说明、顶栏没有配置预览；行打开页和返回、路由页；返回链（附录 A 第 7 条）；1280×1400 两栏和右栏子页、852×393 两栏和 48 高顶栏、760 宽一栏最宽 720；跨 840 缩放保留页；搜索（分组标题、标记、就地开关、每个词都要匹配、空结果、清空）、结果里的跳转行进页并高亮、Ctrl+F 和 Esc。`packages/live_ui/test/settings_row_test.dart`（当时 16 个，现在 18 个）：组和分隔线、两行说明和对比度（四个种子色、深浅两套）、开关整行点和颜色、不能用、处理中、窄屏和 1.5 倍字体换行、计数、滑块、选项、搜索标记、电视焦点放大和描边。当时 `apps/pure_live` 290 个、`live_ui` 61 个、`live_store` 36 个全部通过。
+- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：设置总览通过。搜索、Ctrl+F、两栏在平板或 Windows 上没有看过（登记表是“完成”，问题见[子分类页](../README.md)“已知问题”）。
+- 留下的问题和去向：设置项逐条核对 → J01.2；宽屏两栏和键盘操作在 Windows 上看 → X01.1；设置各页 Esc 不返回 → A05.1；没有做 profile 帧时间（每页 ≤30 行，一次性构建）→ R01.2 有需要时。

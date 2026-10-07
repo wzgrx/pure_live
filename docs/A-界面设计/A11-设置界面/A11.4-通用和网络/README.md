@@ -1,8 +1,9 @@
-# A11.4 通用和网络：设计（第 1 版）
+# A11.4 通用和网络：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：通用（含界面刷新率、开机窗口尺寸、定时退出）、平台显示与授权、刷新设置、网络与代理设置四页和它们弹出的对话框。本地用户与互动页（A11.4-07）归 A08.2，这里不做
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a114)（A11.4-01～06、08～16）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a114)
+- 旧编号：U.6d、T09a.5（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（Y1～Y4 按建议 A）、D-010（界面刷新率）、D-018；记录 [record.md](record.md)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（共用部分 [src/smock.py](src/smock.py)，和 A11.3 同一份）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；平台图标取自 `packages/live_ui/assets/platforms/`
 - 和 A11.1、A11.3 的关系：行的样子和 A11.3 一样，先用 A07.6 已确认的那套，统一行组件以 A11.1 为准；选项对话框、时长对话框和 A11.3 同一个
@@ -91,7 +92,7 @@
 | Q13 | 代理关着时地址和端口消失，打开时内容跳动 | `network_proxy_settings_page.dart:150-160`、`:173-183` |
 | Q14 | 播放代理在内核页还有一处能改（A11.3 P7） | `player_kernel_settings_page.dart:61-74` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -145,10 +146,34 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，Y1～Y4 按建议 A。一并处理的跨任务待同步：A16.1（“关闭窗口时”三选一、开机窗口尺寸默认 1280 × 720 和范围、“新建独立播放窗口”的说明）、A18.1（界面刷新率 iPhone Pro 也显示）、A18.2（Mac 上不显示“关闭窗口时”，没做，见下）。
-- 实现：d1～d14 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/settings/settings_catalog.dart`（通用、平台、刷新、网络各节）、`settings_editors.dart`（`RefreshRateTile`、`StartupTile`、`WindowSizeTile`、`CloseWindowTile`、`AutoExitTile`、`PreferPlatformTile`、`ProxyEditorTile`）、`settings_tiles.dart` 的 `SettingCounterTile`。“关闭窗口时”照旧写 `dontAskExit` + `exitChoose` 两个键；代理输入停 0.5 秒后保存、端口不在 1～65535 时红字不保存。
-- 偏差：平台页多一组 v4 自己的“发现与列表”（显示不可播放的直播、Twitch 语言筛选、斗鱼登录后强制续期，UPGRADES 已批准）；刷新页末尾保留观看记录上限（3.x 的 `historyLimit`）；iOS 的刷新率说明用系统报告的刷新率；macOS 的“登录时打开”没做。
-- 提交：同 A11.3（`6b87e96f9`，合并 `ccd54d3c7`，记录 `e9e41d557`，2026-10-02）。
-- 测试：`apps/pure_live/test/features/settings/settings_general_test.dart` 记录时 9 个（手机通用页、刷新率对话框、定时退出、Windows 五组和窗口尺寸、iOS 高刷、平台页搜索、刷新页、计数按住、网络页窄屏和宽屏）。
-- 真机：没有单独记录；刷新率一行属于 R02.2（待真机）的范围。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看通用、平台、刷新、网络四页；Windows 的窗口项等 X01 开工。
-- 留下的问题：macOS 的“登录时打开”、Mac 上隐藏“关闭窗口时”（A18.2）；Linux、macOS 的开机启动和关窗口选择是否加（A16.1 的后续，X 组）。
+**定稿**：用户确认第 1 版，Y1～Y4 按建议 A（D-003）。一并处理的跨任务待同步：A16.1（“关闭窗口时”三选一、开机窗口尺寸默认 1280 × 720 和范围、“新建独立播放窗口”的说明）、A18.1（界面刷新率 iPhone Pro 也显示）、A18.2（Mac 上不显示“关闭窗口时”，没做，见下）、A12.1 和 A08.2（A11.1 已做，这次没有改动）。
+
+**实现**（详见 [record.md](record.md)；2026-10-02，和 A11.3、A11.5 同一批：提交 `6b87e96f9`，合并 `ccd54d3c7`“Merge U.6c-e: playback, general and data settings”；登记表记的是 `e9e41d557`（记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/settings/` 省略前缀） |
+|---|---|---|
+| d1 | ✅ | 四页：通用 `settings_catalog.dart:1341`、平台 `:537`、刷新 `:600`、网络 `:1463`；键都没改；开机启动、开机窗口尺寸、关闭窗口时、新建独立播放窗口只在 Windows（`_windows`，Linux、macOS 照 v3 没有）；界面刷新率在 Android、Windows 和高刷 iPhone / iPad（`_refreshRate`，`SettingsEnv.fastDisplay`） |
+| d2 | ✅ | 通用页：显示 `:1342`（界面刷新率）→ 启动 `:1376`（开机启动、开机窗口尺寸、启动动画）→ 更新 `:1401`（自动检查更新、GitHub 更新源）→ 窗口 `:1417`（关闭窗口时、新建独立播放窗口）→ 定时退出 `:1436`（应用定时退出、退出前等待时间） |
+| d3 | ✅ | `RefreshRateTile`（`settings_editors.dart:901`）：Windows 的说明写“当前显示器 1920 × 1080 · 60 Hz（最高 144 Hz），换显示器时自动更新”；对话框左下角“重新检测”（`:966`，有显示模式通道的平台） |
+| d4 | ✅ | 档位“省电 / 均衡 / 最高”写在右边（`options` `:909`）；说明只写 Hz（`_rates` `:929`，“当前 60 Hz，最高 120 Hz”）；对话框里每档“档位名 · 耗电”加 v3 的整段说明 |
+| d5 | ✅ | `CloseWindowTile`（`:719`）：每次询问 = `dontAskExit` 关；最小化到托盘 / 退出应用 = `dontAskExit` 开 + `exitChoose`；“最小化”照实际行为写“缩到托盘，直播照常” |
+| d6 | ✅ | `AutoExitMinutesTile`（`:867`）用 `showNumberDialog`（`settings_dialogs.dart:155`，和 A11.3 自动助眠同一个）：标题和行名都是“退出前等待时间”，“输入 1～525600 分钟”；定时退出开着时这一行的说明显示剩余时间（`formatCountdown` `:842`，每秒只重建这一行）；计时器 `AutoExitTimer`（`:767`，`app/startup.dart` 启动时接上） |
+| d7 | ✅ | `WindowSizeTile`（`:535`）：预设 1080 × 720、1280 × 720（720P · 默认）、1600 × 900、1920 × 1080、2560 × 1440，当前尺寸高亮；“应用”实心按钮（`:654`）、“点‘应用’后窗口立即变成这个大小”；最小值取设置和 `DesktopShell.minimumSize` 里大的那个（`windowSizeMinimum` `:576`）；完成提示“设置已应用” |
+| d8 | ✅（偏差 1） | 平台页：平台 `settings_catalog.dart:538`（首选平台带图标 `:549`）、账号和标签 `:556`，加 v4 自己的“发现与列表” `:574`（显示不可播放的直播 `:578`、Twitch 语言筛选 `:584`、斗鱼登录后强制续期 `:594`）；原来这一页的网络电视链接去掉 |
+| d9 | ✅ | `PreferPlatformTile`（`settings_editors.dart:182`）的对话框（`:224` 起）：搜索框、“没有匹配的平台”、选项行同 A11.3 的“主色 + 勾”、带平台图标 |
+| d10 | ✅（偏差 2） | 刷新页：关注列表 `settings_catalog.dart:601`（开启关注自动刷新、刷新间隔、返回应用时刷新关注、首页并发刷新任务）、直播缩略图 `:641`（自动刷新、间隔）；间隔照 v3 用选项对话框（12 档 `followRefreshMinutes` `:55`、8 档 `coverRefreshMinutes` `:58`），开关关着时变灰写原因 |
+| d11 | ✅ | “返回应用时刷新关注”（`:620`，新键 `settings_refresh_on_resume`） |
+| d12 | ✅ | 首页并发刷新任务（`:628`）是计数行 `SettingCounterTile`（`settings_tiles.dart:442`）1～20，按住连续变，点数字可输入；说明写默认和建议值 |
+| d13 | ✅ | `ProxyEditorTile`（`settings_editors.dart:420`）：开关用设置行，地址和端口关着时变灰不消失；宽 ≥420 时 3:2 并排（`:512`）；输入停 0.5 秒后保存（`:454`）；端口不在 1～65535 时框下红字、不保存（`:451`、`:467`） |
+| d14 | ✅ | 内核页那一行（`PlayerProxyLinkTile`，`playback_tiles.dart:230`）打开网络页并高亮“启用播放代理”；`SettingsSection.byName('network')`（`settings_model.dart:136`）照旧可以从路由参数打开（搜索页 `features/search/search_view.dart:672` 用它） |
+
+- 根因（记录，v3 的问题）：通用页一长串没有分组；刷新率和 Windows 动态刷新率两行、说明把档位和 Hz 混在一起；“退出不再询问”说不清记住了什么；两个时长对话框不一样；开机窗口尺寸“确认”后不知道什么时候生效；首选平台对话框没有图标；刷新间隔离开关很远；“返回应用时刷新收藏”用旧叫法；并发数 20 项单选；网络页地址端口关着时消失。
+- 偏差（记录）：①平台页多一组 v4 自己的“发现与列表”（UPGRADES 已批准，设计里没有）；②刷新页末尾保留“历史记录”一组（观看记录上限，3.x 的 `historyLimit`，`:660`），设计图没画；③iOS 上界面刷新率只在显示器高于 60 Hz 时出现，Hz 用系统报告的刷新率；macOS 的“登录时打开”没做（开机启动这一行只在 Windows）。
+- 新翻译键：和 A11.3、A11.5 合计（见 A11.3），改了 2 条已有文字（`settings_refresh_on_resume_desc`、`settings_refresh_concurrency_desc`）；没有新设置（“关闭窗口时”照旧写 `dontAskExit` + `exitChoose`）。
+- 后来的变化：O03.2（F.0a）在通用页末尾加了“分享”一组的“识别剪贴板里的直播间口令”（`settings_catalog.dart:1453`）；R02.2 在界面刷新率下面加了 60 Hz 限速提示（`settings_editors.dart:977`，待真机）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/settings/settings_general_test.dart`（当时 9 个，现在 10 个用例声明）：手机通用页各组和行序、刷新率档位在右边和 Hz 说明、对话框选档；定时退出（剩余时间、快捷时长、关掉停止）；Windows（五组、关闭窗口时三选一写两个键、窗口尺寸预设高亮、超出范围、应用和提示）；iOS 高刷才显示刷新率；平台页、图标、搜索和空结果、选平台、标签跳路由；刷新页（变灰写原因、12 档对话框、计数加减）；按住连续加；网络页（关着时变灰、输入保存、端口红字不保存、窄屏上下排、宽屏并排）。刷新率的帧率声明和限速提示另在 `match_frame_rate_test.dart`、`refresh_rate_limited_test.dart`（R02）。
+- 真机：记录里没有 K90 结果；界面刷新率一行属于 R02.2（待真机）的范围。登记表是“完成”，问题见[子分类页](../README.md)“已知问题”；建议 [S03.1](../../../S-质量和验证/S03-统一验证/S03.1-统一验证/README.md) 补看：设置 → 通用（刷新率对话框、定时退出的剩余时间）、平台显示与授权（首选平台搜索）、刷新设置（关掉自动刷新后间隔变灰、并发数按住连续加）、网络与代理设置（端口输 70000 时红字）；Windows 的窗口项等 X01 开工时看。
+- 留下的问题和去向：macOS 的“登录时打开”、Mac 上隐藏“关闭窗口时”→ A18.2；Linux、macOS 是否加开机启动和关窗口选择 → X 组（A16.1 的后续）。

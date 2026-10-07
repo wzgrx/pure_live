@@ -10,19 +10,20 @@
 ## 目标和验收
 
 1. 下面清单的每一条都有结果：通过 / 不通过（现象、截图、根因线索）/ 没法看（原因，例如缺条件）。
-2. 结果写回 18 个任务各自的 `verify.md`（没有就照 `docs/templates/verify.md` 在任务文件夹新建）：设备、构建（提交号、debug 或 profile）、日期、逐条结果、截图放任务文件夹的 `verify/`。
+2. 结果写回 18 个任务各自的 `verify.md`：16 个已经有（2026-10-07 各组写的，步骤和本清单对得上，编号对照见每条的“任务”一列，例如 “A07.10-1” 是 A07.10 记录“要在 K90 上看的”第 1 条）；R01.1、R02.2 还没有，照 `docs/templates/verify.md` 在任务文件夹新建，步骤用本清单 3A-09～3A-12、3B、3C。每份写设备、构建（提交号、debug 或 profile）、日期、逐条结果，截图放任务文件夹的 `verify/`。同一件事两边都有步骤时（例如 O05.2 的 verify.md 和 1B-21），结果两边都写。
 3. 本文件夹写 `record.md`：一张汇总表（任务、阶段、结论、返工任务编号），以及 R01.1 基准控制台的那几行。
 4. 每个阶段看完：通过的任务在登记表改“完成”、写日期；不通过的开返工任务（新编号，标题写“接 <任务>”）；本任务的 `done` 加一；运行 `python3 tools/docs/docs.py`。
 5. 用户的 3.x 和它的数据没被碰过；所有临时改过的系统设置（动画、显示大小、`wm size`、刷新率、画中画权限、本地网络权限、防火墙规则）都恢复了。
 
 ## 现状（读代码得出）
 
-- 这 18 个提交都在标签 `v4.0.0`（`4b039e0c7`，构建号 5001）里。之后 master 上 `apps/`、`packages/` 只改了注释里的文档路径，行为不变：用当前 master 构建测试包即可。
-- 布局规则：`apps/pure_live/lib/features/live_play/logic/room_layout.dart:59-67`——高度 <480 且宽 >高、宽 ≥600 是横屏手机；宽 ≥840 才是宽屏分栏。K90 是 400×869 dp（3 倍），横过来 869×400，所以 **K90 上默认看不到宽屏分栏**，要用 `wm size` 模拟。
+- 这 18 个提交都在标签 `v4.0.0`（`4b039e0c7`，构建号 5001）里。之后到 2026-10-07 的 master（`c10e46829`）`apps/`、`packages/` 只有 4 个提交，改的是注释里的文档路径和一个测试的期望值，行为不变：用当前 master 构建测试包即可（`git log --oneline v4.0.0..master -- apps packages` 复核；如果那时已经有别的任务合并了代码，在 `verify.md` 写清用的提交）。
+- 布局规则：`apps/pure_live/lib/features/live_play/logic/room_layout.dart:59-70`（`roomWideMinWidth = 840` `:59`、`roomCompactMaxHeight = 480` `:62`、`roomPageLayout` `:66`）——高度 <480 且宽 >高、宽 ≥600 是横屏手机；宽 ≥840 才是宽屏分栏。K90 是 400×869 dp（3 倍），横过来 869×400，所以 **K90 上默认看不到宽屏分栏**，要用 `wm size` 模拟。
 - 横屏方向：`apps/pure_live/lib/platform/screen_orientation.dart`（`landscape()` 先 Flutter 的两个横向，再原生 `sensorLandscape`）；直播间 `live_play_page.dart:552-556`、离开全屏 `:598-604`（先竖屏，3 秒后放开）。
-- 暂停时的弹幕：设置键 `danmakuPausedBehavior`，三处都用 `danmakuRunning`（主画面 `player/player_view.dart:483`、小窗 `mini/compact_danmaku.dart`、多画面 `features/multiview/multiview_page.dart`）。
-- 飞行弹幕点按、长按：`player/player_view.dart:416-438`（`_danmakuAt`，要开“点按 / 长按”开关）、`:444-449`（面板打开时弹幕停住）。
-- 录制通知标题：`apps/pure_live/lib/app/recording_notice.dart`，文字 `record_notify_one_preparing`“准备录制 · {name}”、`record_notify_one`“正在录制 · {name}”、`record_notify_one_reconnecting`“正在重连 · {name}”、`record_notify_one_processing`“正在整理录像 · {name}”、`record_notify_many`“正在录制 {count} 个直播间”；“录制已停止”提醒在任务失败且应用不在前台时发（`recording_notice.dart:145-160`），图标 `ic_stat_record_stopped`。
+- 暂停时的弹幕：设置键 `danmakuPausedBehavior`，三处都用 `danmakuRunning`（主画面 `features/live_play/player/player_view.dart:483` 起、小窗 `features/live_play/mini/compact_danmaku.dart`、多画面 `features/multiview/multiview_page.dart`）。
+- 飞行弹幕点按、长按：`features/live_play/player/player_view.dart:416-438`（`_danmakuAt`，锁定时不响应 `:417`，要开“点按 / 长按”开关）、`:444-449`（`_danmakuHeld`：面板打开时弹幕停住，关上后继续）。
+- 录制通知标题：`apps/pure_live/lib/app/recording_notice.dart`，文字 `record_notify_one_preparing`“准备录制 · {name}”、`record_notify_one`“正在录制 · {name}”、`record_notify_one_reconnecting`“正在重连 · {name}”、`record_notify_one_processing`“正在整理录像 · {name}”、`record_notify_many`“正在录制 {count} 个直播间”；“录制已停止”提醒在任务**变成**失败、且被系统停掉（`lastErrorStage == 'background'`）或应用不在前台时发（`recording_notice.dart:147-160`，`:152-153` 是条件），图标 `ic_stat_record_stopped`（`RecorderForegroundService.kt:135`）。
+- 造“录制失败”：**H01.5 合并之前不能靠“断网等重试用完”**——断网先触发的 EOF 不计重试次数（`packages/live_record/lib/src/policy.dart` 的 `shouldEnterPollingAfterRetryLimit`），任务一直快速重连，等不到失败。要先在录制设置里关掉“自动断线重连”，断网后第一次出错就停（[H05.1 的 verify.md](../../../H-录制/H05-录制通知/H05.1-录制通知按状态写标题/verify.md) 第 7 步和结论最后一条）。
 
 ## 3.x 基线
 
@@ -37,7 +38,7 @@
 
 ## 范围
 
-- 可以改：本文件夹的文件；18 个任务文件夹里的 `verify.md`、`verify/`；[CHECKLIST.md](../CHECKLIST.md) 的“结果”一列（同一功能点看过的顺带填）；`docs/tasks.toml` 里这 18 个任务和 S02.5 的状态、日期、阶段（维护者做）。
+- 可以改：本文件夹的文件（含本任务的 `record.md`）；18 个任务文件夹里的 `verify.md`、`verify/`（R01.1、R02.2 新建 `verify.md`）；[CHECKLIST.md](../CHECKLIST.md) 的“结果”一列（同一功能点看过的顺带填）；`docs/tasks.toml` 里这 18 个任务和 S02.5 的状态、日期、阶段（维护者做）。
 - 不能改：任何代码（问题开返工任务）；任务的设计 README 正文；版本号、`assets/version.json`、`assets/releases.json`；手机上的 `com.mystyle.purelive` 和它的数据。
 
 ## 方案和阶段
@@ -275,17 +276,18 @@ flutter drive --profile -d 192.168.1.2:5555 \
 
 **4B “录制已停止”提醒**
 
-准备：录制设置把“最大重试次数”调到最小、“重试间隔”调到 5 秒；录制中心里先有十几个任务（可以给关注里的直播间加“等开播”）。
+准备：录制设置里关掉“自动断线重连”（H01.5 合并之前必须这样做，见“现状”最后一条）；录制中心里先有十几个任务（可以给关注里的直播间加“等开播”）。
 
 | 编号 | 步骤 | 期望 | 任务 |
 |---|---|---|---|
-| 4B-01 | 对排在后面的一个房间“立即录”，按 Home 切到别的应用，只断测试包的网，等重试用完 | 通知栏出现“录制已停止 · 主播名”，小图标是开口圆环加“!”（不是录制中的图形） | H05.1、A08.5-3 |
-| 4B-02 | 点通知本身 | 录制中心滚到这条，有一圈主色描边，约 2 秒后淡掉 | A08.5-3 |
-| 4B-03 | 再触发一次，点通知上的“打开录制中心”按钮 | 效果一样 | A08.5-3 |
-| 4B-04 | 两个任务先后各出一条提醒，分别点 | 各自定位到自己的任务 | A08.5-4 |
+| 4B-01 | 对排在后面的一个房间“立即录”，等开始写文件（顶栏变红）后按 Home 切到别的应用，只断测试包的网 | 半分钟内通知栏出现“录制已停止 · 主播名”，正文“录制出错停止了。已录下的 m:ss 已保存，回到应用可以重新开始。”；小图标是开口圆环加“!”（不是录制中的图形） | H05.1、A08.5-3 |
+| 4B-02 | 恢复网络，点通知本身 | 录制中心滚到这条，有一圈主色描边，约 2 秒后淡掉；提醒自动消失 | A08.5-3 |
+| 4B-03 | 再触发一次（重复 4B-01），点通知上的“打开录制中心”按钮 | 效果一样 | A08.5-3 |
+| 4B-04 | 两个任务先后各出一条提醒（各录一个房间，按 Home 后断网），分别点 | 各自定位到自己的任务 | A08.5-4 |
 | 4B-05 | 停在录制中心时点提醒；按一次返回 | 不叠出第二个录制中心；返回到进录制中心之前的页面 | A08.5-5 |
 | 4B-06 | 杀掉应用（`adb shell am force-stop com.mystyle.purelive.v4dev`）后点还留在通知栏的提醒 | 应用启动后录制中心定位到那条（任务恢复后才出现也能定位） | A08.5-6 |
-| 4B-07 | 测完恢复网络、把录制设置改回 | — | — |
+| 4B-07 | 留在直播间里（不按 Home）重复 4B-01 的断网 | **不**出现“录制已停止”提醒（应用在前台时普通失败不提醒）；录制按钮变成失败的样子 | H05.1 |
+| 4B-08 | 测完：恢复网络；录制设置的“自动断线重连”改回开；删掉测试产生的失败任务，清掉通知 | — | — |
 
 已知差异：前台录制通知（“正在录制 · 晚风”）点开仍是录制中心顶部（A08.5 偏差 5，已登记 H05.2）。
 
@@ -304,7 +306,7 @@ flutter drive --profile -d 192.168.1.2:5555 \
 - 断网只断测试包（防火墙规则），不要关 Wi-Fi：adb 走 Wi-Fi，断了就连不回来。规则用完立即删，`adb shell su -c "iptables -S OUTPUT"` 确认没有残留。
 - 基准（3B）和 `flutter run --profile`（阶段 2）都会覆盖装 `.v4dev`；测试包的数据保留，但要重新装回平时的包再接着做。
 - 临时改的系统设置都要恢复：动画、`wm size`、`wm density`、系统刷新率、画中画权限；做完 `adb shell wm size`、`adb shell settings get global animator_duration_scale` 核对。
-- 4B 会造出“失败”的录制任务和通知：测完在录制中心删掉，通知清掉。
+- 4B 会造出“失败”的录制任务和通知：测完在录制中心删掉，通知清掉，“自动断线重连”改回开。H01.5 合并以后，4B 也可以改回“开着自动断线重连、断网等重试用完”再看一遍（那时它就是 H01.5 的验证）。
 - 扫码登录的哔哩哔哩账号、Cookie 不进截图和记录。
 - 不在 18 个任务的设计 README 里改结论；结果只写 `verify.md` 和记录。
 

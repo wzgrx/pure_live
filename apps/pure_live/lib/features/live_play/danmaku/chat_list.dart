@@ -96,10 +96,14 @@ String chatCopyText(LiveMessage message) {
 /// when a scroll ends at the bottom or "N 条新弹幕" is pressed.
 class ChatList extends ConsumerStatefulWidget {
   /// Creates the list.
-  const new({required this.controller, this.onTouched, this.memory, super.key});
+  const new({required this.controller, this.onTouched, this.memory, this.buttonInset = 0, super.key});
 
   /// The room.
   final LiveRoomController controller;
+
+  /// How much further from the right the new-messages button sits: clear of
+  /// the composer's star on the list (A07.17 c3).
+  final double buttonInset;
 
   /// Called when the user touches the list (clears the tab's count).
   final VoidCallback? onTouched;
@@ -449,7 +453,7 @@ class _ChatListState extends ConsumerState<ChatList> {
           ),
           if (!_following)
             Positioned(
-              right: 12,
+              right: 12 + widget.buttonInset,
               bottom: 12,
               child: FilledButton.icon(
                 key: const ValueKey('live-play-new-messages'),

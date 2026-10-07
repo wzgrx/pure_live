@@ -86,8 +86,23 @@ class RoomPlayer extends ConsumerStatefulWidget {
     this.onOpenGuide,
     this.swipe,
     this.edge,
+    this.onTitle,
+    this.pickersInBar = false,
+    this.alignment = Alignment.center,
     super.key,
   });
+
+  /// A phone held sideways (A07.17 c2): the title shows the figures and
+  /// opens or closes the room details ([PlayerBarActions.onTitle]).
+  final VoidCallback? onTitle;
+
+  /// The quality and line buttons in the inline bottom bar (A07.17 c2).
+  final bool pickersInBar;
+
+  /// Where the picture sits in the player: at the top under the portrait
+  /// room's panel (A07.17 c3: centred, a portrait picture left a black
+  /// strip above it and hid as much under the panel), else in the middle.
+  final Alignment alignment;
 
   /// On the middle of the right edge, shown and hidden with the controls:
   /// the wide room's handle that folds the chat or guide column (B09 c5,
@@ -511,7 +526,13 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     // F.1a: the screen stays on while it plays only with "屏幕常亮" on.
     final keepOn = watchSetting(ref, Settings.enableScreenKeepOn);
     if (presentation == PicturePresentation.plain) {
-      return LiveVideoView(key: _video, session: _room.session, fit: fit, keepScreenOn: keepOn);
+      return LiveVideoView(
+        key: _video,
+        session: _room.session,
+        fit: fit,
+        keepScreenOn: keepOn,
+        alignment: widget.alignment,
+      );
     }
     final mode = presentation == PicturePresentation.ambient
         ? PortraitDisplayMode.ambient
@@ -523,6 +544,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       // The ambient background shows around the picture.
       fill: OnVideoColors.clear,
       keepScreenOn: keepOn,
+      alignment: widget.alignment,
     );
     return Stack(
       key: ValueKey('live-play-picture-${mode.name}'),
@@ -603,6 +625,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       onMenu: _onMenu,
       onWindowFullscreen: widget.onWindowFullscreen,
       wide: widget.wide,
+      onTitle: widget.onTitle,
+      pickersInBar: widget.pickersInBar,
+      overPanel: widget.overlayBottom > 0,
     );
     final padding = MediaQuery.paddingOf(context);
     final badgeTop = switch (arrangement) {

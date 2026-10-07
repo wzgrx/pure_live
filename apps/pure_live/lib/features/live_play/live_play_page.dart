@@ -12,6 +12,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
@@ -66,8 +67,9 @@ import 'package:pure_live/routes/route_path.dart';
 /// - narrower: the picture on top and the strip and chat below, or for a
 ///   portrait stream the picture filling the area under a three-stop panel
 ///   (U.2b);
-/// - under 480 high (a phone held sideways): the picture with the landscape
-///   bars;
+/// - under 480 high (a phone held sideways): the picture at the full height
+///   and only the chat list on its right; the strip folds into the picture's
+///   title (A07.17 c2);
 /// - fullscreen (U.2c), the portrait fullscreen (U.2b) and, on desktops, the
 ///   in-window fullscreen.
 ///
@@ -110,7 +112,6 @@ typedef _LayoutSettings = ({
   String mode,
   String policy,
   bool collapsed,
-  bool composer,
   bool swipe,
 });
 
@@ -513,7 +514,6 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     mode: ref.read(storeProvider).settings.get(Settings.portraitLayoutMode),
     policy: ref.read(storeProvider).settings.get(Settings.portraitFullscreenPolicy),
     collapsed: ref.read(storeProvider).settings.get(Settings.livePlayChatCollapsed),
-    composer: ref.read(storeProvider).settings.get(Settings.localInteractionEnabled),
     swipe: ref.read(storeProvider).settings.get(Settings.portraitFullscreenSwipeSwitch),
   );
 
@@ -690,7 +690,6 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       mode: watchSetting(ref, Settings.portraitLayoutMode),
       policy: watchSetting(ref, Settings.portraitFullscreenPolicy),
       collapsed: watchSetting(ref, Settings.livePlayChatCollapsed),
-      composer: watchSetting(ref, Settings.localInteractionEnabled),
       swipe: watchSetting(ref, Settings.portraitFullscreenSwipeSwitch),
     );
     return RoomMiniScope(
@@ -768,6 +767,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     VoidCallback? onBack,
     RoomSwipeController? swipe,
     Widget? edge,
+    VoidCallback? onTitle,
+    bool pickersInBar = false,
+    Alignment alignment = Alignment.center,
   }) => RoomPlayer(
     key: _playerKey,
     controller: controller,
@@ -789,6 +791,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     onOpenGuide: _revealGuide,
     swipe: swipe,
     edge: edge,
+    onTitle: onTitle,
+    pickersInBar: pickersInBar,
+    alignment: alignment,
   );
 
   /// The open panel, or nothing.
@@ -1061,13 +1066,23 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     );
   }
 
-  /// The strip, a divider and the chat with the details over it.
-  Widget _chatColumn(LiveRoomController controller) => Column(
+  /// The strip, a divider and the chat with the details over it; with
+  /// [composerCollapsed] the local composer is a star on the chat list
+  /// (the portrait room's panel, A07.17 c3).
+  Widget _chatColumn(LiveRoomController controller, {bool composerCollapsed = false}) => Column(
     children: [
       _infoBar(controller),
       const Divider(height: 1),
       Expanded(
-        child: _withDetails(controller, ChatPanel(controller: controller, detailsOpen: _details, memory: _memory)),
+        child: _withDetails(
+          controller,
+          ChatPanel(
+            controller: controller,
+            detailsOpen: _details,
+            memory: _memory,
+            composerCollapsed: composerCollapsed,
+          ),
+        ),
       ),
     ],
   );
@@ -1078,6 +1093,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       final layout = roomPageLayout(
         width: page.maxWidth,
         height: page.maxHeight,
+        mobile: _platform.mobile,
         portraitPanel: portraitPanelEligible(
           portraitStream: portrait,
           adaptation: settings.adaptation,
@@ -1100,10 +1116,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
             builder: (context, constraints) {
               if (controller.site.id == SiteIds.iptv) return _channel(controller, settings, layout, constraints);
               return switch (layout) {
-                // A phone held sideways splits like a wide window, with the
-                // narrow chat column of U.2e c17.
-                RoomPageLayout.wide ||
-                RoomPageLayout.landscape => _wide(controller, settings, constraints, portrait: portrait),
+                RoomPageLayout.wide => _wide(controller, settings, constraints, portrait: portrait),
+                RoomPageLayout.landscape => _phoneLandscape(controller, settings, portrait: portrait),
                 RoomPageLayout.portraitPanel => _portraitPanel(controller, settings),
                 RoomPageLayout.phone => _phone(controller, settings, constraints),
               };
@@ -1203,19 +1217,69 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
 
   /// A portrait stream on a phone or a narrow window (U.2b): the picture
   /// under the three-stop panel.
+  ///
+  /// A07.17 c3: the picture sits at the top of the area (centred, the
+  /// area's extra height left a black strip over it and hid as much more
+  /// under the panel), and the local composer is a star on the chat list,
+  /// so the middle stop keeps five lines of chat in view.
   Widget _portraitPanel(LiveRoomController controller, _LayoutSettings settings) => PortraitPanelLayout(
     key: const ValueKey('live-play-portrait-panel'),
     mode: settings.mode,
-    least: portraitPanelLeast + (settings.composer ? portraitPanelComposer : 0),
     mobile: _platform.mobile,
     onPortraitFullscreen: _platform.mobile ? () => unawaited(_enterPortraitFullscreen()) : null,
     onFullscreen: () => unawaited(_enterFullscreen(landscape: _platform.mobile)),
-    player: (covered) => _player(controller, settings, arrangement: ControlsArrangement.inline, covered: covered),
+    player: (covered) => _player(
+      controller,
+      settings,
+      arrangement: ControlsArrangement.inline,
+      covered: covered,
+      alignment: Alignment.topCenter,
+    ),
     stop: _memory.panelStop,
     onStop: (stop) => _memory.panelStop = stop,
-    content: _chatColumn(controller),
+    content: _chatColumn(controller, composerCollapsed: true),
     panels: _panelLayer(controller, portrait: true),
   );
+
+  /// A07.17 c2 (choice A): a phone held sideways, not in fullscreen. The
+  /// picture takes the full height under the app bar; on its right only the
+  /// chat list, [phoneLandscapeChatWidth] wide (the tablet's split put the
+  /// strip, the tabs, the login hint and the composer there and left one
+  /// line of chat). The strip folds into the picture's title, which opens
+  /// the details over the list; the quality and line move to the bottom
+  /// bar. Panels come in from the right as in the wide room.
+  Widget _phoneLandscape(LiveRoomController controller, _LayoutSettings settings, {required bool portrait}) {
+    final scheme = Theme.of(context).colorScheme;
+    final player = _player(
+      controller,
+      settings,
+      arrangement: ControlsArrangement.inline,
+      presentation: portrait ? PicturePresentation.ambient : PicturePresentation.plain,
+      onTitle: _toggleDetails,
+      pickersInBar: true,
+    );
+    return _withSidePanel(
+      controller,
+      Row(
+        key: const ValueKey('live-play-phone-landscape'),
+        children: [
+          Expanded(
+            child: ColoredBox(color: OnVideoColors.ground, child: player),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(left: BorderSide(color: scheme.outlineVariant)),
+            ),
+            child: SizedBox(
+              key: const ValueKey('live-play-landscape-chat'),
+              width: phoneLandscapeChatWidth,
+              child: _withDetails(controller, ChatList(controller: controller, memory: _memory)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   /// 840 and wider (U.2d): the picture beside the chat column (34 %, 300 to
   /// 400), which folds away from the bottom bar or its edge handle and stays

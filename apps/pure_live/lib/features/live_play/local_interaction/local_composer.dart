@@ -271,20 +271,42 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
   }
 
   Widget _field(BuildContext context, {required TextStyle? style, required TextStyle? hint, Color? cursor}) =>
-      TextField(
-        key: const ValueKey('local-composer-input'),
-        controller: _text,
-        focusNode: _focus,
-        autofocus: widget.autofocus,
-        style: style,
-        cursorColor: cursor,
-        textInputAction: TextInputAction.send,
-        onSubmitted: (_) => _send(),
-        decoration: InputDecoration.collapsed(hintText: i18n('local_message_hint'), hintStyle: hint).copyWith(
-          // A long hint ends in "…" instead of wrapping.
-          hintMaxLines: 1,
+      LayoutBuilder(
+        builder: (context, constraints) => TextField(
+          key: const ValueKey('local-composer-input'),
+          controller: _text,
+          focusNode: _focus,
+          autofocus: widget.autofocus,
+          style: style,
+          cursorColor: cursor,
+          textInputAction: TextInputAction.send,
+          onSubmitted: (_) => _send(),
+          decoration:
+              InputDecoration.collapsed(
+                hintText: localComposerHint(context, hint, constraints.maxWidth),
+                hintStyle: hint,
+              ).copyWith(
+                // A long hint ends in "…" instead of wrapping.
+                hintMaxLines: 1,
+              ),
         ),
       );
+}
+
+/// The composer's hint for a field [width] wide (A07.17 c4): the long one
+/// ("发送本地弹幕，只有你看得到") where it fits, else the short "发送一条本地字幕"
+/// (3.x's), so a narrow field (the portrait fullscreen's) is not cut short.
+String localComposerHint(BuildContext context, TextStyle? style, double width) {
+  final long = i18n('local_message_hint');
+  final painter = TextPainter(
+    text: TextSpan(text: long, style: DefaultTextStyle.of(context).style.merge(style)),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final fits = painter.width <= width;
+  painter.dispose();
+  return fits ? long : i18n('local_message_hint_short');
 }
 
 /// The composer's star: opens the local danmaku style (U.2k #1).
@@ -334,22 +356,30 @@ class _LocalComposerStar extends StatefulWidget {
   State<_LocalComposerStar> createState() => _LocalComposerStarState();
 }
 
+/// Opens the composer's row over [context]'s page until a message is sent or
+/// the user taps elsewhere: on the picture above the bar
+/// ([LocalComposerPlace.video]), or as the chat list's bar along the bottom
+/// ([LocalComposerPlace.chat]).
+Future<void> _showComposerRow(BuildContext context, LocalRoomSession session, LocalComposerPlace place) {
+  final panels = RoomPanelScope.maybeOf(context);
+  return showGeneralDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: OnVideoColors.clear,
+    transitionDuration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 150),
+    pageBuilder: (dialogContext, _, _) =>
+        _ComposerRow(session: session, panels: panels, place: place, onSent: () => Navigator.of(dialogContext).pop()),
+  );
+}
+
 class _LocalComposerStarState extends State<_LocalComposerStar> {
   bool _open = false;
 
   Future<void> _openRow() async {
-    final panels = RoomPanelScope.maybeOf(context);
     setState(() => _open = true);
     widget.onHold?.call(true);
-    await showGeneralDialog<void>(
-      context: context,
-      barrierDismissible: true,
-      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      barrierColor: OnVideoColors.clear,
-      transitionDuration: MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 150),
-      pageBuilder: (dialogContext, _, _) =>
-          _ComposerRow(session: widget.session, panels: panels, onSent: () => Navigator.of(dialogContext).pop()),
-    );
+    await _showComposerRow(context, widget.session, LocalComposerPlace.video);
     if (!mounted) return;
     setState(() => _open = false);
     widget.onHold?.call(false);
@@ -386,26 +416,48 @@ class _LocalComposerStarState extends State<_LocalComposerStar> {
 }
 
 /// The row of the narrow screen: above the bar, or on the keyboard when it
-/// is up (iOS too).
+/// is up (iOS too); from the chat list's star (A07.17 c3), the chat list's
+/// bar along the bottom, on the keyboard when it is up.
 class _ComposerRow extends StatelessWidget {
-  const new({required this.session, required this.panels, required this.onSent});
+  const new({required this.session, required this.panels, required this.onSent, required this.place});
 
   final LocalRoomSession session;
   final RoomPanelController? panels;
   final VoidCallback onSent;
+  final LocalComposerPlace place;
 
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final bottom = math.max(media.viewInsets.bottom + 8, media.padding.bottom + 64);
     final composer = LocalDanmakuComposer(
       key: const ValueKey('local-composer-row'),
-      place: LocalComposerPlace.video,
+      place: place,
       session: session,
       autofocus: true,
       onSent: onSent,
       maxWidth: 520,
     );
+    final row = Material(
+      type: MaterialType.transparency,
+      // The star inside the row still reaches the room's panels.
+      child: panels == null ? composer : RoomPanelScope(notifier: panels!, child: composer),
+    );
+    if (place == LocalComposerPlace.chat) {
+      return Stack(
+        children: [
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: media.viewInsets.bottom,
+            child: ColoredBox(
+              color: Theme.of(context).colorScheme.surfaceContainerLow,
+              child: SafeArea(top: false, child: row),
+            ),
+          ),
+        ],
+      );
+    }
+    final bottom = math.max(media.viewInsets.bottom + 8, media.padding.bottom + 64);
     return Stack(
       children: [
         Positioned(
@@ -413,17 +465,39 @@ class _ComposerRow extends StatelessWidget {
           right: 12,
           bottom: bottom,
           child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Material(
-                type: MaterialType.transparency,
-                // The star inside the row still reaches the room's panels.
-                child: panels == null ? composer : RoomPanelScope(notifier: panels!, child: composer),
-              ),
-            ),
+            child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 520), child: row),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// A07.17 c3: the composer folded into a star at the lower right of the
+/// chat list (the portrait room's panel, where its bar left two lines of
+/// chat); a tap opens the composer's bar along the bottom with the
+/// keyboard. Nothing while the local interaction is off or outside a room.
+class LocalComposerChatStar extends ConsumerWidget {
+  /// Creates the star.
+  const new({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = LocalRoomScope.maybeOf(context);
+    if (session == null || !localInteractionAvailable(ref)) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return IconButton.filledTonal(
+      key: const ValueKey('local-composer-chat-star'),
+      tooltip: i18n('local_send_message'),
+      style: IconButton.styleFrom(
+        fixedSize: const Size.square(40),
+        minimumSize: const Size.square(40),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        backgroundColor: scheme.secondaryContainer,
+        foregroundColor: scheme.primary,
+      ),
+      onPressed: () => unawaited(_showComposerRow(context, session, LocalComposerPlace.chat)),
+      icon: const Icon(AppIcons.localStyle, size: 20),
     );
   }
 }
@@ -433,19 +507,36 @@ class _ComposerRow extends StatelessWidget {
 bool localOverlayShown(SettingsStore settings) =>
     settings.get(Settings.enableDanmakuDisplay) && !settings.get(Settings.hideDanmaku);
 
-/// The composer under the chat list of [child] (the list's tab, U.2k-a).
+/// The composer under the chat list of [child] (the list's tab, U.2k-a), or
+/// with [collapsed] its star at the list's lower right
+/// ([LocalComposerChatStar], A07.17 c3: the portrait room's panel).
 class LocalComposerBelow extends StatelessWidget {
   /// Creates the column.
-  const new({required this.child, super.key});
+  const new({required this.child, this.collapsed = false, super.key});
 
   /// The chat list.
   final Widget child;
 
+  /// The composer is a star on the list instead of a bar under it.
+  final bool collapsed;
+
+  /// How far the star pushes the list's own lower-right button (the new
+  /// messages) to the left.
+  static const double starInset = 52;
+
   @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      Expanded(child: child),
-      const LocalDanmakuComposer(),
-    ],
-  );
+  Widget build(BuildContext context) => collapsed
+      ? Stack(
+          fit: StackFit.expand,
+          children: [
+            child,
+            const Positioned(right: 12, bottom: 12, child: LocalComposerChatStar()),
+          ],
+        )
+      : Column(
+          children: [
+            Expanded(child: child),
+            const LocalDanmakuComposer(),
+          ],
+        );
 }

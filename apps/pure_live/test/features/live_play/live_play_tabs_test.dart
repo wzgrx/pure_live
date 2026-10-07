@@ -416,14 +416,19 @@ void main() {
   });
 
   group('wide and landscape (c17)', () {
-    testWidgets('1280 x 800 and a phone held sideways put the tabs in the right column', (tester) async {
-      for (final size in const [Size(1280, 800), Size(852, 393)]) {
-        final room = await _pump(tester, width: size.width, height: size.height);
-        expect(find.byKey(const ValueKey('live-play-desktop-split')), findsOneWidget, reason: '$size');
-        final tabs = tester.getRect(find.byKey(const ValueKey('live-play-tabs')));
-        expect(tabs.left, greaterThan(size.width / 2), reason: '$size');
-        await _close(tester, room);
-      }
+    testWidgets('1280 x 800 puts the tabs in the right column; a phone held sideways only the list', (tester) async {
+      final wide = await _pump(tester, width: 1280, height: 800);
+      expect(find.byKey(const ValueKey('live-play-desktop-split')), findsOneWidget);
+      final tabs = tester.getRect(find.byKey(const ValueKey('live-play-tabs')));
+      expect(tabs.left, greaterThan(640));
+      await _close(tester, wide);
+
+      // A07.17 c2: the phone's column is the chat list alone.
+      final phone = await _pump(tester, width: 852, height: 393);
+      expect(find.byKey(const ValueKey('live-play-phone-landscape')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-tabs')), findsNothing);
+      expect(tester.getRect(find.byKey(const ValueKey('live-play-landscape-chat'))).left, greaterThan(426));
+      await _close(tester, phone);
     });
   });
 }

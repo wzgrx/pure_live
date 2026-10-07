@@ -16,7 +16,8 @@ enum FollowButtonPlace {
   /// grey (docs/A-界面设计/A07-直播间界面/A07.1-竖屏普通布局, change 12).
   bar,
 
-  /// The room details: 3.x's heart on a tonal button.
+  /// The room details: 3.x's heart; filled with the theme colour like the
+  /// bar's until followed, then tonal (A07.17 c6: one action, one look).
   details,
 
   /// The fullscreen bars: the bar's pill on the picture (3.x
@@ -191,11 +192,19 @@ class _FollowButtonState extends ConsumerState<FollowButton> {
 
   Widget _details({required bool followed, required VoidCallback? onPressed}) {
     final scheme = Theme.of(context).colorScheme;
-    return FilledButton.tonalIcon(
+    final background = followed ? scheme.secondaryContainer : scheme.primary;
+    final foreground = followed ? scheme.onSecondaryContainer : scheme.onPrimary;
+    return FilledButton.icon(
       key: const ValueKey('live-play-details-follow'),
-      style: FilledButton.styleFrom(shape: const StadiumBorder()),
+      style: FilledButton.styleFrom(
+        backgroundColor: background,
+        foregroundColor: foreground,
+        disabledBackgroundColor: background,
+        disabledForegroundColor: foreground,
+        shape: const StadiumBorder(),
+      ),
       onPressed: onPressed,
-      icon: _mark(followed ? AppIcons.followedHeart : AppIcons.followHeart, scheme.onSecondaryContainer),
+      icon: _mark(followed ? AppIcons.followedHeart : AppIcons.followHeart, foreground),
       label: Text(i18n(followed ? 'followed' : 'follow')),
     );
   }

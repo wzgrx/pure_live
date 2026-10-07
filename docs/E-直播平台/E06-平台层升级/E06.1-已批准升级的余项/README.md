@@ -1,13 +1,11 @@
-# E06.1 已批准升级里还没做的（原 M13.18 收尾）
+# E06.1 已批准升级的余项（UPGRADES 回填、平台层和弹幕层、列表、数据、文字）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 档位：可以以后；规模：大
-- 功能点：不是 v3 功能（[specs/UPGRADES.md](../../../specs/UPGRADES.md) 的余项）（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）
-- 涉及代码：多处，见下
-- 依赖：F.0～F.4 的“必须”完成后
-- 来源：scratchpad `rest/m13_18_closing.md`（没开始）、M13.17 任务说明第 7 项
-- 评审页：发评审页（条目多，逐条表态）
-- 记录：[records/F.5a.md](../../../TASKS.md)（开发后）；第 2、4 条：[records/F.5a1.md](record-2.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 类型：平台
+- 来源：[specs/UPGRADES.md](../../../specs/UPGRADES.md) 里 2026-10-02 还没做完的已批准升级（原 M13.18 收尾、M13.17 任务说明第 7 项）；第 2、4 条由一个代理做（[record-2.md](record-2.md)），第 1、3、5、6 条由另一个代理做（[record.md](record.md)），都按授权直接开发、要选的按 A（D-003）
+- 旧编号：F.5a、F.5a1、T02f.1
+- 相关：界面余项 [E06.2](../E06.2-平台层新数据接到界面/README.md)；YY FLV 优先 [E06.3](../E06.3-YY优先用FLV/README.md)；模型 [E05.2](../../E05-平台框架和模型/E05.2-模型扩展/README.md)；WebDAV Digest 拆到 J04.1；英文界面下的平台文字 Z05.2；决定 D-003、D-016、D-024
+- 说明：下面“要做的”到“经过”是 2026-10-02 开发前写的功能对比，文件:行是当时的位置（之后代码变了，以 [record.md](record.md)、[record-2.md](record-2.md) 和本页末尾“结果”为准）
 
 ## 要做的（逐条核对代码后再定范围）
 
@@ -208,3 +206,25 @@ v4 现在：
 | 2026-10-02 | 第 2、4 条平台层、弹幕层完成，界面部分交回；待界面接上后 K90 验证（快手标题下次装机即可看） |
 
 | 2026-10-02 | 第 1、3、5、6 条写功能对比、开发完成（投屏标题按协调员授权一起做），待 K90 验证 |
+
+## 结果
+
+- 合并：2026-10-02，提交 `069be46e4`（登记表）；第 2、4 条的记录 [record-2.md](record-2.md)，第 1、3、5、6 条的记录 [record.md](record.md)。
+- 第 2 条（平台层、弹幕层）：c1 快手详情不再用简介当标题、`fillFromDetail` 取卡片标题（现在 `packages/live_core/lib/src/live_room.dart:652`）；c2 CC、百度未开播确认；c3 `LiveSiteCookieRefusals`（`live_site.dart:403`，Twitch `twitch_site.dart:196`）；c4 `LiveMessage.sourceRoomId`（`live_message.dart:357`）和酷狗 400305；c5 `LivePlayUrlResolution.appliedQuality`（`live_site.dart:185-190`）；c6、c11 哔哩哔哩游客轮播（`bilibili_site.dart:415-449`、`live_site.dart:194` 的 `start`）；c7 `nameColor`、`badges`、`LiveBadge`（`live_message.dart:257`、`:361`、`:365`）和 17LIVE；c8 `TwitchSite(codecs:)`（`twitch_site.dart:147`）。
+- 第 4 条（`live_core` 收尾）：c9 `HlsStreamInf`（`hls_master.dart:281`）给 YouTube、PandaTV 共用；c10 `Fc2LiveSite(probeControl:)`（`fc2live_site.dart:59-91`）；c12 LiveMe、TikTok 租期不改。
+- 第 1 条：UPGRADES 状态列回填 74 行（之后 V03.3 又逐条核对一次）。第 3 条：卡片“已播 N 分钟”共用时钟 `roomClockProvider`（`apps/pure_live/lib/shared/rooms/room_grid.dart`）、观看记录卡片标“轮播”“已封禁”、SHOWROOM 搜索翻页共用快照。第 5 条：完整备份带网络电视列表和多画面会话（`shared/backup/backup_iptv.dart`、`features/multiview/logic/multiview_session.dart`）、投屏标题“主播名 - 标题”（`packages/live_cast`）。第 6 条：20 个目录说明、20 个口径说明改成通俗文字，账号页和工具箱用 `platformName`，删了 zh、en 各 930 个不再引用的键（键名清单在 record.md 末尾）。
+- 测试：第 2、4 条新增 15 个（`live_core` 12、`live_danmaku` 3），第 1、3、5、6 条新增 10 个（`room_lists_test.dart`、`history_page_test.dart`、`backup_extras_test.dart`、`i18n_test.dart` 两个保护用例、`live_cast` 的 `controller_test.dart`、`toolbox_page_test.dart`）；当时 `live_core` 3640、`live_danmaku` 1589、`apps/pure_live` 705 个全部通过。
+
+## 验证
+
+- 自动测试：见上；没有真实样本、只用合成回答测的：`getRoundPlayVideo` 的回答、Twitch 的 `codecs`、酷狗 400305 除 S09 以外的写法。
+- 真机：两份记录的“要在 K90 上看的”共 9 条，记录里都没有结果：快手从卡片进房标题（不用等界面）、卡片“已播 N 分钟”、观看记录“轮播”标记、备份恢复网络电视和多画面、投屏标题、目录说明文字可以直接看；哔哩哔哩轮播、酷狗“对方”、Twitch 提示、17LIVE 徽章、Picarto 档名要等 [E06.2](../E06.2-平台层新数据接到界面/README.md) 接上。登记表写的是“完成”，但按 PROCESS 3.2 应有 K90 结果（写进本组报告：建议改“待真机”或把能直接看的几条并入 S02.6）。
+
+## 留下的问题
+
+- 界面余项（1-1 轮播入口和起点、B-14 名字颜色和徽章、B-16“对方”、B-7 提示、8-8 编码、11-1 恢复后的档名、26-2 FC2 控制连接接手）→ [E06.2](../E06.2-平台层新数据接到界面/README.md)。
+- 6-1 YY FLV 优先（平台层早有开关，应用没打开）→ [E06.3](../E06.3-YY优先用FLV/README.md)。
+- 观看记录卡片不显示已播时长（选 A1：记录是上次看时的快照）；卡片简介 11-5 → A09.11。
+- 设备同步、同步到电视、设置里的数据工具直接用 `BackupService`，不带搜索记录、网络电视列表、多画面会话：没有任务管（record.md“没做的”）。
+- 平台层直接给的中文公告、画质名、分区名在英文界面仍是中文 → Z05.2。
+- 被删的翻译键如果别的分支还在用，合并后显示键名：`i18n_test.dart` 的“用到的键都在”会查出来（D-016、D-024）。

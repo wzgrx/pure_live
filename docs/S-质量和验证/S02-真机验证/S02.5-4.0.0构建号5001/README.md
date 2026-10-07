@@ -34,7 +34,7 @@
 | 4 | [A08.5](../../../A-界面设计/A08-弹幕界面/A08.5-设置里的弹幕页/record.md)（`ec7a27261`） | 设置里的弹幕页和直播间同一个组件；“录制已停止”通知点开定位到任务 | 6 条 |
 
 - 构建：这 18 个提交都在标签 `v4.0.0`（`4b039e0c7`，构建号 5001）里；之后到 2026-10-07 的 master（`c10e46829`）`apps/`、`packages/` 只有 4 个提交，改的是注释里的文档路径（2026-10-02、10-03 两次文档重排：`305c0e414`、`c613b73f9`、`9dfbb424d`）和 `version_page_test.dart` 的一个期望值（`e3f644d67`，发布文件指向 5001），行为和 5001 一样，所以用当前 master 构建的测试包验证即可（`git log --oneline v4.0.0..master -- apps packages` 可以复核）。
-- 3.x 对照：每个任务的 3.x 行为写在它自己的 README 或记录里（例如 A07.13 对照 `v3.2.11:lib/modules/live_play/widgets/dialogs/play_other.dart`）；本任务只看 4.x 是否做到了确认的样子。
+- 3.x 对照：每个任务的 3.x 行为写在它自己的 README 或记录里（例如 A07.13 对照 `v3.2.11:lib/modules/live_play/dialogs/play_other.dart`）；本任务只看 4.x 是否做到了确认的样子。
 
 ## 方案
 

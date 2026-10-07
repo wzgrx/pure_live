@@ -53,7 +53,7 @@
 - FFmpegKit 原生包：根 `pubspec.yaml` 指向本地 `.ffmpeg_kit/`，每个新工作区先跑 `bash tools/ffmpeg_kit/fetch.sh`，否则构建和应用测试报 “Local override not found”。
 - 3.x 兼容：任务 JSON（`recorder_tasks`，schema 9）、`RecordStatus` 的下标顺序、19 个设置的 Hive 键名和含义都不改（D-018）；不碰用户的 3.x 安装和数据（D-019）。
 - 已知的跨组问题：
-  - 六间房的录制详情不带弹幕参数（`packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416`，`getRoomDetailForRecording` 调 `_detail(roomId, media: true)`，没有 `danmaku: true`；进房详情 `:407` 带）。D 组（[D01.28](../D-弹幕/D01-平台弹幕协议/D01.28-六间房弹幕/README.md)）记的影响是“六间房录制没有弹幕 XML”，但读代码看**录制的弹幕不受影响**：录制弹幕的连接器 `recordChatConnector` 自己调 `site.getRoomDetail`（`apps/pure_live/lib/app/recording.dart:51`），拿的是带弹幕参数的进房详情；录制详情只给 `RecordStreamResolver` 选流（`packages/live_record/lib/src/resolver.dart:166`）。真正受影响的是多画面：`features/multiview/logic/multiview_controller.dart:488` 用录制详情建格子，`:865` 因 `danmakuData` 为空不连弹幕，六间房的格子没有弹幕（N 组）。没有任务；H 这边不用改，建议 D01.28 的说明改成指向多画面，修法照旧（录制详情也带 `SixRoomDanmakuArgs`）。
+  - 六间房的录制详情不带弹幕参数（`packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416`，`getRoomDetailForRecording` 调 `_detail(roomId, media: true)`，没有 `danmaku: true`；进房详情 `:407` 带）。D 组（[D01.28](../D-弹幕/D01-平台弹幕协议/D01.28-六间房弹幕/README.md)）记的影响是“六间房录制没有弹幕 XML”，但读代码看**录制的弹幕不受影响**：录制弹幕的连接器 `recordChatConnector` 自己调 `site.getRoomDetail`（`apps/pure_live/lib/app/recording.dart:51`），拿的是带弹幕参数的进房详情；录制详情只给 `RecordStreamResolver` 选流（`packages/live_record/lib/src/resolver.dart:166`）。真正受影响的是多画面：`features/multiview/logic/multiview_controller.dart:488` 用录制详情建格子，`:865` 因 `danmakuData` 为空不连弹幕，六间房的格子没有弹幕（N 组）。H 这边不用改；D01.28 的说明已改成指向多画面（2026-10-07），修法（录制详情也带 `SixRoomDanmakuArgs`）→ [E05.4](../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md)。
   - 主播下播、平台说“未开播”时，开着开播自动录的任务不合并（`packages/live_record/lib/src/recorder.dart:495-501`，3.x 同），并入 H01.5 c3b，见 [H04](H04-自动录制和排队/README.md)。
 - 改这一组的代码时：合并失败一律保留原始分段（`merge.dart` fail closed）；签名地址不落盘（`RecordTask.toJson`）；诊断先脱敏（`diagnostics.dart`）；测试定时器至少 1 秒、不访问真实平台（D-017）；用户看得到的文字中文、中英文翻译一起加（D-005）。
 
@@ -80,7 +80,7 @@
 
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
-| [H01.5](H01-录制核心/H01.5-主播下播后不再无限快速重试/README.md) 主播下播后不再无限快速重试；合并时跳过 0 字节分段，有一段有效就能合并 | 未开始 | 第一档 | 0/2：下一阶段“EOF 重试设上限后转入等开播” |
+| [H01.5](H01-录制核心/H01.5-主播下播后不再无限快速重试/README.md) 主播下播后不再无限快速重试；正常下播后合并已录分段（开播自动录拿不到 MP4）；合并时跳过 0 字节分段，有一段有效就能合并 | 未开始 | 第一档 | 0/3：下一阶段“EOF 重试设上限后转入等开播” |
 | [H01.4](H01-录制核心/H01.4-录制余项/README.md) 录制的 4 项真机验证：划掉应用后继续录、所有文件访问权限、同时录弹幕 XML、HLS 预取 | 未开始 | 第二档 | 0/2：下一阶段“划掉应用后继续录和所有文件访问权限” |
 | [H05.2](H05-录制通知/H05.2-只录一个直播间时点前台录制/README.md) 只录一个直播间时，点前台录制通知也定位到那条任务 | 未开始 | 第三档 | — |
 | [H05.3](H05-录制通知/H05.3-录制通知显示合并进度/README.md) 录制通知在合并时显示进度（H01.3 记录“没做的”第 2 条） | 未开始 | 第三档 | — |

@@ -82,7 +82,7 @@ AppBootstrap.start（bootstrap.dart:98）
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | Keystore 加解密、杀掉重开仍登录、重装后解不开时的提示，都没在真机上看过 | `secret_cipher.dart:20`、`AppChannelsPlugin.kt:147-187`、`secrets.dart:55-70` | 某些机型的 Keystore 出错时 Cookie 存不进去（迁移时会跳过并提示一次重新登录，`LegacyReloginNotice`），平常登录时会怎样没验证 | [K02.1](../../K-账号和登录/K02-登录状态/K02.1-Cookie和密码加密存储验证/README.md) |
-| 平常保存 Cookie 时 Keystore 出错，`SecretStore.writeAll` 直接抛出，调用方没有接住 | `secrets.dart:164-168`；`features/account/account_services.dart:101-107`（`save`）；`cookie_editor.dart:234-239`（只有 `finally`）；`platform_cookie_view.dart:94-123` | 用户点“保存”后按钮恢复、输入框仍是“未保存”，**没有任何提示**，异常进未处理错误；扫码登录时保存出错按轮询失败处理（`bilibili_qr_login.dart:150-159`，提示一次轮询失败），但 `_key` 已清空（`:136`），之后的轮询直接返回，页面停在“核验中” | K02.1 真机先确认 K90 上不会出错；建议开小任务：保存失败时提示“无法在本机加密保存”，并加一个用假密钥抛错的测试 |
+| 平常保存 Cookie 时 Keystore 出错，`SecretStore.writeAll` 直接抛出，调用方没有接住 | `secrets.dart:164-168`；`features/account/account_services.dart:101-107`（`save`）；`cookie_editor.dart:234-239`（只有 `finally`）；`platform_cookie_view.dart:94-123` | 用户点“保存”后按钮恢复、输入框仍是“未保存”，**没有任何提示**，异常进未处理错误；扫码登录时保存出错按轮询失败处理（`bilibili_qr_login.dart:150-159`，提示一次轮询失败），但 `_key` 已清空（`:136`），之后的轮询直接返回，页面停在“核验中” | [K02.2](../../K-账号和登录/K02-登录状态/K02.2-加密存储失败时提示/README.md)（2026-10-07 登记：保存失败时提示，用会抛错的假加密测）；K90 上会不会出错由 K02.1 看 |
 | 数据库 `schemaVersion` 还是 1，没有升级路径（加列、改表时要写 drift 的 `onUpgrade`） | `database.dart:85` | 现在没影响；以后第一次改表结构的任务要先补升级框架和测试 | 以后改表的任务里做，任务书写明 |
 | 解不开的密文一直留在 `secrets` 表里，直到同名重新写入或用户在账号页“退出” | `secrets.dart:46-50` | 占一点空间；账号页一直显示“无法在本机读取”，用户退出一次就清掉 | 照设计，不做 |
 | `legacy_values` 里没人接走的 3.x 原值（例如 `record_history`）一直留着 | `live_store.dart:57-64`、`legacy_snapshot.dart:422-427` | 几 KB；3.x 自己也只写不读 | 不做 |

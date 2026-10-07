@@ -59,7 +59,7 @@
 ## 留下的问题
 
 - 进房时详情给的是主页卡片的 `onlineNumber`，几秒后弹幕给的是直播间的 `watchNumber`，两者差几个到十几个人，后到的覆盖详情值：照官网直播间的做法，不改，没有任务。
-- 主播重新开播后直播号 `roomIdStr` 会变，旧连接不会自己结束（只剩 ping、pong）。B-24 的“下播后重连”只在弹幕连接已经结束时重连（`apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`，`refreshDetail` 里 `danmaku.status == DanmakuStatus.closed`），所以这种情况人留在直播间时弹幕不会换到新的一场，要重新进房；TwitCasting 一样。没有任务，建议在 C01 开一个“弹幕参数变了就重连”的任务（`refreshDetail` 比较 `danmakuData`）。
+- 主播重新开播后直播号 `roomIdStr` 会变，旧连接不会自己结束（只剩 ping、pong）。B-24 的“下播后重连”只在弹幕连接已经结束时重连（`apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`，`refreshDetail` 里 `danmaku.status == DanmakuStatus.closed`），所以这种情况人留在直播间时弹幕不会换到新的一场，要重新进房；TwitCasting 一样。→ [C01.6](../../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)（2026-10-07 登记）。
 - 进场、第一次点亮不显示（B-10 决定不做，和其他平台一致）。
 - 付费提问显示 5 分钟是按录到的上板时间（11～865 s，中位数约 4.5 分钟）自定的；主播清板（301）不会提前撤下醒目留言（模型没有“提前结束”）：没有任务。
 - 被拒时会连着出现两条提示（`protocolError` 一条，连接自己的“断开”一条），和 YY 的握手超时一样：界面文字的问题，没有任务。

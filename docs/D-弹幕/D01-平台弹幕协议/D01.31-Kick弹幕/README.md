@@ -31,7 +31,7 @@ Kick（海外直播）直播间能看到公开聊天、撤回、订阅和突袭�
 
 ## 结果
 
-- **提交**：96e032864（2026-10-01，本任务的代码）；登记表记的 6c68f0010 是同日的文档提交（`docs: M4.34 Kick, M5.34 Kick chat, the Twitch WebView transport, X-1 status`），不是代码提交。之后 `kick.dart` 没有改动。
+- **提交**：96e032864（2026-10-01，本任务的代码）；登记表原来记的 6c68f0010 是同日的文档提交（`docs: M4.34 Kick, M5.34 Kick chat, the Twitch WebView transport, X-1 status`），2026-10-07 已改成代码提交。之后 `kick.dart` 没有改动。
 - **期望值**：`fixtures/kick/danmaku/expected.py` 按上游 `parseFrame` 独立读一遍每个收到的帧（加上等级和下播），写进 `expected.json`。S07-chat（lonche，聊天房间 3852600，频道 3862536）75 s 录制的前 160 帧：会话建立、三个订阅确认、141 条聊天（含回复）、投票更新、置顶删除、pong；S08-stream-end（xqc，聊天房间和频道都是 668）16 条聊天和 `StopStreamBroadcast`。
 - **样本**：`fixtures/kick/danmaku/` 的 S07-chat、S08-stream-end（发送者和被回复者的 id、用户名、slug 换成同形同长度的合成值，`socket_id` 换掉；记在 `meta.json` 的 `scrubbed`）。
 - **测试**：`packages/live_danmaku/test/sites/kick_test.dart` 现在运行时 18 个（和做完时一样；文件里 17 处 `test(`，第 74 行的“逐帧对照”在 S07、S08 两段录制上各跑一次）：录制逐帧对照、下播通知；聊天各字段、回复和其他类型、别的房间、旧形状、坏帧；撤回三种、订阅和赠送和突袭、置顶和投票、Kicks 两种、Pusher 错误；连接时序（会话后才订阅、确认后才就绪和上报、回 pong、代理和握手头）、错误后重连再订阅、加入超时、心跳、参数不对时结束、拒绝别的参数类型。
@@ -48,4 +48,4 @@ Kick（海外直播）直播间能看到公开聊天、撤回、订阅和突袭�
 - 投票（`PollUpdateEvent`）没有界面；置顶现在是一行通知，不是置顶条：没有任务。
 - 表情显示成名字，图片地址 `files.kick.com/emotes/<id>/fullsize` 没接：没有任务。`LiveMessage.emotes`（`packages/live_core/lib/src/live_message.dart:352`）现在只有哔哩哔哩、快手、CHZZK、YouTube 填，显示 D03.2 已做；要做时在本平台的 `message` 里填 `emotes`。
 - Windows 上没有 Kick（要 WinHTTP 通道）：X01.2（X-1 的余项，未开始）。
-- 登记表 D01.31 的 `commit` 记的是文档提交 6c68f0010，代码提交是 96e032864：登记表的事，在报告里提出，这里不改。
+- 登记表 D01.31 的 `commit` 原来记的是文档提交 6c68f0010，2026-10-07 已改成代码提交 96e032864。

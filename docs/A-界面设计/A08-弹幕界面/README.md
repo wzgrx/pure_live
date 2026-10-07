@@ -116,7 +116,7 @@
 | 本地礼物在列表里那一行没有长按菜单（3.x 的礼物和弹幕是同一种卡片，可以长按） | `features/live_play/danmaku/chat_list.dart:609-618`（本地礼物直接返回 `LocalChatLine`） | 不能复制礼物那一行 | A08.2 记录“没做的”；没有任务管，影响小，不做 |
 | 本地互动的数据和规则（`local_interaction/logic/`）没有登记在哪个功能子分类 | `features/live_play/local_interaction/logic/` | 以后改数据和规则时不知道在哪开任务 | 需要维护者决定（建议归 D 组新开子分类或并入 D05） |
 | 设置的弹幕屏蔽页、弹幕页、本地互动设置页在电脑上按 Esc 不返回（没有 `EscapeBack`） | `features/shield/shield_page.dart:31`、`features/settings/danmaku_page.dart:46`、`local_interaction_settings_page.dart` | 规范 5.4 的 Esc 返回链不全 | A05.1 c3 |
-| A08.5 c3（清理翻译键）没做：旧弹幕目录行用过的 18 个键现在没有字面引用；A08.3 删掉的两个标签页用的 `shield_tab_*`、`shield_clear*`、`shield_duplicate` 也留着 | 键名清单在 [A08.5 记录](A08.5-设置里的弹幕页/record.md)“留给以后” | 翻译文件里有不用的键 | D-024：这次不清理；以后按 D-016 先列清单（Z05） |
+| A08.5 c3（清理翻译键）没做：旧弹幕目录行用过的 18 个键现在没有字面引用；A08.3 删掉的两个标签页用的 `shield_tab_*`、`shield_clear*`、`shield_duplicate` 已被 `00f5edf18`（2026-10-02 清理不用的键）删掉，`shield_*` 现在只剩在用的 `shield_title`、`shield_removed`（2026-10-07 核对） | 键名清单在 [A08.5 记录](A08.5-设置里的弹幕页/record.md)“留给以后” | 翻译文件里有不用的键 | D-024：这次不清理；以后按 D-016 先列清单（Z05） |
 | 代码注释里还用旧编号（`U.2e c8`、`U.2k-a`、`B09 c4`、`F02 c1`、`F.2b`、`UI_PLAN §7` 等），本子分类的文件里约 116 处 | `chat_panel.dart:17-18`、`:85`、`:117`、`danmaku_page.dart:21-22` 等 | 按注释找文档要先查 [MAPPING.md](../../MAPPING.md) | Z 组一次性替换（单元 2 已建议） |
 | 电视直播间没有弹幕列表和醒目留言（pure_live_TV 也没有），弹幕设置和屏蔽在播放设置侧面板 | `apps/pure_live/lib/tv/room/tv_live_play_page.dart:464` | 电视上看不到聊天 | A17.4（照 pure_live_TV，不做聊天区） |
 

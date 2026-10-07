@@ -51,7 +51,7 @@ TwitCasting（日本个人直播）直播间能看到评论（3.x 进房只提�
 
 ## 留下的问题
 
-- 主播重新开播后直播号会变，旧连接不会自己结束（服务端只剩 `[]` 保活）：直播间每 60 s 刷新详情，但只在弹幕连接已结束（`DanmakuStatus.closed`）时重连（`apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`，B-24 由 C01.1 做的），而且刷新用的 `getRoomDetailForRefresh` 不带弹幕参数，TwitCasting 的换场次没有覆盖。没有任务，见报告（建议：刷新发现 `movieId` 变了时重新进房取参数并重连弹幕，归 C01 组）。
+- 主播重新开播后直播号会变，旧连接不会自己结束（服务端只剩 `[]` 保活）：直播间每 60 s 刷新详情，但只在弹幕连接已结束（`DanmakuStatus.closed`）时重连（`apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`，B-24 由 C01.1 做的），而且刷新用的 `getRoomDetailForRefresh` 不带弹幕参数，TwitCasting 的换场次没有覆盖。→ [C01.6](../../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)（2026-10-07 登记：刷新发现换场时按进房详情取新参数重连）。
 - 断线期间的评论不补拉（网页要页面令牌请求 `eventpolling.php`）：没有任务。
 - 口令直播能否匿名取地址没有验证（口令直播即私密直播，现在本来就不能播放，直播间按受限类型说明，见 UPGRADES 12-5）：没有任务。
 - 礼物（含带留言的付费礼物 `isPaidGift`）不显示：要地址加 `gift=1` 并解码 `gift` 事件，B-21 的礼物显示（C01.2）只覆盖已上报礼物的平台；没有任务，要做先在 V01 提议（D-026）。

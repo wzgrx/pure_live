@@ -8,7 +8,7 @@
   - 纯音频的播放部分：`PlaybackSession.setAudioOnly`（`packages/live_player/lib/src/session.dart:309-314`，不重开）、`MpvEngine._applyAudioOnly`（`mpv_engine.dart:230-258`：Android 关掉控制器的视频输出、桌面 `vid=no`，切回视频等出画面最多 2.8 秒）、纯音频时不做画面停住检测（`session.dart:312`、`:735`）。
   - 音量规则：`packages/live_player/lib/src/policies.dart` 的 `roomVolumeKey`（`:12`，3.x 键名）、`roomVolume`（`:17-32`）；直播间 `room_controller.dart` 的 `_volume`（`:551-568`）、`setVolume`、`saveVolume`（`:575-588`）；设置 `globalVolumeMute`（`settings.dart:649`）、`roomVolumes`（`:652`）、`defaultMobileVolume`、`defaultDesktopVolume`（`:631`、`:640`）。
   - 系统媒体会话：`features/live_play/logic/background_playback.dart` 的 `RoomMediaNotification`（audio_service，`:299` 起）、`mediaControls`（中文按钮标签）、`_RoomAudioHandler`（通知的播放、暂停、停止接到直播间）。
-  - 音频焦点（来电、通知音、导航语音时暂停或压低；拔耳机、蓝牙断开时暂停）——**4.x 还没有**。
+  - 音频焦点（来电、通知音、导航语音时暂停或压低；拔耳机、蓝牙断开时暂停）——**4.x 还没有**，G05.1。
   - 后台继续播放的规则 `shouldContinueInBackground`（`policies.dart:7`）。
 - 不包括（归哪里）：
   - 纯音频封面、音量面板、静音按钮的样子 → A07（A07.10 的“纯音频已暂停”、A07.6 的面板）；画面上下滑调音量和亮度的手势 → C01.2（`player_gestures.dart`）、`DeviceControls`（媒体音量和窗口亮度的原生通道）。
@@ -29,7 +29,7 @@
 - 完成度（和 3.x 对照）：
   - 一致：纯音频不重开、切回等画面；每房间音量键名和规则；全局静音；后台继续的规则；通知内容和按钮。
   - 确认过的改动：手机上音量面板改系统媒体音量（A07）；媒体通知只在后台播放或助眠时显示（C01.2）；按钮文字中文（U.14 c6）；状态栏图标单色（U.14 c2）。
-  - 还缺：音频焦点（3.x 有，4.x 没接）。
+  - 还缺：音频焦点（3.x 有，4.x 没接）→ G05.1。
 
 ## 代码地图
 
@@ -57,7 +57,7 @@
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| **没有音频焦点**：来电、别的应用播放声音时直播不暂停也不压低；拔耳机、蓝牙耳机断开时继续从扬声器外放。3.x 用 `audio_session` 做了这三件事（`live_audio_handler.dart:98-176`），4.x 没有引 `audio_session`，`_RoomAudioHandler` 只接了通知按钮。功能清点（`inventory/FEATURES.md`）里没有这一项，G02.1 的“留下的问题”提过 | `apps/pure_live/lib/features/live_play/logic/background_playback.dart:251-271`、`apps/pure_live/pubspec.yaml:20` | 比 3.x 少：通勤拔耳机时外放、来电时直播声音和通话叠在一起（Android 会给通话自动降低媒体音量，但不暂停） | 需要维护者开任务（建议 G05 第一档或第二档，小到中：引 `audio_session`、配音乐、照 3.x 处理三种事件、只在直播间或后台播放时生效、测试用假的事件流）；同时在 FEATURES 补一个功能点 |
+| **没有音频焦点**：来电、别的应用播放声音时直播不暂停也不压低；拔耳机、蓝牙耳机断开时继续从扬声器外放。3.x 用 `audio_session` 做了这三件事（`live_audio_handler.dart:98-176`），4.x 没有引 `audio_session`，`_RoomAudioHandler` 只接了通知按钮。功能清点（`inventory/FEATURES.md`）里没有这一项，G02.1 的“留下的问题”提过 | `apps/pure_live/lib/features/live_play/logic/background_playback.dart:251-271`、`apps/pure_live/pubspec.yaml:20` | 比 3.x 少：通勤拔耳机时外放、来电时直播声音和通话叠在一起（Android 会给通话自动降低媒体音量，但不暂停） | [G05.1](G05.1-音频焦点/README.md)（2026-10-07 登记，第二档，中）；功能清点已补 F-MINI-05（缺失） |
 | `defaultMobileVolume` 在直播间不起作用：手机上播放器音量固定 1（照 3.x 适配器），这个设置只被多画面读 | `room_controller.dart:555`、`multiview_controller.dart:778` | 设置页的“手机默认音量”只影响多画面，用户可能以为影响直播间 | 照 3.x（3.x 也是这样）；设置说明文字是否要写清，交给 A11.3 |
 | 纯音频时 mpv 仍在解码视频（Android 只关输出，`setVideoOutputEnabled(false)`） | `mpv_engine.dart:232-233` | 纯音频省电不如 `vid=no`；但切回视频不用重开、更快（3.x 的取舍） | 照 3.x；R05.1 测耗电时一起看纯音频 |
 | 媒体通知只在后台播放或助眠时显示，前台播放时耳机按键依赖 Flutter 的媒体键（C02.1 c6） | `background_playback.dart:393` 起 | 前台时蓝牙耳机按键能不能暂停要看系统把按键给谁 | 没有 K90 记录；建议并入 S02.6 |
@@ -77,7 +77,7 @@
 
 ## 路线
 
-1. 请维护者决定音频焦点的任务（建议开在本子分类，第二档；3.x 有、用户每天会碰到拔耳机）。
+1. [G05.1](G05.1-音频焦点/README.md)（第二档，中，两个阶段）：音频焦点——来电暂停和恢复、提示音压低、拔耳机暂停（3.x 有、用户每天会碰到拔耳机）。
 2. 纯音频和前台耳机按键的真机结果随 S02.6 补。
 3. 以后：纯音频的耗电（R05.1 一起测）；Windows 的系统媒体控制（3.x 有 `audio_service_win`，X01）。新想法写进 V01 提议。
 
@@ -88,9 +88,17 @@
 属于 [G 播放](../README.md)。
 
 - 代码：`packages/live_player`、`logic/background_playback.dart`
-- 进度：还没有任务
+- 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
 
 
-还没有任务。
+| 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
+|---|---|---|---|---|---|---|
+| G05.1 | 音频焦点：来电时暂停、拔耳机时暂停（3.x 用 audio_session） | 功能 | 未开始 | — | — | [设计或说明](G05.1-音频焦点/README.md)、[任务书](G05.1-音频焦点/brief.md) |
+
+## 还没完成的
+
+- **G05.1 音频焦点：来电时暂停、拔耳机时暂停（3.x 用 audio_session）**（未开始，第二档，规模 中）
+  - 阶段：来电和别的应用：拿焦点、暂停和恢复、压低音量 → 拔耳机和蓝牙断开时暂停；多画面出声的那一格
+  - 来源：docs v2 G 组核对（G05 说明“已知问题”；功能清点补 F-MINI-05）
 
 <!-- docs:生成结束 -->

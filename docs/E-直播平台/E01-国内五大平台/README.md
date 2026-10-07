@@ -76,7 +76,7 @@
 | 付费、私密房间没有真实样本（斗鱼、虎牙、抖音、快手），按网页代码或接口含义实现 | 各 `*_api.dart` 的受限类型 | 受限类型可能不准 | 巡检时遇到就录样本（E01.6） |
 | 虎牙别名房间号是否不分大小写没实测 | `packages/live_core/lib/src/sites.dart:223` | 大小写不同时可能出现两个关注 | E01.6 巡检时试 |
 | 虎牙播放 UA 依赖 GitHub 镜像上的 `assets/play_config.json` | `huya_site.dart:394-402` | 镜像都不通时用内置 UA | 没有任务管 |
-| 记录里写的斗鱼设置键 `douyuForceRenewal` 和代码不一致，实际是 `douyuForceRenew` | `packages/live_store/lib/src/settings/settings.dart:117`；`douyu_site.dart:73` 的注释 | 按注释找设置会找不到 | 写进本组报告（注释是代码，Z 组顺手改） |
+| 记录里写的斗鱼设置键 `douyuForceRenewal` 和代码不一致，实际是 `douyuForceRenew` | `packages/live_store/lib/src/settings/settings.dart:117`；`douyu_site.dart:73` 的注释 | 按注释找设置会找不到 | [E05.4](../E05-平台框架和模型/E05.4-平台层小问题合集/README.md) 第 3 阶段（2026-10-07 登记） |
 
 ## 相关决定和规范
 

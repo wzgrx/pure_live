@@ -32,7 +32,7 @@
   - 一致：错误分类的顺序、关键词和代码；事件分代；事务规则；mpv 属性的值和顺序；配方每次打开各取各的授权；codec 12 → Enhanced FLV 的改写逐字节同 3.x。
   - 确认过的改动（G01.1、G02.1 的“有意差异”）：只用 mpv；引擎降级 → 硬解改软解；请求头跟线路走；HLS 中继纯 Dart；租期切断连接的 HLS 也续签；一个中继服务所有输入；证书放行表只放百度两类主机。
   - 修掉的 3.x 问题 18 个（G01.1 10 个、G02.1 8 个，见两个任务的说明）。
-  - 还缺：“优先 H.264”默认值没有真机依据（G01.2）；Steam 分档画质没有真的限定变体（见“已知问题”）。
+  - 还缺：“优先 H.264”默认值没有真机依据（G01.2）；Steam 分档画质没有真的限定变体（G01.4）；映客默认 HEVC（G01.3）。
 
 ## 代码地图
 
@@ -95,8 +95,8 @@
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | “优先 H.264”默认开没有真机依据：升级的统一原则写着“在高通真机上验证硬解后再评估”，G01.1、G02.1、S02.3 都没做 | `packages/live_store/lib/src/settings/settings.dart:293` | 默认看不到 HEVC 档（同码率画质更好、更省流量）；也不知道 K90 硬解 HEVC 稳不稳 | G01.2 |
-| **映客默认播 HEVC**：映客开着“优先 H.264”时画质是 `[FLV, 原画]`（`inke_site.dart:347`），但默认清晰度按名字找“原画”（`apps/pure_live/lib/shared/rooms/play_quality.dart:7-10`，设置 `preferResolution` 默认“原画”，`settings.dart:270-273`），而映客的“原画”只有即构的 HEVC 线路（`inke_api.dart:165-169`），所以默认就落在 HEVC 档，“优先 H.264”对它不起作用 | `play_quality.dart:9`；`packages/live_core/lib/src/sites/inke/inke_site.dart:340-348` | 和设置“优先 H.264 编码”的说明不符；K90 上 HEVC 硬解不稳时映客会先失败再软解 | 先由 G01.2 测映客 HEVC；不管结论如何，“按名字选原画”和“优先 H.264”谁优先要定（建议：开着“优先 H.264”时名字匹配跳过 `codec == 'hevc'` 的档），需要维护者开任务（E02.5 或 C01） |
-| **Steam 选“720p”实际仍是自适应**：每个变体档的 `resolvePlayUrlsRaw` 返回的都是同一个主列表地址（`steambroadcast_site.dart:440-448` 的 `_resolution`），`SteamBroadcastVariant.selectIn`（`steambroadcast_api.dart:82`）只在平台包里定义，播放管线没有任何地方用它限定变体；mpv 拿到完整主列表按带宽自己选。UPGRADES 27-7 写“完成（G01.1）：各档是普通 HLS 线路，播放核心无需改动”不对 | `packages/live_core/lib/src/sites/steambroadcast/steambroadcast_site.dart:440-448`；`packages/live_media/lib/src/source.dart:111-127`（没有“按变体改写主列表”的路线） | 用户选 720p 仍可能播 1080p60（流量、发热），清晰度菜单显示的档和实际不符 | 需要开任务：线路带上变体选择（例如 `LivePlayUrlResolution` 加主列表筛选，`MediaRoute.of` 遇到它走 `hlsRelay`，中继像 niconico 那样只留选中变体，参考 `inputs/recipes.dart:25-47`）；UPGRADES 27-7 改回“部分完成” |
+| **映客默认播 HEVC**：映客开着“优先 H.264”时画质是 `[FLV, 原画]`（`inke_site.dart:347`），但默认清晰度按名字找“原画”（`apps/pure_live/lib/shared/rooms/play_quality.dart:7-10`，设置 `preferResolution` 默认“原画”，`settings.dart:270-273`），而映客的“原画”只有即构的 HEVC 线路（`inke_api.dart:165-169`），所以默认就落在 HEVC 档，“优先 H.264”对它不起作用 | `play_quality.dart:9`；`packages/live_core/lib/src/sites/inke/inke_site.dart:340-348` | 和设置“优先 H.264 编码”的说明不符；K90 上 HEVC 硬解不稳时映客会先失败再软解 | 先由 G01.2 测映客 HEVC；不管结论如何，“按名字选原画”和“优先 H.264”谁优先要定（建议：开着“优先 H.264”时名字匹配跳过 `codec == 'hevc'` 的档），→ [G01.3](G01.3-映客默认播HEVC/README.md)（2026-10-07 登记，第二档，小；17LIVE、百度、快手同类一起改） |
+| **Steam 选“720p”实际仍是自适应**：每个变体档的 `resolvePlayUrlsRaw` 返回的都是同一个主列表地址（`steambroadcast_site.dart:440-448` 的 `_resolution`），`SteamBroadcastVariant.selectIn`（`steambroadcast_api.dart:82`）只在平台包里定义，播放管线没有任何地方用它限定变体；mpv 拿到完整主列表按带宽自己选。UPGRADES 27-7 写“完成（G01.1）：各档是普通 HLS 线路，播放核心无需改动”不对 | `packages/live_core/lib/src/sites/steambroadcast/steambroadcast_site.dart:440-448`；`packages/live_media/lib/src/source.dart:111-127`（没有“按变体改写主列表”的路线） | 用户选 720p 仍可能播 1080p60（流量、发热），清晰度菜单显示的档和实际不符 | [G01.4](G01.4-Steam选清晰度实际仍是自适应/README.md)（2026-10-07 登记，第三档，小：线路带上变体选择器，`MediaRoute.of` 遇到它走 `hlsRelay`，中继像 niconico 那样只留选中变体）；UPGRADES 27-7 已改“部分完成” |
 | HEVC FLV 改写只在 FFmpeg 版本未知的包上打开；Android x86、Linux arm64、iOS、macOS 的包是否真的读不了 codec 12 没验证 | `engine_profile.dart:15-28` | 这些平台多一层中继（性能略差），或者本来能读 | 做到这些客户端时验证（X 组） |
 | YouTube、PandaTV 两个平台各自写了宽松的 HLS 主列表解析，没有合并 | `packages/live_core` 的两个平台适配器 | 重复代码；中继本身按行改写，不受影响 | 没有任务（E 组） |
 | LiveMe、TikTok 的租期按“不切断连接”处理，只预取 | 平台层的 `PlayLease.cutsConnection` | 如果实际会断，到点会断流后再恢复 | 两个平台都受阻（D01.18、D01.19、E 组），看到断开再改标记 |
@@ -121,7 +121,7 @@
 ## 路线
 
 1. G01.2：K90 上逐平台测 HEVC 硬解（含映客），定“优先 H.264”的默认值并写进 DECISIONS；顺带给出“按名字选原画”和“优先 H.264”谁优先的建议。
-2. 请维护者为 Steam 变体限定开任务（规模小到中：模型加筛选、选路、中继改写主列表、测试），同时把 UPGRADES 27-7 改回“部分完成”。
+2. G01.3（第二档，小）：“优先 H.264”开着时名字匹配跳过 HEVC 档（映客、17LIVE、百度、快手）。G01.4（第三档，小）：Steam 档位限定 HLS 变体（UPGRADES 27-7 已改“部分完成”）。
 3. G03.1 测量后如果要调探测和缓冲参数，改的是 `mpv_options.dart`；按 G03.1 的数字做，不在本子分类单独开任务。
 4. 以后：做到 Windows、Linux、苹果平台时核对各自原生包的 FFmpeg 和 HEVC 改写（X 组）；跟进 media_kit 上游时按 `PURELIVE_PATCH.md` 保留补丁。新想法写进 V01 提议。
 
@@ -132,18 +132,25 @@
 属于 [G 播放](../README.md)。
 
 - 代码：`packages/live_media`、`third_party/media_kit`
-- 进度：`██████████░░░░░░░░░░` 50%
+- 进度：`███████░░░░░░░░░░░░░` 33%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | G01.1 | 播放核心：media_kit 分支和取流管线 | 功能 | 完成 | 2026-10-01 | b4fb966e8 | [设计或说明](G01.1-播放核心/README.md)、[记录](G01.1-播放核心/record.md) |
 | G01.2 | 高通硬解评估：在 K90 上看 HEVC 硬解，定“优先 H.264”的默认值（UPGRADES 22-3） | 验证 | 未开始 | — | — | [设计或说明](G01.2-高通硬解评估/README.md)、[任务书](G01.2-高通硬解评估/brief.md) |
+| G01.3 | 映客默认播 HEVC：按名字选“原画”绕过了“优先 H.264” | 功能 | 未开始 | — | — | [设计或说明](G01.3-映客默认播HEVC/README.md)、[任务书](G01.3-映客默认播HEVC/brief.md) |
+| G01.4 | Steam 选清晰度实际仍是自适应：用档位限定 HLS 变体 | 平台 | 未开始 | — | — | [设计或说明](G01.4-Steam选清晰度实际仍是自适应/README.md)、[任务书](G01.4-Steam选清晰度实际仍是自适应/brief.md) |
 
 ## 还没完成的
 
 - **G01.2 高通硬解评估：在 K90 上看 HEVC 硬解，定“优先 H.264”的默认值（UPGRADES 22-3）**（未开始，第二档，规模 中）
   - 阶段：K90 上逐平台测 HEVC 硬解 → 定默认值并写进 DECISIONS
   - 来源：UPGRADES 统一原则“默认编码”、22-3（V03.3 核对：S02.3 没有做这一项）
+- **G01.3 映客默认播 HEVC：按名字选“原画”绕过了“优先 H.264”**（未开始，第二档，规模 小）
+  - 说明：和 G01.2（HEVC 硬解评估）无先后：不管默认值定成什么，名字匹配都要听“优先 H.264”
+  - 来源：docs v2 G 组核对（G01 说明“已知问题”）和 E 组核对（E02 说明）
+- **G01.4 Steam 选清晰度实际仍是自适应：用档位限定 HLS 变体**（未开始，第三档，规模 小）
+  - 来源：docs v2 G 组核对和 E 组核对：UPGRADES 27-7 只做了列表（SteamBroadcastVariant.selectIn 没人调用）
 
 <!-- docs:生成结束 -->

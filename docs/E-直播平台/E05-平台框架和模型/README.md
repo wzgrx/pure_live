@@ -77,7 +77,7 @@
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | `fillFromDetail` 不补封面，详情不给封面时观看记录、纯音频封面、通知大图变空 | `live_room.dart:652-660` | 观看记录没封面 | [E05.3](E05.3-房间详情补齐时连封面一起补/README.md) |
-| `LiveSite.getDanmaku()` 和 `live_danmaku.dart` 的 `LiveDanmaku`、`EmptyDanmaku` 没有调用方：弹幕走 `DanmakuRegistry`（`packages/live_danmaku/lib/src/registry.dart:42`） | `live_site.dart:27`、`live_danmaku.dart:9`、`:50` | 死代码，新平台作者可能以为要实现 `getDanmaku` | 写进本组报告；以后整理时删（Z 组），没有任务 |
+| `LiveSite.getDanmaku()` 和 `live_danmaku.dart` 的 `LiveDanmaku`、`EmptyDanmaku` 没有调用方：弹幕走 `DanmakuRegistry`（`packages/live_danmaku/lib/src/registry.dart:42`） | `live_site.dart:27`、`live_danmaku.dart:9`、`:50` | 死代码，新平台作者可能以为要实现 `getDanmaku` | [E05.4](E05.4-平台层小问题合集/README.md) 第 3 阶段（2026-10-07 登记） |
 | `LiveSite.getPlayUrls` 只返回地址、丢掉请求头和格式，应用都走 `resolvePlayUrls`；只剩测试替身实现它 | `live_site.dart:53` | 无（兼容 3.x 接口） | 不做 |
 | 虎牙别名房间号、BIGO 以外的字母房间号是否不分大小写没核实完 | `sites.dart:223` | 大小写不同时可能出现两个关注 | 巡检时核实（E01.6、E07.1），有证据再加 |
 | 代码注释里还用旧编号（`M3`、`M5`、`M9`、`M4.34` 等） | `platforms.dart:134`、`:190`、`:261`，`sites.dart:156`、`:217` 等 | 按注释找文档要先查 MAPPING | Z 组一次性替换 |
@@ -96,7 +96,8 @@
 ## 路线
 
 1. [E05.3](E05.3-房间详情补齐时连封面一起补/README.md)（第二档，小）：`fillFromDetail` 加封面，一行代码加两个测试。
-2. 以后：清理 `getDanmaku` 死代码和旧编号注释（Z 组）；虎牙等字母房间号的大小写在巡检时核实后加进 `caseInsensitiveRoomIds`。新想法写进 V01 提议，不直接加任务。
+2. [E05.4](E05.4-平台层小问题合集/README.md)（第二档，中，三个阶段）：克拉克拉空页、LOOK 搜索说明、AcFun 付费直播不连弹幕、百度刷新带弹幕参数、录制详情带弹幕参数（多画面）、3.x 占位名的表、删 `getDanmaku` 死代码、斗鱼注释。
+3. 以后：旧编号注释的整理（Z 组）；虎牙等字母房间号的大小写在巡检时核实后加进 `caseInsensitiveRoomIds`。新想法写进 V01 提议，不直接加任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -105,7 +106,7 @@
 属于 [E 直播平台](../README.md)。
 
 - 代码：`packages/live_core/lib/src/`
-- 进度：`████████████████░░░░` 80%
+- 进度：`███████████░░░░░░░░░` 57%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -113,10 +114,16 @@
 | E05.1 | 基础模型与接口 | 平台 | 完成 | 2026-09-28 | 50d4f9bdb | [设计或说明](E05.1-基础模型与接口/README.md)、[记录](E05.1-基础模型与接口/record.md) |
 | E05.2 | 模型扩展：开播时间、受限类型、轮播和不可播放状态、房间身份 | 平台 | 完成 | 2026-09-29 | 87bc61dfc | [设计或说明](E05.2-模型扩展/README.md)、[记录](E05.2-模型扩展/record.md) |
 | E05.3 | 房间详情补齐时连封面一起补（fillFromDetail 漏了封面，观看记录等处封面变空） | 功能 | 未开始 | — | — | [设计或说明](E05.3-房间详情补齐时连封面一起补/README.md)、[任务书](E05.3-房间详情补齐时连封面一起补/brief.md) |
+| E05.4 | 平台层小问题合集：克拉克拉列表提前到底、LOOK 搜索能力、AcFun 付费直播仍连弹幕、百度签名过期后重连用旧地址、多画面里六间房没有弹幕、京东酷狗百度的 3.x 占位名、getDanmaku 死代码、斗鱼设置键注释 | 平台 | 未开始 | — | — | [设计或说明](E05.4-平台层小问题合集/README.md)、[任务书](E05.4-平台层小问题合集/brief.md) |
 
 ## 还没完成的
 
 - **E05.3 房间详情补齐时连封面一起补（fillFromDetail 漏了封面，观看记录等处封面变空）**（未开始，第二档，规模 小）
   - 说明：上游 pure_live fa67c637f、pure_live_TV 5bc53016 修了同一个问题
+  - 来源：上游 pure_live fa67c637f、pure_live_TV 5bc53016（W01.1 对照）
+- **E05.4 平台层小问题合集：克拉克拉列表提前到底、LOOK 搜索能力、AcFun 付费直播仍连弹幕、百度签名过期后重连用旧地址、多画面里六间房没有弹幕、京东酷狗百度的 3.x 占位名、getDanmaku 死代码、斗鱼设置键注释**（未开始，第二档，规模 中）
+  - 阶段：列表和搜索：克拉克拉空页、LOOK 搜索说明 → 弹幕参数：AcFun 付费直播、百度刷新带参数、录制详情带弹幕参数 → 清理：3.x 占位名常量、getDanmaku 死代码、斗鱼注释
+  - 说明：占位名的清理在 J06.2 做，本任务只给常量；百度那条和 C01.6 互补
+  - 来源：docs v2 E 组核对（E02、E02.6 说明）和 D 组核对（D01.27、D01.28），H、I 组更正（六间房影响的是多画面）
 
 <!-- docs:生成结束 -->

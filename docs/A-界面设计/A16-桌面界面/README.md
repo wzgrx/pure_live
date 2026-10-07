@@ -29,7 +29,7 @@ Windows（以后 Linux）窗口本身的样子和操作：自绘标题栏、窗�
 - **完成度**（和 3.x 对照）：
   - 一致的：标题栏高度、图标和字号、拖动、双击最大化、三个按钮尺寸、关闭红、改大小时的尺寸提示；托盘左键显示、右键菜单；点 ✕ 时问和“不再询问”（`dontAskExit`、`exitChoose`）；只开一个；新窗口是独立进程、带着直播间；桌面小窗置顶（A07.8）；3.x 的窗口相关设置键都不变（D-018）。
   - 确认过的改动：A16.1 c1～c15（T1～T4 按建议 A，T3 = 新窗口共用数据），D-003。
-  - 还缺：c2（Linux）代码按“有没有桌面外壳 / 托盘 / 能不能开新窗口”写，但桌面外壳只在 Windows 启动、仓库里没有 `linux/` 运行器；c12 的直播间菜单那一半没有接上；**没有任何 Windows 真机结果**（D-004：现在只做 Android），登记为“完成”和 PROCESS 不符（见“已知问题”）。
+  - 还缺：c2（Linux）代码按“有没有桌面外壳 / 托盘 / 能不能开新窗口”写，但桌面外壳只在 Windows 启动、仓库里没有 `linux/` 运行器；c12 的直播间菜单那一半没有接上（A16.2）；**没有任何 Windows 真机结果**（D-004：现在只做 Android），登记为“完成”和 PROCESS 不符（见“已知问题”）。
 
 ## 代码地图
 
@@ -79,7 +79,7 @@ Windows（以后 Linux）窗口本身的样子和操作：自绘标题栏、窗�
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | A16.1 登记为“完成”，但**没有任何 Windows 真机结果**（Windows 没构建过；记录“没有在真机上看的”整节都没看） | A16.1 [record.md](A16.1-桌面窗口/record.md) | 不符合 PROCESS“完成要有真机结果” | 写进本单元报告；建议维护者决定改回“待真机”或并入 [X01.1](../../X-多端客户端/X01-Windows/X01.1-键盘鼠标操作核对/README.md) |
-| 直播间菜单的“在新窗口打开”还是旧做法：按平台（`windows` 参数）而不是设置显示，文字是旧的“在新窗口播放此直播间”（`open_room_in_new_window`）、图标 `AppIcons.newWindow`，调旧的 `launchNewWindow` | `apps/pure_live/lib/features/live_play/buttons/room_menu_button.dart:173`、`:257`、`:300` | 关掉设置“新建独立播放窗口”后直播间菜单里仍有这一项；文字、图标和 c12 不一致 | 没有登记任务；建议 X01 开工前登记一个小任务：改调 `DesktopWindow.offersNewWindow` / `openNewWindow`、图标 `AppIcons.newPlayerWindow`、放在“在哔哩哔哩打开”后面 |
+| 直播间菜单的“在新窗口打开”还是旧做法：按平台（`windows` 参数）而不是设置显示，文字是旧的“在新窗口播放此直播间”（`open_room_in_new_window`）、图标 `AppIcons.newWindow`，调旧的 `launchNewWindow` | `apps/pure_live/lib/features/live_play/buttons/room_menu_button.dart:173`、`:257`、`:300` | 关掉设置“新建独立播放窗口”后直播间菜单里仍有这一项；文字、图标和 c12 不一致 | [A16.2](A16.2-直播间菜单的在新窗口打开/README.md)（2026-10-07 登记，第三档，小）：改调 `DesktopWindow.offersNewWindow` / `openNewWindow`、图标 `AppIcons.newPlayerWindow`、补回 `open_in_new_window` |
 | A16.1 加的翻译键 `open_in_new_window`“在新窗口打开”因为直播间菜单没用上，被 `00f5edf18`（清理不用的键）删掉了 | `apps/pure_live/assets/translations/zh.json`、`en.json` | 上一条的小任务要重新加这个键 | 同上一条；D-024（以后清理先列清单） |
 | 窗口大小设置的下限是 400×300（3.x），新的最小窗口是 360×400：窄于 400 的窗口存成 400 宽；“开机窗口尺寸”编辑框的下限是 400×400 | `packages/live_store/lib/src/settings/settings.dart:822-837`；`apps/pure_live/lib/features/settings/settings_editors.dart:577-578` | 很窄的窗口不能原样恢复 | A16.1“需要决定的事”1，没有登记；改设置定义要先过 D-018 |
 | 托盘菜单录制中只有一行（A16.1 设计），A18.2 写的是两行（加“录制中心…”）；第一行没有红点 | `tray.dart:25` | 两个设计不一致 | A16.1“需要决定的事”2，A18.2 开发时一起定 |
@@ -100,7 +100,7 @@ Windows（以后 Linux）窗口本身的样子和操作：自绘标题栏、窗�
 
 ## 路线
 
-1. X01 开工前：登记并做直播间菜单的“在新窗口打开”（接到 `DesktopWindow`、重新加 `open_in_new_window` 键，小任务）。
+1. X01 开工前：做 [A16.2](A16.2-直播间菜单的在新窗口打开/README.md)（直播间菜单的“在新窗口打开”接到 `DesktopWindow`、补回 `open_in_new_window` 键，小任务）。
 2. [X01.3](../../X-多端客户端/X01-Windows/X01.3-Windows安装包和自动更新/README.md) 第一阶段能在 Windows 上构建后，[X01.1](../../X-多端客户端/X01-Windows/X01.1-键盘鼠标操作核对/README.md)、[X01.2](../../X-多端客户端/X01-Windows/X01.2-Windows专属功能/README.md) 按 A16.1 记录逐项看，补上真机结果；顺带定窗口大小下限、托盘行数（A18.2 开发前）。
 3. [X02.1](../../X-多端客户端/X02-Linux/X02.1-Linux构建和打包/README.md)：加 `linux/` 运行器后打开桌面外壳（`supported` 加 Linux），做单实例。
 4. 以后：新窗口的录制合进主窗口的录制中心（要先决定，V01 提议）。
@@ -112,11 +112,17 @@ Windows（以后 Linux）窗口本身的样子和操作：自绘标题栏、窗�
 属于 [A 界面设计](../README.md)。
 
 - 代码：`app/desktop/`
-- 进度：`████████████████████` 100%
+- 进度：`█████████████░░░░░░░` 67%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | A16.1 | 桌面窗口：标题栏、托盘、窗口内全屏 | 界面 | 完成 | 2026-10-01 | 99a8f8f53 | [设计或说明](A16.1-桌面窗口/README.md)、[记录](A16.1-桌面窗口/record.md)、[评审页](A16.1-桌面窗口/page/01-说明.jpg) |
+| A16.2 | 直播间菜单的“在新窗口打开”接上 A16.1 的新窗口，补回误删的翻译键 | 界面 | 未开始 | — | — | [设计或说明](A16.2-直播间菜单的在新窗口打开/README.md)、[任务书](A16.2-直播间菜单的在新窗口打开/brief.md) |
+
+## 还没完成的
+
+- **A16.2 直播间菜单的“在新窗口打开”接上 A16.1 的新窗口，补回误删的翻译键**（未开始，第三档，规模 小）
+  - 来源：A16.1 记录 c12“首页完成、直播间菜单交出”；docs v2 A 组核对（翻译键 open_in_new_window 被 00f5edf18 删掉）
 
 <!-- docs:生成结束 -->

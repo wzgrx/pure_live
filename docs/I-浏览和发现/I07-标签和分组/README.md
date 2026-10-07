@@ -74,7 +74,7 @@ TagStore（live_store tags.dart:57）：名字不分大小写唯一；删标签�
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 标签名和说明的长度上限写了两份（标签管理的编辑框和设标签框里的新建） | `features/tags/tag_editor_dialog.dart:10`、`:13`；`shared/rooms/room_tags_dialog.dart:13`、`:16` | 改一处忘了另一处会不一致 | 没有任务；下次改时把上限放进 `TagStore` 或 `shared/` 一处 |
+| 标签名和说明的长度上限写了两份（标签管理的编辑框和设标签框里的新建） | `features/tags/tag_editor_dialog.dart:10`、`:13`；`shared/rooms/room_tags_dialog.dart:13`、`:16` | 改一处忘了另一处会不一致 | [I03.2](../I03-分区/I03.2-浏览列表的小问题合集/README.md) 第 2 阶段（2026-10-07 登记：上限放进一处） |
 | I07.1 记录和代码不符：`shield/block_list_tab.dart` 已被 A08.3（`5ba728803`）换成 `shared/danmaku/block_manager.dart` 的 `DanmakuBlockManager`，`shield_page.dart` 只剩 47 行；“清空”“手动加屏蔽用户”随 A08.3 设计去掉；I07.1 加的 `shield_tab_*`、`shield_clear*`、`shield_duplicate` 等翻译键现在已不在翻译文件里（只剩 `shield_title`、`shield_removed`） | [I07.1 记录](I07.1-分组与屏蔽/record.md) | 只是记录过时；另外 A08 子分类说明写这些键“还留着”，和实际不符 | I07.1 README 已注明；A08 的说法写进本单元报告 |
 | I07.1 登记“完成”，记录没有 K90 结果；标签管理的拖动排序、设标签在 S02.3 冒烟里没有单独记录 | — | 没有真机证据 | 建议并入 S02.6 第 3 阶段（写进本单元报告） |
 
@@ -90,7 +90,7 @@ TagStore（live_store tags.dart:57）：名字不分大小写唯一；删标签�
 
 ## 路线
 
-本子分类没有未完成的任务。界面由 A09.10、A09.1、A08.3 管；屏蔽的规则由 D02 管。新想法（例如标签颜色、按标签批量操作）写进 [V01](../../V-需求和反馈/V01-新功能提议/README.md)。
+本子分类没有未完成的任务（标签长度上限写两份的那条并进了 [I03.2](../I03-分区/I03.2-浏览列表的小问题合集/README.md)）。界面由 A09.10、A09.1、A08.3 管；屏蔽的规则由 D02 管。新想法（例如标签颜色、按标签批量操作）写进 [V01](../../V-需求和反馈/V01-新功能提议/README.md)。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 

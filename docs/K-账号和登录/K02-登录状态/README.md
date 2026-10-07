@@ -71,7 +71,7 @@ SecretStore（J02）── cookieFor / cookieChanges ──▶ StoreCookieVault�
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | Keystore 加密、杀掉重开仍登录、重装后解不开的提示都没在真机上看过 | `platform/secret_cipher.dart:20`；`account_state.dart` 的 `unreadable` 状态 | 不知道 K90（HyperOS）上 Keystore 是否正常；也没人见过“无法在本机读取”的样子 | [K02.1](K02.1-Cookie和密码加密存储验证/README.md) |
-| 保存时 Keystore 出错没有提示 | J02 已知问题 | 少见机型 | K02.1 先确认 K90 上不出错；之后小任务 |
+| 保存时 Keystore 出错没有提示（编辑框只有 `finally`，`cookie_editor.dart:234-239`）；扫码登录保存出错时停在“核验中”（`bilibili_qr_login.dart:136-161`）；退出哔哩哔哩不清 WebView 的 Cookie（3.x 清，`bilibili_account_service.dart:200`） | `features/account/` | 少见机型上用户以为存上了；扫码页卡住；退出后网页里仍登录 | [K02.2](K02.2-加密存储失败时提示/README.md)（2026-10-07 登记，第二档，小） |
 | 只核验哔哩哔哩和抖音；其他平台的 Cookie 失效没有任何提示，直到用户发现画质变低或搜不到 | `account_platforms.dart` 的 `check` | 斗鱼按保存时间推算到期；虎牙、快手、YY、SOOP 无从判断 | 照 3.x；Twitch 的被拒提示 → E06.2 |
 | 直播间“登录可能失效”的判断只看打码昵称个数（3 条打码且没有完整名字） | `room_controller.dart:259-276` | 弹幕很少的房间可能一直不提示；平台改打码规则会误报 | 照 D02.1 的设计；有反馈再调阈值 |
 
@@ -87,8 +87,9 @@ SecretStore（J02）── cookieFor / cookieChanges ──▶ StoreCookieVault�
 ## 路线
 
 1. **K02.1**（第二档，小）：真机验证加密存储和三种状态（正常、杀掉重开、重装后解不开），顺带看保存失败。
-2. E06.2 的“Twitch”阶段：Cookie 被拒时直播间提示一次。
-3. 以后：其他平台的失效检测（例如虎牙、快手请求时回登录错误时提示）要先有平台层的错误分类，进 V01 提议或 E 组任务。
+2. **K02.2**（第二档，小）：加密存储失败时提示、扫码登录出错不再卡在“核验中”、退出哔哩哔哩时清网页 Cookie。
+3. E06.2 的“Twitch”阶段：Cookie 被拒时直播间提示一次。
+4. 以后：其他平台的失效检测（例如虎牙、快手请求时回登录错误时提示）要先有平台层的错误分类，进 V01 提议或 E 组任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -103,9 +104,12 @@ SecretStore（J02）── cookieFor / cookieChanges ──▶ StoreCookieVault�
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | K02.1 | Cookie 和密码加密存储在真机上验证 | 验证 | 未开始 | — | — | [设计或说明](K02.1-Cookie和密码加密存储验证/README.md)、[任务书](K02.1-Cookie和密码加密存储验证/brief.md) |
+| K02.2 | 加密存储失败时提示；扫码登录出错不再卡在“核验中”；退出哔哩哔哩时清网页 Cookie | 功能 | 未开始 | — | — | [设计或说明](K02.2-加密存储失败时提示/README.md)、[任务书](K02.2-加密存储失败时提示/brief.md) |
 
 ## 还没完成的
 
 - **K02.1 Cookie 和密码加密存储在真机上验证**（未开始，第二档，规模 小）
+- **K02.2 加密存储失败时提示；扫码登录出错不再卡在“核验中”；退出哔哩哔哩时清网页 Cookie**（未开始，第二档，规模 小）
+  - 来源：docs v2 J、K、L、N 组核对
 
 <!-- docs:生成结束 -->

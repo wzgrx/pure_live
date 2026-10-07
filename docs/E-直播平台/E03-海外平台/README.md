@@ -70,7 +70,7 @@
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | 平台层新数据没接到界面：Twitch Cookie 失效提示和编码、Picarto 恢复后的档名、FC2 控制连接接手、17LIVE 名字颜色和徽章 | `platforms.dart:152-158`、`:178`；直播间 | 已批准的升级用户看不到 | [E06.2](../E06-平台层升级/E06.2-平台层新数据接到界面/README.md) |
-| Steam 27-7：每档的线路都是整个主列表，档位只在画质 `data` 里（`SteamBroadcastVariant.selectIn`，`steambroadcast_api.dart:82`），播放没用它限定变体，选“720p”实际仍自适应；UPGRADES 写“完成（G01.1）” | `steambroadcast_api.dart:82`、`:1024-1030` | 界面显示的档位和实际播放的不一定一致 | 写进本组报告：建议 UPGRADES 27-7 改回“部分完成”，在 G 组开任务 |
+| Steam 27-7：每档的线路都是整个主列表，档位只在画质 `data` 里（`SteamBroadcastVariant.selectIn`，`steambroadcast_api.dart:82`），播放没用它限定变体，选“720p”实际仍自适应；UPGRADES 写“完成（G01.1）” | `steambroadcast_api.dart:82`、`:1024-1030` | 界面显示的档位和实际播放的不一定一致 | UPGRADES 27-7 已改“部分完成”；按档播放 → [G01.4](../../G-播放/G01-引擎/G01.4-Steam选清晰度实际仍是自适应/README.md)（2026-10-07 登记） |
 | PandaTV 目录说明的中文还是旧说法（没提“新人主播”），UPGRADES 25-7 写“中文界面完成” | `apps/pure_live/assets/translations/zh.json:1152`（`pandalive_directory_scope`） | 说明和实际不符 | Z05.2 一并核对 |
 | GitHub 归档分支 `archive/v4` 的 17LIVE 搜索样本里还有主播私人账户记录的原值（令牌、密码散列、邮箱、电话、IP） | 远端分支 `archive/v4` 的 `fixtures/17live/` | 隐私 | 写进本组报告：要维护者决定（重写归档分支或删掉那几个文件），没有任务管 |
 | LiveMe、TikTok 弹幕受阻（要登录 IM、要网页安全 SDK 签名） | D01.18、D01.19 | 没有弹幕 | 受阻 |

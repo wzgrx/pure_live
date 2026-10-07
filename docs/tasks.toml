@@ -1399,6 +1399,15 @@ commit = "99a8f8f53"
 old = ["U.13", "T17a.1"]
 
 [[task]]
+id = "A16.2"
+title = "直播间菜单的“在新窗口打开”接上 A16.1 的新窗口，补回误删的翻译键"
+type = "界面"
+status = "未开始"
+size = "小"
+tier = 3
+from = "A16.1 记录 c12“首页完成、直播间菜单交出”；docs v2 A 组核对（翻译键 open_in_new_window 被 00f5edf18 删掉）"
+
+[[task]]
 id = "A17.1"
 title = "电视设计系统和通用组件"
 type = "界面"
@@ -1552,6 +1561,29 @@ stages = ["规则搬到 live_core，录制改调它", "直播间和多画面用�
 done = 0
 note = "和 E06.2 的“实际清晰度”阶段改同一处，最好一起做"
 from = "H01.3 记录“没做的”第 1 条（V03.3 核对）"
+
+[[task]]
+id = "C01.5"
+title = "后台时未开播的房间开播后不自动出声，后台播放补出媒体通知"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+stages = ["离开时没在播的房间，后台开播不自动播放，回到应用再开始", "后台播放中重新加载时保住媒体通知"]
+done = 0
+from = "C01 说明“已知问题”第 1、2 条（原归 C01.3 第 3 阶段，C01.3 按 D-029 关掉后没有去处）；docs v2 C、O 组核对"
+
+[[task]]
+id = "C01.6"
+title = "主播换场后弹幕参数变了要重连；改“YouTube 显示全部聊天”立即生效"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+stages = ["换场和弹幕结束后按进房详情取新参数重连", "YouTube 显示全部聊天改了就重连"]
+done = 0
+from = "docs v2 D 组核对（D06 余项、D01.14、D01.16、D01.27）和 C、O 组核对"
+note = "和 E05.4 的“百度刷新带弹幕参数”、C01.5 改同一个文件（room_controller.dart），先后做"
 
 [[task]]
 id = "C02.1"
@@ -1887,6 +1919,17 @@ status = "完成"
 date = "2026-10-02"
 commit = "cd42f89b1"
 old = ["F.2c", "T06c.2"]
+
+[[task]]
+id = "D03.3"
+title = "小窗和画中画的弹幕：放大后跟着变大，用弹幕字体，画表情图"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 2
+stages = ["小窗弹幕用弹幕字体、画表情图", "随窗口放大（上限 2 倍）和直播间 48 条上限的测试"]
+done = 0
+from = "docs v2 D 组核对（compact_danmaku.dart 不传字体和表情表，3.x 有）；V01.5 评估：上游 pure_live b2cca41c7（缩放上限 1.0 → 2.0）"
 
 [[task]]
 id = "D04.1"
@@ -2270,6 +2313,18 @@ old = ["T02g.3"]
 note = "上游 pure_live fa67c637f、pure_live_TV 5bc53016 修了同一个问题"
 
 [[task]]
+id = "E05.4"
+title = "平台层小问题合集：克拉克拉列表提前到底、LOOK 搜索能力、AcFun 付费直播仍连弹幕、百度签名过期后重连用旧地址、多画面里六间房没有弹幕、京东酷狗百度的 3.x 占位名、getDanmaku 死代码、斗鱼设置键注释"
+type = "平台"
+status = "未开始"
+size = "中"
+tier = 2
+stages = ["列表和搜索：克拉克拉空页、LOOK 搜索说明", "弹幕参数：AcFun 付费直播、百度刷新带参数、录制详情带弹幕参数", "清理：3.x 占位名常量、getDanmaku 死代码、斗鱼注释"]
+done = 0
+from = "docs v2 E 组核对（E02、E02.6 说明）和 D 组核对（D01.27、D01.28），H、I 组更正（六间房影响的是多画面）"
+note = "占位名的清理在 J06.2 做，本任务只给常量；百度那条和 C01.6 互补"
+
+[[task]]
 id = "E06.1"
 title = "已批准升级的余项（UPGRADES 回填、平台层和弹幕层、列表、数据、文字）"
 type = "平台"
@@ -2335,6 +2390,25 @@ done = 0
 from = "UPGRADES 统一原则“默认编码”、22-3（V03.3 核对：S02.3 没有做这一项）"
 
 [[task]]
+id = "G01.3"
+title = "映客默认播 HEVC：按名字选“原画”绕过了“优先 H.264”"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+from = "docs v2 G 组核对（G01 说明“已知问题”）和 E 组核对（E02 说明）"
+note = "和 G01.2（HEVC 硬解评估）无先后：不管默认值定成什么，名字匹配都要听“优先 H.264”"
+
+[[task]]
+id = "G01.4"
+title = "Steam 选清晰度实际仍是自适应：用档位限定 HLS 变体"
+type = "平台"
+status = "未开始"
+size = "小"
+tier = 3
+from = "docs v2 G 组核对和 E 组核对：UPGRADES 27-7 只做了列表（SteamBroadcastVariant.selectIn 没人调用）"
+
+[[task]]
 id = "G02.1"
 title = "播放器：会话、恢复、Flutter 绑定"
 type = "功能"
@@ -2372,6 +2446,17 @@ status = "完成"
 date = "2026-10-02"
 commit = "7b37e6f5f"
 old = ["F.1b", "T04d.1"]
+
+[[task]]
+id = "G05.1"
+title = "音频焦点：来电时暂停、拔耳机时暂停（3.x 用 audio_session）"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 2
+stages = ["来电和别的应用：拿焦点、暂停和恢复、压低音量", "拔耳机和蓝牙断开时暂停；多画面出声的那一格"]
+done = 0
+from = "docs v2 G 组核对（G05 说明“已知问题”；功能清点补 F-MINI-05）"
 
 [[task]]
 id = "H01.1"
@@ -2507,6 +2592,17 @@ commit = "023936ebe"
 old = ["M13.5", "T07c.1"]
 
 [[task]]
+id = "I03.2"
+title = "浏览列表的小问题合集：断网预检和移动网络提示只在热门、分区目录切标签重新请求、借图竞态、分区房间页设置只读一次、重试忽略条数、关注无适配器不进冷却、观看记录把已下线平台算失败、标签长度上限写两份"
+type = "功能"
+status = "未开始"
+size = "中"
+tier = 3
+stages = ["分区：断网预检和移动网络提示、目录留在应用里、借图竞态、隐藏设置跟着变", "列表通用和其他页：重试条数、关注和观看记录的已下线平台、标签长度上限"]
+done = 0
+from = "docs v2 H、I 组核对和 G、Q、R 组核对（功能清点 F-NET-03 只核对了热门）"
+
+[[task]]
 id = "I04.1"
 title = "关注"
 type = "功能"
@@ -2609,6 +2705,18 @@ stages = ["准备装着 3.x 和真实数据的手机", "覆盖安装 4.x", "逐�
 done = 0
 
 [[task]]
+id = "J06.2"
+title = "3.x 迁移报告在正式版里看得到，清掉京东、酷狗、百度的占位名"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+stages = ["迁移报告写进应用日志并留一份摘要", "清掉占位名（新迁移和已经迁移过的）"]
+done = 0
+from = "docs v2 J、K、L、N 组核对和 E 组核对（E02 说明、E02.9 记录的数据清理建议）"
+note = "最好在 J06.1 之前合并，J06.1 核对时就能在日志页看到报告"
+
+[[task]]
 id = "K01.1"
 title = "账号与登录"
 type = "功能"
@@ -2625,6 +2733,15 @@ status = "未开始"
 size = "小"
 tier = 2
 old = ["T10b.1"]
+
+[[task]]
+id = "K02.2"
+title = "加密存储失败时提示；扫码登录出错不再卡在“核验中”；退出哔哩哔哩时清网页 Cookie"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+from = "docs v2 J、K、L、N 组核对"
 
 [[task]]
 id = "L01.1"
@@ -2771,6 +2888,15 @@ status = "完成"
 date = "2026-09-29"
 commit = "a2b5c0610"
 old = ["M1.1", "T03a.2"]
+
+[[task]]
+id = "Q02.1"
+title = "封面和头像走应用代理（3.x 的 CustomImageCacheManager）"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 2
+from = "docs v2 G、Q、R 组核对（Q02 说明“已知问题”；功能清点 F-NET-01 改“部分”）"
 
 [[task]]
 id = "Q03.1"

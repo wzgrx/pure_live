@@ -1,10 +1,12 @@
-# A12.3 云账号停用说明：设计（第 1 版）
+# A12.3 云账号停用说明：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 范围：v3 的 Firebase 云端账号（登录、注册、找回密码、GitHub 登录，“我的”，管理员的“管理用户”和用户配置中心）已经去掉（I01.1，用户决定不恢复）；三个旧路由 `kSignIn`、`kMine`、`kUserManage` 落到一个说明页（v4 现在的 `apps/pure_live/lib/features/auth/auth_page.dart`），指向 WebDav、设备同步、备份与恢复
-- 对应：[TASKS.md](../../../TASKS.md)（第 6 节“不恢复的界面”）、[inventory/UI.md](../../../inventory/UI.md#a123)（A12.3-01～06）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a123)
-- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.10c、T10c.1（见 [MAPPING.md](../../../MAPPING.md)）
+- 范围：v3 的 Firebase 云端账号（登录、注册、找回密码、GitHub 登录，“我的”，管理员的“管理用户”和用户配置中心）已经去掉（I01.1，用户决定不恢复）；三个旧路由 `kSignIn`、`kMine`、`kUserManage` 落到一个说明页（`apps/pure_live/lib/features/auth/auth_page.dart`），指向 WebDAV、设备同步、备份与恢复
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a123)（A12.3-01～06）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a123)；功能点 F-ACC-08（不做，[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；备份页的“云端账号（已停用）”一行在 [A12.4](../A12.4-备份与恢复/README.md)；相关决定 D-003（X1、X2 按建议 A）
+- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；邮箱是假的（`user01@example.com`）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -39,7 +41,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 去掉三个云端界面，旧路由落到说明页；备份页留一行指向说明页；两个选择 | 待评审 |
+| 第 1 版 | 去掉三个云端界面，旧路由落到说明页；备份页留一行指向说明页；两个选择 | 用户 2026-10-01 确认；X1、X2 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -65,7 +67,7 @@
 | [v4-backup-entry.jpg](v4-backup-entry.jpg) | 新：备份页留的“云端账号（已停用）”一行（待选 X1 选 A 时，在 A12.4 出图） |
 | [v4-wide.jpg](v4-wide.jpg)、[v4-land.jpg](v4-land.jpg) | 1280×800、852×393 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -107,10 +109,23 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，X1、X2 按建议 A（备份页留一行“云端账号（已停用）”、说明页加“平台账号”一行）。
-- 实现：c1～c3、c5 做到，c4（备份页的那一行）由 A12.4 做完（跳 `RoutePath.kMine`），详见 [record.md](record.md)。`apps/pure_live/lib/features/auth/auth_page.dart`：三个旧路由 `kSignIn`、`kMine`、`kUserManage` 共用一页，停用卡 → “同步与备份”（WebDAV、设备同步、备份与恢复）→ “平台账号”。Firebase 登录、注册、“我的”、用户管理在 I01.1 时就已去掉。
-- 偏差：图标走 `AppIcons`（“备份与恢复”用 `save_3_line`）；“WebDav”的写法当时照 v3，A12.5 统一改成“WebDAV”。
-- 提交：`a90c0502e`，在 `59248e0b9` 合并（2026-10-01）。`auth` 的直接颜色和图标 5 → 0。
-- 测试：`account_page_test.dart` 中 2 个（三个旧路由都显示说明页、停用卡和四行的顺序与图标、两行能跳转、1280×800 和 852×393 一栏 ≤720）。
-- 真机：没有单独记录；页面是静态说明，风险小。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 顺带看一眼。
-- 留下的问题：无。
+**实现**（详见 [record.md](record.md)；2026-10-01，开发提交 `a90c0502e`“feat(ui): U.10c cloud account retirement page per the confirmed design”（登记表写的就是它），合并提交 `59248e0b9`“Merge U.9 and U.10: IPTV management and accounts”）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | I01.1 时已去掉 Firebase 登录、注册、找回密码、GitHub 登录，v4 没有这些代码（3.x 的 `modules/auth/` 共 2786 行，`firebase_email_auth.dart` 489 行、`firebase_manager.dart` 372 行） |
+| c2 | ✅ | 同上：“我的”、用户配置中心、“管理用户”都没有 |
+| c3 | ✅ | `routes/app_router.dart:43-45` 三个旧路由都建 `AuthPage`（`features/auth/auth_page.dart:22`）：停用卡（`:34-60`，主色 5% 底、圆角 20、`AppIcons.cloudOff`，标题、为什么停用、旧云端配置怎么迁移）→“同步与备份”WebDAV、设备同步、备份与恢复三行（`:62-90`）→“平台账号”一行（`:92-104`，X2 A，跳 `RoutePath.kSettingsAccount`）；一栏最宽 720（`ReadableContent` `:111-114`） |
+| c4 | ✅（在 A12.4 做） | `features/backup/backup_page.dart:293-300`：“云端和其他设备”第一行“云端账号（已停用）”，跳 `RoutePath.kMine`（X1 A） |
+| c5 | ✅ | 照 v3 设置页的写法：分组标题、分组卡片、行；现在是 `live_ui` 的 `SettingsGroup`、`SettingsLinkRow`（A02.1 换的） |
+
+- 偏差（记录“偏差”）：①图标走 `AppIcons`（`cloudOff`、`webDav`、`deviceSync`、`backupFiles`、`platformAccounts`），“备份与恢复”用 v4 原来的 `save_3_line`；②“WebDav”当时照 v3 写，A12.5 统一改成“WebDAV”（中英文的 `webdav`、`backup_to_webdav`、`auth_webdav_desc`）；③记录写“标题居中由页面自己设”，后来 D-011（`e320e0e72`）统一照 3.x 实际位置，现在是普通 `AppBar` 默认位置（Android 靠左，`auth_page.dart:107`）。
+- 后来的变化（以现在的代码为准）：记录里写的 `buildGroupTitle`、`buildModernCard`、`buildTile` 在 A02.1（`914784264`，2026-10-02）换成 `live_ui` 的 `SettingsGroup`、`SettingsLinkRow`，样子不变。
+- 新文字：`auth_platform_accounts_desc`；改 `auth_webdav_desc`；行标题用 A12.1 的 `account_title`“平台账号”。没有设置。
+- 门禁：`auth` 直接写的颜色和图标 5 → 0，`tools/gate/ui_baseline.json` 去掉这一项。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/account/account_page_test.dart` 中本任务 2 个，分组 `U.10c cloud account`（`:650-701`）：三个旧路由都显示说明页，停用卡、分组和四行的顺序与图标，“平台账号”和 WebDAV 两行能跳转；1280×800、852×393 一栏 ≤720 居中。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`；页面是静态说明，风险小。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：备份与恢复 → “云端账号（已停用）”打开这一页，四行都能进对应页面；建议在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 看备份页时顺带点一下。
+- 留下的问题和去向：横屏手机顶栏 56 高（普通 `AppBar`，同组备份页是 48）→ 建议并入 A04.1；Esc 返回 → A05.1。云端账号本身不做（F-ACC-08，用户决定；以后只有在用户要求恢复云端服务、并且有不依赖谷歌服务的后端时才重新考虑）。

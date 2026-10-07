@@ -1,10 +1,12 @@
-# A12.4 备份与恢复：设计（第 1 版）
+# A12.4 备份与恢复：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 范围：备份与恢复页（列表、进行中、空、出错）、恢复预览对话框、备份文件菜单、同步电视的扫码页和输入地址对话框、提示条
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a124)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a124)
-- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.11a、T09c.2（见 [MAPPING.md](../../../MAPPING.md)）
+- 范围：备份与恢复页（列表、进行中、空、出错）、恢复预览对话框、备份文件菜单、同步电视的扫码页和输入地址对话框、提示条；日志管理移到设置后，日志页本身也放在这里（Q1）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a124)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a124)；功能点 F-BAK-01～03、F-BAK-06、F-BAK-07（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；备份格式和 `BackupService` 在 [J03](../../../J-设置和数据/J03-备份恢复/README.md)；设置里的入口在 [A11.5](../../A11-设置界面/A11.5-数据/README.md)；相关决定 D-003（Q1～Q3 按建议 A）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；相机画面是示意图片；路径、地址、文件名都是示例
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -59,7 +61,7 @@ I01.1 已经做了：去掉 Firebase 行；组的顺序改成本地备份在前�
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 对比、各状态、扫码页、三处待选 | 待评审 |
+| 第 1 版 | 对比、各状态、扫码页、三处待选 | 用户 2026-10-02 确认；Q1～Q3 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -88,7 +90,7 @@ I01.1 已经做了：去掉 Firebase 行；组的顺序改成本地备份在前�
 | [v3-backup-land.jpg](v3-backup-land.jpg)、[v4-backup-land.jpg](v4-backup-land.jpg) | 手机横屏 852×393 |
 | [v3-backup-wide.jpg](v3-backup-wide.jpg)、[v4-backup-wide.jpg](v4-backup-wide.jpg)、[v4-backup-wide-n.jpg](v4-backup-wide-n.jpg) | 宽屏 1280×800 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -155,10 +157,29 @@ I01.1 已经做了：去掉 Firebase 行；组的顺序改成本地备份在前�
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，Q1～Q3 按建议 A（日志管理移到设置、手机点“同步TV数据”直接扫码、目录中的备份全部列出）。
-- 实现：c1～c11 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/backup/backup_page.dart`（四组、一次只做一件事、文件行小菜单、选目录）、`tv_sync.dart`（扫码后发送、输入地址）、`log_page.dart`（从设置搬来，路由 `RoutePath.kLogs`）；恢复预览、备份文件、数据范围搬到 `shared/backup/`（WebDAV、设备同步共用）；扫码页 `shared/qr_scan.dart`（手电筒三态、切换相机、取景框、四种状态，相机是接口 `QrCamera`，图标颜色跟主题）。
-- 偏差：行用 A11.1 的统一设置行（标题 15 号 600，设计图写常规）；为了能编译，`features/settings/settings_catalog.dart` 的“日志管理”改成路由（两行）。
-- 提交：`ccf5c3c93`，和 A10.2、A12.5、A12.6 一起在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`backup` 的直接颜色和图标 22 → 0，`settings` 126 → 119；跨功能引用 `backup -> search/search_history.dart` 去掉。
-- 测试：`apps/pure_live/test/features/backup/backup_page_test.dart` 7 → 18 个（四组九行、创建后列出、恢复时其他操作变灰、小菜单、删除确认、读不了目录、选目录、手机扫码 / 电脑输入地址、横屏和宽屏；扫码页 4 个）；新增假相机 `test/shared/fake_qr_camera.dart`。四个任务一起跑时 `apps/pure_live` 497 个中 496 个通过，唯一失败的网络电视时间测试已在之后把同步时间接到固定时钟（`iptvClockProvider`）。
-- 真机：没有看过。登记表已是“完成”，建议按 [S02 的 CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 1 条（创建完整备份、恢复 3.x 备份）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看，扫码同步电视要有电视端（A17.9）。
-- 留下的问题：电视端接收页的设计在 A17.9（网页遥控、同步页）。
+**实现**（详见 [record.md](record.md)；2026-10-02，开发提交 `ccf5c3c93`“feat(backup): backup and restore per the U.11a design”，和 A10.2、A12.5、A12.6 一起在 `f5351b91c`“Merge U.7b and U.11a-c”合并；登记表写的是记录提交 `965d41956`）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 入口不变：首页 ≡ 菜单（`features/home/menu_button.dart:81`）、设置 → 数据（`features/settings/settings_model.dart:102`）；`features/backup/backup_page.dart:274` 的 `build`：先“云端和其他设备”后“本地备份”；创建备份 → 恢复备份 → 仅导出关注列表 → 仅导入关注列表，图标回到 v3（`:326-362`）；一次只做一件事（`_run` `:116`） |
+| c2 | ✅ | “云端和其他设备”（`:289-325`）：云端账号（已停用）→ 说明页（A12.3 X1）、WebDAV、设备同步、同步TV数据（所有客户端都有）；没有 Firebase |
+| c3 | ✅ | “目录中的备份 · N”（`:363-408`）：每行“时间 · 大小 · 完整备份 / 仅关注列表”，点一下预览后恢复；`_BackupFileRow`（`:470`）的 ⋮、右键、长按打开同一个 `showAppMenu`（`:500-546`）：恢复全部设置、仅恢复关注列表、（线）红色删除，仅关注的文件没有“恢复全部设置”；删除先确认（`_delete` `:181`）；读不了目录时说明并能重试 |
+| c4 | ✅ | 恢复前预览 `restoreWithPreview`（`shared/backup/backup_preview_dialog.dart:140`），差别由 `previewRestore`（`shared/backup/backup_data.dart:248`）算 |
+| c5 | ✅ | 直接存到备份目录（`_create` `:126-148`）；默认目录 `defaultBackupFolder`（`shared/backup/backup_files.dart:73`，Android 先试 `Download/PureLive`）；“备份目录”组（`:410-440`）：没设过写“备份目录（默认）”、设过才有“改回默认目录”（`_resetFolder` `:228`）、电脑多“打开备份目录”（`backupOpensFolderProvider` `:41`）；没有系统选择器时用应用内的 `showFileBrowser`（`features/backup/file_browser.dart:15`） |
+| c6 | ✅ | 提示“已备份到 purelive_….txt”（`:137-139`），列表同时多一条（`_loadFiles` `:96`） |
+| c7 | ✅ | 正在做的行转圈，其他备份行（含同步TV数据、备份文件、备份目录）变灰（`_usable` `:270`）；云端账号、WebDAV、设备同步照常能进 |
+| c8 | ✅ | 扫码页 `shared/qr_scan.dart:141` 的 `QrScanPage`：顶栏手电筒三种图标、切换相机，颜色跟顶栏前景色（`:224-240`）；“手动输入地址”；同步电视的状态在 `features/backup/tv_sync.dart:151` 的 `TvSyncScanPage`（发送中、成功“完成 / 再扫一次”、失败写原因“重试 / 输入地址”，`:213-233`）；相机不可用写原因和“重试”“输入地址”；手机（`QrScan.available`）直接进扫码页，电脑和没相机时弹输入地址对话框（`_syncTv` `:250-268`、`askTvAddress` `tv_sync.dart:64`） |
+| c9 | ✅（偏差 2） | 日志页搬到 `features/backup/log_page.dart:28`，路由 `RoutePath.kLogs`（`routes/app_router.dart:84`）；设置 → 数据最后一行“日志管理”（`features/settings/settings_model.dart:115`） |
+| c10 | ✅（偏差 1） | 行用 `live_ui` 的统一设置行（`SettingsGroup`、`SettingsRow`、`SettingsLinkRow`），副标题 `onSurfaceVariant` |
+| c11 | ✅ | `SettingsPageList`（`packages/live_ui/lib/src/widgets/settings_page_frame.dart:49`）一栏最宽 720 居中；顶栏 `settingsPageAppBar`，窗口高 <480 时 48 |
+
+- 偏差（记录）：①统一设置行的标题是 15 号 600（设计图写常规）；②为了能编译，`features/settings/settings_catalog.dart` 的“日志管理”当时改成路由（两行），A11.5 合并后入口在 `settings_model.dart:115`；③设计范围外：`backup_data.dart`、`backup_preview_dialog.dart`、`backup_files.dart` 从 `features/backup/` 搬到 `shared/backup/`（设备同步要用预览，功能目录之间不能互相引用），`QrScan.scan` 换成 `QrScan.camera`（`platform/plugins.dart:42`）。
+- 后来的变化（以现在的代码为准）：A02.2（`fc5bcdd46`）确认框、提示条、输入地址对话框换成共用组件；A03.1（`a048ea540`）备份文件列表接 `AppRefreshView`；E06.1（`f8acb92b6`）完整备份加上网络电视播放列表和多画面的最后布局（`shared/backup/backup_iptv.dart`），预览多两项。
+- 新文字：“云端和其他设备”“手动输入地址”“输入地址”“完成”“再扫一次”“正在发送到电视 {address}”“关注、历史、屏蔽词和弹幕设置已发送到电视”和相机不可用的说明等（键名见记录）。没有新设置。
+- 门禁：`backup` 直接写的颜色和图标 22 → 0（日志页搬进来后也是 0），`settings` 126 → 119；跨功能引用 `backup -> search/search_history.dart` 去掉（随 `backup_data.dart` 搬到 shared）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/backup/backup_page_test.dart`（现在 18 个；当时 7 → 18）：数据 4 个（3.x 备份的预览、仅关注文件恢复关注、搜索记录、文件名和电视地址）；页面 10 个（四组九行和图标、没有 Firebase 和日志组；创建后列出并写文件名；恢复预览时其他备份操作变灰；⋮ / 右键 / 长按同一菜单和删除确认；读不了目录；选目录和改回默认；不是备份的文件；手机扫码、电脑输入地址；横屏 720 和 48 顶栏；宽屏 720 和“打开备份目录”）；扫码页 4 个（顶栏、发送中到完成、失败、相机不可用）。`test/shared/fake_qr_camera.dart` 是假相机；`test/plugins_test.dart:106` 测电视地址对话框的扫码按钮；`test/shared/backup_extras_test.dart`（4）测网络电视和多画面段；`test/features/settings/settings_data_test.dart:152` 测日志入口。日志页本身没有组件测试。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 1 条（创建完整备份，文件在 `Download/PureLive`；恢复一个 3.x 导出的备份，先预览再确认），归 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md)；另看扫码页的手电筒和相机权限被拒时的说明。扫码同步电视要有电视端（A17.9）。
+- 留下的问题和去向：电视端接收页 → [A17.9](../../A17-电视界面/A17.9-电视设置/README.md)；日志页补测试 → S01；Esc 返回 → A05.1。

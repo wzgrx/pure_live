@@ -14,7 +14,7 @@
 ## 现状：做到哪、怎么工作的
 
 - **怎么跑**：`bash tools/gate/gate.sh --all` 依次跑依赖方向、样本隐私、界面结构、文档检查，再对每个成员跑 `dart format --output=none --set-exit-if-changed`、`dart analyze --fatal-infos` 和测试（有 `sdk: flutter` 的成员用 `flutter test`，其余 `dart test`，`gate.sh:120-124`），最后跑 `tools/gate/tests/` 的 Python 测试；日志里有 `gate: passed` 才算通过。不带参数时只跑相对 `origin/master` 改过的成员。同一时间只跑一个（`flock` 锁 `pure_live-gate.lock`）。跑应用测试前会先取 FFmpeg 包（`tools/ffmpeg_kit/fetch.sh linux`，应用的构建钩子要用）。
-- **数量**（2026-10-03，按 `test(`、`testWidgets(` 调用粗数，循环生成的不算；运行器实际报的数更多，例如 S02.1 记录里 `live_core` 是 3590 个）：
+- **数量**（2026-10-03 统计，2026-10-07 在 `c10e46829` 上复核没变；按 `test(`、`testWidgets(` 调用粗数，循环生成的不算；运行器实际报的数更多，例如 S02.1 记录里 `live_core` 是 3590 个）：
 
 | 成员 | 测试文件 | 调用处 | `lib/` 行数 |
 |---|---:|---:|---:|

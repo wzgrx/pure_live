@@ -1,13 +1,11 @@
 # J04.1 WebDAV Digest 认证
 
-- 状态：以登记表为准，见[子分类页](../../../A-界面设计/A12-账号和数据界面/README.md)和 [STATUS.md](../../../STATUS.md)
-- 档位：可以以后；规模：小
-- 功能点：F-BAK-04（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）
-- 涉及代码：`apps/pure_live/lib/features/web_dav/web_dav_client.dart`
-- 依赖：A12.5（WebDAV 界面）合并后
-- 来源：J03.1“留给后续”、M13.18 任务说明第 4 项
-- 评审页：按授权直接开发（把 v3 的认证方式补回来；两处选择按建议 A 做）
-- 记录：[records/F.4b.md](record.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 类型：功能
+- 来源：J03.1 记录“留给后续”（WebDAV 只做了 Basic）、模块重构 M13.18 任务说明第 4 项；功能点 F-BAK-04（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）
+- 旧编号：F.4b、T09d.2
+- 相关：J03.1（客户端）、A12.5（WebDAV 界面，先合并）；按授权直接开发（把 3.x 的认证方式补回来，两处选择按建议 A，D-003）；记录 [record.md](record.md)
+- 涉及代码：`apps/pure_live/lib/features/web_dav/web_dav_client.dart`、`web_dav_auth.dart`（新）
 
 ## v3 的行为（`~/ref/v3ref`，v3.2.11；认证在依赖包 webdav_client 1.2.2 里）
 
@@ -21,7 +19,7 @@
 
 v3 的 Digest 有几处不合 RFC（v4 不照搬）：`uri` 用的是相对地址根的路径（`webdav_dio.dart:76` 传进 `auth.dart:82`），地址带文件夹（如坚果云的 `/dav/`）时和请求行对不上，会被检查 uri 的服务器拒绝；`nc=1` 不是 8 位十六进制；MD5-sess 用了 nc 而不是 nonce（`auth.dart:116`）；opaque 没加引号（`auth.dart:102`）。
 
-## v4 现在
+## v4 做之前（J03.1 的客户端；行号是当时的）
 
 - `WebDavClient` 每个请求都先带 Basic（`features/web_dav/web_dav_client.dart:86-88`、`:98`），不读 `WWW-Authenticate`；401、403 一律算“账号或密码错误”（`:107-111`）。
 - 客户端按选中的服务器建一个（`web_dav_page.dart:97`），配置对话框的“测试”每次新建一个（`:182`）。
@@ -51,7 +49,7 @@ v3 的 Digest 有几处不合 RFC（v4 不照搬）：`uri` 用的是相对地�
 | 1 第一次请求带不带密码 | 照 v3 先不带，按服务器的要求选；每个客户端多一次 401 往返（页面打开或换服务器时一次，测试连接时一次） | 照 v4 现在先带 Basic，401 要 Digest 时再换；少一次往返，但 Digest 服务器也会先收到 Base64 的密码 |
 | 2 401 没有 `WWW-Authenticate` | 用 Basic 再试一次（v4 现在能连的照旧能连） | 照 v3 直接报错 |
 
-## 测试和验证
+## 测试和验证（开发前的计划）
 
 - 单元测试（`apps/pure_live/test/features/web_dav/web_dav_auth_test.dart`，本地假服务器，地址 `https://dav.example.com/dav/`、账号 `user@example.com`）：
   - Digest 计算和 RFC 7616 3.9.1 的 MD5 例子一致；MD5 用 RFC 1321 的例子；`WWW-Authenticate` 多个方式、引号里的逗号、多行都能读。
@@ -75,3 +73,22 @@ v3 的 Digest 有几处不合 RFC（v4 不照搬）：`uri` 用的是相对地�
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比 |
 | 2026-10-02 | 开发完成（先不带账号，按 `WWW-Authenticate` 选 Basic 或 Digest），待 K90 验证 |
+
+## 结果
+
+- 提交：`c168fdb99`（2026-10-02 合并）。改了 `features/web_dav/web_dav_client.dart`（按服务器的要求选认证方式：`_learn` `:140`、`_exchange` `:157`、`_send` `:180`），新加 `web_dav_auth.dart`（`parseAuthChallenges` `:18`、`DigestChallenge` `:69`、`digestAuthorization` `:127`、`md5Hex` `:179`）和测试 `test/features/web_dav/web_dav_auth_test.dart`。
+- c1～c4 全部做到（[record.md](record.md)“逐条对照”）：MD5 和 MD5-sess、`qop=auth` 或不带 qop、opaque 和 algorithm 带回、同一个 nonce 的 nc 递增（8 位十六进制）、`uri` 用请求行的路径和查询；第一次不带账号，401 时按 `WWW-Authenticate` 选（两种都给用 Digest），之后直接带上；`stale=true` 或旧 nonce 换新 nonce 重发，每个请求最多重发一次；401 不带 `WWW-Authenticate` 用 Basic 再试一次，只给不认识的方式不发密码。
+- 和 3.x 的差别：Digest 按 RFC 写（3.x 的 `uri`、`nc`、MD5-sess、opaque 引号有错）；401 没有 `WWW-Authenticate` 时多试一次 Basic（选择 2 的 A）。只支持 SHA-256 或 `auth-int` 的 Digest 不支持（3.x 也不支持）。
+- 没有新设置、没有新翻译；3.x 的 WebDAV 配置键名和含义不变。
+- 测试：新增 5 个（改之前其中 3 个会失败）；原有的 WebDAV 页面测试不改照旧通过；当时 `apps/pure_live` 全部测试通过。
+
+## 验证
+
+- 自动测试：`cd apps/pure_live && flutter test test/features/web_dav/`（含本机回环端口上的真实 HTTP 栈连 Digest 服务器）。
+- 真机：**没有 K90 结果**。要看的是坚果云照旧能用（测试连接、上传、恢复），且每个客户端只多一次 401：[S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 第 2 条（CHECKLIST 第 5 节第 2 条）。真实的 Digest 服务器手边没有，只有单元测试。登记表按当时的口径记成“完成”。
+
+## 留下的问题
+
+- 坚果云真机 → S02.4 第 2 条，做完把结果补进本节。
+- 走 http 代理（不是隧道）访问 http 地址时 `uri` 写路径而请求行是完整地址，个别严格的服务器可能拒绝 → 不做，有反馈再说（J04 子分类页“已知问题”）。
+

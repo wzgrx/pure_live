@@ -6,6 +6,7 @@
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/modules/live/iptv/`、`modules/live/movie_playback/`）。手机上同样的功能：v3 的 IPTV 设置页和订阅源管理（`modules/iptv/iptv_page.dart`、`iptv_manage.dart`；手机版 [A13.1](../../A13-网络电视和多画面界面/A13.1-网络电视管理/README.md) 未开始）、工具箱的链接解析（`modules/toolbox/toolbox_page.dart`；[A15.1](../../A15-小页面/A15.1-工具箱/README.md) 未开始）、节目单（[A07.7](../../A07-直播间界面/A07.7-直播间的状态/README.md)）。电视直播间的其余部分见 [A17.4](../A17.4-电视直播间/README.md)
 - 评审页：claude.ai 私有页面（已发布，用户评审确认），由 `page.json` 生成（`tools/ui/mock/page.py`）；效果图源文件 [src/gen.py](src/gen.py)（电视公共样式在 [A17.4/src/tvkit.py](../A17.4-电视直播间/src/tvkit.py)）
 - 图片：pure_live_TV 按代码还原（1920×1080 设计像素折半画在 960×540 上）；文字取自 pure_live_TV 和 v3 的 `zh.json`；画面、二维码是示意
+- 旧编号：U.15e、T18d.1。设计确认：2026-10-01（用户同意全部电视设计：“后续全部通过”；确认记录 `62391fdd2`），待选 N1～N4 按建议 A（D-003）。下面正文里“改动（待确认）”“待评审”等是定稿前的字样，正文没有改。还没开发，任务书见 [brief.md](brief.md)
 
 ## 界面清点表
 
@@ -179,3 +180,11 @@
 | `core/widgets/remote_sync_qr_card.dart`、`tv_qr_card.dart` | 局域网接收（`features/remote_receiver/` 是设备同步，IPTV 和链接的手机网页随 X 定） |
 | `modules/live/movie_playback/movie_playback_page.dart` | 电视版还没有；解析逻辑同手机工具箱 `features/toolbox/` |
 | —（没有节目单） | `features/live_play/dialogs/iptv_guide.dart`（A07.7 组件） |
+
+## 实现和验证
+
+- 实现：**还没开发**（登记表“已确认”，第三档；阶段“设计 ✓ → 开发 → 真机”只做完设计）。按 D-004 的客户端顺序，电视排在 Android、Windows 之后；开发的要求、阶段、测试和真机步骤都在 [brief.md](brief.md)，开发顺序见[子分类页](../README.md)的“路线”。
+- 现在的代码：电视上只有网络电视频道列表（`apps/pure_live/lib/tv/pages/tv_iptv_pane.dart`），“IPTV管理”打开手机页；没有链接放映；电视直播间没有节目单；旧分支 M14.2 的 `tv_iptv_room.dart`、M14.5 的网页遥控是半成品。
+- 开发前要知道的：登记表标题“电视网络电视和影片”和本页标题“电视网络电视和链接放映”不一致；设计写的时候 A13.1、A15.1 未开始，现在都已完成，开发以它们现在的代码为准；Referer、Cookie 两个请求头 4.x 没有，局域网网页遥控没有。
+- 验证：没有自动测试，也没有真机结果。真机要一台 Android 电视或电视盒子（任务书“真机验证”一节）。
+- 留下的问题和去向：见[子分类页](../README.md)“已知问题”。

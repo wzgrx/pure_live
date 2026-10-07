@@ -52,6 +52,6 @@
 - 延迟最多一个间隔（5 s）加分片生成的时间；接百度 IM 能更快：不做（附录 B-18：要运行平台不公开的 SDK）。
 - 进场、点赞、升级通知不显示：不做（B-19）；在线人数不改用 `real_onlineusercnt_str`：不做（B-20，和房间页、卡片的人数对不上）。
 - 102 没有实测到：没有任务。如果平台其实不发 102，下播后连接只是每 5 s 拉一次没有新分片的列表，不打转、不报错，界面按房间状态处理。
-- 签名过期（`credentialsUnavailable`）后要拿新的房间详情再连：没有任务。C01.1 的 B-24 在弹幕连接结束后，直播间每 60 秒刷新详情时重连（`apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`），但刷新用的 `getRoomDetailForRefresh`（`packages/live_core/lib/src/sites/baidulive/baidulive_site.dart:321`）不带弹幕参数，`LiveRoom.mergeFrom` 保留旧的（`packages/live_core/lib/src/live_room.dart:619`），所以重连用的还是同一组过期地址，会立刻再次结束。列表签半年，实际很少遇到；要做时让百度的刷新在直播中也带参数，或过期时直播间按进房详情重取。
+- 签名过期（`credentialsUnavailable`）后要拿新的房间详情再连：2026-10-07 登记，平台层让刷新带参数 → [E05.4](../../../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md)，直播间在连接结束后先按进房详情取参数 → [C01.6](../../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)。C01.1 的 B-24 在弹幕连接结束后，直播间每 60 秒刷新详情时重连（`apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`），但刷新用的 `getRoomDetailForRefresh`（`packages/live_core/lib/src/sites/baidulive/baidulive_site.dart:321`）不带弹幕参数，`LiveRoom.mergeFrom` 保留旧的（`packages/live_core/lib/src/live_room.dart:619`），所以重连用的还是同一组过期地址，会立刻再次结束。列表签半年，实际很少遇到；要做时让百度的刷新在直播中也带参数，或过期时直播间按进房详情重取。
 - 3.x 存下的旧公告：已由 J02.1 处理，真机核对在 [J06.1](../../../J-设置和数据/J06-3.x数据迁移/J06.1-3.x数据迁移的真机验证/README.md)。
 - 没有真机结果：没有任务；真机清单没有本平台弹幕的条目（见“验证”）。

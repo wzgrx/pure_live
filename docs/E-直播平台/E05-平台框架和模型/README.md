@@ -77,7 +77,7 @@
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | `fillFromDetail` 不补封面，详情不给封面时观看记录、纯音频封面、通知大图变空 | `live_room.dart:652-660` | 观看记录没封面 | [E05.3](E05.3-房间详情补齐时连封面一起补/README.md) |
-| `LiveSite.getDanmaku()` 和 `live_danmaku.dart` 的 `LiveDanmaku`、`EmptyDanmaku` 没有调用方：弹幕走 `DanmakuRegistry`（`packages/live_danmaku/lib/src/registry.dart:42`） | `live_site.dart:27`、`live_danmaku.dart:9`、`:50` | 死代码，新平台作者可能以为要实现 `getDanmaku` | 写进本组报告；以后整理时删（Z 组），没有任务 |
+| `LiveSite.getDanmaku()` 和 `live_danmaku.dart` 的 `LiveDanmaku`、`EmptyDanmaku` 没有调用方：弹幕走 `DanmakuRegistry`（`packages/live_danmaku/lib/src/registry.dart:42`） | `live_site.dart:27`、`live_danmaku.dart:9`、`:50` | 死代码，新平台作者可能以为要实现 `getDanmaku` | [E05.4](E05.4-平台层小问题合集/README.md) 第 3 阶段（2026-10-07 登记） |
 | `LiveSite.getPlayUrls` 只返回地址、丢掉请求头和格式，应用都走 `resolvePlayUrls`；只剩测试替身实现它 | `live_site.dart:53` | 无（兼容 3.x 接口） | 不做 |
 | 虎牙别名房间号、BIGO 以外的字母房间号是否不分大小写没核实完 | `sites.dart:223` | 大小写不同时可能出现两个关注 | 巡检时核实（E01.6、E07.1），有证据再加 |
 | 代码注释里还用旧编号（`M3`、`M5`、`M9`、`M4.34` 等） | `platforms.dart:134`、`:190`、`:261`，`sites.dart:156`、`:217` 等 | 按注释找文档要先查 MAPPING | Z 组一次性替换 |
@@ -96,7 +96,8 @@
 ## 路线
 
 1. [E05.3](E05.3-房间详情补齐时连封面一起补/README.md)（第二档，小）：`fillFromDetail` 加封面，一行代码加两个测试。
-2. 以后：清理 `getDanmaku` 死代码和旧编号注释（Z 组）；虎牙等字母房间号的大小写在巡检时核实后加进 `caseInsensitiveRoomIds`。新想法写进 V01 提议，不直接加任务。
+2. [E05.4](E05.4-平台层小问题合集/README.md)（第二档，中，三个阶段）：克拉克拉空页、LOOK 搜索说明、AcFun 付费直播不连弹幕、百度刷新带弹幕参数、录制详情带弹幕参数（多画面）、3.x 占位名的表、删 `getDanmaku` 死代码、斗鱼注释。
+3. 以后：旧编号注释的整理（Z 组）；虎牙等字母房间号的大小写在巡检时核实后加进 `caseInsensitiveRoomIds`。新想法写进 V01 提议，不直接加任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 

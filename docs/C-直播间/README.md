@@ -36,16 +36,16 @@
 
 | 问题 | 位置 | 和 3.x 比 | 建议 |
 |---|---|---|---|
-| 后台时未开播的房间开播会自动出声，通知栏也没有媒体通知可以停 | `apps/pure_live/lib/features/live_play/logic/room_controller.dart:775-778`；`logic/background_playback.dart:472-490` | 3.x 没有定时刷新，没有这个问题（4.x 新有） | 在 C01 开任务（第二档，小）；原来归 C01.3，C01.3 关掉后没有去处 |
-| 主播换场后弹幕参数变了（TwitCasting、克拉克拉、SHOWROOM），直播间刷新不重连，弹幕停在旧的一场 | `logic/room_controller.dart:785`；`packages/live_core/lib/src/live_room.dart:619` | 3.x 这三个平台没有弹幕 | 在 C01 开任务（D 组 [D06](../D-弹幕/D06-弹幕功能余项/README.md) 也列了这一条，建议开在 C01 或 D01，只开一处） |
-| 改“YouTube 显示全部聊天”要重新进房才生效 | `apps/pure_live/lib/app/platforms.dart:227`；`logic/room_controller.dart:313-315` | 3.x YouTube 没有这个设置 | 小改动，可以和上一条一起做 |
+| 后台时未开播的房间开播会自动出声，通知栏也没有媒体通知可以停 | `apps/pure_live/lib/features/live_play/logic/room_controller.dart:775-778`；`logic/background_playback.dart:472-490` | 3.x 没有定时刷新，没有这个问题（4.x 新有） | [C01.5](C01-进房和房间逻辑/C01.5-后台时未开播的房间开播后/README.md)（2026-10-07 登记，第二档，小；原来归 C01.3） |
+| 主播换场后弹幕参数变了（TwitCasting、克拉克拉、SHOWROOM），直播间刷新不重连，弹幕停在旧的一场 | `logic/room_controller.dart:785`；`packages/live_core/lib/src/live_room.dart:619` | 3.x 这三个平台没有弹幕 | [C01.6](C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)（2026-10-07 登记；D 组 [D06](../D-弹幕/D06-弹幕功能余项/README.md) 的同一条也指向它） |
+| 改“YouTube 显示全部聊天”要重新进房才生效 | `apps/pure_live/lib/app/platforms.dart:227`；`logic/room_controller.dart:313-315` | 3.x YouTube 没有这个设置 | [C01.6](C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md) 第 2 阶段 |
 
 - **主要代码**：`apps/pure_live/lib/features/live_play/` 共 62 个文件约 21200 行；这一组主要是 `live_play_page.dart`（1366 行）、`logic/`（16 个文件 3462 行，其中 `room_controller.dart` 1064 行、`background_playback.dart` 517 行）、`mini/`（4 个文件 1370 行）、`buttons/room_menu_button.dart`（344 行）、`dialogs/`（4 个文件 1583 行）。电视的直播间（`apps/pure_live/lib/tv/room/tv_live_play_page.dart`）也用同一个 `LiveRoomController`，控制器的改动电视会跟着变。逐个文件的职责写在各子分类说明的代码地图里。
 
 ## 当前重点和顺序
 
 - **第二档：C01.4 直播间清晰度显示平台实际给的档**（小，两个阶段）：规则从录制搬到 `live_core`，直播间、多画面、电视（同一个控制器）一起用；和 E06.2（暂停中）的“实际清晰度”阶段改同一段代码，最好一起做或紧接着做。
-- **等维护者决定**：上表三个没有任务的问题要不要开任务（建议都开在 C01、第二档、小；“后台开播出声”用户最容易碰到，排第一）。
+- 上表三个问题 2026-10-07 已登记为 C01.5、C01.6（第二档、小；“后台开播出声”用户最容易碰到，排第一）。
 - **真机**：这一组自己没有待真机的任务；直播间相关的真机在 S02.5 第一阶段（A07 的界面任务）、S02.6 第 1 阶段（常亮、返回、投屏、断网重连）、O02.1（画中画回来）、O05.2（横屏翻转），四个可以同一次上机做完。
 - 新的直播间想法（例如 V01.5 小窗拖角改尺寸）先在 V01 提议，确认后再开到这里或 A07。
 - 同时在改 `features/live_play/` 的别组任务：A07.14（双击飞行弹幕时面板一闪）、A07.15（画面上下滑避开系统手势区）、G02.2（缓冲状态对账）、A03.3（直播间拖动手感，暂停中）、E06.2（平台层新数据接到界面，暂停中）。同一时间只开一个，避免冲突。

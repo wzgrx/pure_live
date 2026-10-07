@@ -132,11 +132,11 @@ DanmakuConnection.events（同步广播流）
 | Twitch Cookie 失效提示、17LIVE 名字颜色和徽章、酷狗 PK“对方”标记：弹幕层已上报，界面没接 | `LiveMessage.nameColor`、`badges`、`sourceRoomId` | 数据有了但看不到 | [E06.2](../../E-直播平台/E06-平台层升级/E06.2-平台层新数据接到界面/brief.md)（暂停） |
 | 28 个“完成”的平台弹幕任务都没有单独的 K90 记录（S02.2 冒烟只看了一个直播间的飞行弹幕）；CHECKLIST 第 2 节第 1 条只列国内五大平台、结果为空，其他 23 个平台清单里没有弹幕条目；SHOWROOM、BIGO LIVE、PandaTV 的实现连真实服务器都没接过（只用录制回放和本地服务器测）；登记表 D01.31 的 `commit` 记的是文档提交 `6c68f0010`，代码提交是 `96e032864` | [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 2 节 | 不符合 PROCESS 3.2“完成必须有真机结果” | 写进本单元报告；建议 CHECKLIST 第 2 节加“其他平台弹幕抽查”（YY、AcFun 和其余国内平台归 S02.6，海外平台开代理归 S02.4；PandaTV 要连续看 35 分钟） |
 | SOOP 登记时也传了 `danmakuHandshake()` 的连接器：`PURE_LIVE_PLAIN_WS_UA` 打开后会顶替保留大小写的握手，SOOP 服务器不回答 | `app/platforms.dart:214`（注释 `:247` 只写了 YY、FC2 有自己的握手） | 现在开关默认关，不受影响；Q03.1 打开开关时会坏 | 写进 [Q03.1](../../Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md) 的风险：打开前 SOOP 不再传 `connector`（D01.8） |
-| 主播换场后弹幕参数变了（TwitCasting 的直播号、克拉克拉的房间号、SHOWROOM 的订阅键），旧连接不会自己断，直播间刷新只在连接已结束时才重连，不比较 `danmakuData` | `features/live_play/logic/room_controller.dart:785` | 人留在直播间时弹幕停在旧的一场 | 没有任务；建议在 C01 开任务：刷新时弹幕参数变了就重连（D01.12、D01.14、D01.16） |
-| 改“YouTube 显示全部聊天”后已经打开的直播间不生效（设置在建连接时读） | `app/platforms.dart:227`、`features/live_play/live_play_page.dart:278` | 要重新进房 | 没有任务；建议并入上一条的 C01 任务（D01.20） |
-| AcFun 付费直播没有弹幕参数时照样 `connect(null)`，基类抛 `ArgumentError`，提示“弹幕服务器连接失败” | `packages/live_danmaku/lib/src/connection_base.dart:55` | 提示不准 | 没有任务；建议参数为空时直接显示“没有弹幕”（D01.10） |
-| 百度签名过期后重连仍用过期地址：直播中的刷新（`getRoomDetailForRefresh`）不带弹幕参数，`LiveRoom.mergeFrom` 保留旧参数 | `packages/live_core/lib/src/sites/baidulive/baidulive_site.dart:321`、`packages/live_core/lib/src/live_room.dart:619` | 签名半年才过期，很少遇到；遇到时每 60 秒失败一次 | 没有任务（D01.27） |
-| 六间房录制时不带弹幕参数（其他平台的录制详情都带） | `packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416` | 六间房录制没有弹幕 XML | 没有任务（D01.28） |
+| 主播换场后弹幕参数变了（TwitCasting 的直播号、克拉克拉的房间号、SHOWROOM 的订阅键），旧连接不会自己断，直播间刷新只在连接已结束时才重连，不比较 `danmakuData` | `features/live_play/logic/room_controller.dart:785` | 人留在直播间时弹幕停在旧的一场 | [C01.6](../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)（2026-10-07 登记；D01.12、D01.14、D01.16） |
+| 改“YouTube 显示全部聊天”后已经打开的直播间不生效（设置在建连接时读） | `app/platforms.dart:227`、`features/live_play/live_play_page.dart:278` | 要重新进房 | [C01.6](../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md) 第 2 阶段（D01.20） |
+| AcFun 付费直播没有弹幕参数时照样 `connect(null)`，基类抛 `ArgumentError`，提示“弹幕服务器连接失败” | `packages/live_danmaku/lib/src/connection_base.dart:55` | 提示不准 | [E05.4](../../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md)（2026-10-07 登记：参数为空时不连；D01.10） |
+| 百度签名过期后重连仍用过期地址：直播中的刷新（`getRoomDetailForRefresh`）不带弹幕参数，`LiveRoom.mergeFrom` 保留旧参数 | `packages/live_core/lib/src/sites/baidulive/baidulive_site.dart:321`、`packages/live_core/lib/src/live_room.dart:619` | 签名半年才过期，很少遇到；遇到时每 60 秒失败一次 | 平台层刷新带参数 [E05.4](../../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md)，直播间重连前取进房详情 [C01.6](../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)（2026-10-07 登记；D01.27） |
+| 六间房（以及 AcFun、克拉克拉）的录制详情不带弹幕参数 | `packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416` | 多画面用录制详情建格子，这几个平台的格子没有弹幕（录制本身不受影响，录制的弹幕走进房详情，2026-10-07 H、I 组更正） | [E05.4](../../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md)（2026-10-07 登记；D01.28） |
 | 长按弹幕面板不显示等级（3.x 显示 `Lv.N`），猫耳、克拉克拉、SHOWROOM、BIGO 解出的等级用不上 | `features/live_play/danmaku/message_panel.dart:112-150`；3.x `danmaku_message_actions.dart:19` | 少一项信息 | 需要维护者决定是否加回（A08） |
 | 协议层写死的文字：快手“快手用户”、YY“YY用户”、CHZZK 匿名捐赠的韩文和置顶、订阅赠送的中文句子 | 各平台文件（见 D01.6、D01.7、D01.17） | 英文界面下是中文或韩文（D-005） | [Z05.2](../../Z-工程文档和维护/Z05-多语言/Z05.2-英文界面里平台给的中文/README.md) |
 | 表情图片只有哔哩哔哩、快手、CHZZK、YouTube 填 `LiveMessage.emotes`；Steam、Kick、酷狗、六间房的表情还是文字；FC2、酷狗、六间房、LOOK 的礼物没上报 | 各平台文件 | 和有表情、礼物的平台不一致 | 没有任务；有需要在 V01 提议 |
@@ -164,7 +164,8 @@ DanmakuConnection.events（同步广播流）
 2. 补真机结果：国内五大平台的连接、断网重连、醒目留言（并入 S02.6 第 1 阶段），海外平台（S02.4，要代理）。
 3. Q03.1：握手 User-Agent 在 K90 上逐平台验证后默认去掉 Dart 前缀。
 4. E06.2：把 17LIVE 名字颜色和徽章、酷狗 PK、Twitch Cookie 提示接到聊天列表。
-5. 受阻的两个（D01.18、D01.19）和 CC 只在解除条件满足时再开工；新平台的弹幕随 E 组平台任务登记。新想法写进 V01 提议，不直接加任务。
+5. 2026-10-07 登记的跨组修复：换场和 YouTube 设置 → C01.6；AcFun 付费、百度刷新带参数、录制详情带弹幕参数 → E05.4；小窗弹幕 → D03.3。
+6. 受阻的两个（D01.18、D01.19）和 CC 只在解除条件满足时再开工；新平台的弹幕随 E 组平台任务登记。新想法写进 V01 提议，不直接加任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 

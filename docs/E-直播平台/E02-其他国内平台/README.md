@@ -64,11 +64,11 @@
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | YY FLV 优先没打开 | `apps/pure_live/lib/app/platforms.dart:160` | 延迟高、少“蓝光” | [E06.3](../E06-平台层升级/E06.3-YY优先用FLV/README.md) |
-| 映客默认会播 HEVC：默认画质按名字选（偏好默认“原画”），映客的“原画”只有 HEVC 线路，“优先 H.264”只在同一档里把 HEVC 排后 | `apps/pure_live/lib/shared/rooms/play_quality.dart:7`；映客画质在 `inke_api.dart` | 硬解不好的手机上可能卡；E02.5 记录给 G 组的提醒没落实 | 写进本组报告：建议在 G 组开任务（和 G01.2 的默认编码一起定）；百度在偏好靠后档时有同类风险 |
-| 克拉克拉列表提前到底：适配器去重后一页全是重复时返回空页（仍说有下一页），列表把空页当到底 | `apps/pure_live/lib/shared/rooms/room_feed.dart:483`（`chunk.rooms.isNotEmpty`）；`kilakila_site.dart` | 热门第 3 页全重复时第 4 页的新主播看不到 | 写进本组报告：没有任务管，建议 I 组开任务 |
-| LOOK 的搜索能力写成“只能按房间号查”，实际还会在推荐第 1 页按名字、标题筛选 | `search_capability.dart:139`（`roomLookup`）；`looklive_site.dart:225-241` | 搜索页的说明比实际少 | 写进本组报告：应改成 `showcaseSnapshot`（I05 的搜索任务） |
+| 映客默认会播 HEVC：默认画质按名字选（偏好默认“原画”），映客的“原画”只有 HEVC 线路，“优先 H.264”只在同一档里把 HEVC 排后 | `apps/pure_live/lib/shared/rooms/play_quality.dart:7`；映客画质在 `inke_api.dart` | 硬解不好的手机上可能卡；E02.5 记录给 G 组的提醒没落实 | [G01.3](../../G-播放/G01-引擎/G01.3-映客默认播HEVC/README.md)（2026-10-07 登记；百度、17LIVE、快手同类，一起改） |
+| 克拉克拉列表提前到底：适配器去重后一页全是重复时返回空页（仍说有下一页），列表把空页当到底 | `apps/pure_live/lib/shared/rooms/room_feed.dart:483`（`chunk.rooms.isNotEmpty`）；`kilakila_site.dart` | 热门第 3 页全重复时第 4 页的新主播看不到 | [E05.4](../E05-平台框架和模型/E05.4-平台层小问题合集/README.md) 第 1 阶段（2026-10-07 登记） |
+| LOOK 的搜索能力写成“只能按房间号查”，实际还会在推荐第 1 页按名字、标题筛选 | `search_capability.dart:139`（`roomLookup`）；`looklive_site.dart:225-241` | 搜索页的说明比实际少 | [E05.4](../E05-平台框架和模型/E05.4-平台层小问题合集/README.md) 第 1 阶段（2026-10-07 登记：改成 `showcaseSnapshot`） |
 | 微博搜索说明（`search_scope_weibo`）仍写“开播状态进入后确认”，没提 `t.cn` 短链 | 翻译 `assets/translations/zh.json` | 说明不完整 | 写进本组报告；Z05 文字整理 |
-| 3.x 存下的占位值（京东“JD Live”、酷狗旧标题和“Kugou Live”、百度“Baidu Live”）迁移时没清 | `packages/live_store/lib/src/legacy/` | 老用户的关注卡上还显示占位名，直到刷新带回真名 | 写进本组报告：J06.1 / J02.1 |
+| 3.x 存下的占位值（京东“JD Live”、酷狗旧标题和“Kugou Live”、百度“Baidu Live”）迁移时没清 | `packages/live_store/lib/src/legacy/` | 老用户的关注卡上还显示占位名，直到刷新带回真名 | 清理 [J06.2](../../J-设置和数据/J06-3.x数据迁移/J06.2-3.x迁移报告在正式版里看得到/README.md)，占位名的表 [E05.4](../E05-平台框架和模型/E05.4-平台层小问题合集/README.md)（2026-10-07 登记） |
 | 小红书、微博只能按场次关注（16-5、18-10 受阻：要登录或网页签名） | `xiaohongshu_site.dart`、`weibo_site.dart` | 主播下次开播关注对不上 | 受阻，不做 |
 | 京东标题和店铺名（28-7 受阻：详情接口要 h5st 签名） | `jdlive_api.dart:36-41` | 从链接进房没有标题 | 受阻 |
 | 网易 CC 弹幕（C-22）、YY 礼物（C-20）、YY 真实在线数（C-18） | 弹幕层 | — | 未排（C-22 要登录 Cookie） |
@@ -88,7 +88,7 @@
 
 1. [E06.3](../E06-平台层升级/E06.3-YY优先用FLV/README.md)：YY FLV 优先（第二档，小）。
 2. [E07.1](../E07-平台巡检/E07.1-平台巡检工具/README.md)：工具做好后这 13 个平台一起巡检，失效的在这里开修复任务（标题写“接 E07.1”）。
-3. 上面“已知问题”里写进报告的几条（映客默认 HEVC、克拉克拉列表到底、LOOK 搜索说明、占位值迁移）由维护者决定开到 G、I、J 组。新想法写进 V01 提议，不直接加任务。
+3. 上面“已知问题”里的几条 2026-10-07 已登记：映客默认 HEVC → G01.3；克拉克拉列表到底、LOOK 搜索说明 → E05.4；占位值 → J06.2（表在 E05.4）。新想法写进 V01 提议，不直接加任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 

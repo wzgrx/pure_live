@@ -20,9 +20,9 @@
 
 | 余项 | 位置 | 和 3.x 比 | 记在哪 |
 |---|---|---|---|
-| 应用内小窗和画中画的弹幕不用弹幕字体、不画应用自带的表情图，“纯文字”只去掉消息自带的表情代码 | `apps/pure_live/lib/features/live_play/mini/compact_danmaku.dart:105`、`:190`、`:204-213` | 3.x 小窗用弹幕字体和同一个表情图集（`git show v3.2.11:lib/modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart:35`、`:62`、`:86`），**比 3.x 少** | [D03](../D03-飞行弹幕引擎/README.md)、[D05](../D05-弹幕设置生效/README.md) |
-| 主播换场后弹幕参数变了（TwitCasting、克拉克拉、SHOWROOM），直播间刷新不重连，弹幕停在旧的一场；“YouTube 显示全部聊天”改了要重新进房 | `apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`；`apps/pure_live/lib/app/platforms.dart:227` | 3.x 这几个平台没有弹幕 | [D01](../D01-平台弹幕协议/README.md) |
-| AcFun 付费直播提示“弹幕服务器连接失败”，应该是“没有弹幕” | `packages/live_danmaku/lib/src/connection_base.dart:55` | 3.x AcFun 没有弹幕 | D01 |
+| 应用内小窗和画中画的弹幕不用弹幕字体、不画应用自带的表情图，“纯文字”只去掉消息自带的表情代码 | `apps/pure_live/lib/features/live_play/mini/compact_danmaku.dart:105`、`:190`、`:204-213` | 3.x 小窗用弹幕字体和同一个表情图集（`git show v3.2.11:lib/modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart:35`、`:62`、`:86`），**比 3.x 少** | [D03.3](../D03-飞行弹幕引擎/D03.3-小窗和画中画的弹幕/README.md)（2026-10-07 登记） |
+| 主播换场后弹幕参数变了（TwitCasting、克拉克拉、SHOWROOM），直播间刷新不重连，弹幕停在旧的一场；“YouTube 显示全部聊天”改了要重新进房 | `apps/pure_live/lib/features/live_play/logic/room_controller.dart:785`；`apps/pure_live/lib/app/platforms.dart:227` | 3.x 这几个平台没有弹幕 | [C01.6](../../C-直播间/C01-进房和房间逻辑/C01.6-主播换场后弹幕参数变了要重连/README.md)（2026-10-07 登记） |
+| AcFun 付费直播提示“弹幕服务器连接失败”，应该是“没有弹幕” | `packages/live_danmaku/lib/src/connection_base.dart:55` | 3.x AcFun 没有弹幕 | [E05.4](../../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md)（2026-10-07 登记） |
 | 长按弹幕面板不显示等级（3.x 显示 `Lv.N`） | `apps/pure_live/lib/features/live_play/danmaku/message_panel.dart:112-150` | **比 3.x 少**（`danmaku_message_actions.dart:19`） | D01（需要维护者决定，界面归 A08） |
 | 多画面弹幕不跟帧率设置 | `apps/pure_live/lib/features/multiview/multiview_page.dart:878` | 比 3.x 少 | 已有任务 N01.2 |
 
@@ -41,7 +41,7 @@
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 上表的余项都还没有登记任务 | 见上表 | 比 3.x 少的两项（小窗字体和表情、长按面板等级）会被当作已经“完成” | 写进本单元报告，请维护者决定开在 D06 还是对应子分类 |
+| 长按面板的等级还没有任务（其余各项 2026-10-07 已登记，见上表） | 上表第 4 行 | 比 3.x 少，会被当作已经“完成” | 等用户定要不要加回（docs v2 报告的“用户定”） |
 | 功能清点里 15 个弹幕功能点标“完成”但没有真机结果 | CHECKLIST 第 2 节 | 和 D-029 的口径（“完成”要有 K90 结果或关键部分不靠原生和系统服务）有出入：这些都是纯 Dart 逻辑，按 D-029 可以算完成，但界面效果没人看过 | 建议和 D02.1、D04.1 的真机验证同一轮补看 |
 | 功能清点 F-DM-10、F-DM-12 的“4.x 位置”过时：写的是 `app/platforms.dart:184`、`chat_list.dart:521`，现在是 `platforms.dart:204-208`、`features/live_play/danmaku/message_panel.dart` | [inventory/FEATURES.md](../../inventory/FEATURES.md) 第 9 节 | 按清点找代码会找错 | inventory 不归本组；写进本单元报告 |
 
@@ -58,7 +58,7 @@
 
 ## 路线
 
-1. 维护者对上表的余项表态：开新任务（建议“小窗和画中画的弹幕字体和表情图”开在 D05 或 D03，“换场后弹幕参数变了要重连”开在 C01 或 D01，“长按面板的等级”先定要不要），或写明不做。
+1. 上表的余项 2026-10-07 已登记：小窗和画中画的弹幕 → D03.3；换场后重连和 YouTube 设置 → C01.6；AcFun 付费直播 → E05.4。“长按面板的等级”等用户定要不要加回。
 2. 以后功能清点、审查、真机验证发现的弹幕零散问题，先在这里登记，评估后能归到 D01～D05 的就开到那里；新功能进 V01。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->

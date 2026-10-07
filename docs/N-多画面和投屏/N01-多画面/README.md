@@ -74,8 +74,9 @@ MultiviewPage（multiview_page.dart）建 MultiviewController（logic/multiview_
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | 飞行弹幕不跟“弹幕帧率”设置，每个刷新周期都画（3.x 跟） | `multiview_page.dart:877-882` 的 `DanmakuOverlay` 没传 `fps`、`refreshRate` | K90 上按 120 帧画，4 格时耗电；关了“跟随界面刷新率”选 30 帧也没用 | [N01.2](N01.2-多画面弹幕跟随帧率设置/README.md) |
-| 飞行弹幕不传表情表 | 同上（没有 `emotes`） | 表情显示成文字（直播间显示图片） | 没有任务；D03 建议和 N01.2 一起做（N01.2 任务书的可选阶段） |
-| 不看“屏幕常亮”设置，播放时总是常亮 | `widgets/cell_view.dart:92`（`LiveVideoView` 的 `keepScreenOn` 默认 `true`） | 设置里关了常亮，多画面照样不灭屏；3.x 一样（media_kit `Video` 默认常亮，`multiview_page.dart:994`），O 组发现 | 没有任务；O05 记为“等用户反馈”；N01.2 任务书的可选阶段（传 `keepScreenOn: watchSetting(Settings.enableScreenKeepOn)`） |
+| 飞行弹幕不传表情表 | 同上（没有 `emotes`） | 表情显示成文字（直播间显示图片） | N01.2 第 2 阶段（可选，2026-10-07 登记进登记表，做不做开工前由维护者定） |
+| 六间房、AcFun、克拉克拉的格子没有弹幕：多画面用录制详情建格子（`logic/multiview_controller.dart:486-490`），这三家的录制详情不带弹幕参数，`:865` 就不连 | `packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416` 等 | 这几个平台在多画面里没有聊天（直播间里有） | [E05.4](../../E-直播平台/E05-平台框架和模型/E05.4-平台层小问题合集/README.md) 第 2 阶段（2026-10-07 登记：录制详情也带弹幕参数） |
+| 不看“屏幕常亮”设置，播放时总是常亮 | `widgets/cell_view.dart:92`（`LiveVideoView` 的 `keepScreenOn` 默认 `true`） | 设置里关了常亮，多画面照样不灭屏；3.x 一样（media_kit `Video` 默认常亮，`multiview_page.dart:994`），O 组发现 | N01.2 第 2 阶段（可选，2026-10-07 登记；传 `keepScreenOn: watchSetting(Settings.enableScreenKeepOn)`）；O05 记为“等用户反馈” |
 | 4 路解码、沉浸、全屏和返回没在 K90 上看过 | — | 不知道 4 路时的帧时间、发热、退出时的纹理释放 | [S02.6](../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md) 第 2 阶段（CHECKLIST 第 1 节第 16 条） |
 | 网络电视频道在多画面里没有弹幕 | `multiview_controller.dart:866` | 网络电视本来就没有弹幕 | 照设计 |
 | 进入直播间时先暂停所有格、回来再继续 | `:695-714` | 回来后要重新缓冲 | 照设计（避免两边同时解码） |

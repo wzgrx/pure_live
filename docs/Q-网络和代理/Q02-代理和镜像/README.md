@@ -8,7 +8,7 @@
   - `packages/live_net/lib/src/proxy.dart`：`ProxyRoute`（`DirectRoute`、`HttpProxyRoute`）、`ProxyPolicy`、`FixedProxyPolicy`、`proxyRouteFrom`、`normalizeProxyHost`、端口校验和修复、`isLocalNetworkProxyHost`。
   - 应用的两套策略：`SettingsProxyPolicy`（应用代理，`apps/pure_live/lib/app/platforms.dart:13-26`）、`PlaybackProxyPolicy`（播放代理，`:35-48`）；它们交给谁（`bootstrap.dart` 的 HTTP 客户端、原生通道、Twitch 无界面浏览器、录制、弹幕；播放的 `MediaOpener`）。
   - 镜像和竞速：`packages/live_net/lib/src/race.dart`（`raceFirst`、`raceJson`、`fastestUrl`、`GitHubMirror`）；更新检查和下载的镜像表（`apps/pure_live/lib/features/version/update_feed.dart:12`、`:273-301`、`:341-345`）、字体仓库（`app/fonts.dart:73-74`、`:343-345`）；设置 `useGitHubOriginForUpdates`。
-  - 图片（封面、头像）走不走代理（现在不走，见“已知问题”）。
+  - 图片（封面、头像）走不走代理（现在不走，见“已知问题”，Q02.1）。
 - 不包括（归哪里）：
   - 代理设置页的样子（两组开关、地址、端口的编辑框）→ A11（`features/settings/settings_editors.dart:395-398`）；设置的存储 → J 组。
   - 本地网络权限的申请和提示 → [Q04](../Q04-网络状态和权限/README.md)（`LocalNetworkGuard`）；它在代理指向局域网时触发。
@@ -32,7 +32,7 @@
 - 完成度（和 3.x 对照）：
   - 一致：两套代理的分工（播放代理只管视频，录制走应用代理）；地址纠错、默认端口 7897；局域网判断；镜像表和顺序；“仅从 GitHub 获取更新”。
   - 确认过的改动：按平台选路（`ProxyPolicy.routeFor(site, url)`，现在两个策略都不分平台，留了接口）；局域网判断四段都校验（Q01.1 问题 11）；播放代理恢复成独立的一组（O03.2 c5，F-NET-02）。
-  - 还缺：**图片不走应用代理**（3.x 走）；F-NET-02（播放代理）的真机验证在 S02.4。
+  - 还缺：**图片不走应用代理**（3.x 走，Q02.1）；F-NET-02（播放代理）的真机验证在 S02.4。
 
 ## 代码地图
 
@@ -72,7 +72,7 @@
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| **封面和头像不走应用代理**：`LiveUiConfig.imageCacheManager` 全应用没有人设置（只有测试设了），`CachedNetworkImage` 用 flutter_cache_manager 的默认管理器（自己的直连 `HttpClient`、200 个、30 天）；3.x 专门为此建了跟随应用代理的 `CustomImageCacheManager`。功能清点 F-NET-01 写“应用代理（平台请求、弹幕、图片、WebDAV）完成”，图片一项不对 | `packages/live_ui/lib/src/widgets/network_image.dart:46`；`packages/live_ui/lib/src/scope.dart:240-242`；`apps/pure_live/lib/platform/plugins.dart:39` | 开着应用代理看海外平台（Twitch、YouTube、Kick、SOOP 等）时卡片封面和头像加载失败或很慢；国内平台不受影响 | 需要维护者开任务（建议 Q02，第二档，小）：照 3.x 建一个 `CacheManager`（`HttpFileService` + 跟随 `SettingsProxyPolicy` 的 `HttpClient`，320 个、30 分钟），在应用的 `LiveUiConfig` 里设置；`ImageCacheTools.clearDisk` 和设置里的缓存大小（`features/settings/data_tools.dart:25-30`）一起改到新管理器；FEATURES 的 F-NET-01 改回“部分”，验证并入 S02.4 |
+| **封面和头像不走应用代理**：`LiveUiConfig.imageCacheManager` 全应用没有人设置（只有测试设了），`CachedNetworkImage` 用 flutter_cache_manager 的默认管理器（自己的直连 `HttpClient`、200 个、30 天）；3.x 专门为此建了跟随应用代理的 `CustomImageCacheManager`。功能清点 F-NET-01 写“应用代理（平台请求、弹幕、图片、WebDAV）完成”，图片一项不对 | `packages/live_ui/lib/src/widgets/network_image.dart:46`；`packages/live_ui/lib/src/scope.dart:240-242`；`apps/pure_live/lib/platform/plugins.dart:39` | 开着应用代理看海外平台（Twitch、YouTube、Kick、SOOP 等）时卡片封面和头像加载失败或很慢；国内平台不受影响 | [Q02.1](Q02.1-封面和头像走应用代理/README.md)（2026-10-07 登记，第二档，小）：照 3.x 建 `CacheManager`（`HttpFileService` + 跟随 `SettingsProxyPolicy` 的 `HttpClient`，320 个、30 分钟），设进 `LiveUiConfig`；清缓存和缓存大小一起改；FEATURES 的 F-NET-01 已改“部分” |
 | 两个策略都不分平台：`routeFor(site, url)` 的 `site` 没用上，海外平台和国内平台同一条路线 | `platforms.dart:21-25`、`:43-47` | 开应用代理时国内平台也绕代理（照 3.x） | 照 3.x；“按平台代理”是新功能，先进 V01 提议 |
 | 两张镜像表不同（`GitHubMirror.rawPrefixes` 14 个、`downloadMirrorPrefixes` 17 个），都是写死的第三方镜像，会失效；没有定期检查 | `race.dart:107-122`、`update_feed.dart:273-291` | 某些镜像挂了时检查更新变慢（竞速会跳过）、下载要多试几个 | 照 3.x 两张表；Z 组定期维护时检查一次（PROCESS 第 12 节“每月”） |
 | 不读 Android 系统设置里的 HTTP 代理 | `dart:io` 的 `HttpClient` 默认 | 用户只在系统 Wi-Fi 设置里配了代理时应用不走 | 照 3.x；VPN 模式的工具透明生效；不做 |
@@ -92,7 +92,7 @@
 
 ## 路线
 
-1. 请维护者为“图片走应用代理”开任务（建议第二档，小）；FEATURES 的 F-NET-01 同时改准。
+1. **Q02.1**（第二档，小）：封面、头像、表情图走应用代理（FEATURES 的 F-NET-01 已改“部分”，完成后改回）。
 2. S02.4 看播放代理和有代理时的 Twitch、Kick。
 3. 以后：镜像表的定期检查（Z 组）；“按平台走代理”“读系统代理”这类新行为先进 V01 提议。
 

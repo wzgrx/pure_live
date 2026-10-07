@@ -1,4 +1,4 @@
-# H01.5 主播下播后不再无限快速重试；合并时跳过 0 字节分段：任务书
+# H01.5 主播下播后不再无限快速重试；正常下播后合并已录分段；合并时跳过 0 字节分段：任务书
 
 > 任务书模板（v2）。自包含：读完这一页和“先读”里的文件就能开工。
 
@@ -78,10 +78,11 @@
 
 | 阶段 | 做什么（对应 c 编号） | 改哪些文件 | 怎么算做完 |
 |---|---|---|---|
-| 1 EOF 重试设上限后转入等开播 | c1、c2、c3、c3b | `policy.dart`、`recorder.dart`、`test/ffmpeg_test.dart`、`test/recorder_test.dart` | 验收 1～6、12；阶段 1 的新测试改之前失败、改之后通过；门禁通过 |
-| 2 合并跳过空分段 | c4、c5、c6、c7 | `merge.dart`、`segments.dart`、`recorder.dart`、`metrics.dart`、`recorder_texts.dart`、翻译、`test/merge_empty_test.dart`（新）、`support/fakes.dart`、应用的失败说明测试 | 验收 7～12；同上 |
+| 1 EOF 重试设上限后转入等开播 | c1、c2、c3 | `policy.dart`、`recorder.dart`、`test/ffmpeg_test.dart`、`test/recorder_test.dart` | 验收 1、2、4～6、12；阶段 1 的新测试改之前失败、改之后通过；门禁通过 |
+| 2 正常下播后合并已录分段 | c3b（用阶段 1 的收尾函数，多一个调用点） | `recorder.dart`、`test/recorder_test.dart` | 验收 3、12；测试 5 改之前失败 |
+| 3 合并跳过空分段 | c4、c5、c6、c7 | `merge.dart`、`segments.dart`、`recorder.dart`、`metrics.dart`、`recorder_texts.dart`、翻译、`test/merge_empty_test.dart`（新）、`support/fakes.dart`、应用的失败说明测试 | 验收 7～12；同上 |
 
-每个阶段都要能单独合并（门禁通过、不留半截功能）。阶段 1 合并后，用完次数时会合并，遇到尾部空段仍会报合并失败——停止时现在也是这样，阶段 2 修掉。
+每个阶段都要能单独合并（门禁通过、不留半截功能）。阶段 1 合并后，用完次数时会合并，遇到尾部空段仍会报合并失败——停止时现在也是这样，阶段 3 修掉。阶段 2 只是把正常下播（平台马上说未开播）的路也接到同一个收尾，单独合并是因为它影响最常见的“开播自动录”场景，验收和测试独立。
 
 ### c1 EOF 上限（`policy.dart:35-41`）
 
@@ -155,9 +156,10 @@ static bool shouldEnterPollingAfterRetryLimit({
     2. `开播自动录 off: the fast retries running out end the session saved, not failed`：`addTask(room(), autoRecord: false)`，期望 `completed`、`lastError` 为空。
     3. `a network outage keeps reconnecting without using up the limit`：第一次录制 EOF 后把 `site.detailError` 设成普通异常（解析成 `networkError`），等 `retryCount` 超过 2 次后任务仍是 `reconnecting`；清掉 `detailError`、`captureExit = null`，下一次进入 `running`。
     4. `with the live check on, the task checks the room again after the join`：`RecordSettings(maxRetryCount: 1, enablePolling: true, liveCheckInterval: 10)`；到 `waitingLive` 后把 `captureExit` 设为 null，约 10 秒后自动开始第 3 次录制并进入 `running`（证明检测在合并之后排上了，没有被 `_canPoll` 挡掉）；`Timeout(Duration(seconds: 60))`。
-    5. `when the room reports offline, the session is joined before it waits again`（c3b）：`addTask(room(), autoRecord: true)`、`captureExit = 0`；到 `reconnecting` 后 `site.status = LiveStatus.offline`；期望先 `processing` 再 `waitingLive`，`pendingAttempts` 为空、`lastOutputPath` 以 `.mp4` 结尾。改之前停在 `waitingLive` 但 `pendingAttempts` 有 1 个、没有 MP4。
   - 现有 `a live EOF reconnects quickly with a new attempt and joins both at the end`（:194-208）照样通过（一次断开在上限以内）。
-- 阶段 2：新文件 `packages/live_record/test/merge_empty_test.dart`（用临时目录和 `FakeFfmpeg`；`support/fakes.dart` 的 `FakeFfmpeg` 加两样可选的东西，默认行为不变：合并时把 `-i` 后面清单文件的内容记进 `joinManifests`；录制时写多少字节 `captureBytes`，默认 1000，0 表示空分段且不写日志行）：
+- 阶段 2：`test/recorder_test.dart` 新增：
+    5. `when the room reports offline, the session is joined before it waits again`（c3b）：`addTask(room(), autoRecord: true)`、`captureExit = 0`；到 `reconnecting` 后 `site.status = LiveStatus.offline`；期望先 `processing` 再 `waitingLive`，`pendingAttempts` 为空、`lastOutputPath` 以 `.mp4` 结尾。改之前停在 `waitingLive` 但 `pendingAttempts` 有 1 个、没有 MP4。
+- 阶段 3：新文件 `packages/live_record/test/merge_empty_test.dart`（用临时目录和 `FakeFfmpeg`；`support/fakes.dart` 的 `FakeFfmpeg` 加两样可选的东西，默认行为不变：合并时把 `-i` 后面清单文件的内容记进 `joinManifests`；录制时写多少字节 `captureBytes`，默认 1000，0 表示空分段且不写日志行）：
   1. `an empty last segment is skipped and the attempt joins`：`p_000000.clock-v1.ts`（1000 字节）、`p_000001.clock-v1.ts`（0 字节）、日志一行 `p_000000.clock-v1.ts,0.000000,4.000000` → 成功；清单只有 000000；之后目录里只剩 `p.mp4`。改之前是 `MergeFailure.segmentClock`。
   2. `a journal row of the empty tail goes with it`：日志两行（第二行 `p_000001.clock-v1.ts,4.000000,4.040000`）→ 成功。
   3. `an empty segment in the middle still fails closed`：000000（1000）、000001（0）、000002（1000），日志三行 → `segmentClock`，三个分段和日志都还在。
@@ -186,7 +188,7 @@ static bool shouldEnterPollingAfterRetryLimit({
 - `_run` 的 `finally`（`:522-536`）按状态决定释放前台服务和保护目录，收尾要在它之前做完（`await`）。
 - 删文件只删本次前缀的 0 字节分段和空日志；路径从任务里来，删之前确认在录制根目录下面（`RecordStorage.recordDirectory()`），不要因为 3.x 导入的奇怪路径删到别处。
 - 冲突：`recorder.dart` 是录制的大文件，A10.x、H05.2 也可能改 `recorder_texts.dart`；翻译文件按键名排序合并。
-- 规模：登记表写“小”，实际按两个阶段各约 2 小时；超出时停在阶段边界。
+- 规模：登记表写“小”，实际三个阶段约 2、1、2 小时；超出时停在阶段边界。
 
 ## 环境和提交
 

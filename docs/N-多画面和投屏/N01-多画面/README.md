@@ -114,6 +114,7 @@ MultiviewPage（multiview_page.dart）建 MultiviewController（logic/multiview_
 ## 还没完成的
 
 - **N01.2 多画面的飞行弹幕跟随弹幕帧率设置（3.x 跟随，v4 每个刷新周期都画）**（未开始，第二档，规模 小）
+  - 阶段：多画面弹幕跟随弹幕帧率 → （可选）多画面的表情图和屏幕常亮
   - 来源：V03.3 功能清点 F-MV-05；D05.1 记录“合并时注意”
 
 <!-- docs:生成结束 -->

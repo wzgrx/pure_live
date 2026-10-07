@@ -117,6 +117,16 @@ void main() {
       expect(_hd.withPlaybackUnconfirmed(unconfirmed: false), same(_hd));
     });
 
+    test('G01.3: the codec hint is not part of the identity and survives marking unconfirmed', () {
+      const hevc = LivePlayQuality(quality: '原画', id: 'origin', codec: 'hevc');
+      const plain = LivePlayQuality(quality: '原画', id: 'origin');
+      expect(hevc.selectionId, plain.selectionId);
+      expect(const LivePlayQuality(quality: '原画', codec: 'hevc').selectionId, '原画');
+      expect(plain.codec, isNull);
+      final unconfirmed = hevc.withPlaybackUnconfirmed(unconfirmed: true);
+      expect((unconfirmed.codec, unconfirmed.isPlaybackUnconfirmed, unconfirmed.id), ('hevc', true, 'origin'));
+    });
+
     test('11-1: a quality the platform switched to and named is shown confirmed; normalizing keeps it', () {
       const switched = LivePlayQuality(quality: '1080p 60fps', id: 'new');
       final resolution = LivePlayUrlResolution(

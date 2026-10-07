@@ -431,7 +431,9 @@ class LiveRoomController extends ChangeNotifier {
     final preferred = kept >= 0 ? null : await _preferredQuality();
     if (!_current(epoch)) return;
     _qualities = found;
-    _qualityIndex = kept >= 0 ? kept : defaultQualityIndex(found, preferred!);
+    _qualityIndex = kept >= 0
+        ? kept
+        : defaultQualityIndex(found, preferred!, preferH264: store.settings.get<bool>(Settings.preferH264));
     _notify();
     final opened = await _openQuality(_qualityIndex, epoch, userChoice: false);
     if (!opened || !_current(epoch)) return;

@@ -323,6 +323,80 @@ void main() {
     expect(defaultQualityIndex(const [], '原画'), 0);
   });
 
+  test('with 优先 H.264 the name match skips an HEVC quality (G01.3)', () {
+    const flv = LivePlayQuality(quality: 'FLV', codec: 'avc');
+    const original = LivePlayQuality(quality: '原画', codec: 'hevc');
+    expect(defaultQualityIndex(const [flv, original], '原画', preferH264: true), 0);
+    expect(defaultQualityIndex(const [flv, original], '原画'), 1, reason: 'off: the name wins, as before');
+    expect(defaultQualityIndex(const [original, flv], '原画'), 0);
+    // Only HEVC on offer: it is still the one chosen.
+    expect(defaultQualityIndex(const [original], '原画', preferH264: true), 0);
+    expect(
+      defaultQualityIndex(const [original, LivePlayQuality(quality: '超清', codec: 'hevc')], '原画', preferH264: true),
+      0,
+    );
+    // Without hints the rule is unchanged.
+    const unhinted = [LivePlayQuality(quality: 'FLV'), LivePlayQuality(quality: '原画')];
+    expect(defaultQualityIndex(unhinted, '原画', preferH264: true), 1);
+    // The skipped match falls back to the relative position.
+    const ladder = [
+      LivePlayQuality(quality: '蓝光', codec: 'avc'),
+      LivePlayQuality(quality: '超清', codec: 'hevc'),
+      LivePlayQuality(quality: '高清', codec: 'avc'),
+      LivePlayQuality(quality: '流畅', codec: 'avc'),
+    ];
+    expect(defaultQualityIndex(ladder, '超清', preferH264: true), 2);
+    expect(defaultQualityIndex(ladder, '超清'), 1);
+    // A fallback position on HEVC moves to the nearest other quality.
+    const hevcAtPosition = [
+      LivePlayQuality(quality: '蓝光', codec: 'avc'),
+      LivePlayQuality(quality: '高清', codec: 'avc'),
+      LivePlayQuality(quality: '超清', codec: 'hevc'),
+      LivePlayQuality(quality: '流畅', codec: 'avc'),
+    ];
+    expect(defaultQualityIndex(hevcAtPosition, '超清', preferH264: true), 1);
+  });
+
+  group('G01.3: the starting quality of an Inke-like room', () {
+    const flv = LivePlayQuality(quality: 'FLV', id: 'flv', codec: 'avc');
+    const original = LivePlayQuality(quality: '原画', id: 'origin', sort: 1, codec: 'hevc');
+
+    test('with 优先 H.264 on (the default) the H.264 FLV opens, not the HEVC original', () async {
+      final site = FakeSite(liveRoom())..qualities = const [flv, original];
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      expect(store.settings.get(Settings.preferResolution), '原画');
+      expect(store.settings.get(Settings.preferH264), isTrue);
+      expect(controller.qualityIndex, 0);
+      expect(engine.opens.single.uri.toString(), endsWith('/flv.flv'));
+      controller.dispose();
+    });
+
+    test('with 优先 H.264 off the original is chosen by its name', () async {
+      await store.settings.set(Settings.preferH264, false);
+      final site = FakeSite(liveRoom())..qualities = const [original, flv];
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      expect(controller.qualityIndex, 0);
+      expect(engine.opens.single.uri.toString(), endsWith('/origin.flv'));
+      controller.dispose();
+    });
+
+    test('picking the original by hand plays it', () async {
+      final site = FakeSite(liveRoom())..qualities = const [flv, original];
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      await controller.selectQuality(1);
+      await settle();
+      expect(controller.qualityIndex, 1);
+      expect(engine.opens.last.uri.toString(), endsWith('/origin.flv'));
+      controller.dispose();
+    });
+  });
+
   test('texts: time on air, audience numbers', () {
     expect(startedAgo(now.subtract(const Duration(minutes: 80)), now), '已开播 1 小时 20 分');
     expect(startedAgo(now.subtract(const Duration(seconds: 20)), now), '刚刚开播');

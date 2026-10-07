@@ -566,10 +566,10 @@ void main() {
       final setup = _setup(['S03-share-live', 'S04-publish-live'], now: clock.call);
       final room = await setup.site.getRoomDetail(roomId: _live);
       final qualities = await setup.site.getPlayQualities(detail: room);
-      expect(qualities.map((quality) => (quality.quality, quality.id)), [
-        ('FLV', 'flv'),
-        ('原画', 'origin'),
-      ], reason: '14-5, with "优先 H.264" on (the default) H.264 first');
+      expect(qualities.map((quality) => (quality.quality, quality.id, quality.codec)), [
+        ('FLV', 'flv', 'avc'),
+        ('原画', 'origin', 'hevc'),
+      ], reason: '14-5, with "优先 H.264" on (the default) H.264 first; G01.3 codec hints');
       expect(setup.http.requests, hasLength(2));
       clock.advance(const Duration(seconds: 29));
       final resolution = await setup.site.resolvePlayUrls(detail: room, quality: qualities.first);

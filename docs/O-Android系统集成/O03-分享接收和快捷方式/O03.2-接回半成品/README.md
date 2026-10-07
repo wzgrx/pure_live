@@ -1,12 +1,15 @@
 # O03.2 接回 M12.5 半成品：权限、分享接收、剪贴板口令、播放代理
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（下面“档位：必须”是当时旧任务表的写法）
+- 类型：功能（含 Android 原生：两个新插件）
+- 旧编号：F.0a、T13c.2（半成品来自 M12.5）
+- 相关：决定 D-018（新设置只加不改）、D-019；界面 A14.1（Android 部分 c1～c15 一起做）、A06.3；权限的原生部分归 [O04](../../O04-权限/README.md)；播放代理的规则归 Q02；真机 S02.2、S02.3、S02.4、S02.6
 - 档位：必须；规模：中
 - 功能点：F-AND-01、F-AND-02、F-AND-03、F-NET-02（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）；界面照 [A14.1](../../../A-界面设计/A14-系统界面/A14.1-系统界面/README.md)（已确认）和 A06.3 的 `showRoomPrompt`
 - 涉及代码：`apps/pure_live/lib/app/`（新 `app/intake/`）、`platform/`、`shared/`、`features/settings/`（剪贴板开关、接上权限）、`features/toolbox/`（粘贴口令）、`android/`；`packages/live_store`（只添加）
 - 来源：M12.5 分支 `worktree-agent-a27f9a86b17d9663f` 的 `2894bdfe0`、`341513e13`、`e8ff1bb40`、`4157aafbc`（旧目录 `lib/pages/`，按文件搬，不合并）
 - 评审页：没有发（任务书要求直接开发）；X1、X2 按建议 A 做
-- 记录：[records/F.0a.md](record.md)（开发后）
+- 记录：[record.md](record.md)
 
 ## v3 的行为（`v3.2.11`）
 
@@ -68,3 +71,33 @@ A14.1 的 Android 部分（c1～c15）一起做，逐条见 [records/U.14](../..
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；发现清点 F-NET-02“播放和录制走它”与 v3 不符（录制走应用代理），改成 X1 |
 | 2026-10-02 | 开发完成（和 A14.1 的 Android 部分一起），等合并和 K90 验证 |
+
+## 结果
+
+- 提交：合并 `8cf3c21b7`（2026-10-02）；逐条见 [record.md](record.md)。c1～c7 都做到。
+- 偏差：分享来的口令照 3.x 先弹对话框（M12.5 分支是直接进房）；分支新加的“`#EXTM3U` 文字导入”“无扩展名按开头字节识别”没搬（3.x 没有）；分支“通知被拒也打开开关”改回 3.x：被拒时开关保持关；分支把剪贴板“问过的”存进 meta、连平台链接也认，都改回 3.x（本次运行只问一次、只认口令，X2）。
+- 现在的位置（`apps/pure_live/` 下）：
+  - c1、c2：`lib/shared/rooms/share_code.dart:69`（`decodeRoomShareCode`）、`:181`（`OwnClipboardTexts`）；`lib/app/intake/clipboard_rooms.dart:34`（`ClipboardRoomWatcher`）；设置 `detectClipboardRooms`（`lib/features/settings/settings_catalog.dart:1457`，“通用 → 分享与剪贴板”）；原生 `android/.../ShareIntakePlugin.kt:185`（`clipboardStamp`）。
+  - c3：`android/.../ShareIntakePlugin.kt`（`receive` :221、`setShortcuts` :139）；`lib/platform/share_channel.dart`；`lib/app/intake/share_intake.dart:105`（`ingest`）；`lib/app/intake/system_intake.dart:32`。
+  - c4：`android/.../PermissionsPlugin.kt`（`notificationState` :91、`requestNotifications` :107、`batteryUnrestricted` :127、`requestBatteryUnrestricted` :133、`openNotificationSettings` :149）；`lib/platform/system_permissions.dart`；`lib/shared/permission_prompts.dart`（`BackgroundPermissions`）；`switchGateProvider`（`lib/features/settings/playback_tiles.dart`）。
+  - c5：`lib/app/platforms.dart:35` 的 `PlaybackProxyPolicy`，`MediaOpener` 用它；录制仍走应用代理。
+  - c6：`RecordingPermissionPrompts`（`lib/shared/permission_prompts.dart`，meta `permission.recordingNotifications`）；`androidStorageAccess(explain:)`（`lib/platform/recording_platform.dart:322`）。
+- 新设置 `detectClipboardRooms`（默认开）；新 meta 键 `permission.recordingNotifications`；原生 `SharedPreferences` `pure_live_permissions`（通知权限问过一次）。翻译中英各加 31 条。
+- 测试：新增 32 个（和 A14.1 合计）：`test/intake_test.dart`（当时 12 个，现在 15 个）、`test/shared/permission_prompts_test.dart` 7 个、`test/platforms_test.dart` +1、`settings_general_test.dart` +1、`settings_playback_test.dart` +1、`toolbox_page_test.dart` +1、`packages/live_store/test/stores_test.dart` 加一行断言；当时应用 634 个测试全部通过。
+
+## 验证
+
+- 自动测试：上面的文件；`cd apps/pure_live && flutter test test/intake_test.dart test/shared/permission_prompts_test.dart test/platforms_test.dart`。
+- 真机（K90）：
+  - 打开“后台播放”时先说明、通知权限、电池优化（记录“要在 K90 上看的”第 1 条）：**通过**（S02.2，2026-10-02；清点 F-AND-03 完成）。拒绝两次后“去设置”再回来的分支没看。
+  - 从别的应用分享直播间链接直接进房（第 2 条前半）：**通过**（S02.3；F-AND-02 完成）。分享口令、m3u 文件、“打开方式”、普通文字没看。
+  - 剪贴板口令（第 3 条）：没看 → S02.6 第 3 阶段（F-AND-01 没验证）。
+  - 播放代理（第 4 条）：没看 → S02.4（F-NET-02 没验证，CHECKLIST 第 5 节第 6 条；原 Q04.1 按 D-029 并入）。
+  - 第一次录制的通知说明、所有文件权限说明（第 5 条）：没看；没有专门的任务，S02.5 第二阶段（录制）可以顺带。
+
+## 留下的问题
+
+- 上面没看的真机项：剪贴板口令和文件分享 → S02.6；播放代理 → S02.4；永久拒绝通知后“去设置”回来、录制的权限说明 → 没有专门的任务，建议 S02.5 第二阶段顺带。
+- 多个文件一起分享只显示最后一条结果（同 3.x），不做。
+- 本任务改了 `features/live_play/logic/background_playback.dart`（A14.1 的 c2、c6、c7 只能在这里改：通知小图标、按钮中文、画中画窗口按钮），C02 的代码地图已经写进去。
+

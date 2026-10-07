@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
@@ -362,13 +363,20 @@ class AudienceStrip extends StatelessWidget {
           shadows: shadows,
         ),
     ];
+    // Each part flexes by its own measured width: equal flex would cap every
+    // part at an equal share, so a long time on air ("2 小时 5 分") was cut
+    // short beside two short figures although the whole line fitted.
+    final widths = [
+      for (final index in fit.shown) measure(figureText(figures[index]), small: fit.small),
+      if (elapsed != null) measure(clockText(short: fit.shortClock), small: fit.small),
+    ];
     return Row(
       key: const ValueKey('live-play-audience'),
       mainAxisSize: MainAxisSize.min,
       children: [
         for (final (index, part) in parts.indexed) ...[
           if (index > 0) const SizedBox(width: spacing),
-          Flexible(child: part),
+          Flexible(flex: math.max(1, widths[index].round()), child: part),
         ],
       ],
     );

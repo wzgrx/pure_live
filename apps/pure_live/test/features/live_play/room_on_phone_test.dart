@@ -5,6 +5,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +64,7 @@ Future<_Room> _pump(
   bool portrait = false,
   bool signedIn = true,
   Map<Setting<Object>, Object> settings = const {},
+  LiveRoom? room,
 }) async {
   // Reset by [_close]: the test must end with it unset.
   debugDefaultTargetPlatformOverride = platform;
@@ -92,7 +94,7 @@ Future<_Room> _pump(
   final previous = AppNavigator.toast;
   AppNavigator.toast = (_) {};
   addTearDown(() => AppNavigator.toast = previous);
-  final site = FakeSite(_busyRoom());
+  final site = FakeSite(room ?? _busyRoom());
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -198,6 +200,35 @@ void main() {
       expect(tester.getSize(_key('live-play-chat-box')).width, 300);
       _expectOneLine(tester, '300 column');
       await _close(tester, wide);
+    });
+
+    testWidgets('a long time on air beside two short figures is not cut short', (tester) async {
+      // K90 2026-10-08 (Bilibili, 68.6万 热度, 577 看过, 2 h 5 min): the
+      // parts flexed equally, so the time on air read "2 小..." although
+      // the whole line fitted.
+      final room = LiveRoom(
+        platform: SiteIds.bilibili,
+        roomId: '7',
+        nick: '主播',
+        title: '乱斗',
+        area: '英雄联盟',
+        liveStatus: LiveStatus.live,
+        popularity: '686000',
+        totalViewers: '577',
+        startedAt: DateTime.now().subtract(const Duration(hours: 2, minutes: 5, seconds: 10)),
+        link: 'https://live.bilibili.com/7',
+        danmakuData: 'args-7',
+      );
+      // 480 wide: the long words fit the line, but not an equal third of it.
+      final phone = await _pump(tester, room: room, width: 480);
+      final clock = tester.renderObject<RenderParagraph>(
+        find.descendant(
+          of: find.descendant(of: _key('live-play-on-air'), matching: find.byType(Text)),
+          matching: find.byType(RichText),
+        ),
+      );
+      expect(clock.didExceedMaxLines, isFalse, reason: 'the time on air is never cut short when the line fits');
+      await _close(tester, phone);
     });
 
     test('fitAudience drops 看过, shortens the time, shrinks the text, then drops from the end', () {

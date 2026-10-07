@@ -1874,7 +1874,7 @@
     "settings_danmaku_style": "Danmaku style",
     "settings_danmaku_style_desc": "Size, speed, opacity, area; the same as \"Danmaku settings\" in a room",
     "settings_danmaku_tap": "Tap a danmaku for actions",
-    "settings_danmaku_tap_desc": "Tap a danmaku on the video to copy or block it",
+    "settings_danmaku_tap_desc": "While the controls show, tap a danmaku on the video to open its actions",
     "settings_danmaku_top_margin": "Top margin",
     "settings_danmaku_top_margin_desc": "Height at the top kept free of danmaku",
     "settings_decrease": "Decrease",

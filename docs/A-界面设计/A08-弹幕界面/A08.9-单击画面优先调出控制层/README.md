@@ -27,6 +27,6 @@
 
 ## 实现和验证
 
-- 未开始。改 `player_view.dart` 的 `_onTap`：`hit != null && shownBefore` 时才 `_tapMessage(hit)`，否则 `_tapControls()`；双击全屏逻辑不变。
+- 做完（待真机，[记录](record.md)）：`player_view.dart` 的 `_onTap`（:336）在点中弹幕、控制层显示着（`_controls`，淡出一开始就是假）且没暂停时才 `_tapMessage`，否则 `_tapControls()`（:360）；双击全屏、长按、命中算法都没动。“点按弹幕”的说明（`settings_danmaku_tap_desc`）改成“控制条显示时点按画面上的弹幕打开操作面板”。
 - 测试：`apps/pure_live/test/features/live_play/` 里画面点按的测试（A08.4 加的那组）补两条：控制层隐藏时点中弹幕只显示控制层；控制层显示时点中弹幕打开面板。
 - 真机：K90 哔哩哔哩热门房间，竖屏和横屏全屏各点 5 次画面，控制层都能一下调出来。

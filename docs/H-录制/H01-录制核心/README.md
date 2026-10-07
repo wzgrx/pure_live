@@ -68,6 +68,9 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 |---|---|---|---|
 | 下播后 EOF、403、404 永远走快速重试，不计上限 | `policy.dart:37-41`；`capture.dart:103-106`；`recorder.dart:620-622`、`:901-905` | 录制中心一直“重连中”，每 2 秒新建一个尝试目录、敲一次 CDN | [H01.5](H01.5-主播下播后不再无限快速重试/README.md) 阶段 1 |
 | 重试用完转“等待开播”时不合并已录的尝试 | `recorder.dart:906-914` | 下播后看不到 MP4，要等下一场结束或手动停止 | H01.5 阶段 1 |
+| 平台说“未开播”时转“等待开播”也不合并；下一场由检测开始时不清待合并，几场的尝试要等用户停止才一起合成 | `recorder.dart:495-501`；3.x `recorder_controller.dart:962-967` 同 | 开着开播自动录的任务一直拿不到 MP4 | H01.5 c3b（2026-10-07 写任务书时发现） |
+| `_doFinalize` 的同步前缀里调 `_endSession`（重试用完且下播就结束）时，`rt.finalizing` 先被它填上、又被 `??=` 覆盖、随即清空，合并期间录制器以为没在整理文件 | `recorder.dart:703-710`、`:726-732`、`:906-909` | 合并期间“开始录制”“停止”“检测”不会等合并结束 | H01.5 c3（统一由 `_doFinalize` 自己 `await` 合并） |
+| 六间房的录制详情不带弹幕参数 | `packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416` | 不影响录制弹幕（`recordChatConnector` 用进房详情，`apps/pure_live/lib/app/recording.dart:51`）；影响多画面的六间房格子（N 组） | 本子分类不用改，见[组说明](../README.md)“风险和注意” |
 | 一个 0 字节分段让这次尝试合并失败；失败的尝试留在 `pendingAttempts`，之后每一场结束都再失败一次 | `merge.dart:88-90`、`:105-107`；`recorder.dart:864-879`；`task.dart:418-426`（新会话不清待合并） | 那一段录像不出 MP4，任务一直标“文件合并”失败 | H01.5 阶段 2 |
 | 合并失败的说明是英文 | `recorder.dart:887-894`（`'Joining the recording failed'`）、`features/recorder/recorder_texts.dart:72-90`（`merge` 阶段没有本地化说明） | 卡片写“最近失败（文件合并）：Joining the recording failed” | H01.5 阶段 2 |
 | 每次失败的尝试都留下一个目录（目录在开输入之前就建了） | `recorder.dart:418-428` | 重试多时录制目录里一堆空文件夹 | H01.5 阶段 2 |
@@ -88,7 +91,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 
 ## 路线
 
-1. H01.5（第一档）：阶段 1 EOF 重试设上限后转等开播，用完时先合并；阶段 2 合并跳过尾部空分段、全空的尝试不算失败、清空目录、合并失败说中文。
+1. H01.5（第一档）：阶段 1 EOF 重试设上限后转等开播，用完时和平台说未开播时都先合并（c3、c3b）；阶段 2 合并跳过尾部空分段、全空的尝试不算失败、清空目录、合并失败说中文。
 2. H01.4（第二档）：F-REC-06、07、10、11 四项真机验证，改功能清点；H01.3 留下的两条真机检查建议顺带看。
 3. 新想法（例如录制历史页、按大小分段）写进 [V01](../../V-需求和反馈/V01-新功能提议/README.md)，不直接加任务。
 

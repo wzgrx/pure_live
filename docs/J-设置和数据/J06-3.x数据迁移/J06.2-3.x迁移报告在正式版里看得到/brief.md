@@ -19,9 +19,9 @@
 
 ## 现状（读代码得出，写文件:行）
 
-- 启动：`apps/pure_live/lib/app/bootstrap.dart:98-137` `AppBootstrap.start`，只在主窗口（`launch.isPrimary`，`:113`）：`legacyHiveFiles()`、`LegacyMigration.importHiveFiles`（`:118`）→ `log('3.x import: $report')`（`:119`）→ `LegacyReloginNotice.record`（`:120`）；失败 `log`（`:122`）；`LegacyIptvMigration.importDatabases`（`:125-130`）→ `log`（`:131`）、失败（`:133`）。`log` 来自 `dart:developer`。之后 `wire`；身份迁移 `IdentityMigration.run`（`:244`，后台）。
+- 启动：`apps/pure_live/lib/app/bootstrap.dart:98-137` `AppBootstrap.start`，只在主窗口（`launch.isPrimary`，`:114`）：`legacyHiveFiles()`、`LegacyMigration.importHiveFiles`（`:118`）→ `log('3.x import: $report')`（`:119`）→ `LegacyReloginNotice.record`（`:120`）；失败 `log`（`:122`）；`LegacyIptvMigration.importDatabases`（`:125-130`）→ `log`（`:131`）、失败（`:133`）。`log` 来自 `dart:developer`。之后 `wire`；身份迁移 `IdentityMigration.run`（`:244`，后台）。
 - 报告：`packages/live_store/lib/src/legacy/legacy_import.dart:92-121` `LegacyImportReport`（`toString` `:118-120` 只有数量）；网络电视 `apps/pure_live/lib/app/iptv_legacy.dart:28-55` `LegacyIptvReport`（`toString` `:52`）。
-- 应用日志：`apps/pure_live/lib/app/app_log.dart`：`AppLog.instance`（`:150`）、`info`/`warning`（`:256`、`:259`）、写入前 `redactSecrets`（`:127-134`）、`attach`（`:183`，`main.dart:89`，在迁移之后；打开文件时把内存条目补写进去 `:226-228`）、`export`（`:302`）。日志页 `apps/pure_live/lib/features/backup/log_page.dart`（`_share` `:83-93` 调 `export`）。`main.dart:26` 很早就 `AppLog.instance.install()`，迁移时 `AppLog.instance` 已可用。
+- 应用日志：`apps/pure_live/lib/app/app_log.dart`：`AppLog.instance`（`:149`）、`info`/`warning`（`:256`、`:259`）、写入前 `redactSecrets`（`:127-134`）、`attach`（`:183`，`main.dart:89`，在迁移之后；打开文件时把内存条目补写进去 `:226-228`）、`export`（`:302`）。日志页 `apps/pure_live/lib/features/backup/log_page.dart`（`_share` `:83-93` 调 `export`）。`main.dart:26` 很早就 `AppLog.instance.install()`，迁移时 `AppLog.instance` 已可用。
 - 迁移的房间：`packages/live_store/lib/src/legacy/legacy_snapshot.dart:266` `_room(json) => LegacyRules.clearStaleNotice(LiveRoom.fromJson(json))`；`legacy_rules.dart:5-30`（`isStaleNotice`、`clearStaleNotice`、主题色）。存储：`store.follows.all()` / `replaceAll`、`store.history.all()` / `replaceAll`（`IdentityMigration.run` `legacy_import.dart:316-343` 的写法可以照抄）。
 - 占位名的表：E05.4 第 3 阶段在 `live_core` 加 `legacyPlaceholderNames`；没合并时本任务先放在 `LegacyRules`。
 - 测试：`packages/live_store/test/migration_test.dart`（用 hive_ce 造的 3.x 文件）；`apps/pure_live/test/services_test.dart`（日志、脱敏）。

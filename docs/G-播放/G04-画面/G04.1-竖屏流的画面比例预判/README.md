@@ -1,13 +1,10 @@
 # G04.1 竖屏流的画面比例预判
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 档位：应该；规模：中
-- 功能点：F-ROOM-22（见 [inventory/FEATURES.md](../../../inventory/FEATURES.md)）
-- 涉及代码：`packages/live_core`（`play_line.dart`、`live_site.dart`、抖音 `douyin_api.dart`，只添加字段）、`packages/live_player`（`state.dart`，只添加）、`features/live_play/`
-- 依赖：—
-- 来源：G01.1、G02.1“放到其他模块的部分”，M13.17 任务说明第 8 项
-- 评审页：只把 v3 的行为补回来，按授权直接开发（X1 按 A）
-- 记录：[records/F.1b.md](record.md)
+- 编号、状态、档位、规模：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 类型：功能
+- 来源：G01.1、G02.1“放到其他模块的部分”（3.x 的 `live_stream_geometry_hint.dart` 当时没有搬，要 live_core 的抖音数据带宽高）；功能点 F-ROOM-22（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；评审页没出，只把 3.x 的行为补回来，按授权直接开发（X1 按 A，D-003）
+- 旧编号：F.1b、T04d.1
+- 相关：决定 D-001、D-003；[G01.1](../../G01-引擎/G01.1-播放核心/README.md)、[G02.1](../../G02-会话和恢复/G02.1-播放器/README.md)；竖屏布局 A07.3；小窗和画中画 A07.8；抖音平台 E01；涉及代码 `packages/live_core`（`play_line.dart`、`live_site.dart`、抖音 `douyin_api.dart`，只添加字段）、`packages/live_player`（`state.dart`，只添加）、`features/live_play/`；记录 [record.md](record.md)
 
 ## v3 的行为（`~/ref/v3ref/lib`，v3.2.11）
 
@@ -20,7 +17,7 @@
 | 每换一个源（进房、换清晰度、换线路）都从“未知”开始，提示当作暂定值；解码器报了尺寸就以解码为准 | `player/core/player_manager.dart:830-857`、`:1396-1399`、`:2118` |
 | 没选地址时用默认档或多数一致的比例（`:100-153`）——v3 的调用都带了地址，这段实际用不到 | 同上 |
 
-## v4 现在
+## v4 现在（开发前写的，行号是当时的；现在的位置见“结果”）
 
 - `PlaybackState.isPortrait` 只看解码出的宽高，不知道时当 16:9（`packages/live_player/lib/src/state.dart:118-126`）；每次打开源都清空尺寸（`session.dart:426-440`）。
 - 直播间按它决定竖屏排版（`features/live_play/live_play_page.dart:209-212`、`:315-317`）；应用内小窗、画中画同样（`mini/floating_window.dart:136-140`、`mini/room_mini_window.dart:102-105`）。
@@ -63,3 +60,19 @@
 | 2026-10-02 | 建立（第 1 版清点） |
 | 2026-10-02 | 写功能对比；X1 按 A（只有抖音） |
 | 2026-10-02 | 开发完成（c1～c3），待 K90 验证 |
+
+## 结果
+
+- 改动（提交 `7b37e6f5f`，2026-10-02 合并）：c1 `LivePlayLine` 加可选 `width`、`height` 和 `declaredAspectRatio`，抖音 `DouyinApi.pictureSize` 按 3.x 的顺序和范围给每档线路填宽高（同 URL 的别名档并给留下的那档，按 `quality.data` 播的未知档不填）；c2 `PlaybackState.declaredAspectRatio`、`expectedAspectRatio`、`expectsPortrait`（`packages/live_player/lib/src/state.dart:146-161`，`isPortrait` 不变）；c3 直播间竖屏判断、应用内悬浮窗、画中画（进入和自动进入）、桌面小窗、“均衡”模式的缩放都改用预判（`live_play_page.dart:236-241`、`mini/floating_window.dart:136`、`logic/mini_window.dart:74`、`player/player_view.dart:530`）。
+- 偏差：3.x“没选地址时用默认档或多数一致的比例”（`live_stream_geometry_hint.dart:100-153`）实际用不到，没搬；3.x 的稳定计时和置信度不搬（4.x 没有那套识别器）。
+- 测试 5 个：`packages/live_core` 2 个（三个录制样本每档的宽高、别名档、未知档、取值顺序和范围）、`packages/live_player` 1 个（声明生效、解码覆盖、停止后不算）、直播间 2 个（`room_extras_test.dart`：声明竖屏时第一帧前就是竖屏面板、解码横屏后换回；不声明时照旧）。
+
+## 验证
+
+- 自动测试：见上；`cd packages/live_core && dart test`、`cd packages/live_player && flutter test`、`cd apps/pure_live && flutter test test/features/live_play/room_extras_test.dart`。
+- 真机：**没有 K90 结果**。本任务的提交在 S02.2、S02.3 用的构建 `288fec0ec` 之后合并，[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 8 条（进抖音竖屏主播，起播时直接是竖屏面板、第一帧出来时不跳；横屏主播、游戏直播起播仍是横屏）结果栏是空的。登记表写“完成”和 PROCESS 3.2 不符，建议并入 S02.6 补看，看不过时改回“待真机”。
+
+## 留下的问题
+
+- 真机验证（见上）。
+- TikTok 的 `sdk_params.resolution` 也有宽高，X1 选 A 没接；有用户反馈时再开任务（E03.9 + G04）。

@@ -4,7 +4,7 @@
 - 类型：功能（模块重构）
 - 来源：4.x 逐块重构计划（D-001）的播放第一块：把 3.x `lib/player/core/` 里不依赖 Flutter 和具体引擎的部分、`lib/player/models/`，以及播放借用的录制中继，搬进纯 Dart 包 `packages/live_media`
 - 旧编号：M7.1、T04a.1
-- 相关：决定 D-001、D-017；后续 [G02.1](../../G02-会话和恢复/G02.1-播放器/README.md)（引擎绑定、会话）；录制复用中继 H01.1；线路自带请求头 E05.1；设置“优先 H.264” J02.1；记录 [record.md](record.md)
+- 相关：决定 D-001、D-017；后续 [G01.2](../G01.2-高通硬解评估/README.md)（“优先 H.264”默认值）、[G02.1](../../G02-会话和恢复/G02.1-播放器/README.md)（引擎绑定、会话）；录制复用中继 H01.1；线路自带请求头 E05.1；设置“优先 H.264” J02.1；记录 [record.md](record.md)
 
 ## 目标
 
@@ -22,7 +22,7 @@
 | 引擎降级 | `engine_fallback_manager.dart:35,54`（多引擎） | `fallback.dart:59-133`（硬解 → 软解） | 有意差异（只用 mpv） |
 | 错误分类 | `player_error_classifier.dart`（188 行） | `errors.dart:79-235` | 不变 |
 | FLV 续签拼接 | `flv_splice_relay.dart` `_handover`（约 200～260 行）常推迟一个 GOP | `relay/flv_splicer.dart`（归档 v4 的拼接器：旧流在关键帧前等新连接，最多 10 秒） | 修了 |
-| codec 12 HEVC | `flv_legacy_hevc_relay.dart:76` 只认 `.17app.co` | `relay/flv.dart:186` + `source.dart:111-130`（线路标了 `hevc` 就算；按引擎能力开关） | 修了；Android arm64 默认不改写 |
+| codec 12 HEVC | `flv_legacy_hevc_relay.dart:76` 只认 `.17app.co` | `relay/flv.dart:186` + `source.dart:111-127`（线路标了 `hevc` 就算；按引擎能力开关） | 修了；Android arm64 默认不改写 |
 | HLS 令牌和续签 | 借用录制的 FFmpeg 中继（`recorder/services/ffmpeg_hls_input_relay.dart`） | `relay/hls_relay.dart:151`（纯 Dart 改写列表、转发分片；租期切断的 CHZZK、PandaTV 也续签） | 有意差异 |
 | 配方输入 | `bigo_playback_input.dart`、`fc2_playback_input.dart`、`niconico_playback_input.dart`（195 行，放在录制层） | `inputs/recipes.dart:71-185` | 每次打开各取授权；录制反过来依赖它 |
 | 本地服务器 | 每个 FLV 中继各开一个（`flv_splice_relay.dart:359`、`flv_legacy_hevc_relay.dart:106`） | `relay/loopback_relay.dart:37`（一个服务，每个输入一个随机路径） | 修了 |
@@ -41,7 +41,7 @@
 - 修掉的 3.x 问题：10 个（记录“审查发现的 v3 问题”表）。
 - 依赖：新包 `live_media`（`live_core`、`live_net`、`meta`、`clock`；测试用 `fake_async`）。
 - 偏差：“HEVC FLV 改写”默认关（4.x 原生包的 FFmpeg 9.0.2 能读），由 G02.1 的 `mpvEngineProfile()` 按包开关；`live_stream_geometry_hint`（抖音画面比例）留给 G02.1，后来由 [G04.1](../../G04-画面/G04.1-竖屏流的画面比例预判/README.md) 做完。
-- 测试：38 个（`errors_test` 9、`plan_test` 14、`flv_splicer_test` 4、`relay_test` 8、`transport_test` 3）。
+- 测试：38 个（`errors_test` 9、`plan_test` 14、`flv_splicer_test` 4、`relay_test` 8、`transport_test` 3）；之后录制的 HLS 预取窗口（`021a94d31`，H01）在同一个包里加了 `hls_window_test` 2 个，包里现在共 40 个。
 
 ## 验证
 
@@ -53,4 +53,6 @@
 - YouTube、PandaTV 的宽松 HLS 主列表读法合并：在 `live_core` 的平台适配器里，没有任务（建议 E 组登记）。
 - LiveMe、TikTok 的租期是否切断连接：现在按不切断只预取，没有任务（真机看到断开再改平台层标记）。
 - FC2 画质探测交出控制连接、哔哩哔哩轮播从 `play_time` 播：在 E06.2（暂停）。
-- “优先 H.264”默认值：等高通真机硬解验证，没有任务（见 [G01 已知问题](../README.md#已知问题和限制)）。
+- “优先 H.264”默认值：等高通真机硬解验证 → [G01.2](../G01.2-高通硬解评估/README.md)（V03.3 核对时开的）。
+- 升级 27-7（Steam 按档位提供画质）在本任务的记录里写成“播放核心无需改动”，但各档返回的是同一个主列表地址、播放管线没有限定变体，选“720p”实际仍是自适应：本任务漏掉的部分，见 [G01 已知问题](../README.md#已知问题和限制)，需要开任务。
+- 映客默认清晰度按名字落在 HEVC 的“原画”档（“优先 H.264”的排序被名字匹配绕过）：同上，G01.2 先测映客的 HEVC。

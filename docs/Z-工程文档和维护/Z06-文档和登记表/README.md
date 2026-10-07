@@ -20,7 +20,7 @@
 - 三次结构变化：
   - **v0**（Z06.1，`c613b73f9`，北京时间 2026-10-03 00:13）：四套平行的文档（模块 M、界面 U、功能 F、4.0.x 的 B/P）合成一个登记表加生成的进度，20 组用 T00～T19 编号；旧文档全文存档在标签 `docs-archive-2026-10-02`。
   - **v1**（Z06.2，`9dfbb424d`，10-03 00:58，标签 `docs-v1`）：20 组改成按优先级排的字母 A～Z（跳过 B、F、M、P、T、U），文件夹“编号-中文名”，界面设计单独成 A 组排第一，新增 V、W、Z07；登记表加 `from`、`to`（D-025、D-028）。
-  - **v2**（**正在进行，还没登记任务**）：2026-10-03 01:18 的骨架 `64046b98b` 把组和子分类 README 分成“手写说明 + 生成区”（`docs:生成开始` 到 `docs:生成结束` 两行注释之间），模板改成 v2（每节写具体内容）；2026-10-07 起各组逐个重写组说明、子分类说明、每个任务的 README 和任务书（`7589916ce` 给 56 个没有文件夹的任务建了文件夹）。维护者合并完各组后会登记 Z06.3；`docs/tasks.toml:1` 和 `docs/README.md` 的版本还写“docs v1”，`CHANGELOG.md` 还没有 v2。
+  - **v2**（Z06.3，2026-10-07 完成，标签 `docs-v2`）：2026-10-03 01:18 的骨架 `64046b98b` 把组和子分类 README 分成“手写说明 + 生成区”（`docs:生成开始` 到 `docs:生成结束` 两行注释之间），模板改成 v2（每节写具体内容）；2026-10-07 起各组逐个重写组说明、子分类说明、每个任务的 README 和任务书（`7589916ce` 给 56 个没有文件夹的任务建了文件夹）。维护者合并完各组后会登记 Z06.3；`docs/tasks.toml:1` 和 `docs/README.md` 的版本还写“docs v1”，`CHANGELOG.md` 还没有 v2。
 - 怎么工作（`tools/docs/docs.py`，571 行）：
   - `load`（`:98`）读 `tasks.toml`；`Project`（`:144` 起）校验登记表（`validate` `:155`：编号格式、组字母不用 B、F、M、P、T、U、状态和类型的取值、没完成的要写档位、完成和待真机要写日期、暂停要写 `next`、`done` 不超过阶段数、`to` 存在；组和子分类的文件夹名等于“编号-去掉空格括号的标题”；每个任务文件夹都登记了）。
   - 进度：没有阶段的按状态（`STATE_PROGRESS`，未开始 0、设计中 15、待确认 25、已确认 35、开发中 60、暂停 30、受阻 50、待真机 90、完成 100），有阶段的按 `90% × done / 阶段数`；组和全项目按规模加权（小 1、中 2、大 4），“不做”不算（`progress` `:103`、`weight` `:113`）。
@@ -51,7 +51,7 @@
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| **代码注释里 16 处文档路径是坏的**：`c613b73f9` 把旧路径（`docs/4.0.x/`、`docs/ui/`、`docs/ui/compare/`、`docs/ui/tasks/`、`docs/features/records/`、`docs/modules/`）换成新路径时，路径在注释里换了行的地方被换成了 `docs/README.md/`、`docs/TASKS.md/` + 下一行的旧文件名，例如 `apps/pure_live/lib/platform/display_mode.dart:140-141` 写成 `docs/README.md/` + `research-smoothness-2026-10-02.md 1.4`（原文 `docs/4.0.x/research-smoothness-2026-10-02.md`，现在应指向 `docs/V-需求和反馈/V03-审查和调研/V03.2-流畅度、刷新率、分辨率调研`）。全部 16 处见下表 | 代码注释 | 按注释找不到文档 | 需要一个小任务改注释（建议登记 Z06.4），同时修下一行的检查漏洞 |
+| **代码注释里 16 处文档路径是坏的**：`c613b73f9` 把旧路径（`docs/4.0.x/`、`docs/ui/`、`docs/ui/compare/`、`docs/ui/tasks/`、`docs/features/records/`、`docs/modules/`）换成新路径时，路径在注释里换了行的地方被换成了 `docs/README.md/`、`docs/TASKS.md/` + 下一行的旧文件名，例如 `apps/pure_live/lib/platform/display_mode.dart:140-141` 写成 `docs/README.md/` + `research-smoothness-2026-10-02.md 1.4`（原文 `docs/4.0.x/research-smoothness-2026-10-02.md`，现在应指向 `docs/V-需求和反馈/V03-审查和调研/V03.2-流畅度、刷新率、分辨率调研`）。全部 16 处见下表 | 代码注释 | 按注释找不到文档 | Z06.4 |
 | **为什么检查没拦住**：`check_code_paths` 用 `PATH_RX = (?<![\w/.\-])docs/[\w.\-/、]*[\w\-]`（`docs.py:502`）逐段匹配，`[\w.\-/、]*` 不跨换行；`docs/README.md/` 后面就是行尾，最后一个字符必须是字母数字或 `-`，正则回退掉末尾的 `/`，得到 `docs/README.md`——这个文件存在，于是通过。凡是“路径在 `/` 处换行、前半截恰好是存在的文件或目录”的都会漏 | `tools/docs/docs.py:502`、`:523-542` | 检查形同虚设 | 修法建议：匹配到的路径如果后面紧跟 `/` 加换行，就报“路径在注释里换行”（要求路径写在一行里）；或者匹配前把注释续行拼起来。加 `tools/gate/tests/test_docs.py` |
 | `fixtures/README.md` 不在检查范围（`CODE_DIRS` 只有 `apps`、`packages`、`tools`，根目录只查 5 个文件），里面的 `docs/adr/0009-fixture-format.md`、`docs/modules/M4.*.md`、`spec/sites/<平台>.md`、`test/fixtures_expected/`、`tools/live_cli/...` 都不存在 | `tools/docs/docs.py:503-504`；`fixtures/README.md:3`、`:17`、`:24`、`:32`、`:43` | 样本说明里的链接全部失效 | `docs.py` 把 `fixtures/` 加进检查；`fixtures/README.md` 的内容由 E07.1（取回 `tools/live_cli`）一起改 |
 | `tools/live_cli` 不存在，但 `docs/specs/ENGINEERING.md:52`、`tools/gate/check_deps.py:34`、`:41`、`fixtures/README.md:17`、`:24` 当它存在 | 同左 | 文档和代码不符 | E07.1 已写取回和重写方案；不取回时删掉这些引用 |
@@ -60,7 +60,7 @@
 | 链接检查也匹配反引号里的代码：在代码格式里写一个右方括号紧跟左圆括号，也会被当成链接去找 | `docs.py:501`、`:508` | 文档里不能用代码形式写这种字符 | 影响小，没有任务 |
 | `docs.py` 没有测试 | `tools/gate/tests/` | 改脚本没有保护 | 和上面的检查漏洞一起加 |
 | 代码注释和测试名里大量旧编号（U、M、F、B、P、T 开头，粗数约 2400 处，带 U/F/B 编号的文件 333 个） | 例如 `packages/live_store/lib/src/settings/settings.dart` 的 `U.2i`、`F.0a`、`M14.1` | 按注释找文档要先查 MAPPING | V03.3 记为“归 Z03.3、Z06 以后处理”；工作量大，建议只在改到那个文件时顺手换，不专门开任务（需要维护者决定） |
-| docs v2 本身没有登记任务；`tasks.toml:1`、`docs/README.md` 还写 v1；`CHANGELOG.md` 没有 v2 | `docs/tasks.toml:1`、`docs/README.md:3`、`docs/CHANGELOG.md` | 版本记录落后 | 维护者合并后登记 Z06.3，写 CHANGELOG v2、打标签 `docs-v2`（D-028） |
+| docs v2 本身没有登记任务；`tasks.toml:1`、`docs/README.md` 还写 v1；`CHANGELOG.md` 没有 v2 | `docs/tasks.toml:1`、`docs/README.md:3`、`docs/CHANGELOG.md` | 版本记录落后 | 已登记 Z06.3（完成），CHANGELOG 加了 v2，标签 `docs-v2` |
 
 16 处坏路径（下一行是旧文件名或旧编号，右列是应该指向的新位置）：
 
@@ -96,8 +96,8 @@
 
 ## 路线
 
-- 现在：docs v2 重写（各组分头写，维护者合并后统一运行 `docs.py`、登记 Z06.3、写 CHANGELOG v2、打 `docs-v2` 标签）。
-- 之后建议登记（需要维护者决定）：修 16 处坏路径和 `§9`、`docs.py` 的换行漏洞和 `fixtures/` 检查、给 `docs.py` 加测试（一个小任务即可）。
+- docs v2 已完成（Z06.3）。
+- Z06.4：修 16 处坏路径和 `§9`、`docs.py` 的换行漏洞和 `fixtures/` 检查、给 `docs.py` 加测试。
 - 季度复查（Z07.3）时核对 `docs/README.md`、PROCESS、CHANGELOG 和实际结构一致。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
@@ -107,12 +107,20 @@
 属于 [Z 工程文档和维护](../README.md)。
 
 - 代码：`docs/`、`tools/docs/`
-- 进度：`████████████████████` 100%
+- 进度：`██████████████████░░` 89%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| Z06.1 | docs 重写为 20 组：登记表、总进度、生成脚本、模板 | 文档 | 完成 | 2026-10-02 | — | [设计或说明](Z06.1-docs重写为20组/README.md) |
-| Z06.2 | docs v1：20 组按优先级重排（界面设计第一），字母加中文文件夹，新增需求和反馈、上游借鉴、定期维护 | 文档 | 完成 | 2026-10-03 | — | [设计或说明](Z06.2-docsv1/README.md) |
+| Z06.1 | docs 重写为 20 组：登记表、总进度、生成脚本、模板 | 文档 | 完成 | 2026-10-02 | c613b73f9 | [设计或说明](Z06.1-docs重写为20组/README.md) |
+| Z06.2 | docs v1：20 组按优先级重排（界面设计第一），字母加中文文件夹，新增需求和反馈、上游借鉴、定期维护 | 文档 | 完成 | 2026-10-03 | 9dfbb424d | [设计或说明](Z06.2-docsv1/README.md) |
+| Z06.3 | docs v2：每个组、子分类、任务重写成详细说明，没完成的都有任务书，待真机的都有验证清单 | 文档 | 完成 | 2026-10-07 | 64046b98b | [设计或说明](Z06.3-docsv2/README.md) |
+| Z06.4 | 代码注释里 16 处坏的文档路径，docs.py 的路径检查不跨行的漏洞和 fixtures/ 不在检查范围，给 docs.py 加测试 | 工程 | 未开始 | — | — | [设计或说明](Z06.4-修坏的文档路径/README.md)、[任务书](Z06.4-修坏的文档路径/brief.md) |
+
+## 还没完成的
+
+- **Z06.4 代码注释里 16 处坏的文档路径，docs.py 的路径检查不跨行的漏洞和 fixtures/ 不在检查范围，给 docs.py 加测试**（未开始，第二档，规模 小）
+  - 阶段：修 docs.py 的检查和加测试 → 改 16 处注释和其他悬空引用
+  - 来源：docs v2 写作时发现（Z06 已知问题）
 
 <!-- docs:生成结束 -->

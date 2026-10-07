@@ -1,4 +1,4 @@
-# 项目任务登记表（docs v1）：docs 里所有编号、状态和进度的唯一来源。
+# 项目任务登记表（docs v2）：docs 里所有编号、状态和进度的唯一来源。
 # 加任务、改状态、记阶段都只改这里，然后运行 python3 tools/docs/docs.py 重新生成索引和进度；
 # 门禁会检查生成的文件是不是最新。字段的含义见 docs/PROCESS.md 第 3 节。
 
@@ -3301,7 +3301,8 @@ status = "未开始"
 size = "中"
 tier = 3
 old = ["T17e.1"]
-
+branch = ".claude/worktrees/agent-ab1a5d264e55120e5"
+note = "没合并的 Linux 桌面外壳半成品（旧编号 M12.6，提交 0dc0df759，36 个文件）在 branch 的工作区里，清理工作区前先看 X02.1"
 [[task]]
 id = "X03.1"
 title = "电视外壳、焦点导航、直播浏览、基本直播间"
@@ -3320,6 +3321,22 @@ size = "中"
 tier = 3
 old = ["T19c.1"]
 
+
+[[task]]
+id = "X05.1"
+title = "macOS 工程和构建：生成 macos/、沙盒和权限、Keychain 加密、桌面外壳，能在 Mac 上运行"
+type = "功能"
+status = "未开始"
+size = "大"
+tier = 3
+
+[[task]]
+id = "X05.2"
+title = "macOS 签名、公证和分发，应用内更新"
+type = "发布"
+status = "未开始"
+size = "中"
+tier = 3
 [[task]]
 id = "Y01.1"
 title = "4.0.0 发布前修复"
@@ -3336,7 +3353,7 @@ type = "发布"
 status = "完成"
 date = "2026-10-02"
 old = ["T16a.2"]
-
+commit = "e3a0799cf"
 [[task]]
 id = "Y01.3"
 title = "4.0.0 覆盖发布为构建号 5001"
@@ -3371,7 +3388,7 @@ type = "发布"
 status = "完成"
 date = "2026-10-02"
 old = ["T16c.1"]
-
+commit = "dd16f0b26"
 [[task]]
 id = "Y04.1"
 title = "隐私说明写进 README：不收集数据、样本脱敏规则"
@@ -3406,7 +3423,7 @@ type = "工程"
 status = "完成"
 date = "2026-10-01"
 old = ["U.0", "T00b.1"]
-
+commit = "4e8e9998f"
 [[task]]
 id = "Z02.2"
 title = "门禁加“文档”检查：生成文件是否最新、链接和代码里的文档路径是否有效"
@@ -3414,7 +3431,16 @@ type = "工程"
 status = "完成"
 date = "2026-10-02"
 old = ["T00b.2"]
+commit = "c613b73f9"
 
+[[task]]
+id = "Z02.3"
+title = "门禁默认模式在只改文档、样本、脚本时也跑仓库级检查"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 2
+from = "docs v2 写作时发现（Z02 已知问题）"
 [[task]]
 id = "Z03.1"
 title = "界面清点脚本：v3 和电视的每个界面文件都分到一个任务"
@@ -3422,7 +3448,7 @@ type = "工程"
 status = "完成"
 date = "2026-10-01"
 old = ["T00c.1"]
-
+commit = "2707a2869"
 [[task]]
 id = "Z03.2"
 title = "项目清点脚本：代码文件、功能点、设置项、平台、原生插件都归到子分类，没归的报错"
@@ -3482,14 +3508,35 @@ type = "文档"
 status = "完成"
 date = "2026-10-02"
 old = ["T00f.1"]
-
+commit = "c613b73f9"
 [[task]]
 id = "Z06.2"
 title = "docs v1：20 组按优先级重排（界面设计第一），字母加中文文件夹，新增需求和反馈、上游借鉴、定期维护"
 type = "文档"
 status = "完成"
 date = "2026-10-03"
+commit = "9dfbb424d"
 
+[[task]]
+id = "Z06.3"
+title = "docs v2：每个组、子分类、任务重写成详细说明，没完成的都有任务书，待真机的都有验证清单"
+type = "文档"
+status = "完成"
+size = "大"
+date = "2026-10-07"
+commit = "64046b98b"
+note = "骨架 64046b98b；云端单元 1～4（A01～A09、功能清点核对）合并到 0901b9179；本机各组合并到 2026-10-07，标签 docs-v2"
+
+[[task]]
+id = "Z06.4"
+title = "代码注释里 16 处坏的文档路径，docs.py 的路径检查不跨行的漏洞和 fixtures/ 不在检查范围，给 docs.py 加测试"
+type = "工程"
+status = "未开始"
+size = "小"
+tier = 2
+from = "docs v2 写作时发现（Z06 已知问题）"
+stages = ["修 docs.py 的检查和加测试", "改 16 处注释和其他悬空引用"]
+done = 0
 [[task]]
 id = "Z07.1"
 title = "每月：清理已合并的分支和工作区（含暂停任务确认后的旧工作区）、本机中间文件"

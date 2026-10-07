@@ -55,7 +55,8 @@
 - 改之前会失败：英文界面下用 `fixtures/chzzk/S06-live-detail-adult`（成人直播，公告是 `ChzzkApi.adultNotice`）和 `S06-live-detail-region`（地区限制，`regionNotice`）进直播间，详情公告是英文（现在是中文常量）。样本里没有回看中的直播，`timeMachineNotice` 只在一致性测试里覆盖。
 - 一致性测试：遍历常量 → 键的表，断言每个键在 zh.json、en.json 都存在，zh 的值等于常量。
 - 中文界面的已有界面测试照旧通过（文字一字不差）。
-- 测试不访问真实平台，定时器至少 1 秒。改过的包跑 `dart format --output=none --set-exit-if-changed .`、`dart analyze`、`dart test`；`apps/pure_live` 跑全部 `flutter test`；`python3 tools/gate/check_ui_structure.py`（检查翻译键排序和硬编码文字）。
+- 测试不访问真实平台，定时器至少 1 秒。改过的包跑 `dart format --output=none --set-exit-if-changed .`、`dart analyze`、`dart test`；`apps/pure_live` 跑全部 `flutter test`；`python3 tools/gate/check_ui_structure.py`（它只查功能目录之间的引用、直接写的颜色和图标、`logic/` 引 material，**不查**翻译键排序和写死的文字）。
+- 翻译文件的排序和 4 空格缩进现在没有任何自动检查（`apps/pure_live/test/i18n_test.dart` 只查字面键有翻译）：加键后自己核对两份文件仍按键名排序；Z05.1 计划加排序测试，本任务先做时可以把那个测试一起加上（`JsonEncoder.withIndent('    ')` 重新编码后和原文一致）。
 
 ## 真机验证（维护者在 K90 上做）
 

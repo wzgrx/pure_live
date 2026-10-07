@@ -1,8 +1,9 @@
-# A11.2 外观：设计（第 1 版）
+# A11.2 外观：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：设置 › 外观（v3“主题定制”）和从它进去的页：主题颜色、加载动画、房间卡片、分页、字体管理、精细化字号；设置 › 导航栏显示控制；候选 C-3（默认品牌蓝）、C-4（纯黑）、C-7（一个文字大小）
 - 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a112)（A11.2-01～17）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a112)；设置首页和设置行在 [A11.1](../A11.1-设置总览/README.md)
+- 旧编号：U.6b、T09a.3（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（T1～T4 按建议 A）、D-018（`themeColorSwitch` 改默认值是唯一例外，用迁移处理）；记录 [record.md](record.md)
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（设置行、两栏排法用 [A11.1/src/skit.py](../A11.1-设置总览/src/skit.py)）
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`，加载样式名取自 `common/consts/app_consts.dart`，字体取自 `assets/fonts/fonts-manifest.json`）；房间卡片封面是示意图片，加载动画是示意图形，字体文件大小是示意数字
 
@@ -127,7 +128,7 @@ v4 现在的偏差（J01.1 时自行设计）：外观摊在设置的“外观�
 | Q13 | 间距预设没边框；输入框被箭头撑高 | `theme_settings_page.dart:436-450`、`:465-489` |
 | Q14 | 主题和间距对话框圆角 16，别的对话框 24 | `theme_settings_page.dart:290`、`:416`；`common/style/theme.dart:182` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -184,11 +185,35 @@ v4 现在的偏差（J01.1 时自行设计）：外观摊在设置的“外观�
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，T1～T4 按建议 A（C-3 品牌蓝 #2E6FE0 + fidelity 配色、3.x 默认蓝迁移；C-4 纯黑背景默认关；C-7 “文字大小”为主、五个字号留在子页；间距用计数行）。
-- 实现：c1～c15 做到，详见 [record.md](record.md)；同时修了 v3 的页码跳转不生效、字体缩放替换系统字号、默认色块和界面不一致、分页设置按整屏宽度、多画面开关只有 Windows。主要文件：`apps/pure_live/lib/features/settings/appearance_pages.dart`（外观四组的行、间距、文字大小、加载动画页、房间卡片页、导航栏）、`font_manager_page.dart`、`settings_dialogs.dart` 的颜色对话框、`packages/live_ui/lib/src/widgets/color_picker.dart`（补回分页、色阶、调色盘和透明度）。
-- 范围外的改动：主题和文字大小在 `apps/pure_live/lib/app/app.dart` 生成（fidelity、纯黑、`AppTextScaler`）；`live_store` 改了 `themeColorSwitch` 的默认值（`FF2196F3` → `FF2E6FE0`）并加一次性迁移（导入 3.x 数据、恢复 3.x 备份时换成品牌蓝，已导入过的安装只迁移一次）；新设置 `pureBlackTheme`（默认关，进备份）。
-- 偏差：字体卡片的名字用本字体显示只对本次已加载的字体生效（为显示名字去加载每款几十 MB 的字体太占内存）。
-- 提交：`6a61ef4f2`，合并 `5e77cca15`，记录 `3f53f8123`（2026-10-01）。`AppIcons` 加 54 个，颜色进 `LivePureBlack`、`LivePalettes`。
-- 测试：`settings_page_test.dart` 里外观部分 11 个（行序和值、对话框、纯黑变灰、颜色预览和取消恢复、间距、分页设置、字号、加载动画 3 列、房间卡片、导航栏）；`live_ui` 颜色选择器 3 个、主题 3 个；`packages/live_store/test/theme_color_test.dart` 4 个（默认值、迁移规则、3.x 数据和备份、只迁移一次）。字体页没有组件测试。
-- 真机：没有单独记录（S02 的 CHECKLIST 第 5 节第 5 条“下载一个字体设为应用字体，重启”归 S02.4，还没做）。登记表已是“完成”，建议在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 和 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看颜色、纯黑、文字大小。
-- 留下的问题：电视设置的颜色列表还是 3.x 的蓝、电视去掉“主题模式”（A17.9）。
+**定稿**：用户确认第 1 版，T1～T4 按建议 A（C-3 品牌蓝 #2E6FE0 + fidelity 配色、3.x 默认蓝迁移；C-4 纯黑背景默认关；C-7“文字大小”为主、五个字号留在子页；间距用计数行；D-003）。
+
+**实现**（详见 [record.md](record.md)；2026-10-01，提交 `6a61ef4f2`（和 A11.1 一起），合并 `5e77cca15`“Merge U.6a-b: settings overview and appearance”；登记表记的是 `3f53f8123`（记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/settings/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 外观的行在 `settings_catalog.dart:326-516`、导航栏 `:518-535`；3.x 存储键一个没改；85 种加载动画（`loading_style_names.dart`，设计和记录写的“86 种”是笔误，3.x `AppConsts.allStyles` 也是 85 种）、57 种字体、字号范围照旧 |
+| c2 | ✅ | 四组：主题 `:327`、房间卡片和列表 `:370`、语言和界面 `:418`、字体和字号 `:441`；页名“外观” |
+| c3 | ✅ | 行上的值：主题模式 `ThemeModeTile`（`appearance_pages.dart:45`）、主题颜色色块 `ThemeColorTile`（`:108`，动态取色开着时变灰写原因 `:119-126`，iOS 不算）、语言 `LanguageTile`（`:145`）、字体 `FontFamilyTile`（`:391`，“系统默认”，Windows 写 Microsoft YaHei）；iOS 不显示动态取色（`settings_catalog.dart:359` `_notIos`） |
+| c4 | ✅ | `SpacingTile`（`appearance_pages.dart:193`，`SettingsCounterRow` ±1 px、0～64、到头变灰）；点数字开对话框（`:244` 起：0/4/6/8/12/16 px 预设带边框、输入框后缀 px、范围校验） |
+| c5 | ✅ | `TextScaleTile`（`:348`，50%～200%，示例随拖动变，停 200 毫秒写入）；`AppTextScaler`（`packages/live_ui/lib/src/theme/text_styles.dart:175`）在 `apps/pure_live/lib/app/app.dart:246` 把系统缩放和应用倍数相乘 |
+| c6 | ✅ | 一键置顶按钮在外观、所有设备（`settings_catalog.dart:402-408`）；分页设置只在电脑上（`:410-417`，`when: _desktop`），子页 `SettingsSubpage.paging`（`:476` 起） |
+| c7 | ✅ | 页码跳转开关（`:490`）由分页条读：`shared/rooms/room_grid.dart:512`、`features/areas/platform_areas_view.dart:236`、`features/favorite/favorite_page.dart:401` → `PaginationBar`（`shared/rooms/paging.dart:37`）；v4 原来就接上了，补了测试 |
+| c8 | ✅ | `LiveTheme.brandBlue`（`packages/live_ui/lib/src/theme/live_theme.dart:177`）；`app.dart:190-204` 用 `DynamicSchemeVariant.fidelity`；`themeColorSwitch` 默认值 `FF2196F3` → `FF2E6FE0`；迁移 `LegacyRules.themeColor`（`packages/live_store/lib/src/legacy/legacy_rules.dart:19`，导入 3.x 数据和 3.x 备份时）和一次性记录 `themeColorMigration`（`packages/live_store/lib/src/settings/settings.dart:169`，已导入过的安装只迁移一次） |
+| c9 | ✅ | `PureBlackTile`（`appearance_pages.dart:79`，默认关、浅色时变灰写原因）；新设置 `pureBlackTheme`；深色时 `LivePureBlack`（`packages/live_ui/lib/src/theme/live_colors.dart:314`，`surface` 纯黑、卡片 `#0E0E10`、`#161618`、`#1E1E21`），`app.dart:160` 读它 |
+| c10 | ✅ | `showColorDialog`（`settings_dialogs.dart:317`，圆角 24）里是 `LiveColorPicker`（`packages/live_ui/lib/src/widgets/color_picker.dart:73`：推荐第一且品牌蓝排第一、圆形色块、当前色加圈和勾，常用、鲜艳、调色盘、色阶、透明度、代码）；选色时背后界面即时预览，取消恢复 |
+| c11 | ✅ | `LoadingStylePage`（`appearance_pages.dart:580`：恢复默认先确认 `_restore` `:584`；每格至少 104 宽、大字号时更宽 `:664-666`，手机 3 列；名字 12 号；颜色行写“现在：…”；每格一个重绘边界） |
+| c12 | ✅ | `RoomCardSettingsPage`（`:764`）：“移动端（手机、平板）”“桌面端（电脑）”、重置先确认（`_reset` `:800`）、“当前：自定义”说明；平台徽章、卡片布局是行内选项，圆角是滑块行 |
+| c13 | ✅（偏差 1） | `font_manager_page.dart`：卡片的 ⋮ 菜单（`:260`，打开所在文件夹、删除；现在是 A02.3 的 `AppMenuButton`）、删除确认（`:132`）、下载进度“下载中 3/7”和“取消”（`:102`、`:303-321`）、“正在使用”（`:385`）、换字重（`_pickWeight` `:166`，标出现在用的）、去投影渐变；页名“字体”；`danmaku: true` 时是“更换弹幕字体”（A11.3 用） |
+| c14 | ✅ | 导航栏页两组“首页入口”“底部导航栏”（`settings_catalog.dart:519`、`:528`）；多画面开关所有平台（`:523`）；`HomeMenusList`（`appearance_pages.dart:1176`）图标和导航栏同一份（`HomeMenu`），提示“按住”，隐藏的排最后写“已隐藏”、至少留一个 |
+| c15 | ✅ | `FontSizesPage`（`:444`）：顶上说明、五个滑块各带示例（`:462`）、重置先确认（红色“重置”） |
+
+- 根因（记录，设计里查出的 v3 问题）：页码跳转开关存了不读（Q5）；全局字体缩放替换了系统字号（Q3）；默认色块和界面颜色不一致（Q6，3.x 的配色算法会把种子色调暗）；分页设置按整屏宽度判断（Q4）；多画面开关只有 Windows（Q11）。
+- 偏差（记录）：①字体卡片的名字用本字体显示只对本次已加载的字体生效（为显示名字去加载每款几十 MB 的字体太占内存）；②范围外的改动：主题和文字大小只能在 `apps/pure_live/lib/app/app.dart` 生成，`live_store` 改了 `themeColorSwitch` 的默认值并加迁移（D-018 的唯一例外，C-3 本身的要求）。
+- 新设置 `pureBlackTheme`（`theme` 段，默认关，进备份；3.x 读备份时忽略）和内部记录 `themeColorMigration`（不进备份）。翻译中英各 77 条（和 A11.1 合计）；`AppIcons` 加 54 个，颜色进 `LivePureBlack`、`LivePalettes`、`LiveTvColors`。门禁：`settings` 直接写的颜色和图标 209 → 126（和 A11.1 合计）。
+- 后来的变化：M14.1 在“语言和界面”加了“界面模式”（自动 / 手机 / 电视，`settings_catalog.dart:427-440`）；A11.3 c7 把主题模式、语言对话框改成“主色 + 勾”的选项行；A02.3（`9f68079cc`）把字体卡片的 ⋮ 换成 `AppMenuButton`；颜色对话框的主按钮写“保存”（A02.2）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/settings/settings_page_test.dart` 的 `appearance (U.6b)`、`navigation (U.6b)` 两组 11 个和页码跳转 1 个（外观四组和行序、行上的值、分页设置只在电脑上；主题模式和语言对话框；纯黑默认关、浅色时变灰；颜色预览、取消恢复、代码校验、动态取色时变灰；间距加减和对话框；分页设置子页；精细化字号示例和重置确认；加载动画 3 列和恢复确认；房间卡片端名、自定义说明、重置确认；导航栏多画面开关、隐藏排最后、至少留一个；页码跳转开关控制分页条）；`packages/live_ui/test/settings_row_test.dart` 里颜色选择器 3 个、主题 3 个（fidelity 主色和白字对比、纯黑只改深色、文字大小相乘）；`packages/live_store/test/theme_color_test.dart` 4 个（默认值、迁移规则、3.x 数据和备份迁移而 v4 备份不迁移、已导入的安装只迁移一次且之后保留用户的选择）。字体页没有组件测试（下载、加载、删除逻辑在 `services_test.dart`）。
+- 真机：记录里没有 K90 结果（S02 的 CHECKLIST 第 5 节第 5 条“下载一个字体设为应用字体，重启”归 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md)，未开始）。登记表是“完成”，问题见[子分类页](../README.md)“已知问题”；建议 S02.4 和 [S03.1](../../../S-质量和验证/S03-统一验证/S03.1-统一验证/README.md) 补看：设置 → 外观，换主题颜色（背后即时变、取消恢复）、深色下打开纯黑背景、文字大小拖到 150% 看示例和首页、下载一个字体并设为应用字体后重启、加载动画选一个后进直播间看转圈。
+- 留下的问题和去向：电视设置的颜色列表还是 3.x 的蓝、电视去掉“主题模式”→ A17.9；A01.2（设计系统）把品牌蓝和纯黑写进颜色角色的文档 → A01.2（开发中）。

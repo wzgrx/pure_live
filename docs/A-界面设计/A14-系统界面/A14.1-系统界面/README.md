@@ -1,9 +1,12 @@
-# A14.1 系统界面：设计（第 1 版）
+# A14.1 系统界面：设计（第 1 版，已确认，Android 已开发，登记为完成）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 范围：系统画、应用决定内容的界面：Android 的播放通知（媒体控制）、录制前台服务通知、画中画窗口里的系统按钮、启动图标和系统启动画面、分享接收、桌面快捷方式、权限请求说明；Windows、Linux 的通知和任务栏按钮（v3 都没有）。iOS、macOS 的差异在 [X](../../A18-苹果平台界面/A18.1-iOS和iPadOS差异设计/README.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；原生部分多数确认改动没有 K90 结果，见“实现和验证”）
+- 范围：系统画、应用决定内容的界面：Android 的播放通知（媒体控制）、录制前台服务通知、画中画窗口里的系统按钮、启动图标和系统启动画面、分享接收、桌面快捷方式、权限请求说明；Windows、Linux 的通知和任务栏按钮（v3 都没有）。iOS、macOS 的差异在 [A18.1](../../A18-苹果平台界面/A18.1-iOS和iPadOS差异设计/README.md)、[A18.2](../../A18-苹果平台界面/A18.2-macOS差异设计/README.md)
+- 旧编号：U.14、T13a.1（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（X1～X4 按建议 A）
+- 一起做的功能任务：[O03.2](../../../O-Android系统集成/O03-分享接收和快捷方式/O03.2-接回半成品/README.md)（权限、分享接收、剪贴板口令）
 - 对应：[TASKS.md](../../../TASKS.md)（A14.1 没有逐项界面条目，原生代码不在 Dart 里）；相关：[A07.8](../../A07-直播间界面/A07.8-小窗/README.md)（小窗和画中画里我们自己的按钮）、[A06.4](../../A06-首页和全局/A06.4-启动页/README.md)（应用的启动页）、[A06.3](../../A06-首页和全局/A06.3-全局弹窗/README.md)（口令导入对话框）、[A16.1](../../A16-桌面界面/A16.1-桌面窗口/README.md)（窗口、托盘）
-- 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
+- 记录：[record.md](record.md)
 - 图片：通知栏、画中画菜单、桌面、分享面板、系统启动画面是**系统画的**，图里按 Android 15 原生样式示意（各厂商系统不同，K90 是 HyperOS）；其中应用决定的部分（文字、小图标、按钮、图标图案）照 v3 代码；封面和头像是示意图片
 
 ## 界面清点表
@@ -219,10 +222,49 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，X1～X4 按建议 A（录制通知加“停止录制 / 全部停止”和“录制中心”、新类别“录制提醒”、长按图标三个快捷方式、单色层）。这一轮只做 Android；c16（Windows、Linux 照 v3 不加系统通知）本来不用改。
-- 实现：c1～c15 做到，详见 [record.md](record.md)，和 O03.2（权限、分享接收、剪贴板口令、播放代理，[O03.2 记录](../../../O-Android系统集成/O03-分享接收和快捷方式/O03.2-接回半成品/record.md)）一起做。主要文件：`apps/pure_live/lib/features/live_play/logic/background_playback.dart`（小图标、中文按钮、画中画暂停 / 播放，只加不改原逻辑）、`apps/pure_live/lib/app/recording_notice.dart`（录制通知文字）、`apps/pure_live/lib/platform/recording_platform.dart`（有变化才发）、`apps/pure_live/lib/shared/permission_prompts.dart`（权限说明）、`apps/pure_live/lib/app/intake/`（分享提示）；原生 `MainActivity.kt`（画中画动作、`setSplashTheme`）、`RecorderForegroundService.kt`（通知重写）、`RecorderPlugin.kt`（`update`、`alert`、`stopAll`）、`ShareIntakePlugin.kt`（动态快捷方式）；资源：小图标、单色层、前景内缩 16% → 2%、12 起的启动画面主题、`raw/keep.xml` 留住只在 Dart 里按名字用的资源。
-- 偏差：c5“录制已停止”点开当时只到录制中心——后来 A08.5（提交 `6a599edee`）做了定位到那条任务；c9 自选主题色、纯黑时系统启动画面仍是默认底色；c11 提示条没有转圈、3 秒后自己消失；c15 直播间快捷方式没有主播头像、是动态快捷方式（开发包包名不同，静态的写不了）。合并后 H05.1（提交 `79ecb5d2b`）把单个直播间的通知标题按状态写，“录制已停止”换成自己的小图标 `ic_stat_record_stopped`。
-- 提交：`02085e8dd`（应用）、`def02145b`（测试）、`1d98ecc04`（Android），在 `dad6c96fc` 合并，记录 `8cf3c21b7`（2026-10-02）。`flutter build apk --debug` 通过。
-- 测试：`apps/pure_live/test/platform/system_surfaces_test.dart` 记录时 9 个（录制通知文字、保活、“录制已停止”、媒体按钮中文、画中画按钮、资源文件）；分享、权限、快捷方式的测试在 O03.2 的 `intake_test.dart`、`permission_prompts_test.dart`。
-- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)（2026-10-02，提交 `288fec0ec` 的 arm64 profile）：后台播放通知标题是直播间标题、正文是主播名、按钮“暂停”“停止”是中文，通过（c6）；录制通知“正在录制 · 主播名”、正文“标题 · 清晰度”、按钮“停止录制”“录制中心”，通过（c3、c4）。[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)：画中画进入通过、分享链接直接进直播间通过。记录里“要在 K90 上看的”第 1 条的小图标形状、第 3 条“录制已停止”、第 4 条画中画的暂停按钮、第 5 条桌面图标和快捷方式、第 6 条系统启动画面没有逐项写结果——第 3 条随 [A10.3 的 verify.md](../../A10-录制界面/A10.3-录制按钮和状态图标/verify.md) 第 13 条看，其余建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补。
-- 留下的问题：快捷方式头像、提示条转圈（都没有登记）；从画中画回来控制条卡住（O02.1）。
+**实现**（详见 [record.md](record.md)；2026-10-02，和 O03.2 一起做，合并提交 `dad6c96fc`“Merge U.14 (Android) and F.0a: permissions, share intake, clipboard codes, playback proxy, system surfaces”；登记表记的是记录提交 `8cf3c21b7`）
+
+定稿：用户确认第 1 版，X1～X4 由维护者按建议 A 定（D-003）。这一轮只做 Android；c16（Windows、Linux 照 3.x 不加系统通知）本来不用改。
+
+| 编号 | 做到 | 现在的代码（Dart 在 `apps/pure_live/lib/`，原生在 `apps/pure_live/android/app/src/main/`） |
+|---|---|---|
+| c1 | ✅ | 保留的照旧：播放通知类别 id `com.mystyle.purelive.audio`（`features/live_play/logic/background_playback.dart:311`）、点通知回到直播间、录制前台服务（`AndroidManifest.xml:142`）、系统画中画、`res/xml/share_targets.xml`；分享接收和权限说明是 O03.2 新接的 |
+| c2 | ✅ | 播放 `res/drawable/ic_stat_playback.xml`（`background_playback.dart:316` 的 `androidNotificationIcon`，`res/raw/keep.xml` 留住）；录制 `res/drawable/ic_stat_recording.xml`（`kotlin/com/mystyle/purelive/RecorderForegroundService.kt:331`），后来随 A10.3 改成实心圆挖方块 |
+| c3 | ✅ | 文字 `app/recording_notice.dart:22` 的 `recordNotificationContent`（一个：“正在录制 · 主播名”+“标题 · 清晰度”；几个：“正在录制 N 个直播间”+ 主播名；计时起点取最早开始的）；有变化才发 `platform/recording_platform.dart:216` 的 `AndroidRecordKeepAlive.refresh`；原生 `buildNotification`（`RecorderForegroundService.kt:323`），系统计时 `setUsesChronometer`（`:341`）；类别 `pure_live_recording`（`:97`）名字改成“录制”（`record_channel_name`）；点通知打开录制中心（`:334`） |
+| c4 | ✅ | 两个按钮 `RecorderForegroundService.kt:335-336`（“停止录制 / 全部停止”、“录制中心”）；“停止录制”→ `RecorderPlugin.kt:159` 的 `onStopRequested` → `recording_platform.dart:300` → `RecordingNotices.stopAll`（`recording_notice.dart:165`，已录的保存） |
+| c5 | ✅（偏差 1，后来补上） | `RecordingNotices.changed`（`recording_notice.dart:147`）：后台被停掉（`lastErrorStage == 'background'`）一定发，其他失败只在应用不在前台时发，每次失败只发一次；文字 `recordStoppedContent`（`:76`，原因 + 已保存时长）；原生 `alert`（`RecorderForegroundService.kt:130`），新类别“录制提醒”（`pure_live_recording_alerts` `:98`），按钮“打开录制中心” |
+| c6 | ✅ | `background_playback.dart:276` 的 `mediaControls`：播放、暂停、停止（`media_play`、`media_pause`、`media_stop`；图标仍用 audio_service 的） |
+| c7 | ✅ | `PictureInPicture.bindPlayback`（`background_playback.dart:72`，`RoomBackgroundPolicy._syncNotification` `:434` 调，变化才发）；原生 `MainActivity.kt:545` 的 `setPictureInPicturePlaying` 和 `:532` 的 `pictureInPictureActions`（一个 `RemoteAction`，图标 `ic_pip_play.xml` / `ic_pip_pause.xml`）；进画中画、自动画中画、更新参数都带上；离开房间 `unbindPlayback`（`:515`） |
+| c8 | ✅ | `res/mipmap-anydpi-v26/ic_launcher.xml`：前景内缩 16% → 2%（电视约占可见圆的六成），`<monochrome>` 用 `res/drawable/ic_launcher_monochrome.xml` |
+| c9 | ✅（偏差 2） | `res/values-v31/styles.xml`（`LaunchTheme`、`SplashTheme.Light`、`SplashTheme.Dark`）、`res/values-night-v31/styles.xml`；底色 `res/values/colors.xml` 的 `splash_light` `#FAF8FF`、`splash_dark` `#121318`；图标 `res/drawable/splash_icon.xml`（`splash_logo.png` 内缩 24%，288 dp 的框里约 150 dp，不设图标底色所以没有白圈）；13 起 `app/intake/system_intake.dart:58` 跟着“主题模式”调 `setSplashTheme`（`:96`）→ `MainActivity.kt:570`；11 及以下 `res/drawable/launch_background.xml`、`drawable-v21/launch_background.xml` 同底色 |
+| c10 | ✅ | `app/intake/share_intake.dart:155`、`:159`（没有链接：“分享的内容里没有能打开的直播间链接”，`share_intake_no_room`）、`:202`（只有文件格式不对：`unsupported_file_format`） |
+| c11 | ✅（偏差 3） | `share_intake.dart:183`（“正在打开分享的直播间…”，`share_intake_opening`）；平台下线、解析失败照 3.x（`:191`） |
+| c12 | ✅ | `shared/permission_prompts.dart:30` 的 `showPermissionDialog`：A02.2 的对话框（标题左对齐，“取消”和主按钮在右下），文字照 3.x 的 `permission_*` 键 |
+| c13 | ✅ | `BackgroundPermissions._notifications`（`permission_prompts.dart:105`）：永久拒绝时换成“通知权限已关闭”+“去设置”（`:120-124`），打开本应用的通知设置（`PermissionsPlugin.kt:72`），`nextResume`（`:49`）回到应用再查，开了就把开关打开；还是关的照 A11.3 红字 |
+| c14 | ✅ | `RecordingPermissionPrompts.notificationsOnce`（`permission_prompts.dart:168`，“以后再说”，录制照常）、`explainStorage`（`:207`，所有文件访问权限先说明）；见 O03.2 的 c6 |
+| c15 | ✅（偏差 4） | 动态快捷方式 `ShareIntakePlugin.kt:139` 的 `setShortcuts`（搜索直播、录制中心、最多两个直播间 `:156`，名字最长 24 字）；Dart `system_intake.dart:57`、`:83` 的 `recentRoomShortcuts`（跟观看记录，变了才发）；文字 `res/values/strings.xml`、`values-en/strings.xml` |
+| c16 | 不用改 | Windows、Linux 没有系统通知、任务栏缩略图按钮、系统媒体控制（同 3.x）；X01 开工时确认 |
+
+- 偏差（记录“和设计不同的地方”）：①c5 点开当时只到录制中心——后来 A08.5（`6a599edee`“Recording reminder opens the recording centre at its task”，A08.5 c3）做到定位到那条任务（`RecorderForegroundService.kt:171` 的 `openRecordings` 带任务 id、`:187` 每个任务一个请求码）；只录一个直播间时点**前台**录制通知仍不定位 → H05.2。②c9 自选主题色、纯黑深色时系统启动画面仍是默认底色（系统启动画面拿不到应用的主题色，设计“拿不准”第 6 条）。③c11 提示条没有转圈、3 秒后自己消失（提示条没有关闭接口，在 `routes/` 里，不在可改范围）。④c15 直播间快捷方式用统一的电视图标、没有主播头像（要下载头像）；是动态快捷方式（开发包包名不同，静态的写不了），先打开过一次应用才出现。
+- 后来的变化：H05.1（`79ecb5d2b`）单个直播间的通知标题按状态写（`_oneTitleKey`，`recording_notice.dart:59`：准备录制、正在录制、正在重连、正在整理录像），“录制已停止”换成自己的小图标 `ic_stat_record_stopped.xml`（`RecorderForegroundService.kt:135`）；A10.3 改了 `ic_stat_recording.xml` 的形状；`c5bc87666` 把 audio_service 的三个按钮图标加进 `res/raw/keep.xml`（发布版资源压缩删掉后 Android 13 起播放通知和前台服务起不来）；`132a5672b` 让本地网络请求用自己的请求码。
+- 提交：`02085e8dd`（应用：分享、口令、权限、播放代理、系统界面）、`def02145b`（测试）、`1d98ecc04`（Android：插件、服务、资源，29 个文件）；合并 `dad6c96fc`；记录 `8cf3c21b7`。`flutter build apk --debug` 通过（只构建、没有安装）。
+- 新翻译键 31 个（O03.2 和本任务合计）：本任务的是 `media_play/pause/stop`、`record_channel_*`、`record_alert_channel_*`、`record_notify_*`、`record_stopped_*`、`permission_notification_blocked_*`、`permission_open_settings`、`permission_later`、`permission_record_notification_content`、`permission_storage_*`、`share_intake_no_room`、`share_intake_opening`；原生 `strings.xml` 加 `shortcut_search`、`shortcut_recordings`。没有新设置（`detectClipboardRooms` 是 O03.2 的）。
+- 和合并有关的：改了 `features/live_play/logic/background_playback.dart`（c2、c6、c7 只能在这里接，只加不改原逻辑）、`packages/live_ui`（一个图标）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/platform/system_surfaces_test.dart`（新，记录时 9 个，现在 12 个用例声明：后来加了 H05.1 的按状态标题、发布版留住的资源、插件请求码不重复）：录制通知文字、保活没变不发、“停止录制”停全部、“录制已停止”的文字和何时发、媒体按钮中文、画中画按钮、资源文件（小图标、图标内缩和单色层、启动画面颜色和图标、快捷方式两种语言）。分享提示、权限、快捷方式数据在 O03.2 的 `apps/pure_live/test/intake_test.dart`（15 个）、`apps/pure_live/test/shared/permission_prompts_test.dart`（7 个）。原生画出来的样子测试代替不了。
+- 真机（K90，[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)、[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)，2026-10-02，提交 `288fec0ec` 的 arm64 profile）：
+
+  | 记录“要在 K90 上看的” | 结果 |
+  |---|---|
+  | 1. 状态栏小图标形状；媒体卡片按钮中文 | 按钮“暂停”“停止”中文、标题和正文对，**通过**（S02.2，c6）；小图标形状**没有记录**（c2） |
+  | 2. 录制一个、两个直播间的通知、计时、两个按钮、通知类别名 | 一个直播间的标题、正文、“停止录制”“录制中心”**通过**（S02.2，c3、c4）；两个直播间、计时、按钮能停、类别名**没有记录** |
+  | 3. 系统停掉后台录制时的“录制已停止” | **没有记录**（c5）；排在 [S02.5](../../../S-质量和验证/S02-真机验证/S02.5-4.0.0构建号5001/README.md) 阶段 4 的 4B-01～06（A08.5、H05.1） |
+  | 4. 画中画的暂停 / 播放按钮 | 进画中画**通过**（S02.3）；暂停按钮**没有记录**（c7） |
+  | 5. 桌面图标、主题图标、长按快捷方式 | **没有记录**（c8、c15） |
+  | 6. 冷启动的系统启动画面、跟主题模式 | **没有记录**（c9）；S02.2 只记了冷启动 198 毫秒 |
+  | 7. 分享、权限（O03.2） | 分享链接直接进直播间**通过**（S02.3）；打开后台播放：说明 → 系统通知权限 → 电池说明 → 系统电量页**通过**（S02.2，c12）；“没有链接”“正在打开”提示（c10、c11）、永久拒绝（c13）、第一次录制的说明（c14）**没有记录** |
+
+  登记表写“完成”，但原生部分的多数确认改动没有 K90 结果（不符合 PROCESS“完成要有真机结果”）；建议并入 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 或补一份 verify.md，由维护者定。
+- 留下的问题和去向：前台录制通知不定位 → [H05.2](../../../H-录制/H05-录制通知/H05.2-只录一个直播间时点前台录制/README.md)；合并时不显示进度 → [H05.3](../../../H-录制/H05-录制通知/H05.3-录制通知显示合并进度/README.md)；从画中画回来控制条卡住 → [O02.1](../../../O-Android系统集成/O02-画中画/O02.1-画中画复验/README.md)；快捷方式头像、提示条转圈没有登记（以后走 V01 提议）；Windows、Linux（c16）→ X01、X02。

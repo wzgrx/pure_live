@@ -6,6 +6,7 @@
 - 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
 - 图片：项目历史上没有在苹果设备上跑过的 v3，v3 的图按 `v3.2.11` 代码推出在 iPhone、iPad 上的样子；新设计直接用 A07.7、A07.5、A06.1、A06.2 的生成脚本画出已确认（或待确认）的界面，只加平台需要的部分。画面、头像、主屏、其他应用是示意图片；系统画的部分（状态栏、灵动岛、分享面板、画中画按钮、粘贴提示、快捷键列表）是示意，以系统为准
 - 尺寸：iPhone 393×852（灵动岛 126×37，距顶 11；安全区上 59、下 34；横屏左右各 59、下 21），iPad 1180×820（状态栏 24、主屏指示条区 20），分屏一半 585
+- 旧编号：U.17a、T19a.1。设计确认：2026-10-01（确认记录 `62391fdd2`“U.1c-d, U.13, U.14, U.15d-e, U.17a-b confirmed”），待选 Q1～Q3 按建议 A（D-003）。下面正文里“改动（待确认）”“待评审”等是定稿前的字样，正文没有改。还没开发，任务书见 [brief.md](brief.md)
 
 ## 界面清点表
 
@@ -204,3 +205,11 @@
 | [v4-ipad-stage.jpg](v4-ipad-stage.jpg) | iPad 台前调度窗口（760×600，侧边导航，左上窗口按钮） |
 | [v4-ipad-keys.jpg](v4-ipad-keys.jpg) | iPad 按住 ⌘ 的快捷键列表 |
 | [v3-ipad-share.jpg](v3-ipad-share.jpg)、[v4-ipad-share.jpg](v4-ipad-share.jpg) | iPad 分享：v3 失败 / 新设计的分享气泡 |
+
+## 实现和验证
+
+- 实现：**还没开发**（登记表“已确认”，第三档，没有阶段记录）。按 D-004，苹果平台排在所有客户端最后，[specs/UI.md](../../../specs/UI.md) 第 5.6 节“暂时只设计、不构建”。开发的要求、阶段、测试和真机步骤都在 [brief.md](brief.md)；前提是苹果平台的工程（[X04](../../../X-多端客户端/X04-iOS和iPadOS/README.md)、[X05](../../../X-多端客户端/X05-macOS/README.md)）。
+- 现在的代码：4.x 没有 `ios/` 工程（X04.1 未开始）。代码里已经有的 iOS 分支：“后台播放”iOS 也显示（`apps/pure_live/lib/features/settings/settings_catalog.dart:790`，即本页 c5 交给 A11.3 的那一半）、竖屏全屏 iOS 也有（`features/live_play/player/player_controls.dart:70` 的 `RoomPlatform.mobile`，c6）、弹性滚动（`packages/live_ui/lib/src/widgets/scrolling.dart:18`）。v3 的几个问题 4.x 照样有：iOS 回到前台直接读剪贴板（`app/intake/clipboard_rooms.dart:93`，只有 Android 有 `stamp`）、iPad 分享不给弹出位置（`platform/plugins.dart:95`）、直播间快捷键没有 Cmd 组合（`features/live_play/live_play_page.dart:737-750`）、全屏时不让返回（`:731` 的 `PopScope`）。
+- 开发前要知道的：本机没有 Mac，原生部分（系统画中画、后台音频、共享扩展、`UIKeyCommand`）只能在 Mac 上做和验；mpv 画面能否交给系统画中画没核对；“交给其他任务的”里 R02.1 / A11.4 的 iPhone Pro 刷新率、A14.1 的苹果系统界面还没有任务。
+- 验证：没有自动测试，也没有设备结果（项目里没有苹果设备）。
+- 留下的问题和去向：见[子分类页](../README.md)“已知问题”。

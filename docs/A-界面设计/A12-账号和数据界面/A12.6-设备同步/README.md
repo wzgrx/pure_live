@@ -1,10 +1,12 @@
-# A12.6 设备同步：设计（第 1 版）
+# A12.6 设备同步：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.11c、T09e.1（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：设备同步页（本机、发现的设备、手动输入、各种状态）、对方请求、配对码、发送确认、接收预览、扫码后选方向、扫码页、提示条
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a126)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a126)
-- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a126)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a126)；功能点 F-BAK-05、F-BAK-06（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；协议和服务在 [J05](../../../J-设置和数据/J05-设备同步/README.md)；接收预览和扫码页和 [A12.4](../A12.4-备份与恢复/README.md) 共用；相关决定 D-003（S1、S2 按建议 A）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；地址、配对码、二维码都是编的；相机画面是示意图片
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -53,7 +55,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 对比、状态、对话框、扫码、两处待选 | 待评审 |
+| 第 1 版 | 对比、状态、对话框、扫码、两处待选 | 用户 2026-10-02 确认；S1、S2 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -82,7 +84,7 @@
 | [v3-sync-land.jpg](v3-sync-land.jpg)、[v4-sync-land.jpg](v4-sync-land.jpg) | 手机横屏 852×393 |
 | [v3-sync-wide.jpg](v3-sync-wide.jpg)、[v4-sync-wide.jpg](v4-sync-wide.jpg) | 宽屏 1280×800 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -140,10 +142,30 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，S1、S2 按建议 A（接收先预览再写入、宽屏两列）。
-- 实现：c1～c11 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/remote_receiver/remote_receiver_page.dart`（三块、组标题在卡片外、设备卡片按平台图标和“地址 · 版本”、按钮“接收（描边）· 发送（实心）”、配对码六个格子、接收预览、对方请求写名字且不能点外面关、拿不到地址写原因、宽 ≥840 且不是横屏手机时两列最宽 1120）；服务拆成 `fetch` 和 `apply`（`remote_sync_service.dart`，协议不变）；扫码用 A12.4 的 `shared/qr_scan.dart`。
-- 没做：macOS 正式版的 `com.apple.security.network.server` 权限（A18.2 → A12.6 的待同步）——v4 没有 macOS 工程，等 X04.1 建工程时加。
-- 提交：`69f67d54e`，在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`remote_receiver` 的直接颜色和图标 11 → 0。
-- 测试：`apps/pure_live/test/features/remote_receiver/remote_sync_test.dart` 4 → 12 个（说明和组标题、设备卡片、拿不到地址和停止、发送、接收先预览、对方请求、扫码和选方向、宽屏两列、横屏一列）；页面测试用记录发送和拉取的假服务。
-- 真机：没有看过（要两台设备）。登记表已是“完成”，建议按 CHECKLIST 第 5 节第 3 条（互相发现、扫码、发送和接收）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看；Android 17 的本地网络权限见 O04.1。
-- 留下的问题：同步前选内容（V01.6 提议）；服务分不清“没网络”和“没权限”（J05）。
+**实现**（详见 [record.md](record.md)；2026-10-02，开发提交 `69f67d54e`“feat(remote_receiver): device sync per the U.11c design”，和 A10.2、A12.4、A12.5 一起在 `f5351b91c` 合并；登记表写的是记录提交 `965d41956`）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/remote_receiver/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | `remote_receiver_page.dart:306` 的 `build`：顶栏扫码（只在 `QrScan.available`，照 v3 桌面没有）、开始 / 停止（`syncStart` / `syncStop`）；我的设备 → 发现的设备 → 手动输入；对方请求不能点外面关（`dismissible: false`，`:77`）；扫码后“选择同步操作”（`_scan` `:267-303`，接收是文字按钮、发送是实心）；离开页面 `dispose` 停止服务（`:61-64`） |
+| c2 | ✅ | `_receive`（`:140-158`）：配对码 → `fetch`（`remote_sync_service.dart:395`）→ `previewRestore` → `_confirmReceive`（`:160-223`：“来自 {name}”、地址 · 版本、“接收后会这样变化：”、设置几项不同和各部分、账号一行，对方没开“同步账号 Cookie”时写“本机账号不变”、不可撤销的提醒）→“接收”才 `apply`（`:407`） |
+| c3 | ✅ | `_send`（`:125-136`）：“确定要将当前设备的全部配置发送到“{name}”吗？对方确认后会覆盖它的配置。”，按钮“发送”；配对码对话框“输入“{name}”上显示的 6 位配对码”，六个格子（`_PairingCodeDialog` `:667`，一个隐藏输入框，能粘贴）；不是 6 位数字时提示“配对码应为 6 位数字”（`:116-120`） |
+| c4 | ✅ | 设备卡片和手动输入同一个 `_buttons`（`:638`）：接收（描边）在左、发送（实心）在右，高 48 |
+| c5 | ✅ | `_localDevice`（`:438`）：拿不到地址时断网图标 +“未获取到本机地址”+ 原因和下一步（`:456-460`），不再写“扫描此二维码”；停止时“同步服务未运行”和图标用错误色 |
+| c6 | ✅ | 顶栏下 2 像素进度条（`:330`），同步中按钮变灰 |
+| c7 | ✅ | `_device`（`:555`）：按平台图标（手机、电脑、其他）、“地址 · v版本”或“3.x 版本的设备”（`_peerOf` `:234-243`）；一张卡片里设备之间分隔线 |
+| c8 | ✅ | `_confirmIncoming`（`:72-106`）：认得的设备写“设备 192.168.1.101（PureLive Windows）请求…”（`nameOf`，`remote_sync_service.dart:420`），不认得的照 v3 只写地址；按钮“拒绝 / 允许” |
+| c9 | ✅ | 扫码用 A12.4 的 `scanQrCode`（`shared/qr_scan.dart:107`），提示“扫描另一台设备“设备同步”页上的二维码”；“手动输入地址”关掉扫码页并把光标放到地址框（`onManual: _addressFocus.requestFocus` `:272`）；地址框里有扫码按钮、能粘贴同步链接（`_typed` `:255-264`） |
+| c10 | ✅ | 组标题在卡片外（`_group` `:388`，13 号主色）；“发现的设备”标题右边“正在搜索”转圈；地址 18 号 600、可复制；配对码 28 号等宽、字距 6（`:493`） |
+| c11 | ✅ | 宽 ≥840（`remoteSyncTwoColumns` `:24`）且窗口不矮（`:338`）时两列：左我的设备，右另两块，最宽 1120（`:357`）；其余一列最宽 720 |
+
+- 根因（记录）：3.x 接收是拉取后直接 `importAllSettings`，没有预览；发送不确认；两处按钮顺序相反；拿不到地址时还写“扫描此二维码”。服务原来的 `receive` 拉取和写入是一步，现在拆成 `fetch` 和 `apply`（协议不变，`receive` 仍在 `:387`）。
+- 偏差：记录没有设计上的偏差。没做的：macOS 正式版 `Release.entitlements` 的 `com.apple.security.network.server`（A18.2 → A12.6 的待同步）——v4 没有 macOS 工程，等 [X04.1](../../../X-多端客户端/X04-iOS和iPadOS/X04.1-苹果平台的构建和签名/README.md) 建工程时加（3.x 的文件在 `~/ref/v3ref/macos/Runner/Release.entitlements`）。
+- 后来的变化（以现在的代码为准）：A02.2（`fc5bcdd46`）对话框、提示条换成共用的 `AppDialog`、`showAppConfirmDialog`、`AppNavigator.toast`；A02.1 的 `9f68079cc`（设置对话框写明动作、去掉最后几个弹出菜单）改了这一页的确认按钮文字。
+- 新文字：没有地址的说明、写名字的发送确认和配对码、“来自 {name}”、预览的标题和提醒、“拒绝”“允许”、扫码提示（见设计“确认的改动”下的列表）。没有新设置（“同步账号 Cookie”仍是本页的临时开关，同 v3）。
+- 门禁：`remote_receiver` 直接写的颜色和图标 11 → 0；没有新增跨功能引用（预览从 `shared/backup/` 来）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/remote_receiver/remote_sync_test.dart`（现在 12 个；当时 4 → 12）：服务 3 个（3.x 二维码和地址、收发、配对码）、本机设备 1 个；页面 8 个（分组 `page (U.11c)`：竖屏说明和三组标题、拿不到地址和停止、发送写名字和六个格子、接收先配对码再预览确认后才写入、对方请求名字和拒绝 / 允许和点外面不关、手机顶栏扫码选方向和二维码带的配对码、宽屏两列、横屏一列和 48 顶栏）。页面测试用记下发送和拉取的服务子类 `_FakeSync`。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`（要两台设备）。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 3 条（和另一台 v4 或 3.x 设备互相发现、扫码、发送和接收、接收前的预览）、第 8 条（Android 17 关掉“本地网络”权限时的提示），归 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 和 [O04.1](../../../O-Android系统集成/O04-权限/README.md)；K90 上的 3.x 是用户日常用的，不能拿来当第二台。
+- 留下的问题和去向：同步前选内容 → [V01.6](../../../V-需求和反馈/V01-新功能提议/V01.6-设备同步选择同步内容/README.md) 提议；服务分不清“没网络”和“没权限”（`remote_sync_service.dart:180-184`）→ J05；对方发来配置时本机只问“拒绝 / 允许”、没有预览（`remote_sync_service.dart:342-358`，3.x 同样，设计 S1 只要求主动接收预览）→ 有需要走 V01 提议；Esc 返回 → A05.1。

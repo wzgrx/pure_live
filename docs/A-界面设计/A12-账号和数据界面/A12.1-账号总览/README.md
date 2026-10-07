@@ -1,10 +1,12 @@
-# A12.1 账号总览：设计（第 1 版）
+# A12.1 账号总览：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.10a、T10a.2（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：v3 的“三方认证”页（各平台登录状态），点平台后的退出确认和哔哩哔哩的“选择登录方式”；各平台的登录页和 Cookie 页在 [A12.2](../A12.2-登录和Cookie/README.md)
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a121)（A12.1-01、02）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a121)
-- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a121)（A12.1-01、02）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a121)；功能点 F-ACC-01（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；登录和 Cookie 的逻辑在 [K01.1](../../../K-账号和登录/K01-账号和登录方式/README.md)；相关决定 D-003（K1～K3 按建议 A）、D-013（登录引导用 `RoutePath.kSettingsAccount` 加平台 id）、D-018（存储键不变）
+- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；用户名、昵称、账号 ID 都是编的占位（“示例用户”“example_user”“12345678”）
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -35,7 +37,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 点平台进页面、退出只用行尾按钮、状态具体、分组和顺序、改名“平台账号”、三个选择 | 待评审 |
+| 第 1 版 | 点平台进页面、退出只用行尾按钮、状态具体、分组和顺序、改名“平台账号”、三个选择 | 用户 2026-10-01 确认；K1～K3 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -60,7 +62,7 @@
 | [v3-wide.jpg](v3-wide.jpg)、[v4-wide.jpg](v4-wide.jpg) | 1280×800 |
 | [v3-land.jpg](v3-land.jpg)、[v4-land.jpg](v4-land.jpg) | 手机横屏 852×393 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -105,11 +107,28 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，K1～K3 按建议 A（标题“平台账号”分两组、哔哩哔哩没登录直接进扫码页、不要“退出全部账号”）。
-- 实现：c1～c8 和 K3 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/account/account_list_view.dart`（列表、退出、提醒卡）、`account_state.dart`（状态文字和颜色，和 A12.2 的状态卡共用 `accountStatus`）、`account_widgets.dart`（退出确认照 3.x 文字）、`account_platforms.dart`（九个平台的顺序和名字）；`routes/app_navigator.dart` 的 `toBiliBiliLogin` 直接进扫码页，“请选择登陆方式”对话框去掉。
-- 偏差：斗鱼“登录态已失效”现在也有退出按钮（存了 Cookie 就有）；标题居中由页面自己设。
-- 新文字：`account_title`、`account_site_soop`、`account_site_cc`、`account_status_saved`；删 v4 自加的三条“退出全部账号”。没有新设置，Cookie 存储照旧。
-- 提交：`587ccc3c7`（和 A12.2 一起），在 `59248e0b9` 合并（2026-10-01）。`account` 的直接颜色和图标 25 → 0（两个任务合计）。
-- 测试：`apps/pure_live/test/features/account/account_page_test.dart` 中本任务 6 个（两组九个平台、状态文字和颜色、退出按钮 ≥48、点平台进页面、列表退出、启动核验失效、读不出的提醒、1280 宽 ≤720）。
-- 真机：没有看过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)写明“账号页没在真机上看”）。登记表已是“完成”，建议随 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 或 [K02.1](../../../K-账号和登录/K02-登录状态/README.md) 补看。
-- 留下的问题：设置里入口改名“平台账号”当时交给 A11.4，A11.1 已一并做了；账号页的“网易 CC”和平台列表的写法后来统一成“网易CC”、“Soop”统一成“SOOP”（[A07.9 记录](../../A07-直播间界面/A07.9-已合并界面任务的收尾/record.md)第 4 节，提交 `6d90f6649`）。
+**实现**（详见 [record.md](record.md)；2026-10-01，开发提交 `587ccc3c7`“feat(ui): U.10a/U.10b platform accounts, login and cookie pages per the confirmed design”（登记表写的就是它，和 A12.2 同一个提交），合并提交 `59248e0b9`“Merge U.9 and U.10: IPTV management and accounts”）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/account/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | `account_list_view.dart:97` 的 `_open`：点任何一行都进该平台的页面（`RoutePath.kSettingsAccount` 加平台 id，或平台自己的路由）；哔哩哔哩没存 Cookie 时直接进 `RoutePath.kBiliBiliQRLogin`（K2 A）；退出只用行尾按钮（`:213-218`），先 `confirmSignOut`（`account_widgets.dart:200`） |
+| c2 | ✅ | `account_state.dart:115` 的 `accountStatus`、颜色 `AccountTone`（`:8`）和 `accountToneColor`（`account_widgets.dart:10`）：正常主色加粗、提醒黄、失效红、未设置和核验中灰；状态不限行数（`account_list_view.dart:195-206`）。各平台的文字见记录的状态表 |
+| c3 | ✅ | 标题 `account_title`“平台账号”（`account_list_view.dart:167`）；两组 `account_group_domestic`、`account_group_overseas`（`:163-164`）；顶部说明 `account_intro`（`:155-162`） |
+| c4 | ✅ | `account_platforms.dart:87-141` 的 `accountPlatforms`：哔哩哔哩、斗鱼、虎牙、抖音、快手、YY、网易CC；Twitch、SOOP（`overseas: true`） |
+| c5 | ✅（偏差 4） | 没存时一律“未设置”；SOOP、网易CC 用账号页自己的名字键（`AccountPlatform.nameKey`，`account_platforms.dart:58-62`）；“请选择登陆方式”对话框随 K2 A 去掉 |
+| c6 | ✅ | `account_platforms.dart:117-122`（`usedByRequests: false`）；状态“已保存，暂未用于请求（登录后加入弹幕待验证）”（黄，`account_state.dart:171-173`） |
+| c7 | ✅ | 读不出时提醒卡 `AccountNotice`（`account_widgets.dart:70`）代替顶部说明（`account_list_view.dart:151-153`），行写“无法在本机读取已保存的 Cookie，请重新填写”（`account_state.dart:123`），也有退出按钮 |
+| c8 | ✅ | 一行 `_tile`（`account_list_view.dart:184-223`）：`PlatformLogo` 24、名字 15、状态 12，退出图标 18（`error` 80%）、点击区 48、悬停“退出登录”；同一平台退出进行中行尾转圈且不能再点（`_signOut` `:116-129`）；哔哩哔哩启动核验失效提示“哔哩哔哩登录已失效，请重新登录”并退出（`:86-91`） |
+| K3 | ✅ | 标题栏没有菜单；`AccountActions.signOutAll` 和三条只有它用的文字删除 |
+
+- 偏差（记录“偏差和原因”）：①斗鱼“登录态已失效”现在也有退出按钮（规则是“存了 Cookie 就有退出”，设计图的状态一览里也有）；②记录写“标题居中由页面自己设”，后来 D-011（`e320e0e72`）统一成照 3.x 实际运行的位置，现在是普通 `AppBar` 的默认位置（Android 靠左）；③`AppNavigator.toBiliBiliLogin`（`routes/app_navigator.dart:165`）改为直接打开扫码页；④账号页的“SOOP”“网易CC”当时和平台列表的“Soop”“网易CC”写法不同，A07.9 的收尾（`6d90f6649`）统一成“SOOP”“网易CC”。
+- 后来的变化（以现在的代码为准）：A02.1（`914784264`）列表行改用共用组件；A02.2（`fc5bcdd46`）确认框换成 `showAppConfirmDialog` 一套（`account_widgets.dart:176`）；A07.9 收尾（`8f6a925b6`）让 A12.2 的页内退出也用这里的 `confirmSignOut`。
+- 新文字：`account_title`、`account_site_soop`、`account_site_cc`、`account_status_saved`；改 `account_intro`、`account_unreadable_notice`；删 v4 自加的 `account_sign_out_all`、`account_sign_out_all_confirm`、`account_signed_out_all`。没有新设置，Cookie 存储（`LiveStore.secrets`）、`bilibiliUid`、`douyuCookieSavedAt` 照旧（D-018）。
+- 门禁：`account` 直接写的颜色和图标 25 → 0（A12.1、A12.2 合计），`tools/gate/ui_baseline.json` 去掉这一项。
+- 设置里的入口：记录写“改名由 A11.4 做”；实际入口在设置 → 账号和标签 → “平台账号”（`features/settings/settings_catalog.dart:555-561`，A11.1 做的，搜索关键词里留着“三方认证”）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/account/account_page_test.dart`（现在 22 个）中本任务 6 个，分组 `U.10a platform accounts`（`:208-332`）：两组九个平台的顺序、名字、各状态文字和颜色、不截断、退出按钮和箭头、没有标题栏菜单；点平台进页面、哔哩哔哩没登录直接进扫码页；列表退出（3.x 文字、取消、确认、提示）；哔哩哔哩启动核验失效自动退出；读不出的提醒和退出按钮；1280 宽一栏 ≤720 居中。另有 `:703` 的平台名统一测试（A07.9）。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`。[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)写明“账号页没在真机上看”。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：设置 → 账号和标签 → 平台账号，两组九行和状态；哔哩哔哩没登录点它直接进扫码页；存了 Cookie 的平台点行尾退出、确认后变“未设置”。建议随 [S02.6](../../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md)（哔哩哔哩登录）和 [K02.1](../../../K-账号和登录/K02-登录状态/K02.1-Cookie和密码加密存储验证/README.md)（读不出 Cookie 的提醒要在 Keystore 出问题时才出现）一起看。
+- 留下的问题和去向：横屏手机顶栏 56 高（同组的备份等页是 48）→ 建议并入 A04.1；电脑上 Esc 不返回 → A05.1；网易CC 的 Cookie 接上请求 → UPGRADES C-22（未排）；哔哩哔哩多账号 → [V01.2](../../../V-需求和反馈/V01-新功能提议/V01.2-哔哩哔哩多账号/README.md) 提议。

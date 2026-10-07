@@ -1,10 +1,12 @@
-# A12.5 WebDAV：设计（第 1 版）
+# A12.5 WebDAV：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.11b、T09d.1（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：WebDAV 页（文件列表、路径、各种状态、上传）、服务器抽屉、顶栏菜单和文件菜单、配置对话框、恢复和删除确认、使用帮助页、提示条
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a125)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a125)
-- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a125)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a125)；功能点 F-BAK-04（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；请求和认证在 [J03.1](../../../J-设置和数据/J03-备份恢复/README.md)、[J04](../../../J-设置和数据/J04-WebDAV/README.md)（J04.1 Digest）；恢复预览和 [A12.4](../A12.4-备份与恢复/README.md) 共用；相关决定 D-003（R1～R4 按建议 A）、D-009（下拉刷新）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）。服务器名、地址、用户名都是占位；帮助页里 v3 写的坚果云地址（`web_dav_help.dart:19`、帮助文字里的官网和服务器地址）换成了占位或“坚果云官网”；坚果云网页截图用灰块代替
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -61,7 +63,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 对比、状态、对话框、帮助、四处待选 | 待评审 |
+| 第 1 版 | 对比、状态、对话框、帮助、四处待选 | 用户 2026-10-02 确认；R1～R4 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -91,7 +93,7 @@
 | [v3-webdav-land.jpg](v3-webdav-land.jpg)、[v4-webdav-land.jpg](v4-webdav-land.jpg) | 手机横屏 852×393 |
 | [v3-webdav-wide.jpg](v3-webdav-wide.jpg)、[v4-webdav-wide.jpg](v4-webdav-wide.jpg) | 宽屏 1280×800 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -159,10 +161,32 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，R1～R4 按建议 A（顶栏服务器和刷新、点备份文件预览后恢复、上传按钮带文字、子目录里按返回直接离开）。一并把中英文的“WebDav”统一成“WebDAV”。
-- 实现：c1～c13 和 R4 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/web_dav/web_dav_page.dart`（两行标题写当前服务器、⋮ 小菜单、路径从左排、文件行“时间 · 大小”和备份文件图标、点文件预览后恢复、出错写原因加“编辑配置”、空目录说明、上传和删除失败带“重试”、抽屉）、`web_dav_config_dialog.dart`（标题前的图标、编辑时名称不能改）、`web_dav_help.dart`（内容照 v3，换卡片样式）；去掉了 v4 的“返回先回上一级”。
-- 偏差：无（设计的每一条都照做）。
-- 提交：`2c6563bb1`，在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`web_dav` 的直接颜色和图标 36 → 0；三条到 `backup/` 的跨功能引用改引 `shared/backup/`。
-- 测试：`apps/pure_live/test/features/web_dav/web_dav_page_test.dart` 3 → 9 个（顶栏、⋮ 菜单和帮助页、路径、文件行、三种打开菜单的方式、出错、抽屉、上传失败重试、返回直接离开、宽屏 720）；只用 `dav.test`、`example.com` 这类假地址。
-- 真机：没有看过。登记表已是“完成”，建议按 CHECKLIST 第 5 节第 2 条（坚果云：测试连接、上传、恢复）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看。
-- 留下的问题：无。
+**实现**（详见 [record.md](record.md)；2026-10-02，开发提交 `2c6563bb1`“feat(web_dav): WebDAV per the U.11b design”，和 A10.2、A12.4、A12.6 一起在 `f5351b91c` 合并；登记表写的是记录提交 `965d41956`。一并把中英文的“WebDav”统一成“WebDAV”）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/web_dav/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 路径、文件夹打开、文件菜单三项、上传按钮、服务器抽屉、配置四个字段和校验、删除确认、帮助内容都保留；配置对话框标题前加回 v3 的图标（`web_dav_config_dialog.dart:110`），编辑时名称不能改 |
+| c2 | ✅ | `web_dav_page.dart:382-423`：`settingsPageAppBar` 标题“WebDAV”下一行当前服务器名（没有时“还没有服务器”）；顶栏服务器（开抽屉）、刷新、⋮ 小菜单（仅上传关注列表——不能上传时变灰、使用帮助教程）；下拉刷新（`_pullLoad` `:135`，`AppRefreshView`） |
+| c3 | ✅ | “备份到当前目录”带文字的按钮，上传中转圈 +“正在上传备份”；目录出错时不显示（`:426-435`） |
+| c4 | ✅ | 点备份文件 = 预览后恢复（`_open` `:324`，`purelive_favorites` 开头的只恢复关注，`:327`）；`_EntryRow`（`:662`）的 ⋮、右键、长按打开同一个 `showAppMenu`（`_fileMenu` `:331`）：恢复全部设置、仅恢复关注列表、（线）红色删除；文件夹只有删除 |
+| c5 | ✅ | `restoreWithPreview`（`_restore` `:284-299`）；恢复、删除时路径下一行字和进度条（`:443-453`），列表变灰（`:736`） |
+| c6 | ✅ | 出错状态（`:490-502`）：“无法加载目录”+ 原因（`webDavFailureText`，`web_dav_config_dialog.dart:11`：账号密码、网络、目录不存在、服务器错误）+“重试”+“编辑配置” |
+| c7 | ✅ | 没有配置（`:465-478`）：说明 +“创建新配置”+“使用帮助教程”；空目录（`:505-521`）：“这个目录是空的”“点右下角按钮把当前数据备份到这里”，可下拉刷新 |
+| c8 | ✅ | 文件行“时间 · 大小”，文件夹只写时间（`:687-691`，`formatFileTime`、`formatFileSize` 来自 `shared/backup/backup_files.dart:116-127`）；名字以 `purelive` 开头的用备份文件图标（`:686`、`:700-705`） |
+| c9 | ✅ | 测试连接、显示密码（`web_dav_config_dialog.dart:43`、`:156`）；成功用语义色 `LiveSemanticColors.success`（`:104`） |
+| c10 | ✅ | 抽屉 `_drawer`（`:597-657`）：标题“WebDAV 服务器”、名字和地址、当前服务器实心图标和选中底色、编辑和红色删除同一行、“添加新配置” |
+| c11 | ✅ | 路径从左开始，长了跳到最后一级（`_breadcrumbs` `:547-595`）；路径和列表在一个最宽 720 的居中列里（`:438-439`，`readableContentMaxWidth`） |
+| c12 | ✅ | 普通结果用应用统一的提示条；上传、删除失败用带“重试”的提示条（`_failed` `:150-155`） |
+| c13 | ✅ | 帮助页 `web_dav_help.dart:12`：内容照 3.x；组标题 13 号主色（`:24-30`）、卡片圆角 16（`:35`）、最宽 720（`:54`）；截图点开全屏看大图（`WebDavScreenshot` `:156`、`:193-195`） |
+| R4 | ✅ | 去掉 v4 原来的 `PopScope`（先回上一级），子目录里按返回直接离开；回上一级用路径 |
+
+- 偏差：记录写“无（设计的每一条都照做）”。两处补充：①标题“WebDAV”靠左（下面一行服务器名，和返回键挨着，同设计图）；②上传后的文件名照 3.x 不带 uuid，同一秒加 `_2`（`shared/backup/backup_files.dart:18`），设计“拿不准的地方”第 3 条。
+- 后来的变化（以现在的代码为准）：A02.2（`fc5bcdd46`）配置对话框、确认框、提示条换成共用组件；A03.1（`a048ea540`）列表接 `AppRefreshView`（D-009 两端回弹、经典下拉刷新头）；D-011（`e320e0e72`）去掉一处标题居中设置；J04.1（开发提交 `5919208a1`，登记表记的是 `c168fdb99`）请求按服务器的要求选 Basic 或 Digest（`web_dav_auth.dart`），界面没变。
+- 新文字：出错页的“编辑配置”（`webdav_edit_current`）、“还没有服务器”（`webdav_no_server`）等；`webdav`、`backup_to_webdav`、`auth_webdav_desc` 里“WebDav”改“WebDAV”。没有新设置（服务器仍存在 `LiveStore.webdav`，密码加密）。
+- 门禁：`web_dav` 直接写的颜色和图标 36 → 0；`web_dav -> backup/...` 三条跨功能引用改引 `shared/backup/`。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/web_dav/web_dav_page_test.dart`（现在 10 个；当时 3 → 9，A03.1 加了 1 个下拉刷新）：PROPFIND 解析；加服务器先测试、上传、点文件预览后恢复；下拉刷新时行不消失；顶栏三个按钮、⋮ 两项和帮助页、路径从左、文件行图标和“时间 · 大小”；⋮ / 右键 / 长按同一菜单、文件夹只有删除、删除红色带线；出错原因和“编辑配置”；抽屉；上传失败“重试”；子目录里返回直接离开（R4）；宽屏 720 居中。`web_dav_auth_test.dart`（5）测 Digest（J04.1）。只用 `dav.test`、`example.com` 这类假地址。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 2 条（坚果云：添加服务器、测试连接、上传、点文件预览后恢复、删除），归 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md)；坚果云的各种错误码是否都落到四类原因里（设计“拿不准的地方”第 4 条）也在那时看。
+- 留下的问题和去向：Esc 返回链（抽屉、页面）→ A05.1；电视不做 WebDAV（pure_live_TV 已去掉，A17.9）。

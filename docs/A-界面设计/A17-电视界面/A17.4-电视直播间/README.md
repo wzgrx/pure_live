@@ -6,6 +6,7 @@
 - 基线：pure_live_TV（`~/ref/pure_live_TV/lib/modules/live/playback/`），不是 v3；同一功能用手机版的同一个组件：小菜单、弹幕设置、录制面板照 [A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（已确认），全屏按钮照 [A07.4](../../A07-直播间界面/A07.4-横屏全屏/README.md)，屏蔽管理照 [A08.1](../../A08-弹幕界面/A08.1-弹幕列表和弹幕设置页/README.md)，状态照 [A07.7](../../A07-直播间界面/A07.7-直播间的状态/README.md)，信息照 [A07.1](../../A07-直播间界面/A07.1-竖屏普通布局/README.md)
 - 评审页：claude.ai 私有页面（已发布，用户评审确认），由 `page.json` 生成（`tools/ui/mock/page.py`）；效果图源文件 [src/gen.py](src/gen.py)（电视的公共样式在 [src/tvkit.py](src/tvkit.py)，A17.5 也用）
 - 图片：pure_live_TV 按代码还原，尺寸是它的 1920×1080 设计像素折半画在 960×540 上（出图 1920 宽）；文字取自 pure_live_TV 的 `assets/translations/zh.json`（`i18nOr` 的键也查了）；画面和头像是示意图片
+- 旧编号：U.15d、T18c.1。设计确认：2026-10-01（用户同意全部电视设计：“后续全部通过”；确认记录 `62391fdd2`），待选 T1～T4 按建议 A（D-003）。下面正文里“改动（待确认）”“待评审”等是定稿前的字样，正文没有改。还没开发，任务书见 [brief.md](brief.md)
 
 ## 界面清点表
 
@@ -201,3 +202,11 @@
 | `widgets/panels/shield_panel.dart` | `features/shield/`（A08.1 屏蔽管理组件） |
 | `widgets/video_player/playback_failure_overlay.dart`、`placeholder/not_living_video_widget.dart`、`audio_only_surface.dart` | `features/live_play/player/player_status.dart`（`RoomStatusLayer`，A07.7） |
 | — | `features/recorder/`（录制面板，A07.6） |
+
+## 实现和验证
+
+- 实现：**还没开发**（登记表“已确认”，第三档；阶段“设计 ✓ → 开发 → 真机”只做完设计）。按 D-004 的客户端顺序，电视排在 Android、Windows 之后；开发的要求、阶段、测试和真机步骤都在 [brief.md](brief.md)，开发顺序见[子分类页](../README.md)的“路线”。
+- 现在的代码：X03.1 的基础直播间（`apps/pure_live/lib/tv/room/tv_live_play_page.dart`、`tv_room_overlays.dart`）：控制层带字按钮、左右键都开右侧房间列表、画质线路是居中选择框，没有播放设置、弹幕设置、屏蔽、录制；旧分支 M14.2（`69f12f418`）有重做前的半成品。
+- 开发前要知道的：手机的面板组件（弹幕设置、屏蔽、录制、状态）要加电视样式，做法写进 record.md 给 A17.6、A17.9 用；网络电视的“节目单”一行依赖 A17.5。
+- 验证：没有自动测试，也没有真机结果。真机要一台 Android 电视或电视盒子（任务书“真机验证”一节）。
+- 留下的问题和去向：见[子分类页](../README.md)“已知问题”。

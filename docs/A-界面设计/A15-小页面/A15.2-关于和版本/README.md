@@ -1,9 +1,11 @@
-# A15.2 关于和版本：设计（第 1 版）
+# A15.2 关于和版本：设计（第 1 版，已确认，已开发，登记为完成）
 
-- 状态：以登记表为准，见[子分类页](../../A06-首页和全局/README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-02；记录里没有 K90 结果，见“实现和验证”）
 - 范围：关于页、版本更新页（含下载源对话框、获取失败）、版本历史页（手机列表和详情对话框、宽屏左右分栏、下载确认）、启动时的新版本提示
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a152)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a152)
-- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a152)（A15.2-01～09）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a152)；功能清点 F-TOOL-03、F-TOOL-04（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；跨任务约定“A15.2 → A06.3：新版本提示用同一个组件”
+- 旧编号：U.12b、T07i.4（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（N1～N3 按建议 A）、D-015（`assets/version.json`、`assets/releases.json` 不能删）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）；按章节导出在 [page/](page/01-说明.jpg)
+- 记录：[record.md](record.md)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；版本号、日期、大小、下载次数、更新日志是示例；项目地址（含账号名）和 18 个镜像地址换成了占位；作者头像用默认图标
 
 ## 界面清点表
@@ -157,11 +159,35 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，N1～N3 按建议 A（“历史记录”改名“版本历史”、下载源收起、按父组件 840 分栏）。
-- 实现：c1～c13 做到，c14 有偏差，详见 [record.md](record.md)。`apps/pure_live/lib/features/about/about_page.dart`（顶栏只有返回、图标回到 3.x、“新版本 v…”标签、声明的信息图标、Logo 不弹跳）、`features/version/version_page.dart`（本平台的包和“本机”、“下载并安装”、下载源对话框三个按钮）、`features/version/release_history_view.dart`（从 `about/` 挪来，列表“发布于”和“最新”“当前”、按父组件 840 分栏、详情关闭在右上角、下载先确认并在应用内下载）、`update_feed.dart` 加 `foundUpdate`。启动时的新版本提示也改为下载本机的包（原来固定取第一个 arm64 包）。
-- 偏差：c14 新版本提示照任务书用 A06.3 已做好的 `NewVersionDialog`，设计图的“项目主页 / 以后再说 / 去更新”三个按钮和“发布于”没照做（需要维护者定以哪个为准）；“本机”按应用自己的架构 `Abi.current()`（设计写按设备 ABI 列表第一个）；获取失败用 `AppStatusView`。
-- 新文字：中英各 9 条（`version_history`、`about_new_version`、`update_choose_source`、`update_native_package`、`version_latest_badge`、`version_current_badge`、`update_download_package_title`、`update_download_confirm_named`、`update_download_action`）；没有新设置；`live_ui` 加 12 个 `AppIcons`。
-- 提交：`dd2e8cbfb`，在 `6f13ced71` 合并（2026-10-02）。`about` 16 → 0、`version` 11 → 0；跨功能引用 `about -> version/markdown_text.dart` 去掉。
-- 测试：`apps/pure_live/test/features/version/version_page_test.dart` 9 → 18 个（关于页、新版本标签、版本更新页的包和下载源、版本历史的标签和分栏、详情、下载确认）；`update_dialogs_test.dart` 9 个照旧通过。
-- 真机：没有单独记录。登记表已是“完成”，建议按 CHECKLIST 第 5 节第 4 条（装一个低版本测试包，版本页“下载并安装”）在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 补看。
-- 留下的问题：新版本对话框以 A06.3 还是本任务的设计为准（没有登记）；同版本换包收不到提示（Y02.1）；macOS 菜单栏的“关于”在 A18.2。
+**实现**（详见 [record.md](record.md)；提交 `dd2e8cbfb`“feat(version): about, update and version history per the U.12b design”（2026-10-02，登记表记的是这个），同日和 A15.1、A09.10、A08.3 一起在 `6f13ced71` 合并）
+
+定稿：用户确认第 1 版，N1～N3 由维护者按建议 A 定（D-003）：“历史记录”改名“版本历史”、下载源收起、按父组件 840 分栏。
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 三页的结构照旧；关于页顶栏只有返回（`about/about_page.dart:78`，v4 原来有标题“关于”）；图标回到 3.x 的 Remix（`AppIcons.onlineUpdate`、`versionHistory`、`licenses`、`projectPage` 等 12 个，`about_page.dart:141-173`） |
+| c2 | ✅ | 新键 `version_history`“版本历史”（`about_page.dart:153`；版本历史页标题 `version/release_history_view.dart:79`）；副标题仍是“历史版本更新记录” |
+| c3 | ✅ | `version/update_feed.dart:20` 的 `foundUpdate`、`:23` 的 `noteCheckedUpdate`：启动检查（`version/update_prompt.dart:45`）和版本页检查（`version/version_page.dart:129`）记下；关于页 `about_page.dart:138` 读它，`_NewVersionBadge`（`:206`）主色“新版本 v…”（`about_new_version`）；没检查过或没有新版本不显示 |
+| c4 | ✅ | `about_page.dart:181-186`：`AppIcons.infoLine` 次要色 + `about_legalese` 整段（没有 Firebase） |
+| c5 | ✅ | Logo 直接显示，去掉 3.x 的 1 秒 `elasticOut` |
+| c6 | ✅ | `version/version_page.dart:297` 的 `_StatusCard`（v4 原来就有），图标换成 `AppIcons.updateAvailable` / `upToDate` |
+| c7 | ✅ | `_Package`（`version_page.dart:367`）：一行“ARM64 (64位) · 大小 [本机]”（`:417`），右边“下载并安装”（`:431`，A06.3 的 `showUpdateDownload`：先试最快的源，失败换下一个）；“选择下载源（N 个）”（`:459`）点开才显示下载源按钮；“本机”按 `nativePackageTitle`（`:49`，`Abi.current()`），Windows 标在 EXE 安装包、macOS 标在通用包；启动时的新版本提示也改为下载本机的包（`update_prompt.dart:59-61`，原来固定取第一个 arm64） |
+| c8 | ✅ | 下载源对话框标题“ARM64 (64位) · 下载源 3”，文件名、地址，“在应用内下载”“在浏览器中下载”“复制链接”（`version_page.dart:550-574`），底部“取消” |
+| c9 | ✅ | 右上角刷新（`version_page.dart:164`，v4 原来就有） |
+| c10 | ✅ | `version/release_history_view.dart:20` 的 `releaseHistorySplitWidth` 840，`LayoutBuilder` 按父组件宽（`:95`，字体放大超过 1.5 倍时不分栏），左栏 320（`:132`）；852×393 横屏手机也是分栏 |
+| c11 | ✅ | `_VersionLine`（`release_history_view.dart:313`）：“发布于 日期”（`:347`）、“最新”“当前”标签（`:341-342`，`_Badge` `:287`），去掉文件大小；列表一张卡片、懒加载 |
+| c12 | ✅ | `_ReleaseHeader`（`release_history_view.dart:357`）：头像、版本、日期、打开发布页面、✕（`:416`）；日志和文件单独滚动；窄时是 `showAppDialog`（`:252`），返回键、Esc、点外面也关 |
+| c13 | ✅ | `_FileCard._download`（`release_history_view.dart:458-464`）：“下载安装包 / 是否下载“…apk”（38.6 MB）？下载完成后会打开安装。/ 取消、下载”，确认后在应用内下载（A06.3 的下载对话框，同 3.x `downloadAndInstallApk`；v4 原来直接用浏览器打开、不确认） |
+| c14 | ✅（偏差 1） | 照任务书用 A06.3 已做好的 `NewVersionDialog`（`update_prompt.dart:108`）：标题“发现新版本 v…”、“当前 v…”、更新内容、“不再提醒这个版本”、按钮“其他下载方式 / 取消 / 下载并安装”；设计图的“项目主页 / 以后再说 / 去更新”和“发布于 …”**没有照做** |
+
+- 结构上的改动：版本历史从 `about/` 挪到 `version/release_history_view.dart`（它的下载要用 `showUpdateDownload`，留在 `about` 里要多一条跨功能引用）；`RoutePath.kVersionHistory` 仍由 `AboutPage` 接（`about_page.dart:27`）转给 `VersionPage`，路由表没改；门禁基线里 `about -> version/markdown_text.dart` 去掉。
+- 偏差（记录）：①c14 用 A06.3 的对话框，两个任务的设计图不一致，要维护者定以哪个为准；②“本机”按应用自己的架构（`Abi.current()`，不加原生代码），设计“拿不准”第 1 条写的是设备 ABI 列表的第一个，64 位手机装了 32 位包时标 ARM32；③获取失败用 `AppStatusView`（云朵图标、标题、说明、“重试”，`version_page.dart:183-189`），按钮是 A02.1 的浅色实心（设计图照 3.x 画的深色实心）。
+- 后来的变化：`00f5edf18`（清理不用的翻译键）删掉了本任务不再用的 `version_history_desc`、`about_installed_version`、`version_file_size`、`download`；A02.2（`fc5bcdd46`）对话框换成共用组件；`e3a0799cf`、`4b039e0c7`（4.0.0 发布）改了版本号和测试数据。
+- 新设置、新文字：没有新设置；中英各加 9 条（`version_history`、`about_new_version`、`update_choose_source`、`update_native_package`、`version_latest_badge`、`version_current_badge`、`update_download_package_title`、`update_download_confirm_named`、`update_download_action`）；设计里的“以后再说”“去更新”随偏差 1 没有加。`live_ui` 加 12 个图标（`onlineUpdate`、`versionHistory`、`licenses`、`projectPage`、`updateAvailable`、`upToDate`、`downloadPackage`、`downloadSource`、`openInBrowser`、`releaseFile`、`releaseAuthor`、`releasePage`）。
+- 门禁：`about` 直接写的颜色和图标 16 → 0、`version` 11 → 0；跨功能引用少一条，没有新增（`about -> version/app_version.dart`、`about -> version/update_feed.dart` 两条还在 `tools/gate/ui_baseline.json:3-4`）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/version/version_page_test.dart`，本任务 9 → 18 个，现在 19 个用例声明：关于页（没有标题、两组五行的顺序、图标、“版本历史”、没有 Firebase、声明、“新版本 v9.0.0”、不弹跳、点“版本历史”）；关于页和版本更新页 852×393、1280×800 最宽 720；启动检查和版本页记下 / 清掉新版本；版本更新页的包（“下载文件 · Android”、三个包的顺序、“下载并安装”在右、48 高、“本机”只在本机的包、下载源收起和展开、下载源对话框的标题和三个按钮）；版本历史（“最新”“当前”、没有文件大小、关闭在右上角、Esc 关）、按父组件 839 / 852 分栏、下载确认的标题文字按钮；`nativePackageTitle` 的对应。照实改了的原有断言 4 条见记录。A06.3 的 `apps/pure_live/test/features/version/update_dialogs_test.dart` 现在 10 个，照旧通过。
+- 真机：**记录里没有 K90 结果**（S02.2、S02.3 没看这几页；登记为“完成”不符合 PROCESS“完成要有真机结果”）。要看的：首页更多菜单 → 关于（顶栏只有返回、Logo 不弹跳、有新版本时“新版本 v…”）；在线更新（状态卡、“本机”标在 ARM64、下载源收起和展开、下载源对话框）；版本历史（竖屏点一行出详情、✕ 关；横屏左右分栏）；“下载并安装”只走到系统安装器出现并取消（会下载正式包，装了会覆盖用户的 3.x）。应用内下载在 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 第 4 阶段（CHECKLIST 第 5 节第 4 条），页面本身建议同一轮或 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看。
+- 留下的问题和去向：新版本对话框以 A06.3 还是本任务的设计为准（没有登记，要维护者定）；同版本换包收不到提示 → [Y02.1](../../../Y-发布和运营/Y02-更新通道/Y02.1-同版本换包时应用内收不到更新/README.md)；电脑上 Esc 不返回 → A05.1 c3；电视的关于和检查更新 → A17.9；macOS 菜单栏的“关于”→ A18.2。

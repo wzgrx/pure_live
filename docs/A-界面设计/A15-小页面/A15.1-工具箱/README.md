@@ -1,9 +1,11 @@
-# A15.1 工具箱（链接解析）：设计（第 1 版）
+# A15.1 工具箱（链接解析）：设计（第 1 版，已确认，已开发，登记为完成）
 
-- 状态：以登记表为准，见[子分类页](../../A06-首页和全局/README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；记录里没有 K90 结果，见“实现和验证”）
 - 范围：链接解析页（输入、进行中、支持列表）、选择清晰度和选择线路对话框、自动填充提示和结果提示
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a151)、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a151)
-- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a151)（A15.1-01）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a151)；功能清点 F-TOOL-01、F-TOOL-02（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；跨任务约定“A17.5 → A15.1：链接放映和工具箱用同一份支持解析列表”
+- 旧编号：U.12a、T07i.3（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（Y1、Y2 按建议 A）、D-011（标题居中）
+- 评审页：claude.ai 私有页面（已发布，用户评审确认）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)（公用部分 [src/skit.py](src/skit.py)）；按章节导出在 [page/](page/01-说明.jpg)
+- 记录：[record.md](record.md)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；直播流地址是占位；平台标签的图标是示意（首字 + 颜色），开发时用 `PlatformLogo`
 
 ## 界面清点表
@@ -124,10 +126,29 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，Y1、Y2 按建议 A（一个输入框、两个按钮并排；支持列表单独一张、默认收起）。一并处理 A17.5 → A15.1：链接放映和工具箱用同一份“支持解析列表”。
-- 实现：c1～c9 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/toolbox/toolbox_page.dart`（组标题在卡片外、粘贴 / 清除切换、“链接跳转”实心和“获取直链”浅色各 48 高、进行中写在做什么、选择对话框标题 20 号每项 ≥56、最宽 720、横屏手机顶栏 48）；支持列表挪到 `apps/pure_live/lib/shared/links/supported_platforms.dart`（`linkPlatforms`、`SupportedPlatformsCard`）；控制器 `toolbox_actions.dart` 的逻辑没改。
-- 偏差：无；“共 N 个平台”按实际注册的平台数，不是设计图写的 45。
-- 提交：`b164796dc`，和 A15.2、A09.10 等一起在 `6f13ced71` 合并（2026-10-02）。`toolbox` 的直接颜色和图标 7 → 0；没有新文字和新设置；`live_ui` 加 `AppIcons.linkJump`。
-- 测试：`apps/pure_live/test/features/toolbox/toolbox_page_test.dart` 6 → 9 个（竖屏、进行中和对话框、852×393 和 1280×800）。
-- 真机：没有单独记录。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看（粘贴一个哔哩哔哩链接，跳转和获取直链各一次）。
-- 留下的问题：电视的链接放映（A17.5）开发时用 `SupportedPlatformsCard`。
+**实现**（详见 [record.md](record.md)；提交 `b164796dc`“feat(toolbox): link parser per the U.12a design”（2026-10-01，登记表记的是这个），2026-10-02 和 A15.2、A09.10、A08.3 一起在 `6f13ced71`“Merge U.12a-d: toolbox, about and versions, tags, danmaku blocking”合并）
+
+定稿：用户确认第 1 版，Y1、Y2 由维护者按建议 A 定（D-003）。一并处理 A17.5 → A15.1：链接放映和工具箱用同一份“支持解析列表”。
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 入口没动（`features/home/menu_button.dart:100`、`:117` 的 `HomeAction.openLink`）；控制器 `features/toolbox/toolbox_actions.dart:45` 的 `ToolboxController` 逻辑没改（只把 `linkPlatforms` 挪到 `shared/`）；选清晰度、线路在 `features/toolbox/toolbox_page.dart:109-119` |
+| c2 | ✅ | `toolbox_page.dart:329` 的 `_ActionButtons`：“链接跳转”实心（`AppIcons.linkJump` `:350`）、“获取直链”浅色（`AppIcons.streamLink` `:357`），各 48 高、圆角 12；宽 <320 上下排（`:361`） |
+| c3 | ✅ | `toolbox_page.dart:167` 的 `SettingsGroup`（A11.1 的组）：组标题“平台链接”在卡片外；卡片里 13 号次要色说明（`_LinkCard` `:223`） |
+| c4 | ✅ | `shared/links/supported_platforms.dart:21` 的 `SupportedPlatformsCard`（默认收起、平台标签），放在 `toolbox_page.dart:185`；平台 `linkPlatforms`（`supported_platforms.dart:12`，有链接规则的平台，不含网络电视） |
+| c5 | ✅ | `_LinkCard`（`toolbox_page.dart:199`）：空时“粘贴”（`AppIcons.pasteText`，`:244`），有字时“清除”（`AppIcons.clearField`，`:250`） |
+| c6 | ✅ | 进行中“正在解析链接… / 正在读取直播流地址…”（`toolbox_opening`、`toolbox_reading_stream`），两个按钮变灰，右边“取消”（`:274`，48 的点击区） |
+| c7 | ✅ | 自动填充 `_fillFromClipboard`（`toolbox_page.dart:88`）用 `AppNavigator.toast`（`:95`，“已自动填充剪贴板中的直播链接”） |
+| c8 | ✅ | `ToolboxChoiceDialog`（`toolbox_page.dart:288`）：标题 20/600，每项最少 56 高、左边距 24，名字 15 号、地址 12 号一行截断，去掉 v4 原来的右箭头，底部“取消”；外壳后来随 A02.2 换成统一对话框（`fc5bcdd46`） |
+| c9 | ✅ | `ReadableContent`（`toolbox_page.dart:187`，最宽 720 居中，滚动区是整个窗口宽）；窗口高 <480 时顶栏 48（`:153-157`）；标题居中 `centredPageTitle`（`:156`，A02.1 后按 D-011） |
+
+- 偏差：无。“共 N 个平台”按 `linkPlatforms` 的实际数（测试里是测试注册的平台），不是设计图写的 45。
+- 后来的变化：O03.2（`02085e8dd`）让工具箱也认 3.x 的分享口令（`toolbox_actions.dart:194-199` 的 `_resolve` 先试口令）；A02.2（`fc5bcdd46`）对话框、提示条换成共用组件；A02.1（`914784264`、`e320e0e72`）标题位置按 D-011（工具箱居中）。
+- 新设置、新文字：没有（用的都是 v4 已有的键 `toolbox_link_title`、`toolbox_link_subtitle`、`toolbox_paste`、`toolbox_support_count`、`toolbox_support_hint`、`toolbox_opening`、`toolbox_reading_stream`）。`live_ui` 加 `AppIcons.linkJump`。
+- 门禁：`toolbox` 直接写的颜色和图标 7 → 0（`tools/gate/ui_baseline.json` 去掉这一项）；没有新增跨功能引用。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/toolbox/toolbox_page_test.dart`，本任务 6 → 9 个，现在 10 个用例声明（O03.2 加了“离线认分享口令”）：竖屏（组标题在卡片外、一个框、粘贴 / 清除切换、两个按钮的顺序图标和高度、支持列表单独一张且收起）；进行中（说明文字、按钮变灰、对话框标题 20 号、选项左对齐 24 和高度 ≥56、没有箭头、地址一行）；852×393 和 1280×800（最宽 720 居中、横屏 48 高顶栏、按钮一行）；原有的打开、复制、取消、失败提示、自动填充、平台列表。
+- 真机：**记录里没有 K90 结果**（S02.2、S02.3 都没看工具箱；登记为“完成”不符合 PROCESS“完成要有真机结果”）。要看的：首页链接按钮进入；复制一个哔哩哔哩直播间链接后进入，框里自动填上并有提示；“链接跳转”进直播间；“获取直链”选清晰度和线路后提示已复制；进行中点“取消”；横屏最宽 720、顶栏 48；支持列表展开收起。建议随 [S02.4](../../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 或 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看，标题居中在 S02.5 的 4A-01。
+- 留下的问题和去向：电视的链接放映（[A17.5](../../A17-电视界面/A17.5-电视网络电视和影片/README.md)）开发时用 `SupportedPlatformsCard` / `linkPlatforms`；电脑上 Esc 不返回 → A05.1 c3。

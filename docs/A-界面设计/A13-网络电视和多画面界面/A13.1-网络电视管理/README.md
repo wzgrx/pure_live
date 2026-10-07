@@ -1,10 +1,12 @@
-# A13.1 网络电视管理：设计（第 1 版）
+# A13.1 网络电视管理：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.9、T11a.4（见 [MAPPING.md](../../../MAPPING.md)）
 - 范围：v3 的“IPTV 设置”页、“订阅源管理”页，以及它们弹出的导入方式、网络导入、同步间隔、请求头、选节目单、删除、同名替换对话框和提示条
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a131)（A13.1-01～13）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a131)
-- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a131)（A13.1-01～13）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a131)；功能点 F-IPTV-01～05（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；逻辑在 [L01](../../../L-网络电视和点播/L01-网络电视/README.md)（L01.1～L01.3）；相关决定 D-003（H1～H4 按建议 A）、D-011、D-017
+- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`，`tools/ui/strings.py` 列出）；播放列表名字和地址是编的（`example.com`），默认节目单地址是 v3 代码里写的
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -50,7 +52,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 两页合一、叫法统一、卡片改用颜色角色、点卡片不再打开地址、状态补齐、四个选择 | 待评审 |
+| 第 1 版 | 两页合一、叫法统一、卡片改用颜色角色、点卡片不再打开地址、状态补齐、四个选择 | 用户 2026-10-01 确认；H1～H4 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -77,7 +79,7 @@
 | [v3-wide.jpg](v3-wide.jpg)、[v4-wide.jpg](v4-wide.jpg) | 1280×800 |
 | [v3-land.jpg](v3-land.jpg)、[v4-land.jpg](v4-land.jpg) | 手机横屏 852×393 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -127,11 +129,36 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，H1～H4 按建议 A（两页合一、一栏最宽 720、卡片上没有“使用”按钮、删除留在卡片上）。
-- 实现：c1～c17 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/iptv/iptv_page.dart`（一页四组、全部同步、各状态）、`iptv_cards.dart`（卡片、标签、统计、同步进度、状态卡、静态骨架）、`iptv_import.dart`（导入方式照 3.x 的顺序、网络导入的失败原因和“重试”、同名替换、粘贴文本）、`iptv_settings.dart`（同步间隔、请求头）；叫法统一成“播放列表”“节目单”；`platform/plugins.dart` 改了文件选择框的标题（一行）。`live_ui` 只做添加：IPTV 一组 `AppIcons`、暖色容器 `LiveSemanticColors.warmContainer`、`ReadableContent`。
-- 偏差：标题居中由本页自己设（后来 D-011 定了哪些页居中，本页照 3.x 居中，符合）；默认节目单导入失败的状态沿用 v4 的读取失败卡（设计没画）；卡片本身不可点，所以没有整卡悬停。
-- 新文字：中英各加 18 条、改 22 条、删 4 条 v4 自己加的键；3.x 的键都没删。没有新设置，存储键不变。
-- 提交：`7c6d685cb`，和 A12.1～A12.3 一起在 `59248e0b9` 合并（2026-10-01）；二维码和提示卡按钮的小修 `dc5abab12`。`iptv` 的直接颜色和图标 38 → 0。
-- 测试：`apps/pure_live/test/features/iptv/iptv_page_test.dart` 8 → 16 个（布局、状态、对话框、操作、340 宽 1.3 倍字号）；`live_ui` 47 个。记录时有一个用例依赖真实时间（过零点会失败），之后把导入时间也接到了固定时钟 `iptvClockProvider`（`features/iptv/iptv_data.dart:15`）。
-- 真机：没有看过（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)“没测的”里有网络电视）。登记表已是“完成”，建议按 CHECKLIST 第 1 节第 17 条（导入 m3u、播放、节目单和回看）在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看。
-- 留下的问题：电视的网络电视页（A17.5）。
+**实现**（详见 [record.md](record.md)；2026-10-01，开发提交 `7c6d685cb`“feat(ui): U.9 IPTV settings as one page per the confirmed design”（登记表写的就是它），和 A12.1～A12.3 一起在 `59248e0b9`“Merge U.9 and U.10: IPTV management and accounts”合并）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/iptv/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | `iptv_page.dart:416` 的 `build`：未启用提醒（`:498`）→ 统计（`:470-480`）→ 播放列表组（`_playlistSection` `:531`）→ 节目单组（`_guideSection` `:588`）→ 同步和播放（`_settingsSection` `:686`）；路由 `RoutePath.kIptv`（`routes/app_router.dart:53`），入口设置 → 直播来源 → IPTV 设置（`features/settings/settings_model.dart:55`） |
+| c2 | ✅ | 文字键 `import_playlist`“导入播放列表”、`import_epg_source`“导入节目单”、`active_epg_source`“当前使用的节目单”、`select_epg_source`“选择节目单”等；页面里不再出现“订阅源”“播放源” |
+| c3 | ✅ | `IptvOverview.load`（`iptv_data.dart:40`）排序：网络在前，再按名字（不分大小写），内置热门列表最后；“网络 / 本地”是卡片上的灰标签 `IptvTag`（`iptv_cards.dart:291`） |
+| c4 | ✅ | `IptvSourceCard`（`iptv_cards.dart:24`）、格式标记 `_Leading`（`:252`）：播放列表 `primaryContainer`、节目单 `LiveSemanticColors.warmContainer`（`packages/live_ui/lib/src/theme/live_colors.dart:213-219`）；去阴影、圆角 16；“1,024 个频道 · 今天 08:00 更新”（`groupDigits` `iptv_data.dart:115`、`updatedText` `:127`）；使用中的节目单主色描边 +“使用中” |
+| c5 | ✅（见“留下的问题”） | 点卡片不打开地址；右上角“更多”和右键（`iptv_cards.dart:194`）打开同一个菜单（`_menu` `:90-108`）：在浏览器中打开 / 打开文件、复制地址；动作在 `iptv_page.dart:382` 的 `_cardAction`；删除留在卡片上（H4 A） |
+| c6 | ✅ | 同步、删除、自动同步；卡片宽 ≥520 一行（`iptvCardOneRowWidth` `iptv_cards.dart:17`、`:213`），窄时两行；本地来源只有删除；按钮高 48；忙时变灰、同步转圈（`_runItem` `iptv_page.dart:258`） |
+| c7 | ✅ | 标题栏“同步”（`iptv_page.dart:430-437`）同步全部网络来源（`_syncEverything` `:295`），统计位置换成 `IptvSyncProgress`（`iptv_cards.dart:471`，“正在同步网络来源 1 / 3”和进度条），结束提示成败个数 |
+| c8 | ✅ | `IptvStats`（`iptv_cards.dart:427`）：播放列表、频道、节目单，数字 20 号等宽，没有图标框 |
+| c9 | ✅ | `chooseImportOrigin`（`iptv_import.dart:84`）：顺序照 v3 本地、网络，再加“粘贴文本”（播放列表）或“默认节目单”（节目单），每项一句说明，没有按钮 |
+| c10 | ✅ | `IptvNetworkImportDialog`（`iptv_import.dart:273`）：带标签的“订阅地址”“名称（可选）”，失败原因在地址框下（`failureText` `iptv_data.dart:154`）、按钮变“重试”；同名先问（`confirmReplace` `iptv_import.dart:240`），取消不算失败 |
+| c11 | ✅ | `_maybeLoadDefaultGuide`（`iptv_page.dart:124`）：只在 `meta` 里没有 `defaultGuideMetaKey`（`:42`）时自动导入一次，导入成功才记（`:150`）；以后在空状态和导入方式里一键导入 |
+| c12 | ✅ | `_delete`（`iptv_page.dart:342`）：确认写清后果、红底“删除”、点外面不关；删正在使用的节目单多一句并改用下一个 |
+| c13 | ✅ | `_chooseGuide`（`iptv_page.dart:99`）：标题“选择节目单”、没有右上角关闭、底部“取消”、当前项主色；点一项切换并关闭，提示“已改用“名字””（`_select` `:83-89`，`iptv_guide_switched`） |
+| c14 | ✅ | `editUserAgent`（`iptv_settings.dart:35`）：去掉“－ 144 px ＋”，输入框随内容变高（最多 8 行），清除按钮在右上角；没设置时“未设置（使用默认请求头）” |
+| c15 | ✅ | 文件选择框标题 `importPickerTitle`（`iptv_import.dart:48`，“选择播放列表文件 / 选择节目单文件”，`platform/plugins.dart` 用它）；“已保存请求头” |
+| c16 | ✅ | 骨架 `IptvSkeleton`（`iptv_cards.dart:622`，静态无扫光）、读取失败和两组空状态、默认节目单导入中 `IptvStateCard`（`:514`）、未启用提醒（`iptv_page.dart:498`）、全部同步进度；数据变了自动刷新（`iptvOverviewProvider` `iptv_data.dart:19-23` 的 `database.watch`） |
+| c17 | ✅ | 同步间隔六档 `syncIntervalOptions`（`iptv_settings.dart:7`）和对话框（`:12`，当前项填充勾、没有按钮）；“启动时全自动同步”；请求头 500 字（`:29`）；一次只做一个导入（`_import` `iptv_page.dart:182`） |
+
+- 偏差（记录“偏差和原因”，以现在的代码为准）：①记录写“标题居中是本页自己设的（`centerTitle: true`）”，A02.1 的 `914784264` 去掉了这一行，D-011 定了 3.x 实际运行时标题靠左（3.x 的 `main.dart` 替换了主题里的居中设置），现在“IPTV 设置”靠左；②默认节目单导入失败：设计没画，用读取失败卡，标题“默认节目单导入失败”、说明用 v3 的“默认节目单来源尚未准备好……”、按钮“重试”“导入节目单”；③卡片本身不可点（c5），没有整卡悬停高亮。
+- 后来的变化：`ad5f8d1fb`（测试：页面和导入器同一个时钟）；A02.1（`914784264`）设置行、标签换成共用组件；A02.2（`fc5bcdd46`）对话框和提示条换成 `showAppDialog`、`showAppConfirmDialog`、`showAppOptionDialog`；`9f68079cc` 网络导入的主按钮写“导入”而不是“确认”；`dc5abab12` 提醒卡按钮靠左。
+- 依赖：本地导入用 O03.1 加的 `file_picker`（Android 走系统文档选择器，不要存储权限）；输入路径对话框 `askForFilePath`（`iptv_import.dart:159`）只留作测试和没有插件时的后备。
+- 新文字：中英各加 18 条、改 22 条、删 4 条 v4 自己加的（`iptv_guide_channel_count`、`iptv_section_guides`、`iptv_section_playlists`、`iptv_use_guide`），3.x 的键都没删。没有新设置，存储键不变（`isAutoSyncEnabled`、`autoSyncHoursInterval`、`customIptvUserAgent`、`selectedSourceId/Name`、`hotAreasList`）。
+- 门禁：`iptv` 直接写的颜色和图标 38 → 0。`live_ui` 只做添加：IPTV 一组 `AppIcons`、暖色容器、`ReadableContent`（`packages/live_ui/lib/src/widgets/settings_tiles.dart:16`）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/iptv/iptv_page_test.dart`（现在 15 个声明，其中“一栏 ≤720、卡片按钮一行”在循环里跑 1280×800 和 852×393 两种尺寸，共 16 个，和记录的 8 → 16 一致）：一页的顺序和 v3 图标、竖屏卡片两行；宽屏 / 横屏一栏和一行按钮；“更多”菜单、复制地址、右键、点卡片不打开；默认节目单只导入一次和空状态里的入口；导入方式顺序和说明；网络导入、同名替换、失败原因和“重试”；进行中关闭对话框导入继续；粘贴文本和本地文件（标题“选择播放列表文件”）；单个 / 全部同步、自动同步、删除；节目单只从“当前使用的节目单”切换、删除改用下一个；启用、自动同步、间隔、请求头；静态骨架；读取失败和重试；340 宽 1.3 倍字号不溢出。`packages/live_ui` 当时 47 个（`ReadableContent`、暖色容器对比度）。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`（[S02.3 记录](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)“没测的”里有网络电视）。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 17 条（导入 m3u、播放频道、节目单和回看），归 [S02.6](../../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md) 阶段 c2；另看系统文件选择器的标题、第一次进来默认节目单的导入卡和失败卡。
+- 留下的问题和去向：卡片“更多”菜单仍是 Flutter 的 `showMenu`（`iptv_cards.dart:91`），是应用里最后一处，没跟上 A02.3 的统一小菜单 → [A02.3](../../A02-组件/A02.3-贴着按钮的小菜单/README.md)；电视的网络电视页 → [A17.5](../../A17-电视界面/A17.5-电视网络电视和影片/README.md)；Esc 返回 → A05.1。

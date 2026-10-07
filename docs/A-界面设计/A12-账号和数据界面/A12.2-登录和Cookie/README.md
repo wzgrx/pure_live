@@ -1,10 +1,12 @@
-# A12.2 登录和 Cookie：设计（第 1 版）
+# A12.2 登录和 Cookie：设计（第 1 版，已确认，已开发，待真机）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
-- 范围：哔哩哔哩扫码登录、网页登录；虎牙、斗鱼、抖音、快手、YY、Twitch、SOOP 的 Cookie 页（共用 `AccountCookieEditorPage`），斗鱼多出的续期输入；改了没保存时的确认
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a122)（A12.2-01～11）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a122)；入口在 [A12.1](../A12.1-账号总览/README.md)
-- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；K90 上没有记录，见“实现和验证”）
+- 旧编号：U.10b、T10a.3（见 [MAPPING.md](../../../MAPPING.md)）
+- 范围：哔哩哔哩扫码登录、网页登录；虎牙、斗鱼、抖音、快手、YY、Twitch、SOOP 的 Cookie 页（3.x 共用 `AccountCookieEditorPage`），斗鱼多出的续期输入；改了没保存时的确认；新加网易CC 的 Cookie 页
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a122)（A12.2-01～11）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a122)；功能点 F-ACC-02～05（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；入口在 [A12.1](../A12.1-账号总览/README.md)；逻辑在 [K01.1](../../../K-账号和登录/K01-账号和登录方式/README.md)；升级 2-1（斗鱼强制续期）、C-22（网易CC）见 [specs/UPGRADES.md](../../../specs/UPGRADES.md)；相关决定 D-003（L1～L3 按建议 A）、D-018
+- 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）。**8 个平台**是账号列表上的 8 个：7 个有 Cookie 页，用同一个页面，只是输入提示和说明不同，所以用虎牙代表画一张完整的，差别列成表；斗鱼多三项，单独画；哔哩哔哩没有 Cookie 页，是扫码和网页登录。图里的 Cookie、名字、ID 都是一眼能看出的假占位（`xxxxxxxx`、`12345678`、“示例用户”），二维码是随机图案，不能扫
+- 记录：[record.md](record.md)
 
 ## 界面清点表
 
@@ -53,7 +55,7 @@
 
 | 版 | 内容 | 用户意见 |
 |---|---|---|
-| 第 1 版 | 一个 Cookie 页加平台差别表；状态卡、说明统一、粘贴清空、先核验再保存、页内退出；斗鱼续期组；扫码覆盖层和其他登录方式；三个选择 | 待评审 |
+| 第 1 版 | 一个 Cookie 页加平台差别表；状态卡、说明统一、粘贴清空、先核验再保存、页内退出；斗鱼续期组；扫码覆盖层和其他登录方式；三个选择 | 用户 2026-10-01 确认；L1～L3 按建议 A（D-003） |
 
 ## 对比页（按章节导出）
 
@@ -83,7 +85,7 @@
 | [v3-wide.jpg](v3-wide.jpg)、[v4-wide.jpg](v4-wide.jpg)、[v3-qr-wide.jpg](v3-qr-wide.jpg)、[v4-qr-wide.jpg](v4-qr-wide.jpg) | 1280×800 |
 | [v3-land.jpg](v3-land.jpg)、[v4-land.jpg](v4-land.jpg) | 手机横屏 852×393 |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -130,11 +132,33 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，L1～L3 按建议 A（已存 Cookie 照原文显示、扫码页下面“扫不了？”、页内退出用设计图的文字）。
-- 实现：c1～c15 做到，详见 [record.md](record.md)。通用 Cookie 页 `apps/pure_live/lib/features/account/platform_cookie_view.dart` + 框架 `cookie_editor.dart`（粘贴、清空、格式错误、去“Cookie:”前缀、没改动时保存变灰、先核验再存、舍弃确认、Ctrl+S / Cmd+S）；斗鱼 `douyu_cookie_view.dart`；扫码 `bilibili_qr_login.dart`（二维码 200、宽屏 220，六种覆盖层，位置不动）；网页登录 `bilibili_web_login.dart`（盖层和底部红条照 v3）。
-- 偏差：网页登录在手机上显示（设计写“v4 没有内置浏览器、先不显示”，但 O03.1 已接入 `flutter_inappwebview`）；页内退出确认当时照图写“退出虎牙？”，合并后的收尾（[A07.9 记录](../../A07-直播间界面/A07.9-已合并界面任务的收尾/record.md)第 3 节，提交 `8f6a925b6`）改成和列表同一个 `confirmSignOut`（3.x 的“退出登录 / 确定退出“{name}”账号吗？”），`confirmPageSignOut` 和它的两条文字已删；斗鱼到期时间沿用 `yyyy-MM-dd HH:mm`；哔哩哔哩 Cookie 页去掉标题栏的“二维码登录”。网页登录成功后改成直接 `pop(true)`（A09.8 修了共用浏览器的死循环后，这里不再用 `maybePop`）。
-- 新文字：`account_status_none_hint`、`account_qr_cannot_scan`、`qr_scanned`、`douyu_open_passport` 等 10 条（其中 `account_sign_out_title`、`account_sign_out_message` 后来随收尾删掉），改 16 条。没有新设置（`douyuForceRenew` 原有）。测试和截图只用假 Cookie。
-- 提交：`587ccc3c7`，在 `59248e0b9` 合并（2026-10-01）；二维码深色主题的定位点修在 `dc5abab12`；收尾 `8f6a925b6`（同一套退出确认）、`6d90f6649`（平台名统一成“SOOP”“网易CC”）、`d2ec7bbfc`（网页登录存好 Cookie 后关闭），在 `a88f26dfc` 合并（2026-10-02）。
-- 测试：`account_page_test.dart` 中本任务 13 个（Cookie 页的顺序和各状态、页内退出、剪贴板和 Ctrl+S、先核验再存和核验失败照存、网易 CC、斗鱼各部分、扫码覆盖层和刷新、平台拒绝不存、“扫不了？”、手机网页登录在前、宽屏、没有内置浏览器的提醒）。
-- 真机：没有看过。登记表已是“完成”，建议按 [S02 的 CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 6～8 条（扫码登录、网页登录、登录后原画）补看，Cookie 加密在真机上的读写归 [K02.1](../../../K-账号和登录/K02-登录状态/README.md)。
-- 留下的问题：哔哩哔哩多账号（V01.2 提议）。
+**实现**（详见 [record.md](record.md)；2026-10-01，开发提交 `587ccc3c7`（登记表写的就是它，和 A12.1 同一个提交），合并提交 `59248e0b9`；收尾在 `a88f26dfc`“Merge U.2, U.8 and U.10 follow-ups”（2026-10-02）合并）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/account/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | 标题 `account_editor_title`“{name}账号”（`cookie_editor.dart:404`；3.x 都是“设置cookie”） |
+| c2 | ✅ | 状态卡 `AccountStatusCard`（`account_widgets.dart:20`，图标 32），文字和列表同一个 `accountStatus`（`platform_cookie_view.dart:137`）；没存时“未设置：粘贴登录后的 Cookie”；哔哩哔哩、抖音卡片右边“重新核验”（`platform_cookie_view.dart:149-152`，核验中不显示） |
+| c3 | ✅ | 通用说明 `cookie_tip`、提示 `cookie_hint`（`account_platforms.dart:76-79`）；哔哩哔哩、斗鱼、Twitch、SOOP 用各自的键（`:92-93`、`:100`、`:128-129`、`:137-138`）；“仅保存在本机”挪到页底说明 |
+| c4 | ✅ | 说明横幅 `AccountTipBanner`（`account_widgets.dart:99`）里“打开 xx 网页”，系统浏览器打开（`openAccountWebsite` `:166`）；斗鱼是“打开 passport.douyu.com”（`douyu_cookie_view.dart:19`） |
+| c5 | ✅ | “粘贴”“清空”两个描边小按钮（`cookie_editor.dart:334-338`）；去掉“Cookie:”前缀（`account_state.dart:255`）；不像 Cookie 时框变红、说明、不能保存（`cookie_editor.dart:229-230`，`looksLikeCookie` `account_state.dart:258`） |
+| c6 | ✅ | 没改动时保存变灰（`cookie_editor.dart:346`）；先核验再存（`platform_cookie_view.dart:95-124`，保存中“正在核验并保存…” `cookie_editor.dart:307`）；核验请求本身失败照存并提示“已保存，暂时无法核验账号”；一次一条提示 |
+| c7 | ✅（偏差 1） | 页内“退出登录”（`cookie_editor.dart:381`），确认用和列表同一个 `confirmSignOut`（`:244`）；清空后保存按退出处理（`:225-228`） |
+| c8 | ✅ | 说明横幅、“Cookie”分组、多行输入 3～7 行（`:83-84`）、48 高的保存按钮、舍弃确认“舍弃 Cookie 修改？”“继续编辑 / 舍弃”（`:274-283`，`PopScope` `:394`）；L1 A：已存的 Cookie 在框里照原文显示 |
+| c9 | ✅ | 斗鱼会话说明在状态卡（`account_state.dart:211`、`:224`）；“续期”一组：LTP0、dy_did 带标签的框、“立即续期”和一句说明（`douyu_cookie_view.dart:201-255`）；粘贴 passport Cookie 只取走 LTP0 / dy_did（`:72-79`），保存后框里是实际存下的登录 Cookie（`:93-115`） |
+| c10 | ✅ | “登录后强制续期”开关单独一张卡（`douyu_cookie_view.dart:257-261`，设置键 `douyuForceRenew`，`packages/live_store/lib/src/settings/settings.dart:117`，默认关） |
+| c11 | ✅ | 扫码页 `BilibiliQrLoginView`（`bilibili_qr_login.dart:183`）：没有重复的顶部说明；二维码 200，宽 ≥600 时 220（`:257-260`）；六种状态 `BilibiliQrPhase`（`:17`）盖在 `live_ui` 的 `QrCodeCard` 上（`_QrCard` `:309`），失效、失败的按钮在二维码中间；下面一行 `_QrMessage`（`:349`，已扫描时主色浅底） |
+| c12 | ✅ | “扫不了？”（`:274-300`）：网页登录只在 Android、iOS 且 `InAppWeb.available`（`:243-244`）；“填写 Cookie”进哔哩哔哩的 Cookie 页，返回回到扫码页（L2 A） |
+| c13 | ✅ | `_complete`（`:214-240`）：确认后先核验，平台说没登录不存；核验请求失败照存，提示“已保存，暂时无法核验账号” |
+| c14 | ✅ | 网页登录 `BilibiliWebLoginView`（`bilibili_web_login.dart:46`）：标题栏“二维码登录”（宽 <520 只有图标，`:140`），核验中盖一层（`:168-190`），出错底部红条（`:192-220`）；成功后 `pop(true)`（`:125`） |
+| c15 | ✅ | 网易CC 走 `RoutePath.kSettingsAccount` 加 `cc`（`account_platforms.dart:117-122` 没有自己的路由），同一个 `PlatformCookieView`；状态“已保存，暂未用于请求” |
+
+- 根因（记录）：3.x 每个平台一个 `*_cookie_page.dart`、标题都写“设置cookie”，保存不核验、什么都不填也提示“已保存”，斗鱼的会话说明是一条和保存提示同时出现的提示条，扫码页的状态把二维码整个换掉导致位置跳动。
+- 偏差（记录“偏差和原因”，以现在的代码为准）：①页内退出确认当时照图写“退出虎牙？”，A07.9 收尾（`8f6a925b6`，2026-10-01）改成和列表同一个 `confirmSignOut`（3.x 文字），`confirmPageSignOut` 和 `account_sign_out_title`、`account_sign_out_message` 已删；②网页登录：设计写“v4 没有内置浏览器，先不显示”，实际 O03.1 已接入 `flutter_inappwebview`，所以手机上显示；没有内置浏览器时旧网页登录地址显示哔哩哔哩 Cookie 页加黄色提醒（`account_page.dart:39`、`platform_cookie_view.dart:140`）；③斗鱼到期时间沿用 `yyyy-MM-dd HH:mm`（设计图是示意的“10-08 21:30”）；④哔哩哔哩 Cookie 页去掉 v4 原来标题栏的“二维码登录”。
+- 后来的变化：`dc5abab12`（2026-10-01）二维码深色主题的定位点、提醒卡按钮靠左；`6d90f6649` 平台名统一成“SOOP”“网易CC”；`d2ec7bbfc` 网页登录存好 Cookie 后直接关闭（A09.8 修了共用浏览器的死循环后不再用 `maybePop`）；A02.1（`914784264`）二维码卡片挪到 `live_ui` 的 `QrCodeCard`、斗鱼和 Cookie 页改用共用设置行；A02.2（`fc5bcdd46`）确认框改用 `showAppConfirmDialog`。
+- 新文字：`account_status_none_hint`、`account_saving_verifying`、`account_qr_cannot_scan`、`account_qr_stopped`、`account_web_login_option`、`qr_scanned`、`qr_expired_hint`、`douyu_open_passport` 等（当时 10 条，其中 `account_sign_out_title`、`account_sign_out_message` 随收尾删掉）；改 16 条（`account_editor_title`、`account_saved_signed_in`“已保存，已登录：{name}”、`cookie_tip` 等，见记录）。没有新设置（`douyuForceRenew` 是 K01.1 的）。测试和截图只用假 Cookie（`SESSDATA=ok`、`yyuid=1234`）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/account/account_page_test.dart` 中本任务 13 个，分组 `U.10b cookie pages`（`:334-648`）：Cookie 页从上到下的顺序和各状态、页内退出（3.x 文字）和清空保存等于退出、剪贴板粘贴和 Ctrl+S、哔哩哔哩和抖音先核验再存与重新核验、网易CC 页、斗鱼的状态卡续期组 passport Cookie 立即续期强制续期、扫码覆盖层位置不动和刷新后确认并存、平台拒绝不存（c13）、“扫不了？”、手机有内置浏览器时网页登录在前、宽屏二维码 220 和 Cookie 页 ≤720、没有内置浏览器的提醒、斗鱼会话说明的逻辑。`test/plugins_test.dart:197` 测内置浏览器落到哔哩哔哩主站时取 Cookie。
+- 真机：**记录里没有 K90 结果**，也没有 `verify.md`。登记表已是“完成”，不符合 PROCESS 3.2（问题记在[子分类页](../README.md)“已知问题”）。要看的：[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 4 节第 6 条（扫码登录、杀掉重开仍登录，Keystore 解密，[K02.1](../../../K-账号和登录/K02-登录状态/K02.1-Cookie和密码加密存储验证/README.md)）、第 7 条（网页登录，F-ACC-03）、第 8 条（登录后原画，F-ACC-07），归 [S02.6](../../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md)；另看一次虎牙 Cookie 页的粘贴、清空、舍弃确认和斗鱼续期组的键盘遮挡（`scrollPadding` `cookie_editor.dart:93`）。
+- 留下的问题和去向：网易CC 的 Cookie 还不用于请求 → UPGRADES C-22（未排）；横屏手机顶栏 56 高（`cookie_editor.dart:404`、`bilibili_qr_login.dart:250`、`bilibili_web_login.dart:136` 用普通 `AppBar`）→ 建议并入 A04.1；Esc 返回 → A05.1；哔哩哔哩多账号 → [V01.2](../../../V-需求和反馈/V01-新功能提议/V01.2-哔哩哔哩多账号/README.md) 提议。

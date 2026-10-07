@@ -1,6 +1,6 @@
 # 工程规范
 
-- 更新：2026-10-02（从模块重构计划整理，改正了测试包名和多语言两处过时的说法）
+- 更新：2026-10-07（第 5 节上游对照的结论改写进 W01；`tools/live_cli` 在 master 上还没有，指向 E07.1）；2026-10-02（从模块重构计划整理，改正了测试包名和多语言两处过时的说法）
 - 代码和门禁脚本里写的“docs/specs/ENGINEERING.md §3、§4”指这里的第 3、4 节。
 
 ## 1. 范围
@@ -49,8 +49,10 @@ apps/pure_live
   ├─ live_danmaku、live_iptv、live_cast、live_vod
   ├─ live_store（存储、设置、迁移）
   └─ live_core（模型、平台接口、平台适配器） → live_net（HTTP、WebSocket、代理）
-tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gate、tools/docs
+tools/check_latest、tools/gate、tools/docs、tools/ui、tools/ffmpeg_kit
 ```
+
+平台探针和样本录制的命令行工具 `tools/live_cli` 在 master 上**还没有**（只在归档分支 `archive/v4` 里；`tools/gate/check_deps.py`、`fixtures/README.md` 里提到它的地方按“以后会有”理解），由 [E07.1](../E-直播平台/E07-平台巡检/E07.1-平台巡检工具/README.md) 重写后再加回上图。
 
 每个包归哪个组见 [README.md](../README.md#20-组按优先级)。
 
@@ -65,7 +67,7 @@ tools/live_cli（平台探针、样本录制）、tools/check_latest、tools/gat
 | [liuchuancong/flv_lzc](https://github.com/liuchuancong/flv_lzc) | MIT | FLV 和 H.265 的低延迟经验（G） |
 | 之前从零写的版本（分支 `archive/v4`） | AGPL-3.0 | 已写好并测过的各包实现，按任务借鉴 |
 
-本机副本在 `~/ref/`，对照笔记在 `~/ref/notes/`；每次对照的结论写进 [Z 的上游对照](../Z-工程文档和维护/README.md)（例如 `upstream-2026-10-03.md`）。AGPL-3.0 的代码借鉴时注明来源仓库和提交；MIT 的保留版权声明。
+本机副本在 `~/ref/`，对照笔记在 `~/ref/notes/`；每次对照的结论写进 [W01 定期对照](../W-上游借鉴/W01-定期对照/README.md)，一次对照一个任务（例如 [W01.1](../W-上游借鉴/W01-定期对照/W01.1-2026-10-03上游对照/README.md)；每周跟踪见 W01.2）。AGPL-3.0 的代码借鉴时注明来源仓库和提交；MIT 的保留版权声明。
 
 ## 6. 测试包和正式包
 

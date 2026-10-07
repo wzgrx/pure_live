@@ -65,7 +65,7 @@
 | 平台层的 7 项界面没接 | 见上表“应用（待接）” | 已批准的升级用户看不到 | [E06.2](E06.2-平台层新数据接到界面/README.md)（暂停，0/6） |
 | `Fc2RecipeOpener.adopt` 按“频道:画质”配对，探测连接是 `auto`，就算接上也几乎配不上 | `packages/live_media/lib/src/inputs/recipes.dart:104-118` | 接了 `probeControl` 反而会挂着没人关的连接 | E06.2 第 6 阶段（半成品 `Fc2ControlPool` 已改成按频道） |
 | YY FLV 优先没打开 | `app/platforms.dart:160` | 延迟高、少一档“蓝光” | [E06.3](E06.3-YY优先用FLV/README.md) |
-| E06.1 登记为“完成”，两份记录的“要在 K90 上看的”9 条都没有结果 | [E06.1 record.md](E06.1-已批准升级的余项/record.md)、[record-2.md](E06.1-已批准升级的余项/record-2.md) | 不符合 PROCESS 3.2 | 写进本组报告：建议能直接看的 5 条并入 S02.6，其余随 E06.2 的真机验证 |
+| E06.1 登记为“完成”，两份记录的“要在 K90 上看的”9 条（`record.md` 5 条、`record-2.md` 4 条；拆开是 11 项，见 E06.1 README“验证”）都没有结果 | [E06.1 record.md](E06.1-已批准升级的余项/record.md)、[record-2.md](E06.1-已批准升级的余项/record-2.md) | 不符合 PROCESS 3.2 | 写进本组报告：建议能直接看的 5 条并入 S02.6，其余随 E06.2 的真机验证 |
 | Steam 27-7（按档位选变体）：每档的线路都是整个主列表，档位只在画质的 `data` 里，播放没用它限定变体，选“720p”实际仍是自适应 | `sites/steambroadcast/`（`SteamBroadcastVariant.selectIn`）；UPGRADES 27-7 写“完成（G01.1）” | 界面显示的档位和实际播放的不一定一致 | 写进本组报告：建议 UPGRADES 27-7 改回“部分完成”，在 G 组开任务 |
 | 平台层的中文文字（公告、目录说明、画质名、分区名）在英文界面仍是中文 | 各平台 `*_api.dart` | 英文界面混中文 | Z05.2 |
 
@@ -77,7 +77,7 @@
 ## 测试和验证
 
 - 自动测试：平台层 `cd packages/live_core && dart test`、`cd packages/live_danmaku && dart test`；应用 `cd apps/pure_live && flutter test test/shared/ test/i18n_test.dart`。E06.2、E06.3 的用例写在各自的任务书里。
-- 真机：E06.1 的 9 条见“已知问题”；E06.2、E06.3 的步骤在各自的任务书“真机验证”。[S02 的 CHECKLIST.md](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 1 条（备份恢复）、第 7 条（Twitch、Kick）也覆盖一部分。
+- 真机：E06.1 的 9 条（拆开 11 项）见“已知问题”；E06.2、E06.3 的步骤在各自的任务书“真机验证”。[S02 的 CHECKLIST.md](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 5 节第 1 条（备份恢复）、第 7 条（Twitch、Kick）也覆盖一部分。
 
 ## 路线
 

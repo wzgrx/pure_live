@@ -26,13 +26,13 @@
   - **弹幕设置**：标签和画面上的面板是同一份内容 `RoomDanmakuSettings`：先是共用的 `DanmakuSettingsContent`（观看模板、显示范围、样式、重复弹幕、画面弹幕交互、流畅度），后面“弹幕列表”（列表样式分段按钮、在聊天列表显示礼物）和“小窗弹幕”（3.x 的 12 项，“小窗显示弹幕”关闭时其余收起，数值带单位 px、px/s、秒）（`danmaku_settings_panel.dart:76-137`、`:143` 起）。标签里“改动立即生效”在第一组标题右边，面板里在标题栏。“统一弹幕颜色”点开是居中的颜色对话框（`showDanmakuColorDialog`，`shared/danmaku/danmaku_color_dialog.dart:66`），全屏时压在画面中间（A08.7 要改）。
   - **屏蔽管理**：一页四组，顺序是弹幕关键词屏蔽（输入框最多 40 字 + “添加”，下面是已加的词）→ 已屏蔽用户 → 平台弹幕过滤（斗鱼疑似自动弹幕）→ 相似弹幕过滤（开关 + 三个滑块，关着时变灰）（`block_manager.dart:212-388`）。词和用户都是小标签，只有 × 能删（点击区 40×48，悬停“点击移除: 词”，`BlockChip` `:402`），删除后 4 秒内可撤销且放回原位（`restoreBlockEntry` `:392`）；重复的词在输入框下面提示、不清空；两节为空时写说明。第一次打开时如果 D02.1 清理过打码昵称，顶上说一次（`_maskedNotice` `:90`）。直播间“屏蔽管理”标签和设置里的“弹幕屏蔽”页是这同一个组件、同一份存储。
   - **长按弹幕**：列表长按、画面弹幕点按或长按都打开同一个面板（`showRoomMessageActions`，`message_panel.dart:20`）：竖屏在画面下方、横屏在右侧；“复制”“屏蔽此用户”“屏蔽关键词…”（第二页输入，A07.11）；本地弹幕和打码昵称（`观***`）没有“屏蔽此用户”（`:169`，D-013）。面板开着时飞行弹幕整层停住（`DanmakuOverlay.held`），关了继续。
-  - **画面弹幕的点按和长按**：设置里“点按 / 长按”两个开关（默认开）打开时，点按在按下那一刻、长按在长按时问弹幕层“这个点上是哪条”（`player_view.dart:416-440`，`DanmakuOverlayState.messageAt` `shared/danmaku/danmaku_overlay.dart:292`）；控制条显示时上下控制条范围不算（`danmakuTapAllowed` `player_view.dart:830`）；没点中照常显示或隐藏控制层。
+  - **画面弹幕的点按和长按**：设置里“点按 / 长按”两个开关（默认开）打开时，点按在按下那一刻、长按在长按时问弹幕层“这个点上是哪条”（`player_view.dart:416-440`，`DanmakuOverlayState.messageAt` `shared/danmaku/danmaku_overlay.dart:292`）；控制条显示时上下控制条范围不算（`danmakuTapAllowed` `player_view.dart:839`）；没点中照常显示或隐藏控制层。**单击**只在控制层显示着、没有暂停时才打开面板，控制层隐藏时（淡出一开始就算）单击一律只调出控制层（`_onTap` `player_view.dart:360`，D-038，A08.9）；长按不受影响。
   - **设置里的两页**：设置 → 弹幕（`DanmakuSettingsPage`，`features/settings/danmaku_page.dart:32`，路由 `/danmaku_settings`）正文就是 `DanmakuSettingsContent`，末尾“更多”一组（显示弹幕、在画面上显示飞行弹幕、YouTube 显示全部聊天、更换弹幕字体、弹幕屏蔽），最宽 720，宽屏在右栏；**没有**直播间的“弹幕列表”“小窗弹幕”两组（A08.6）。设置 → 弹幕屏蔽（`ShieldPage`，`features/shield/shield_page.dart:21`，路由 `/shield`）就是 `DanmakuBlockManager`，最宽 720 居中，带 `BlockKind.user` 打开时滚到“已屏蔽用户”。
   - **本地互动**（总开关默认开）：弹幕列表下面一行输入框（星形打开本地弹幕样式、发送按钮），全屏下栏中间也有一个（窄于 180 收成星形按钮，`local_composer.dart:26`、`:29`），发出立即进列表、飞过（不再等 2 秒）；右上角菜单第三组“本地互动体验”打开互动面板（竖屏画面下方、横屏和宽屏右侧 360）：身份卡、发送框、礼物（余额不够变淡）、加体验币、我的资料、画面上、记录；本地弹幕样式是面板的下一页，预览固定在顶上；送礼时礼物横幅在画面中间 3 秒（`LocalGiftLayer`，`player_view.dart:699`）；列表里本地弹幕有“本地”标签和徽章胶囊；设置里“本地用户与互动”页（`/local_interaction`）。礼物和徽章的 emoji 用应用自带的 Noto 子集字体（iOS、macOS 用系统 emoji）。
 - 内部怎么工作：
   - 数据：`LiveRoomController`（`features/live_play/logic/room_controller.dart`）持有 `chat`（`ChatFeed`，`features/live_play/danmaku/chat_feed.dart:101`，最多 500 条，每帧最多通知一次）、`superChats`、`chatConnection`（空闲、连接中、已连接、超时、失败、平台不提供）、`showGifts`（存在 meta 的 `live_play.showGifts`，`room_controller.dart:189`）。`ChatList` 只听 `ChatFeed` 和它要显示的几项房间状态（`_RoomFacts` `chat_list.dart:499`），不随人数、音量重建；列表倒序（最新是第 0 行）、每行组件建一次（`Expando`）。
   - 设置：弹幕设置、屏蔽列表、相似过滤都在 `live_store` 的设置和 `BlockListStore` 里，直播间、设置页、多画面读同一份；`watchSetting` 只重建用到的行。
-  - 点按：手势层（`player_view.dart:655-662`）→ `_danmakuAt` → `DanmakuOverlayState.messageAt`（按这一帧的位置，四周放宽 4，叠着时取后进来的）→ `_openMessage` 把弹幕层 `held` 置真 → `showRoomMessageActions` → 面板关闭后恢复。
+  - 点按：手势层（`player_view.dart:662-675`）→ `_danmakuAt` → `DanmakuOverlayState.messageAt`（按这一帧的位置，四周放宽 4，叠着时取后进来的）→ `_onTap`：控制层显示着且没暂停才 `_openMessage`（D-038），否则只切换控制层 → `_openMessage` 把弹幕层 `held` 置真 → `showRoomMessageActions` → 面板关闭后恢复。
   - 本地互动：`LocalInteraction`（`local_interaction/logic/local_interaction.dart:113`，29 个 3.x `localInteraction.*` 设置）、`LocalCatalog`（`logic/local_catalog.dart:154`，模板、颜色、34 个资源包、礼物）、每个直播间一个 `LocalRoomSession`（`logic/local_room_session.dart:32`，经 `LocalRoomScope` 找到）；本地弹幕经 `room_controller.dart` 的 `addLocal` 进同一个 `ChatFeed`，飞过时 `danmaku_overlay.dart` 的本地分支用本地样式（`_placeLocal` `:513`）。
 - 完成度（和 3.x 对照）：
   - 一致的：四个标签和顺序、左右滑；长按 / 右键 / 双击弹幕；“N 条新弹幕”；醒目留言卡片结构、到点移除；弹幕设置的全部项和范围、3.x 观看模板；小窗弹幕 12 项；屏蔽管理全部设置项和范围；关键词 40 字；画面弹幕的点按、长按开关和控制条范围不命中；本地互动的功能、数据、默认值、存储键。
@@ -51,7 +51,7 @@
 | `danmaku/super_chats.dart`（302） | `superChatRemaining`（`:14`）、`SuperChatList`（`:25`，新的在上、一个时钟 `:75`、平台不提供 `:88-93`）、`_SuperChatEmpty`（`:111`）、`SuperChatCard`（`:148`，按对比度选墨、窄栏竖排 `:227`） | A08.1 c5～c7 |
 | `danmaku/danmaku_settings_panel.dart`（308） | `showRoomDanmakuSettings`（`:20`）、`RoomDanmakuSettingsPanel`（`:37`，画面上的面板）、`RoomDanmakuSettings`（`:76`，标签和面板共用：共用正文 + “弹幕列表” + “小窗弹幕”）、`PipDanmakuSettings`（`:143`，小窗弹幕 12 项，颜色对话框 `:193-209`） | A08.1 c8～c10、A07.6 |
 | `danmaku/message_panel.dart`（261） | `showRoomMessageActions`（`:20`）、`RoomMessagePanel`（`:50`，复制、屏蔽此用户 `:169`、屏蔽关键词）、`_KeywordPage`（`:195`，第二页输入） | A07.6、A07.11 c8、A08.4 c3 |
-| `player/player_view.dart`（871） | 画面手势接弹幕：`_danmakuAt`（`:416`）、`_openMessage`（`:443`）、弹幕层 `held`（`:485`）、点按和长按（`:655-662`）、`danmakuTapAllowed`（`:830`，控制条范围不命中）；礼物横幅层（`:699`） | A08.4 |
+| `player/player_view.dart`（879） | 画面手势接弹幕：`_onTap`（`:336`，控制层隐藏或暂停时单击不开面板，D-038）、`_danmakuAt`（`:425`）、`_openMessage`（`:452`）、弹幕层 `held`（`:494`）、点按和长按（`:662-675`）、`danmakuTapAllowed`（`:839`，控制条范围不命中）；礼物横幅层（`:708`） | A08.4 |
 | `local_interaction/local_composer.dart`（451） | `LocalComposerPlace`（`:13`，列表下、面板、画面）、`localComposerCollapseWidth` 180（`:26`）、`localComposerVideoMaxWidth` 420（`:29`）、`LocalDanmakuComposer`（`:49`）、`localVideoFocusColor`（`:314`）、`LocalComposerBelow`（`:437`，接在弹幕列表下） | A08.2 c6、c13、c14 |
 | `local_interaction/local_interaction_panel.dart`（575） | `LocalInteractionPanel`（`:24`）、`LocalIdentityCard`（`:151`）、礼物格（`:225`、`:263`）、`LocalRechargeRow`（`:322`）、`LocalProfileEditor`（`:368`）、`LocalHistory`（`:447`） | A08.2 c2、c3、c8、c11、c12 |
 | `local_interaction/local_style_panel.dart`（755） | `LocalDanmakuStylePanel`（`:19`）、`showLocalDanmakuStyleSheet`（`:72`，设置页用）、`LocalDanmakuPreview`（`:78`）、`LocalDanmakuStyleControls`（`:257`） | A08.2 c4、c5 |
@@ -148,7 +148,7 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：`features/live_play/danmaku/`、`shared/danmaku/`、`local_interaction/`
-- 进度：`██████████████░░░░░░` 70%
+- 进度：`███████████████░░░░░` 76%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -161,7 +161,7 @@
 | A08.6 | 设置的弹幕页补上“弹幕列表”“小窗弹幕”两组 | 界面 | 未开始 | — | — | [设计或说明](A08.6-设置的弹幕页补两组/README.md)、[任务书](A08.6-设置的弹幕页补两组/brief.md) |
 | A08.7 | 小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框） | 界面 | 未开始 | — | — | [设计或说明](A08.7-小窗弹幕颜色改成面板/README.md)、[任务书](A08.7-小窗弹幕颜色改成面板/brief.md) |
 | A08.8 | 长按弹幕面板加回 3.x 的等级 Lv.N | 界面 | 未开始 | — | — | [设计或说明](A08.8-长按弹幕面板显示等级/README.md)、[任务书](A08.8-长按弹幕面板显示等级/brief.md) |
-| A08.9 | 单击画面优先调出控制层：弹幕多时点画面总是打开长按弹幕面板 | 界面 | 未开始 | — | — | [设计或说明](A08.9-单击画面优先调出控制层/README.md)、[任务书](A08.9-单击画面优先调出控制层/brief.md) |
+| A08.9 | 单击画面优先调出控制层：弹幕多时点画面总是打开长按弹幕面板 | 界面 | 待真机 | 2026-10-08 | df901709a | [设计或说明](A08.9-单击画面优先调出控制层/README.md)、[任务书](A08.9-单击画面优先调出控制层/brief.md)、[记录](A08.9-单击画面优先调出控制层/record.md) |
 
 ## 还没完成的
 
@@ -169,7 +169,5 @@
 - **A08.7 小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框）**（未开始，第二档，规模 小）
 - **A08.8 长按弹幕面板加回 3.x 的等级 Lv.N**（未开始，第三档，规模 小）
   - 来源：D 组写文档时发现（D01 已知问题）；D-033
-- **A08.9 单击画面优先调出控制层：弹幕多时点画面总是打开长按弹幕面板**（未开始，第二档，规模 小）
-  - 来源：V03.4-07（2026-10-08 真机对照）
 
 <!-- docs:生成结束 -->

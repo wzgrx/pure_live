@@ -271,6 +271,18 @@ void main() {
 
     DanmakuOverlay overlay(WidgetTester tester) => tester.widget(find.byType(DanmakuOverlay));
 
+    /// Where the danmaku [fly] aimed at is now.
+    Offset now(WidgetTester tester, DanmakuOverlayState state) {
+      final (_, rect) = state.debugFlying.firstWhere((item) => item.$1.message == '点这一条弹幕');
+      return tester.renderObject<RenderBox>(find.byType(DanmakuOverlay)).localToGlobal(rect.center);
+    }
+
+    double shown(WidgetTester tester) => tester
+        .widget<AnimatedOpacity>(
+          find.ancestor(of: find.byKey(const ValueKey('live-play-fullscreen')), matching: find.byType(AnimatedOpacity)),
+        )
+        .opacity;
+
     testWidgets('opens the long-press sheet; the danmaku stand until it closes', (tester) async {
       final danmaku = FakeDanmaku();
       final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
@@ -321,6 +333,58 @@ void main() {
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
       expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
       expect(overlay(tester).held, isFalse);
+      await _close(tester, services);
+    });
+
+    testWidgets('A08.9 (D-038): controls hidden, a tap on a danmaku only brings them; shown, it opens the sheet', (
+      tester,
+    ) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      AppNavigator.toast = (_) {};
+      await tester.pump(const Duration(seconds: 5));
+      expect(shown(tester), 0, reason: 'the controls hid');
+      final (state, at) = await fly(tester, danmaku);
+      await tester.tapAt(at);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
+      expect(overlay(tester).held, isFalse);
+      expect(shown(tester), 1, reason: 'the tap brought the controls');
+
+      await tester.tapAt(now(tester, state));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget, reason: 'the controls showed');
+      expect(overlay(tester).held, isTrue);
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      await _close(tester, services);
+    });
+
+    testWidgets('A08.9 (A07.10): paused, a tap on a standing danmaku only hides or shows the controls', (tester) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      AppNavigator.toast = (_) {};
+      final (state, _) = await fly(tester, danmaku);
+      final session = tester.widget<RoomPlayer>(find.byType(RoomPlayer)).controller.session;
+      await tester.runAsync(session.togglePlayPause);
+      await tester.pump();
+      expect(session.state.status, PlaybackStatus.paused);
+      await tester.pump(const Duration(seconds: 5));
+      expect(shown(tester), 1, reason: 'paused, the controls stay');
+      final at = now(tester, state);
+      await tester.tapAt(at);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
+      expect(shown(tester), 0);
+      await tester.tapAt(at);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
+      expect(shown(tester), 1);
       await _close(tester, services);
     });
 

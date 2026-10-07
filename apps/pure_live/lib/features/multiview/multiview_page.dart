@@ -409,9 +409,11 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
     }
   }
 
+  /// The system bars back; the phone upright first while auto-rotate is off
+  /// (O05.3).
   Future<void> _restoreSystemUi() async {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    await SystemChrome.setPreferredOrientations(const []);
+    await ScreenOrientation.restore();
   }
 
   void _onBack(bool didPop) {

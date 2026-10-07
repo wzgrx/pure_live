@@ -26,6 +26,9 @@ import io.flutter.plugin.common.PluginRegistry
  *   phone even while auto-rotate is off (issue #36; Flutter's two landscapes
  *   are USER_LANDSCAPE, which stays put then). Flutter's next preferred
  *   orientations replace it.
+ * - `autoRotate`: whether the system's auto-rotate is on; leaving a
+ *   fullscreen with it off turns the phone upright before letting go (O05.3).
+ *   Only read: writing the setting would need WRITE_SETTINGS.
  */
 internal class SystemAccessPlugin :
     FlutterPlugin,
@@ -81,6 +84,7 @@ internal class SystemAccessPlugin :
             "localNetworkGranted" -> result.success(localNetworkGranted())
             "requestLocalNetwork" -> requestLocalNetwork(result)
             "sensorLandscape" -> result.success(sensorLandscape())
+            "autoRotate" -> result.success(autoRotate())
             else -> result.notImplemented()
         }
     }
@@ -113,6 +117,11 @@ internal class SystemAccessPlugin :
         val host = activity?.activity ?: return false
         host.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
         return true
+    }
+
+    private fun autoRotate(): Boolean {
+        val context = context ?: return false
+        return Settings.System.getInt(context.contentResolver, Settings.System.ACCELEROMETER_ROTATION, 0) != 0
     }
 
     private fun requestLocalNetwork(result: MethodChannel.Result) {

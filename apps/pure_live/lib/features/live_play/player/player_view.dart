@@ -325,6 +325,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// Paused, the controls stay until a tap hides them (B02 c1), so the
   /// still picture can be seen without them.
   ///
+  /// A tap on a flying danmaku (its switch on) opens its actions instead,
+  /// but only while the controls show and the stream is not paused (D-038).
+  ///
   /// B09 c1 (audit B-8): the tap acts at once (3.x, and 4.0.0, held every
   /// tap back by the double tap's timeout, about 300 ms). A second tap
   /// within that time and near the first is the double tap (appendix A 3,
@@ -349,7 +352,13 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     }
     _closeDoubleTap();
     final shownBefore = _controls;
-    final undo = hit != null ? _tapMessage(hit) : _tapControls();
+    // D-038 (A08.9): with many danmaku nearly every tap lands on one, so a
+    // tap brings hidden controls whatever it lands on; a flying danmaku
+    // opens its actions only while they show (gone the moment they start
+    // to fade), and never while paused (A07.10: the tap only shows or hides
+    // them).
+    final message = shownBefore && !_paused ? hit : null;
+    final undo = message != null ? _tapMessage(message) : _tapControls();
     if (_locked || at == null) return;
     _firstTapAt = at;
     _undoTap = undo;

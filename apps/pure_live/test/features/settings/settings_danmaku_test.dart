@@ -96,6 +96,16 @@ void main() {
     expect(settingsRow('video_block_list'), findsOneWidget);
   });
 
+  testWidgets('A08.9 (D-038): the tap switch says a tap opens the actions while the controls show', (tester) async {
+    await pumpSettings(tester);
+    await searchSettingsFor(tester, '点击 弹幕');
+    expect(settingsRow('danmaku_tap'), findsOneWidget);
+    expect(
+      find.descendant(of: settingsRow('danmaku_tap'), matching: find.text('控制条显示时点按画面上的弹幕打开操作面板')),
+      findsOneWidget,
+    );
+  });
+
   test('its route opens the page', () {
     final page = pageRoutes[RoutePath.kDanmakuSettings]!(const RouteArgs(RoutePath.kDanmakuSettings));
     expect(page, isA<DanmakuSettingsPage>());

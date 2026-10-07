@@ -1873,7 +1873,7 @@
     "settings_danmaku_style": "弹幕样式",
     "settings_danmaku_style_desc": "字号、速度、透明度、显示范围；和直播间里的“弹幕设置”是同一个",
     "settings_danmaku_tap": "点按弹幕显示操作",
-    "settings_danmaku_tap_desc": "点按画面上的弹幕可复制、屏蔽",
+    "settings_danmaku_tap_desc": "控制条显示时点按画面上的弹幕打开操作面板",
     "settings_danmaku_top_margin": "顶部留白",
     "settings_danmaku_top_margin_desc": "画面顶部不显示弹幕的高度",
     "settings_decrease": "减小",

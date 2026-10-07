@@ -133,9 +133,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   RoomDisplay _display = RoomDisplay.inline;
 
   /// A landscape fullscreen forced from a portrait room turns the phone back
-  /// upright when it ends (appendix A 11).
+  /// upright when it ends, auto-rotate on or off (appendix A 11).
   bool _restorePortrait = false;
-  Timer? _releaseOrientation;
   bool _entryHint = false;
   bool _pip = false;
   bool _details = false;
@@ -451,7 +450,6 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     unawaited(RoomBackChannel.instance.release(this));
     unawaited(_autoFullscreen?.cancel());
     unawaited(_shape?.cancel());
-    _releaseOrientation?.cancel();
     final mini = _mini;
     if (mini != null) {
       mini.removeListener(_onMini);
@@ -536,7 +534,6 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           adaptation: settings.adaptation,
           policy: settings.policy,
         );
-    _releaseOrientation?.cancel();
     setState(() {
       _display = portrait ? RoomDisplay.portraitFullscreen : RoomDisplay.fullscreen;
       _entryHint = portrait;
@@ -549,9 +546,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     _restorePortrait = landscape;
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     if (portrait) {
-      await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      await ScreenOrientation.portrait();
     } else if (!landscape && orientation == FullscreenOrientation.followSystem) {
-      await SystemChrome.setPreferredOrientations(const []);
+      await ScreenOrientation.free();
     } else {
       await ScreenOrientation.landscape();
     }
@@ -562,14 +559,13 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// `enterPortraitFullScreen`).
   Future<void> _enterPortraitFullscreen() async {
     if (_display != RoomDisplay.inline || !_platform.mobile) return;
-    _releaseOrientation?.cancel();
     setState(() {
       _display = RoomDisplay.portraitFullscreen;
       _entryHint = true;
     });
     _restorePortrait = false;
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    await ScreenOrientation.portrait();
   }
 
   /// Back to the room page.
@@ -590,19 +586,11 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     await _restoreSystemUi(upright: upright);
   }
 
-  /// The system bars back; an [upright] phone is turned upright first and
-  /// let go a moment later (3.x `exitFullscreenWithOrientationRestore`).
+  /// The system bars back; the phone upright first while auto-rotate is off,
+  /// [upright] whatever (O05.3; 3.x `exitFullscreenWithOrientationRestore`).
   Future<void> _restoreSystemUi({bool upright = false}) async {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    if (!upright) {
-      await SystemChrome.setPreferredOrientations(const []);
-      return;
-    }
-    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    _releaseOrientation?.cancel();
-    _releaseOrientation = Timer(const Duration(seconds: 3), () {
-      unawaited(SystemChrome.setPreferredOrientations(const []));
-    });
+    await ScreenOrientation.restore(upright: upright);
   }
 
   /// The fullscreen button, double tap and F; in the in-window fullscreen

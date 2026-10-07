@@ -45,6 +45,7 @@ Future<_Room> _pump(
   double height = 852,
   TargetPlatform platform = TargetPlatform.android,
   bool portrait = false,
+  bool autoRotate = false,
   Map<Setting<Object>, Object> settings = const {},
 }) async {
   // Reset by [_close]: the test must end with it unset.
@@ -68,7 +69,7 @@ Future<_Room> _pump(
   const systemAccess = MethodChannel('pure_live/system_access');
   tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, (call) async {
     if (call.method == 'sensorLandscape') orientations.add(call.method);
-    return true;
+    return call.method != 'autoRotate' || autoRotate;
   });
   addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, null));
   final engine = FakeEngine();
@@ -330,6 +331,64 @@ void main() {
       // B09 c5 (audit B-18): at least 11 (it was 9).
       expect(tester.widget<Text>(find.text('76')).style!.fontSize, greaterThanOrEqualTo(11));
       await tester.pumpWidget(const SizedBox.shrink());
+    });
+  });
+
+  group('O05.3 leaving the landscape fullscreen turns the phone upright', () {
+    const sideways = ['DeviceOrientation.landscapeLeft', 'DeviceOrientation.landscapeRight'];
+    const upright = ['DeviceOrientation.portraitUp'];
+
+    Future<void> doubleTap(WidgetTester tester) async {
+      final picture = tester.getRect(find.byType(LiveVideoView));
+      final at = Offset(picture.left + 60, picture.center.dy);
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tapAt(at);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('auto-rotate off: the button and double tap, out by Back and double tap', (tester) async {
+      final room = await _pump(tester);
+      await _tap(tester, 'live-play-fullscreen');
+      tester.view.physicalSize = const Size(852, 393);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(room.orientations, [sideways, 'sensorLandscape', upright], reason: 'upright first');
+      tester.view.physicalSize = const Size(393, 852);
+      await tester.pump(const Duration(seconds: 4));
+      expect(room.orientations.last, isEmpty, reason: 'then free again');
+
+      room.orientations.clear();
+      await doubleTap(tester);
+      expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
+      tester.view.physicalSize = const Size(852, 393);
+      await tester.pump(const Duration(seconds: 1));
+      await doubleTap(tester);
+      expect(find.byType(AppBar), findsOneWidget, reason: 'back from the fullscreen');
+      expect(room.orientations, [sideways, 'sensorLandscape', upright]);
+      tester.view.physicalSize = const Size(393, 852);
+      await tester.pump(const Duration(seconds: 4));
+      expect(room.orientations, [sideways, 'sensorLandscape', upright, <Object?>[]]);
+      await _close(tester, room);
+    });
+
+    testWidgets('auto-rotate on: let go at once, following the phone', (tester) async {
+      final room = await _pump(tester, autoRotate: true);
+      await _tap(tester, 'live-play-fullscreen');
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 4));
+      expect(room.orientations, [sideways, 'sensorLandscape', <Object?>[]]);
+      await _close(tester, room);
+    });
+
+    testWidgets('the room closed while in the fullscreen: upright, then free', (tester) async {
+      final room = await _pump(tester);
+      await _tap(tester, 'live-play-fullscreen');
+      await _close(tester, room);
+      expect(room.orientations, [sideways, 'sensorLandscape', upright, <Object?>[]]);
     });
   });
 

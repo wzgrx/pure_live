@@ -14,14 +14,14 @@
 
 | 方面 | 3.x（文件:行） | 现在（文件:行） | 要做到 |
 |---|---|---|---|
-| 直播间 Esc | `modules/live_play/widgets/keyboard/video_keyboard.dart:55`：画中画时不管；全屏时退全屏；窗口内全屏时退窗口内全屏；**普通状态离开直播间**（`:35-41` 显式 `maybePop`，注释写明桌面 Flutter 不会自己把 Esc 当返回） | `features/live_play/live_play_page.dart:738` 绑到 `_back()`（`:662-673`）：桌面小窗回直播间、关面板、退全屏、关详情；**普通状态什么都不做**（不离开直播间） | 和 3.x 一样：普通状态按 Esc 离开直播间（附录 A 第 7 条“Esc 走同一条返回链”） |
+| 直播间 Esc | `modules/live_play/widgets/keyboard/video_keyboard.dart:55`：画中画时不管；全屏时退全屏；窗口内全屏时退窗口内全屏；**普通状态离开直播间**（`:20-41`，`:41` 显式 `maybePop`，注释写明桌面 Flutter 不会自己把 Esc 当返回） | `features/live_play/live_play_page.dart:738` 绑到 `_back()`（`:662-673`）：桌面小窗回直播间、关面板、退全屏、关详情；**普通状态什么都不做**（不离开直播间） | 和 3.x 一样：普通状态按 Esc 离开直播间（附录 A 第 7 条“Esc 走同一条返回链”） |
 | 空格暂停/继续 | `video_keyboard.dart:60` | `live_play_page.dart:742` | 保持 |
 | 媒体键（播放、暂停、播放/暂停） | `video_keyboard.dart:56-58` | `live_play_page.dart:750-753`（F.1d） | 保持 |
 | R 刷新 | `video_keyboard.dart:61` | `live_play_page.dart:748` `controller.load()` | 保持 |
 | ↑↓ 音量 ±5% | `video_keyboard.dart:62-79` | `live_play_page.dart:744-747`，`save: true` 记成房间音量 | 保持 |
 | F 全屏 | 没有 | `live_play_page.dart:739`（桌面小窗时不响应）；C01.1 的提交 `0249e830e` 加的，记录里没有写依据 | 新加的：请维护者确认留不留，写进本文件 |
 | 滚轮调音量 | `video_controller_panel.dart:952` | `features/live_play/player/player_gestures.dart:223`；小窗 `features/live_play/mini/mini_player.dart:199` | 保持，核对每格步长 |
-| 鼠标移动显示控制层、静止后隐藏 | `widgets/layout/control_hover_region.dart:5`（处理“组件消失时收不到 onExit”） | `features/live_play/player/player_view.dart:798` `MouseRegion.onHover` → `_touch()`（`:399`） | 核对：鼠标离开画面时控制层按时隐藏；控制条上悬停时不隐藏 |
+| 鼠标移动显示控制层、静止后隐藏 | `widgets/layout/control_hover_region.dart:5`（处理“组件消失时收不到 onExit”） | `features/live_play/player/player_view.dart:799` `MouseRegion.onHover` → `_touch()`（`:399`） | 核对：鼠标离开画面时控制层按时隐藏；控制条上悬停时不隐藏 |
 | 桌面单击只显示控制层、双击全屏 | 附录 A 第 1、3 条 | `player_view.dart` 的点按处理 | 写测试固定 |
 | 右键等于长按 | 房间卡片 `common/widgets/room_card.dart:1078`、弹幕列表 `danmaku_list_view.dart:501`、多画面格子 `multiview_page.dart:984` | 卡片 `packages/live_ui/lib/src/widgets/live_room_card.dart:129`、`:692`；聊天列表 `features/live_play/danmaku/chat_list.dart:615`、`:706`；多画面 `features/multiview/widgets/cell_view.dart:84`；新加的：分区卡片 `areas/area_card.dart:74`、录制任务 `recorder/recorder_task_card.dart:260`、网络电视 `iptv/iptv_cards.dart:194`、备份 `backup/backup_page.dart:545`、WebDAV `web_dav/web_dav_page.dart:695` | 3.x 有的都在；播放画面本身 3.x 也没有右键菜单，不加 |
 | 标签栏滚轮横向滚动 | `common/widgets/scrollable_tab_bar.dart:92` | `packages/live_ui/lib/src/widgets/scrollable_tab_bar.dart:145` | 保持 |

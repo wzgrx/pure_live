@@ -19,14 +19,14 @@
 ## 现状（读代码得出，写文件:行）
 
 - 直播间快捷键：`apps/pure_live/lib/features/live_play/live_play_page.dart:737-753`（`CallbackShortcuts`）：Esc → `_back`、F → 全屏、空格 → `togglePlayPause`、↑↓ → `setVolume(±0.05, save: true)`、R → `controller.load()`、媒体键。`_back()`（`:662-673`）顺序：桌面小窗回直播间 → 关面板 → 退全屏 → 关详情；`_poppable`（`:639-640`）为真时没有动作——**根因线索**：3.x 显式 `Navigator.maybePop`，4.x 的 Esc 被 `CallbackShortcuts` 接住后没有交给返回。
-- 鼠标：滚轮音量 `features/live_play/player/player_gestures.dart:223`；小窗滚轮 `features/live_play/mini/mini_player.dart:199`；悬停 `features/live_play/player/player_view.dart:798`（`onHover` → `_touch()`，`:399`）；右键 `packages/live_ui/lib/src/widgets/live_room_card.dart:129`、`:692`，`features/live_play/danmaku/chat_list.dart:615`、`:706`，`features/multiview/widgets/cell_view.dart:84`。
+- 鼠标：滚轮音量 `features/live_play/player/player_gestures.dart:223`；小窗滚轮 `features/live_play/mini/mini_player.dart:199`；悬停 `features/live_play/player/player_view.dart:799`（`onHover` → `_touch()`，`:399`）；右键 `packages/live_ui/lib/src/widgets/live_room_card.dart:129`、`:692`，`features/live_play/danmaku/chat_list.dart:615`、`:706`，`features/multiview/widgets/cell_view.dart:84`。
 - 标签：`packages/live_ui/lib/src/widgets/scrollable_tab_bar.dart:145`（滚轮）；←→ 翻页 `features/favorite/favorite_page.dart:512`、`features/areas/platform_areas_view.dart:246`、`shared/rooms/room_grid.dart:585`；搜索平台行竖滚轮横向滚（`features/search/search_widgets.dart:83`，3.x 要按 Shift）。
 - 多画面 Esc：`features/multiview/multiview_page.dart:380`。设置页查找：`features/settings/settings_page.dart:237-239`。
 - 已有测试：`test/features/live_play/live_play_layouts_test.dart:309`、`:457`（Esc 退全屏、退窗口内全屏）、`test/features/live_play/room_extras_test.dart:466`（媒体键）；没有“普通状态 Esc 离开”的测试。
 
 ## 3.x 基线
 
-- `git show v3.2.11:lib/modules/live_play/widgets/keyboard/video_keyboard.dart`：`:20-46` `_handleEscape`，`:55-80` 快捷键表，`:91-101` `resolveEscapePresentationAction`（画中画不管 → 全屏 → 窗口内全屏 → 返回）。
+- `git show v3.2.11:lib/modules/live_play/widgets/keyboard/video_keyboard.dart`：`:14-46` `_handleEscape`，`:55-80` 快捷键表，`:92-101` `resolveEscapePresentationAction`（画中画不管 → 全屏 → 窗口内全屏 → 返回）。
 - `lib/modules/live_play/widgets/video_player/video_controller_panel.dart:952`（滚轮音量）、`lib/modules/live_play/widgets/layout/control_hover_region.dart:5`（悬停区）、`lib/common/widgets/scrollable_tab_bar.dart:92`、`:149`（标签滚轮）、`lib/common/base/base_page_view_extension.dart:10-15`（←→）、`lib/common/widgets/room_card.dart:1078`、`lib/modules/live_play/widgets/danmaku/danmaku_list_view.dart:501`、`lib/modules/multiview/multiview_page.dart:164`、`:984`。
 - 要保留：附录 A 第 1 条（桌面单击只显示控制层）、第 3 条（双击全屏、全屏中先退出）、第 7 条（Esc 链）、第 13、14、16 条。
 

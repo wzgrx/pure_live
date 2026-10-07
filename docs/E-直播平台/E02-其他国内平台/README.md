@@ -31,7 +31,7 @@
 | LOOK | 完成 | 新增 | 按房间号查，另在推荐第 1 页按名字筛选（见已知问题） | 完成 | 完成 | |
 
 - 内部怎么工作：和 E01 一样分 `*_api.dart`（纯解析）和 `*_site.dart`（请求编排、会话、链接）两层；几个平台用“看到过的卡片”补详情回答里没有的名字、封面（六间房 `sixroom_api.dart:157`、百度 `baidulive_api.dart:255`、LOOK `looklive_api.dart:249`、京东 `jdlive_api.dart:126`），占位名字（“JD Live”“Baidu Live”）一律留空（UPGRADES X-2）。
-- 完成度（和 3.x 对照）：3.x 的功能都在，行为以 3.x 冻结输出为准（这 13 个平台的 `expected.json` 由各平台目录的 `legacy_expected.dart` 生成，见 `fixtures/README.md`“自己补的期望值”）；UPGRADES 第 6、9、10、13～16、18、28～32 节的条目在 2026-09-29 落地；没有弹幕的 9 个平台中 9 个由 D01 新增了弹幕（3.x 只有 YY 有）。
+- 完成度（和 3.x 对照）：3.x 的功能都在，行为以 3.x 冻结输出为准（这 13 个平台的 `expected.json` 由各平台目录的 `legacy_expected.dart` 生成，见 `fixtures/README.md`“自己补的期望值”）；UPGRADES 第 6、9、10、13～16、18、28～32 节的条目在 2026-09-29 落地；弹幕：3.x 只有 YY 有，D01 给 AcFun、猫耳、克拉克拉、京东、酷狗、百度、六间房、LOOK 新增了 8 个。
 
 ## 代码地图
 

@@ -1,8 +1,9 @@
-# A10.2 录制设置：设计（第 1 版）
+# A10.2 录制设置：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：录制设置页面和它的对话框（默认录制清晰度、录制读写超时、输入缓冲队列、最大同时录制任务数、缓存上限、清空确认）、提示条
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a102)（A10.2-01～06）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a102)；依赖 A11.1（设置总览，未定稿：设置行的样子等 J 定稿后统一）
+- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a102)（A10.2-01～06）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a102)；依赖 A11.1（设置总览，已完成：设置行、组和页面框架都用 A11.1 的组件）
+- 旧编号：U.7b、T08c.1（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（V1～V4 按建议 A）、D-018（录制设置键名不变）
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；录制目录是示例路径
 
@@ -120,7 +121,7 @@
 | S14 | 组名“挂机轮询检测”，别处都叫“开播检测” | `:184` |
 | S15 | 选目录失败提示“录制失败……请前往设置修改下载目录”，这时没在录、人就在设置里 | `record_settings_controller.dart:262-264` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -184,11 +185,34 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，V1～V4 按建议 A（“缓存”改叫“录制文件”、最大任务数行内加减、切片按整分钟、“打开文件夹”在目录行右边）。
-- 实现：c1～c14 做到，详见 [record.md](record.md)。`apps/pure_live/lib/features/record_settings/record_settings_page.dart`（五组 21 行，用 A11.1 的设置行和 `SettingsPageList` 最宽 720）、`record_settings_dialogs.dart`（单选当前项主色加勾、上限对话框、清空确认写清删多少、没有系统选择器时的目录对话框）、`record_settings_texts.dart`（中文单位、GB）。“改上限”带参数 `max-tasks` 打开本页，滚到“最大同时录制任务数”并高亮 2 秒。
-- 偏差和范围外的改动：有系统文件夹选择器时点目录行直接打开选择器（照 v3），没有时仍是输入路径的对话框；为了 c9，直播间录制面板和录制中心的“改上限”各改了一行，改调 `openRecordLimit()`（`shared/record/record_actions.dart`）。3.x 存的不是整分钟的切片时长显示“5.5 分钟”，拖动后才变整分钟。
-- 新文字：改名用新键（旧键 `cache_management` 等没动）、不能写入的提示新键；`live_ui` 设置行加 `subtitleMaxLines`（只做添加）；`AppIcons` 加 21 个。没有新设置，存储键一个没改（D-018）。
-- 提交：`fc8a12db6`，和 A12.4～A12.6 一起在 `f5351b91c` 合并，记录 `965d41956`（2026-10-02）。`record_settings` 的直接颜色和图标 28 → 0，跨功能引用 `record_settings -> recorder/recorder_texts.dart` 去掉。
-- 测试：新增 `apps/pure_live/test/features/record_settings/record_settings_page_test.dart` 12 个（文字和单位、21 行的顺序和图标、依赖项变灰、3.x 的值、行内加减、“改上限”高亮、三种对话框、清空确认、选目录、横屏和宽屏 720）；`recorder_page_test.dart` 删掉 2 个和新设计冲突的旧用例。
-- 真机：没有单独记录（S02 的 CHECKLIST 第 3 节第 6 条“录制目录换到 `Download/`”没做）。登记表已是“完成”，建议在 [S03.1](../../../S-质量和验证/S03-统一验证/README.md) 补看目录选择、清空和“改上限”。
-- 留下的问题：“优先录制原画轨道”和“默认录制清晰度”同时设置时谁优先，说明照 v3 保留，没在代码里确认（归 H03）；iOS 的目录行交给 A18.1。
+**定稿**：用户确认第 1 版，V1～V4 按建议 A（“缓存”改叫“录制文件”、最大任务数行内加减、切片按整分钟、“打开文件夹”在目录行右边；D-003）。
+
+**实现**（详见 [record.md](record.md)；2026-10-01，提交 `fc8a12db6`“feat(record_settings): recording settings per the U.7b design”，2026-10-02 和 A12.4～A12.6 一起合并 `f5351b91c`“Merge U.7b and U.11a-c”；登记表记的是 `965d41956`（记录））
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/features/record_settings/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | `record_settings_page.dart` 的 `RecordSettingsPage`（`:29`）：五组 21 行一项不少（基本 `:273`、录制文件 `:314`、性能与画质 `:375`、断线重连 `:448`、开播检测 `:484`），存储键一个没改（`Settings.record*`）；行用 A11.1 的 `SettingsLinkRow` / `SettingsSwitchRow` / `SettingsCounterRow`（`packages/live_ui/lib/src/widgets/settings_row.dart`）；选目录、清空、计算大小时行尾转圈 |
+| c2 | ✅ | A11.1 的 `SettingsGroup`（`settings_row.dart:118`）：组标题 13 号主色、说明次要色、卡片低表面容器色 |
+| c3 | ✅ | `live_ui` 设置行加 `subtitleMaxLines`（`settings_row.dart:282`，默认 2 行），这一页的说明和路径传 `null`（例如 `:300`、`:322`） |
+| c4 | ✅ | 依赖项 `enabled:`：总大小上限 `:349`、最大重试次数 `:466`、重连间隔 `:478`、检测间隔 `:502`、指数退避 `:511`、最大检测间隔 `:522`（开播检测和指数退避都开才可用）；不能用时变灰、不响应 |
+| c5 | ✅ | `record_settings_texts.dart`：“15 秒”“5 分钟”“5.5 分钟”“1 小时”（`recordDurationLabel` `:12`）、“5 次”（`:23`）、GB / MB 一位小数（`recordSpaceLabel` `:26`） |
+| c6 | ✅ | 读写超时 `:386-394`（值“15 秒”在右边、说明 `recordTimeoutMeaning` `record_settings_texts.dart:48`）、缓冲队列 `:411-419`（`recordQueueMeaning` `:55`），文字取自 v3 对话框 |
+| c7 | ✅ | 新键：`record_files`“录制文件”、`record_size_limit`“限制录制文件总大小”、`record_size_cap`“总大小上限”、`record_used_space`“已占用”、`record_live_check`“开播检测”、`record_files_cleared` 等；旧键 `cache_management` 等没动（D-018、D-024） |
+| c8 | ✅ | `confirmRecordClear`（`record_settings_dialogs.dart:218`）：标题“清空录制文件目录？”、正文带大小“将删除 3.5 GB 录像，不能恢复……”、“清空”错误色（`danger: true`） |
+| c9 | ✅ | `_maxTasks`（`record_settings_page.dart:542`）：`SettingsCounterRow` 1～10，到头按钮变灰，点一下就存；带参数 `recordSettingsMaxTasks` 进来时（`:81`）`_showLimit`（`:87-98`）滚到这一行、主色 2 像素边框和 8% 主色底高亮 2 秒（`recordLimitHighlight` `:21`）。“改上限”的两处调用改成 `openRecordLimit()`（`shared/record/record_actions.dart:22`）：录制面板 `features/live_play/record/record_panel.dart:340`、录制中心 `features/recorder/recorder_page.dart:266` |
+| c10 | ✅ | 目录行 `:316-332`：右边主色文件夹图标按钮“打开文件夹”（`openRecordFolder`）；组标题行不再有按钮 |
+| c11 | ✅ | 切片时长 `_SliderSetting`（`:432-443`）：1～60 分钟、59 档，拖完才存（`_SliderSetting` `:576`）；最大检测间隔同样按分钟（5～60，`:514-524`） |
+| c12 | ✅ | `SettingsPageList`（`:258`，`packages/live_ui/lib/src/widgets/settings_page_frame.dart:49`，最宽 720 居中）；窗口高 <480 时顶栏 48 高（`settingsPageAppBar` `:241`） |
+| c13 | ✅ | `showRecordRadioDialog`（`record_settings_dialogs.dart:34`）：不再用单选圈；当前项主色文字、8% 主色底、右边勾；选了就存并关 |
+| c14 | ✅ | 不能写入时提示 `record_folder_unwritable`“这个文件夹不能写入（不存在、有非法字符或没有存储权限），请换一个”（`record_settings_page.dart:153`、`:163`）；原来的 `path_or_permission_error` 别处还在用，没改 |
+
+- 根因（记录）：v3 的组标题和说明对比度不够（约 2.9:1、3.4:1）；说明和路径只显示一行；依赖项关着时消失、页面跳；英文缩写单位；读写超时、缓冲队列只显示数字；“缓存”其实是录像；清空不说删多少；改最大任务数要三步；切片连续滑块；宽屏最宽 960。
+- 偏差（记录）：拿不准的第 3 条（目录行）：有系统文件夹选择器时（Android、Windows、Linux，`recordDirectoryPickerProvider` `record_settings_dialogs.dart:13`）点目录行直接打开选择器（照 v3，`record_settings_page.dart:176`），没有时仍是输入路径的对话框（`RecordDirectoryDialog` `record_settings_dialogs.dart:231`，有“使用默认目录”）；3.x 存的不是整分钟的切片时长显示“5.5 分钟”，拖动后才变整分钟。设计范围外的改动：为了 c9，录制面板和录制中心的“改上限”各改了一行。
+- 新翻译键：改名和“不能写入”用新键（见 c7、c14）；`AppIcons` 加 21 个（`recordQuality` 等，照 v3 的字形）；`live_ui` 设置行加 `subtitleMaxLines`、页面框架 `SettingsPageList`（只做添加）。没有新设置，存储键一个没改（D-018）。门禁：`record_settings` 直接写的颜色和图标 28 → 0，跨功能引用 `record_settings -> recorder/recorder_texts.dart` 去掉（单位和大小的文字改在本目录；`recorder_texts.dart` 里原来给录制设置用的 `recordSizeText`、`recordSecondsText` 因此没有调用者了，见[子分类页](../README.md)“已知问题”）。
+- 后来的变化：A02.2（U.1d，提交 `9f68079cc`）把目录对话框的主按钮从“确认”改成“保存”；A02.1、A02.2 的共用组件（`914784264`、`fc5bcdd46`）换掉了对话框外壳，样子不变。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/record_settings/record_settings_page_test.dart`（新，12 个用例声明）：文字和单位；竖屏五组 21 行的顺序、图标、值在右边和意思、依赖项变灰、说明不截断、“打开文件夹”在目录行右边；3.x 存的值（5.5 分钟、5、30 秒）和打开开关后恢复；行内加减 1～10；“改上限”滚到并高亮 2 秒；单选对话框；总大小上限对话框；清空确认；系统选择器和不能写入的提示；没有选择器时的目录对话框；横屏一栏最宽 720、顶栏 48；宽屏 720 居中。`recorder_page_test.dart` 删掉 2 个和新设计冲突的旧用例（目录对话框、“10m”“30s”和最大任务数对话框）。全部测试数见 [A12.6 的记录](../../A12-账号和数据界面/A12.6-设备同步/record.md) 末尾（四个任务一起跑）。
+- 真机：记录里没有 K90 结果（S02 的 CHECKLIST 第 3 节第 6 条“录制目录换到 `Download/`”没做）。登记表已是“完成”，问题见[子分类页](../README.md)“已知问题”；建议在 [S03.1](../../../S-质量和验证/S03-统一验证/S03.1-统一验证/README.md) 或 S02.6 补看：设置 → 录制设置（或录制中心右上角齿轮）打开这一页；看五组、单位、变灰；从录制面板排队卡片的“改上限”进来，“最大同时录制任务数”高亮 2 秒；点目录行出系统选择器，选 `Download/` 下的文件夹；清空确认写着大小。
+- 留下的问题和去向：“优先录制原画轨道”和“默认录制清晰度”同时设置时谁优先，说明照 v3 保留，没在代码里确认 → H03；iOS 的目录行和“打开文件夹”→ A18.1；录制设置页在电脑上按 Esc 不返回 → A05.1。

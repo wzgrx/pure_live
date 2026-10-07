@@ -1,8 +1,9 @@
-# A10.1 录制中心：设计（第 1 版）
+# A10.1 录制中心：设计（第 1 版，已定稿并实现）
 
 - 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
 - 范围：录制中心页面（任务列表、状态筛选、每个任务的卡片和按钮、删除确认、空状态、开播检测关着的提示）；录制设置页在 [A10.2](../A10.2-录制设置/README.md)，直播间的录制面板在 [A07.6](../../A07-直播间界面/A07.6-直播间弹窗/README.md)（已确认）
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a101)（A10.1-01 页面、A10.1-02 取消监控对话框）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a101)；依赖 A09.1（房间卡片，未定稿；这里的卡片头是录制专用的，不影响 A09.1）
+- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a101)（A10.1-01 页面、A10.1-02 取消监控对话框）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a101)；和 A09.1（房间卡片，已完成）无关：这里的卡片头是录制专用的
+- 旧编号：U.7a、T08b.2（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（U1～U3 按建议 A）、D-018
 - 评审页：claude.ai 私有页面（只有项目所有者能打开）；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；封面和头像是示意图片；新设计的状态卡照 A07.6 已确认的录制面板（`apps/pure_live/lib/features/live_play/record/record_panel.dart`）
 
@@ -112,7 +113,7 @@
 | P10 | 手机上一张卡约 400 高，一屏一个多任务；宽屏卡片拉满窗口 | `:562-576`、`:96-101` |
 | P11 | 菜单按钮按整屏宽度判断（`Get.width <= 680`） | `:29` |
 
-## 改动（待确认）
+## 确认的改动
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
@@ -167,11 +168,31 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，U1～U3 按建议 A（筛选一行五个带数量、删除进卡片右上角的更多菜单、已保存卡片是播放 / 打开文件夹 / 再录一次）。
-- 实现：c1～c11 做到，P1～P11 都修了，详见 [record.md](record.md)。先把 A07.6 直播间录制面板的状态卡搬到共用的 `apps/pure_live/lib/shared/record/record_status_card.dart`（加紧凑尺寸参数，直播间样子不变）、九种状态的判断搬到 `shared/record/record_state.dart`、按钮动作搬到 `shared/record/record_actions.dart`；页面在 `features/recorder/recorder_page.dart`、卡片在 `recorder_task_card.dart`、筛选和列数在 `features/recorder/logic/recorder_view.dart`（列数 = ⌊(宽 + 12) ÷ 412⌋，1～4 列）。排队中的“启动”去掉（v3 点了没反应，P4）。
-- 偏差：左上角菜单只看是不是首页标签，不再读整屏宽度（顺带去掉 `recorder -> home/home_menu.dart` 的跨功能引用）；筛选格高 48（效果图 44，守 48 的点击区域）；空状态用 `AppStatusView`（圆和图标比效果图大）；紧凑按钮内边距 8（三个按钮一行放得下）；开播检测关着的提示在“全部”和“等待开播”都出现。
-- 新文字：中英各 7 条（`recorder_delete_task`、`recorder_filter_active`、`recorder_polling_off` 等）；`AppIcons` 加 7 个（`recordFolder`、`recordSettings`、`more`、`enterRoom`、`delete` 等）。没有新设置。
-- 提交：`220825af9`，合并 `d389bc6d6`，记录 `83b1de999`（2026-10-01）。`recorder` 的直接颜色和图标 36 → 0。
-- 测试：新增 `apps/pure_live/test/features/recorder/recorder_centre_test.dart` 14 个（顶栏、筛选和数量、九种状态卡、更多菜单三种打开方式、删除、开播检测提示、横屏两列、宽屏三列、逻辑）；A07.6 的 20 个弹窗测试断言不改全部通过；当时 `apps/pure_live` 291 个通过。
-- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：停止录制后录制中心显示“已保存”卡片（时长、大小、播放、打开文件夹、再录一次），通过；[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md) 录一场 5 分钟以上、两段合成一个 MP4，通过。筛选、更多菜单、删除没有逐项记录。
-- 留下的问题：卡片头的状态图形后来由 A10.3 换成统一的七种图形；iOS 的“打开文件夹”交给 A18.1；从通知定位到任务的高亮（`RecorderTaskHighlight`）是 A08.5 加的，只录一个直播间时点前台通知不定位见 H05.2。
+**定稿**：用户确认第 1 版，U1～U3 按建议 A（筛选一行五个带数量、删除进卡片右上角的更多菜单、已保存卡片是播放 / 打开文件夹 / 再录一次；D-003）。
+
+**实现**（详见 [record.md](record.md)；2026-10-01，提交 `220825af9`“feat(recorder): recording centre per the confirmed U.7a design”、`2cda9f3d5`（测试），合并 `d389bc6d6`“Merge U.7a: recording centre”；登记表记的是 `83b1de999`（记录））。先把 A07.6 直播间录制面板的状态卡搬到共用的 `shared/record/record_status_card.dart`（加紧凑尺寸参数，直播间样子不变）、九种状态的判断搬到 `shared/record/record_state.dart`、按钮动作搬到 `shared/record/record_actions.dart`，再写页面。
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/` 省略前缀） |
+|---|---|---|
+| c1 | ✅（偏差 1、2） | 入口：手机底部导航标签和宽屏导航项都是 `features/home/home_page.dart:169`（`inHome: true`；宽屏从 3.x 的导航栏按钮改成导航项是后来 A06.2 的改动）、录制面板“录制中心 ›”`features/live_play/record/record_panel.dart:76`、“在录制中心查看”`:346`。顶栏 `features/recorder/recorder_page.dart:276-301`：标题居中，手机首页标签里左上角菜单（`showsHomeBarButtons`，只看是不是首页标签、不读整屏宽度），右边打开文件夹 `AppIcons.recordFolder`、录制设置 `AppIcons.recordSettings`（22 号）。排序 `features/recorder/logic/recorder_view.dart:48-58`（按 `recordCardOrder` `shared/record/record_state.dart:145`，同状态新的在前）。筛选格照 v3：圆角 11（`recorder_page.dart:447`）、选中主色容器底 |
+| c2 | ✅（偏差 4） | `features/recorder/recorder_task_card.dart:268` 用 `RecordStatusCard(compact: true)`（`shared/record/record_status_card.dart:164`）：计时 24 号（`:344`）、按钮 40 高（`:623`）、内边距 8（`:626`）、卡片圆角 12 和内边距 12（`:526-529`）；没在录制不写说明句（`:271`），整理文件用短说明 `record_card_processing_desc`（`:437`）；录像有缺失时加 3.x 的黄色提示（`:519`，只在紧凑尺寸） |
+| c3 | ✅ | `_Head`（`recorder_task_card.dart:309`）：封面 96×54、宽屏 160×90（`:321`，按显示尺寸两倍解码）；“平台 · 热度 84.7万”（`:161`，共用的 `audienceLabel` + `readableAudience`）；“⏱ 自动录”胶囊 `_AutoPill`（`:399`，按 `autoRecordOn`，和直播间顶栏同一个判断）；封面上不再压状态字 |
+| c4 | ✅ | 更多菜单 `_CardMenu`（`:74`）、菜单项 `_menuItems`（`:215`：进入直播间、开播自动录带开关、删除任务红色带分隔线）、按钮 `_menuButton`（`:297`，现在是 A02.3 的 `AppMenuButton`）；“⋮”、长按、右键打开同一个菜单（`:259-260`）；删除确认 `showAppConfirmDialog`（`:201-205`，标题“删除“晚风”的录制任务？”，正文说清正在录的会先停止并保存、文件留着）；确认后照 v3 先停止再删 |
+| c5 | ✅ | 已保存三个按钮一行（`record_status_card.dart:457-496`）：“播放”`playRecording`（`shared/record/record_actions.dart:76`，文件不在时不显示，后来改成后台检查 `SavedFileCheck`，`shared/record/saved_file.dart:12`）、“打开文件夹”打开这次录像所在的文件夹（`recordTaskFolder` `recorder_page.dart:77`）、“再录一次”（`record_actions.dart:69`） |
+| c6 | ✅ | `RecorderFilter`（`recorder_view.dart:7`，按卡片状态分，排队有空位算“准备中”、停止且录到东西算“已保存”）；筛选行 `_FilterBar`（`recorder_page.dart:369`），数量变化只重建这一行（`ListenableSelector` `:388`）；格高 48；宽屏最宽 660（`:416`） |
+| c7 | ✅（偏差 3） | `_TaskGrid` 的空状态（`recorder_page.dart:532-540`，`AppStatusView`）：没有任务“暂无录制任务”+ `recorder_empty_hint`；某个筛选为空“没有“失败”的任务” |
+| c8 | ✅（偏差 5） | 提示 `_PollingOffBanner`（`recorder_page.dart:582`，只在当前列表有等待开播的任务时作为第一行 `:543-552`）；“打开”调 `enableRecordPolling`（`record_actions.dart:27`，和面板同一个函数，提示“已打开开播检测（每 N 秒检查一次）”）；等待开播的卡片写检查间隔和上次检查时间（`record_status_card.dart:274-298`） |
+| c9 | ✅ | `showRecordFailureReason`（`record_actions.dart:81`，可选中复制，和面板同一个对话框） |
+| c10 | ✅ | `recorderColumns`（`recorder_view.dart:93`）：⌊(可用宽 + 12) ÷ 412⌋，1～4 列；`recorder_page.dart:311-335` 用 `LayoutBuilder` 取页面自己的宽高，宽屏（宽 ≥840 且高 ≥480）两边留白 24、手机 16；一行里卡片顶对齐、按行懒加载 |
+| c11 | ✅ | 状态卡不再有开始时间、“1.0x”、满格细条、线路名（录制中看计时，已保存写完成时间，线路名在失败原因里） |
+
+- 根因（记录）：v3 的状态块九种颜色没有含义、白字压在彩色底上对比度不到 2:1、红色“删除”最显眼、排队中的“启动”点了没反应（录制器对排队中的任务直接返回，v4 同样，所以去掉这个按钮）、录好的文件找不到、九个筛选占三行、开播检测关着时没有提示、按整屏宽度判断菜单。
+- 偏差（记录）：①左上角菜单只看是不是首页标签，不再读整屏宽度（当时顺带去掉了 `recorder -> home/home_menu.dart`；合并时和首页外壳 U.3a 的 `showsHomeBarButtons` 一起又引用回来，门禁基线现在有 `recorder -> home/home_menu.dart`、`recorder -> home/menu_button.dart` 两条）；②筛选格高 48（效果图 44，守 48 的点击区域）；③空状态用 `live_ui` 的 `AppStatusView`（圆和图标比效果图大）；④紧凑按钮内边距 8（三个按钮一行放得下）；⑤开播检测关着的提示在“全部”和“等待开播”都出现。
+- 新翻译键中英各 7 条（`recorder_delete_task`、`recorder_delete_title`、`recorder_delete_body`、`recorder_filter_active`、`recorder_filter_saved`、`recorder_polling_off`、`record_card_processing_desc`）；`AppIcons` 加 7 个（`recordFolder`、`recordSettings`、`recordEmpty`、`recordUnavailable`、`more`、`enterRoom`、`delete`）。没有新设置。门禁：`recorder` 直接写的颜色和图标 36 → 0。
+- 后来的变化：A10.3 把卡片头的图形换成统一的七种（`record_status_card.dart:265`）；A08.5（F02 c2）加了从“录制已停止”提醒进来时滚到并高亮那条任务（`recorderTaskOf` `recorder_page.dart:110`、`RecorderTaskHighlight` `:605`）；A06.1（U.3a c6）在手机首页标签的顶栏右边加了搜索和更多（`:300`）；A07.11（B09 c6）让“播放”在后台问文件在不在；A02.3（B03，提交 `9f68079cc`）把“⋮”从 `PopupMenuButton` 换成共用的 `AppMenuButton`（贴着按钮、按实测高度定位，开播自动录那一行仍是点整行切换）。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/features/recorder/recorder_centre_test.dart`（新，当时 14 个，现在 23 个用例声明：后来加了 A10.3 的卡片头图形、B09 c6 的后台检查、3.x 默认目录搬家和 A08.5 的定位高亮 5 个）：顶栏、空、手机一列和筛选数量、九种状态卡、已保存三个按钮、筛选和空筛选、开播检测提示、更多菜单三种打开方式、删除、横屏两列、宽屏三列、逻辑。A07.6 的 20 个弹窗测试只改引用、断言没改。`recorder_page_test.dart` 里 v3 九个筛选和红色“删除”的旧用例删掉（照实改的断言见记录）。当时 `apps/pure_live` 291 个全部通过。
+- 真机：[S02.2 记录](../../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md)：停止录制后录制中心显示“已保存”卡片（时长、大小、播放、打开文件夹、再录一次），通过；[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md) 录一场 5 分钟以上、两段合成一个 MP4，通过。筛选、更多菜单、删除、开播检测提示、横屏两列没有记录（登记表是“完成”，问题见[子分类页](../README.md)“已知问题”）。
+- 留下的问题和去向：拿不准的第 2 条（Android 上“打开文件夹”打开子目录各机型是否都支持）没在 K90 上看，归 CHECKLIST 第 3 节第 6 条；iOS 的“打开文件夹”→ A18.1；只录一个直播间时点前台通知不定位 → H05.2；`recorder -> home/*` 的两条跨功能引用没有任务管（子分类页“已知问题”）。

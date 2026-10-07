@@ -19,7 +19,7 @@
 
 ## 现状：做到哪、怎么工作的
 
-- 用户看得到的：进直播间后聊天列表先写“开始连接弹幕服务器”，连上写“弹幕服务器连接正常”，之后弹幕同时进聊天列表和画面；断了写“与弹幕服务器断开连接，正在尝试重连”，重连 8 次失败写“弹幕服务器多次重连失败，已断开；刷新直播间可再次连接”，第一次尝试 30 秒没完成写“弹幕服务器连接超时，已自动释放并可重新连接”并给“重新连接”（`apps/pure_live/assets/translations/zh.json:274`、`:308`、`:309`、`:772-780`）。没登记弹幕的平台（网易 CC、映客、小红书、微博、LiveMe、TikTok）提示一次“该平台暂不支持弹幕”，聊天列表中间写“平台不提供弹幕”；IPTV 不连也不提示。哔哩哔哩未登录时列表顶上有“访客模式下哔哩哔哩会隐藏昵称 · 去登录”（D01.32）。
+- 用户看得到的：进直播间后聊天列表先写“开始连接弹幕服务器”，连上写“弹幕服务器连接正常”，之后弹幕同时进聊天列表和画面；断了写“与弹幕服务器断开连接，正在尝试重连”，重连 8 次失败写“弹幕服务器多次重连失败，已断开；刷新直播间可再次连接”，第一次尝试 30 秒没完成写“弹幕服务器连接超时，已自动释放并可重新连接”并给“重新连接”（`apps/pure_live/assets/translations/zh.json:274`、`:308`、`:309`、`:772-780`）。没登记弹幕的平台（网易 CC、映客、小红书、微博、LiveMe、TikTok）聊天列表中间写“{平台}的直播间没有弹幕”和“醒目留言、弹幕设置、屏蔽管理照常可用”（`features/live_play/danmaku/chat_list.dart:287-295`，`zh.json:768-769`），同时记一条系统行“该平台暂不支持弹幕”（被空状态挡住，只有发了本地弹幕后才看得到）；IPTV 不连也不提示。哔哩哔哩未登录时列表顶上有“访客模式下哔哩哔哩会隐藏昵称 · 去登录”（D01.32）。
 - 内部怎么工作：
 
 ```text
@@ -130,7 +130,16 @@ DanmakuConnection.events（同步广播流）
 | 斗鱼进房时补不上还在显示的超级弹幕（找不到列表接口） | E01.2 | 进房前发的醒目留言看不到 | 附录 C-5 受阻，未排 |
 | 弹幕握手的 User-Agent 带 `Dart/… (dart:io)` 前缀 | `app/platforms.dart:245`（编译参数，默认关） | 只是外观；各平台都接受 | [Q03.1](../../Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md)（在 K90 逐平台验证后默认打开） |
 | Twitch Cookie 失效提示、17LIVE 名字颜色和徽章、酷狗 PK“对方”标记：弹幕层已上报，界面没接 | `LiveMessage.nameColor`、`badges`、`sourceRoomId` | 数据有了但看不到 | [E06.2](../../E-直播平台/E06-平台层升级/E06.2-平台层新数据接到界面/README.md)（暂停） |
-| 30 个平台弹幕任务登记为“完成”，但除哔哩哔哩外没有单独的 K90 记录；S02.2 冒烟只看了一个直播间的飞行弹幕，CHECKLIST 第 2 节第 1 条（五大平台连接和断网重连）还没填 | [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 2 节 | 不符合 PROCESS 3.2“完成必须有真机结果”；海外平台还要代理 | 写进本单元报告；建议国内五大平台并入 S02.6，海外平台并入 S02.4（Twitch、Kick 已在里面） |
+| 28 个“完成”的平台弹幕任务都没有单独的 K90 记录（S02.2 冒烟只看了一个直播间的飞行弹幕）；CHECKLIST 第 2 节第 1 条只列国内五大平台、结果为空，其他 23 个平台清单里没有弹幕条目；SHOWROOM、BIGO LIVE、PandaTV 的实现连真实服务器都没接过（只用录制回放和本地服务器测）；登记表 D01.31 的 `commit` 记的是文档提交 `6c68f0010`，代码提交是 `96e032864` | [CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 2 节 | 不符合 PROCESS 3.2“完成必须有真机结果” | 写进本单元报告；建议 CHECKLIST 第 2 节加“其他平台弹幕抽查”（YY、AcFun 和其余国内平台归 S02.6，海外平台开代理归 S02.4；PandaTV 要连续看 35 分钟） |
+| SOOP 登记时也传了 `danmakuHandshake()` 的连接器：`PURE_LIVE_PLAIN_WS_UA` 打开后会顶替保留大小写的握手，SOOP 服务器不回答 | `app/platforms.dart:214`（注释 `:247` 只写了 YY、FC2 有自己的握手） | 现在开关默认关，不受影响；Q03.1 打开开关时会坏 | 写进 [Q03.1](../../Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md) 的风险：打开前 SOOP 不再传 `connector`（D01.8） |
+| 主播换场后弹幕参数变了（TwitCasting 的直播号、克拉克拉的房间号、SHOWROOM 的订阅键），旧连接不会自己断，直播间刷新只在连接已结束时才重连，不比较 `danmakuData` | `features/live_play/logic/room_controller.dart:785` | 人留在直播间时弹幕停在旧的一场 | 没有任务；建议在 C01 开任务：刷新时弹幕参数变了就重连（D01.12、D01.14、D01.16） |
+| 改“YouTube 显示全部聊天”后已经打开的直播间不生效（设置在建连接时读） | `app/platforms.dart:227`、`features/live_play/live_play_page.dart:278` | 要重新进房 | 没有任务；建议并入上一条的 C01 任务（D01.20） |
+| AcFun 付费直播没有弹幕参数时照样 `connect(null)`，基类抛 `ArgumentError`，提示“弹幕服务器连接失败” | `packages/live_danmaku/lib/src/connection_base.dart:55` | 提示不准 | 没有任务；建议参数为空时直接显示“没有弹幕”（D01.10） |
+| 百度签名过期后重连仍用过期地址：直播中的刷新（`getRoomDetailForRefresh`）不带弹幕参数，`LiveRoom.mergeFrom` 保留旧参数 | `packages/live_core/lib/src/sites/baidulive/baidulive_site.dart:321`、`packages/live_core/lib/src/live_room.dart:619` | 签名半年才过期，很少遇到；遇到时每 60 秒失败一次 | 没有任务（D01.27） |
+| 六间房录制时不带弹幕参数（其他平台的录制详情都带） | `packages/live_core/lib/src/sites/sixroom/sixroom_site.dart:416` | 六间房录制没有弹幕 XML | 没有任务（D01.28） |
+| 长按弹幕面板不显示等级（3.x 显示 `Lv.N`），猫耳、克拉克拉、SHOWROOM、BIGO 解出的等级用不上 | `features/live_play/danmaku/message_panel.dart:112-150`；3.x `danmaku_message_actions.dart:19` | 少一项信息 | 需要维护者决定是否加回（A08） |
+| 协议层写死的文字：快手“快手用户”、YY“YY用户”、CHZZK 匿名捐赠的韩文和置顶、订阅赠送的中文句子 | 各平台文件（见 D01.6、D01.7、D01.17） | 英文界面下是中文或韩文（D-005） | [Z05.2](../../Z-工程文档和维护/Z05-多语言/Z05.2-英文界面里平台给的中文/README.md) |
+| 表情图片只有哔哩哔哩、快手、CHZZK、YouTube 填 `LiveMessage.emotes`；Steam、Kick、酷狗、六间房的表情还是文字；FC2、酷狗、六间房、LOOK 的礼物没上报 | 各平台文件 | 和有表情、礼物的平台不一致 | 没有任务；有需要在 V01 提议 |
 | 代码注释还用旧编号（M5、M5.17、M5.18、M5.34、B-x 的出处写成 M5.F 等） | `app/platforms.dart:190-195`、`:226`；`packages/live_danmaku/lib/live_danmaku.dart:1-5` | 按注释找文档要先查 [MAPPING.md](../../MAPPING.md) | Z 组一次性替换（和其他组一起） |
 | 头像借用 `LiveMessage.data`（`DanmakuSender`） | `packages/live_danmaku/lib/src/sender.dart:8` | 以后读 `data` 的代码要认得它 | 需要维护者决定是否加正式字段（D01.32） |
 

@@ -53,7 +53,7 @@ void main() {
           settingsRow(id),
       ]);
       for (final (id, icon) in [
-        ('global_mute', AppIcons.settingsUnmuted),
+        ('global_mute', AppIcons.settingsMuted),
         ('prefer_resolution', AppIcons.settingsQuality),
         ('prefer_resolution_cellular', AppIcons.settingsCellularQuality),
         ('portrait', AppIcons.settingsPortrait),

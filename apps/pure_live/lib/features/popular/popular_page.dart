@@ -378,15 +378,19 @@ class _PlatformTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(
-                  platformName(id, fallback: id.toUpperCase()),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: context.textStyles.t13.copyWith(
-                    height: 1.4,
-                    color: selected ? scheme.onSecondaryContainer : scheme.onSurface,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                // A long Latin name (SHOWROOM, YouTube Live) narrows a
+                // little rather than losing its end to an ellipsis.
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    platformName(id, fallback: id.toUpperCase()),
+                    maxLines: 1,
+                    textAlign: TextAlign.center,
+                    style: context.textStyles.t13.copyWith(
+                      height: 1.4,
+                      color: selected ? scheme.onSecondaryContainer : scheme.onSurface,
+                      fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    ),
                   ),
                 ),
               ],

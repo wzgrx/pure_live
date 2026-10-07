@@ -35,12 +35,10 @@ class GlobalMuteTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final muted = watchSetting(ref, Settings.globalVolumeMute);
-    return SettingToggleTile(
-      entry: entry,
-      setting: Settings.globalVolumeMute,
-      icon: muted ? AppIcons.settingsMuted : AppIcons.settingsUnmuted,
-    );
+    // A01.4 c4: the row is about muting, so it always shows the muted
+    // speaker; the switch tells whether it is on (the default volume row
+    // below uses the plain speaker).
+    return SettingToggleTile(entry: entry, setting: Settings.globalVolumeMute, icon: AppIcons.settingsMuted);
   }
 }
 

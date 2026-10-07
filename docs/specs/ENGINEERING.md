@@ -1,6 +1,6 @@
 # 工程规范
 
-- 更新：2026-10-07（第 5 节上游对照的结论改写进 W01；`tools/live_cli` 在 master 上还没有，指向 E07.1）；2026-10-02（从模块重构计划整理，改正了测试包名和多语言两处过时的说法）
+- 更新：2026-10-08（`tools/live_cli` 回到 master：平台探针和巡检，E07.1）；2026-10-07（第 5 节上游对照的结论改写进 W01）；2026-10-02（从模块重构计划整理，改正了测试包名和多语言两处过时的说法）
 - 代码和门禁脚本里写的“docs/specs/ENGINEERING.md §3、§4”指这里的第 3、4 节。
 
 ## 1. 范围
@@ -49,10 +49,11 @@ apps/pure_live
   ├─ live_danmaku、live_iptv、live_cast、live_vod
   ├─ live_store（存储、设置、迁移）
   └─ live_core（模型、平台接口、平台适配器） → live_net（HTTP、WebSocket、代理）
+tools/live_cli → live_danmaku、live_core、live_net
 tools/check_latest、tools/gate、tools/docs、tools/ui、tools/ffmpeg_kit
 ```
 
-平台探针和样本录制的命令行工具 `tools/live_cli` 在 master 上**还没有**（只在归档分支 `archive/v4` 里；`tools/gate/check_deps.py`、`fixtures/README.md` 里提到它的地方按“以后会有”理解），由 [E07.1](../E-直播平台/E07-平台巡检/E07.1-平台巡检工具/README.md) 重写后再加回上图。
+`tools/live_cli` 是平台的命令行工具（纯 Dart，工作区成员）：`probe` 把一个房间从链接走到媒体开头字节，`patrol` 按 [CHECKS.md](../E-直播平台/E07-平台巡检/CHECKS.md) 巡检各平台并出报告（[E07.1](../E-直播平台/E07-平台巡检/E07.1-平台巡检工具/README.md)）。它会访问真实平台，只在人手动运行时用；它自己的单元测试不联网，跟门禁一起跑（D-017）。录样本的 `fixture capture` 还在归档分支 `archive/v4` 里，没有取回（见 `fixtures/README.md`）。
 
 每个包归哪个组见 [README.md](../README.md#20-组按优先级)。
 

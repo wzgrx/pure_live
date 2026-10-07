@@ -5,7 +5,7 @@
 ## 范围
 
 - 包括：
-  - 巡检工具：`tools/live_cli/`（计划，现在 master 上没有，归档在 `v4-archive`）：`probe`（单个房间从链接到媒体开头字节）、`patrol`（多个平台按检查项跑、出报告）。
+  - 巡检工具：`tools/live_cli/`（E07.1，2026-10-08）：`probe`（单个房间从链接到媒体开头字节）、`patrol`（多个平台按检查项跑、出报告）。
   - 检查项和对象表：本文件夹的 `CHECKS.md`（E07.1 第 1 阶段写）。
   - 每一轮的结果：E07.1 的 `runs/` 和 record.md；以后定期的轮次也记在这里（新任务或 E07.1 的 record 追加）。
 - 不包括（归哪里）：
@@ -16,8 +16,8 @@
 
 ## 现状：做到哪、怎么工作的
 
-- 做到哪（2026-10-07）：还没有工具、没有定期巡检。唯一一轮真实接口检查是各平台重构时（2026-09-28～10-01）用临时程序跑的，结果分散在 34 个平台 record.md 的“真实环境检查”一节（例如 [E01.1 记录](../E01-国内五大平台/E01.1-哔哩哔哩/record.md)第 177 行起），程序没进仓库。那一轮发现并修了：哔哩哔哩分区对游客 -352、虎牙搜索 403、抖音游戏直播间没有分区。
-- 计划怎么工作（E07.1）：
+- 做到哪（2026-10-08）：工具 `tools/live_cli` 的 `patrol` 和检查项 [CHECKS.md](CHECKS.md) 做好了（E07.1），第一轮的报告在 [E07.1 的 runs/](E07.1-平台巡检工具/record.md)，国内五大平台的修复在 [E01.6](../E01-国内五大平台/E01.6-国内五大平台巡检和修复/README.md)。之前唯一一轮真实接口检查是各平台重构时（2026-09-28～10-01）用临时程序跑的，结果分散在 34 个平台 record.md 的“真实环境检查”一节，那一轮发现并修了：哔哩哔哩分区对游客 -352、虎牙搜索 403、抖音游戏直播间没有分区。
+- 怎么工作（E07.1）：
   1. 工具按平台建适配器（和应用同样的构造参数，但 Cookie 为空、只用 `IoLiveHttp`）；国内直连，海外按 `--proxy` 走代理；
   2. 每个平台按 `CHECKS.md` 跑 P1～P12（推荐、分类、分区、搜索房间和主播、在播 3 个和未开播、不存在的房间、清晰度、每条线路前 64 KB、租期、链接），`--danmaku` 时加 P13；
   3. 每项判成“正常 / 失败 / 没测到 / 不支持”，出 Markdown 报告（格式同 record.md 的“真实环境检查”表，已脱敏）和 JSON；
@@ -26,11 +26,11 @@
 
 ## 代码地图
 
-现在（master）没有代码，下面是 E07.1 要建的和它依赖的：
+E07.1 建的和它依赖的：
 
 | 文件 | 职责 |
 |---|---|
-| `tools/live_cli/`（计划） | `bin/live_cli.dart`、`lib/src/sites.dart`（工厂表）、`lib/src/probe/probe_command.dart`、`lib/src/patrol/`（`targets.dart`、`checks.dart`、`media.dart`、`report.dart`、`patrol_command.dart`）、`test/` |
+| `tools/live_cli/` | `bin/live_cli.dart`、`lib/src/sites.dart`（工厂表）、`lib/src/probe/probe_command.dart`、`lib/src/patrol/`（`targets.dart`、`checks.dart`、`media.dart`、`report.dart`、`patrol_command.dart`）、`test/` |
 | `git show v4-archive:tools/live_cli/` | 归档的工具：`probe_command.dart`（207 行，接口是归档 v4 的，要重写）、`sites.dart`（33 个平台的工厂表）、`fixture/`（录样本和脱敏规则，这次不取回） |
 | `packages/live_core/lib/src/live_site.dart` | 工具调用的平台接口（`:30`～`:59`）和扩展 `resolvePlayUrls`（`:421`）、`discoverPlayQualities`（`:468`）、目录分页 `LiveSiteDirectoryPager`（`:375`） |
 | `packages/live_core/lib/src/play_line.dart`、`site_error.dart`、`links.dart` | 线路和租期、9 种错误、链接解析 |
@@ -49,7 +49,7 @@
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 文档和门禁已经当 `tools/live_cli` 存在，master 上却没有 | `docs/specs/ENGINEERING.md:52`、`tools/gate/check_deps.py:34`、`:41`、`fixtures/README.md:17`、`:24` | 照 `fixtures/README.md` 录样本的命令跑不起来 | [E07.1](E07.1-平台巡检工具/README.md) 取回工具（`fixture` 命令以后另开任务） |
+| 录样本的 `fixture capture` 不在 master | 归档 `v4-archive` 的 `tools/live_cli/lib/src/fixture/`；`fixtures/README.md` “录制” | 样本只能手工补录 | 以后另开任务取回（E07.1 只取回了探针和巡检） |
 | Kick、Twitch 在应用里走 Android 系统 TLS，电脑上的工具没有这个通道 | `apps/pure_live/lib/app/platforms.dart:119-126` | 这两个平台的巡检结果可能是“被拒”而应用正常 | 报告单独标出；真机验证归 S02.4 |
 | 没有定期巡检的约定 | `docs/PROCESS.md` 第 12 节的维护表没有巡检这一行 | 巡检会被忘掉 | 写进本组报告：建议每两周一次、发布前一次，由维护者加进 PROCESS 第 12 节 |
 | 上一轮的临时程序和结果分散在 34 个 record.md | 各平台 record.md“真实环境检查” | 下一轮没有基准可比 | E07.1 第 3 阶段的报告成为基准 |
@@ -77,17 +77,22 @@
 
 属于 [E 直播平台](../README.md)。
 
-- 代码：`tools/live_cli/`（计划）
-- 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
+- 代码：`tools/live_cli/`
+- 进度：`████████████░░░░░░░░` 60%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| E07.1 | 平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来 | 平台 | 未开始 | — | — | [设计或说明](E07.1-平台巡检工具/README.md)、[任务书](E07.1-平台巡检工具/brief.md) |
+| E07.1 | 平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来 | 平台 | 开发中 | — | — | [设计或说明](E07.1-平台巡检工具/README.md)、[任务书](E07.1-平台巡检工具/brief.md)、[记录](E07.1-平台巡检工具/record.md) |
 
 ## 还没完成的
 
-- **E07.1 平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来**（未开始，第一档，规模 中）
-  - 阶段：定检查项 → 写工具 → 跑一遍并记录
+- **E07.1 平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来**（开发中，第一档，规模 中）
+  - 阶段：✓ 定检查项 → ✓ 写工具 → 跑一遍并记录
+  - 接着做：第 3 阶段：全部平台跑一遍，报告存 runs/
+
+## 资料
+
+- [CHECKS.md](CHECKS.md)
 
 <!-- docs:生成结束 -->

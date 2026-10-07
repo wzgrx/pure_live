@@ -31,7 +31,8 @@ ALLOWED = {
         'live_ui', 'live_media', 'live_player', 'live_record', 'live_danmaku', 'live_iptv', 'live_store', 'live_core',
         'live_net', 'live_cast', 'live_vod',
     },
-    'tools/live_cli': {'live_core', 'live_net', 'live_danmaku', 'live_media', 'live_record'},
+    # Platform probe and patrol (E07.1): adapters, transport and danmaku only.
+    'tools/live_cli': {'live_core', 'live_net', 'live_danmaku'},
     'tools/check_latest': set(),
 }
 

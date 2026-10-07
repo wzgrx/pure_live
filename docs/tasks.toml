@@ -304,7 +304,7 @@ code = "`packages/live_core`、`app/platforms.dart`"
 id = "E07"
 title = "平台巡检"
 scope = "定期用真实接口检查各平台还能不能用。"
-code = "`tools/live_cli/`（计划）"
+code = "`tools/live_cli/`"
 
 [[sub]]
 id = "G01"
@@ -2427,12 +2427,13 @@ from = "UPGRADES 6-1（V03.3 核对）"
 id = "E07.1"
 title = "平台巡检工具：定期用真实接口跑播放地址、搜索、分区，失效报出来"
 type = "平台"
-status = "未开始"
+status = "开发中"
 size = "中"
 tier = 1
 old = ["T02e.1"]
 stages = ["定检查项", "写工具", "跑一遍并记录"]
-done = 0
+done = 2
+next = "第 3 阶段：全部平台跑一遍，报告存 runs/"
 
 [[task]]
 id = "G01.1"

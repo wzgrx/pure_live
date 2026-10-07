@@ -20,20 +20,24 @@
 
 用户看得到的：
 
-- **横屏全屏**（手机；双击、全屏按钮、F，或横屏直播间开着“默认全屏”，或竖屏直播间点“横屏全屏”胶囊）：画面横过来，**手机翻转 180° 画面跟着翻**，开着系统的旋转锁也翻（issue #36，D-023；3.x 开着旋转锁时不翻）。退出全屏：从“横屏全屏”胶囊进的先转回竖屏、3 秒后放开方向；其他情况直接放开方向。设置“进入全屏时的方向”选“跟随系统”时，横屏直播进全屏不锁方向、跟系统的自动旋转走（开着旋转锁就不转）。多画面的全屏一样按传感器翻转。
+- **横屏全屏**（手机；双击、全屏按钮、F，或横屏直播间开着“默认全屏”，或竖屏直播间点“横屏全屏”胶囊）：画面横过来，**手机翻转 180° 画面跟着翻**，开着系统的旋转锁也翻（issue #36，D-023；3.x 开着旋转锁时不翻）。退出全屏（O05.3）：手机自动旋转关着时，不管怎么进的都先转回竖屏、3 秒后放开方向（HyperOS 在锁定时会把 `user_rotation` 改成横屏，直接放开会停在横屏）；自动旋转开着时直接放开、跟着手机方向；从“横屏全屏”胶囊进的不管开没开都先转回竖屏。设置“进入全屏时的方向”选“跟随系统”时，横屏直播进全屏不锁方向、跟系统的自动旋转走（开着旋转锁就不转）。多画面的全屏一样按传感器翻转。
 - **刷新率**：直播间播放时按视频帧率声明（例如 30 帧的流在 120 Hz 屏上请求 120 Hz 的整数倍关系，具体策略见 R02）；不播放时设置“界面刷新率”选“性能”就请求最高刷新率；系统把应用限制在 60 Hz 时设置里提示（D-010）。
 - **屏幕常亮**（设置 → 视频 →“屏幕常亮”，默认开，3.x 键 `enableScreenKeepOn`）：开着时直播间、应用内小窗**播放或缓冲时**不灭屏，暂停后按系统超时灭屏；关掉后看直播也按系统超时灭屏；改设置立即生效。多画面和电视不看这个设置，播放时总是常亮。
 
 内部怎么工作：
 
 ```text
-方向：LivePlayPage._enterFullscreen（live_play_page.dart:526）
-  竖屏全屏 → setPreferredOrientations([portraitUp])（:552）
-  跟随系统且不是“横屏全屏”胶囊 → setPreferredOrientations([])（:554，UNSPECIFIED）
-  其他 → ScreenOrientation.landscape()（:556）
+方向：方向请求都走 ScreenOrientation（screen_orientation.dart），新的请求先取消还没到的“放开”
+LivePlayPage._enterFullscreen（live_play_page.dart:524）
+  竖屏全屏 → ScreenOrientation.portrait() = [portraitUp]（:549）
+  跟随系统且不是“横屏全屏”胶囊 → ScreenOrientation.free() = []（:551，UNSPECIFIED）
+  其他 → ScreenOrientation.landscape()（:553）
         = setPreferredOrientations([landscapeLeft, landscapeRight])（Flutter → Android USER_LANDSCAPE，旋转锁开时不翻）
         + Android：通道 pure_live/system_access 的 sensorLandscape → requestedOrientation = SENSOR_LANDSCAPE（SystemAccessPlugin.kt:112）
-  退出 _exitFullscreen（:576）→ _restoreSystemUi（:595）：胶囊进的先 [portraitUp]、3 秒后 []；否则直接 []
+  退出 _exitFullscreen（:572）→ _restoreSystemUi（:591）→ ScreenOrientation.restore(upright: 胶囊进的)（:70）
+        Android 问通道 autoRotate（SystemAccessPlugin.kt:122，只读 ACCELEROMETER_ROTATION）
+        关着、问不到或 upright → [portraitUp]，3 秒（settle）后 []；开着 → 直接 []；iOS 直接 []
+  多画面同样：landscape()（multiview_page.dart:403），退出 restore()（:416）
   下一次 setPreferredOrientations 会覆盖 SENSOR_LANDSCAPE
 刷新率：RoomRefreshRate（logic/room_refresh_rate.dart:13）→ DisplayMode.setPlayback（display_mode.dart:260）
   → 通道 pure_live/display_mode setHighRefreshRate {enabled, frameRate, refreshRate}（MainActivity.kt:217）
@@ -50,10 +54,10 @@
 
 | 文件 | 职责 |
 |---|---|
-| `apps/pure_live/lib/platform/screen_orientation.dart`（27 行） | `ScreenOrientation.landscape()`（:13）：先 Flutter 的两个横向，再在 Android 上调 `sensorLandscape`；通道出错时只是不翻转 |
-| `apps/pure_live/android/app/src/main/kotlin/com/mystyle/purelive/SystemAccessPlugin.kt` | `sensorLandscape`（:112-116）：`requestedOrientation = SCREEN_ORIENTATION_SENSOR_LANDSCAPE`；没有 Activity 时回答 false |
-| `apps/pure_live/lib/features/live_play/live_play_page.dart` | `_enterFullscreen`（:526，方向 :551-557）、`_enterPortraitFullscreen`（:563）、`_exitFullscreen`（:576）、`_restoreSystemUi`（:595-606，`_releaseOrientation` 3 秒） |
-| `apps/pure_live/lib/features/multiview/multiview_page.dart` | 全屏 `ScreenOrientation.landscape()`（:403）、退出 `setPreferredOrientations(const [])`（:414） |
+| `apps/pure_live/lib/platform/screen_orientation.dart`（104 行） | `ScreenOrientation`：`landscape()`（:37，先 Flutter 的两个横向，再在 Android 上调 `sensorLandscape`；通道出错时只是不翻转）、`portrait()`（:54）、`free()`（:60）、`restore({upright})`（:70，O05.3）；全应用一个“放开”定时器（`settle` 3 秒），任何请求先取消它（`_claim` :88） |
+| `apps/pure_live/android/app/src/main/kotlin/com/mystyle/purelive/SystemAccessPlugin.kt` | `sensorLandscape`（:116-120）：`requestedOrientation = SCREEN_ORIENTATION_SENSOR_LANDSCAPE`；没有 Activity 时回答 false。`autoRotate`（:122-125）：只读 `Settings.System.ACCELEROMETER_ROTATION` |
+| `apps/pure_live/lib/features/live_play/live_play_page.dart` | `_enterFullscreen`（:524，方向 :548-554）、`_enterPortraitFullscreen`（:560）、`_exitFullscreen`（:572）、`_restoreSystemUi`（:591） |
+| `apps/pure_live/lib/features/multiview/multiview_page.dart` | 全屏 `ScreenOrientation.landscape()`（:403）、退出 `ScreenOrientation.restore()`（:416） |
 | `apps/pure_live/android/app/src/main/kotlin/com/mystyle/purelive/MainActivity.kt` | `pure_live/display_mode`（:211-230：`setHighRefreshRate`、`getDisplayModeInfo`）；`highRefreshRateEnabled`、`playbackFrameRate`、`playbackWindowRate`（:102-110）；显示器监听（:142-153、`registerDisplayListener` :742）；`applyRefreshRate`（:784-835，只用数值不用类别，注释 :781-782）；`applySurfaceFrameRate`（:842，`CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS`）；`flutterSurfaceView`（:860）；`displayModeInfo`（:875） |
 | `apps/pure_live/lib/platform/display_mode.dart`（376 行） | `DisplayModeInfo`（:12）、`PlaybackRefresh`（:92）、计算函数 `normalizeFrameRate`、`frameRateMultiples`、`playbackRefreshRate`（:111-170，归 R02）；`DisplayMode`（:171：`applyHighRefreshRate` :250、`setPlayback` :260、60 Hz 限速检测 `_checkLimit` :327） |
 | `apps/pure_live/lib/features/live_play/logic/room_refresh_rate.dart`（77 行） | `RoomRefreshRate`（:13）：直播间播放时按会话的帧率调 `DisplayMode.setPlayback`（R02.1） |
@@ -65,12 +69,13 @@
 
 | 测试文件 | 覆盖什么 |
 |---|---|
-| `apps/pure_live/test/features/live_play/live_play_layouts_test.dart` | 假的 `pure_live/system_access`（:64-72）；“横屏全屏”胶囊进入时先两个横向再 `sensorLandscape`、退出转回竖屏（:729） |
+| `apps/pure_live/test/features/live_play/live_play_layouts_test.dart` | 假的 `pure_live/system_access`（:64-74，`autoRotate` 默认关）；O05.3 组（:337）：自动旋转关着时全屏按钮、双击进出都先竖屏再放开，开着时直接放开，全屏里关掉直播间也先竖屏；“横屏全屏”胶囊进入时先两个横向再 `sensorLandscape`、退出转回竖屏 |
+| `apps/pure_live/test/platform/screen_orientation_test.dart`（6 个） | `ScreenOrientation.restore`：关着、开着、问不到、`upright`、3 秒内再进全屏不被放开、iOS |
 | `apps/pure_live/test/features/live_play/live_play_page_test.dart` | 屏幕常亮：关时直播间不请求，再开立即请求，离开释放（:439，F.1a） |
 | `packages/live_player/test/frame_rate_test.dart` | `ScreenWake`：关时不请求、开时立即请求、视图销毁释放（:102）；两个视图共用计数、暂停释放（:118） |
 | `apps/pure_live/test/platform/display_mode_test.dart`（6 个）、`test/features/live_play/room_refresh_rate_test.dart`（10 个） | 刷新率的通道和策略（R02） |
 
-多画面的 `ScreenOrientation.landscape()` 没有测试（只在真机看，S02.5 的 1D-06）。
+多画面：`multiview_page_test.dart` 的 O05.3 一条测退出时先竖屏再放开；进全屏的翻转只在真机看（S02.5 的 1D-06）。
 
 ## 3.x 基线
 
@@ -114,18 +119,13 @@
 属于 [O Android系统集成](../README.md)。
 
 - 代码：`MainActivity.kt`、`platform/display_mode.dart`、`platform/screen_orientation.dart`
-- 进度：`███████████████░░░░░` 76%
+- 进度：`███████████████████░` 94%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | O05.1 | 屏幕常亮跟随设置 | 功能 | 完成 | 2026-10-02 | b8462638a | [设计或说明](O05.1-屏幕常亮跟随设置/README.md)、[记录](O05.1-屏幕常亮跟随设置/record.md) |
 | O05.2 | 横屏全屏随手机方向翻转，开着旋转锁也翻（issue #36） | 功能 | 待真机 | 2026-10-02 | 3c1aa45ee | [设计或说明](O05.2-横屏全屏随手机方向翻转/README.md)、[任务书](O05.2-横屏全屏随手机方向翻转/brief.md)、[真机验证](O05.2-横屏全屏随手机方向翻转/verify.md) |
-| O05.3 | 退出横屏全屏后回到竖屏，不改动系统的旋转锁定方向（自动旋转关着时 HyperOS 把 user_rotation 改成横屏） | 原生 | 未开始 | — | — | [设计或说明](O05.3-退出横屏全屏后回到竖屏/README.md)、[任务书](O05.3-退出横屏全屏后回到竖屏/brief.md) |
-
-## 还没完成的
-
-- **O05.3 退出横屏全屏后回到竖屏，不改动系统的旋转锁定方向（自动旋转关着时 HyperOS 把 user_rotation 改成横屏）**（未开始，第一档，规模 小）
-  - 来源：V03.4-08（2026-10-08 真机对照）；接 O05.2（D-023）
+| O05.3 | 退出横屏全屏后回到竖屏，不改动系统的旋转锁定方向（自动旋转关着时 HyperOS 把 user_rotation 改成横屏） | 原生 | 待真机 | 2026-10-08 | — | [设计或说明](O05.3-退出横屏全屏后回到竖屏/README.md)、[任务书](O05.3-退出横屏全屏后回到竖屏/brief.md)、[记录](O05.3-退出横屏全屏后回到竖屏/record.md) |
 
 <!-- docs:生成结束 -->

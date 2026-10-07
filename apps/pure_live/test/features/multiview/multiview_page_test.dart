@@ -535,6 +535,36 @@ void main() {
     await _close(tester, services);
   });
 
+  testWidgets('O05.3: leaving the fullscreen turns the phone upright, then lets go', (tester) async {
+    final orientations = <Object?>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'SystemChrome.setPreferredOrientations') orientations.add(call.arguments);
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    const systemAccess = MethodChannel('pure_live/system_access');
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, (call) async {
+      if (call.method == 'sensorLandscape') orientations.add(call.method);
+      // Auto-rotate off.
+      return call.method != 'autoRotate';
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(systemAccess, null));
+    final (services, _) = await _pump(tester, const Size(393, 852));
+    await tester.tap(_key('multiview-fullscreen'));
+    await _wait(tester);
+    tester.view.physicalSize = const Size(852, 393);
+    await _wait(tester);
+    await tester.tap(_key('multiview-fullscreen-exit'));
+    await _wait(tester);
+    const sideways = ['DeviceOrientation.landscapeLeft', 'DeviceOrientation.landscapeRight'];
+    const upright = ['DeviceOrientation.portraitUp'];
+    expect(orientations, [sideways, 'sensorLandscape', upright], reason: 'upright first');
+    tester.view.physicalSize = const Size(393, 852);
+    await tester.pump(const Duration(seconds: 4));
+    expect(orientations, [sideways, 'sensorLandscape', upright, <Object?>[]], reason: 'then free again');
+    await _close(tester, services);
+  });
+
   testWidgets('wide: icons on the layouts, a 360 column; 1+3 grows; the large cell bar in fullscreen', (tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.windows;
     final processors = MultiviewPage.processors;

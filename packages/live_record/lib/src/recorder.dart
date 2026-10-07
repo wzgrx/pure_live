@@ -489,9 +489,8 @@ final class Recorder {
         if (error.type == RecordStreamErrorType.notLive && _endsAfterBroadcast(task)) {
           // The broadcast ended and the live room's "开播自动录" is off: the
           // session ends here instead of waiting for the next one.
-          rt.rapidRecovery = false;
           task.clearFailure();
-          await _endSession(task, failed: false);
+          await _finalizing(rt, () => _closeSession(task, broadcastEnded: true));
         } else if (error.type == RecordStreamErrorType.notLive) {
           rt.rapidRecovery = false;
           task
@@ -504,7 +503,13 @@ final class Recorder {
           _update(task);
           _notice(RecordNotice(task, RecordNoticeKind.resolveFailed, streamError: error));
         } else {
-          _scheduleReconnect(task, fast: rt.rapidRecovery);
+          // A request that failed outright is the network, not the end of
+          // the broadcast: it reconnects without using up the retries. A
+          // platform that answers without a usable stream counts.
+          final fast = rt.rapidRecovery;
+          if (!_scheduleReconnect(task, fast: fast, counted: error.type != RecordStreamErrorType.networkError)) {
+            await _finalizing(rt, () => _closeSession(task, broadcastEnded: fast));
+          }
         }
       }
       _completeLifecycle(rt);
@@ -512,7 +517,10 @@ final class Recorder {
       if (!token.isCancelled && _owns(task)) {
         task.markFailure(stage: 'recorder', error: error, now: clock.now());
         if (task.autoReconnect) {
-          _scheduleReconnect(task, fast: rt.rapidRecovery);
+          final fast = rt.rapidRecovery;
+          if (!_scheduleReconnect(task, fast: fast)) {
+            await _finalizing(rt, () => _closeSession(task, broadcastEnded: fast));
+          }
         } else {
           task.status = RecordStatus.failed;
           _update(task);
@@ -699,15 +707,31 @@ final class Recorder {
     required bool fast,
     required bool damaged,
   }) {
-    final rt = _rt(task);
-    return rt.finalizing ??= _doFinalize(
-      task,
-      manual: manual,
-      failed: failed,
-      shouldRetry: shouldRetry,
-      fast: fast,
-      damaged: damaged,
-    ).whenComplete(() => rt.finalizing = null);
+    return _finalizing(
+      _rt(task),
+      () => _doFinalize(task, manual: manual, failed: failed, shouldRetry: shouldRetry, fast: fast, damaged: damaged),
+    );
+  }
+
+  /// Runs [body] as the task's finalization (`_Runtime.finalizing`, which
+  /// holds back starts, stops and live checks), or returns the one running.
+  /// The future is stored before [body] starts: a body that finishes or
+  /// starts another finalization synchronously can never leave it unset
+  /// while it still works.
+  Future<void> _finalizing(_Runtime rt, Future<void> Function() body) {
+    final running = rt.finalizing;
+    if (running != null) return running;
+    final done = Completer<void>();
+    final future = rt.finalizing = done.future;
+    unawaited(() async {
+      try {
+        await body();
+      } finally {
+        if (identical(rt.finalizing, future)) rt.finalizing = null;
+        done.complete();
+      }
+    }());
+    return future;
   }
 
   Future<void> _doFinalize(
@@ -726,8 +750,13 @@ final class Recorder {
       if (failed && shouldRetry && task.autoReconnect && !stopped) {
         // Reconnect first; joining waits until the session ends (3.x: a
         // 10–20 s join here left a hole at every short lease).
-        _completeLifecycle(rt);
-        _scheduleReconnect(task, fast: fast);
+        if (_scheduleReconnect(task, fast: fast)) {
+          _completeLifecycle(rt);
+          return;
+        }
+        // Out of retries: the session ends here, joined before the run
+        // (and its keep-alive) ends.
+        await _closeSession(task, broadcastEnded: fast);
         return;
       }
       var merged = true;
@@ -749,9 +778,7 @@ final class Recorder {
       } else if (task.autoReconnect) {
         task.status = RecordStatus.waitingLive;
         _update(task);
-        _completeLifecycle(rt);
-        _schedulePoll(task, delay: const Duration(seconds: 1));
-        return;
+        _pollAfterRun(task, delay: const Duration(seconds: 1));
       } else {
         task.status = RecordStatus.completed;
       }
@@ -773,37 +800,62 @@ final class Recorder {
   bool _endsAfterBroadcast(RecordTask task) =>
       task.autoRecord == false && (task.recordedSeconds > 0 || task.pendingAttempts.isNotEmpty);
 
-  /// Joins the session's attempts and ends it: completed, or failed when
-  /// [failed] or the join failed.
-  Future<void> _endSession(RecordTask task, {required bool failed}) {
-    final rt = _rt(task);
-    return rt.finalizing ??= () async {
-      try {
-        var merged = true;
-        if (task.pendingAttempts.isNotEmpty) {
-          task.status = RecordStatus.processing;
-          _update(task);
-          merged = await _mergePending(task);
-          if (!_owns(task)) return;
-        }
-        if (!merged) {
-          _markMergeFailure(task);
-          task.status = RecordStatus.failed;
-        } else {
-          task
-            ..status = failed ? RecordStatus.failed : RecordStatus.completed
-            ..retryCount = failed ? task.retryCount : 0;
-        }
+  /// Ends a session whose broadcast is over: the retries are used up or the
+  /// room went offline ([broadcastEnded] for an offline room and for fast
+  /// retries after live EOFs running out). The pending attempts are joined
+  /// first; then a task that ends after the broadcast ([_endsAfterBroadcast])
+  /// is completed ([broadcastEnded]) or failed, and any other waits for the
+  /// room, checked again once this finalization is over. Runs inside
+  /// [_finalizing].
+  Future<void> _closeSession(RecordTask task, {required bool broadcastEnded}) async {
+    final rt = _rt(task)..rapidRecovery = false;
+    _cancelLease(rt);
+    // Before the join empties the pending attempts.
+    final ends = _endsAfterBroadcast(task);
+    try {
+      var merged = true;
+      if (task.pendingAttempts.isNotEmpty) {
+        task.status = RecordStatus.processing;
         _update(task);
-      } on Object catch (error) {
-        if (_owns(task)) {
-          task
-            ..markFailure(stage: 'merge', error: error, now: clock.now())
-            ..status = RecordStatus.failed;
-          _update(task);
-        }
+        merged = await _mergePending(task);
+        if (!_owns(task)) return;
       }
-    }().whenComplete(() => rt.finalizing = null);
+      if (!merged) {
+        _markMergeFailure(task);
+        task.status = RecordStatus.failed;
+      } else if (ends && broadcastEnded) {
+        task
+          ..clearFailure()
+          ..status = RecordStatus.completed
+          ..retryCount = 0;
+      } else if (ends) {
+        task.status = RecordStatus.failed;
+      } else {
+        if (broadcastEnded) task.clearFailure();
+        task.status = RecordStatus.waitingLive;
+        _pollAfterRun(task);
+      }
+      _update(task);
+    } on Object catch (error) {
+      if (_owns(task)) {
+        task
+          ..markFailure(stage: 'merge', error: error, now: clock.now())
+          ..status = RecordStatus.failed;
+        _update(task);
+      }
+    }
+  }
+
+  /// Schedules [task]'s live check once its current run and finalization
+  /// are over: both hold back [_schedulePoll] ([_canPoll]), so a check
+  /// scheduled from inside them would never run.
+  void _pollAfterRun(RecordTask task, {Duration? delay}) {
+    final rt = _rt(task);
+    unawaited(() async {
+      await scheduler.waitFor(task.taskId);
+      await rt.finalizing;
+      if (_owns(task) && task.status == RecordStatus.waitingLive) _schedulePoll(task, delay: delay);
+    }());
   }
 
   void _queueCurrentAttempt(RecordTask task, {bool allowLegacy = false, bool damaged = false}) {
@@ -893,25 +945,22 @@ final class Recorder {
     );
   }
 
-  void _scheduleReconnect(RecordTask task, {bool fast = false}) {
-    if (!_owns(task) || task.wasStoppedByUser) return;
+  /// Schedules the next attempt of [task] after a failure; false when the
+  /// retries are used up, leaving the task to the caller ([_closeSession]).
+  /// The count always rises (the card's "第 N 次"); a failure that is not
+  /// [counted] (the network) never uses up the retries.
+  bool _scheduleReconnect(RecordTask task, {bool fast = false, bool counted = true}) {
+    if (!_owns(task) || task.wasStoppedByUser) return true;
     final rt = _rt(task);
     final current = settings();
     task.retryCount = (task.retryCount + 1).clamp(0, 1000);
-    if (RecordPolicy.shouldEnterPollingAfterRetryLimit(
-      retryCount: task.retryCount,
-      maximumRetries: current.maxRetryCount,
-      unexpectedEof: fast,
-    )) {
-      if (_endsAfterBroadcast(task)) {
-        // Out of retries and not waiting for the room: the session fails.
-        unawaited(_endSession(task, failed: true));
-        return;
-      }
-      task.status = RecordStatus.waitingLive;
-      _update(task);
-      _schedulePoll(task);
-      return;
+    if (counted &&
+        RecordPolicy.shouldEnterPollingAfterRetryLimit(
+          retryCount: task.retryCount,
+          maximumRetries: current.maxRetryCount,
+          unexpectedEof: fast,
+        )) {
+      return false;
     }
     rt.retryTimer?.cancel();
     final delay = RecordPolicy.reconnectDelay(
@@ -930,6 +979,7 @@ final class Recorder {
       task.nextRetryAt = null;
       if (_owns(task) && !task.wasStoppedByUser) unawaited(_start(task));
     });
+    return true;
   }
 
   void _scheduleLeasePrefetch(RecordTask task, ResolvedRecordStream stream, {Duration? delay}) {

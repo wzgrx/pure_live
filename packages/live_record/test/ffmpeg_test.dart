@@ -108,7 +108,7 @@ void main() {
     await expectLater(SegmentReservation.acquire(directory.path, 'p'), throwsA(isA<FileSystemException>()));
   });
 
-  test('reconnect, polling and lease timing follow 3.x', () {
+  test('reconnect, polling and lease timing follow 3.x; a live EOF gets twice the retries (upstream 2b9ffc7a3)', () {
     expect(
       RecordPolicy.reconnectDelay(
         failureCount: 3,
@@ -125,6 +125,18 @@ void main() {
     );
     expect(
       RecordPolicy.shouldEnterPollingAfterRetryLimit(retryCount: 9, maximumRetries: 5, unexpectedEof: true),
+      isFalse,
+    );
+    expect(
+      RecordPolicy.shouldEnterPollingAfterRetryLimit(retryCount: 10, maximumRetries: 5, unexpectedEof: true),
+      isTrue,
+    );
+    expect(
+      RecordPolicy.shouldEnterPollingAfterRetryLimit(retryCount: 5, maximumRetries: 5, unexpectedEof: false),
+      isTrue,
+    );
+    expect(
+      RecordPolicy.shouldEnterPollingAfterRetryLimit(retryCount: 4, maximumRetries: 5, unexpectedEof: false),
       isFalse,
     );
     final now = DateTime.utc(2026, 10, 2);

@@ -1,9 +1,11 @@
-# A16.1 桌面窗口：设计（第 1 版）
+# A16.1 桌面窗口：设计（第 1 版，已确认，已开发，登记为完成，没在 Windows 上看过）
 
-- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)
+- 状态：以登记表为准，见[子分类页](../README.md)和 [STATUS.md](../../../STATUS.md)（登记为完成，2026-10-01；Windows 没有构建过，没有真机结果，见“实现和验证”）
 - 范围：Windows、Linux 的窗口本身：自绘标题栏、窗口大小和位置、托盘和托盘菜单、关闭时的选择对话框、在新窗口打开、桌面小窗置顶的入口；macOS 的差异在 [A18.2](../../A18-苹果平台界面/A18.2-macOS差异设计/README.md)
-- 对应：[TASKS.md](../../../TASKS.md)、[inventory/UI.md](../../../inventory/UI.md#a161)；窗口里的页面见 [A06.2](../../A06-首页和全局/A06.2-宽屏首页/README.md)（宽屏首页）、[A07.5](../../A07-直播间界面/A07.5-宽屏左右分栏/README.md)（宽屏直播间）、[A07.8](../../A07-直播间界面/A07.8-小窗/README.md)（桌面小窗）
-- 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)
+- 对应：[inventory/UI.md](../../../inventory/UI.md#a161)（A16.1-01）、[inventory/UI_FILES.md](../../../inventory/UI_FILES.md#a161)；功能清点第 13 节 F-WIN-01～04、06～08（[inventory/FEATURES.md](../../../inventory/FEATURES.md)）；窗口里的页面见 [A06.2](../../A06-首页和全局/A06.2-宽屏首页/README.md)（宽屏首页）、[A07.5](../../A07-直播间界面/A07.5-宽屏左右分栏/README.md)（宽屏直播间）、[A07.8](../../A07-直播间界面/A07.8-小窗/README.md)（桌面小窗）
+- 评审页：claude.ai 私有页面（只有项目所有者能打开），每条改动可以点“满意 / 不满意 / 再想想”；源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；按章节导出在 [page/](page/01-说明.jpg)
+- 旧编号：U.13、T17a.1（见 [MAPPING.md](../../../MAPPING.md)）；相关决定 D-003（T1～T4 按建议 A）、D-004（Windows 是第二个客户端）、D-018（窗口相关的 3.x 键不变）
+- 记录：[record.md](record.md)
 - 图片：v3 按 `v3.2.11` 代码还原（文字取自 `assets/translations/zh.json`）；窗口里的首页用 A06.2 的源文件；桌面壁纸、任务栏、托盘区、系统菜单是系统画的东西，图里是示意；封面和头像是示意图片
 
 ## 界面清点表
@@ -195,11 +197,49 @@
 
 ## 实现和验证
 
-- 定稿：用户确认第 1 版，T1～T4 按建议 A（T3 新窗口和主窗口共用同一份关注、历史和设置）。
-- 实现：c1、c3～c11、c13～c15 做到；c2（Linux）代码完成但桌面外壳只在 Windows 启动、没有 `linux/` 运行器；c12 首页菜单完成、直播间菜单只交出接口。详见 [record.md](record.md)。主要文件：`apps/pure_live/lib/app/desktop/desktop_window.dart`（`DesktopShell`、`DesktopWindow`）、`title_bar.dart`、`close_dialog.dart`（新）、`tray.dart`、`shared_data.dart`（新）、`app/data_root.dart`、`app/launch_args.dart`；`live_store` 加共用打开和 `syncExternal()`；Windows 运行器 `windows/runner/main.cpp`、`win32_window.cpp`（按窗口属性找主窗口）。去掉了 3.x 的交接文件（`--config-file` 不再读）。
-- 偏差：窗口大小仍存在 3.x 的 `window_width` / `window_height`（下限 400×300），窗口拖到 360 宽时记成 400；从托盘退出和新窗口的对话框没有“不再询问”；托盘菜单录制中一行、没有红点（A18.2 写两行，没照做）；标题栏不随系统字体放大。
-- 新文字和记录：`open_in_new_window`“在新窗口打开”（直播间菜单还没用上）、关闭对话框和托盘的文字；`meta` 新加 `window.maximized`、`recorder.tasks.<窗口 id>`（不进备份）；没有新设置。
-- 提交：`b0ad47273`（一个数据库给多个窗口、标题栏图标和颜色）、`a44167dc2`（窗口、标题栏、托盘、关闭、新窗口），在 `86ffd56f2` 合并，记录 `99a8f8f53`（2026-10-01）；`flutter build apk --debug` 通过，Windows 没有构建。
-- 测试：新增 `apps/pure_live/test/desktop_window_test.dart` 26 个（标题栏 9、关闭对话框 5、关闭流程 6、托盘 1、窗口 3、共用数据 1、首页菜单 1，含附录 A 第 15 条）；`launch_args_test.dart` 删 2 加 1；`packages/live_store/test/shared_store_test.dart` 6 个；当时 `apps/pure_live` 413 个通过。
-- 真机：没有在 Windows 上看过（D-004 现在只做 Android）。记录里“没有在真机上看的”一节就是 Windows 的验证清单（系统窗口菜单、Alt+空格、最大化记忆和拔显示器、第二次启动找主窗口、托盘菜单、两个窗口同步、Windows 11 圆角），等 [X01.1](../../../X-多端客户端/X01-Windows/README.md) 开工时照着看。登记表是“完成”，但没有真机结果，和 PROCESS 第 3.2 节不符，建议维护者决定是否改回“待真机”。
-- 留下的问题：直播间菜单“在新窗口打开”仍按平台显示、用旧文字和图标（`features/live_play/buttons/room_menu_button.dart:173`、`:300`），没有登记任务；窗口大小下限、托盘行数、新窗口的录制任务进不了主窗口的录制中心（记录“需要决定的事”1～3）。
+**实现**（详见 [record.md](record.md)；2026-10-01，提交 `b0ad47273`“feat(store,ui): one database for several desktop windows; title bar glyphs and colours”、`a44167dc2`“feat(app): U.13 desktop window: title bar, size and place, tray, closing, new windows”、`ac7cb136a`（格式），合并 `86ffd56f2`“Merge U.13: desktop window”；登记表记的是记录提交 `99a8f8f53`）
+
+定稿：用户确认第 1 版，T1～T4 由维护者按建议 A 定（D-003；T3 = 新窗口和主窗口共用同一份关注、历史和设置）。
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/app/desktop/` 省略前缀） |
+|---|---|---|
+| c1 | ✅ | `title_bar.dart:34` 的 `DesktopTitleBar`：高 32（`:42`）、图标 16（`_IconButton` `:207`）+ “纯粹直播”13 号 600（`:53`）、拖动和双击（`:73-74`，自己的手势区，代替 `DragToMoveArea`）、三个按钮 46×32（`:45`，`_WindowButton` `:243`）、关闭悬停红底（`:129`）、改大小时“[宽 × 高]”（`:87-93`）、全屏和小窗时藏起来（`DesktopFrame` `:331-338`）；托盘 `tray.dart:49`；只开一个是运行器原有的互斥量（`apps/pure_live/windows/runner/main.cpp:98`） |
+| c2 | 代码完成，没启用 | 标题栏、托盘、关闭、新窗口都只看“有没有桌面外壳 / 托盘 / 能不能开新窗口”，不看平台名；窗口名由 `WindowOptions.title` 设成“纯粹直播”。**桌面外壳只在 Windows 启动**（`desktop_window.dart:257`）；仓库里没有 `linux/` 运行器，“只开一个”要等 X02.1 加运行器时做 |
+| c3 | ✅ | `DesktopWindow.maximized`（`desktop_window.dart:61`）跟着最大化 / 还原事件，中间按钮换成 `AppIcons.windowRestore`（`filter_none`）；名称用 `Tooltip`（`title_bar.dart:311`，停 0.5 秒），`DesktopFrame` 用 `Overlay.wrap`（`:333`）给标题栏自己的浮层 |
+| c4 | ✅ | 一律 `colorScheme.surface`、字 `onSurface`（深色不再纯黑）；启动页顶部本来就是表面色，不再单独画渐变 |
+| c5 | ✅ | v4 本来就没有 Mica（运行器和 Dart 都没开），没有改动 |
+| c6 | ✅（偏差 1） | `DesktopShell._start`（`desktop_window.dart:286`）：最小 360×400（`:261`）；第一次 1280×720 居中；最大化记在 `meta` 的 `window.maximized`（`:192`、`:293`、`:485`），先摆好位置再最大化；位置不在显示器上 `center()`（`:308`，`titleRowOnScreen` `:567`）；只有主窗口记（`_saveGeometry` `:514`） |
+| c7 | ✅ | `close_dialog.dart:170` 的 `CloseWindowDialog`：宽 440，标题“关闭窗口”（`window_close`），左文字按钮、右红底白字“退出应用”（`:293`），两端对齐；没有托盘时“…最小化到任务栏继续运行？”；点外面、Esc 等于取消 |
+| c8 | ✅（设置行在 A11.4） | 小字“以后可以在‘设置 → 通用 → 关闭窗口时’里改”（`window_close_hint`，`:267`），12 号次要色，和“不再询问”（`:216`）左对齐 |
+| c9 | ✅（偏差 2、3） | `_RecordingNote`（`close_dialog.dart:310`，浅红底 `LiveSemanticColors.recordingNote`、`recording_rooms_count` + `window_close_recording_desc`）；录制个数 `AppRecording.activeCount`；`WindowCloser`（`:48`）记住“退出”时照样问；托盘提示 `trayTooltip`（`tray.dart:41`）、菜单第一行 `trayMenuRows`（`:25`）；退出时先停录制器（最多等 3 秒） |
+| c10 | ✅ | 只有主窗口建 `DesktopTray`；新窗口 ✕ 直接关，录制中弹同一个对话框（没有托盘的写法，没有“不再询问”） |
+| c11 | ✅ | `roomNameOf`（`title_bar.dart:15`，取 `LiveRouteObserver.topPage` `routes/route_observer.dart:27` 的 `LiveRoom.nick`）、`nativeWindowTitle`（`:25`，“晚风 - 纯粹直播”），`app/app.dart:140` 路由变化时 `relabel`；运行器改按窗口属性 `PureLive.PrimaryWindow` 找主窗口（`main.cpp:26`、`:43`、`:131`，`win32_window.cpp:190` 去掉） |
+| c12 | 一半（首页完成，直播间菜单没接上） | 首页菜单 `features/home/menu_button.dart:56`（`canOpenNewWindow` + 设置）、`:84`（`DesktopWindow.openNewWindow`）；接口 `DesktopWindow.offersNewWindow` / `openNewWindow`（`desktop_window.dart:89`、`:94`）已备好。直播间菜单 `features/live_play/buttons/room_menu_button.dart:173`、`:257`、`:300` 仍按平台显示、旧文字“在新窗口播放此直播间”、旧图标、调 `launchNewWindow`（见“留下的问题”） |
+| c13 | ✅ | `_IconButton`（`title_bar.dart:207`，24 的点击区、悬停圆角 4 浅底），左键、右键都弹系统窗口菜单（`windowManager.popUpWindowMenu()`，`desktop_window.dart:208`）；名字和空白处右键（`title_bar.dart:75`）；不再打开浏览器 |
+| c14 | ✅ | 同一个数据文件夹（`app/data_root.dart:21`）、共用打开数据库（`live_store` 的 `LiveStore.open(shared: true)`）、`SharedDataWatch`（`shared_data.dart:16`）→ `LiveStore.syncExternal()`；新窗口的录制任务 `recorder.tasks.<窗口 id>`；去掉交接文件（`--config-file` 不再读） |
+| c15 | ✅ | A07.8 已做（`mini_window.dart:104` 的 `desktopRefusesOnTop`、小窗图钉），没有改；数据共用后两个窗口的“小窗始终置顶”是同一个值 |
+
+- 偏差（记录）：①窗口大小仍存在 3.x 的 `window_width` / `window_height`（`live_store` 下限 400×300，`packages/live_store/lib/src/settings/settings.dart:822-837`），窗口拖到 360 宽时存成 400；“开机窗口尺寸”编辑框下限 400×400（`features/settings/settings_editors.dart:577-578`）。②从托盘退出和新窗口的对话框没有“不再询问”（只为录制确认，勾了会改掉 ✕ 的行为）。③托盘菜单第一行没有红点（菜单项图标要图片资源），录制中一行；A18.2 写两行，没照做。④标题栏不随系统字体放大（`MediaQuery.withNoTextScaling`，`title_bar.dart:55`）。⑤按钮的键盘焦点照 3.x 加 2 像素主色框，只在用键盘时显示。
+- 新设置、新文字：没有新设置；`meta` 新加 `window.maximized`、`recorder.tasks.<窗口 id>`（不进备份）。新文字有窗口按钮名称、关闭对话框、托盘提示（`window_button_*`、`window_close*`、`tray_tooltip_recording`、`recording_rooms_count` 等，现在都在翻译文件里）；给直播间菜单准备的 `open_in_new_window`“在新窗口打开”因为没人用，后来被 `00f5edf18`（清理不用的键）删掉了。
+- `live_ui`、`live_store` 只做添加：窗口按钮图标 4 个、`WindowButtonColors.closeHover`（`#E81123`）、`LiveSemanticColors.recordingNote`（浅 `#FCEEEE`、深 `#3A1A18`）；`StoreDatabase.file(shared:)`、`dataVersion()`、`notifyAllTables()`、`SettingsStore.reload()`、`SecretStore.reload()`、`LiveStore.syncExternal()`。
+- 门禁：`app/desktop/` 不在门禁范围，这次也把原来的 `Colors.*`、`Icons.*`、`Color(0xFFE81123)` 换成 `live_ui` 的角色和 `AppIcons`（10 处 → 0）；没有新增功能之间的引用。
+- 构建：`flutter build apk --debug` 通过；Windows 运行器改了但**没有在 Windows 上构建**。
+
+**验证**
+
+- 自动测试：新增 `apps/pure_live/test/desktop_window_test.dart` 26 个（现在仍是 26 个用例声明：标题栏 9、关闭对话框 5、关闭流程 6、托盘 1、窗口 3、共用数据 1、首页菜单 1，含附录 A 第 15 条“在新窗口打开直播间”）；`apps/pure_live/test/launch_args_test.dart` 删 2 加 1（现在 4 个）；`packages/live_store/test/shared_store_test.dart` 新 6 个（`live_store` 39 → 45）；`live_ui` 加 1 个对比度用例（67 → 68）；当时 `apps/pure_live` 413 个全部通过，`apps/pure_live/test/plugins_test.dart`（8 个）原有的标题栏测试照样通过。
+- 真机：**没有在 Windows 上看过**（D-004：现在只做 Android；仓库里也没有任何 Windows 构建或验证的记录）。登记表是“完成”，和 PROCESS“完成要有真机结果”不符，建议维护者决定改回“待真机”或把下面这张清单并入 [X01.1](../../../X-多端客户端/X01-Windows/X01.1-键盘鼠标操作核对/README.md)。要看的（记录“没有在真机上看的”）：
+
+  | 要看的 | 期望 |
+  |---|---|
+  | 1. 冷启动、拖动、双击标题栏、拉边改大小 | 1280×720 居中；拖动移动、双击最大化 / 还原；改大小时中间“[宽 × 高]”；最小拉不到 360×400 以下 |
+  | 2. 点图标、右键标题栏；Alt+空格 | 弹系统窗口菜单，“还原 / 最大化”按当前状态变灰 |
+  | 3. 最大化后关掉再开；把窗口拖到副屏、拔掉副屏再开 | 打开时仍是最大化；位置不在显示器上时回到正中 |
+  | 4. 点 ✕（不录制、录制中各一次）；勾“不再询问”选最小化 | 对话框文字、左右按钮、录制中的浅红提示；之后 ✕ 直接藏到托盘 |
+  | 5. 托盘左键、右键（录制中） | 左键显示窗口；右键第一行灰色“正在录制 N 个直播间”；悬停提示“纯粹直播 · 正在录制 N 个” |
+  | 6. 主窗口藏在托盘时再双击程序图标 | 主窗口出现在前面，不开第二个 |
+  | 7. 进直播间 | 标题栏“纯粹直播 · 主播名”，任务栏和 Alt+Tab“主播名 - 纯粹直播” |
+  | 8. 首页菜单“新建独立播放窗口”；在新窗口里关注一个主播、改一个设置 | 新窗口打开；主窗口的关注和设置马上跟着变（文件夹事件，`ReadDirectoryChangesW`） |
+  | 9. Windows 11 | 无边框窗口有圆角 |
+
+- 留下的问题和去向：直播间菜单“在新窗口打开”没接上、`open_in_new_window` 键已被删（没有登记任务，建议 X01 开工前登记）；窗口大小下限、托盘行数、新窗口的录制任务进不了主窗口的录制中心（记录“需要决定的事”1～3，要维护者定）；Linux 的桌面外壳和单实例 → [X02.1](../../../X-多端客户端/X02-Linux/X02.1-Linux构建和打包/README.md)；macOS 的窗口和菜单栏 → [A18.2](../../A18-苹果平台界面/A18.2-macOS差异设计/README.md)。

@@ -76,7 +76,7 @@ SplashPage（splash_page.dart:31）：Timer(1 s) 或点按 / 按键 → _leave�
 |---|---|---|---|
 | 工具箱的“打开时读剪贴板”和全局的“回到前台识别剪贴板口令”（O03）都读剪贴板：从后台回来直接到工具箱时，可能先弹口令提示、框里又填同一个链接 | `toolbox_page.dart:88`；`app/intake/clipboard_rooms.dart` | 同一个链接两处反应 | 没有在真机上看过；S02.6 第 3 阶段看剪贴板口令时顺带看，有问题开 O03 任务 |
 | 设备同步（J05）子分类说明还没写、没有任务；`features/remote_receiver/` 同时在 J05（逻辑）和 A12.6（界面） | [J05](../../J-设置和数据/J05-设备同步/README.md) | 改设备同步时找不到说明 | 写进本单元报告（归 J 组的写作单元） |
-| 新版本对话框以 A06.3 还是 A15.2 的设计为准，没有定、没有登记 | [A15.2 README](../../A-界面设计/A15-小页面/A15.2-关于和版本/README.md)“留下的问题” | 现在用的是 A06.3 的（`update_prompt.dart:108`） | 需要维护者决定（A15.2 已记） |
+| 新版本对话框以 A06.3 还是 A15.2 的设计为准，没有定、没有登记 | [A15.2 README](../../A-界面设计/A15-小页面/A15.2-关于和版本/README.md)“留下的问题” | 现在用的是 A06.3 的（`update_prompt.dart:108`） | 已定以 A06.3 为准（D-037） |
 | I08.1 记录和代码不符：`release_history_view.dart` 从 `about/` 挪到了 `version/`；新增 `update_download.dart`（643）、`download_directory_dialog.dart`（83）；下载改成应用内；`mdns_peers.dart`（122）由 I01.3 加；`linkPlatforms` 挪到 `shared/links/supported_platforms.dart`；“需要协调者接上”的两条已接上；扫码已有 | [I08.1 记录](I08.1-小页面/record.md) | 只是记录过时 | I08.1 README 已注明 |
 | I08.1 登记“完成”，没有 K90 记录；工具箱、启动页在 S02.2 冒烟里走过，设备同步、应用内下载归 S02.4 | — | 部分没有真机证据 | S02.4 已列设备同步和应用内更新；工具箱的“获取直链”建议并入 S02.6 第 3 阶段（写进本单元报告） |
 

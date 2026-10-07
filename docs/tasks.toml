@@ -1117,6 +1117,15 @@ size = "小"
 tier = 2
 old = ["T06e.4"]
 
+
+[[task]]
+id = "A08.8"
+title = "长按弹幕面板加回 3.x 的等级 Lv.N"
+type = "界面"
+status = "未开始"
+size = "小"
+tier = 3
+from = "D 组写文档时发现（D01 已知问题）；D-033"
 [[task]]
 id = "A09.1"
 title = "房间卡片"
@@ -2800,7 +2809,7 @@ type = "功能"
 status = "未开始"
 size = "小"
 tier = 2
-stages = ["多画面弹幕跟随弹幕帧率", "（可选）多画面的表情图和屏幕常亮"]
+stages = ["多画面弹幕跟随弹幕帧率", "多画面的表情图和屏幕常亮（D-035）"]
 done = 0
 from = "V03.3 功能清点 F-MV-05；D05.1 记录“合并时注意”"
 
@@ -3104,7 +3113,7 @@ tier = 3
 old = ["T07e.3"]
 stages = ["方案和对比页", "用户确认", "开发"]
 done = 0
-
+note = "同意做（D-036），按 V01 路线的顺序评估"
 [[task]]
 id = "V01.2"
 title = "哔哩哔哩多账号：账号名册和切换（先出方案）"
@@ -3115,7 +3124,7 @@ tier = 3
 old = ["T10a.4"]
 stages = ["方案和对比页", "开发"]
 done = 0
-note = "参考 pure_live_TV 6ba16c55"
+note = "同意做（D-036）；参考 pure_live_TV 6ba16c55"
 
 [[task]]
 id = "V01.3"
@@ -3125,7 +3134,7 @@ status = "未开始"
 size = "小"
 tier = 3
 old = ["T06c.5"]
-note = "参考 flame_barrage 3eddae8"
+note = "同意做（D-036）；参考 flame_barrage 3eddae8"
 
 [[task]]
 id = "V01.4"
@@ -3135,7 +3144,7 @@ status = "未开始"
 size = "小"
 tier = 3
 old = ["T06e.5"]
-note = "参考 pure_live_TV 9a7bb104"
+note = "同意做（D-036）；参考 pure_live_TV 9a7bb104"
 
 [[task]]
 id = "V01.5"
@@ -3147,7 +3156,7 @@ tier = 3
 old = ["T05j.3"]
 stages = ["方案和对比页", "拖角改尺寸和尺寸设置", "弹幕缩放"]
 done = 0
-note = "参考上游 pure_live f9e03f446、582e355f7、b2cca41c7 和 media_core 的画中画系列"
+note = "同意做（D-036）；参考上游 pure_live f9e03f446、582e355f7、b2cca41c7 和 media_core 的画中画系列"
 
 [[task]]
 id = "V01.6"
@@ -3157,7 +3166,7 @@ status = "未开始"
 size = "小"
 tier = 3
 old = ["T09e.2"]
-note = "参考上游 pure_live 9483ccf03"
+note = "同意做（D-036）；参考上游 pure_live 9483ccf03"
 
 [[task]]
 id = "V02.1"

@@ -593,14 +593,14 @@ void main() {
         follows: [room('douyu', '1', nick: '甲', status: LiveStatus.offline)],
         details: {'1': room('douyu', '1', status: LiveStatus.offline)},
       );
-      expect(find.text('关注的 1 个直播间现在都没有开播'), findsOneWidget);
+      expect(find.text(withoutOrphan('关注的 1 个直播间现在都没有开播')), findsOneWidget);
       expect(find.text(i18n('favorite_show_offline')), findsOneWidget);
       expect(tester.widget(find.byKey(const ValueKey('status-secondary-button'))), isA<TextButton>());
       expect(find.text('刷新'), findsOneWidget);
       // Recording: the hint for phones.
       await tester.tap(find.textContaining(i18n('recording_room_title')));
       await tester.pumpAndSettle();
-      expect(find.text('可以左右滑动切换平台，或下拉刷新'), findsOneWidget);
+      expect(find.text(withoutOrphan('可以左右滑动切换平台，或下拉刷新')), findsOneWidget);
       expect(controller.group, FollowGroup.replay);
       await tester.runAsync(services.close);
     });

@@ -40,7 +40,7 @@ void main() {
       ]);
       expect(settingsRow('log'), findsNothing);
       expect(settingsRow('reset_all'), findsNothing);
-      expect(_inRow('cache_size', _text('临时缩略图和表情文件；点一下重新计算')), findsOneWidget);
+      expect(_inRow('cache_size', _text(withoutOrphan('临时缩略图和表情文件；点一下重新计算'))), findsOneWidget);
       expect(_inRow('cache_size', find.byIcon(AppIcons.settingsRecount)), findsOneWidget);
       for (final id in ['refresh_covers_now', 'clear_cache']) {
         expect(_inRow(id, find.byIcon(Icons.chevron_right_rounded)), findsNothing, reason: id);
@@ -50,10 +50,10 @@ void main() {
         Theme.of(tester.element(settingsRow('clear_cache'))).colorScheme.error,
       );
       expect(_inRow('download_directory', _text('默认')), findsOneWidget);
-      expect(_text('下载目录用于安装包、下载的文件和字体；录制文件的位置在录制设置里。'), findsOneWidget);
+      expect(_text(withoutOrphan('下载目录用于安装包、下载的文件和字体；录制文件的位置在录制设置里。')), findsOneWidget);
       // The default folder is in use: its restore is greyed out (e6).
       expect(_rowWidget(tester, 'download_reset').enabled, isFalse);
-      expect(_inRow('download_reset', _text('现在用的就是默认目录')), findsOneWidget);
+      expect(_inRow('download_reset', _text(withoutOrphan('现在用的就是默认目录'))), findsOneWidget);
 
       await tapSettings(tester, settingsRow('download_directory'));
       // The folder is checked for writing (real file work).
@@ -96,7 +96,7 @@ void main() {
       for (final label in ['favorites', 'history', 'tags', 'config_modules']) {
         expect(find.byKey(ValueKey('settings-config-stat-$label')), findsOneWidget);
       }
-      expect(find.textContaining('这里不显示账号 Cookie 和 WebDAV 设置'), findsOneWidget);
+      expect(findWords('这里不显示账号 Cookie 和 WebDAV 设置'), findsOneWidget);
       // One scroll: the tree is part of the page.
       expect(
         find.ancestor(

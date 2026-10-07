@@ -117,7 +117,7 @@ void main() {
     testWidgets('a row that depends on a switch is greyed out and says so (c5)', (tester) async {
       final h = await pumpSettings(tester, height: 3200, arguments: 'video');
       expect(_rowWidget(tester, 'asmr_minutes').enabled, isFalse);
-      expect(_inRow('asmr_minutes', _text('打开“新直播间自动助眠”后生效')), findsOneWidget);
+      expect(_inRow('asmr_minutes', _text(withoutOrphan('打开“新直播间自动助眠”后生效'))), findsOneWidget);
       await tapSettings(tester, settingsRow('asmr_sleep'));
       expect(h.settings.get(Settings.enableAsmrSleepMode), isTrue);
       expect(_rowWidget(tester, 'asmr_minutes').enabled, isTrue);
@@ -187,7 +187,7 @@ void main() {
       );
       await tapSettings(tester, settingsRow('background_play'));
       expect(h.settings.get(Settings.enableBackgroundPlay), isFalse);
-      expect(_inRow('background_play', _text('通知权限已关闭：在系统设置里允许通知后再打开')), findsOneWidget);
+      expect(_inRow('background_play', _text(withoutOrphan('通知权限已关闭：在系统设置里允许通知后再打开'))), findsOneWidget);
     });
 
     testWidgets('background play: cancelling the explanation keeps it off without red words (3.x, F.0a)', (
@@ -314,15 +314,15 @@ void main() {
       expect(find.byKey(const ValueKey('settings-mpv-docs')), findsOneWidget);
       // The drivers wait for "custom drivers".
       expect(_rowWidget(tester, 'hardware_decoder').enabled, isFalse);
-      expect(_inRow('hardware_decoder', _text('打开“自定义驱动与硬件加速”后生效')), findsOneWidget);
+      expect(_inRow('hardware_decoder', _text(withoutOrphan('打开“自定义驱动与硬件加速”后生效'))), findsOneWidget);
       await tapSettings(tester, settingsRow('custom_output'));
       expect(h.settings.get(Settings.customPlayerOutput), isTrue);
       expect(_rowWidget(tester, 'hardware_decoder').enabled, isTrue);
       expect(_rowWidget(tester, 'hardware_decoding').enabled, isFalse);
-      expect(_inRow('hardware_decoding', _text('由“自定义驱动与硬件加速”接管')), findsOneWidget);
+      expect(_inRow('hardware_decoding', _text(withoutOrphan('由“自定义驱动与硬件加速”接管'))), findsOneWidget);
       // The compatibility mode takes over both.
       await tapSettings(tester, settingsRow('compat_mode'));
-      expect(_inRow('custom_output', _text('由“兼容模式”接管')), findsOneWidget);
+      expect(_inRow('custom_output', _text(withoutOrphan('由“兼容模式”接管'))), findsOneWidget);
       expect(_rowWidget(tester, 'hardware_decoder').enabled, isFalse);
     });
 
@@ -391,7 +391,7 @@ void main() {
     testWidgets('phone: the preview above the rows; groups in order; off greys every row', (tester) async {
       final h = await pumpSettings(tester, width: 393, height: 2600, arguments: 'pipDanmaku');
       expect(find.byKey(const ValueKey('settings-pip-one-column')), findsOneWidget);
-      expect(_text('配置系统画中画、桌面小窗和应用内小窗的弹幕样式'), findsOneWidget);
+      expect(_text(withoutOrphan('配置系统画中画、桌面小窗和应用内小窗的弹幕样式')), findsOneWidget);
       final preview = find.byKey(const ValueKey('settings-pip-preview'));
       expect(topOf(tester, preview), lessThan(topOf(tester, settingsRow('pip_danmaku'))));
       expectInOrder(tester, [
@@ -421,12 +421,12 @@ void main() {
       expect(_inRow('pip_speed', _text('90 px/s')), findsOneWidget);
       expect(_inRow('pip_size', _text('12.0 px')), findsOneWidget);
       expect(_inRow('pip_interval', _text('0.35 秒')), findsOneWidget);
-      expect(_inRow('pip_auto_scale', _text('小窗越小字越小，最小 10 px')), findsOneWidget);
+      expect(_inRow('pip_auto_scale', _text(withoutOrphan('小窗越小字越小，最小 10 px'))), findsOneWidget);
       // The colour waits for "keep the platform's colours" off; the frame
       // rate says which policy it follows.
       expect(_rowWidget(tester, 'pip_color').enabled, isFalse);
       expect(_rowWidget(tester, 'pip_fps').enabled, isFalse);
-      expect(_inRow('pip_fps', _text('现在跟随“通用”里的“省电”档位')), findsOneWidget);
+      expect(_inRow('pip_fps', _text(withoutOrphan('现在跟随“通用”里的“省电”档位'))), findsOneWidget);
       expect(_inRow('pip_fps', _text('30 FPS')), findsOneWidget);
       // Off: everything below is greyed out, the preview says so.
       await tapSettings(tester, settingsRow('pip_danmaku'));

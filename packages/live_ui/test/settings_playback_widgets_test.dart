@@ -13,7 +13,7 @@ void main() {
       _app(SettingsLinkRow(title: '全屏方向', subtitle: '说明', value: '跟随直播源（推荐）', valueBelow: true, onTap: () {})),
     );
     final value = find.text('跟随直播源（推荐）');
-    expect(tester.getTopLeft(value).dy, greaterThan(tester.getTopLeft(find.text('说明')).dy));
+    expect(tester.getTopLeft(value).dy, greaterThan(tester.getTopLeft(find.text(withoutOrphan('说明'))).dy));
     expect(tester.widget<Text>(value).style?.color, Theme.of(tester.element(value)).colorScheme.primary);
     expect(find.byIcon(Icons.chevron_right_rounded), findsOneWidget);
   });

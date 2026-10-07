@@ -308,7 +308,7 @@ void main() {
     await _pump(tester);
     expect(_key('recorder-empty'), findsOneWidget);
     expect(find.text('暂无录制任务'), findsOneWidget);
-    expect(find.text('在直播间点“录制”即可添加。打开“开播检测”后，等待开播的任务会在主播开播时自动开始。'), findsOneWidget);
+    expect(find.text(withoutOrphan('在直播间点“录制”即可添加。打开“开播检测”后，等待开播的任务会在主播开播时自动开始。')), findsOneWidget);
     for (final filter in RecorderFilter.values) {
       expect(tester.widget<Text>(_key('recorder-filter-${filter.name}-label')).textSpan!.toPlainText(), endsWith(' 0'));
     }
@@ -540,7 +540,7 @@ void main() {
   ) async {
     final (recording, outside, _) = await _pumpNine(tester, size: const Size(393, 6000));
     expect(_key('recorder-polling-off'), findsOneWidget);
-    expect(find.text('“开播检测”关着，等待开播的任务到时不会自动开始。'), findsOneWidget);
+    expect(find.text(withoutOrphan('“开播检测”关着，等待开播的任务到时不会自动开始。')), findsOneWidget);
     expect(tester.getRect(_key('recorder-polling-off')).bottom, lessThan(tester.getRect(_card('r')).top));
     await tester.tap(_key('recorder-filter-saved'));
     await _settle(tester);

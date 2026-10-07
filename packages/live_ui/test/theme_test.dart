@@ -17,7 +17,8 @@ void main() {
       const sizes = LiveFontSizes(bodySmall: 11, bodyMedium: 14, bodyLarge: 16, titleMedium: 17, titleLarge: 22);
       final text = const LiveTheme(primaryColor: Colors.blue, fontSizes: sizes).light.textTheme;
       expect(text.bodySmall!.fontSize, 11);
-      expect(text.labelSmall!.fontSize, 10);
+      // A01.4 c5: no smaller than the small size.
+      expect(text.labelSmall!.fontSize, 11);
       expect(text.bodyMedium!.fontSize, 14);
       expect(text.labelLarge!.fontSize, 14);
       expect(text.bodyLarge!.fontSize, 16);

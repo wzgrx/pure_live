@@ -823,7 +823,7 @@ void main() {
       await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
       await tester.pump();
       expect(find.byKey(const ValueKey('search-empty')), findsOneWidget);
-      expect(find.text('换个关键词试试，或者切换到其他平台'), findsOneWidget);
+      expect(find.text(withoutOrphan('换个关键词试试，或者切换到其他平台。')), findsOneWidget);
       final button = find.byKey(const ValueKey('status-button'));
       expect(find.descendant(of: button, matching: find.byIcon(AppIcons.webSearch)), findsOneWidget);
       expect(find.descendant(of: button, matching: find.text('继续网页搜索')), findsOneWidget);
@@ -835,7 +835,7 @@ void main() {
       await tester.tap(find.byKey(const ValueKey('search-include-offline')));
       await tester.pump();
       expect(find.byKey(const ValueKey('search-all-offline')), findsOneWidget);
-      expect(find.text('找到的都是未开播的房间，已被“包含未开播”筛选隐藏'), findsOneWidget);
+      expect(find.text(withoutOrphan('找到的都是未开播的房间，已被“包含未开播”筛选隐藏。')), findsOneWidget);
       expect(find.descendant(of: button, matching: find.byIcon(AppIcons.showHidden)), findsOneWidget);
       await tester.tap(button);
       await tester.pump();

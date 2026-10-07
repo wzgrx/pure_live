@@ -128,7 +128,7 @@ class _Badge extends StatelessWidget {
     final style = Theme.of(context).textTheme.labelSmall?.copyWith(
       color: live ? LiveSemanticColors.onLive : OnVideoColors.foreground,
       fontWeight: FontWeight.w700,
-      fontSize: 10.5,
+      fontSize: 12,
       height: 1,
     );
     return Container(
@@ -240,7 +240,7 @@ class _Cover extends StatelessWidget {
                   data.title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(color: OnVideoColors.foreground, fontSize: 11),
+                  style: theme.textTheme.labelSmall?.copyWith(color: OnVideoColors.foreground, fontSize: 12),
                 ),
               ),
             ),

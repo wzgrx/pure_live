@@ -22,7 +22,7 @@ class LocalChatLine extends StatelessWidget {
     final body = theme.textTheme.bodyLarge?.regular;
     final profile = LocalProfile.of(message);
     final gift = LocalGiftData.of(message);
-    final chip = theme.textTheme.labelSmall?.emphasis.copyWith(fontSize: 11, height: 18 / 11);
+    final chip = theme.textTheme.labelSmall?.emphasis.copyWith(fontSize: 12, height: 18 / 12);
     final badge = profile?.badgeLabel ?? '';
     return Padding(
       key: const ValueKey('live-play-local-line'),

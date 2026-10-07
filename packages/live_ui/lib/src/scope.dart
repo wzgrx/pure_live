@@ -48,7 +48,7 @@ final class LiveUiStrings {
   /// Simplified Chinese (3.x `zh.json`).
   static const zh = LiveUiStrings(
     emptyTitle: '暂无数据',
-    emptySubtitle: '这里空空如也，什么都没有发现',
+    emptySubtitle: '这里空空如也，什么都没有发现。',
     errorTitle: '网络请求错误',
     errorSubtitle: '请检查您的网络连接或稍后再试',
     retry: '重新加载',
@@ -66,7 +66,7 @@ final class LiveUiStrings {
   /// English (3.x `en.json`).
   static const en = LiveUiStrings(
     emptyTitle: 'No Data Available',
-    emptySubtitle: 'It looks quite empty here, nothing was found',
+    emptySubtitle: 'It looks quite empty here, nothing was found.',
     errorTitle: 'Network Request Error',
     errorSubtitle: 'Please check your network connection or try again later',
     retry: 'Retry',

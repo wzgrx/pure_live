@@ -760,8 +760,9 @@ abstract final class AppIcons {
   /// Backup files.
   static const IconData backupFiles = Remix.save_3_line;
 
-  /// The platform accounts (3.x settings "三方认证").
-  static const IconData platformAccounts = Remix.accessibility_line;
+  /// The platform accounts (3.x settings "三方认证"; 3.x's accessibility
+  /// figure read as accessibility, A01.4 c4).
+  static const IconData platformAccounts = Remix.account_box_line;
 
   // ---- settings: the overview (3.x settings_page.dart; U.6a) ----
 
@@ -798,8 +799,12 @@ abstract final class AppIcons {
   /// "播放时匹配视频帧率" (U.2i): the refresh rate follows the video.
   static const IconData matchFrameRate = Remix.movie_2_line;
 
-  /// Network proxies; also the language (both a globe in 3.x).
+  /// Network proxies (a globe in 3.x; the language has its own icon now,
+  /// A01.4 c4).
   static const IconData settingsNetwork = Remix.global_line;
+
+  /// The app's language (3.x used the network globe, A01.4 c4).
+  static const IconData settingsLanguage = Remix.translate_2;
 
   /// Local interaction.
   static const IconData settingsLocalInteraction = Icons.auto_awesome_rounded;
@@ -827,8 +832,9 @@ abstract final class AppIcons {
   /// Dynamic colour.
   static const IconData dynamicColor = Remix.magic_line;
 
-  /// Room card settings; also the multi-view entry (3.x used one icon).
-  static const IconData roomCardSettings = Remix.layout_grid_line;
+  /// Room card settings (3.x shared the multi-view grid; A01.4 c4 gives
+  /// the cards their own).
+  static const IconData roomCardSettings = Remix.gallery_view_2;
 
   /// Column spacing.
   static const IconData columnSpacing = Remix.arrow_left_right_line;
@@ -846,7 +852,7 @@ abstract final class AppIcons {
   static const IconData uiMode = Remix.tv_2_line;
 
   /// The app font.
-  static const IconData appFont = Remix.font_color;
+  static const IconData appFont = Remix.font_family;
 
   /// Text size.
   static const IconData textSize = Remix.text_spacing;
@@ -872,8 +878,8 @@ abstract final class AppIcons {
   /// Restore the loading style (3.x).
   static const IconData restoreDefault = Remix.arrow_go_back_line;
 
-  /// Reset the room card layout (3.x).
-  static const IconData resetLayout = Remix.restart_line;
+  /// Reset the room card layout (the same as [restoreDefault], A01.4 c4).
+  static const IconData resetLayout = Remix.arrow_go_back_line;
 
   /// Show the anchor's avatar.
   static const IconData cardAvatar = Remix.user_3_line;
@@ -1046,11 +1052,12 @@ abstract final class AppIcons {
   /// Global mute while off.
   static const IconData settingsUnmuted = Remix.volume_up_line;
 
-  /// The phones' default volume.
-  static const IconData settingsPhoneVolume = Remix.phone_line;
+  /// The phones' default volume (3.x's handset read as the call volume,
+  /// A01.4 c4).
+  static const IconData settingsPhoneVolume = Remix.volume_up_line;
 
   /// The computers' default volume.
-  static const IconData settingsDesktopVolume = Remix.computer_line;
+  static const IconData settingsDesktopVolume = Remix.volume_up_line;
 
   /// The preferred quality.
   static const IconData settingsQuality = Remix.hd_line;
@@ -1079,8 +1086,8 @@ abstract final class AppIcons {
   /// Background play.
   static const IconData settingsBackgroundPlay = Remix.music_2_line;
 
-  /// Automatic sleep in new rooms.
-  static const IconData settingsAutoSleep = Remix.moon_clear_line;
+  /// Automatic sleep in new rooms (the moon is the theme mode, A01.4 c4).
+  static const IconData settingsAutoSleep = Remix.zzz_line;
 
   /// How long the automatic sleep plays.
   static const IconData settingsSleepMinutes = Remix.timer_2_line;
@@ -1103,11 +1110,13 @@ abstract final class AppIcons {
   /// Show danmaku.
   static const IconData settingsShowDanmaku = Remix.chat_smile_2_line;
 
-  /// The danmaku style (the room's danmaku settings).
-  static const IconData settingsDanmakuStyle = Remix.palette_line;
+  /// The danmaku style (the room's danmaku settings; the palette is the
+  /// theme colour, A01.4 c4).
+  static const IconData settingsDanmakuStyle = Remix.chat_settings_line;
 
-  /// The danmaku font.
-  static const IconData settingsDanmakuFont = Remix.font_size;
+  /// The danmaku font (the same as [appFont]; the text size has
+  /// [fontSizes]).
+  static const IconData settingsDanmakuFont = Remix.font_family;
 
   /// The danmaku block list.
   static const IconData settingsDanmakuBlock = Remix.filter_2_line;
@@ -1148,8 +1157,9 @@ abstract final class AppIcons {
   /// Smart portrait detection.
   static const IconData portraitDetect = Icons.aspect_ratio_rounded;
 
-  /// Adaptive height of the room page.
-  static const IconData portraitHeight = Icons.view_agenda_outlined;
+  /// Adaptive height of the room page (the rows are the card layout,
+  /// A01.4 c4).
+  static const IconData portraitHeight = Icons.height_rounded;
 
   /// The room page's layout for portrait streams.
   static const IconData portraitLayout = Icons.dashboard_customize_outlined;
@@ -1174,14 +1184,16 @@ abstract final class AppIcons {
 
   // ---- settings: general, platforms, refresh, network (U.6d) ----
 
-  /// The refresh-rate policy.
-  static const IconData settingsRefreshRate = Remix.speed_up_line;
+  /// The refresh-rate policy (the speedometer is hardware decoding,
+  /// A01.4 c4).
+  static const IconData settingsRefreshRate = Remix.pulse_line;
 
   /// Start with the system.
   static const IconData settingsStartup = Remix.windows_line;
 
-  /// The window size at start.
-  static const IconData settingsWindowSize = Remix.aspect_ratio_line;
+  /// The window size at start (the aspect ratio is the video fit, A01.4
+  /// c4).
+  static const IconData settingsWindowSize = Remix.window_line;
 
   /// The splash animation.
   static const IconData settingsSplash = Remix.rocket_2_line;
@@ -1189,8 +1201,9 @@ abstract final class AppIcons {
   /// Share codes on the clipboard (F.0a).
   static const IconData settingsClipboardRooms = Remix.clipboard_line;
 
-  /// Check for updates.
-  static const IconData settingsAutoUpdate = Remix.refresh_line;
+  /// Check for updates (the same as [onlineUpdate]; the arrows are a
+  /// refresh, A01.4 c4).
+  static const IconData settingsAutoUpdate = Remix.download_cloud_2_line;
 
   /// GitHub as the update source.
   static const IconData settingsGitHub = Remix.github_line;
@@ -1201,8 +1214,9 @@ abstract final class AppIcons {
   /// The exit timer.
   static const IconData settingsExitTimer = Remix.timer_line;
 
-  /// How long before the app exits.
-  static const IconData settingsExitMinutes = Remix.timer_flash_line;
+  /// How long before the app exits (the same as [settingsExitTimer]; the
+  /// flash stopwatch is the recording timeout, A01.4 c4).
+  static const IconData settingsExitMinutes = Remix.timer_line;
 
   /// The platforms shown.
   static const IconData settingsPlatformList = Remix.apps_2_line;
@@ -1216,14 +1230,14 @@ abstract final class AppIcons {
   /// Twitch's languages.
   static const IconData settingsTwitchLanguages = Remix.twitch_line;
 
-  /// Renew Douyu's cookie.
-  static const IconData settingsDouyuRenew = Remix.refresh_line;
+  /// Renew Douyu's cookie (a key: the login, not a refresh, A01.4 c4).
+  static const IconData settingsDouyuRenew = Remix.key_2_line;
 
   /// Refresh follows automatically.
   static const IconData settingsAutoRefresh = Remix.refresh_line;
 
-  /// Refresh follows on returning to the app.
-  static const IconData settingsRefreshOnResume = Remix.restart_line;
+  /// Refresh follows on returning to the app (a refresh, A01.4 c4).
+  static const IconData settingsRefreshOnResume = Remix.refresh_line;
 
   /// A refresh interval.
   static const IconData settingsInterval = Remix.time_line;
@@ -1237,8 +1251,9 @@ abstract final class AppIcons {
   /// How many rooms the history keeps.
   static const IconData settingsHistoryLimit = Remix.history_line;
 
-  /// The app's proxy.
-  static const IconData settingsAppProxy = Remix.apps_line;
+  /// The app's proxy (the network globe; 3.x's four circles read as the
+  /// platforms, A01.4 c4).
+  static const IconData settingsAppProxy = Remix.global_line;
 
   /// The player's proxy (on the network page).
   static const IconData settingsStreamProxy = Remix.video_line;
@@ -1261,8 +1276,9 @@ abstract final class AppIcons {
   /// The download folder.
   static const IconData settingsDownloadFolder = Remix.folder_2_line;
 
-  /// Back to the default download folder.
-  static const IconData settingsDownloadReset = Remix.refresh_line;
+  /// Back to the default download folder (the same as [restoreDefault],
+  /// A01.4 c4).
+  static const IconData settingsDownloadReset = Remix.arrow_go_back_line;
 
   /// The log.
   static const IconData settingsLog = Remix.file_list_3_line;
@@ -1290,8 +1306,9 @@ abstract final class AppIcons {
   /// The default recording quality.
   static const IconData recordQuality = Remix.hd_line;
 
-  /// Pinyin folder names.
-  static const IconData recordPinyin = Remix.translate_2;
+  /// Pinyin folder names (the translation mark is the language, A01.4
+  /// c4).
+  static const IconData recordPinyin = Remix.input_method_line;
 
   /// Record the danmaku too.
   static const IconData recordDanmaku = Remix.chat_3_line;
@@ -1317,14 +1334,15 @@ abstract final class AppIcons {
   /// The input queue.
   static const IconData recordQueue = Remix.speed_mini_line;
 
-  /// The segment length.
-  static const IconData recordSegment = Remix.film_line;
+  /// The segment length (the film is the video, A01.4 c4).
+  static const IconData recordSegment = Remix.scissors_cut_line;
 
   /// The most recordings at once.
   static const IconData recordMaxTasks = Remix.task_line;
 
-  /// Reconnect when a recording breaks.
-  static const IconData recordReconnect = Remix.refresh_line;
+  /// Reconnect when a recording breaks (the same as
+  /// [recordReconnecting], A01.4 c4).
+  static const IconData recordReconnect = Remix.loop_right_line;
 
   /// The most retries.
   static const IconData recordRetries = Remix.loop_left_line;

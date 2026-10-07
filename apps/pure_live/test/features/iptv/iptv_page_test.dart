@@ -212,8 +212,8 @@ void main() {
       find.descendant(of: find.byKey(const ValueKey('iptv-stat-channels')), matching: find.text('2')),
       findsOneWidget,
     );
-    expect(find.text('M3U / TXT 文件、订阅地址，或粘贴文本'), findsOneWidget);
-    expect(find.text('XML / GZ / JSON 文件或订阅地址'), findsOneWidget);
+    expect(find.text(withoutOrphan('M3U / TXT 文件、订阅地址，或粘贴文本')), findsOneWidget);
+    expect(find.text(withoutOrphan('XML / GZ / JSON 文件或订阅地址')), findsOneWidget);
     // v3's icons.
     expect(
       find.descendant(
@@ -347,7 +347,8 @@ void main() {
     expect(await _run(tester, () => h.services.store.meta.get(defaultGuideMetaKey)), '1');
     expect(h.toasts, ['已导入默认节目单']);
     // The "in use" row and the card; the empty playlist state.
-    expect(find.text('默认节目单'), findsNWidgets(2));
+    expect(find.text('默认节目单'), findsOneWidget);
+    expect(find.text(withoutOrphan('默认节目单')), findsOneWidget);
     expect(find.text('使用中'), findsOneWidget);
     expect(find.text('XML.GZ'), findsOneWidget);
     expect(find.byKey(const ValueKey('iptv-no-playlists')), findsOneWidget);
@@ -362,7 +363,7 @@ void main() {
     expect(await _run(tester, h.library.guideSources), isEmpty);
     expect(h.settings.get(Settings.selectedSourceId), '');
     expect(find.text('还没有节目单'), findsOneWidget);
-    expect(find.text('点击选择一个节目单'), findsOneWidget);
+    expect(find.text(withoutOrphan('点击选择一个节目单')), findsOneWidget);
     expect(h.http.requests, hasLength(1));
   });
 
@@ -624,7 +625,7 @@ void main() {
     expect(h.settings.get(Settings.autoSyncHoursInterval), 6);
     expect(find.text('当前每隔 6 小时进行一次同步'), findsOneWidget);
 
-    expect(find.text('未设置（使用默认请求头）'), findsOneWidget);
+    expect(find.text(withoutOrphan('未设置（使用默认请求头）')), findsOneWidget);
     await _tap(tester, find.text('自定义直播源请求头'));
     expect(find.text('修改请求头 (User-Agent)'), findsOneWidget);
     expect(find.textContaining('px'), findsNothing);

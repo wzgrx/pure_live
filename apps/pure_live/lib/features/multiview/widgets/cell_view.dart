@@ -120,7 +120,7 @@ class MultiviewCellView extends StatelessWidget {
                       bottom: 6,
                       child: _Mark(
                         key: const ValueKey('multiview-saver-mark'),
-                        child: Text(i18n('multiview_saver_mark'), style: _markStyle(context, 11)),
+                        child: Text(i18n('multiview_saver_mark'), style: _markStyle(context, 12)),
                       ),
                     ),
                   if (footer case final bar? when video) Positioned(left: 8, right: 8, bottom: 8, child: bar),
@@ -263,6 +263,40 @@ class _Placeholder extends StatelessWidget {
     final title = _markStyle(context, 13);
     final muted = _markStyle(context, 12, weight: FontWeight.w400).copyWith(color: OnVideoColors.secondary);
     final room = cell.room;
+    if (small && cell.stage == CellStage.empty) {
+      // A small empty cell puts the + beside its words, so both keep their
+      // size (12 and 20) instead of shrinking to fit (A01.4 c5: the column
+      // scaled "点击选台" down to about 7).
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(8, 26, 8, 6),
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: pickTarget ? accent.withValues(alpha: 0.25) : OnVideoColors.chip,
+                  ),
+                  child: const Icon(AppIcons.addCell, size: 20, color: OnVideoColors.foreground),
+                ),
+                Text(
+                  i18n(pickTarget ? 'multiview_pick_target_short' : 'multiview_empty_cell_hint'),
+                  key: const ValueKey('multiview-cell-hint'),
+                  style: _markStyle(context, 12, weight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     final children = switch (cell.stage) {
       CellStage.empty => [
         Container(

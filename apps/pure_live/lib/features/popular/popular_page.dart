@@ -291,7 +291,7 @@ class PlatformPicker extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: Text(
-              i18n('popular_all_platforms_hint'),
+              withoutOrphan(i18n('popular_all_platforms_hint')),
               key: const ValueKey('popular-platform-hint'),
               style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
             ),

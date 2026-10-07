@@ -213,9 +213,9 @@ void main() {
         );
         if (i > 0) expect(_top(tester, title), greaterThan(_top(tester, rows[i - 1].$1)), reason: title);
       }
-      expect(find.text('备份到 WebDAV 服务器'), findsOneWidget);
-      expect(find.text('保存设置、关注、历史、分组、屏蔽词和搜索记录（不含账号 Cookie 和 WebDAV 密码）'), findsOneWidget);
-      expect(find.text('改用 WebDAV 或设备同步；点这里看怎么迁移旧的云端配置'), findsOneWidget);
+      expect(find.text(withoutOrphan('备份到 WebDAV 服务器')), findsOneWidget);
+      expect(find.text(withoutOrphan('保存设置、关注、历史、分组、屏蔽词和搜索记录（不含账号 Cookie 和 WebDAV 密码）')), findsOneWidget);
+      expect(find.text(withoutOrphan('改用 WebDAV 或设备同步；点这里看怎么迁移旧的云端配置')), findsOneWidget);
       // 3.x's Firebase row and log group are gone (c2, c9).
       expect(find.textContaining('Firebase'), findsNothing);
       expect(find.text('日志管理'), findsNothing);
@@ -240,7 +240,7 @@ void main() {
       expect((saved['favorite']! as Map)['favoriteRooms'], hasLength(1));
       expect(_toasts, ['已备份到 purelive_2026-10-01T20_00_00.txt']);
       expect(find.text('purelive_2026-10-01T20_00_00.txt'), findsOneWidget);
-      expect(find.textContaining('完整备份'), findsOneWidget);
+      expect(findWords('完整备份'), findsOneWidget);
       expect(find.text('目录中的备份 · 1'), findsOneWidget);
     });
 
@@ -296,7 +296,7 @@ void main() {
       expect(_top(tester, follows), lessThan(_top(tester, full)), reason: 'newest first');
       expect(find.descendant(of: _row(full), matching: find.byIcon(AppIcons.backupFile)), findsOneWidget);
       expect(find.descendant(of: _row(follows), matching: find.byIcon(AppIcons.backupFollows)), findsOneWidget);
-      expect(find.textContaining('仅关注列表'), findsOneWidget);
+      expect(findWords('仅关注列表'), findsOneWidget);
       final more = find.descendant(of: _row(full), matching: find.byIcon(AppIcons.moreVertical));
       expect(tester.getCenter(more).dx, greaterThan(tester.getCenter(find.text(full)).dx));
 

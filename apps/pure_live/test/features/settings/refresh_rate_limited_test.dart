@@ -45,7 +45,7 @@ void main() {
     DisplayMode.limited.value = true;
     await tester.pump();
     expect(find.text(_limited), findsOneWidget);
-    expect(find.text('当前 60 Hz，最高 120 Hz'), findsOneWidget, reason: 'the row stays as it was');
+    expect(find.text(withoutOrphan('当前 60 Hz，最高 120 Hz')), findsOneWidget, reason: 'the row stays as it was');
 
     Future<void> mode(String value) async {
       await tester.runAsync(() => settings.set(Settings.refreshRateMode, value));

@@ -679,7 +679,7 @@ void main() {
           reason: key,
         );
       }
-      expect(find.text('哔哩哔哩、斗鱼、虎牙等平台的登录，和云端账号无关'), findsOneWidget);
+      expect(find.text(withoutOrphan('哔哩哔哩、斗鱼、虎牙等平台的登录，和云端账号无关')), findsOneWidget);
 
       await _tap(tester, find.byKey(const ValueKey('auth-platform-accounts')));
       expect(find.text('平台账号'), findsOneWidget);

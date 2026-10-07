@@ -56,7 +56,7 @@ void main() {
         expect(decoration.shape, BoxShape.circle);
       }
       expect(find.text('没有网络连接'), findsOneWidget);
-      expect(find.text('检查网络后重试；连上网络后会自动刷新'), findsOneWidget);
+      expect(find.text(withoutOrphan('检查网络后重试；连上网络后会自动刷新')), findsOneWidget);
 
       // The restricted state's button says what it does (C1, U.4e c6).
       await tester.pumpWidget(_app(AppStatusView(type: AppStatusType.restricted, onButtonPressed: () {})));
@@ -209,7 +209,7 @@ void main() {
       expect(ground('info'), colors.surfaceContainerLow);
       expect(ground('warning'), LiveSemanticColors.warningContainer(Brightness.light));
       expect(ground('error'), colors.errorContainer);
-      final words = tester.getRect(find.text('您当前正在使用移动蜂窝流量，请注意流量消耗。'));
+      final words = tester.getRect(find.text(withoutOrphan('您当前正在使用移动蜂窝流量，请注意流量消耗。')));
       expect(tester.getRect(find.byKey(const ValueKey('never'))).top, greaterThan(words.top));
       expect(tester.getSize(find.byKey(const ValueKey('status-banner-close'))), const Size(48, 48));
       await tester.tap(find.byKey(const ValueKey('never')));
@@ -494,7 +494,7 @@ void main() {
         final title = tester.widget<Text>(find.text('首选清晰度')).style!;
         expect(title.fontSize, 15);
         expect(title.fontWeight, FontWeight.w400);
-        final subtitle = tester.widget<Text>(find.text('当进入直播播放页，首选的视频清晰度')).style!;
+        final subtitle = tester.widget<Text>(find.text(withoutOrphan('当进入直播播放页，首选的视频清晰度'))).style!;
         expect(subtitle.fontSize, 12);
         expect(subtitle.color, colors.onSurfaceVariant);
         // 3.x: hint colour at 75 %, about 3.4:1 (TASKS §7 from U.10b).

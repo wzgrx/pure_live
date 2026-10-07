@@ -237,7 +237,9 @@ final class LiveTheme {
       bodySmall: scale(localized.bodySmall, sizes.bodySmall),
       labelLarge: scale(localized.labelLarge, sizes.bodyMedium).copyWith(fontWeight: medium),
       labelMedium: scale(localized.labelMedium, sizes.bodySmall),
-      labelSmall: scale(localized.labelSmall, sizes.bodySmall - 1),
+      // Nothing smaller than the small size (A01.4 c5: 12 by default;
+      // Material makes labelSmall one smaller).
+      labelSmall: scale(localized.labelSmall, sizes.bodySmall),
     );
   }
 

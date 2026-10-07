@@ -457,7 +457,7 @@ void main() {
   testWidgets('U.5c: the empty page says what comes here and has no clear button', (tester) async {
     await _pump(tester);
     expect(find.byKey(const ValueKey('history-empty')), findsOneWidget);
-    expect(find.text('看过的直播间会按观看时间出现在这里'), findsOneWidget);
+    expect(find.text(withoutOrphan('看过的直播间会按观看时间出现在这里。')), findsOneWidget);
     expect(find.byIcon(AppIcons.historyEmpty), findsOneWidget);
     expect(find.byKey(const ValueKey('history-clear')), findsNothing);
     expect(tester.widget<IconButton>(find.byKey(const ValueKey('history-refresh'))).onPressed, isNull);

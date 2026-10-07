@@ -92,6 +92,12 @@ void main() {
     final add = tester.getRect(find.byKey(const ValueKey('live-play-block-add')));
     expect(add.left, greaterThan(input.right));
     expect(tester.widget<TextField>(find.byKey(const ValueKey('live-play-block-input'))).maxLength, 40);
+    // A01.4 c6: "0/40" under the box's bottom-right corner, not inset
+    // towards "添加".
+    final counter = tester.getRect(find.text('0/40'));
+    expect(counter.top, greaterThanOrEqualTo(input.top + 48));
+    expect(counter.right, lessThanOrEqualTo(input.right));
+    expect(input.right - counter.right, lessThanOrEqualTo(6));
   });
 
   testWidgets('adds with Enter; empty and repeated keywords are refused, the repeat kept (c1, c4)', (tester) async {

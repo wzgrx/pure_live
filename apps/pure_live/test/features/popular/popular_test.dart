@@ -592,7 +592,7 @@ void main() {
     await tester.pumpAndSettle();
     // Phones: from the bottom.
     expect(find.byType(BottomSheet), findsOneWidget);
-    expect(find.text('点一个直接切过去；在“平台显示”里隐藏和排序'), findsOneWidget);
+    expect(find.text(withoutOrphan('点一个直接切过去；在“平台显示”里隐藏和排序')), findsOneWidget);
     // Two platforms fit: the panel is as tall as they are.
     expect(find.byKey(const ValueKey('panel-docked')), findsNothing);
     final selected = find.byKey(const ValueKey('popular-platform-selected'));
@@ -731,7 +731,7 @@ void main() {
     final bilibili = _FakeSite(SiteIds.bilibili, [const []]);
     final services = await _pump(tester, {SiteIds.bilibili: bilibili});
     expect(find.text('未发现直播'), findsOneWidget);
-    expect(find.text('这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以下拉刷新'), findsOneWidget);
+    expect(find.text(withoutOrphan('这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以下拉刷新')), findsOneWidget);
     expect(find.byIcon(AppIcons.emptyPopular), findsOneWidget);
     await tester.tap(find.text('刷新'));
     await tester.pumpAndSettle();

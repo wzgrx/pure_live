@@ -358,7 +358,7 @@ void main() {
     await _settle(tester);
     expect(dav.files, isEmpty);
     expect(find.text('这个目录是空的'), findsOneWidget);
-    expect(find.text('点右下角按钮把当前数据备份到这里'), findsOneWidget);
+    expect(find.text(withoutOrphan('点右下角按钮把当前数据备份到这里。')), findsOneWidget);
 
     await tester.tap(find.text('我的文件'));
     await _settle(tester);
@@ -373,7 +373,7 @@ void main() {
       server: const WebDavConfig(name: 'home', address: 'https://dav.test/dav/', username: 'u', password: 'x'),
     );
     expect(find.text('无法加载目录'), findsOneWidget);
-    expect(find.text('账号或密码错误（坚果云请使用应用密码）'), findsOneWidget);
+    expect(find.text(withoutOrphan('账号或密码错误（坚果云请使用应用密码）')), findsOneWidget);
     expect(find.text('重试'), findsOneWidget);
     expect(find.byKey(const ValueKey('webdav-upload')), findsNothing);
     await tester.tap(find.text('编辑配置'));

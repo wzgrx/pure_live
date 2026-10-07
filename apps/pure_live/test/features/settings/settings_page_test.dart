@@ -7,6 +7,7 @@ import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/features/settings/settings_page.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
@@ -71,11 +72,11 @@ void main() {
         find.descendant(of: settingsSection(SettingsSection.danmaku), matching: find.byType(DanmakuIcon)),
         findsOneWidget,
       );
-      // Explanations show up to two lines (3.x cut them at one).
+      // Explanations show up to three lines (3.x cut them at one; A01.4 c2).
       final explanation = tester.widget<HighlightedText>(
         find.descendant(of: settingsSection(SettingsSection.appearance), matching: find.byType(HighlightedText)).last,
       );
-      expect(explanation.maxLines, 2);
+      expect(explanation.maxLines, 3);
     });
 
     testWidgets('a row opens its page; back returns to the overview; route pages open their route', (tester) async {
@@ -301,7 +302,7 @@ void main() {
       expect(h.settings.get(Settings.pureBlackTheme), isTrue);
       await tester.runAsync(() => h.settings.set(Settings.themeMode, 'Light'));
       await settleSettings(tester);
-      expect(find.text('浅色模式下不起作用：先把主题模式换成深色或跟随系统'), findsOneWidget);
+      expect(find.text(withoutOrphan('浅色模式下不起作用：先把主题模式换成深色或跟随系统')), findsOneWidget);
       await tester.tap(settingsRow('pure_black'), warnIfMissed: false);
       await settleSettings(tester);
       expect(h.settings.get(Settings.pureBlackTheme), isTrue);
@@ -339,7 +340,7 @@ void main() {
       // Dynamic colour decides while on: the row says so and is not usable.
       await tester.runAsync(() => h.settings.set(Settings.enableDynamicTheme, true));
       await settleSettings(tester);
-      expect(find.text('动态取色开着，颜色来自壁纸；关掉动态取色后才能选'), findsOneWidget);
+      expect(find.text(withoutOrphan('动态取色开着，颜色来自壁纸；关掉动态取色后才能选')), findsOneWidget);
     });
 
     testWidgets('spacing: − and + by 1 px; the number opens the checked dialog', (tester) async {
@@ -423,7 +424,7 @@ void main() {
       expect(at(1).dy, at(0).dy);
       expect(at(2).dy, at(0).dy);
       expect(at(3).dy, greaterThan(at(0).dy));
-      expect(find.textContaining('现在：跟随主题色'), findsOneWidget);
+      expect(findWords('现在：跟随主题色'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('settings-loading-restore')));
       await frames();
       expect(find.text('恢复默认？'), findsOneWidget);
@@ -439,9 +440,9 @@ void main() {
         await tapSettings(tester, settingsRow('room_card'));
         expect(find.text('移动端（手机、平板）'), findsOneWidget);
         expect(find.text('桌面端（电脑）'), findsOneWidget);
-        expect(find.text('改了下面任何一项，就显示“当前：自定义”，点一个预设回到它的样子。'), findsOneWidget);
+        expect(find.text(withoutOrphan('改了下面任何一项，就显示“当前：自定义”，点一个预设回到它的样子。')), findsOneWidget);
         await tapSettings(tester, find.byKey(const ValueKey('settings-room-card-avatar')));
-        expect(find.text('当前：自定义。点一个预设回到它的样子。'), findsOneWidget);
+        expect(find.text(withoutOrphan('当前：自定义。点一个预设回到它的样子。')), findsOneWidget);
         await tapSettings(tester, find.byKey(const ValueKey('settings-room-card-reset')));
         expect(find.text('“移动端（手机、平板）”的卡片恢复成“标准”预设。'), findsOneWidget);
         await tapSettings(tester, find.byKey(const ValueKey('settings-confirm')));
@@ -464,10 +465,10 @@ void main() {
 
         Finder menu(String id) => find.byKey(ValueKey('settings-menu-$id'));
         expectInOrder(tester, [menu('favorites'), menu('areas'), menu('popular'), menu('record')]);
-        expect(find.descendant(of: menu('popular'), matching: find.text('已隐藏')), findsOneWidget);
+        expect(find.descendant(of: menu('popular'), matching: find.text(withoutOrphan('已隐藏'))), findsOneWidget);
         expect(find.byKey(const ValueKey('settings-menu-handle-popular')), findsNothing);
         expect(find.byKey(const ValueKey('settings-menu-handle-favorites')), findsOneWidget);
-        expect(find.text('按住右侧把手上下拖动可以调整顺序；隐藏的排在最后，至少保留一个。'), findsOneWidget);
+        expect(find.text(withoutOrphan('按住右侧把手上下拖动可以调整顺序；隐藏的排在最后，至少保留一个。')), findsOneWidget);
 
         await tapSettings(tester, find.descendant(of: menu('popular'), matching: find.byType(Switch)));
         expect(h.settings.get(Settings.savedMenuIds), ['favorites', 'areas', 'popular']);
@@ -556,6 +557,22 @@ void main() {
     expect(find.byKey(const ValueKey('pager-goto')), findsOneWidget);
     await bar(showGoto: false);
     expect(find.byKey(const ValueKey('pager-goto')), findsNothing);
+  });
+
+  test('A01.4 c2: every settings explanation fits 40 characters (three lines at most on a phone)', () {
+    // Chinese characters count one, other letters half.
+    double length(String text) => text.runes.fold(0, (sum, rune) => sum + (rune < 0x2E80 ? 0.5 : 1));
+    final explanations = <String, String>{
+      for (final entry in settingsCatalog) ?entry.description: entry.descriptionText ?? '',
+      for (final section in SettingsSection.values) section.descriptionKey: i18n(section.descriptionKey),
+      // Rows drawn outside the catalogue.
+      for (final key in ['account_douyu_force_renew_desc', 'auto_start_boot_desc', 'record_danmaku_desc'])
+        key: i18n(key),
+    };
+    expect(explanations.length, greaterThan(100));
+    for (final MapEntry(:key, :value) in explanations.entries) {
+      expect(length(value), lessThanOrEqualTo(40), reason: '$key: $value');
+    }
   });
 
   test('search needs every word and ignores blanks', () {

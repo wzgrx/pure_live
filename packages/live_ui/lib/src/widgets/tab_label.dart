@@ -52,7 +52,7 @@ class TabLabel extends StatelessWidget {
             decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(9)),
             child: Text(
               badge,
-              style: TextStyle(fontSize: 11, height: 1.2, fontWeight: FontWeight.w600, color: scheme.onPrimary).tabular,
+              style: TextStyle(fontSize: 12, height: 1.2, fontWeight: FontWeight.w600, color: scheme.onPrimary).tabular,
             ),
           ),
         ],

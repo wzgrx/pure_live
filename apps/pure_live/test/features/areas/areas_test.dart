@@ -523,7 +523,7 @@ void main() {
       expect(find.byType(FavoriteAreasView), findsOneWidget);
       expect(find.byKey(const ValueKey('favorite-areas-platform-tabs')), findsNothing);
       expect(find.text('未发现分区'), findsOneWidget);
-      expect(find.text('在分区页长按分区卡片，或打开分区后点右上角的“关注”'), findsOneWidget);
+      expect(find.text(withoutOrphan('在分区页长按分区卡片，或打开分区后点右上角的“关注”。')), findsOneWidget);
       await tester.tap(find.text('去分区'));
       await _settle(tester);
       expect(find.byType(FavoriteAreasView), findsNothing);

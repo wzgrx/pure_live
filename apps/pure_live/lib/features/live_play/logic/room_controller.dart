@@ -139,6 +139,24 @@ class LiveRoomController extends ChangeNotifier {
   /// How often the room detail is fetched again while the page is open.
   final Duration refreshInterval;
 
+  /// Whether the periodic refresh may start playback by itself now (C01.5):
+  /// the background policy answers false while the app is away and the room
+  /// was not playing when it left, so a broadcast that begins then makes no
+  /// sound nobody asked for (3.x had no periodic refresh at all). Null
+  /// always may.
+  bool Function()? mayAutoStart;
+
+  /// A refresh found the room playable while it could not start; the
+  /// background policy loads it when the app is back ([takeStartWhenBack]).
+  bool _startWhenBack = false;
+
+  /// Whether a refresh left the start for the app's return; reading clears it.
+  bool takeStartWhenBack() {
+    final start = _startWhenBack;
+    _startWhenBack = false;
+    return start;
+  }
+
   /// How long the first danmaku attempt may take (Kuaishou's poll waits up
   /// to 20 s before it tries its backup host, so 3.x's 20 s cut it off).
   final Duration danmakuStartTimeout;
@@ -360,6 +378,7 @@ class LiveRoomController extends ChangeNotifier {
   Future<void> load() async {
     if (_disposed) return;
     final epoch = ++_epoch;
+    _startWhenBack = false;
     _stage = RoomStage.loading;
     _failure = null;
     _catchup = null;
@@ -772,19 +791,21 @@ class LiveRoomController extends ChangeNotifier {
     }
     if (!_current(epoch) || fetched.isLiveStatusPending) return;
     final playing = _stage == RoomStage.playing;
-    // A room that came on air starts playing (U.2g c8). A room on air whose
-    // stream is withheld keeps its danmaku; it is tried again by "重试".
-    if (!playing && _stage != RoomStage.unplayable && fetched.isPlayableNow) {
+    // A room that came on air starts playing (U.2g c8); a failed stream of a
+    // broadcast that ended is reloaded. A room on air whose stream is
+    // withheld keeps its danmaku; it is tried again by "重试".
+    final reload =
+        (!playing && _stage != RoomStage.unplayable && fetched.isPlayableNow) ||
+        (playing && !fetched.isPlayableNow && session.state.status == PlaybackStatus.error);
+    if (reload && (mayAutoStart?.call() ?? true)) {
       await load();
       return;
     }
-    if (playing && !fetched.isPlayableNow && session.state.status == PlaybackStatus.error) {
-      await load();
-      return;
-    }
+    // Away from the app: only the state is updated; the start waits.
+    if (reload) _startWhenBack = true;
     _room = _room.mergeFrom(fetched).withAudienceFallbackFrom(_room);
     _notify();
-    if (playing && danmaku.status == DanmakuStatus.closed) unawaited(_syncDanmaku(force: true));
+    if (playing && !reload && danmaku.status == DanmakuStatus.closed) unawaited(_syncDanmaku(force: true));
   }
 
   /// A followed room's card gets the fresh detail (3.x

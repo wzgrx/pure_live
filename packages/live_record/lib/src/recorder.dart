@@ -486,18 +486,12 @@ final class Recorder {
     } on RecordStreamException catch (error) {
       if (!token.isCancelled && _owns(task)) {
         task.markFailure(stage: error.stage, error: error.message, now: clock.now());
-        if (error.type == RecordStreamErrorType.notLive && _endsAfterBroadcast(task)) {
-          // The broadcast ended and the live room's "开播自动录" is off: the
-          // session ends here instead of waiting for the next one.
+        if (error.type == RecordStreamErrorType.notLive) {
+          // The broadcast ended: the session's attempts are joined now, then
+          // it ends (the live room's "开播自动录" off) or waits for the next
+          // broadcast.
           task.clearFailure();
           await _finalizing(rt, () => _closeSession(task, broadcastEnded: true));
-        } else if (error.type == RecordStreamErrorType.notLive) {
-          rt.rapidRecovery = false;
-          task
-            ..clearFailure()
-            ..status = RecordStatus.waitingLive;
-          _update(task);
-          _schedulePoll(task);
         } else if (!error.retryable || !task.autoReconnect) {
           task.status = RecordStatus.failed;
           _update(task);

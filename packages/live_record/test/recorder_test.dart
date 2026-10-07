@@ -278,6 +278,35 @@ void main() {
       }, timeout: const Timeout(Duration(seconds: 60)));
     });
 
+    test('when the room reports offline, the session is joined before it waits again', () async {
+      ffmpeg
+        ..captureExit = 0
+        ..captureSeconds = const Duration(seconds: 1);
+      final task = (await recorder.addTask(room(), autoRecord: true))!;
+      await until(() => task.status == RecordStatus.reconnecting);
+      expect(task.pendingAttempts, hasLength(1));
+      final statuses = <RecordStatus>[];
+      final subscription = recorder.changes.listen((_) => statuses.add(task.status));
+      addTearDown(subscription.cancel);
+      site.status = LiveStatus.offline;
+      await until(() => task.status == RecordStatus.waitingLive, within: const Duration(seconds: 20));
+      expect(statuses, contains(RecordStatus.processing));
+      expect(statuses.indexOf(RecordStatus.processing), lessThan(statuses.indexOf(RecordStatus.waitingLive)));
+      expect(task.pendingAttempts, isEmpty);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      expect(task.lastError, isNull);
+    }, timeout: const Timeout(Duration(seconds: 40)));
+
+    test('with the live check on, a room found offline by a start is checked again', () async {
+      settings = RecordSettings(enablePolling: true, liveCheckInterval: 10);
+      site.status = LiveStatus.offline;
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.waitingLive);
+      site.status = LiveStatus.live;
+      await until(() => task.status == RecordStatus.running, within: const Duration(seconds: 20));
+      expect(ffmpeg.runs, hasLength(1));
+    }, timeout: const Timeout(Duration(seconds: 40)));
+
     test('an offline room waits for the live check', () async {
       site.status = LiveStatus.offline;
       final task = (await recorder.addTask(room()))!;

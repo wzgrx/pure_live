@@ -643,9 +643,23 @@ void main() {
       expect(find.text('同时搜索 2 个平台，各平台能搜到的范围不同，点此查看。'), findsOneWidget);
       expect(tester.widget<Text>(find.byKey(const ValueKey('search-coverage-text'))).maxLines, 2);
 
+      // A09.12 c4 (A09.7 v4-phone): "全部" shows its grid when chosen, no
+      // tick; a chosen platform still swaps its logo for the tick.
+      final all = find.byKey(const ValueKey('search-platform-0'));
+      expect(find.descendant(of: all, matching: find.byIcon(AppIcons.allPlatforms)), findsOneWidget);
+      expect(find.descendant(of: all, matching: find.byIcon(Icons.check_rounded)), findsNothing);
+
       // One platform with a web search: "继续网页搜索" wraps onto the next line (c3).
       await tester.tap(find.byKey(const ValueKey('search-platform-1')));
       await tester.pumpAndSettle();
+      expect(find.descendant(of: all, matching: find.byIcon(AppIcons.allPlatforms)), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('search-platform-1')),
+          matching: find.byIcon(Icons.check_rounded),
+        ),
+        findsOneWidget,
+      );
       final web = tester.getRect(find.byKey(const ValueKey('search-web')));
       expect(web.right, lessThanOrEqualTo(393));
       expect(web.top, greaterThan(sort.top));

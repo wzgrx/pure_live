@@ -20,14 +20,47 @@ const double sidePanelBreakpoint = 600;
 /// [sidePanelBreakpoint]); the page behind is dimmed. ✕ in the content's
 /// [PanelHeader], Back, Esc, a tap outside and (from the bottom) a downward
 /// drag close it.
+///
+/// With [openHeight] (a share of the screen's height) a bottom panel opens
+/// that tall and can be dragged up to the full height (the top stop of
+/// docs/A-界面设计/A03-动效和手感/A03.2-翻页和面板's panels; A09.12 c3): the content's
+/// list scrolls with the [PrimaryScrollController] (`primary: true`), which
+/// moves the panel first. Without it the panel is as tall as its content,
+/// at most 85% of the screen.
 Future<T?> showAdaptivePanel<T>(
   BuildContext context, {
   required WidgetBuilder builder,
   bool? side,
   String? barrierLabel,
+  double? openHeight,
 }) {
   if (!(side ?? MediaQuery.sizeOf(context).width >= sidePanelBreakpoint)) {
     final height = MediaQuery.sizeOf(context).height;
+    if (openHeight != null) {
+      // The sheet's room: under the status bar, below the 48 of the handle.
+      final room = height - MediaQuery.paddingOf(context).top - kMinInteractiveDimension;
+      final open = room <= 0 ? 1.0 : ((height * openHeight - kMinInteractiveDimension) / room).clamp(0.3, 1.0);
+      return showModalBottomSheet<T>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        useSafeArea: true,
+        constraints: const BoxConstraints(),
+        builder: (context) => DraggableScrollableSheet(
+          key: const ValueKey('panel-docked'),
+          expand: false,
+          initialChildSize: open,
+          // Dragged below this the panel closes.
+          minChildSize: open * 0.4,
+          snap: true,
+          snapSizes: [if (open < 1) open],
+          builder: (context, controller) => PrimaryScrollController(
+            controller: controller,
+            child: Builder(builder: builder),
+          ),
+        ),
+      );
+    }
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,

@@ -1,9 +1,16 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+/// The width of the fade at the end of a scrolling tab strip
+/// (docs/A-界面设计/A09-浏览界面/A09.12-浏览界面真机对照修正 c1).
+const double tabStripEndFade = 24;
+
 /// A [TabBar] that desktop users can also scroll with the mouse wheel and by
 /// dragging with the mouse (from liuchuancong/pure_live). Touch behaviour and
-/// the given scroll physics are unchanged.
+/// the given scroll physics are unchanged. With [endFade] a scrolling strip
+/// fades out over its last [endFade] points while more tabs lie beyond, so
+/// a tab cut by the edge (or by a button after the strip) fades instead of
+/// stopping hard.
 class ScrollableTabBar extends StatefulWidget {
   /// Creates the tab bar.
   const new({
@@ -38,6 +45,7 @@ class ScrollableTabBar extends StatefulWidget {
     this.mouseWheelScrollFactor = 1.0,
     this.mouseWheelDuration = const Duration(milliseconds: 100),
     this.mouseWheelCurve = Curves.easeOut,
+    this.endFade = 0,
     super.key,
   });
 
@@ -134,46 +142,93 @@ class ScrollableTabBar extends StatefulWidget {
   /// Curve of a wheel scroll.
   final Curve mouseWheelCurve;
 
+  /// The width of the fade at the strip's end while more tabs lie beyond
+  /// it ([tabStripEndFade]); 0 for none.
+  final double endFade;
+
   @override
-  State<ScrollableTabBar> createState() => _ScrollableTabBarState();
+  State<ScrollableTabBar> createState() => ScrollableTabBarState();
 }
 
-class _ScrollableTabBarState extends State<ScrollableTabBar> {
+/// The state of a [ScrollableTabBar].
+class ScrollableTabBarState extends State<ScrollableTabBar> {
+  bool _moreAfter = false;
+
+  /// Whether the strip's end fades now: [ScrollableTabBar.endFade] is set
+  /// and tabs lie beyond the end.
+  bool get fadesEnd => widget.endFade > 0 && _moreAfter;
+
+  bool _onMetrics(ScrollMetrics metrics, int depth) {
+    if (depth != 0 || metrics.axis != Axis.horizontal || !metrics.hasContentDimensions) return false;
+    final moreAfter = metrics.extentAfter > 0.5;
+    if (moreAfter != _moreAfter) setState(() => _moreAfter = moreAfter);
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerSignal: widget.enableMouseWheel ? _handlePointerSignal : null,
-      child: ScrollConfiguration(
-        behavior: const _CrossPlatformTabBarScrollBehavior(),
-        child: TabBar(
-          controller: widget.controller,
-          tabs: widget.tabs,
-          isScrollable: widget.isScrollable,
-          padding: widget.padding,
-          indicatorColor: widget.indicatorColor,
-          dividerColor: widget.dividerColor,
-          indicatorWeight: widget.indicatorWeight,
-          indicatorSize: widget.indicatorSize,
-          indicator: widget.indicator,
-          indicatorPadding: widget.indicatorPadding,
-          labelColor: widget.labelColor,
-          unselectedLabelColor: widget.unselectedLabelColor,
-          labelStyle: widget.labelStyle,
-          unselectedLabelStyle: widget.unselectedLabelStyle,
-          labelPadding: widget.labelPadding,
-          dividerHeight: widget.dividerHeight,
-          tabAlignment: widget.tabAlignment,
-          physics: widget.physics,
-          onTap: widget.onTap,
-          onHover: widget.onHover,
-          onFocusChange: widget.onFocusChange,
-          overlayColor: widget.overlayColor,
-          mouseCursor: widget.mouseCursor,
-          dragStartBehavior: widget.dragStartBehavior,
-          enableFeedback: widget.enableFeedback,
-          splashBorderRadius: widget.splashBorderRadius,
-          splashFactory: widget.splashFactory,
+    var strip = _tabBar();
+    if (widget.endFade > 0) {
+      // The mask stays in the tree when nothing lies beyond (then it is
+      // opaque), so the strip keeps its state and scroll position.
+      final fade = widget.endFade;
+      final rtl = Directionality.of(context) == TextDirection.rtl;
+      final moreAfter = _moreAfter;
+      strip = NotificationListener<ScrollMetricsNotification>(
+        onNotification: (notification) => _onMetrics(notification.metrics, notification.depth),
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) => _onMetrics(notification.metrics, notification.depth),
+          child: ShaderMask(
+            key: const ValueKey('tab-strip-fade'),
+            blendMode: BlendMode.dstIn,
+            shaderCallback: (bounds) {
+              final width = bounds.width <= 0 ? 1.0 : bounds.width;
+              return LinearGradient(
+                begin: rtl ? Alignment.centerRight : Alignment.centerLeft,
+                end: rtl ? Alignment.centerLeft : Alignment.centerRight,
+                colors: [const Color(0xFFFFFFFF), Color(moreAfter ? 0x00FFFFFF : 0xFFFFFFFF)],
+                stops: [if (moreAfter) ((width - fade) / width).clamp(0.0, 1.0) else 1.0, 1.0],
+              ).createShader(bounds);
+            },
+            child: strip,
+          ),
         ),
+      );
+    }
+    return Listener(onPointerSignal: widget.enableMouseWheel ? _handlePointerSignal : null, child: strip);
+  }
+
+  Widget _tabBar() {
+    return ScrollConfiguration(
+      behavior: const _CrossPlatformTabBarScrollBehavior(),
+      child: TabBar(
+        controller: widget.controller,
+        tabs: widget.tabs,
+        isScrollable: widget.isScrollable,
+        padding: widget.padding,
+        indicatorColor: widget.indicatorColor,
+        dividerColor: widget.dividerColor,
+        indicatorWeight: widget.indicatorWeight,
+        indicatorSize: widget.indicatorSize,
+        indicator: widget.indicator,
+        indicatorPadding: widget.indicatorPadding,
+        labelColor: widget.labelColor,
+        unselectedLabelColor: widget.unselectedLabelColor,
+        labelStyle: widget.labelStyle,
+        unselectedLabelStyle: widget.unselectedLabelStyle,
+        labelPadding: widget.labelPadding,
+        dividerHeight: widget.dividerHeight,
+        tabAlignment: widget.tabAlignment,
+        physics: widget.physics,
+        onTap: widget.onTap,
+        onHover: widget.onHover,
+        onFocusChange: widget.onFocusChange,
+        overlayColor: widget.overlayColor,
+        mouseCursor: widget.mouseCursor,
+        dragStartBehavior: widget.dragStartBehavior,
+        enableFeedback: widget.enableFeedback,
+        splashBorderRadius: widget.splashBorderRadius,
+        splashFactory: widget.splashFactory,
       ),
     );
   }

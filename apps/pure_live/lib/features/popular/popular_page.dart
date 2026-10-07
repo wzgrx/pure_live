@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -152,9 +153,18 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
   Future<void> _pickPlatform() async {
     final tabs = _tabs;
     if (tabs == null) return;
+    final screen = MediaQuery.sizeOf(context);
+    final side = screen.width >= 600;
+    // A09.12 c3: a long list opens at the design's height (half the screen
+    // and a bit) and drags up to the full height; a short one fits itself.
+    final tall =
+        !side &&
+        PlatformPicker.heightOf(_ids.length, width: screen.width, textScaler: MediaQuery.textScalerOf(context)) >
+            screen.height * platformPickerOpenHeight;
     final picked = await showAdaptivePanel<int>(
       context,
-      side: MediaQuery.sizeOf(context).width >= 600,
+      side: side,
+      openHeight: tall ? platformPickerOpenHeight : null,
       builder: (context) => PlatformPicker(ids: _ids, current: tabs.index),
     );
     if (picked != null && mounted && _tabs == tabs) tabs.animateTo(picked);
@@ -187,6 +197,8 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
                       tabAlignment: TabAlignment.start,
                       dividerHeight: 0,
                       physics: const PureLiveBoundedScrollPhysics(),
+                      // A09.12 c1: the tab cut by ⌄ fades.
+                      endFade: tabStripEndFade,
                       tabs: [for (final id in ids) TabLabel(label: platformName(id, fallback: sites.of(id).name))],
                     ),
                   ),
@@ -218,6 +230,10 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
   }
 }
 
+/// How much of a phone's height "all platforms" opens at when its list is
+/// longer (A09.2 v4-phone-picker: the top at about 29%; A09.12 c3).
+const double platformPickerOpenHeight = 0.71;
+
 /// "All platforms" (U.4b c2): every platform of the tabs with its logo and
 /// name, the current one ticked; a tap switches to it and closes the panel;
 /// "平台显示" opens the settings that hide and order them. The same content
@@ -225,6 +241,20 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
 class PlatformPicker extends StatelessWidget {
   /// Creates the picker of [ids] with [current] selected.
   const new({required this.ids, required this.current, super.key});
+
+  static int _columns(double width) =>
+      GridColumns.count(width: width, minItemWidth: 84, spacing: 8, padding: 12, min: 3, max: 6);
+
+  static double _tileHeight(TextScaler textScaler) => 76 + textScaler.scale(13) * 1.4;
+
+  /// The height the picker of [count] platforms needs as a bottom panel
+  /// [width] wide, with the panel's handle.
+  static double heightOf(int count, {required double width, required TextScaler textScaler}) {
+    final rows = (count / _columns(width)).ceil();
+    final grid = rows * _tileHeight(textScaler) + math.max(0, rows - 1) * 4 + 16;
+    // The handle, the header and its line, the one-line hint.
+    return kMinInteractiveDimension + kMinInteractiveDimension + 5 + textScaler.scale(13) * 1.5 + 8 + grid;
+  }
 
   /// The platforms of the tabs.
   final List<String> ids;
@@ -261,29 +291,25 @@ class PlatformPicker extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: Text(
-              i18n('popular_all_platforms_hint', args: {'count': '${ids.length}'}),
+              i18n('popular_all_platforms_hint'),
+              key: const ValueKey('popular-platform-hint'),
               style: context.textStyles.t13.copyWith(color: scheme.onSurfaceVariant),
             ),
           ),
           Flexible(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final columns = GridColumns.count(
-                  width: constraints.maxWidth,
-                  minItemWidth: 84,
-                  spacing: 8,
-                  padding: 12,
-                  min: 3,
-                  max: 6,
-                );
+                final columns = _columns(constraints.maxWidth);
                 return GridView.builder(
+                  // A docked bottom panel moves with this list's drags.
+                  primary: true,
                   shrinkWrap: true,
                   padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: columns,
                     crossAxisSpacing: 8,
                     mainAxisSpacing: 4,
-                    mainAxisExtent: 76 + MediaQuery.textScalerOf(context).scale(13) * 1.4,
+                    mainAxisExtent: _tileHeight(MediaQuery.textScalerOf(context)),
                   ),
                   itemCount: ids.length,
                   itemBuilder: (context, index) => _PlatformTile(

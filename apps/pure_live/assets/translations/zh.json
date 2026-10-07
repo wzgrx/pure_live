@@ -1201,7 +1201,7 @@
     "please_input_number": "请输入数字",
     "please_select_epg_source": "点击选择一个节目单",
     "popular_all_platforms": "全部平台",
-    "popular_all_platforms_hint": "{count} 个平台，点一个直接切过去；在“平台显示”里可以隐藏和排序",
+    "popular_all_platforms_hint": "点一个直接切过去；在“平台显示”里隐藏和排序",
     "popular_empty_desktop": "这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以点下面的刷新",
     "popular_empty_phone": "这个平台暂时没有直播。左右滑动或点上方的平台名切换平台，也可以下拉刷新",
     "popular_hidden_count": "已隐藏 {count} 个暂时不能播放的直播（付费、加锁、仅限 App 等）",

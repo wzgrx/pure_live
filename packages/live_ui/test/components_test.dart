@@ -545,7 +545,7 @@ void main() {
   });
 
   group('the list shell (c20) and Esc', () {
-    testWidgets('"to top" shows past 400; it looks 40 and takes 48', (tester) async {
+    testWidgets('"to top" shows past 400 once the list moves; it looks 40 and takes 48', (tester) async {
       final controller = ScrollController();
       addTearDown(controller.dispose);
       await tester.pumpWidget(
@@ -574,7 +574,17 @@ void main() {
       );
       await tester.pumpAndSettle();
       final top = find.byKey(const ValueKey('jump-top'));
-      expect(tester.widget<AnimatedScale>(find.ancestor(of: top, matching: find.byType(AnimatedScale))).scale, 0);
+      final bottom = find.byKey(const ValueKey('jump-bottom'));
+      double scale(Finder button) =>
+          tester.widget<AnimatedScale>(find.ancestor(of: button, matching: find.byType(AnimatedScale))).scale;
+      // A09.12 c2: nothing before the list moves, though most of it lies
+      // below.
+      expect(scale(top), 0);
+      expect(scale(bottom), 0);
+      await tester.drag(find.byType(ListView), const Offset(0, -40));
+      await tester.pumpAndSettle();
+      expect(scale(top), 0);
+      expect(scale(bottom), 1);
       controller.jumpTo(500);
       await tester.pumpAndSettle();
       expect(tester.widget<AnimatedScale>(find.ancestor(of: top, matching: find.byType(AnimatedScale))).scale, 1);
@@ -582,6 +592,40 @@ void main() {
       await tester.tap(top);
       await tester.pumpAndSettle();
       expect(controller.offset, 0);
+    });
+
+    testWidgets('a list that comes back scrolled shows them at once', (tester) async {
+      final controller = ScrollController(initialScrollOffset: 800);
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(
+        _app(
+          Stack(
+            children: [
+              ListView.builder(
+                controller: controller,
+                itemExtent: 100,
+                itemCount: 100,
+                itemBuilder: (_, i) => Text('$i'),
+              ),
+              Positioned(
+                right: 16,
+                bottom: 16,
+                child: ScrollJumpButtons(
+                  controller: controller,
+                  heroTag: 'test',
+                  topTooltip: '回到顶部',
+                  bottomTooltip: '到底部',
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      for (final key in ['jump-top', 'jump-bottom']) {
+        final button = find.byKey(ValueKey(key));
+        expect(tester.widget<AnimatedScale>(find.ancestor(of: button, matching: find.byType(AnimatedScale))).scale, 1);
+      }
     });
 
     testWidgets("EscapeBack: Esc does what Back does, or the page's own step first", (tester) async {

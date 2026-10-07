@@ -1202,7 +1202,7 @@
     "please_input_number": "Please enter a number",
     "please_select_epg_source": "Tap to choose a guide",
     "popular_all_platforms": "All platforms",
-    "popular_all_platforms_hint": "{count} platforms. Tap one to switch to it; hide or reorder them in Platform Display",
+    "popular_all_platforms_hint": "Tap one to switch to it; hide or reorder them in Platform Display",
     "popular_empty_desktop": "No live streams on this platform right now. Swipe or tap a platform name above to switch, or press Refresh below",
     "popular_empty_phone": "No live streams on this platform right now. Swipe or tap a platform name above to switch, or pull down to refresh",
     "popular_hidden_count": "{count} streams that cannot play here are hidden (paid, locked, app only…)",

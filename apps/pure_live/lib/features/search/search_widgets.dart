@@ -115,7 +115,12 @@ class _SearchPlatformStripState extends State<SearchPlatformStrip> {
                 // before its name.
                 child: AppChip(
                   key: ValueKey('search-platform-$index'),
-                  leading: site == null ? null : PlatformLogo(site.id, size: 18),
+                  // "All" keeps its grid when chosen, with no tick (A09.7
+                  // v4-phone; A09.12 c4).
+                  leading: site == null
+                      ? const Icon(AppIcons.allPlatforms, key: ValueKey('search-platform-all-icon'), size: 18)
+                      : PlatformLogo(site.id, size: 18),
+                  showCheckmark: site != null,
                   label: site == null ? i18n('site_all') : platformName(site.id, fallback: site.name),
                   selected: selected,
                   onSelected: () => widget.onSelected(index),

@@ -6,6 +6,7 @@
 - 评审页：源文件 [page.json](page.json)，效果图源文件 [src/gen.py](src/gen.py)；电视公共部分在 [src/tvkit.py](src/tvkit.py)（A17.2、A17.3 也用）
 - 图片：基线是 pure_live_TV（`~/ref/pure_live_TV`，提交 `b9d2f739`），文字取自它的 `assets/translations/zh.json`；画布 960×540（1080p 电视的逻辑尺寸），pure_live_TV 的尺寸按 1920×1080 设计稿写、在电视上乘 0.5（`core/theme/tv_text_scale.dart:23`、`app/app.dart:45`），还原图按减半后的尺寸画；封面和头像是示意图片，主播名和标题是虚构的（和手机 A09.1 同一套示例数据）
 - 新设计的颜色是手机深色主题的颜色角色（`tools/ui/mock/kit/kit.css` 的深色），默认蓝作种子；“焦点”小黄签是标注，不是界面
+- 旧编号：U.15a、T18a.2。设计确认：2026-10-01 用户同意全部电视设计（“后续全部通过”），待选 A1～A4 按建议 A（D-003）；下面正文里“改动（待确认）”“待评审”是定稿前的字样，正文没有改。开发和验证见文末“实现和验证”
 
 ## 界面清点表
 
@@ -214,3 +215,36 @@
 - 输入框弹出的是系统键盘（各电视不一样），图里没画键盘；新设计要保证键盘弹出时输入框在键盘上方。
 - 新设计“导航栏始终展开”这一行的文字跟着 A17.2 的选择 B2 定。
 - 新建标签的名字长度（15 字）照手机 v3（`room_card.dart` 的标签表单）。
+
+## 实现和验证
+
+**实现**（详见 [record.md](record.md)；2026-10-01，提交 `ce3381b88`（`live_ui` 的 `TvIcons`、`TvColors`，`live_store` 的 `tvFocusZoom`）、`934f65512`（组件和页面换用）、`537428abf`（记录，登记表写的是这个）；合并提交 `727e184ad`“Merge U.15a: TV design system and shared components”）
+
+| 编号 | 做到 | 现在的代码（`apps/pure_live/lib/tv/` 省略前缀） |
+|---|---|---|
+| c1 | 做到 | `widgets/tv_focusable.dart:59` 的 `TvFocusable`：获得焦点 120 毫秒（`tv_theme.dart:180`）、离开不动画、按下 0.97（`:28`）、长按 0.5 秒（`:21`）且松开不再点按；4 列网格 `tv_theme.dart:185`；对话框 `widgets/tv_dialogs.dart`；选择框焦点在当前项（`TvOptionRow` `:271` 获得焦点时滚进视野）；设置行按键 `widgets/tv_settings_rows.dart`（`TvSwitchRow` `:202`、`TvSliderRow` `:365`）；标签再按 OK 刷新 `widgets/tv_tabs.dart:36` |
+| c2 | 做到 | 近白描边 `TvColors.focusRing`（`packages/live_ui/lib/src/theme/tv_colors.dart:6`）宽 3（`tv_focusable.dart:31`）、放大 1.05（`:24`），整行 `zoom: false`，没有 `BoxShadow`；关掉放大的设置 `tvFocusZoom`（`packages/live_store/lib/src/settings/settings.dart:1400`，`tv_app.dart:67` 读它，电视设置页一行 `pages/tv_settings_pane.dart:96`） |
+| c3 | 做到 | 标签、导航项（`widgets/tv_nav_item.dart:9`）、按钮的 `selected` 是主色容器底；选择框当前项主色加粗加勾，焦点行高一级表面色加描边 |
+| c4 | 做到 | `tv_theme.dart:15` 的 `TvPalette` 取手机深色 `ColorScheme` 的角色；电视固定深色（`app/app.dart:219`）；`TvButton`（`widgets/tv_button.dart:22`）三种文字色 |
+| c5 | 做到 | `tv_theme.dart:146` 的 `TvTextSize`：卡片标题 16、主播名 14、角标 14、按钮 16、对话框标题 22、正文 16、设置行标题 17 |
+| c6 | 做到 | `widgets/tv_area_card.dart:13` 的 `TvAreaCard` |
+| c7 | 做到 | `widgets/tv_room_card.dart:276` 的 `TvCoverChip`；混合列表（观看记录、关注“全部平台”、搜索“全部平台”）才显示平台 |
+| c8 | 做到 | `TvCover`（`tv_room_card.dart:225`）、`TvCoverPlaceholder`（`:257`，电视图标） |
+| c9 | 做到 | `widgets/tv_room_dialog.dart:61` 的 `showTvRoomDialog`，热门、关注、观看记录、搜索、分区房间、网络电视的网格都换用（`widgets/tv_room_grid.dart:94`）；关注后弹窗不关、按钮变“已关注” |
+| c10 | 做到 | `tv_focusable.dart:18` 的 `isTvMenuKey`（`contextMenu`），`:138` 当长按 |
+| c11 | 做到 | `tv_room_dialog.dart:252` 的 `TvRoomTagsDialog`：新建标签自动勾上、名字最多 15 字、空名和重名提示 |
+| c12 | 做到 | `tv_dialogs.dart:135` 的 `showTvConfirm(danger:)`：取消关注、清空观看记录、删除一条观看记录、清空最近搜索焦点在“取消”；非危险的保留 0.5 秒防误触 |
+| c13 | 做到 | `widgets/tv_page_header.dart:9` 的 `TvPageHeader`，分区房间页换用 |
+| c14 | 做到 | `widgets/tv_status.dart:40` 的 `TvStatusView`（出错按原因，需要登录时“前往登录”）、`:162` 的 `TvSkeletonGrid` |
+| c15 | 只做了对话框 | `widgets/tv_room_push_dialog.dart:30` 的 `showTvRoomPush`（认出时头像、标题、“主播 · 平台 · 房间号”，认不出时“搜索这段文字”）；**没有调用处**：电视没有接收手机推送的部分，A06.3 的口令解析当时也没合并。接线方法写在记录“手机推送直播间的接线” |
+| c16 | 做到（Android 有偏差） | `TvDialog`（`tv_dialogs.dart:23`）不描边不发光，遮罩 `TvColors.scrim`；`TvInputDialog`（`:468`）。Android 上 `TvTextInput`（`:386`）仍弹原生输入对话框（偏差 1） |
+
+- 偏差（记录“偏差和原因”）：①Android 上的文字输入仍是原生对话框（部分盒子上 Flutter 输入调不出键盘，flutter#154924），要和设计一样需要嵌原生输入视图，等维护者定；②选择行不再 ←→ 直接换值（照设计只有 OK 弹框）；③电视设置页去掉“主题模式”一行（电视固定深色）；④清空最近搜索加确认；⑤导航项也放大 1.05（导航栏样子由 A17.2 定）；⑥分区卡片长按仍是直接关注 / 取消关注（A17.3 c7）；⑦电视设置页只把行换成新组件，结构是 A17.9 的。
+- 新设置 `tvFocusZoom`（默认开）；新翻译键 21 个（`tv_ok`、`tv_input_hint_*`、`tv_load_failed`、`tv_empty_*`、`tv_set_tags`、`tv_push_*`、`tv_focus_zoom*` 等，中英都有）；门禁基线 `tools/gate/ui_baseline.json` 里 `tv` 直接写的颜色和图标 102 → 0，这一项去掉。
+- 之后的变化：电视代码从合并到现在没有再改过（`git log 727e184ad..master -- apps/pure_live/lib/tv` 只有两次文档路径替换），上面的行号就是合并时的代码。
+
+**验证**
+
+- 自动测试：`apps/pure_live/test/tv/tv_components_test.dart`（新，现在 29 个用例声明，记录写 31 个）：调色板和四种主题色的对比度；焦点描边和放大、整行不放大、关掉放大；标签选中和焦点分开；按钮三种文字色、不可用 38%；1080p 上最小字号 14；房间卡片各状态和角标、标题滚动、长按 / 菜单键 / 右键；分区卡片；四种设置行；危险确认框、遮罩 60%、无描边、关闭后焦点回原处；普通确认框 0.5 秒防误触；选择框；输入框；卡片弹窗在 1080p@2x、1080p@1x、720p 三种面板上不出屏；关注 / 取消关注、删除记录先确认、设置标签和新建标签；状态页；子页顶栏；手机推送两种状态。`tv_test.dart`（8 个）照设计改了三处（网格高宽比、长按打开新弹窗、选择行 OK 弹框）。当时 `apps/pure_live` 379 个、`live_ui` 49 个、`live_store` 33 个全部通过。
+- 真机：**没有**。记录“真机”一节写明“没有在电视上看过（这次不安装）”；登记表却是“完成”（不符合 [PROCESS.md](../../../PROCESS.md) 第 3.2 节，见[子分类页](../README.md)“已知问题”）。电视阶段要看的：焦点描边在亮封面上是否够醒目；720p 盒子（`devicePixelRatio = 1`）上字号和卡片弹窗；Android 原生输入对话框和新对话框风格的差别；长按 OK 的重复事件（不同遥控器）；菜单键是否发 `contextMenu`。K90 上把“界面模式”改成“电视”只能粗看焦点路线，不能代替电视。
+- 留下的问题和去向：手机推送的接收端 → A17.5（链接放映的手机网页）、A17.9（扫码到手机）；Android 输入框样子 → 电视阶段由维护者定；分区卡片长按 → A17.3；导航栏放大和样子 → A17.2；电视设置的结构 → A17.9。

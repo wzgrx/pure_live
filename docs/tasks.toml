@@ -2477,13 +2477,15 @@ from = "上游 pure_live fa67c637f、pure_live_TV 5bc53016（W01.1 对照）"
 id = "E05.4"
 title = "平台层小问题合集：克拉克拉列表提前到底、LOOK 搜索能力、AcFun 付费直播仍连弹幕、百度签名过期后重连用旧地址、多画面里六间房没有弹幕、京东酷狗百度的 3.x 占位名、getDanmaku 死代码、斗鱼设置键注释"
 type = "平台"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
+commit = "78d7fa94e"
 size = "中"
 tier = 2
 stages = ["列表和搜索：克拉克拉空页、LOOK 搜索说明", "弹幕参数：AcFun 付费直播、百度刷新带参数、录制详情带弹幕参数", "清理：3.x 占位名常量、getDanmaku 死代码、斗鱼注释"]
-done = 0
+done = 3
 from = "docs v2 E 组核对（E02、E02.6 说明）和 D 组核对（D01.27、D01.28），H、I 组更正（六间房影响的是多画面）"
-note = "占位名的清理在 J06.2 做，本任务只给常量；百度那条和 C01.6 互补"
+note = "占位名的清理在 J06.2 做，本任务只给常量；百度那条和 C01.6 互补。阶段提交 c0e306288、469081c60、78d7fa94e；录制详情另补 CHZZK、Kick、猫耳、Picarto、SOOP、Steam；多画面里 B 站仍没有弹幕（要多一个请求），见 record.md"
 
 [[task]]
 id = "E06.1"

@@ -58,7 +58,7 @@
 
 ## 门禁
 
-- （提交后跑 `bash tools/gate/gate.sh --all`，结果补在这里）
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `7bb7fe4d2`，两个 `[A07.22]` 提交的内容）：`gate: passed (all, 14 members)`。
 
 ## 真机上要看的
 

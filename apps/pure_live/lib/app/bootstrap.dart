@@ -245,19 +245,28 @@ abstract final class AppBootstrap {
 
   /// Starts the services for [args].
   static Future<AppServices> start(List<String> args) async {
+    // R04.1: each step's time (StartupTiming, `startupSteps`).
+    final timing = StartupTiming.current;
     WidgetsFlutterBinding.ensureInitialized();
+    timing
+      ?..step('binding')
+      ..askProcess();
     configureDecodedImageCache(
       desktop: Platform.isWindows,
       totalMemoryBytes: Platform.isAndroid ? readTotalMemoryBytes() : null,
     );
+    timing?.step('imageCache');
     // Which interface `auto` picks (M14.1): asked before the first frame.
     await TvDevice.detect();
+    timing?.step('tvDetect');
     final launch = LaunchArgs.parse(args);
     final dataRoot = await resolveDataRoot();
     final cipher = platformSecretCipher();
+    timing?.step('dataRoot');
     // Shared: another desktop window's process may write at the same time
     // (a single process elsewhere, where it changes nothing).
     final store = await LiveStore.open(dataRoot, cipher: cipher, shared: true);
+    timing?.step('store');
     final iptvLibrary = StoreIptvLibrary(store);
 
     // Every window's exported log starts with the last 3.x import (J06.2).
@@ -270,7 +279,10 @@ abstract final class AppBootstrap {
         playlistDirectory: iptvPlaylistDirectory(dataRoot),
       );
     }
-    return wire(store: store, cipher: cipher, launch: launch, dataRoot: dataRoot, iptvLibrary: iptvLibrary);
+    timing?.step('legacy');
+    final services = wire(store: store, cipher: cipher, launch: launch, dataRoot: dataRoot, iptvLibrary: iptvLibrary);
+    timing?.step('wire');
+    return services;
   }
 
   /// Builds the services over an open [store] and starts the background

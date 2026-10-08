@@ -3331,12 +3331,15 @@ old = ["T14d.1"]
 id = "R04.1"
 title = "启动速度：冷启动到首页可用的时间测量和优化"
 type = "性能"
-status = "未开始"
+status = "开发中"
 size = "中"
 tier = 2
 old = ["T14e.1"]
 stages = ["测量", "改进", "真机对比"]
-done = 0
+done = 1
+next = "K90 测量（阶段 1 第 3 条）：profile 包冷启动、温启动各 10 次 × 开 / 关启动页，记 TotalTime、Fully drawn、startup-timing，填 record.md 的现状表"
+branch = "worktree-agent-a181fd89d52eb7f5c"
+note = "阶段 1 的代码（打点、reportFullyDrawn）做完，测量待真机"
 
 [[task]]
 id = "R05.1"

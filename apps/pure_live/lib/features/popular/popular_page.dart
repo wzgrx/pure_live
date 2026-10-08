@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/home/menu_button.dart';
 import 'package:pure_live/features/popular/popular_catalog.dart';
@@ -16,6 +17,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
+import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// Popular rooms (3.x `lib/modules/popular`): one tab per platform of the
@@ -48,6 +50,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
   List<String> _ids = const [];
   Timer? _settleTimer;
   Timer? _warmTimer;
+  bool _firstContentWatched = false;
 
   @override
   void initState() {
@@ -98,6 +101,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
     _ids = ids;
     if (ids.isEmpty) {
       _tabs = null;
+      if (_watchFirstContent()) unawaited(_firstContentShown(null));
     } else {
       var index = oldPlatform == null ? -1 : ids.indexOf(oldPlatform);
       if (index < 0 && old == null) {
@@ -139,6 +143,7 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
     if (!mounted || index >= _ids.length || _tabs?.index != index) return;
     final count = _firstCount;
     final feed = _catalog.feedOf(_ids[index]);
+    if (_watchFirstContent()) unawaited(_firstContentShown(feed));
     await feed.open(count: count);
     if (!mounted || _tabs?.index != index || feed.rooms.isEmpty || _ids.length < 2) return;
     // Fetch the next platform while the user looks at this one (3.x).
@@ -148,6 +153,23 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
       final next = index + 1 < _ids.length ? index + 1 : index - 1;
       unawaited(_catalog.feedOf(_ids[next]).open(count: count));
     });
+  }
+
+  /// Whether this page, as home's tab, still has to report its first
+  /// content (R04.1, once per page).
+  bool _watchFirstContent() {
+    if (_firstContentWatched || !widget.route.inHome || StartupTiming.current == null) return false;
+    return _firstContentWatched = true;
+  }
+
+  /// R04.1: tells [StartupTiming] when the first platform's first rooms (or
+  /// its empty or error state; without platforms the empty page) are drawn.
+  Future<void> _firstContentShown(RoomFeed? feed) async {
+    final timing = StartupTiming.current;
+    if (timing == null) return;
+    final content = feed == null ? 'empty' : await popularFirstContent(feed);
+    await WidgetsBinding.instance.endOfFrame;
+    await timing.firstContent(tab: HomeMenu.popular.id, content: content);
   }
 
   Future<void> _pickPlatform() async {
@@ -227,6 +249,33 @@ class _PopularPageState extends ConsumerState<PopularPage> with TickerProviderSt
               children: [for (final id in ids) PopularPlatformView(key: ValueKey('popular-$id'), platform: id)],
             ),
     );
+  }
+}
+
+/// What [feed] first shows (R04.1): `rooms` once it has any to show, `error`
+/// when its first load failed, `empty` when the platform answered without
+/// any; null while the first answer is coming.
+String? popularContentOf(RoomFeed feed) {
+  if (feed.rooms.isNotEmpty) return 'rooms';
+  if (feed.error != null) return 'error';
+  if (feed.loaded && !feed.busy) return 'empty';
+  return null;
+}
+
+/// Waits until [feed] shows its first content ([popularContentOf]): the
+/// first chunk's rooms show before the rest of the page arrives.
+Future<String> popularFirstContent(RoomFeed feed) async {
+  if (popularContentOf(feed) case final content?) return content;
+  final shown = Completer<String>();
+  void changed() {
+    if (popularContentOf(feed) case final content? when !shown.isCompleted) shown.complete(content);
+  }
+
+  feed.addListener(changed);
+  try {
+    return await shown.future;
+  } finally {
+    feed.removeListener(changed);
   }
 }
 

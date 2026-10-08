@@ -671,4 +671,149 @@ void main() {
       });
     });
   });
+
+  group('G02.2 buffering reconciliation', () {
+    /// mpv's buffering flag stuck at true while the engine says it plays.
+    void stuck() => engine
+      ..emit(const EngineBuffering(buffering: true))
+      ..emit(const EnginePlaying(playing: true));
+
+    /// mpv's `time-pos` moving on every second.
+    Timer move() {
+      final ticker = Timer.periodic(const Duration(seconds: 1), (_) => engine.advance());
+      addTearDown(ticker.cancel);
+      return ticker;
+    }
+
+    test('positions advancing during a stuck buffering bring playing back; no reopen after 12 s', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b])), async);
+        stuck();
+        expect(session.state.status, PlaybackStatus.buffering);
+        final seen = <PlaybackStatus>[];
+        final subscription = session.states.listen((state) => seen.add(state.status));
+        addTearDown(subscription.cancel);
+        move();
+        async.elapse(const Duration(seconds: 13));
+        expect(session.state.status, PlaybackStatus.playing);
+        expect(session.state.recovering, isFalse);
+        expect(engine.opens, hasLength(1));
+        // One snapshot for the reconciliation, none for the positions.
+        expect(seen, [PlaybackStatus.playing]);
+      });
+    });
+
+    test('positions that stand still keep the buffering deadline', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b])), async);
+        final causes = <(int, String?)>[];
+        final subscription = session.states.listen((state) => causes.add((state.recovery, state.recoveryCause)));
+        addTearDown(subscription.cancel);
+        stuck();
+        final ticker = Timer.periodic(const Duration(seconds: 1), (_) => engine.emit(EnginePosition(engine.position)));
+        addTearDown(ticker.cancel);
+        async.elapse(const Duration(seconds: 11));
+        expect((session.state.status, engine.opens.length), (PlaybackStatus.buffering, 1));
+        async.elapse(const Duration(seconds: 2));
+        expect(engine.opens, hasLength(2));
+        expect(causes, contains((1, 'buffering_stall_timeout')));
+        // The reopened line plays: the recovery and its cause end.
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+        expect(session.state.recoveryCause, isNull);
+      });
+    });
+
+    test('presented frames during buffering bring playing back (Windows)', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b])), async);
+        engine.reportsFrames = true;
+        stuck();
+        for (var frame = 0; frame < 5; frame++) {
+          async.elapse(const Duration(milliseconds: 80));
+          engine.emit(const EngineFrame());
+        }
+        expect(session.state.status, PlaybackStatus.buffering, reason: 'five frames are not enough');
+        for (var frame = 0; frame < 7; frame++) {
+          async.elapse(const Duration(milliseconds: 80));
+          engine.emit(const EngineFrame());
+        }
+        expect(session.state.status, PlaybackStatus.playing);
+        final ticker = Timer.periodic(const Duration(seconds: 1), (_) => engine.emit(const EngineFrame()));
+        addTearDown(ticker.cancel);
+        async.elapse(const Duration(seconds: 13));
+        expect((session.state.status, engine.opens.length), (PlaybackStatus.playing, 1));
+      });
+    });
+
+    test('frames of an audio-only player are no proof', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a]), audioOnly: true), async);
+        engine.reportsFrames = true;
+        stuck();
+        for (var frame = 0; frame < 12; frame++) {
+          async.elapse(const Duration(milliseconds: 80));
+          engine.emit(const EngineFrame());
+        }
+        expect(session.state.status, PlaybackStatus.buffering);
+      });
+    });
+
+    test('a user pause is not undone by positions', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a])), async);
+        stuck();
+        unawaited(session.pause());
+        async.flushMicrotasks();
+        engine.calls.clear();
+        move();
+        async.elapse(const Duration(seconds: 20));
+        expect(session.state.status, PlaybackStatus.paused);
+        expect(engine.calls.where((call) => call == 'play'), isEmpty);
+        expect(engine.opens, hasLength(1));
+      });
+    });
+
+    test('a seek jump is no progress', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'huya', plan: _plan([_a], onDemand: true)), async);
+        stuck();
+        engine.advance(Duration.zero);
+        async.elapse(const Duration(seconds: 1));
+        engine.advance(const Duration(seconds: 60));
+        expect(session.state.status, PlaybackStatus.buffering);
+        // From the new place, real progress counts.
+        async.elapse(const Duration(seconds: 1));
+        engine.advance();
+        expect(session.state.status, PlaybackStatus.playing);
+      });
+    });
+
+    test("a stale generation's positions are ignored", () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b])), async);
+        stuck();
+        engine.onOpen = (_) => Completer<void>().future;
+        unawaited(session.selectLine(1));
+        async.flushMicrotasks();
+        move();
+        async.elapse(const Duration(seconds: 5));
+        expect(session.state.status, isNot(PlaybackStatus.playing));
+        expect(engine.opens, hasLength(2));
+      });
+    });
+
+    test('recoveryCause clears once playing again', () {
+      fakeAsync((async) {
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b])), async);
+        engine
+          ..onOpen = ((_) async {})
+          ..emit(const EngineError(_network));
+        async.flushMicrotasks();
+        expect((session.state.recovery, session.state.recoveryCause), (1, 'transport'));
+        engine.playing();
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+        expect(session.state.recoveryCause, isNull);
+      });
+    });
+  });
 }

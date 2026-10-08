@@ -8,6 +8,7 @@ import 'package:live_iptv/live_iptv.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -185,6 +186,7 @@ class LiveRoomController extends ChangeNotifier {
   int _namedChats = 0;
   bool _unsupportedShown = false;
   bool _historyRecorded = false;
+  int _loggedRecovery = 0;
 
   LiveRoom _room;
   RoomStage _stage = RoomStage.loading;
@@ -317,10 +319,24 @@ class LiveRoomController extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
-  /// Subscribes to danmaku and settings, loads the room and starts the
-  /// periodic refresh.
+  /// G02.2: one app log line per recovery attempt of the session, with its
+  /// count and the failure's code (no address, no headers), also on logcat:
+  /// `playback: recovering #2 buffering_stall_timeout`.
+  void _logRecovery(PlaybackState state) {
+    final attempt = state.recovery;
+    if (attempt > _loggedRecovery) {
+      final line = 'recovering #$attempt ${state.recoveryCause ?? '-'}';
+      AppLog.instance.info('playback', line);
+      debugPrint('playback: $line');
+    }
+    _loggedRecovery = attempt;
+  }
+
+  /// Subscribes to the session's recoveries, danmaku and settings, loads
+  /// the room and starts the periodic refresh.
   Future<void> start() async {
     _subscriptions
+      ..add(session.states.listen(_logRecovery))
       ..add(danmaku.events.listen(_onDanmaku))
       ..add(store.blockLists.watch(BlockKind.keyword).listen((_) => unawaited(_reloadFilter())))
       ..add(store.blockLists.watch(BlockKind.user).listen((_) => unawaited(_reloadFilter())))

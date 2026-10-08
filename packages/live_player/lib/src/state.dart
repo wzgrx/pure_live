@@ -53,6 +53,7 @@ final class PlaybackState {
     this.duration = Duration.zero,
     this.appliedQualityData,
     this.recovery = 0,
+    this.recoveryCause,
   });
 
   /// Where the session is.
@@ -121,6 +122,11 @@ final class PlaybackState {
   /// retry) are no recovery.
   final int recovery;
 
+  /// The code of the failure behind the current recovery
+  /// ([PlayerException.code], e.g. `buffering_stall_timeout`; G02.2), for
+  /// the app log; null while [recovery] is 0.
+  final String? recoveryCause;
+
   /// Whether the session is bringing a failed stream back ([recovery]).
   bool get recovering => recovery > 0;
 
@@ -164,8 +170,9 @@ final class PlaybackState {
   bool get expectsPortrait => (expectedAspectRatio ?? 16 / 9) < 1;
 
   /// A copy with the given fields replaced; [error] and [failure] are kept
-  /// only while the status stays [PlaybackStatus.error]; [clearVideoSize]
-  /// also forgets the frame rate.
+  /// only while the status stays [PlaybackStatus.error]; [recoveryCause]
+  /// only while [recovery] stays above 0; [clearVideoSize] also forgets the
+  /// frame rate.
   PlaybackState copyWith({
     PlaybackStatus? status,
     Object? error,
@@ -186,9 +193,11 @@ final class PlaybackState {
     Duration? duration,
     Object? appliedQualityData,
     int? recovery,
+    String? recoveryCause,
   }) {
     final next = status ?? this.status;
     final keepError = next == PlaybackStatus.error;
+    final attempt = recovery ?? this.recovery;
     return PlaybackState(
       status: next,
       error: keepError ? error ?? this.error : null,
@@ -208,7 +217,8 @@ final class PlaybackState {
       position: position ?? this.position,
       duration: duration ?? this.duration,
       appliedQualityData: appliedQualityData ?? this.appliedQualityData,
-      recovery: recovery ?? this.recovery,
+      recovery: attempt,
+      recoveryCause: attempt > 0 ? recoveryCause ?? this.recoveryCause : null,
     );
   }
 

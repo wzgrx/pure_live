@@ -45,3 +45,10 @@
 - README 里 G2～G4 的建议（定了只改 `app_icons.dart` 和对照表）。
 - 直播间菜单“在新窗口打开”的文字（`open_in_new_window`）交直播间任务。
 - 可能和并行任务冲突的文件：`packages/live_ui/lib/src/widgets/settings_row.dart`、`status_view.dart`、`count_button.dart`（A04.1 的字号上限和触控区域可能改到）；`app_icons.dart` 新名字加在文件末尾。
+
+## G2～G4 定了（2026-10-08，按维护者“按之前的界面设计选最好的”，取各条建议 A）
+
+- `changeRoom`（多画面“换台”）→ `Icons.swap_horiz_outlined`（和 `switchRoom` 同一个）；`guide`（网络电视节目单）→ `Icons.assignment_outlined`（和 `iptvGuide` 同一个）；`uiMode` → `Remix.device_line`；`cast` 保留 `Remix.tv_2_line`。
+- `webDav` → `Remix.upload_cloud_2_line`；`backup`、`settingsBackup` 保留 `Remix.cloud_line`。
+- `unfollow` → `Remix.dislike_line`（和 `unfollowArea` 一致）；`settingsPreferPlatform` → `Remix.star_line`；`homeFavorites`、`followHeart` 保留。
+- 只改了 `app_icons.dart` 的字形和 `design_system_test.dart` 的对照表；`live_ui` 测试全过。

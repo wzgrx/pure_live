@@ -273,7 +273,7 @@ abstract final class AppIcons {
   static const IconData castDevice = Icons.tv_rounded;
 
   /// Unfollow, in the follow button's menu (docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c8).
-  static const IconData unfollow = Remix.heart_3_line;
+  static const IconData unfollow = Remix.dislike_line;
 
   /// Copy a stream address ("获取直链", 3.x's room menu).
   static const IconData streamLink = Remix.link_m;
@@ -611,7 +611,7 @@ abstract final class AppIcons {
   static const IconData cellRefresh = Remix.refresh_line;
 
   /// Pick another room for a view ("换台").
-  static const IconData changeRoom = Remix.tv_2_line;
+  static const IconData changeRoom = Icons.swap_horiz_outlined;
 
   /// Empty a view ("关闭这一格").
   static const IconData closeCell = Remix.close_circle_line;
@@ -656,7 +656,7 @@ abstract final class AppIcons {
   static const IconData playlistAdd = Remix.play_list_add_line;
 
   /// A programme guide (its card, "当前使用的节目单", the default guide).
-  static const IconData guide = Remix.tv_2_line;
+  static const IconData guide = Icons.assignment_outlined;
 
   /// A source read from a network address ("网络", "网络导入").
   static const IconData networkSource = Remix.global_line;
@@ -732,7 +732,7 @@ abstract final class AppIcons {
   static const IconData cloudOff = Remix.cloud_off_line;
 
   /// WebDAV backups (3.x backup page).
-  static const IconData webDav = Remix.cloud_line;
+  static const IconData webDav = Remix.upload_cloud_2_line;
 
   /// Device sync over the local network (3.x backup page).
   static const IconData deviceSync = Remix.qr_scan_2_line;
@@ -829,7 +829,7 @@ abstract final class AppIcons {
   static const IconData pageSettings = Remix.pages_line;
 
   /// Interface mode (phone or TV).
-  static const IconData uiMode = Remix.tv_2_line;
+  static const IconData uiMode = Remix.device_line;
 
   /// The app font.
   static const IconData appFont = Remix.font_family;
@@ -1199,7 +1199,7 @@ abstract final class AppIcons {
   static const IconData settingsPlatformList = Remix.apps_2_line;
 
   /// The platform opened first.
-  static const IconData settingsPreferPlatform = Remix.heart_3_line;
+  static const IconData settingsPreferPlatform = Remix.star_line;
 
   /// Show unplayable rooms.
   static const IconData settingsUnplayable = Remix.lock_line;

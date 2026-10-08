@@ -508,6 +508,24 @@ void main() {
     }
   });
 
+  testWidgets("a phone's split screen is not a landscape phone: the toolbar stays under the app bar (A04.1)", (
+    tester,
+  ) async {
+    // Upright split (400×420) and half of a phone held sideways (410×392):
+    // short, but compact both ways.
+    for (final size in const [Size(400, 420), Size(410, 392)]) {
+      final (services, _) = await _pump(tester, size);
+      expect(_key('multiview-toolbar'), findsOneWidget, reason: '$size');
+      expect(
+        find.descendant(of: find.byType(AppBar), matching: _key('multiview-layouts')),
+        findsNothing,
+        reason: '$size',
+      );
+      expect(_key('multiview-column'), findsNothing, reason: '$size');
+      await _close(tester, services);
+    }
+  });
+
   testWidgets('landscape phone: toolbar in the app bar, the column on the right, the picker in turn', (tester) async {
     final (services, _) = await _pump(tester, const Size(852, 393));
     // c10: the toolbar joins the app bar.
@@ -554,6 +572,16 @@ void main() {
     await _wait(tester);
     expect(_key('multiview-column'), findsNothing);
     expect(find.descendant(of: _key('multiview-fold'), matching: find.byIcon(AppIcons.unfoldLeft)), findsOneWidget);
+    // A04.1: the tab looks 22 wide and answers 48; a tap on its clear
+    // part, over the wall's edge, unfolds it too.
+    final tab = tester.getRect(_key('multiview-fold'));
+    expect(tab.width, 22);
+    await tester.tapAt(tab.centerLeft - const Offset(12, 0));
+    await _wait(tester);
+    expect(_key('multiview-column'), findsOneWidget);
+    await tester.tap(_key('multiview-fold'));
+    await _wait(tester);
+    expect(_key('multiview-column'), findsNothing);
     await tester.tap(_key('multiview-fold'));
     await _wait(tester);
     expect(_key('multiview-column'), findsOneWidget);

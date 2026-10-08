@@ -240,11 +240,17 @@ class _FollowedAreasButton extends StatelessWidget {
                   children: [
                     Icon(AppIcons.followArea, size: 16, color: theme.colorScheme.primary),
                     const SizedBox(width: 8),
-                    Text(
-                      label,
-                      style: context.textStyles.t12.emphasis.copyWith(
-                        color: theme.colorScheme.primary,
-                        letterSpacing: 0.5,
+                    // Large text shortens the words instead of running past
+                    // the pill (A04.1).
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: context.textStyles.t12.emphasis.copyWith(
+                          color: theme.colorScheme.primary,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
                   ],

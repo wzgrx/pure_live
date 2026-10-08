@@ -4,6 +4,7 @@ import 'dart:ui' show SemanticsRole, lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_ui/src/theme/metrics.dart';
+import 'package:live_ui/src/widgets/window_layout.dart';
 
 // The route behind the small menu ([showSmallMenu], [showAppMenu];
 // docs/A-界面设计/A02-组件/A02.3-贴着按钮的小菜单/brief.md). Flutter's `showMenu` only takes the menu's top
@@ -44,7 +45,8 @@ const double _leastHeight = kMinInteractiveDimension + 16;
 /// at once. A tap outside, Back and Esc close it with null; arrows move
 /// between the rows and Enter picks one. [current], the key of a row, is
 /// scrolled into view when the rows scroll. A change of the screen's size
-/// closes it (its button moved).
+/// closes it (its button moved). A fold or hinge that splits the window
+/// keeps the menu on its button's side ([DisplayHinge], A04.1).
 Future<T?> showAnchoredMenu<T>(
   BuildContext anchor, {
   required List<Widget> children,
@@ -129,21 +131,32 @@ class _AnchoredMenuRoute<T> extends PopupRoute<T> {
       });
     }
     final padding = MediaQuery.paddingOf(context);
-    return MediaQuery.removePadding(
-      context: context,
-      removeTop: true,
-      removeBottom: true,
-      removeLeft: true,
-      removeRight: true,
-      child: CustomSingleChildLayout(
-        delegate: _AnchoredMenuLayout(
-          anchor: anchor,
-          padding: padding,
-          preferAbove: preferAbove,
-          textDirection: Directionality.of(context),
-          side: _side,
+    // The side of a fold its button is on: the menu is laid out in there.
+    final area = DisplayHinge.maybeOf(context)?.sideOf(anchor.center, screen) ?? Offset.zero & screen;
+    final inset = EdgeInsets.fromLTRB(area.left, area.top, screen.width - area.right, screen.height - area.bottom);
+    return Padding(
+      padding: inset,
+      child: MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        removeLeft: true,
+        removeRight: true,
+        child: CustomSingleChildLayout(
+          delegate: _AnchoredMenuLayout(
+            anchor: anchor.shift(-area.topLeft),
+            padding: EdgeInsets.fromLTRB(
+              math.max(0, padding.left - inset.left),
+              math.max(0, padding.top - inset.top),
+              math.max(0, padding.right - inset.right),
+              math.max(0, padding.bottom - inset.bottom),
+            ),
+            preferAbove: preferAbove,
+            textDirection: Directionality.of(context),
+            side: _side,
+          ),
+          child: capturedThemes.wrap(still ? menu : _MenuUnfold(animation: animation, side: _side, child: menu)),
         ),
-        child: capturedThemes.wrap(still ? menu : _MenuUnfold(animation: animation, side: _side, child: menu)),
       ),
     );
   }
@@ -327,7 +340,7 @@ class _MenuSurfaceState extends State<_MenuSurface> {
     return Material(
       type: MaterialType.card,
       color: scheme.surfaceContainerHighest,
-      shape: const RoundedRectangleBorder(borderRadius: AppRadii.menu),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       elevation: 3,
       shadowColor: scheme.shadow,
       surfaceTintColor: Colors.transparent,

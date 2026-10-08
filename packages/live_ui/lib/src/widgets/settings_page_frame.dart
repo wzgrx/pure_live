@@ -3,6 +3,7 @@ import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/widgets/scrolling.dart';
 import 'package:live_ui/src/widgets/settings_tiles.dart';
+import 'package:live_ui/src/widgets/window_layout.dart';
 
 // The frame of the settings-like pages outside the settings feature
 // (recording settings, backup, WebDAV, device sync; docs/A-界面设计/A10-录制界面/A10.2-录制设置,
@@ -10,7 +11,8 @@ import 'package:live_ui/src/widgets/settings_tiles.dart';
 
 /// The app bar of a settings-like page: the title at the platform's place
 /// (3.x: the start on Android; [centerTitle] centres it), 20 px semi-bold, [subtitle] under it when given (the WebDAV server); a
-/// compact height when the window is short (a phone held sideways, U.6a).
+/// compact height when the area is short (a phone held sideways or in split
+/// screen, U.6a; [WindowClassScope]).
 PreferredSizeWidget settingsPageAppBar(
   BuildContext context, {
   required String title,
@@ -19,7 +21,6 @@ PreferredSizeWidget settingsPageAppBar(
   PreferredSizeWidget? bottom,
   bool centerTitle = false,
 }) {
-  final short = MediaQuery.sizeOf(context).height < 480;
   final heading = Text(title, style: context.textStyles.t20.emphasis);
   return AppBar(
     title: subtitle == null
@@ -38,7 +39,7 @@ PreferredSizeWidget settingsPageAppBar(
             ],
           ),
     centerTitle: centerTitle,
-    toolbarHeight: short ? 48 : kToolbarHeight,
+    toolbarHeight: WindowClassScope.toolbarHeightOf(context),
     scrolledUnderElevation: 0,
     bottom: bottom,
     actions: [...actions, if (actions.isNotEmpty) const SizedBox(width: 4)],

@@ -179,7 +179,7 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
       selected: _source == source,
       onSelected: (_) => _select(source),
     );
-    return Column(
+    final picker = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ?widget.header,
@@ -251,6 +251,19 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
           ),
         ),
       ],
+    );
+    // Too short for the search, the sources and a few rooms (a phone's
+    // split screen, large text; A04.1): the whole picker scrolls instead of
+    // squeezing the list away.
+    final least = MediaQuery.textScalerOf(context).scale(140) + 3 * _RoomTile.extent(context);
+    return LayoutBuilder(
+      builder: (context, constraints) => !constraints.hasBoundedHeight || constraints.maxHeight >= least
+          ? picker
+          : SingleChildScrollView(
+              key: const ValueKey('multiview-picker-scroll'),
+              physics: const PureLiveScrollPhysics(),
+              child: SizedBox(height: least, child: picker),
+            ),
     );
   }
 }

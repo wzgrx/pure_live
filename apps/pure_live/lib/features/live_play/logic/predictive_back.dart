@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 /// The live room's hold on Android's back (3.x
 /// `AndroidPredictiveBackService`, F.1c): while a room page holds it,
@@ -12,6 +12,11 @@ import 'package:flutter/services.dart';
 /// takes it, and the old page closing afterwards does not give it up (3.x
 /// kept one set of callbacks, which the old page's `dispose` cleared). The
 /// system's back animation is not shown (3.x ignored its progress too).
+///
+/// The overlay priority puts the room before the keyboard, which Android
+/// otherwise closes first: a back while the keyboard is up only closes it
+/// (A07.19; on the K90 one back closed the keyboard and the room switch
+/// panel, and typing a local danmaku then back left the room).
 final class RoomBackChannel {
   new _();
 
@@ -67,6 +72,15 @@ final class RoomBackChannel {
 
   Future<void> _handle(MethodCall call) async {
     // backStarted, backProgress and backCancelled drive no animation (3.x).
-    if (call.method == 'backInvoked') await _onBack?.call();
+    if (call.method != 'backInvoked') return;
+    if (_keyboardUp()) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+    await _onBack?.call();
   }
+
+  static bool _keyboardUp() =>
+      WidgetsBinding.instance.platformDispatcher.views.any((view) => view.viewInsets.bottom > 0) &&
+      FocusManager.instance.primaryFocus?.context?.findAncestorStateOfType<EditableTextState>() != null;
 }

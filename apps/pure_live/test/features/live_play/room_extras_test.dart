@@ -338,6 +338,40 @@ void main() {
     });
   });
 
+  group('A07.19', () {
+    testWidgets('back with the keyboard up only closes the keyboard; the next back reaches the room', (tester) async {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel(_channel), (_) async => null);
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(const MethodChannel(_channel), null),
+      );
+      final channel = RoomBackChannel.instance..reset();
+      final focus = FocusNode();
+      addTearDown(focus.dispose);
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(body: TextField(focusNode: focus)),
+        ),
+      );
+      var backs = 0;
+      await channel.hold(Object(), () async => backs++);
+      focus.requestFocus();
+      tester.view.viewInsets = const FakeViewPadding(bottom: 900);
+      addTearDown(tester.view.resetViewInsets);
+      await tester.pump();
+      expect(focus.hasFocus, isTrue);
+
+      await _nativeBack(tester);
+      expect(backs, 0, reason: 'the keyboard goes first, as Android does for a plain back');
+      expect(focus.hasFocus, isFalse);
+
+      tester.view.viewInsets = FakeViewPadding.zero;
+      await tester.pump();
+      await _nativeBack(tester);
+      expect(backs, 1);
+      channel.reset();
+    });
+  });
+
   group('F.1d', () {
     testWidgets('c1: "播放器强制销毁" off keeps the player for the next room; on releases it; a new setup gets a new one', (
       tester,

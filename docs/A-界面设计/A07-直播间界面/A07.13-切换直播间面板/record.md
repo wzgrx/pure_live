@@ -100,3 +100,7 @@
 - `buttons/room_menu_button.dart`：`roomMenuGroups` 改成按组过滤（结果不变时等价）。
 - `packages/live_ui/lib/src/icons/app_icons.dart`：末尾加了一节（A02.2 也可能在 live_ui 里加东西，只是相邻追加）。
 - `packages/live_store/lib/src/settings/settings.dart`、翻译文件：只加行。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 切换直播间面板：竖屏是画面下面的面板，“关注在播 / 观看记录 / 关注回放”分组、刷新时间、放大镜筛选、3.x 式小卡片网格，“正在观看”一行 ✓；横屏全屏同一个面板在右侧 ✓（A07.18、A07.15 的复查截图）。原地换台没单独看。

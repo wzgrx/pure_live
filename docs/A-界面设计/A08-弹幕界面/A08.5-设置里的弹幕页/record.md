@@ -78,3 +78,7 @@ c1 之后，下面这些键只被删掉的旧弹幕目录行用过，现在代�
 - `features/settings/settings_section_view.dart`（加了一行 `danmaku` 分支）、`settings_catalog.dart`（弹幕一节整段换掉、视频页屏蔽行的关键词）：A04.1 在改设置的高度分档，如果它也动了弹幕一节或 `SettingsSectionPage`，两边都保留。新页 `danmaku_page.dart` 用的是 `settingsAppBar`，A04.1 改了顶栏高度会自动跟上；正文的 `Align`/`ConstrainedBox(720)` 和 `DanmakuStylePage` 一样，A04.1 如果给 `DanmakuStylePage` 改了布局，新页也要同样改。
 - `tools/gate/ui_baseline.json`：settings 的直接图标计数从 25 删到没有；别的任务如果也改了这个文件，按两边结果重算。
 - 没有碰 `features/live_play/`。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 设置 → 弹幕和直播间的“弹幕设置”是同一套分组和控件（A08.6 复查）✓；“录制已停止”通知定位没看（前台录制通知的定位见 H05.2/H05.4）。

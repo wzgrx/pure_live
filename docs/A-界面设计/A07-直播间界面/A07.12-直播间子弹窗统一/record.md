@@ -100,3 +100,7 @@
 - `packages/live_ui/lib/src/widgets/app_menu.dart`、`stream_menu_button.dart`、`app_dialog.dart`、`icons/app_icons.dart`：A02.1 如果也换 `PopupMenuButton`、改对话框按钮，会碰同一批文件（都是只加的改动，合并时两边保留）。
 - `apps/pure_live/assets/translations/zh.json`、`en.json`（按键名排序插入）；`tools/gate/ui_baseline.json`（`raw_styles` 去掉了 `live_play`，A02.1 降 `settings` 时在同一块）。
 - 测试：`live_play_popups_test.dart`、`live_play_page_test.dart`、`live_play_room_test.dart`、`live_play_layouts_test.dart`、`live_play_more_page_test.dart`。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 定时关闭、房间音量都从画面下面升起面板（标题加 ✕），没有居中对话框；投屏（选清晰度 → 线路 → 搜索设备）、获取直链（清晰度 → 线路列表带地址）、横屏的画面比例菜单也都是面板或贴着按钮的菜单 ✓。

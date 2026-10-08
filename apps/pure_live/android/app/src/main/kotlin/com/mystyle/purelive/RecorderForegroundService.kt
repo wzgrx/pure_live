@@ -23,13 +23,15 @@ import android.os.PowerManager
  * title and quality, or "正在录制 N 个直播间" over the streamers), [since]
  * for the system's clock (no refresh every second), [task] (the one active
  * task's id: a tap opens the recording centre at it, H05.2; null with none
- * or several), the button words and the channel names.
+ * or several), [progress] (0–100 while one room joins, a bar; H05.3), the
+ * button words and the channel names.
  */
 internal data class RecordWords(
     val title: String,
     val text: String,
     val since: Long?,
     val task: String?,
+    val progress: Int?,
     val stop: String,
     val center: String,
     val open: String,
@@ -50,6 +52,7 @@ internal data class RecordWords(
                 since = (map["since"] as? Number)?.toLong(),
                 // At most ShareIntakePlugin's MAX_TASK_ID (200), which the centre takes.
                 task = (map["task"] as? String)?.trim()?.takeIf { it.isNotEmpty() && it.length <= 200 },
+                progress = (map["progress"] as? Number)?.toInt()?.coerceIn(0, 100),
                 stop = text("stop", "停止录制"),
                 center = text("center", "录制中心"),
                 open = text("open", "打开录制中心"),
@@ -345,6 +348,9 @@ class RecorderForegroundService : Service() {
             .setOnlyAlertOnce(true)
         val since = words.since
         if (since != null) builder.setWhen(since).setShowWhen(true).setUsesChronometer(true)
+        // The join's bar (H05.3); cleared explicitly once it ends.
+        val progress = words.progress
+        if (progress != null) builder.setProgress(100, progress, false) else builder.setProgress(0, 0, false)
         return builder.build()
     }
 }

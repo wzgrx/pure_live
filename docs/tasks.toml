@@ -2826,10 +2826,11 @@ note = "一个活动任务时通知带它的 id（Dart 的 RecordNotificationCon
 id = "H05.3"
 title = "录制通知在合并时显示进度（H01.3 记录“没做的”第 2 条）"
 type = "功能"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 3
-note = "进度数据 RecordTask.mergeProgress 在 H01.3 已有；改 recording_notice.dart、recording_platform.dart 和原生 RecorderForegroundService.kt（和 H05.2 同一个原生文件）"
+date = "2026-10-08"
+note = "一个直播间整理时正文末尾“42%”、系统进度条，每秒最多更新一次（100% 和结束立即发）；整理时不再显示计时；没在本机构建 APK，Kotlin 改动靠下次构建确认"
 from = "H01.3 记录“没做的”第 2 条（V03.3 核对）"
 
 [[task]]

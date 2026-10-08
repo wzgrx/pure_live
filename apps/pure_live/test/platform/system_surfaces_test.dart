@@ -143,6 +143,67 @@ void main() {
       expect((calls.last.method, (calls.last.arguments as Map)['task']), ('update', null));
       await keepAlive.release(owner);
     });
+
+    test('one room joining shows how far, without the clock; several show no bar (H05.3)', () {
+      final first = DateTime(2026, 10, 2, 21);
+      final joining = _task('a', '晚风', status: RecordStatus.processing, started: first)..mergeProgress = 0.42;
+      final one = recordNotificationContent([joining]);
+      expect((one.title, one.text, one.progress, one.since), ('正在整理录像 · 晚风', '深夜电台 · 点歌接龙到天亮 · 原画 · 42%', 42, null));
+      joining.mergeProgress = null;
+      final unknown = recordNotificationContent([joining]);
+      expect((unknown.text, unknown.progress, unknown.since), ('深夜电台 · 点歌接龙到天亮 · 原画', null, null));
+      final running = recordNotificationContent([_task('a', '晚风', started: first)]);
+      expect((running.progress, running.since), (null, first));
+      joining.mergeProgress = 0.42;
+      final two = recordNotificationContent([joining, _task('b', '星河长明', started: first)]);
+      expect((two.progress, two.since), (null, first));
+      expect(
+        recordNotificationContent([_task('a', '晚风', status: RecordStatus.preparing, started: first)]).since,
+        isNull,
+        reason: 'no clock before writing',
+      );
+    });
+
+    test('the keep-alive sends the join progress at most once a second, the end at once (H05.3)', () async {
+      const channel = MethodChannel('pure_live/recorder');
+      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final calls = <MethodCall>[];
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        calls.add(call);
+        return null;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      var clock = DateTime(2026, 10, 8, 12);
+      var title = '正在整理录像 · 晚风';
+      int? progress = 42;
+      Object? sent() => (calls.last.arguments as Map)['progress'];
+      final keepAlive = AndroidRecordKeepAlive(
+        title: () => title,
+        text: () => '深夜电台${progress == null ? '' : ' · $progress%'}',
+        extra: () => {'progress': progress},
+        onInterrupted: (_) async {},
+        now: () => clock,
+      );
+      final owner = Object();
+      await keepAlive.acquire(owner);
+      expect((calls.single.method, sent()), ('setActive', 42));
+      progress = 43;
+      await keepAlive.refresh();
+      clock = clock.add(const Duration(milliseconds: 500));
+      progress = 44;
+      await keepAlive.refresh();
+      expect(calls, hasLength(1), reason: 'within a second of the last');
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+      expect((calls.length, calls.last.method, sent()), (2, 'update', 44), reason: 'the last one still goes');
+      progress = 100;
+      await keepAlive.refresh();
+      expect((calls.length, sent()), (3, 100), reason: '100% at once');
+      title = '正在录制 · 晚风';
+      progress = null;
+      await keepAlive.refresh();
+      expect((calls.length, sent()), (4, null), reason: 'the join ended: at once');
+      await keepAlive.release(owner);
+    });
   });
 
   group('"录制已停止" (c5)', () {

@@ -182,6 +182,55 @@ void main() {
       }
     });
 
+    test('J01.3: a whole number out of range goes back to the default, or rounds to its step', () {
+      const reset = IntSetting('a', section: 's', defaultValue: 7, min: 1, max: 10, resetOutOfRange: true);
+      expect([reset.read(0), reset.read(11), reset.read(1), reset.read(10), reset.read(5)], [7, 7, 1, 10, 5]);
+      const low = IntSetting('b', section: 's', defaultValue: 50, min: 0, resetOutOfRange: true);
+      expect([low.read(-1), low.read(0), low.read(100000)], [50, 0, 100000]);
+      const stepped = IntSetting('c', section: 's', defaultValue: 500, min: 100, max: 900, step: 100);
+      expect(
+        [
+          stepped.read(550),
+          stepped.read(549),
+          stepped.read(949),
+          stepped.read(1000),
+          stepped.read(49),
+          stepped.read('651'),
+        ],
+        [600, 500, 900, 900, 100, 700],
+      );
+      const plain = IntSetting('d', section: 's', defaultValue: 3, min: 1, max: 5);
+      expect([plain.read(0), plain.read(9), plain.read(4)], [1, 5, 4], reason: 'others still clamp');
+    });
+
+    test("J01.3: history limit, picture fit, proxy ports and danmaku weight out of range read as 3.x's", () async {
+      final out = <Setting<Object>, List<(Object, Object)>>{
+        Settings.historyLimit: [(-1, 50), (0, 0), (200, 200)],
+        Settings.videoFitIndex: [(7, 0), (-1, 0), (5, 5)],
+        Settings.proxyPort: [(0, 7897), (70000, 7897), (1080, 1080)],
+        Settings.appProxyPort: [(0, 7897), (70000, 7897), (65535, 65535)],
+        Settings.danmakuFontWeight: [(550, 600), (949, 900), (1000, 900), (50, 100)],
+        Settings.pipDanmakuFontWeight: [(550, 600), (949, 900), (450, 500)],
+      };
+      for (final MapEntry(:key, value: cases) in out.entries) {
+        for (final (raw, read) in cases) {
+          await store.settings.set(key, raw);
+          final reopened = await SettingsStore.load(store.database);
+          expect(store.settings.get(key), read, reason: '${key.key} $raw');
+          expect(reopened.get(key), read, reason: 'reopened ${key.key} $raw');
+          expect(LegacySnapshot.fromHive({key.key: raw}).settings[key], read, reason: '3.x data: ${key.key} $raw');
+          expect(
+            LegacySnapshot.fromBackup({
+              'backupVersion': 4,
+              key.section: {key.backupKey: raw},
+            }).settings[key],
+            read,
+            reason: 'backup: ${key.key} $raw',
+          );
+        }
+      }
+    });
+
     test('interface mode: auto by default, three choices, kept on this device (M14.1)', () async {
       expect(store.settings.get(Settings.uiMode), 'auto');
       await store.settings.set(Settings.uiMode, 'tv');

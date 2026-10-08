@@ -27,7 +27,7 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
   → SettingsStore（settings_store.dart）：LiveStore.open 时整表读进内存（:15-28），get 同步（:83）；
     set/setAll（:90、:93）先写 settings 表（JSON 值）再更新内存并发出变更；watch（:140）是“当前值 + 之后的变更”
   → 读：界面 watchSetting(ref, Settings.xxx)；逻辑 store.settings.get / watch(...).skip(1)
-  → 坏值：Setting.read（setting.dart:59）= decode（类型不对返回 null）→ normalize（Int/Double 夹到 min/max，:113、:150）→ 否则 defaultValue；不抛错
+  → 坏值：Setting.read（setting.dart:59）= decode（类型不对返回 null）→ normalize（Int/Double 夹到 min/max，:125、:168；Int 可以越界回到默认值 `resetOutOfRange`、取整 `step`，J01.3）→ 否则 defaultValue；不抛错
   → 另一个桌面窗口写了库：LiveStore.syncExternal → SettingsStore.reload（:55）只报真正变了的设置
 ```
 
@@ -40,7 +40,7 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 
 | 文件 | 职责 |
 |---|---|
-| `packages/live_store/lib/src/settings/setting.dart`（214 行） | `SettingScope`（`synced` / `internal`，`:6`）；`Setting<T>`（`:22`：`key`、`section`、`backupKey`、`legacyKeys`、`defaultValue`、`scope`；`read` `:59`）；`BoolSetting`（`:72`）、`IntSetting`（`:86`，`min`/`max` 夹紧 `:113`）、`DoubleSetting`（`:121`）、`StringSetting`（`:158`，可带可选值，不在里面的回默认）、`StringListSetting`（`:182`）、`JsonSetting`（`:195`） |
+| `packages/live_store/lib/src/settings/setting.dart`（232 行） | `SettingScope`（`synced` / `internal`，`:6`）；`Setting<T>`（`:22`：`key`、`section`、`backupKey`、`legacyKeys`、`defaultValue`、`scope`；`read` `:59`）；`BoolSetting`（`:72`）、`IntSetting`（`:88`，`min`/`max` 夹紧、`resetOutOfRange`、`step` `:125`）、`DoubleSetting`（`:139`）、`StringSetting`（`:176`，可带可选值，不在里面的回默认）、`StringListSetting`（`:200`）、`JsonSetting`（`:213`） |
 | `packages/live_store/lib/src/settings/settings.dart`（1592 行） | 218 个设置；`brandThemeColor`；`recorder`（19 个录制设置）、`localInteraction`（29 个本地互动设置）两组展开进 `all`；`Settings.all`（`:1413`）；`byKey`（`:1591`，3.x 键 → 设置，迁移和 `adoptLegacyValues` 用） |
 | `packages/live_store/lib/src/settings/settings_store.dart`（155 行） | `SettingsStore`：`load`（`:15`）、`reload`（`:55`）、`get`（`:83`）、`isSet`（`:86`，迁移时“库里已有的优先”靠它）、`set`/`setAll`（`:90`、`:93`）、`reset`（`:113`）、`resetAll`（`:120`，应用里没有调用）、`watch`（`:140`） |
 | `apps/pure_live/lib/app/services.dart` | `watchSetting`（`:143`）：界面读设置并在变化时只重建这一处 |
@@ -74,7 +74,7 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 已逐条核对（J01.2，[对照表](J01.2-设置项逐条核对/settings.md)）：219 个里 198 个一样、3 个确认改动；14 个数值设置的范围比 3.x 宽，已改；4 个越界值的修法和 3.x 不同 | `settings.dart` 全文；3.x `lib/common/services/settings/` | 越界的历史条数、画面比例、代理端口 3.x 回到默认值、v4 夹紧；只在数据坏了时才遇到 | [J01.3](J01.3-越界设置值回到默认值/README.md) |
+| 已逐条核对（J01.2，[对照表](J01.2-设置项逐条核对/settings.md)）：219 个里 198 个一样、3 个确认改动；14 个数值设置的范围比 3.x 宽，已改；4 个越界值的修法和 3.x 不同，J01.3 已改（回到默认值、弹幕粗细取整到整百） | `settings.dart` 全文；3.x `lib/common/services/settings/` | 无（J01.3 之后和 3.x 一样） | [J01.3](J01.3-越界设置值回到默认值/README.md)（完成） |
 | `refreshRateMode` 的默认值：3.x 没存时由旧开关 `enableHighRefreshRate` 推出（`_initialRefreshRateMode`），v4 注册表写 `'powerSaving'`，旧开关的换算放在迁移里（`legacy_snapshot.dart:409-411`） | `settings.dart:64` | 只有从 3.x 迁过来的才走换算 | J01.2 已核对：3.x 新装没有旧开关，同样是“省电” |
 | `page_default_size` 3.x 默认随屏幕宽度（宽于 960 为 20，否则 12），v4 默认 0 表示“由界面按宽度决定” | `settings.dart:718`；`appearance_pages.dart:1009` `recommendedPageSizes` | 纯 Dart 包拿不到屏幕宽度（J02.1 有意差异）；导出备份时写 0 | J01.2 已核对：3.x 读到 0 时取可选条数的第一个（12 或 20），结果一样 |
 | 4 个设置没人读：`videoPlayerKey`、`autoRefreshTime`、`enableRotateScreen`、`m3uDirectory` | `settings.dart` | 后三个 3.x 也不读；`videoPlayerKey` 只为备份往返 | 不做（清点第 15 节） |
@@ -94,7 +94,7 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 
 ## 路线
 
-1. **J01.2**（做完）：`tools/docs/settings_audit.py` 生成逐条对照表；表驱动测试守住默认值和范围。**J01.3**（第三档）：越界值按 3.x 回到默认值。
+1. **J01.2**（做完）：`tools/docs/settings_audit.py` 生成逐条对照表；表驱动测试守住默认值和范围。**J01.3**（做完）：`IntSetting` 的 `resetOutOfRange`、`step`，越界值按 3.x 回到默认值、弹幕粗细取整到整百。
 2. 以后新加设置：在注册表里加（写清默认值和范围、3.x 没有这个键）、在目录里登记（`SettingsEntry.settings`）、在 `settings_defaults_test.dart` 的 `newInV4` 和清点第 15 节的“新加”名单里补一行，再跑一次 `python3 tools/docs/settings_audit.py`。
 3. 新想法（例如设置导入导出单页、按房间的设置）写进 V01 提议，不直接加任务。
 
@@ -105,18 +105,13 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 属于 [J 设置和数据](../README.md)。
 
 - 代码：`features/settings/`、`packages/live_store/lib/src/settings/`
-- 进度：`████████████████░░░░` 80%
+- 进度：`████████████████████` 100%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | J01.1 | 设置 | 功能 | 完成 | 2026-10-01 | 9a90cbf6c | [设计或说明](J01.1-设置/README.md)、[记录](J01.1-设置/record.md) |
 | J01.2 | 设置项逐条核对：218 个设置的默认值、取值范围和生效位置对照 3.x | 功能 | 完成 | 2026-10-08 | — | [设计或说明](J01.2-设置项逐条核对/README.md)、[任务书](J01.2-设置项逐条核对/brief.md)、[记录](J01.2-设置项逐条核对/record.md) |
-| J01.3 | 越界的设置值按 3.x 回到默认值：历史条数、画面比例、代理端口，弹幕粗细取整 | 功能 | 未开始 | — | — | [设计或说明](J01.3-越界设置值回到默认值/README.md)、[任务书](J01.3-越界设置值回到默认值/brief.md) |
-
-## 还没完成的
-
-- **J01.3 越界的设置值按 3.x 回到默认值：历史条数、画面比例、代理端口，弹幕粗细取整**（未开始，第三档，规模 小）
-  - 来源：J01.2 逐条核对
+| J01.3 | 越界的设置值按 3.x 回到默认值：历史条数、画面比例、代理端口，弹幕粗细取整 | 功能 | 完成 | 2026-10-08 | — | [设计或说明](J01.3-越界设置值回到默认值/README.md)、[任务书](J01.3-越界设置值回到默认值/brief.md)、[记录](J01.3-越界设置值回到默认值/record.md) |
 
 <!-- docs:生成结束 -->

@@ -24,7 +24,7 @@ _RECORD_PAGE = '录制设置页 `record_settings_page.dart`'
 _LOCAL_PANEL = '本地互动样式面板 `local_style_panel.dart`'
 _BLOCK = '屏蔽页 `block_manager.dart`'
 _FILTER_WHEN = '立即（直播间和多画面监听它，重建过滤器）'
-_FOLLOWUP = '回到默认值而不是夹紧，见 J01.3'
+_RESET = 'J01.3 改成和 3.x 一样回到默认值（`IntSetting` 的 `resetOutOfRange`）'
 _FIXED_RANGE = '注册表原来不限，3.x 存的值和导入的备份都夹到这个范围；改成同样的 `min`/`max`'
 
 
@@ -91,8 +91,8 @@ NOTES: dict[str, dict] = {
     'preferPlatform': {'v3': "'bilibili'", 'v3src': 'favorite_room_controller.dart:24'},
     'historyLimit': {
         'v3range': '≥ 0，负数回到 50（`history_controller.dart:8-15`）',
-        'kind': 'open',
-        'verdict': f'默认值和范围一样；存了负数时 3.x 回到 50，v4 夹成 0（不限），{_FOLLOWUP}',
+        'kind': 'fixed',
+        'verdict': f'默认值和范围一样；存了负数时 3.x 回到 50，v4 原来夹成 0（不限），{_RESET}',
     },
     # ---- theme ----
     'themeColorSwitch': {
@@ -116,8 +116,8 @@ NOTES: dict[str, dict] = {
     # ---- player ----
     'videoFitIndex': {
         'v3range': '0～5，越界回到 0（`player_settings_controller.dart:135-139`）',
-        'kind': 'open',
-        'verdict': f'默认值和范围一样；越界时 3.x 回到 0（适应），v4 夹到 0 或 5，{_FOLLOWUP}',
+        'kind': 'fixed',
+        'verdict': f'默认值和范围一样；越界时 3.x 回到 0（适应），v4 原来夹到 0 或 5，{_RESET}',
     },
     'videoPlayerKey': {
         'v3': "'mpv'",
@@ -150,7 +150,7 @@ NOTES: dict[str, dict] = {
         '100',
         '900',
         fixed=True,
-        note='3.x 还取整到整百（550 → 600），v4 画的时候按整百截断（550 → 500），取整见 J01.3',
+        note='3.x 还取整到整百（550 → 600），J01.3 加了同样的取整（`IntSetting` 的 `step: 100`）',
     ),
     'danmakuFontBorder': _danmaku('121', '0', '4'),
     'danmakuOpacity': _danmaku('122', '0', '1'),
@@ -173,7 +173,7 @@ NOTES: dict[str, dict] = {
     'enablePipDanmaku': {'v3': 'true', 'v3src': f'{_D}:17、:79'},
     'pipDanmakuColor': {'v3range': '不限'},
     'pipDanmakuFontSize': _danmaku('272-274', '8', '24', fixed=True, note='3.x 在导入备份时夹，设置页滑块同样 8～24'),
-    'pipDanmakuFontWeight': _danmaku('124、:275', '100', '900', fixed=True),
+    'pipDanmakuFontWeight': _danmaku('124、:275', '100', '900', fixed=True, note='取整到整百同上（J01.3）'),
     'pipDanmakuSpeed': _danmaku('276-278', '20', '400', fixed=True),
     'pipDanmakuOpacity': {
         'v3range': f'0.1～1（`{_D}:279-281`）',
@@ -268,8 +268,8 @@ NOTES: dict[str, dict] = {
         'v3src': '`proxy_settings_controller.dart:9、:13`，`core/common/proxy_routing.dart:1`',
         'v3range': '1～65535，越界回到 7897（`core/common/proxy_routing.dart:2-9`）',
         'ui': '代理对话框的数字框',
-        'kind': 'open',
-        'verdict': f'默认值和范围一样；越界时 3.x 回到 7897，v4 夹到 1 或 65535，{_FOLLOWUP}',
+        'kind': 'fixed',
+        'verdict': f'默认值和范围一样；越界时 3.x 回到 7897，v4 原来夹到 1 或 65535，{_RESET}',
         'when': '下一个请求（每个请求都读）',
     },
     'appProxyPort': {
@@ -277,8 +277,8 @@ NOTES: dict[str, dict] = {
         'v3src': 'proxy_settings_controller.dart:18',
         'v3range': '同上',
         'ui': '代理对话框的数字框',
-        'kind': 'open',
-        'verdict': f'同上，{_FOLLOWUP}',
+        'kind': 'fixed',
+        'verdict': f'同上，{_RESET}',
         'when': '下一个请求（每个请求都读）',
     },
     'enableProxy': {'when': '下一个请求（每个请求都读）'},

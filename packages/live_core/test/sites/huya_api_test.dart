@@ -1267,6 +1267,25 @@ void main() {
       expect(HuyaApi.roomIdFromPage('{"profileRoom":"0"}'), isNull);
     });
 
+    test("the HYSDK UA is the PC client's 7100004; an older configured HYSDK UA falls back to it", () {
+      // Upstream a858550bb (E01.8): the PC client simple_live and upstream send.
+      expect(HuyaApi.hysdkUserAgent, 'HYSDK(Windows,30000002)_APP(pc_exe&7100004&official)_SDK(trans&2.40.0.6448)');
+      Map<String, Object?> config(String ua) => {
+        'huya': {'user_agent': ua},
+      };
+      // The upstream repository's play_config.json still names 7090000.
+      expect(
+        HuyaApi.playUserAgent(config('HYSDK(Windows,30000002)_APP(pc_exe&7090000&official)_SDK(trans&2.35.0.5996)')),
+        isNull,
+      );
+      const newer = 'HYSDK(Windows,30000002)_APP(pc_exe&7110000&official)_SDK(trans&2.41.0.1)';
+      expect(HuyaApi.playUserAgent(config(newer)), newer);
+      expect(HuyaApi.playUserAgent(config(HuyaApi.hysdkUserAgent)), HuyaApi.hysdkUserAgent);
+      // Not a HYSDK UA with a client version: the configuration decides.
+      expect(HuyaApi.playUserAgent(config('HYSDK(custom)')), 'HYSDK(custom)');
+      expect(HuyaApi.playUserAgent(config('Mozilla/5.0 pc_exe&1&official')), 'Mozilla/5.0 pc_exe&1&official');
+    });
+
     test('danmaku arguments print as 3.x did', () {
       expect(
         const HuyaDanmakuArgs(uid: 1346609715, topSid: 1346609715, subSid: 1346609715).toString(),

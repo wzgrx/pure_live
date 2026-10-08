@@ -2156,13 +2156,15 @@ note = "getH5PlayV1 元数据 streamStatus 0 是 StreamUnavailable（douyu_api.d
 id = "E01.8"
 title = "虎牙播放 UA 跟到 7100004（远端配置比内置旧时用内置）；斗鱼 5 分钟有效的 ws 线路加 expire=0"
 type = "平台"
-status = "未开始"
+status = "完成"
 size = "小"
 tier = 2
+date = "2026-10-08"
+commit = "007721efe"
 stages = ["虎牙 UA", "斗鱼 expire=0（先在真实接口上确认 CDN 认）"]
-done = 0
+done = 2
 from = "上游 pure_live a858550bb（W01.3 对照；上游照 simple_live 改）"
-note = "4.x 的虎牙 UA 从上游仓库的 assets/play_config.json 读，那里还是 7090000；斗鱼现在靠租约到期前续期接上，加 expire=0 能少续期"
+note = "虎牙 UA 改成 7100004，远端配置是更旧的 HYSDK 版本时用内置的；斗鱼拿不到 ws 线路（直连和代理都是 hw、hs），hw 线路追加 expire=0 照样 300 秒断、替换则 403，按 c2 只记录不改"
 
 [[task]]
 id = "E02.1"

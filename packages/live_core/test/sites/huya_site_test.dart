@@ -1110,6 +1110,26 @@ void main() {
 
       final unreadable = _site(http, playConfigUrls: [bad]);
       expect(await unreadable.loadPlayUserAgent(), HuyaApi.hysdkUserAgent);
+
+      // An older HYSDK client than the built-in one (the upstream file at
+      // 7090000) keeps the built-in UA (E01.8).
+      final stale = Uri.parse('https://stale.test/play_config.json');
+      final staleHttp = _Http(
+        const [],
+        other: (request) => request.url.host == 'stale.test'
+            ? LiveResponse(
+                status: 200,
+                url: request.url,
+                bytes: utf8.encode(
+                  '{"huya":{"user_agent":"HYSDK(Windows,30000002)_APP(pc_exe&7090000&official)_SDK(trans&2.35.0.5996)"}}',
+                ),
+              )
+            : null,
+      );
+      final staleSite = _site(staleHttp, playConfigUrls: [stale]);
+      expect(await staleSite.loadPlayUserAgent(), HuyaApi.hysdkUserAgent);
+      expect(staleSite.playUserAgent, HuyaApi.hysdkUserAgent);
+      expect(staleHttp.on('stale.test'), hasLength(1));
       expect(
         HuyaSite(http).playConfigUrls.first.toString(),
         'https://raw.githubusercontent.com/liuchuancong/pure_live/master/assets/play_config.json',

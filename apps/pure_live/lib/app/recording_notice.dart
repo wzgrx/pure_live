@@ -4,13 +4,23 @@ import 'dart:developer';
 import 'package:flutter/widgets.dart';
 import 'package:live_record/live_record.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/record/record_state.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 // What Android's recording notifications say (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c3–c5;
 // 3.x always showed "直播录制进行中 / 录制与封装由独立后台服务保护…").
 
-/// The words of the recording notification.
-typedef RecordNotificationContent = ({String title, String text, String stop, DateTime? since});
+/// The words of the recording notification, the one active task's id
+/// (H05.2: a tap opens the recording centre at it; null with none or several)
+/// and how far its join is (H05.3: 0–100 while one room joins, else null).
+typedef RecordNotificationContent = ({
+  String title,
+  String text,
+  String stop,
+  DateTime? since,
+  String? task,
+  int? progress,
+});
 
 String _nick(RecordTask task) => task.nick.trim().isEmpty ? platformName(task.platform) : task.nick.trim();
 
@@ -18,7 +28,9 @@ String _nick(RecordTask task) => task.nick.trim().isEmpty ? platformName(task.pl
 /// over its title and quality (or what it does instead of writing:
 /// preparing, reconnecting, joining; U.2a2 X4); several "正在录制 N 个直播间" over the
 /// streamers. Its `since` is the first recording's
-/// start, from which the system's clock counts (no refresh every second).
+/// start, from which the system's clock counts (no refresh every second);
+/// only rooms writing or reconnecting count, so joining shows no clock
+/// (H05.3), but one room joining ends its text with how far ("42%").
 RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) {
   final active = [
     for (final task in tasks)
@@ -30,20 +42,30 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
       text: i18n('recorder_background_notification_text'),
       stop: i18n('record_notify_stop'),
       since: null,
+      task: null,
+      progress: null,
     );
   }
   DateTime? since;
   for (final task in active) {
+    if (task.status != RecordStatus.running && task.status != RecordStatus.reconnecting) continue;
     final start = task.displayStartTime;
     if (since == null || start.isBefore(since)) since = start;
   }
   if (active.length == 1) {
     final task = active.single;
+    final progress = task.status == RecordStatus.processing ? recordMergePercent(task.mergeProgress) : null;
     return (
       title: i18n(_oneTitleKey(task.status), args: {'name': _nick(task)}),
-      text: [task.title.trim(), task.selectedQuality?.trim() ?? ''].where((part) => part.isNotEmpty).join(' · '),
+      text: [
+        task.title.trim(),
+        task.selectedQuality?.trim() ?? '',
+        if (progress != null) '$progress%',
+      ].where((part) => part.isNotEmpty).join(' · '),
       stop: i18n('record_notify_stop'),
       since: since,
+      task: task.taskId,
+      progress: progress,
     );
   }
   return (
@@ -51,6 +73,8 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
     text: active.map(_nick).join('、'),
     stop: i18n('record_notify_stop_all'),
     since: since,
+    task: null,
+    progress: null,
   );
 }
 

@@ -82,7 +82,9 @@ final class BoolSetting extends Setting<bool> {
   };
 }
 
-/// A whole number, clamped to [min]..[max] when given.
+/// A whole number, clamped to [min]..[max] when given; or, as 3.x repaired
+/// some (J01.3), back to [defaultValue] when out of range
+/// ([resetOutOfRange]), or rounded to the nearest multiple of [step].
 final class IntSetting extends Setting<int> {
   /// Creates a whole-number setting.
   const new(
@@ -91,6 +93,8 @@ final class IntSetting extends Setting<int> {
     required super.defaultValue,
     this.min,
     this.max,
+    this.resetOutOfRange = false,
+    this.step = 1,
     super.backupKey,
     super.scope,
   });
@@ -100,6 +104,14 @@ final class IntSetting extends Setting<int> {
 
   /// Largest allowed value.
   final int? max;
+
+  /// Whether a value outside [min]..[max] reads as [defaultValue] instead
+  /// of the nearer end (3.x's history limit, picture fit, proxy ports).
+  final bool resetOutOfRange;
+
+  /// The value is rounded to a multiple of this after clamping, then
+  /// clamped again (3.x's danmaku weight: 550 is 600); 1 keeps it.
+  final int step;
 
   @override
   int? decode(Object? raw) => switch (raw) {
@@ -111,6 +123,12 @@ final class IntSetting extends Setting<int> {
 
   @override
   int normalize(int value) {
+    final clamped = _clamp(value);
+    if (clamped != value && resetOutOfRange) return defaultValue;
+    return step > 1 ? _clamp((clamped / step).round() * step) : clamped;
+  }
+
+  int _clamp(int value) {
     if (min case final low? when value < low) return low;
     if (max case final high? when value > high) return high;
     return value;

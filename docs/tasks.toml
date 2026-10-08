@@ -2815,19 +2815,22 @@ old = ["T08e.1"]
 id = "H05.2"
 title = "只录一个直播间时，点前台录制通知也定位到那条任务"
 type = "功能"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 3
+date = "2026-10-08"
 old = ["T08e.2"]
+note = "一个活动任务时通知带它的 id（Dart 的 RecordNotificationContent.task → 原生 RecordWords.task），点按和“录制中心”按钮定位；没在本机构建 APK，Kotlin 改动靠下次构建确认"
 
 [[task]]
 id = "H05.3"
 title = "录制通知在合并时显示进度（H01.3 记录“没做的”第 2 条）"
 type = "功能"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 3
-note = "进度数据 RecordTask.mergeProgress 在 H01.3 已有；改 recording_notice.dart、recording_platform.dart 和原生 RecorderForegroundService.kt（和 H05.2 同一个原生文件）"
+date = "2026-10-08"
+note = "一个直播间整理时正文末尾“42%”、系统进度条，每秒最多更新一次（100% 和结束立即发）；整理时不再显示计时；没在本机构建 APK，Kotlin 改动靠下次构建确认"
 from = "H01.3 记录“没做的”第 2 条（V03.3 核对）"
 
 [[task]]
@@ -2954,9 +2957,10 @@ note = "219 个（A08.6 加了 showChatGifts）：198 个一样、3 个确认改
 id = "J01.3"
 title = "越界的设置值按 3.x 回到默认值：历史条数、画面比例、代理端口，弹幕粗细取整"
 type = "功能"
-status = "未开始"
+status = "完成"
 size = "小"
-tier = 3
+date = "2026-10-08"
+note = "IntSetting 加 resetOutOfRange、step：historyLimit、videoFitIndex、两个代理端口越界回到默认值，两个弹幕粗细取整到整百；只有坏数据才遇到，自动测试覆盖，不用上真机"
 from = "J01.2 逐条核对"
 
 [[task]]

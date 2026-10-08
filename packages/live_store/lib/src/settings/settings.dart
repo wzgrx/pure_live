@@ -133,8 +133,15 @@ abstract final class Settings {
 
   // ---- history (history_controller.dart:8-15) ----
 
-  /// History entries kept; 0 keeps everything.
-  static const historyLimit = IntSetting('historyLimit', section: 'history', defaultValue: 50, min: 0);
+  /// History entries kept; 0 keeps everything; a negative count reads 50
+  /// (3.x `normalizeHistoryLimit`, history_controller.dart:11-15; J01.3).
+  static const historyLimit = IntSetting(
+    'historyLimit',
+    section: 'history',
+    defaultValue: 50,
+    min: 0,
+    resetOutOfRange: true,
+  );
 
   // ---- theme (theme_settings_controller.dart:17-24) ----
 
@@ -260,8 +267,16 @@ abstract final class Settings {
 
   // ---- player (player_settings_controller.dart:33-71) ----
 
-  /// Index into contain, cover, fill, fitHeight, fitWidth, scaleDown.
-  static const videoFitIndex = IntSetting('videoFitIndex', section: 'player', defaultValue: 0, min: 0, max: 5);
+  /// Index into contain, cover, fill, fitHeight, fitWidth, scaleDown; any
+  /// other reads 0 (3.x `normalizeVideoFitIndex`; J01.3).
+  static const videoFitIndex = IntSetting(
+    'videoFitIndex',
+    section: 'player',
+    defaultValue: 0,
+    min: 0,
+    max: 5,
+    resetOutOfRange: true,
+  );
 
   /// 3.x's player engine; v4 plays everything with mpv, kept for backups.
   static const videoPlayerKey = StringSetting('videoPlayerKey', section: 'player', defaultValue: 'mpv');
@@ -437,13 +452,15 @@ abstract final class Settings {
     max: 30,
   );
 
-  /// Font weight (100..900, danmaku_settings_controller.dart:41-44).
+  /// Font weight (100..900 in hundreds: 550 reads 600,
+  /// danmaku_settings_controller.dart:41-44; J01.3).
   static const danmakuFontWeight = IntSetting(
     'danmakuFontWeight',
     section: 'danmaku',
     defaultValue: 500,
     min: 100,
     max: 900,
+    step: 100,
   );
 
   /// Stroke width.
@@ -574,13 +591,14 @@ abstract final class Settings {
     max: 24,
   );
 
-  /// PiP font weight (100..900).
+  /// PiP font weight (100..900 in hundreds, as [danmakuFontWeight]).
   static const pipDanmakuFontWeight = IntSetting(
     'pipDanmakuFontWeight',
     section: 'danmaku',
     defaultValue: 500,
     min: 100,
     max: 900,
+    step: 100,
   );
 
   /// PiP speed (20..400).
@@ -858,8 +876,16 @@ abstract final class Settings {
   /// Player proxy host.
   static const proxyHost = StringSetting('proxyHost', section: 'proxy', defaultValue: '');
 
-  /// Player proxy port.
-  static const proxyPort = IntSetting('proxyPort', section: 'proxy', defaultValue: 7897, min: 1, max: 65535);
+  /// Player proxy port; outside 1..65535 reads 7897 (3.x
+  /// `normalizeStoredProxyPort`, proxy_routing.dart:9; J01.3).
+  static const proxyPort = IntSetting(
+    'proxyPort',
+    section: 'proxy',
+    defaultValue: 7897,
+    min: 1,
+    max: 65535,
+    resetOutOfRange: true,
+  );
 
   /// App (request) proxy.
   static const enableAppProxy = BoolSetting('enableAppProxy', section: 'proxy', defaultValue: false);
@@ -867,8 +893,15 @@ abstract final class Settings {
   /// App proxy host.
   static const appProxyHost = StringSetting('appProxyHost', section: 'proxy', defaultValue: '');
 
-  /// App proxy port.
-  static const appProxyPort = IntSetting('appProxyPort', section: 'proxy', defaultValue: 7897, min: 1, max: 65535);
+  /// App proxy port; outside 1..65535 reads 7897 (as [proxyPort]).
+  static const appProxyPort = IntSetting(
+    'appProxyPort',
+    section: 'proxy',
+    defaultValue: 7897,
+    min: 1,
+    max: 65535,
+    resetOutOfRange: true,
+  );
 
   // ---- window, exit, startup (window_size_controller.dart, exit_settings_controller.dart, startup_controller.dart) ----
 

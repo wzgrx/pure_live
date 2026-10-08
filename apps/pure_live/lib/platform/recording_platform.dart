@@ -176,6 +176,7 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
     this.onStart,
     this.onStopAll,
     this._channel = _recorderChannel,
+    this._now = DateTime.now,
   }) {
     _channel.setMethodCallHandler(_native);
   }
@@ -186,8 +187,10 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   /// Notification text.
   final String Function() text;
 
-  /// More of the notification: `since` (milliseconds since the epoch), the
-  /// button words and the channel names (U.14 c3–c5).
+  /// More of the notification: `since` (milliseconds since the epoch),
+  /// `task` (the one active task's id, where a tap opens the recording
+  /// centre; H05.2), `progress` (0–100 while one room joins, drawn as a
+  /// bar; H05.3), the button words and the channel names (U.14 c3–c5).
   final Map<String, Object?> Function()? extra;
 
   /// Called when Android ended the service.
@@ -199,12 +202,19 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   /// The notification's "停止录制 / 全部停止".
   final Future<void> Function()? onStopAll;
 
+  /// The shortest time between two updates of the join progress (H05.3):
+  /// Android drops updates of one notification that come faster.
+  static const progressGap = Duration(seconds: 1);
+
   final MethodChannel _channel;
+  final DateTime Function() _now;
   final _owners = <Object>{};
   bool? _applied;
   String? _interruption;
   Future<void>? _applying;
   Map<String, Object?>? _shown;
+  DateTime? _shownAt;
+  Timer? _later;
 
   @override
   void allowUserRetry() => _interruption = null;
@@ -212,12 +222,28 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   Map<String, Object?> _words() => {'title': title(), 'text': text(), ...?extra?.call()};
 
   /// Sends the notification's words again when they changed (the
-  /// recordings changed); nothing while the service is off.
-  Future<void> refresh() async {
+  /// recordings changed); nothing while the service is off. A join's
+  /// progress goes at most once per [progressGap], the latest when the gap
+  /// is over; 100% and anything else at once (H05.3).
+  Future<void> refresh() => _refresh();
+
+  /// [refresh]; [due]: the wait for the progress is over.
+  Future<void> _refresh({bool due = false}) async {
     if (_applied != true || _applying != null) return;
     final words = _words();
     if (_same(words, _shown)) return;
+    final wait = due ? Duration.zero : _progressWait(words);
+    if (wait > Duration.zero) {
+      _later ??= Timer(wait, () {
+        _later = null;
+        unawaited(_refresh(due: true));
+      });
+      return;
+    }
+    _later?.cancel();
+    _later = null;
     _shown = words;
+    _shownAt = _now();
     try {
       await _channel.invokeMethod<void>('update', words);
     } on PlatformException catch (error) {
@@ -236,6 +262,20 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
     } on MissingPluginException {
       // A build without the native side.
     }
+  }
+
+  /// How long [words] must wait: only a join's progress moving on, while
+  /// the last update is younger than [progressGap].
+  Duration _progressWait(Map<String, Object?> words) {
+    final shown = _shown;
+    final shownAt = _shownAt;
+    final progress = words['progress'];
+    if (shown == null || shownAt == null || progress is! int || progress >= 100) return Duration.zero;
+    if (shown['progress'] is! int || shown['title'] != words['title'] || shown['task'] != words['task']) {
+      return Duration.zero;
+    }
+    final left = progressGap - _now().difference(shownAt);
+    return left > Duration.zero ? left : Duration.zero;
   }
 
   static bool _same(Map<String, Object?> a, Map<String, Object?>? b) =>
@@ -286,8 +326,11 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   Future<void> _set(bool active) async {
     try {
       final words = active ? _words() : null;
+      _later?.cancel();
+      _later = null;
       await _channel.invokeMethod<void>('setActive', {'active': active, ...?words});
       _shown = words;
+      _shownAt = _now();
       _applied = active;
     } on PlatformException catch (error) {
       _applied = null;
@@ -369,6 +412,8 @@ AppRecording platformAppRecording({
             final now = content();
             return {
               'since': now.since?.millisecondsSinceEpoch,
+              'task': now.task,
+              'progress': now.progress,
               'stop': now.stop,
               'center': words('record_center'),
               'open': words('record_notify_open_center'),

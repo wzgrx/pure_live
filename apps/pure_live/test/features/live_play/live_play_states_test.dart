@@ -303,6 +303,28 @@ void main() {
       expect((failed.title, failed.reason), ('播放已中断', '网络连接失败'));
       expect(failed.actions, [PictureAction.retry, PictureAction.switchLine]);
       expect(failed.dim, PictureDim.heavy);
+      // G02.3: the network is gone; the session plays again by itself.
+      final offline = _state(
+        playback: const PlaybackState(
+          status: PlaybackStatus.error,
+          lineCount: 2,
+          error: PlayerException(
+            message: 'x',
+            type: PlayerErrorType.network,
+            code: networkLostCode,
+            error: NetworkFailure(SiteIds.bilibili, 'connect'),
+          ),
+        ),
+      );
+      expect((offline.title, offline.reason), ('播放已中断', '网络已断开，恢复后会自动重连'));
+      expect(offline.actions, [PictureAction.retry, PictureAction.switchLine]);
+      final codec = _state(
+        playback: const PlaybackState(
+          status: PlaybackStatus.error,
+          error: PlayerException(message: 'x', type: PlayerErrorType.codec, code: 'video_decoder_init'),
+        ),
+      );
+      expect(codec.reason, '当前播放器解码失败', reason: 'a real decoding failure keeps its words');
       final reconnecting = _state(
         playback: const PlaybackState(status: PlaybackStatus.buffering, lineCount: 2),
         reconnecting: true,

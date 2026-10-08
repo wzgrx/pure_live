@@ -1196,6 +1196,7 @@
     "play_video_failed": "Play Video Failed",
     "playback_behavior_settings": "Playback Behavior Settings",
     "playback_failure_title": "Playback interrupted",
+    "playback_network_lost": "Network lost; playback resumes by itself when it is back",
     "player_kernel": "Player Engine",
     "player_mpv": "MPV Player",
     "player_proxy_group_title": "Player Kernel Proxy (Fixes live stream fetching)",

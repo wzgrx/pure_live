@@ -8,11 +8,13 @@ import 'package:live_player/live_player.dart';
 ///
 /// The playback session says so itself ([PlaybackState.recovery]): only its
 /// recovery (a refreshed address, the next line, a new engine, a retry
-/// round) is a reconnection. A stream that buffers without having failed
-/// (a slow start, a short stall, a resume after a pause) and the user's own
-/// reopenings (another quality or line, a refresh) are not; the picture
-/// shows a spinner for those (B02: guessing from "playing, then buffering"
-/// called each of them a drop).
+/// round) is a reconnection, and so is a live stream that stopped moving
+/// for `SessionTimings.stallNotice` (G02.3: the session judges it by its
+/// position, not by the engine's flags). A stream that buffers without
+/// having failed (a slow start, a short stall, a resume after a pause) and
+/// the user's own reopenings (another quality or line, a refresh) are not;
+/// the picture shows a spinner for those (B02: guessing from "playing, then
+/// buffering" called each of them a drop).
 final class ReconnectWatch extends ChangeNotifier {
   /// Watches [states] (the session's).
   new(Stream<PlaybackState> states) {

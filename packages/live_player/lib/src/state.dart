@@ -110,7 +110,10 @@ final class PlaybackState {
 
   /// The session's attempt, counting from 1, at bringing back a stream that
   /// failed on its own (a refreshed address, the next line, a new engine,
-  /// software decoding, a retry round); 0 while nothing is being recovered.
+  /// software decoding, a retry round, a look at a network that is gone);
+  /// 0 while nothing is being recovered. A live stream that stopped moving
+  /// for `SessionTimings.stallNotice` is the first attempt already (G02.3);
+  /// a reopened one ends its recovery once it moves again.
   /// The count runs on over drops in a row and starts again once the
   /// stream has played long enough to restore the session's recovery
   /// budgets (30 s by default). Buffering of a stream that has not failed,

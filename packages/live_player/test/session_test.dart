@@ -4,6 +4,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
+import 'package:live_net/live_net.dart';
 import 'package:live_player/live_player.dart';
 
 import 'support/fake_engine.dart';
@@ -475,6 +476,199 @@ void main() {
       async.flushMicrotasks();
       expect(session.state.declaredAspectRatio, isNull);
       async.elapse(const Duration(seconds: 1));
+    });
+  });
+
+  group('G02.3: the network goes away and comes back', () {
+    /// A Bilibili plan whose refresh needs the network: offline it fails as
+    /// the HTTP client does ([hang]: it never answers instead).
+    PlaybackRequest request({required bool Function() online, bool hang = false, void Function()? onRefresh}) =>
+        PlaybackRequest(
+          site: 'bilibili',
+          plan: _plan([_a, _b]),
+          refresh: () async {
+            onRefresh?.call();
+            if (online()) return _plan([_a, _b]);
+            if (hang) await Completer<void>().future;
+            throw const TransportFailure('bilibili', TransportReason.connect);
+          },
+        );
+
+    /// mpv's `time-pos` moving on every second while [flowing] says so.
+    Timer play(bool Function() flowing) {
+      final ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (flowing()) engine.advance();
+      });
+      addTearDown(ticker.cancel);
+      return ticker;
+    }
+
+    test('a stream that stops moving says it reconnects within seconds; flipping flags do not postpone it', () {
+      fakeAsync((async) {
+        var refreshes = 0;
+        var flowing = true;
+        start(request(online: () => true, onRefresh: () => refreshes++), async);
+        final ticker = play(() => flowing);
+        async.elapse(const Duration(seconds: 5));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+
+        // Cut: nothing moves any more; mpv waits for data.
+        flowing = false;
+        engine.emit(const EngineBuffering(buffering: true));
+        async.elapse(const Duration(seconds: 3));
+        expect(session.state.recovering, isFalse, reason: 'a short stall is a buffering (B02)');
+        // mpv's buffering flag flips (core-idle, paused-for-cache): no proof
+        // that anything arrived.
+        engine.playing();
+        async.elapse(const Duration(seconds: 2));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.buffering, 1));
+        engine.emit(const EngineBuffering(buffering: true));
+        async.elapse(const Duration(seconds: 3));
+        engine.playing();
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.buffering, 1));
+        expect(refreshes, 0);
+        // Twelve seconds without progress: the recovery acts, still the
+        // first attempt.
+        async.elapse(const Duration(seconds: 5));
+        expect(refreshes, 1);
+        expect(engine.opens, hasLength(2));
+        // The reopened source says it plays at once (mpv: not paused); that
+        // is no recovery until it moves.
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.buffering, 1));
+        flowing = true;
+        async.elapse(const Duration(seconds: 2));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+        ticker.cancel();
+      });
+    });
+
+    test('offline: the attempts count on, the failure is the network, and it plays again by itself', () {
+      fakeAsync((async) {
+        var online = true;
+        start(request(online: () => online), async);
+        final attempts = <int>[];
+        final subscription = session.states.listen((state) {
+          if (state.recovering && (attempts.isEmpty || attempts.last != state.recovery)) attempts.add(state.recovery);
+        });
+        addTearDown(subscription.cancel);
+        // The connection the cut broke stays dead; a new one opened online
+        // plays.
+        var dead = false;
+        engine.onOpen = (_) async {
+          dead = !online;
+          engine.playing();
+        };
+        play(() => online && !dead);
+        async.elapse(const Duration(seconds: 3));
+
+        online = false;
+        dead = true;
+        engine.emit(const EngineBuffering(buffering: true));
+        async.elapse(const Duration(seconds: 7));
+        expect(session.state.recovery, 1, reason: 'within ten seconds of the cut');
+        async.elapse(const Duration(seconds: 15));
+        expect(session.state.status, PlaybackStatus.buffering);
+        expect(session.state.recovery, greaterThan(2), reason: 'each look at the network is another attempt');
+        expect(engine.opens, hasLength(1), reason: 'no line or decoder is tried while the network is gone');
+        async.elapse(const Duration(seconds: 20));
+        expect(session.state.status, PlaybackStatus.error);
+        expect(session.state.recovering, isFalse);
+        expect(session.state.failure, SourceFailureKind.transient);
+        expect(
+          session.state.error,
+          isA<PlayerException>()
+              .having((error) => error.type, 'type', PlayerErrorType.network)
+              .having((error) => error.code, 'code', networkLostCode),
+        );
+        expect(attempts, [for (var attempt = 1; attempt <= attempts.length; attempt++) attempt]);
+
+        // Back: it plays again without the retry button.
+        async.elapse(const Duration(seconds: 30));
+        expect(session.state.status, PlaybackStatus.error, reason: 'still offline');
+        online = true;
+        async.elapse(const Duration(seconds: 6));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+        expect(engine.opens, hasLength(2));
+        expect(engine.opens.map((media) => media.decoder), everyElement(DecoderMode.hardware));
+      });
+    });
+
+    test('a refresh that never answers counts as the network gone, within a minute of the cut', () {
+      fakeAsync((async) {
+        var online = true;
+        start(request(online: () => online, hang: true), async);
+        var dead = false;
+        engine.onOpen = (_) async {
+          dead = !online;
+          engine.playing();
+        };
+        play(() => online && !dead);
+        async.elapse(const Duration(seconds: 3));
+        online = false;
+        dead = true;
+        engine.emit(const EngineBuffering(buffering: true));
+        async.elapse(const Duration(seconds: 7));
+        expect(session.state.recovery, 1);
+        async.elapse(const Duration(seconds: 50));
+        expect(session.state.status, PlaybackStatus.error);
+        expect((session.state.error! as PlayerException).code, networkLostCode);
+        online = true;
+        async.elapse(const Duration(seconds: 10));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+      });
+    });
+
+    test('a decoder failure while the network is there is still a decoder failure', () {
+      fakeAsync((async) {
+        var refreshes = 0;
+        start(request(online: () => true, onRefresh: () => refreshes++), async);
+        const codec = PlayerException(message: 'decode failed', type: PlayerErrorType.codec, code: 'video_decoder');
+        engine
+          ..onOpen = ((_) async => engine.emit(const EngineError(codec)))
+          ..emit(const EngineError(codec));
+        async.flushMicrotasks();
+        expect(engine.opens.map((media) => media.decoder), [DecoderMode.hardware, DecoderMode.software]);
+        expect(session.state.status, PlaybackStatus.error);
+        expect((session.state.error! as PlayerException).type, PlayerErrorType.codec);
+        expect(refreshes, 0);
+        async.elapse(const Duration(minutes: 1));
+        expect(engine.opens, hasLength(2), reason: 'nothing reopens by itself');
+      });
+    });
+
+    test('B02 unchanged: a pause, a resume that waits and a line switch are no reconnection', () {
+      fakeAsync((async) {
+        var refreshes = 0;
+        var flowing = true;
+        start(request(online: () => true, onRefresh: () => refreshes++), async);
+        play(() => flowing);
+        async.elapse(const Duration(seconds: 3));
+        unawaited(session.pause());
+        flowing = false;
+        engine.emit(const EnginePlaying(playing: false));
+        async.elapse(const Duration(seconds: 20));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.paused, 0));
+
+        unawaited(session.resume());
+        async.flushMicrotasks();
+        engine
+          ..emit(const EngineBuffering(buffering: true))
+          ..emit(const EnginePlaying(playing: true));
+        async.elapse(const Duration(seconds: 8));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.buffering, 0));
+        flowing = true;
+        engine.emit(const EngineBuffering(buffering: false));
+        async.elapse(const Duration(seconds: 3));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.playing, 0));
+
+        flowing = false;
+        unawaited(session.selectLine(1));
+        async.flushMicrotasks();
+        engine.emit(const EngineBuffering(buffering: true));
+        async.elapse(const Duration(seconds: 8));
+        expect((session.state.status, session.state.recovery), (PlaybackStatus.buffering, 0));
+        expect(refreshes, 0);
+      });
     });
   });
 }

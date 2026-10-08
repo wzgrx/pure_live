@@ -1073,12 +1073,13 @@ from = "上游 pure_live 1cdcb7b2a（W01.1 对照）"
 id = "A07.16"
 title = "京东直播间用模糊封面作背景（UPGRADES 28-3，先改直播间设计）"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
 size = "小"
 tier = 3
 stages = ["出图和评审", "沉浸背景和暗封面用 JdLiveRoom.background"]
-done = 0
-note = "平台层的模糊图 JdLiveRoom.background 已有（E02.9），应用没读；3.x 进房后的封面就是这张模糊图，直播间背景用它。没见过卡片时 v4 的背景只有渐变"
+done = 2
+note = "设计按 D-003 定稿（X1、X2 选 A，不出图）；roomBackdropOf：京东模糊图 → 封面 → 头像，沉浸背景、纯音频、恢复中等暗封面都用它；其他平台不变"
 from = "UPGRADES 28-3（V03.3 核对）"
 
 
@@ -1308,12 +1309,13 @@ old = ["U.12c", "T07h.2"]
 id = "A09.11"
 title = "Picarto 搜索卡片显示频道简介（UPGRADES 11-5，先改卡片设计）"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
 size = "小"
 tier = 3
 stages = ["列出受影响的来源，出图和评审", "卡片第二行显示简介"]
-done = 0
-note = "平台层的 introduction 已有（E03.3）；现在卡片两行都是频道名。CHZZK 频道搜索也是标题等于主播名，规则通用时一起受影响"
+done = 2
+note = "设计按 D-003 定稿（X1、X2 选 A，不出图）；通用规则：标题等于主播名且有简介时卡片第二行是简介第一行（RoomCardData.introLine）。受影响：Picarto 搜索、CHZZK 频道、快手主播搜索、SHOWROOM 详情，以及百度、PandaTV、TikTok 标题退到主播名时"
 from = "UPGRADES 11-5（V03.3 核对；E06.1 第 3 条 c2 没做）"
 
 
@@ -2845,10 +2847,12 @@ from = "H01.3 记录“没做的”第 2 条（V03.3 核对）"
 id = "H05.4"
 title = "点录制通知定位到任务后，卡片标题被顶出屏幕"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
 size = "小"
 tier = 3
 from = "K90 复查 H05.2（2026-10-08）"
+note = "定位改成：卡片已整张在屏幕里就不滚；否则卡片顶边停在列表顶上的留白下（12，宽屏 16）。K90 上推测是从系统小窗回来时窗口还矮、alignment 0.2 把高过视口的卡片滚到中间"
 [[task]]
 id = "I01.1"
 title = "应用骨架：入口、路由、首页外壳、多语言、Android 和 Windows 原生部分"

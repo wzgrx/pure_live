@@ -7,6 +7,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
+import 'package:pure_live/features/live_play/logic/room_backdrop.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_status.dart';
 import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
@@ -318,7 +319,8 @@ class PictureStateView extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         const IgnorePointer(child: ColoredBox(color: OnVideoColors.ground)),
-        IgnorePointer(child: _DimmedCover(url: room.cover)),
+        // A07.16: JD Live's blurred frame first; no avatar here (as before).
+        IgnorePointer(child: _DimmedCover(url: roomBackdropOf(room, orAvatar: false))),
         view,
       ],
     );
@@ -353,8 +355,8 @@ class AudioOnlyCover extends StatelessWidget {
       children: [
         const ColoredBox(color: OnVideoColors.ground),
         // A07.20: Missevan drops its placeholder covers; the streamer's
-        // picture stands in.
-        _DimmedCover(url: room.cover.trim().isNotEmpty ? room.cover : room.avatar),
+        // picture stands in. A07.16: JD Live's blurred frame comes first.
+        _DimmedCover(url: roomBackdropOf(room)),
         if (paused)
           // Under the mark, which is in the middle of the same area.
           Positioned.fill(

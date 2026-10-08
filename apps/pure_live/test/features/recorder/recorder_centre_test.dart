@@ -809,6 +809,65 @@ void main() {
       await _drain(tester);
     });
 
+    /// The list's scroll offset.
+    double pixels(WidgetTester tester) => tester
+        .state<ScrollableState>(find.descendant(of: _key('recorder-list'), matching: find.byType(Scrollable)).first)
+        .position
+        .pixels;
+
+    /// "r" recording (the recording notification's one task, H05.2), above
+    /// the twelve that are not.
+    Future<void> recordingFirst(WidgetTester tester, {required Size size}) => _pump(
+      tester,
+      size: size,
+      tasks: [_task('r'), ...twelve()],
+      arguments: 'bilibili_r',
+      prepare: (recording) => recording.recorder!.tasks.firstWhere((task) => task.roomId == 'r')
+        ..status = RecordStatus.running
+        ..recordingStartedAt = _now.subtract(const Duration(minutes: 1))
+        ..recordedSeconds = 60
+        ..fileSize = 1024 * 1024
+        ..bitrate = 3200
+        ..selectedQuality = '原画',
+    );
+
+    testWidgets('H05.4: the first card is already in view: the list stays at the top', (tester) async {
+      await recordingFirst(tester, size: const Size(393, 852));
+      expect(pixels(tester), 0);
+      expect(tester.getRect(_card('r')).top, tester.getRect(_key('recorder-list')).top + 12);
+      expect(find.descendant(of: _key('recorder-task-highlight'), matching: _card('r')), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('H05.4: a window shorter than the card when it opens keeps the head in view once it grows', (
+      tester,
+    ) async {
+      // Back from the system's small window, the page can be laid out at a
+      // height that does not hold the card before it gets the full screen.
+      await recordingFirst(tester, size: const Size(393, 320));
+      expect(pixels(tester), 0, reason: "the card's head, not its middle");
+      tester.view.physicalSize = const Size(393, 852);
+      await _frames(tester);
+      expect(pixels(tester), 0);
+      expect(tester.getRect(_card('r')).top, tester.getRect(_key('recorder-list')).top + 12);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('H05.4: a card whole on the first screen is highlighted without scrolling', (tester) async {
+      await _pump(tester, tasks: twelve(), arguments: 'bilibili_t1');
+      final list = tester.getRect(_key('recorder-list'));
+      expect(tester.getRect(_card('t1')).bottom, lessThanOrEqualTo(list.bottom));
+      expect(pixels(tester), 0);
+      expect(find.descendant(of: _key('recorder-task-highlight'), matching: _card('t1')), findsOneWidget);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets("H05.4: a card further down comes to the top, the list's top gap above it", (tester) async {
+      await _pump(tester, tasks: twelve(), arguments: 'bilibili_t6');
+      expect(tester.getRect(_card('t6')).top, tester.getRect(_key('recorder-list')).top + 12);
+      await tester.pump(const Duration(seconds: 3));
+    });
+
     testWidgets('a task that is gone: the list stays at the top, nothing is highlighted', (tester) async {
       await _pump(tester, tasks: twelve(), arguments: 'bilibili_gone');
       expect(_card('t0'), findsOneWidget);

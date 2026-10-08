@@ -1,9 +1,11 @@
 // The portrait live room of U.2a (docs/A-界面设计/A07-直播间界面/A07.1-竖屏普通布局/README.md): the
 // order, icons and states the confirmed design fixes.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -17,6 +19,7 @@ import 'package:pure_live/features/live_play/layout/room_details.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/area_lookup.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
+import 'package:pure_live/features/live_play/logic/room_backdrop.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/logic/room_status.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
@@ -28,6 +31,7 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
+import 'no_images.dart';
 
 /// A platform whose detail waits for [gate] (the room loading).
 class _SlowSite extends FakeSite {
@@ -57,6 +61,7 @@ Future<_Room> _pump(
   double width = 400,
   double height = 900,
   LiveRoom? room,
+  BaseCacheManager? images,
 }) async {
   tester.view
     ..physicalSize = Size(width, height)
@@ -82,6 +87,13 @@ Future<_Room> _pump(
       ],
       child: MaterialApp(
         theme: const LiveTheme().light,
+        // With [images], pictures ask that cache (and get none).
+        builder: images == null
+            ? null
+            : (context, child) => LiveUiScope(
+                config: LiveUiConfig(imageCacheManager: images),
+                child: child!,
+              ),
         home: LivePlayPage(
           route: RouteArgs(
             RoutePath.kLivePlay,
@@ -614,6 +626,70 @@ void main() {
     expect(find.byKey(const ValueKey('live-play-audio-cover')), findsOneWidget);
     expect(find.text('语音直播'), findsOneWidget);
     await _close(tester, room);
+  });
+
+  group("A07.16 JD Live: the play answer's blurred frame under the dimmed covers", () {
+    /// JD Live's play answer (fixtures/jdlive/S02-play-live): a blurred frame
+    /// as the background and no card cover (upgrade 28-3).
+    JdLiveRoom play() =>
+        JdLiveApi.play(File('../../fixtures/jdlive/S02-play-live/body.json').readAsStringSync(), liveId: '48378944');
+
+    const card = 'https://example.com/card.jpg';
+
+    Finder image(String url) => find.byWidgetPredicate((widget) => widget is LiveNetworkImage && widget.url == url);
+
+    testWidgets('audio only: the blurred frame, not the card cover', (tester) async {
+      final jd = play();
+      final detail = liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30)))
+          .copyWith(cover: card, data: jd);
+      final room = await _pump(tester, site: FakeSite(detail), images: NoImages());
+      await tester.tap(find.byKey(const ValueKey('live-play-audio-only')));
+      await tester.pump();
+      expect(
+        find.descendant(of: find.byKey(const ValueKey('live-play-audio-cover')), matching: image(jd.background)),
+        findsOneWidget,
+      );
+      expect(image(card), findsNothing);
+      await _close(tester, room);
+    });
+
+    testWidgets('a room off air: the blurred frame under the state; another room keeps its cover', (tester) async {
+      final jd = play();
+      var room = await _pump(
+        tester,
+        site: FakeSite(liveRoom(status: LiveStatus.offline).copyWith(data: jd)),
+        images: NoImages(),
+      );
+      expect(image(jd.background), findsOneWidget);
+      await _close(tester, room);
+
+      room = await _pump(
+        tester,
+        site: FakeSite(liveRoom(status: LiveStatus.offline).copyWith(cover: card)),
+        images: NoImages(),
+      );
+      expect(image(card), findsOneWidget);
+      await _close(tester, room);
+    });
+
+    test('the order: the blurred frame, the cover, the avatar (or none)', () {
+      final jd = play();
+      final base = LiveRoom(platform: SiteIds.jdLive, roomId: '48378944', cover: card, avatar: 'a.jpg');
+      expect(roomBackdropOf(base.copyWith(data: jd)), jd.background);
+      expect(roomBackdropOf(base), card);
+      expect(roomBackdropOf(base.copyWith(cover: '')), 'a.jpg');
+      expect(roomBackdropOf(base.copyWith(cover: ''), orAvatar: false), '');
+      expect(
+        roomBackdropOf(
+          base.copyWith(
+            data: const JdLiveRoom(liveId: '48378944', state: JdLiveState.live),
+          ),
+        ),
+        card,
+        reason: 'a card: no frame',
+      );
+      expect(roomBackdropOf(base.copyWith(data: 'args')), card, reason: 'not a JD play answer');
+    });
   });
 
   group('room logic of U.2a', () {

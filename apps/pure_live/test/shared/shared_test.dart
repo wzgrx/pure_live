@@ -80,6 +80,32 @@ void main() {
       expect(card.audience, const RoomAudience(kind: RoomAudienceKind.popularity, value: '12.3万'));
       expect(card.restrictionLabel, '付费');
       expect(policy.cardOf(_room()).anchorName, 'anchor');
+      expect(policy.cardOf(_room()).introLine, isNull, reason: 'a title of its own: the streamer as before');
+    });
+
+    test('A09.11: a title that is the streamer shows the first line of the introduction instead', () {
+      const policy = AudiencePolicy(preferRealOnline: false, realOnlinePlatforms: {});
+      LiveRoom channel(String title, String? introduction) =>
+          _room(title: title).copyWith(introduction: introduction ?? '');
+      expect(policy.cardOf(channel('anchor', 'about the room')).introLine, 'about the room');
+      expect(policy.cardOf(channel(' Anchor ', 'about')).introLine, 'about', reason: 'case and spaces aside');
+      expect(policy.cardOf(channel('anchor', '\n  \nfirst line  \nsecond')).introLine, 'first line');
+      expect(policy.cardOf(channel('anchor', '  ')).introLine, isNull, reason: 'no introduction: the name');
+      expect(policy.cardOf(channel('anchor', null)).introLine, isNull);
+      expect(policy.cardOf(channel('anchor tonight', 'about')).introLine, isNull, reason: 'a title of its own');
+      final card = policy.cardOf(channel('anchor', 'about'));
+      expect(card.anchorName, 'anchor', reason: "the avatar's letter and the rows keep the name");
+      final now = DateTime.utc(2026, 10, 1, 12);
+      expect(
+        policy
+            .cardOf(
+              _room(title: 'anchor', startedAt: now.subtract(const Duration(minutes: 5))),
+              now: now,
+            )
+            .introLine,
+        'about the room · 已播 5 分钟',
+        reason: 'the time on air follows, as after the name',
+      );
     });
 
     test('card settings: phone or desktop, preset or stored, unreadable stored values fall back', () async {

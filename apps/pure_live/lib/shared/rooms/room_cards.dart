@@ -83,6 +83,7 @@ final class AudiencePolicy {
     final name = room.displayNick(platformName(room.platform));
     final duration = now == null ? null : liveDuration(room, now);
     final title = room.title.trim();
+    final intro = title.toLowerCase() == room.nick.trim().toLowerCase() ? _firstLine(room.introduction) : null;
     return RoomCardData(
       platformId: room.platform,
       title: title.isEmpty ? i18n('untitled_room') : title,
@@ -95,7 +96,19 @@ final class AudiencePolicy {
       restrictionLabel: roomMark(room),
       platformName: platformName(room.platform),
       isOffline: room.isExplicitlyOfflineNow,
+      // A09.11 (UPGRADES 11-5): a title that is already the streamer's
+      // name (Picarto's and CHZZK's channels, Kuaishou's streamers, …)
+      // leaves the second line to the introduction.
+      introLine: intro == null || title.isEmpty ? null : (duration == null ? intro : '$intro · $duration'),
     );
+  }
+
+  /// The first line of [introduction] with text, trimmed; null for none.
+  static String? _firstLine(String? introduction) {
+    for (final line in (introduction ?? '').split('\n')) {
+      if (line.trim().isNotEmpty) return line.trim();
+    }
+    return null;
   }
 }
 

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -419,6 +420,43 @@ void main() {
       await tester.pump();
       expect(find.byKey(const ValueKey('search-history')), findsOneWidget);
       expect(find.widgetWithText(InputChip, 'hello'), findsOneWidget);
+    });
+
+    testWidgets('A09.11: Picarto channels show their introduction under the name; others are unchanged', (
+      tester,
+    ) async {
+      // fixtures/picarto/S03-search: the title is the channel's name; 8 of
+      // the 20 have a bio.
+      final picarto = [
+        for (final room in PicartoApi.searchRooms(
+          File('../../fixtures/picarto/S03-search/body.json').readAsStringSync(),
+          pageSize: 20,
+        ))
+          // No pictures in tests.
+          if (room.roomId == 'TheBaker' || room.roomId == 'Dianamation') room.copyWith(avatar: ''),
+      ];
+      await pump(tester, [
+        FakeSite(SiteIds.picarto, pages: {1: picarto}),
+        FakeSite(
+          'bilibili',
+          pages: {
+            1: [_room('bilibili', '42', title: 'Hello')],
+          },
+        ),
+      ]);
+      await submit(tester, 'art');
+      String lineOf(String title) => tester
+          .widget<Text>(
+            find.descendant(
+              of: find.ancestor(of: find.text(title), matching: find.byType(LiveRoomCard)),
+              matching: find.byKey(const ValueKey('room-card-anchor-name')),
+            ),
+          )
+          .data!;
+      // Dianamation's bio begins "Home of the Dianamation Art Stream \n\n…".
+      expect(lineOf('Dianamation'), 'Home of the Dianamation Art Stream');
+      expect(lineOf('TheBaker'), startsWith('TheBaker'), reason: 'no bio: the name as before');
+      expect(lineOf('Hello'), startsWith('nick 42'), reason: 'a title of its own');
     });
 
     testWidgets('U.2b2 c1: without its own opener a card opens the room with the results in their order', (

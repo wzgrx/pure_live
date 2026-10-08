@@ -210,6 +210,7 @@ v3 的问题 P1–P14 见对比页“v3 的问题”。
 - 后来的变化（以现在的代码为准）：
   - 记录“没做的”第 1 条已经做完：搜索（A09.7）、观看记录（A09.9）、设置里的卡片预览（`apps/pure_live/lib/features/settings/appearance_pages.dart:886`）都换成了 `LiveRoomCard`；旧的 `RoomCard`、`CoverMetricBadge`、`CountChip` 已删（`room_card.dart` 只剩输入类型，见 [A01.1](../../A01-设计系统/A01.1-界面基础/README.md)）。
   - E06.1（`1239eb087`）：在播的卡片主播名后面加“· 已播 N”（`shared/rooms/room_cards.dart:82-99` 的 `cardOf`）。
+  - [A09.11](../A09.11-Picarto搜索卡片简介/README.md)（2026-10-08）：标题等于主播名且有简介时，信息区第二行换成简介的第一行（`RoomCardData.introLine`）；行数、尺寸、样式不变，头像字母和 `RoomRow` 仍用主播名，长按对话框不加简介。
   - A02.1、A02.2（`914784264`、`680c2241f`、`fc5bcdd46`）：对话框、提示条换成共用组件；A03.1（`a048ea540`）：能刷新的列表用 `AppRefreshView`；D-011（`e320e0e72`）：页面标题按 3.x 实际的位置。
   - 电视的卡片仍是另一个组件 `TvRoomCard`（`apps/pure_live/lib/tv/widgets/tv_room_grid.dart:126`），A17.3 没做。
 - 自动测试：`packages/live_ui/test/live_room_card_test.dart`（14 个：各状态、平台标三种模式、12 号等宽、颜色角色深浅两套、点按 / 长按 / 右键（附录 A 第 14 条）、悬停和焦点、紧凑行、骨架、`RoomRow`、`FollowPill`、列数表、面板位置）、`status_view_test.dart` +1；`apps/pure_live/test/shared/shared_test.dart`（菜单两个重写、加 1 个：对话框结构和顺序、Esc 关闭、关注后关闭并提示、先问再关注、原地新建、红色取消关注和撤销、横屏两列）。合并时 `live_ui` 60 个、`apps/pure_live` 291 个通过。

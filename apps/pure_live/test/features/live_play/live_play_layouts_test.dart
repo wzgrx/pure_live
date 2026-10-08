@@ -2,11 +2,14 @@
 // U.2c, U.2d): landscape fullscreen, the wide room and portrait streams; the
 // order, icons, places and states the confirmed designs fix.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -28,6 +31,7 @@ import 'package:pure_live/routes/route_path.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
+import 'no_images.dart';
 
 final class _Room {
   new(this.services, this.engine, this.orientations);
@@ -47,6 +51,8 @@ Future<_Room> _pump(
   bool portrait = false,
   bool autoRotate = false,
   Map<Setting<Object>, Object> settings = const {},
+  LiveRoom? detail,
+  BaseCacheManager? images,
 }) async {
   // Reset by [_close]: the test must end with it unset.
   debugDefaultTargetPlatformOverride = platform;
@@ -76,7 +82,7 @@ Future<_Room> _pump(
   final previous = AppNavigator.toast;
   AppNavigator.toast = (_) {};
   addTearDown(() => AppNavigator.toast = previous);
-  final site = FakeSite(liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30))));
+  final site = FakeSite(detail ?? liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30))));
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -87,6 +93,13 @@ Future<_Room> _pump(
       ],
       child: MaterialApp(
         theme: const LiveTheme().light,
+        // With [images], pictures ask that cache (and get none).
+        builder: images == null
+            ? null
+            : (context, child) => LiveUiScope(
+                config: LiveUiConfig(imageCacheManager: images),
+                child: child!,
+              ),
         home: LivePlayPage(
           route: RouteArgs(
             RoutePath.kLivePlay,
@@ -831,6 +844,81 @@ void main() {
       expect(tester.getSize(find.byType(RoomPlayer)).height, 744);
       expect(_key('ambient-backdrop'), findsOneWidget);
       await _close(tester, room);
+    });
+
+    group("A07.16 JD Live: the play answer's blurred frame behind the stream", () {
+      /// JD Live's play answer (fixtures/jdlive/S02-play-live): a blurred
+      /// frame as the background and no card cover (upgrade 28-3).
+      JdLiveRoom play() =>
+          JdLiveApi.play(File('../../fixtures/jdlive/S02-play-live/body.json').readAsStringSync(), liveId: '48378944');
+
+      LiveRoom detail({String cover = '', Object? data}) =>
+          liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30))).copyWith(cover: cover, data: data);
+
+      String backdrop(WidgetTester tester) => tester.widget<LiveNetworkImage>(_key('ambient-backdrop-cover')).url;
+
+      test('the sample has a blurred frame and no card cover', () {
+        expect(play().background, startsWith('https://m.360buyimg.com/'));
+        expect(play().cover, isEmpty);
+      });
+
+      testWidgets('portrait fullscreen, no cover (not seen as a card): the blurred frame', (tester) async {
+        final jd = play();
+        final room = await _pump(
+          tester,
+          portrait: true,
+          detail: detail(data: jd),
+          images: NoImages(),
+        );
+        await _tap(tester, 'live-play-fullscreen');
+        expect(backdrop(tester), jd.background);
+        await _close(tester, room);
+      });
+
+      testWidgets('with a card cover too, the blurred frame first (X2)', (tester) async {
+        final jd = play();
+        final room = await _pump(
+          tester,
+          width: 1280,
+          height: 800,
+          portrait: true,
+          platform: TargetPlatform.windows,
+          images: NoImages(),
+          detail: detail(cover: 'https://example.com/card.jpg', data: jd),
+        );
+        expect(backdrop(tester), jd.background);
+        await _close(tester, room);
+      });
+
+      testWidgets('landscape fullscreen: the same frame at the sides', (tester) async {
+        final jd = play();
+        final room = await _pump(
+          tester,
+          portrait: true,
+          detail: detail(data: jd),
+          images: NoImages(),
+        );
+        await _tap(tester, 'portrait-landscape-fullscreen');
+        tester.view.physicalSize = const Size(852, 393);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(backdrop(tester), jd.background);
+        await tester.binding.handlePopRoute();
+        await tester.pump(const Duration(seconds: 4));
+        await _close(tester, room);
+      });
+
+      testWidgets('another room (no JD play answer): its cover, as before', (tester) async {
+        final room = await _pump(
+          tester,
+          portrait: true,
+          images: NoImages(),
+          detail: detail(cover: 'https://example.com/card.jpg'),
+        );
+        await _tap(tester, 'live-play-fullscreen');
+        expect(backdrop(tester), 'https://example.com/card.jpg');
+        await _close(tester, room);
+      });
     });
 
     testWidgets('"兼容 16:9": the 16:9 stack, and still the portrait fullscreen (change 5)', (tester) async {

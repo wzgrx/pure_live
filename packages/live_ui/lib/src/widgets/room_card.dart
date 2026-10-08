@@ -55,6 +55,7 @@ final class RoomCardData {
     this.restrictionLabel,
     this.platformName,
     this.isOffline = false,
+    this.introLine,
   });
 
   /// Platform id; the badge shows it in capitals (3.x).
@@ -65,6 +66,12 @@ final class RoomCardData {
 
   /// Streamer's name.
   final String anchorName;
+
+  /// What the card's second line shows instead of [anchorName] (A09.11:
+  /// the first line of the introduction of a room whose title is already
+  /// the streamer's name); null shows the name. The avatar's letter and
+  /// `RoomRow` keep the name.
+  final String? introLine;
 
   /// Avatar address (normalised by the app).
   final String? avatarUrl;
@@ -107,7 +114,8 @@ final class RoomCardData {
       other.audience == audience &&
       other.restrictionLabel == restrictionLabel &&
       other.platformName == platformName &&
-      other.isOffline == isOffline;
+      other.isOffline == isOffline &&
+      other.introLine == introLine;
 
   @override
   int get hashCode => Object.hash(
@@ -122,5 +130,6 @@ final class RoomCardData {
     restrictionLabel,
     platformName,
     isOffline,
+    introLine,
   );
 }

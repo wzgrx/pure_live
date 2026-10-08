@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
@@ -133,6 +134,9 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
   bool _found = false;
   int _highlight = 0;
 
+  /// The gap above the first card, as last laid out.
+  double _listTop = 12;
+
   AppRecording? get _recording => ref.read(recordingProvider);
 
   @override
@@ -177,14 +181,16 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
     if (!mounted) return;
     final card = _targetKey.currentContext;
     if (card != null) {
+      final position = _scroll.hasClients ? _scroll.positions.last : null;
+      final to = position == null ? null : _revealOffset(card, position);
       final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+      final scrolled = position == null || to == null || to == position.pixels
+          ? Future<void>.value()
+          : still
+          ? Future<void>.sync(() => position.jumpTo(to))
+          : position.animateTo(to, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic);
       unawaited(
-        Scrollable.ensureVisible(
-          card,
-          alignment: 0.2,
-          duration: still ? Duration.zero : const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-        ).then((_) {
+        scrolled.then((_) {
           if (mounted) setState(() => _highlight++);
         }),
       );
@@ -195,6 +201,22 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
     if (position.pixels >= position.maxScrollExtent) return;
     _scroll.jumpTo(math.min(position.pixels + position.viewportDimension, position.maxScrollExtent));
     WidgetsBinding.instance.addPostFrameCallback((_) => _reveal(step + 1));
+  }
+
+  /// Where [position] shows [card] (H05.4): where it is when the card is
+  /// whole in view; otherwise the card's top [_listTop] below the list's top
+  /// (the gap above the first card), so its head shows even when the
+  /// window is, for a moment, shorter than the card (back from the system's
+  /// small window). Null when the card is not laid out in a list.
+  double? _revealOffset(BuildContext card, ScrollPosition position) {
+    final box = card.findRenderObject();
+    if (box is! RenderBox || !box.attached) return null;
+    final viewport = RenderAbstractViewport.maybeOf(box);
+    if (viewport == null) return null;
+    final atTop = viewport.getOffsetToReveal(box, 0).offset;
+    final atBottom = viewport.getOffsetToReveal(box, 1).offset;
+    if (atBottom <= position.pixels && position.pixels <= atTop) return position.pixels;
+    return (atTop - _listTop).clamp(position.minScrollExtent, position.maxScrollExtent);
   }
 
   void _onNotice(RecordNotice notice) {
@@ -314,6 +336,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
                 // whose height is compact). Only the page's own size counts.
                 final wide = constraints.maxWidth >= 840 && constraints.maxHeight >= 480;
                 final gutter = wide ? 24.0 : 16.0;
+                _listTop = wide ? 16.0 : 12.0;
                 return Column(
                   children: [
                     _FilterBar(
@@ -334,6 +357,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
                         pollingOff: () => !_settingsNow.enablePolling,
                         columns: recorderColumns(constraints.maxWidth - 2 * gutter),
                         gutter: gutter,
+                        top: _listTop,
                         wide: wide,
                         controller: _scroll,
                         onEnablePolling: () => unawaited(enableRecordPolling(recording)),
@@ -496,6 +520,7 @@ class _TaskGrid extends StatelessWidget {
     required this.pollingOff,
     required this.columns,
     required this.gutter,
+    required this.top,
     required this.wide,
     required this.controller,
     required this.onEnablePolling,
@@ -513,6 +538,9 @@ class _TaskGrid extends StatelessWidget {
   final bool Function() pollingOff;
   final int columns;
   final double gutter;
+
+  /// The gap above the first card.
+  final double top;
   final bool wide;
   final VoidCallback onEnablePolling;
   final Widget Function(RecordTask task) card;
@@ -546,7 +574,7 @@ class _TaskGrid extends StatelessWidget {
         key: const ValueKey('recorder-list'),
         controller: controller,
         physics: const PureLiveBoundedScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(gutter, wide ? 16 : 12, gutter, 24),
+        padding: EdgeInsets.fromLTRB(gutter, top, gutter, 24),
         itemCount: rows + (banner ? 1 : 0),
         itemBuilder: (context, index) {
           if (banner && index == 0) return _PollingOffBanner(onEnable: onEnablePolling);

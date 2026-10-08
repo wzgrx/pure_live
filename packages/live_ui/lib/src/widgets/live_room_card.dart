@@ -318,8 +318,9 @@ final class _Parts {
     ),
   );
 
+  /// The second line: the streamer, or the introduction's line (A09.11).
   Widget anchorName() => Text(
-    data.anchorName,
+    data.introLine ?? data.anchorName,
     key: const ValueKey('room-card-anchor-name'),
     maxLines: 1,
     overflow: TextOverflow.ellipsis,

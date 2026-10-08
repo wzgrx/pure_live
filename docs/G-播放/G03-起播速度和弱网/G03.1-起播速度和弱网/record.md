@@ -197,3 +197,18 @@ playback-timing site=bilibili room=1a2b3c route=direct engine=new result=playing
    - B：`flutter build apk --profile --dart-define=MPV_PROBESIZE=1048576 --dart-define=MPV_ANALYZEDURATION=1`
    - C（B 明显有效时再试）：`--dart-define=MPV_PROBESIZE=524288 --dart-define=MPV_ANALYZEDURATION=0.5`
    比较 `firstFrame` 的中位数和 P90；B 比 A 快且没有一次无声或花屏，就把默认值改成 B（`mpv_options.dart` 一处，`options_test.dart` 的断言跟着改）。
+
+## 阶段 4：K90 探测参数 A/B 和决定（2026-10-08，master 3c1306b61）
+
+冷进房（杀进程），每次记 `playback-timing` 和测试包是否有音轨在播（`audio=1`）。原始行：`data/2026-10-08-k90-probe-A.txt`、`…-B.txt`。
+
+| 组 | 哔哩哔哩 加载到第一帧（5 次） | 中位数 | 哔哩哔哩 total 中位数 | 有声音 | 其他平台（斗鱼、虎牙、抖音 各 1 次 total） |
+|---|---|---|---|---|---|
+| A 2 MiB / 2 s（3.x） | 2654、2596、974、615、1802 | 1802 ms | 2295 ms | 5/5 | 1587、1373、808 |
+| B 1 MiB / 1 s | 875、493、812、708、595 | 708 ms | 1179 ms | 5/5 | 1485、1270、937 |
+
+- 决定：默认改成 B（`mpv_options.dart` 的 `mpvProbeDefaults`），A 留作构建开关（`--dart-define=MPV_PROBESIZE=2097152 --dart-define=MPV_ANALYZEDURATION=2`）。B 每次都有声音、画面正常；斗鱼、虎牙、抖音不受影响（和电脑上的结论一样）。
+- 加上阶段 1 的其他平台，冷进房的 P90 已在 2.5 秒以内（原来超出的全是哔哩哔哩）。
+- C（512 KiB / 0.5 s）没在手机上试：B 已经达标，C 在电脑上对哔哩哔哩没有更快（704 vs 627 ms）。
+- 快手：这一轮 3 次里只有 1 次开出来（`detail=2485`），另外两次没有计时行——电脑上量快手时触发了同一出口的“请求过快”风控，K90 也受影响。快手第一次进房省掉第二次取房间页（`8432f9910`）的效果要等风控过去再看。
+- 没测：上下滑换房、弱网（K90 上没有只限测试包的限速办法）。

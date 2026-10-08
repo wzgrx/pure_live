@@ -135,7 +135,8 @@ final class MpvEngineConfig {
     return {
       'force-seekable': 'yes',
       'protocol_whitelist': 'httpproxy,udp,rtp,tcp,tls,data,file,http,https,crypto,rtmp,rtmps,rtsp,srt',
-      // Live FLV/HLS need a short probe, not a long-file analysis pass.
+      // Live FLV/HLS need a short probe, not a long-file analysis pass
+      // ([mpvProbeValues]).
       'demuxer-lavf-probesize': probe.probeSize,
       'demuxer-lavf-analyzeduration': probe.analyzeDuration,
       // Bounded live buffer (3.x's LiveBufferPolicy): memory only, small
@@ -168,12 +169,18 @@ const String _probeSizeDefine = String.fromEnvironment('MPV_PROBESIZE');
 /// one.
 const String _analyzeDurationDefine = String.fromEnvironment('MPV_ANALYZEDURATION');
 
+/// The probe without a build override (see [mpvProbeValues]).
+const ({String probeSize, String analyzeDuration}) mpvProbeDefaults = (probeSize: '1048576', analyzeDuration: '1');
+
 /// mpv's probe of a new input (`demuxer-lavf-probesize` in bytes,
-/// `demuxer-lavf-analyzeduration` in seconds): 3.x's 2 MiB / 2 s, unless the
-/// build names other values for an A/B on a phone (G03.1):
-/// `flutter build apk --profile --dart-define=MPV_PROBESIZE=1048576
-/// --dart-define=MPV_ANALYZEDURATION=1`. A value mpv would refuse (not a
-/// number, a probe under 32 bytes or over 2^31 - 1, a duration that is not
+/// `demuxer-lavf-analyzeduration` in seconds): 1 MiB / 1 s (G03.1: on the
+/// K90 Bilibili's first frame came after 1802 ms with 3.x's 2 MiB / 2 s and
+/// 708 ms with these, cold, median of 5, sound every time; its CDN sends
+/// one or two seconds at once and then real time, so a 2 s analysis waits
+/// for the stream; other platforms did not change), unless the build names
+/// other values for an A/B on a phone: `flutter build apk --profile
+/// --dart-define=MPV_PROBESIZE=2097152 --dart-define=MPV_ANALYZEDURATION=2`.
+/// A value mpv would refuse (not a number, a probe under 32 bytes or over 2^31 - 1, a duration that is not
 /// above 0 and at most 3600) keeps its default. The parameters exist for
 /// tests; the app passes none.
 ({String probeSize, String analyzeDuration}) mpvProbeValues({
@@ -183,7 +190,9 @@ const String _analyzeDurationDefine = String.fromEnvironment('MPV_ANALYZEDURATIO
   final size = int.tryParse(probeSize.trim());
   final seconds = double.tryParse(analyzeDuration.trim());
   return (
-    probeSize: size != null && size >= 32 && size <= 0x7fffffff ? '$size' : '2097152',
-    analyzeDuration: seconds != null && seconds > 0 && seconds <= 3600 ? analyzeDuration.trim() : '2',
+    probeSize: size != null && size >= 32 && size <= 0x7fffffff ? '$size' : mpvProbeDefaults.probeSize,
+    analyzeDuration: seconds != null && seconds > 0 && seconds <= 3600
+        ? analyzeDuration.trim()
+        : mpvProbeDefaults.analyzeDuration,
   );
 }

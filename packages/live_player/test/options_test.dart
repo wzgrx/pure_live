@@ -5,11 +5,11 @@ import 'package:live_player/live_player.dart';
 import 'package:media_kit/media_kit.dart';
 
 void main() {
-  test('live properties keep 3.x values and the bounded buffer', () {
+  test("live properties: G03.1's probe and 3.x's bounded buffer", () {
     const config = MpvEngineConfig();
     final properties = config.liveProperties;
-    expect(properties['demuxer-lavf-probesize'], '2097152');
-    expect(properties['demuxer-lavf-analyzeduration'], '2');
+    expect(properties['demuxer-lavf-probesize'], '1048576');
+    expect(properties['demuxer-lavf-analyzeduration'], '1');
     expect(properties['network-timeout'], '15');
     expect(properties['hwdec-software-fallback'], '1');
     expect(properties['demuxer-max-bytes'], '33554432');
@@ -25,23 +25,24 @@ void main() {
     );
   });
 
-  test('G03.1: the probe keeps 3.x values unless the build overrides them', () {
-    // No --dart-define in the test run: 3.x's 2 MiB / 2 s.
-    expect(mpvProbeValues(), (probeSize: '2097152', analyzeDuration: '2'));
+  test('G03.1: the probe is 1 MiB / 1 s unless the build overrides it', () {
+    // No --dart-define in the test run: 1 MiB / 1 s (3.x had 2 MiB / 2 s).
+    expect(mpvProbeValues(), (probeSize: '1048576', analyzeDuration: '1'));
+    expect(mpvProbeValues(probeSize: '2097152', analyzeDuration: '2'), (probeSize: '2097152', analyzeDuration: '2'));
     expect(mpvProbeValues(probeSize: '1048576', analyzeDuration: '1'), (probeSize: '1048576', analyzeDuration: '1'));
     expect(mpvProbeValues(probeSize: ' 524288 ', analyzeDuration: '0.5'), (
       probeSize: '524288',
       analyzeDuration: '0.5',
     ));
     // Each value falls back on its own; mpv refuses a probe under 32 bytes.
-    expect(mpvProbeValues(probeSize: '31', analyzeDuration: '1'), (probeSize: '2097152', analyzeDuration: '1'));
+    expect(mpvProbeValues(probeSize: '31', analyzeDuration: '2'), (probeSize: '1048576', analyzeDuration: '2'));
     for (final bad in ['', 'abc', '-1', '0', '1e400', 'NaN', '99999999999']) {
       expect(mpvProbeValues(probeSize: bad, analyzeDuration: bad), (
-        probeSize: '2097152',
-        analyzeDuration: '2',
+        probeSize: '1048576',
+        analyzeDuration: '1',
       ), reason: bad);
     }
-    expect(mpvProbeValues(analyzeDuration: '3601'), (probeSize: '2097152', analyzeDuration: '2'));
+    expect(mpvProbeValues(analyzeDuration: '3601'), (probeSize: '1048576', analyzeDuration: '1'));
     final overridden = const MpvEngineConfig().liveProperties;
     expect(overridden['demuxer-lavf-probesize'], mpvProbeValues().probeSize);
     expect(overridden['demuxer-lavf-analyzeduration'], mpvProbeValues().analyzeDuration);

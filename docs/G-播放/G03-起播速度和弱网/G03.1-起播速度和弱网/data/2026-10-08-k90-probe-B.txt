@@ -1,0 +1,8 @@
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=239 qualities=99 urls=100 engineReady=55 input=0 load=4 firstFrame=875 playing=0 total=1375 audio=1
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=264 qualities=123 urls=90 engineReady=39 input=0 load=4 firstFrame=493 playing=0 total=1016 audio=1
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=232 qualities=107 urls=100 engineReady=51 input=0 load=10 firstFrame=812 playing=0 total=1314 audio=1
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=212 qualities=110 urls=94 engineReady=45 input=0 load=7 firstFrame=708 playing=0 total=1179 audio=1
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=253 qualities=136 urls=97 engineReady=38 input=0 load=4 firstFrame=595 playing=0 total=1126 audio=1
+site=douyu room=9f1c10 route=flvSplice engine=new result=playing detail=385 qualities=264 urls=329 engineReady=50 input=0 load=5 firstFrame=449 playing=0 total=1485 audio=1
+site=huya room=e12d61 route=direct engine=new result=playing detail=297 qualities=0 urls=205 engineReady=39 input=0 load=4 firstFrame=723 playing=0 total=1270 audio=1
+site=douyin room=e80aab route=direct engine=new result=playing detail=509 qualities=0 urls=1 engineReady=37 input=0 load=9 firstFrame=379 playing=0 total=937 audio=1

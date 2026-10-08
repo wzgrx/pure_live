@@ -58,7 +58,7 @@ final class MpvEngine implements PlayerEngine {
     final native = player.platform;
     // An A/B build (G03.1) says so in logcat, next to its timing lines.
     final probe = mpvProbeValues();
-    if (probe != (probeSize: '2097152', analyzeDuration: '2')) {
+    if (probe != mpvProbeDefaults) {
       debugPrint('mpv probe override: probesize=${probe.probeSize} analyzeduration=${probe.analyzeDuration}');
     }
     if (native is NativePlayer) {

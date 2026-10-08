@@ -93,3 +93,9 @@
 - `features/live_play/danmaku/chat_list.dart`（E06.2 也改聊天行；D02.1 也改了这个文件）。
 - `features/live_play/logic/room_controller.dart`（很多任务都会动）。
 - `packages/live_danmaku/lib/src/sites/bilibili.dart`、两份翻译文件。
+
+## K90 复查（2026-10-08，没登录）
+
+- 第 1 条：哔哩哔哩直播间聊天最上面是“ⓘ 访客模式下哔哩哔哩会隐藏昵称　去登录”，昵称是“菜***”这样的打码 ✓。
+- 第 2 条：戴粉丝牌的观众名字前有“德云色 25”这样的蓝色小标签 ✓（“德云色”直播间）。
+- 第 3～6 条（登录后、卡片样式、全屏侧栏、Cookie 失效）没看。

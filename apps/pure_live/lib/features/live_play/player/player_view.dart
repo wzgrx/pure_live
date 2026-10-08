@@ -31,6 +31,7 @@ import 'package:pure_live/features/live_play/player/player_status.dart';
 import 'package:pure_live/features/live_play/player/portrait_diagnostics.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
 import 'package:pure_live/features/live_play/player/room_swipe.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
@@ -702,59 +703,65 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
             fit: StackFit.expand,
             children: [
               // Only the picture takes the double tap; a tap acts at once
-              // and a second one takes it back (B09 c1, [_onTap]).
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTapDown: (details) {
-                  _tapAt = details.globalPosition;
-                  _tapHit = _danmakuAt(details.globalPosition, longPress: false);
-                },
-                onTap: _onTap,
-                // F.2b: only with its switch on, so it never holds a drag back.
-                onLongPressStart: longPress
-                    ? (details) {
-                        if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
-                          unawaited(_openMessage(hit));
+              // and a second one takes it back (B09 c1, [_onTap]). A screen
+              // reader names it and says what a tap does (A05.1).
+              Semantics(
+                container: true,
+                label: i18n('live_play_picture'),
+                onTapHint: i18n('live_play_picture_tap_hint'),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (details) {
+                    _tapAt = details.globalPosition;
+                    _tapHit = _danmakuAt(details.globalPosition, longPress: false);
+                  },
+                  onTap: _onTap,
+                  // F.2b: only with its switch on, so it never holds a drag back.
+                  onLongPressStart: longPress
+                      ? (details) {
+                          if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
+                            unawaited(_openMessage(hit));
+                          }
                         }
-                      }
-                    : null,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // E5 audio only, and A07.20 a stream without a real
-                    // picture (a placeholder track, a voice platform): the
-                    // room's cover over the picture, which keeps decoding.
-                    StreamBuilder<PlaybackState>(
-                      stream: _room.session.states,
-                      initialData: _room.session.state,
-                      builder: (context, snapshot) {
-                        final playback = snapshot.data ?? _room.session.state;
-                        return ListenableSelector<bool>(
-                          listenable: _room,
-                          selector: () => _room.audioOnly,
-                          builder: (context, audioOnly, _) {
-                            final voice =
-                                !audioOnly && pictureIsPlaceholder(playback, voiceLive: _room.site.isVoiceLive);
-                            if (!audioOnly && !voice) return const SizedBox.shrink();
-                            return IgnorePointer(
-                              // B-9: "纯音频已暂停" under the play mark.
-                              child: AudioOnlyCover(
-                                room: _room.room,
-                                paused: playback.status == PlaybackStatus.paused,
-                                voiceLive: voice,
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                    _danmaku(
-                      look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
-                      visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
-                      fps: fps,
-                      pausedBehavior: pausedBehavior,
-                    ),
-                  ],
+                      : null,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // E5 audio only, and A07.20 a stream without a real
+                      // picture (a placeholder track, a voice platform): the
+                      // room's cover over the picture, which keeps decoding.
+                      StreamBuilder<PlaybackState>(
+                        stream: _room.session.states,
+                        initialData: _room.session.state,
+                        builder: (context, snapshot) {
+                          final playback = snapshot.data ?? _room.session.state;
+                          return ListenableSelector<bool>(
+                            listenable: _room,
+                            selector: () => _room.audioOnly,
+                            builder: (context, audioOnly, _) {
+                              final voice =
+                                  !audioOnly && pictureIsPlaceholder(playback, voiceLive: _room.site.isVoiceLive);
+                              if (!audioOnly && !voice) return const SizedBox.shrink();
+                              return IgnorePointer(
+                                // B-9: "纯音频已暂停" under the play mark.
+                                child: AudioOnlyCover(
+                                  room: _room.room,
+                                  paused: playback.status == PlaybackStatus.paused,
+                                  voiceLive: voice,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      _danmaku(
+                        look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
+                        visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
+                        fps: fps,
+                        pausedBehavior: pausedBehavior,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               status,

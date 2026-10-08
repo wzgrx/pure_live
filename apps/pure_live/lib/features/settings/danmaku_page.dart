@@ -137,16 +137,20 @@ class _LinkRow extends StatelessWidget {
     child: InkWell(
       key: ValueKey('danmaku-link-$settingKey'),
       onTap: onTap,
-      child: SettingRow(
-        settingKey: settingKey,
-        title: title,
-        subtitle: subtitle,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ?value,
-            Icon(AppIcons.navigate, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          ],
+      // At least 48 to tap, like the switch rows around it (A05.1).
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+        child: SettingRow(
+          settingKey: settingKey,
+          title: title,
+          subtitle: subtitle,
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ?value,
+              Icon(AppIcons.navigate, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ],
+          ),
         ),
       ),
     ),

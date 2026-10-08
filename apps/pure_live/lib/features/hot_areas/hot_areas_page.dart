@@ -105,11 +105,16 @@ class HotAreasPage extends ConsumerWidget {
       final controls = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // The theme's switch, as every settings row (live_ui).
-          Switch(
-            key: ValueKey('platform-switch-$id'),
-            value: shown,
-            onChanged: (value) => _toggle(ref, visible, id, value).ignore(),
+          // The theme's switch, as every settings row (live_ui); a screen
+          // reader names its platform (A05.1).
+          Semantics(
+            container: true,
+            label: name(id),
+            child: Switch(
+              key: ValueKey('platform-switch-$id'),
+              value: shown,
+              onChanged: (value) => _toggle(ref, visible, id, value).ignore(),
+            ),
           ),
           const SizedBox(width: 8),
           // Hidden rows keep the handle's place so the switches line up.

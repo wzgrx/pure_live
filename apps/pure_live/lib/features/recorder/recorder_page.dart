@@ -487,7 +487,9 @@ class _FilterChip extends StatelessWidget {
                         TextSpan(
                           text: ' $count',
                           style: theme.textTheme.bodySmall?.tabular.copyWith(
-                            color: foreground.withValues(alpha: 0.8),
+                            // Softer only off the primary container, where
+                            // 80 % would fall under 4.5:1 (A05.1).
+                            color: selected ? foreground : foreground.withValues(alpha: 0.8),
                             fontWeight: label.fontWeight,
                           ),
                         ),

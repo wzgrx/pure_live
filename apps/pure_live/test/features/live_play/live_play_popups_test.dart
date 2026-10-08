@@ -1042,6 +1042,12 @@ void main() {
         ['原画', '流畅'],
       );
       expect(recordDefaultQuality(const [], '超清'), '超清');
+      const inke = [
+        LivePlayQuality(quality: 'FLV', id: 'flv', codec: 'avc'),
+        LivePlayQuality(quality: '原画', id: 'original', sort: 1, codec: 'hevc'),
+      ];
+      expect(recordDefaultQuality(inke, '原画'), '原画');
+      expect(recordDefaultQuality(inke, '原画', preferH264: true), 'FLV', reason: 'H01.7');
       expect(recordSegmentNumber(754, 300), 3);
       expect(recordSegmentCount(754, 300), 3);
       expect(recordClockText(const Duration(minutes: 12, seconds: 34)), '00:12:34');

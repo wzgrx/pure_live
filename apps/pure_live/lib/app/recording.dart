@@ -278,6 +278,7 @@ final class RecordSettingsStore {
     threadQueueSize: settings.get(Settings.recordThreadQueueSize),
     usePinyinForFolder: settings.get(Settings.recordPinyinFolders),
     recordDanmaku: settings.get(Settings.recordDanmaku),
+    preferH264: settings.get(Settings.preferH264),
   );
 
   /// Settings from values under 3.x's Hive keys (the pre-M8.1 meta object;

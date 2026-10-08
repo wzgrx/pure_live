@@ -138,13 +138,15 @@ final class RecordStreamResolver {
   final LiveSite? Function(String platform) sites;
 
   /// Resolves a stream of [roomId] on [platform] with the quality closest
-  /// to [preferredQuality]. [previousQualityId] and [previousLineIndex] are
-  /// the last attempt's cursor; [renewCurrent] asks for the same quality and
-  /// line with a fresh URL.
+  /// to [preferredQuality] ([preferH264]: see [orderQualities]).
+  /// [previousQualityId] and [previousLineIndex] are the last attempt's
+  /// cursor; [renewCurrent] asks for the same quality and line with a fresh
+  /// URL.
   Future<ResolvedRecordStream> resolve({
     required String roomId,
     required String platform,
     required String preferredQuality,
+    bool preferH264 = false,
     String? previousQualityId,
     int? previousLineIndex,
     bool renewCurrent = false,
@@ -189,6 +191,7 @@ final class RecordStreamResolver {
         site,
         detail,
         preferredQuality: preferredQuality,
+        preferH264: preferH264,
         previousQualityId: previousQualityId,
         previousLineIndex: previousLineIndex,
         renewCurrent: renewCurrent,
@@ -212,6 +215,7 @@ final class RecordStreamResolver {
     LiveSite site,
     LiveRoom detail, {
     required String preferredQuality,
+    required bool preferH264,
     required String? previousQualityId,
     required int? previousLineIndex,
     required bool renewCurrent,
@@ -229,7 +233,7 @@ final class RecordStreamResolver {
     if (qualities.isEmpty) {
       throw const RecordStreamException(RecordStreamErrorType.noQuality, 'No quality');
     }
-    final ordered = orderQualities(qualities, preferredQuality);
+    final ordered = orderQualities(qualities, preferredQuality, preferH264: preferH264);
     final cursor = site is LivePlayUrlCursorResolver;
     final previousIndex = previousQualityId == null
         ? -1
@@ -293,7 +297,17 @@ final class RecordStreamResolver {
   /// duplicates removed, with the tier closest to the five-level
   /// [preferredQuality] moved to the front (3.x `orderQualities`: platform
   /// ids are not comparable, so only names and positions are used).
-  static List<LivePlayQuality> orderQualities(List<LivePlayQuality> source, String preferredQuality) {
+  ///
+  /// With [preferH264] (the player's "优先 H.264", for a task that does not
+  /// name its quality) an HEVC quality ([LivePlayQuality.codec]) is not put
+  /// first while the room offers another: the nearest other one is, the
+  /// better one on a tie (H01.7; the player's G01.3 rule). Inke's 原画 is
+  /// Zego's HEVC in FLV (codec 12), which few players other than ours open.
+  static List<LivePlayQuality> orderQualities(
+    List<LivePlayQuality> source,
+    String preferredQuality, {
+    bool preferH264 = false,
+  }) {
     final seen = <String>{};
     final indexed = source.indexed.where((entry) => seen.add(entry.$2.selectionId.toString())).toList();
     if (indexed.isEmpty) return const [];
@@ -308,7 +322,7 @@ final class RecordStreamResolver {
     String normalize(String value) => value.toLowerCase().replaceAll(RegExp(r'[\s_-]+'), '');
     final wanted = normalize(preferredQuality);
     final exact = qualities.indexWhere((quality) => normalize(quality.quality) == wanted);
-    if (exact >= 0) return _moveToFront(qualities, exact);
+    if (exact >= 0) return _moveToFront(qualities, _avoidHevc(qualities, exact, preferH264: preferH264));
     var preference = recordQualityPreferences.indexOf(preferredQuality);
     if (preference < 0) preference = 0;
     final target = preference / (recordQualityPreferences.length - 1);
@@ -321,7 +335,18 @@ final class RecordStreamResolver {
         distance = candidate;
       }
     }
-    return _moveToFront(qualities, closest);
+    return _moveToFront(qualities, _avoidHevc(qualities, closest, preferH264: preferH264));
+  }
+
+  static int _avoidHevc(List<LivePlayQuality> qualities, int index, {required bool preferH264}) {
+    bool hevc(int at) => qualities[at].codec == 'hevc';
+    if (!preferH264 || !hevc(index)) return index;
+    for (var distance = 1; distance < qualities.length; distance++) {
+      for (final at in [index - distance, index + distance]) {
+        if (at >= 0 && at < qualities.length && !hevc(at)) return at;
+      }
+    }
+    return index;
   }
 
   /// The quality the platform served for [requested]: the option of

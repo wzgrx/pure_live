@@ -85,6 +85,26 @@ void main() {
       expect(result.note, contains('没有房间号'));
     });
 
+    test('a small last page that only repeats page 1 passes and says so (17LIVE, E03.18)', () async {
+      final site = FakePagerSite()
+        ..pages = {
+          1: LiveDirectoryPage(rooms: [for (var i = 1; i <= 8; i++) room('$i')], page: 1, hasMore: true),
+          2: LiveDirectoryPage(rooms: [room('3')], page: 2, hasMore: false),
+        };
+      final result = resultOf(await patrolOf(site, _target).run(), CheckId.p1);
+      expect(result.outcome, Outcome.ok, reason: result.note);
+      expect(result.note, contains('最后一页'));
+    });
+
+    test('a last page as large as page 1 and repeating it still fails (a cursor that is ignored)', () async {
+      final site = FakePagerSite()
+        ..pages = {
+          1: LiveDirectoryPage(rooms: [room('1'), room('2')], page: 1, hasMore: true),
+          2: LiveDirectoryPage(rooms: [room('1'), room('2')], page: 2, hasMore: false),
+        };
+      expect(resultOf(await patrolOf(site, _target).run(), CheckId.p1).outcome, Outcome.failed);
+    });
+
     test('a directory pager without more pages passes and says so', () async {
       final site = FakePagerSite()
         ..pages = {
@@ -122,6 +142,31 @@ void main() {
     const target = PatrolTarget(site: 'weibo', name: '微博', search: SearchKind.roomLookup);
     await patrolOf(site, target).run();
     expect(site.keywords, ['1']);
+  });
+
+  test('P4 of a room-lookup platform without recommendations looks up its first fixed room (E02.14)', () async {
+    final site = _healthy()
+      ..details['100'] = room('100', status: LiveStatus.offline)
+      ..rooms = [room('100', status: LiveStatus.offline)];
+    const target = PatrolTarget(
+      site: 'xiaohongshu',
+      name: '小红书',
+      search: SearchKind.roomLookup,
+      fixedRooms: [FixedRoom('100', note: '已结束')],
+      unsupported: {CheckId.p1: '没有公开目录', CheckId.p2: '没有分区', CheckId.p3: '没有分区'},
+    );
+    final run = await patrolOf(site, target).run();
+    expect(resultOf(run, CheckId.p1).outcome, Outcome.unsupported);
+    expect(site.keywords, ['100']);
+    expect(resultOf(run, CheckId.p4).outcome, Outcome.ok);
+    expect(resultOf(run, CheckId.p6).outcome, Outcome.notRun, reason: 'no live room reachable anonymously');
+  });
+
+  test("Xiaohongshu's object row: no public directory (P1), lookups by its ended room (E02.14)", () {
+    final row = patrolTargets.singleWhere((target) => target.site == SiteIds.xiaohongshu);
+    expect(row.unsupported.keys, containsAll([CheckId.p1, CheckId.p2, CheckId.p3]));
+    expect(row.search, SearchKind.roomLookup);
+    expect(row.fixedRooms, isNotEmpty);
   });
 
   test('P5 is unsupported without streamer search, and listed reasons win', () async {
@@ -242,6 +287,23 @@ void main() {
   });
 
   group('P9 qualities', () {
+    test('a live room the platform says has no stream is skipped, not failed (Douyu streamStatus 0, E01.7)', () async {
+      final site = _healthy()..qualityErrors['2'] = const StreamUnavailable('bilibili', 'no stream pushed');
+      final run = await patrolOf(site, _target).run();
+      final p9 = resultOf(run, CheckId.p9);
+      expect(p9.outcome, Outcome.ok, reason: p9.note);
+      expect(p9.note, contains('2 没有流'));
+      expect(resultOf(run, CheckId.p10).outcome, Outcome.ok);
+    });
+
+    test('when no live room has a stream, P9 is not run rather than failed', () async {
+      final site = _healthy()
+        ..qualityErrors.addAll({
+          for (final id in ['1', '2', '3']) id: const StreamUnavailable('bilibili', 'none'),
+        });
+      expect(resultOf(await patrolOf(site, _target).run(), CheckId.p9).outcome, Outcome.notRun);
+    });
+
     test('repeated names fail', () async {
       final site = _healthy()..qualities['1'] = [_quality, const LivePlayQuality(quality: '原画', id: 1)];
       expect(resultOf(await patrolOf(site, _target).run(), CheckId.p9).note, contains('名字重复'));

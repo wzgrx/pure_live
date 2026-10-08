@@ -65,6 +65,9 @@ class FakeSite extends LiveSite {
   /// Qualities by room id.
   Map<String, List<LivePlayQuality>> qualities = {};
 
+  /// Errors listing the qualities throws, by room id.
+  Map<String, Exception> qualityErrors = {};
+
   /// Resolutions by room id.
   Map<String, LivePlayUrlResolution> resolutions = {};
 
@@ -104,8 +107,10 @@ class FakeSite extends LiveSite {
       _answer<LiveRoom>(details[roomId] ?? NotFound(id, roomId));
 
   @override
-  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
-      qualities[detail.roomId] ?? const [];
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async {
+    if (qualityErrors[detail.roomId] case final error?) throw error;
+    return qualities[detail.roomId] ?? const [];
+  }
 }
 
 /// A [FakeSite] whose recommendations are native directory pages.

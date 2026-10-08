@@ -319,6 +319,25 @@ void main() {
       expect(rooms.first.roomId, isNot(top.first.roomId), reason: 'the filtered list is another list');
     });
 
+    test('S03-top-zh-ko-language (E03.17): the query as the adapter sends it, languages as the Language enum', () {
+      final fixture = _sample('S03-top-zh-ko-language');
+      final body = _json((fixture.meta['request'] as Map)['body'] as String);
+      expect(body['query'], TwitchApi.streamsQuery);
+      expect((body['variables'] as Map)['languages'], TwitchApi.legacyLanguages);
+      final rooms = TwitchApi.streams(_decode(fixture), now: fixture.capturedAt).rooms;
+      expect(rooms, hasLength(26));
+      expect(rooms.every((room) => room.roomId.isNotEmpty && room.isLiveNow), isTrue);
+    });
+
+    test(r'S03-top-string-rejected (E03.17): the platform rejects $languages declared as [String!] (ApiChanged)', () {
+      final fixture = _sample('S03-top-string-rejected');
+      expect((fixture.meta['request'] as Map)['body'], contains(r'$languages: [String!]'));
+      expect(
+        () => TwitchApi.streams(_decode(fixture), now: fixture.capturedAt),
+        throwsA(isA<ApiChanged>().having((error) => error.detail, 'detail', contains('[Language!]'))),
+      );
+    });
+
     test("S03-top-cursor: the next page wants a browser's integrity token (RiskControl)", () {
       expect(() => _decode(_sample('S03-top-cursor')), throwsA(isA<RiskControl>()));
     });

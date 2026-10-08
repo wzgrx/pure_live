@@ -77,6 +77,13 @@ const _qualityNames = {
 /// A 3.x pull URL as the current code gives it: always https (33-3).
 String _https(Object? url) => '$url'.replaceFirst(RegExp('^http://'), 'https://');
 
+/// 3.x's [urls] of quality [id] as the adapter gives them: over https
+/// (33-3), without Wansu's H.264 transcode, which is not served (E03.18).
+List<String> _served(String id, Object? urls) => [
+  for (final url in urls! as List)
+    if (id != 'h264' || !'$url'.contains('://wansu-')) _https(url),
+];
+
 const _live = '27484154';
 const _offline = '28371376';
 const _army = '376827';
@@ -510,11 +517,11 @@ void main() {
         final quality = data.qualities.singleWhere((q) => q.id == id);
         final resolution = SeventeenLiveApi.resolution(data, quality);
         // changed: https (33-3); the same URLs otherwise.
-        expect(resolution.urls, [for (final url in (urls[old] as Map)['value'] as List) _https(url)], reason: old);
+        expect(resolution.urls, _served(id, (urls[old] as Map)['value']), reason: old);
         final applied = (resolved[old] as Map)['value'] as Map;
         expect(applied['appliedQualityData'], old);
         expect(resolution.appliedQualityData, id, reason: '33-2: the current id');
-        expect(resolution.urls, [for (final url in applied['urls'] as List) _https(url)]);
+        expect(resolution.urls, _served(id, applied['urls']));
         expect(resolution.urls.every((url) => url.startsWith('https://')), isTrue);
         // 3.x's id still plays (a stored quality M9 did not migrate).
         final byOldId = SeventeenLiveApi.resolution(data, LivePlayQuality(quality: 'x', id: old));
@@ -531,7 +538,11 @@ void main() {
       };
       for (final quality in data.qualities) {
         final lines = quality.data! as List<LivePlayLine>;
-        expect(lines.map((line) => line.lineId), ['tencent', 'wansu'], reason: 'the first CDN serves');
+        expect(
+          lines.map((line) => line.lineId),
+          quality.id == 'h264' ? ['tencent'] : ['tencent', 'wansu'],
+          reason: "the first CDN serves; Wansu's H.264 is not served (E03.18)",
+        );
         for (final line in lines) {
           expect(line.headers, legacyHeaders);
           expect(line.headers['referer'], 'https://17.live/en/live/$_live');
@@ -545,6 +556,21 @@ void main() {
       expect(recorded, contains(tencent.replaceFirst('https://', 'http://')), reason: 'recorded over http');
       // changed: 3.x played the Tencent CDN over http, as given (33-3).
       expect(tencent, startsWith('https://tencent-global-pull-rtmp.17app.co/'));
+    });
+
+    test('S04-live-wansu (E03.18): Wansu serves first; no H.264 (its url264 is not served), 原画 plays first', () {
+      final data = _data(_entered('S04-live-wansu', '29167718'));
+      expect(data.unavailable, isNull);
+      final recorded = jsonDecode(_sample('S04-live-wansu').body) as Map<String, dynamic>;
+      final providers = ((recorded['pullURLsInfo'] as Map)['rtmpURLs'] as List).cast<Map<String, dynamic>>();
+      expect(providers.map((provider) => provider['provider']), [5, 17], reason: 'Wansu first');
+      expect(providers.first['url264'], isNotEmpty, reason: 'the field is there, the stream is not');
+      expect(data.qualities.map((q) => q.id), ['source', 'enhanced', 'hd']);
+      expect(SeventeenLiveApi.playQualities(data).map((q) => q.id), ['source', 'enhanced', 'hd']);
+      for (final quality in data.qualities) {
+        final lines = quality.data! as List<LivePlayLine>;
+        expect(lines.map((line) => line.lineId), ['wansu', 'tencent'], reason: 'the first CDN serves');
+      }
     });
 
     test('offline: rooms as 3.x; no stream (3.x gave an empty quality list)', () {
@@ -846,9 +872,11 @@ void main() {
         skipped: skipped,
       );
       expect(skipped, ['provider 0 is not an object', 'provider 1: url264 is not text']);
-      expect(qualities.map((q) => q.id), ['source', 'enhanced', 'hd', 'h264']);
-      final h264 = qualities.last.data! as List<LivePlayLine>;
-      expect(h264.map((line) => line.lineId), ['wansu'], reason: "Tencent's H.264 field was bad");
+      expect(qualities.map((q) => q.id), [
+        'source',
+        'enhanced',
+        'hd',
+      ], reason: "Tencent's H.264 field was bad and Wansu's H.264 is not served (E03.18)");
       final source = qualities.first.data! as List<LivePlayLine>;
       expect(source.map((line) => line.lineId), ['tencent', 'wansu']);
       // More than 16 providers: the first 16 are read (3.x refused them all).
@@ -862,6 +890,28 @@ void main() {
         hasLength(4),
       );
       expect(many, ['1 providers over 16']);
+    });
+
+    test('E03.18: H.264 is offered only when the first provider (the one serving) is not Wansu, '
+        'and never from Wansu', () {
+      // Wansu first: its url264 is not served (404 or no data), and Tencent
+      // does not serve while Wansu does; no H.264, 原画 plays first.
+      final wansuFirst = offered(live(providers: [_provider(wansu, 'uid'), _provider(tencent, 'uid')]));
+      expect(wansuFirst.map((q) => q.id), ['source', 'enhanced', 'hd']);
+      final data = _data(
+        SeventeenLiveApi.enteredRoom(
+          _room(live(providers: [_provider(wansu, 'uid'), _provider(tencent, 'uid')])),
+          roomId: '123',
+        ),
+      );
+      expect(SeventeenLiveApi.playQualities(data).first.id, 'source');
+      // Tencent first: its transcode serves; Wansu's url264 is left out.
+      final tencentFirst = offered(live(providers: [_provider(tencent, 'uid'), _provider(wansu, 'uid')]));
+      expect(tencentFirst.map((q) => q.id), ['source', 'enhanced', 'hd', 'h264']);
+      final h264 = tencentFirst.last.data! as List<LivePlayLine>;
+      expect(h264.map((line) => line.lineId), ['tencent']);
+      // Wansu alone: nothing to transcode.
+      expect(offered(live(providers: [_provider(wansu, 'uid')])).map((q) => q.id), ['source', 'enhanced', 'hd']);
     });
 
     test('rtmpUrls when there is no pullURLsInfo; an empty rtmpURLs list is not replaced (3.x)', () {

@@ -28,6 +28,13 @@ const _qualityIds = {'enhanced': 'enhanced', 'hd': 'hd', 'h264': 'h264', 'standa
 /// A 3.x pull URL as the current code gives it: always https (33-3).
 String _https(Object? url) => '$url'.replaceFirst(RegExp('^http://'), 'https://');
 
+/// 3.x's [urls] of quality [id] as the adapter gives them: over https
+/// (33-3), without Wansu's H.264 transcode, which is not served (E03.18).
+List<String> _served(String id, Object? urls) => [
+  for (final url in urls! as List)
+    if (id != 'h264' || !'$url'.contains('://wansu-')) _https(url),
+];
+
 LiveArea _area(String id) => SeventeenLiveApi.areas.singleWhere((area) => area.areaId == id);
 
 /// Answers every request with [answer].
@@ -582,7 +589,7 @@ void main() {
       for (final MapEntry(key: old, value: id) in _qualityIds.entries) {
         final quality = qualities.singleWhere((q) => q.id == id);
         final resolution = await setup.site.resolvePlayUrls(detail: room, quality: quality);
-        expect(resolution.urls, [for (final url in (urls[old] as Map)['value'] as List) _https(url)], reason: old);
+        expect(resolution.urls, _served(id, (urls[old] as Map)['value']), reason: old);
         expect(resolution.appliedQualityData, id);
         expect(resolution.lines.first.headers, SeventeenLiveApi.mediaHeaders(_live));
         expect(await setup.site.getPlayUrls(detail: room, quality: quality), resolution.urls);
@@ -619,7 +626,7 @@ void main() {
         final resolution = await setup.site.resolvePlayUrlsForRecovery(detail: room, quality: quality);
         final legacy = recovered[old] as Map<String, dynamic>;
         expect(_urls(setup.http.requests), legacy['requests']);
-        expect(resolution.urls, [for (final url in (legacy['value'] as Map)['urls'] as List) _https(url)]);
+        expect(resolution.urls, _served(id, (legacy['value'] as Map)['urls']));
         expect((legacy['value'] as Map)['appliedQualityData'], old);
         expect(resolution.appliedQualityData, id, reason: '33-2: the current id');
       }

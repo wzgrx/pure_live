@@ -1,0 +1,102 @@
+{
+ "schema": 1,
+ "platform": "douyu",
+ "sample": "S08-meta-9263298-nostream",
+ "capturedAt": "2026-10-08T01:41:07.663693Z",
+ "route": "direct",
+ "request": {
+  "method": "POST",
+  "url": "https://www.douyu.com/lapi/live/getH5PlayV1/9263298",
+  "headers": {
+   "Accept": "application/json, text/plain, */*",
+   "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+   "Origin": "https://www.douyu.com",
+   "Referer": "https://www.douyu.com/9263298",
+   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+   "Cookie": "dy_did=a42b4d853cda688310fdd9b470eb2765; acf_did=a42b4d853cda688310fdd9b470eb2765",
+   "Content-Type": "application/x-www-form-urlencoded; charset=utf-8"
+  },
+  "body": "enc_data=ebDaeEeactAcGtmeUILtLPdadoPpJcedXkx4PWFqAGqlEwR0YqJ1WIQlbLYHR8yQcuHTbzHMXzb3QpL0AZIpIgWtcoZfc5ChDhpgc3P9eAP5ZUcvDMZfYGdFNzUkCzXmO612bE0eSozuETTpfLEreeAaZXUdQxE6GGA4GjQhYskiRnEbX57vSqNqERe8QAO2TAy2FEP9XDR0KVqqRPZyDrBhGIByDQd8AyCoKt8tQgw4OqRzPQH8IrG7ENDmOKCvH6CgVJz1YEWuVLEiEoHxDMPfVHF6QmK6GlkcfLAkRoOwAMKqTJQcDzH1CI4bYFIyENV4deR8SPf5CIBzWfN1IAuccCThCiDOa5rncTebQwHdFIBfG4ujQY34dqVFILZaIB0aXqRGeP37DVunfPR6QJWGbKGwXUbmLbeaaU46FbavMqVjTHwJBO2FIOAicKrkHBcgL2akMCPIeUGheYAcICE6SbMaJJ3cSQYeVwZtdY57EjftUeBweUnxW8EqYqs0VsZwfw31Abe5DmoraU08VHPiAoZcXqRcVQCxXPizCiHXY3h7PMCPVJYbTU31Tek4U4TSEAP0PIVdWGVpcWQjOOOyDrgja7A4O1QocmG3CsCeXQIlEtuqcDW5HpP6afAPf7mjXEn5dKaKa5YKMDGWAx44cC==&tt=6691564041&did=a42b4d853cda688310fdd9b470eb2765&auth=44cf46fb478612f2138783757d2e3b12&cdn&rate=-1&hevc=0&fa=0&ive=0&ver=Douyu_new&iar=0"
+ },
+ "response": {
+  "status": 200,
+  "headers": {
+   "connection": "keep-alive",
+   "x-ratelimit-limit": "10000",
+   "transfer-encoding": "chunked",
+   "date": "Thu, 08 Oct 2026 01:41:08 GMT",
+   "access-control-allow-origin": "https://www.douyu.com",
+   "content-encoding": "gzip",
+   "vary": "Accept-Encoding, Origin",
+   "strict-transport-security": "max-age=86400",
+   "access-control-expose-headers": "*",
+   "x-ratelimit-remaining": "9994",
+   "content-type": "application/json; charset=utf-8",
+   "access-control-max-age": "5",
+   "server": "Tengine",
+   "c-via": "200",
+   "x-request-id": "a54160ba-ffa4-4d51-85a7-5fbc5c2e19f2",
+   "timing-allow-origin": "*",
+   "access-control-allow-headers": "*",
+   "access-control-allow-methods": "*",
+   "via": "cache3.l2nm125-2[19,0], ens-cache12.cn9479[103,0]",
+   "eagleid": "76b7ae2017914236683054430e"
+  }
+ },
+ "raw": {
+  "sha256": "50785a312dcd4085a470e2f66ed03e7e9380b1250f7b50b19abed647024eac1b",
+  "length": 2100
+ },
+ "body": "body.json",
+ "scrubbed": [
+  {
+   "where": "$.data.rtmp_live:wsAuth",
+   "rule": "secret"
+  },
+  {
+   "where": "$.data.rtmp_live:token",
+   "rule": "secret"
+  },
+  {
+   "where": "$.data.rtmp_live:did",
+   "rule": "secret"
+  },
+  {
+   "where": "$.data.client_ip",
+   "rule": "secret"
+  },
+  {
+   "where": "$.data.p2pMeta.stream_props[0].txSecret",
+   "rule": "secret"
+  },
+  {
+   "where": "$.data.p2pMeta.xp2p_txSecret",
+   "rule": "secret"
+  },
+  {
+   "where": "form:enc_data",
+   "rule": "secret"
+  },
+  {
+   "where": "form:tt",
+   "rule": "secret"
+  },
+  {
+   "where": "form:did",
+   "rule": "secret"
+  },
+  {
+   "where": "form:auth",
+   "rule": "secret"
+  },
+  {
+   "where": "cookie:dy_did",
+   "rule": "secret"
+  },
+  {
+   "where": "cookie:acf_did",
+   "rule": "secret"
+  }
+ ],
+ "tool": "E01.7 temporary dump (DouyuSite over IoLiveHttp) + scratch scrub (same-shape values, as S08-meta-24422)"
+}

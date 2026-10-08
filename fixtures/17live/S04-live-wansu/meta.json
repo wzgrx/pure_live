@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "platform": "17live",
+  "sample": "S04-live-wansu",
+  "capturedAt": "2026-10-08T01:13:57.195330Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "GET",
+    "url": "https://api-dsa.17app.co/api/v1/lives/29167718",
+    "headers": {
+      "Origin": "https://17.live",
+      "Referer": "https://17.live/",
+      "Accept": "application/json, text/plain, */*"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "access-control-allow-credentials": "true",
+      "access-control-allow-origin": "https://17.live",
+      "content-type": "application/json",
+      "date": "Thu, 08 Oct 2026 01:14:00 GMT",
+      "trace-id": "dc01b06140b8440fdada73dca0907d18",
+      "via": "1.1 google",
+      "alt-svc": "h3=\":443\"; ma=2592000,h3-29=\":443\"; ma=2592000",
+      "connection": "close",
+      "transfer-encoding": "chunked"
+    }
+  },
+  "raw": {
+    "sha256": "3c708daf4634cfd433cde75fab7c600a1c9e834a99d544733f5f2f50e7837712",
+    "length": 32546
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "scratch capture script (python urllib, schema 1, E03.18): Wansu is the first provider; guardian fields replaced as in S04-live-live"
+}

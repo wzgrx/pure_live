@@ -243,6 +243,12 @@ final class PlatformPatrol {
     final firstIds = {for (final room in first.rooms) room.roomId};
     final repeated = second.rooms.where((room) => firstIds.contains(room.roomId)).length;
     final note = '第 2 页 ${second.rooms.length} 个，和第 1 页重复 $repeated 个';
+    // A short last page that lists a few rooms of page 1 again is the
+    // platform's (17LIVE's group-call section, E03.18; the app drops rooms
+    // it already shows). A cursor that is ignored gives a full page again.
+    if (second.hasMore == false && second.rooms.length * 4 <= first.rooms.length) {
+      return '$note（最后一页，平台把第 1 页的房间又列了一次，应用按房间去重）';
+    }
     if (repeated * 2 > second.rooms.length) throw CheckFailure('$note（超过一半）');
     return note;
   }
@@ -303,7 +309,8 @@ final class PlatformPatrol {
     SearchKind.liveOnly ||
     SearchKind.channelLookup => target.keyword.isEmpty ? null : target.keyword,
     SearchKind.recommendFilter => _recommended.where((room) => room.hasNick).firstOrNull?.nick,
-    SearchKind.roomLookup => _recommended.firstOrNull?.roomId,
+    // Without a directory (Xiaohongshu) the fixed room is the only id known.
+    SearchKind.roomLookup => _recommended.firstOrNull?.roomId ?? target.fixedRooms.firstOrNull?.roomId,
   };
 
   Future<String> _searchRooms() async {
@@ -460,9 +467,19 @@ final class PlatformPatrol {
     if (_live.isEmpty) throw const CheckSkipped('P6 没拿到在播房间');
     final notes = <String>[];
     final problems = <String>[];
+    var withoutStream = 0;
     for (final room in _live) {
       _step = 'discoverPlayQualities ${room.roomId}';
-      final qualities = await site.discoverPlayQualities(detail: room);
+      final List<LivePlayQuality> qualities;
+      try {
+        qualities = await site.discoverPlayQualities(detail: room);
+      } on StreamUnavailable catch (error) {
+        // On air without a stream (Douyu's streamStatus 0, E01.7): the
+        // platform's state, as P6 skips rooms that went offline.
+        withoutStream++;
+        notes.add('${room.roomId} 没有流（${describeError(error)}，平台状态，跳过）');
+        continue;
+      }
       final names = [for (final quality in qualities) quality.quality.trim()];
       if (qualities.isEmpty) {
         problems.add('${room.roomId} 没有清晰度');
@@ -475,6 +492,7 @@ final class PlatformPatrol {
     }
     final note = notes.join('；');
     if (problems.isNotEmpty) throw CheckFailure([note, ...problems].where((text) => text.isNotEmpty).join('；'));
+    if (withoutStream == _live.length) throw CheckSkipped('$note；在播房间都没有流');
     return note;
   }
 

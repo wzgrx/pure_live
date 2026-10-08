@@ -481,7 +481,17 @@ abstract final class DouyuApi {
   /// platform's order (never sorted: `rate` is a request code), first of a
   /// rate wins, each with [cdns] of the answer. Without `multirates`, one
   /// "默认" option for `data.rate`.
+  ///
+  /// `streamStatus: 0` is `StreamUnavailable` (E01.7): the room is on air
+  /// (`betard`) but no stream is pushed, and the URL it still carries
+  /// answers 404 on every CDN (14 such rooms on 2026-10-08, against about
+  /// 60 with `1` that all played). Only the metadata answer is judged: a
+  /// per-rate answer of a room that played once said `0`
+  /// (S09-24422-r2-hw-h5).
   static List<LivePlayQuality> qualities(Map<String, dynamic> data) {
+    if (jsonInt(data['streamStatus']) == 0) {
+      throw const StreamUnavailable(_site, 'getH5PlayV1: streamStatus 0 (no stream pushed)');
+    }
     final lines = cdns(data);
     final items = [for (final raw in _list(data['multirates'])) ?_object(raw)];
     final seen = <int>{};

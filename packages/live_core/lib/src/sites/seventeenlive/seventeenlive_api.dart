@@ -708,6 +708,11 @@ abstract final class SeventeenLiveApi {
   /// The largest number of providers read (3.x refused more).
   static const int maxProviders = 16;
 
+  /// CDNs (line ids) that serve no H.264 transcode: on 2026-10-08 every
+  /// room served by Wansu (provider 5, AVC sources) answered its `url264`
+  /// with 404 or no data, while Tencent's (provider 17) served (E03.18).
+  static const Set<String> untranscodedCdns = {'wansu'};
+
   /// The qualities of a live `lives/<id>` answer (3.x's `_streams`): the
   /// providers of `pullURLsInfo.rtmpURLs` (else `rtmpUrls`), in their order
   /// (only the first one serves at a time: REG-17LIVE-002); for each quality
@@ -723,6 +728,11 @@ abstract final class SeventeenLiveApi {
   /// URL field that is not text, providers beyond [maxProviders] and
   /// providers that are not a list only lose themselves; each is noted in
   /// [skipped]. Empty when nothing is offered.
+  ///
+  /// The H.264 transcode is offered only when the first CDN (the one
+  /// serving) is not one of [untranscodedCdns], and never read from one of
+  /// them (E03.18): 3.x listed it from every CDN, and with "优先 H.264" on
+  /// a Wansu room opened on a quality nothing serves.
   static List<LivePlayQuality> qualities(Map<String, dynamic> data, {required String roomId, List<String>? skipped}) {
     void skip(String reason) => skipped?.add(reason);
     Object? providers;
@@ -737,6 +747,7 @@ abstract final class SeventeenLiveApi {
     if (providers.length > maxProviders) skip('${providers.length - maxProviders} providers over $maxProviders');
     final lines = <String, List<LivePlayLine>>{};
     final headers = mediaHeaders(roomId);
+    String? firstCdn;
     for (final (index, item) in providers.take(maxProviders).indexed) {
       final provider = _map(item);
       if (provider == null) {
@@ -753,6 +764,9 @@ abstract final class SeventeenLiveApi {
           }
           final url = pullUrl(value);
           if (url == null) continue;
+          final cdn = url.host.toLowerCase().split('-').first;
+          firstCdn ??= cdn;
+          if (id == h264QualityId && untranscodedCdns.contains(cdn)) continue;
           final list = lines.putIfAbsent(id, () => []);
           final text = url.toString();
           if (list.any((line) => line.url == text)) continue;
@@ -762,12 +776,13 @@ abstract final class SeventeenLiveApi {
               headers: headers,
               format: StreamFormat.flv,
               codec: id == h264QualityId ? 'avc' : null,
-              lineId: url.host.toLowerCase().split('-').first,
+              lineId: cdn,
             ),
           );
         }
       }
     }
+    if (untranscodedCdns.contains(firstCdn)) lines.remove(h264QualityId);
     return List.unmodifiable([
       for (final id in qualityFields.keys)
         if (lines[id] case final list?)

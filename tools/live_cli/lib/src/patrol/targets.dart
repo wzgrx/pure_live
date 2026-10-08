@@ -387,7 +387,21 @@ final List<PatrolTarget> patrolTargets = List.unmodifiable(<PatrolTarget>[
     search: SearchKind.roomLookup,
     fixedRooms: [FixedRoom('570305058583373361', note: '已结束的场次')],
     missingRoom: '569865232324657152',
-    unsupported: {CheckId.p2: _noAreas, CheckId.p3: _noAreas, CheckId.p5: _noAnchors, CheckId.p13: _noDanmaku},
+    links: [
+      LinkCase(
+        'https://www.xiaohongshu.com/livestream/570305058583373361',
+        expected: '570305058583373361',
+        note: '已结束场次的分享页',
+      ),
+    ],
+    unsupported: {
+      CheckId.p1: '没有公开的直播目录（网页的列表要登录签名，3.x 同，E02.7），推荐永远为空、不发请求',
+      CheckId.p2: _noAreas,
+      CheckId.p3: _noAreas,
+      CheckId.p5: _noAnchors,
+      CheckId.p13: _noDanmaku,
+    },
+    note: '匿名拿不到在播房间：P4 按固定房间号查，P6～P12 没测到，手工用 probe 查结束页推荐的在播房间',
   ),
   const PatrolTarget(
     site: SiteIds.niconico,

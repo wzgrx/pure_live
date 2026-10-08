@@ -370,6 +370,32 @@ void main() {
   });
 
   group('S08/S09/S10 play answers', () {
+    test('S08-meta-9263298-nostream (E01.7): a live room whose metadata says streamStatus 0 has no stream: '
+        'StreamUnavailable, not its URL that answers 404', () {
+      final fixture = _sample('S08-meta-9263298-nostream');
+      final data = DouyuApi.playData(fixture.body, status: fixture.status);
+      expect(data['streamStatus'], 0);
+      expect(DouyuApi.mediaUrl(data), isNotNull, reason: 'the answer still carries a URL (404 when tried)');
+      expect(() => DouyuApi.qualities(data), throwsA(isA<StreamUnavailable>()));
+      // Recorded metadata of rooms that play say 1.
+      for (final name in ['S08-meta-24422', 'S08-meta-4489985']) {
+        expect(DouyuApi.playData(_sample(name).body)['streamStatus'], 1, reason: name);
+      }
+      // Without the field (older answers, synthetic ones) nothing changes.
+      expect(DouyuApi.qualities({'rate': 2}), hasLength(1));
+      expect(DouyuApi.qualities({'rate': 2, 'streamStatus': '1'}), hasLength(1));
+      expect(() => DouyuApi.qualities({'rate': 2, 'streamStatus': '0'}), throwsA(isA<StreamUnavailable>()));
+    });
+
+    test('E01.7: streamStatus 0 on the answer for one rate is not judged (S09-24422-r2-hw-h5 of a room that '
+        'played); only the metadata answer is', () {
+      final fixture = _sample('S09-24422-r2-hw-h5');
+      final data = DouyuApi.playData(fixture.body);
+      expect(data['streamStatus'], 0);
+      final answer = DouyuApi.answer(data, roomId: '24422', cdn: 'hw-h5', cookie: '', issuedAt: fixture.capturedAt);
+      expect(answer.line.url, isNotEmpty);
+    });
+
     for (final name in ['S08-meta-24422', 'S08-meta-4489985']) {
       test('$name: qualities in platform order, CDNs and the URL match 3.x', () {
         final fixture = _sample(name);

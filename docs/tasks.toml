@@ -2119,6 +2119,17 @@ next = "第 2 轮 2026-10-22：patrol bilibili douyu huya douyin kuaishou --danm
 note = "持续任务：第 1 轮 2026-10-08 做完，本轮无失效（斗鱼一个房间断流是平台状态，候选见 record.md）"
 
 [[task]]
+id = "E01.7"
+title = "斗鱼在播但没有流：streamStatus 为 0 时报“没有画面”，不再交给播放器 404 地址"
+type = "平台"
+status = "待真机"
+size = "小"
+tier = 2
+date = "2026-10-08"
+from = "E01.6 第 1 轮巡检（2026-10-08）"
+note = "getH5PlayV1 元数据 streamStatus 0 是 StreamUnavailable（douyu_api.dart qualities）；当天 14 个 0 全 404、约 60 个 1 全 200；只看元数据，单档回答不判（S09-24422-r2）。巡检 P9 把没有流的房间记跳过。K90 进一个这样的房间看提示"
+
+[[task]]
 id = "E02.1"
 title = "YY 直播"
 type = "平台"
@@ -2239,21 +2250,23 @@ old = ["M4.32", "M4.U.32", "T02b.13"]
 id = "E02.14"
 title = "接 E07.1：小红书推荐对游客为空"
 type = "平台"
-status = "未开始"
+status = "完成"
 size = "小"
 tier = 2
+date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08）：P1 两次都是第 1 页为空，没有报错；P4、P6～P12 因此没测到"
-note = "先看 xiaohongshu_site.dart:100 的推荐请求现在的回答"
+note = "不是失效：xiaohongshu_site.dart:91-100 照 3.x 没有目录、不发请求（E02.7）；改的是巡检对象表（P1 不支持、P4 按固定房间号、P12 固定链接），在播取流 probe 手工查正常"
 
 [[task]]
 id = "E02.15"
 title = "接 E07.1：映客网宿线路读不到数据"
 type = "平台"
-status = "未开始"
+status = "完成"
 size = "小"
 tier = 2
+date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08）：P10 三轮里每次 3 个房间有 2 个的 live-pull-ws 线路 10 秒内没有数据（超时），另一个正常"
-note = "inke_api.dart:171、:324（只保留网宿 H.264 线路）；先确认是不是本机网络到网宿的问题，再看是否要保留别的 CDN"
+note = "只是本机网络：本机（宁夏电信）的网宿节点上没人看的流第一次要 9～15 秒才出数据，第二次 0.1 秒，巡检只等 10 秒；K90 当天播放、录制正常。不改代码"
 
 [[task]]
 id = "E03.1"
@@ -2403,21 +2416,23 @@ old = ["M4.34", "T02c.16"]
 id = "E03.17"
 title = "接 E07.1：Twitch 推荐的 GraphQL 语言参数类型变了"
 type = "平台"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 1
+date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08，经代理）：P1 推荐 ApiChanged：Variable \"$languages\" of type \"[String!]\" used in position expecting type \"[Language!]\""
-note = "twitch_api.dart:156 的查询把 $languages 声明成 [String!]，平台改成了 [Language!] 枚举；推荐页（和用它的分区）打不开。修完在 K90 上看热门里的 Twitch"
+note = "twitch_api.dart:157 的 $languages 改成 [Language!]，巡检 P1 恢复正常（分区用持久化查询，本来不受影响）；K90 经代理看热门里的 Twitch 和语言筛选"
 
 [[task]]
 id = "E03.18"
 title = "接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个"
 type = "平台"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 2
+date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08，经代理）：P10 每个房间 tencent 线路 404、wansu 线路超时；P1、P3 第 2 页只有 1 个且和第 1 页重复"
-note = "seventeenlive_api.dart:717（线路）、seventeenlive_site.dart:101-109（游标翻页）；先换代理出口地区复测，排除地区限制"
+note = "不是地区限制：平台把多数房间换到网宿，网宿不出 H.264 转码，默认的 H.264 档播不了；网宿排第一时不再给 H.264 档（seventeenlive_api.dart untranscodedCdns）。第 2 页重复是平台数据（应用已去重），改巡检判定。巡检 11 正常 0 失败；K90 经代理看默认档有画面"
 
 [[task]]
 id = "E04.1"

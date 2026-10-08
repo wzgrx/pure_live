@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # Quality gate (docs/specs/ENGINEERING.md §3): format, dependency direction, docs, analyze, tests.
 #
-#   tools/gate/gate.sh           workspace members changed against origin/master, plus uncommitted work
+#   tools/gate/gate.sh           workspace members changed against origin/master, plus uncommitted work;
+#                                the repository checks (dependency direction, fixture privacy, ui
+#                                structure, docs) also when only docs/, fixtures/, tools/ or the root
+#                                notes changed, and the gate's own tests when tools/gate/ or tools/docs/ did
 #   tools/gate/gate.sh --all     every member and the gate's own tests; required before every push
-#   tools/gate/gate.sh --hook    Claude Code Stop hook: silent when no member changed, exit 2 on failure
+#   tools/gate/gate.sh --hook    Claude Code Stop hook: the default selection, silent when nothing to check,
+#                                exit 2 on failure
 #
 # One heavy task at a time: a second caller waits for the lock.
 set -uo pipefail
@@ -43,6 +47,8 @@ while IFS= read -r member; do members+=("$member"); done < <(
 )
 
 selected=()
+repo_changed=1
+gate_tools_changed=1
 if [[ $mode == all ]]; then
   selected=("${members[@]}")
 else
@@ -56,8 +62,11 @@ else
       grep -q "^$member/" <<<"$changed" && selected+=("$member")
     done
   fi
-  if [[ ${#selected[@]} -eq 0 ]]; then
-    [[ $mode == hook ]] || echo "gate: no workspace member changed"
+  # Documents, samples and scripts: the repository checks below (Z02.3).
+  grep -qE '^(docs|fixtures|tools)/|^(README|AGENTS|CLAUDE)\.md$' <<<"$changed" || repo_changed=0
+  grep -qE '^tools/(gate|docs)/' <<<"$changed" || gate_tools_changed=0
+  if [[ ${#selected[@]} -eq 0 && $repo_changed == 0 ]]; then
+    [[ $mode == hook ]] || echo "gate: nothing to check (no workspace member, document or script changed)"
     exit 0
   fi
 fi
@@ -95,7 +104,7 @@ stale=0
 for spec in pubspec.lock pubspec.yaml "${members[@]/%//pubspec.yaml}"; do
   [[ -f $spec && $spec -nt $config ]] && stale=1
 done
-if [[ $stale == 1 ]]; then
+if [[ $stale == 1 && ${#selected[@]} -gt 0 ]]; then
   if command -v flutter >/dev/null 2>&1; then
     step "dependencies" flutter pub get
   else
@@ -126,7 +135,7 @@ for member in "${selected[@]}"; do
   fi
 done
 
-if [[ $mode == all ]]; then
+if [[ $mode == all || $gate_tools_changed == 1 ]]; then
   step "gate tests" python3 -m unittest discover -s tools/gate/tests
 fi
 

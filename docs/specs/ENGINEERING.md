@@ -19,7 +19,7 @@
 
 - **工具链**：`toolchain.env` 是唯一来源。`tools/check_latest` 对照官方渠道检查 Flutter、Dart、Gradle、AGP、Kotlin、JDK、NDK、Android SDK、mpv、FFmpeg 和 pub 依赖的最新稳定版：`GITHUB_TOKEN=$(gh auth token) dart run tools/check_latest/bin/check_latest.dart`。
 - **结构**：pub workspace，全部成员共用根目录的 `pubspec.lock`；依赖覆盖只能写在根 `pubspec.yaml`。
-- **门禁**：`tools/gate/gate.sh`，依次检查依赖、FFmpeg 包、依赖方向（`check_deps.py`）、样本隐私（`check_fixtures.py`）、界面结构（`check_ui_structure.py`）、文档（`tools/docs/docs.py --check`），再对每个成员检查格式、`dart analyze --fatal-infos` 和测试。`--all` 是每次推送前必跑的，日志里出现 `gate: passed` 才算通过。
+- **门禁**：`tools/gate/gate.sh`，依次检查依赖、FFmpeg 包、依赖方向（`check_deps.py`）、样本隐私（`check_fixtures.py`）、界面结构（`check_ui_structure.py`）、文档（`tools/docs/docs.py --check`），再对每个成员检查格式、`dart analyze --fatal-infos` 和测试。`--all` 是每次推送前必跑的，日志里出现 `gate: passed` 才算通过。不带参数时只查和 `origin/master` 比有改动的成员；只改了 `docs/`、`fixtures/`、`tools/` 或根目录的说明文件时也跑依赖方向、样本隐私、界面结构、文档这四项，改了 `tools/gate/`、`tools/docs/` 时再跑门禁自己的测试（Z02.3）。
 - **构建**：只在本机构建。Android 在 WSL，Windows 在主机；不用 GitHub Actions。同一时间只跑一个重任务；不要在门禁运行时在同一份代码里构建正式包。
 - **FFmpeg 包**：`tools/ffmpeg_kit/fetch.sh`（Windows 用 `fetch.ps1`）缓存到 `~/.cache/pure_live/ffmpeg_kit/` 并链接到 `.ffmpeg_kit/`；克隆或新建工作区后先跑一次。
 - **时间炸弹**：发布前可跑 `tools/timeshift/run.sh`（+30 天、+1 年、+5 年）；用到样本时间的测试把“现在”固定成录制时间，被测代码能注入时间。

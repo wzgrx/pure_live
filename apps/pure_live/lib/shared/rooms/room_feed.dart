@@ -275,8 +275,9 @@ final class RoomFeed extends ChangeNotifier {
   /// Whether a room is shown (the "show rooms that cannot play" setting).
   final bool Function(LiveRoom room) visible;
 
-  /// Runs before a refresh asks the platform (3.x `checkNetworkBeforeRequest`:
-  /// the offline check); its error is the refresh's error.
+  /// Runs before the feed asks the platform: the first load, loading more
+  /// and a refresh (3.x `checkNetworkBeforeRequest`: the offline check and
+  /// the mobile-data notice, I03.2 c1); its error is the load's error.
   final Future<void> Function()? precheck;
 
   /// Requests per load before it gives up (3.x).
@@ -380,6 +381,8 @@ final class RoomFeed extends ChangeNotifier {
     final cancel = _cancel = CancelToken();
     final result = _Collected(List.of(_rooms), {..._keys});
     try {
+      await precheck?.call();
+      if (generation != _generation) return;
       _hasMore = await _collect(
         _source,
         result,

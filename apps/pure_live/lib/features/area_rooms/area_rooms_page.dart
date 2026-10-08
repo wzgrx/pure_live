@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/area_rooms/follow_area_button.dart';
 import 'package:pure_live/features/areas/areas_common.dart';
@@ -62,13 +65,21 @@ class AreaRoomsView extends ConsumerStatefulWidget {
 
 class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
   late final RoomFeed _feed;
+  late final StreamSubscription<Setting<Object>> _settings;
   late bool _showUnplayable;
 
   @override
   void initState() {
     super.initState();
     final services = ref.read(appServicesProvider);
+    final probe = ref.read(networkProbeProvider);
     _showUnplayable = services.store.settings.get(Settings.showUnplayableInDiscover);
+    // I03.2 c4: the setting changed while the page is open applies at once.
+    _settings = services.store.settings.changes.listen((setting) {
+      if (setting.key != Settings.showUnplayableInDiscover.key || !mounted) return;
+      setState(() => _showUnplayable = services.store.settings.get(Settings.showUnplayableInDiscover));
+      _feed.visibilityChanged();
+    });
     _feed = RoomFeed(
       platform: widget.site.id,
       source: AreaRoomSource(widget.loader ?? areaRoomLoader(widget.site, widget.area), areaName: widget.area.areaName),
@@ -77,6 +88,8 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
           _showUnplayable || !cannotPlayHere(room, signedIn: signedInOn(services.cookies, room.platform)),
       // 3.x kept up to 20000 rooms of a directory.
       maxRooms: 5000,
+      // I03.2 c1: offline and mobile data, as on the popular page.
+      precheck: () => MobileDataNotice.precheck(probe),
     );
   }
 
@@ -87,6 +100,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
 
   @override
   void dispose() {
+    unawaited(_settings.cancel());
     _feed.dispose();
     super.dispose();
   }

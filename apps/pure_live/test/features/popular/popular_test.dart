@@ -10,6 +10,7 @@ import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/popular/popular_page.dart';
@@ -229,6 +230,42 @@ void main() {
       expect(rooms.rooms, hasLength(5));
       expect(rooms.hiddenCount, 1);
       expect(rooms.hasMore, isFalse);
+    });
+
+    test('I03.2 c1: the first load and loading more also check the network', () async {
+      final site = _FakeSite(SiteIds.bilibili, [
+        [_room('bilibili', 1)],
+        [_room('bilibili', 2)],
+      ]);
+      var checks = 0;
+      var offline = false;
+      final rooms = RoomFeed(
+        platform: 'x',
+        source: popularSourceFor(site),
+        visible: (_) => true,
+        precheck: () async {
+          checks++;
+          if (offline) throw const Offline();
+        },
+      );
+      await rooms.open(count: 1);
+      expect(checks, 1);
+      await rooms.loadMore();
+      expect(checks, 2);
+      expect(rooms.rooms, hasLength(2));
+      offline = true;
+      await rooms.loadMore();
+      expect(rooms.error, isA<Offline>());
+      expect(site.requested, [1, 2], reason: 'nothing asked offline');
+      final fresh = RoomFeed(
+        platform: 'x',
+        source: popularSourceFor(site),
+        visible: (_) => true,
+        precheck: () async => throw const Offline(),
+      );
+      await fresh.open(count: 1);
+      expect(fresh.error, isA<Offline>());
+      expect(fresh.rooms, isEmpty);
     });
 
     test('a failed refresh keeps the rooms; a failed first load has none', () async {

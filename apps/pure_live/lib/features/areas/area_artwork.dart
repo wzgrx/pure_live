@@ -101,7 +101,9 @@ final class AreaPictures {
   }
 
   /// Learns the pictures of [categories]; saves when something changed.
+  /// The saved pictures are read first, so the save keeps them (I03.2 c3).
   Future<void> learn(Iterable<LiveCategory> categories) async {
+    await load();
     var changed = false;
     for (final area in categories.expand((category) => category.children)) {
       final name = area.areaName.trim();

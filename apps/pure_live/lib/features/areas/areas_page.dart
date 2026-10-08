@@ -49,7 +49,6 @@ class AreasView extends ConsumerStatefulWidget {
 }
 
 class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateMixin {
-  final Map<String, AreaCatalog> _catalogs = {};
   List<String> _ids = const [];
   TabController? _tabs;
   Timer? _warm;
@@ -66,14 +65,11 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
     _warm?.cancel();
     _tabs?.removeListener(_onTab);
     _tabs?.dispose();
-    for (final catalog in _catalogs.values) {
-      catalog.dispose();
-    }
+    // The catalogues stay in the app (I03.2 c2, [areaCatalogsProvider]).
     super.dispose();
   }
 
-  AreaCatalog _catalog(String id) =>
-      _catalogs[id] ??= AreaCatalog(ref.read(sitesProvider).of(id), pictures: ref.read(areaPicturesProvider));
+  AreaCatalog _catalog(String id) => ref.read(areaCatalogsProvider).of(id);
 
   String? get _currentId {
     final tabs = _tabs;
@@ -94,9 +90,7 @@ class _AreasViewState extends ConsumerState<AreasView> with TickerProviderStateM
       // The old tab bar is still mounted in this frame.
       WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
     }
-    for (final id in _catalogs.keys.where((id) => !ids.contains(id)).toList()) {
-      _catalogs.remove(id)!.dispose();
-    }
+    ref.read(areaCatalogsProvider).retain(ids);
     if (ids.isEmpty) return;
     final index = ids.indexOf(previous ?? '');
     _tabs = TabController(

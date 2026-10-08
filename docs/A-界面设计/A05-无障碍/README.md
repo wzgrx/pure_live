@@ -18,12 +18,12 @@
 - 用户看得到的（或听得到的）：
   - 键盘焦点：用键盘（或遥控器）移动焦点时才画焦点框，触摸时不画（`packages/live_ui/lib/src/widgets/focus_ring.dart:5` 的 `focusFramesShown` 看 `FocusHighlightMode.traditional`）。按钮、芯片、标签由主题和组件画 2 像素主色框（`live_theme.dart:31`、`app_chip.dart:73`、`tab_label.dart:62-66`）；头像、回到顶部用 `FocusRing`；设置行、房间卡片自己画（`settings_row.dart:475-480`、`live_room_card.dart:137`、`:757`）。
   - 键盘操作：直播间空格和媒体键暂停、R 刷新、↑↓ 音量 ±5%、F 全屏、Esc 依次退出（`apps/pure_live/lib/features/live_play/live_play_page.dart:736-753`，照 3.x）；设置 Ctrl/Cmd+F 搜索、Esc 清搜索（`features/settings/settings_page.dart:235-239`）；电脑上房间列表 ← → 翻页（`shared/rooms/room_grid.dart:583`、`features/favorite/favorite_page.dart:510`、`features/areas/platform_areas_view.dart:244`）；对话框回车 = 主要按钮、Esc = 取消、危险确认焦点在“取消”（`packages/live_ui/lib/src/widgets/dialog_keys.dart:12`）；小菜单方向键、回车、Esc，焦点在菜单里循环（`anchored_menu.dart:89`）；计数 ← → 调（`count_button.dart:204`）。Esc 返回（`EscapeBack`）只用在搜索、网页搜索、观看记录，加上直播间、多画面（`features/multiview/multiview_page.dart:380`）；其他二级页面没有。
-  - 读屏：`IconButton` 102 个，粗查（看构造参数里有没有 `tooltip:`）都写了按钮名称（悬停和长按显示，读屏念）；三档面板把手能“增大 / 减小”（`features/live_play/layout/portrait_panel.dart:255-267`，照 3.x）；设置的数值行能增减（`features/settings/settings_tiles.dart:497-498`、`appearance_pages.dart:222-223`、`features/record_settings/record_settings_page.dart:567-568`）；开着读屏时带操作的提示条不自动消失（`packages/live_ui/lib/src/widgets/app_toast.dart:63`、`:137`）；状态页、横幅、面板标题、对话框、设置行、画面中间按钮、录制图形、表情、卡片封面上的标签都有读屏信息（`status_view.dart:162`、`status_banner.dart:103`、`adaptive_panel.dart:125`、`app_dialog.dart:186`、`:357`、`settings_row.dart:216`、`:492`、`video_centre_button.dart:51`、`record_glyph.dart:370`、`emote_text.dart:100`、`live_room_card.dart:559`、`danmaku_icon.dart:56`）。自绘的可点组件（`InkWell` 66、`GestureDetector` 20，62 个文件，不含电视）没逐个查过。
+  - 读屏：`IconButton` 102 个，粗查（看构造参数里有没有 `tooltip:`）都写了按钮名称（悬停和长按显示，读屏念）；三档面板把手能“增大 / 减小”（`features/live_play/layout/portrait_panel.dart:255-267`，照 3.x）；设置的数值行能增减（`features/settings/settings_tiles.dart:497-498`、`appearance_pages.dart:222-223`、`features/record_settings/record_settings_page.dart:567-568`）；开着读屏时带操作的提示条不自动消失（`packages/live_ui/lib/src/widgets/app_toast.dart:63`、`:137`）；状态页、横幅、面板标题、对话框、设置行、画面中间按钮、录制图形、表情、卡片封面上的标签都有读屏信息（`status_view.dart:162`、`status_banner.dart:103`、`adaptive_panel.dart:125`、`app_dialog.dart:186`、`:357`、`settings_row.dart:216`、`:492`、`video_centre_button.dart:51`、`record_glyph.dart:370`、`emote_text.dart:100`、`live_room_card.dart:559`、`danmaku_icon.dart:56`）。自绘的可点组件（`InkWell` 66、`GestureDetector` 20，62 个文件，不含电视）在手机的主要页面和直播间上由自动检查看过（A05.1 第一轮：只有直播画面和平台管理的开关缺名字，已补），其他页面没逐个查过。
   - 对比度：品牌蓝白字 4.7:1（A11.2）；设置行说明、组标题、横幅、状态页、计数、开关在深浅主题下 ≥4.5:1（A02.1，有测试）；画面上的白字在最亮画面上 5.7:1；平台给的颜色上按对比度选深字或白字（`InkOnColor`）。画面上的次要白（70%）在最亮画面上约 3.8:1，还没处理。
   - 触控：A02.1 的组件都到 48；其余见 A04。
   - 减少动态效果：小菜单、录制图形、小窗弹幕预览、侧面板、直播间的面板和换台都跟随；下拉刷新头、回到顶部按钮不跟随。
 - 内部怎么工作：焦点框靠 Flutter 的 `FocusManager.highlightMode`（最后一次输入是键盘还是触摸）决定画不画；主题里的 `FocusFrame` 是一个 `WidgetStateProperty<BorderSide?>`，按钮在 `WidgetState.focused` 且用键盘时画框，相等的框比较相等，主题重建不触发动画。读屏文字和用户看到的文字一样走翻译（`apps/pure_live/assets/translations/zh.json`、`en.json`）。
-- 完成度：没有专门的无障碍任务做完过；焦点框、对比度、触控是 A02.1 顺带做的，读屏和 Esc 返回零散。全应用的检查是 [A05.1](A05.1-无障碍检查/README.md)（未开始，第三档）。和 3.x 比：3.x 没有焦点框（主题 `NoSplash`，焦点只是底色）、对比度几处不够（默认蓝 3.1:1、设置组标题约 2.9:1、说明约 3.3:1），4.x 已修；3.x 的读屏调节（三档面板、音量）保留了（音量改成自带读屏的 `Slider`，`features/live_play/player/bar_parts.dart:206`）。
+- 完成度：没有专门的无障碍任务做完过；焦点框、对比度、触控是 A02.1 顺带做的，读屏和 Esc 返回零散。全应用的检查是 [A05.1](A05.1-无障碍检查/README.md)：第一轮（2026-10-08，Android 手机）用 Flutter 的三条指南查了主要页面和直播间，修了读屏文字、对比度、点击区，加了自动检查 `apps/pure_live/test/accessibility_test.dart`；键盘、Esc 返回、减少动态效果在下一轮。和 3.x 比：3.x 没有焦点框（主题 `NoSplash`，焦点只是底色）、对比度几处不够（默认蓝 3.1:1、设置组标题约 2.9:1、说明约 3.3:1），4.x 已修；3.x 的读屏调节（三档面板、音量）保留了（音量改成自带读屏的 `Slider`，`features/live_play/player/bar_parts.dart:206`）。
 
 ## 代码地图
 
@@ -104,15 +104,11 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：全部界面代码
-- 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
+- 进度：`██████████████████░░` 90%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| A05.1 | 无障碍检查：读屏文字、键盘焦点、对比度、48dp 触控区域全应用过一遍 | 界面 | 未开始 | — | — | [设计或说明](A05.1-无障碍检查/README.md)、[任务书](A05.1-无障碍检查/brief.md) |
-
-## 还没完成的
-
-- **A05.1 无障碍检查：读屏文字、键盘焦点、对比度、48dp 触控区域全应用过一遍**（未开始，第三档，规模 中）
+| A05.1 | 无障碍检查：读屏文字、键盘焦点、对比度、48dp 触控区域全应用过一遍 | 界面 | 待真机 | 2026-10-08 | e25508f18 | [设计或说明](A05.1-无障碍检查/README.md)、[任务书](A05.1-无障碍检查/brief.md)、[记录](A05.1-无障碍检查/record.md) |
 
 <!-- docs:生成结束 -->

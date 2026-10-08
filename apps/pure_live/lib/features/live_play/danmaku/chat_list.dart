@@ -552,7 +552,14 @@ class ChatNameHintBar extends StatelessWidget {
                 style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSecondaryContainer),
               ),
             ),
-            TextButton(key: const ValueKey('live-play-name-hint-login'), onPressed: onAction, child: Text(action)),
+            TextButton(
+              key: const ValueKey('live-play-name-hint-login'),
+              // The bar's ink: the primary colour falls under 4.5:1 on the
+              // secondary container in the light theme (A05.1).
+              style: TextButton.styleFrom(foregroundColor: scheme.onSecondaryContainer),
+              onPressed: onAction,
+              child: Text(action),
+            ),
           ],
         ),
       ),

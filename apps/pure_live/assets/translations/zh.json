@@ -868,6 +868,8 @@
     "live_play_orientation_now": "画面方向：{value}",
     "live_play_orientation_portrait_desc": "当作竖屏直播：画面加高、下面是可拖的面板，能进竖屏全屏",
     "live_play_pause": "暂停",
+    "live_play_picture": "直播画面",
+    "live_play_picture_tap_hint": "显示或隐藏控制按钮",
     "live_play_play": "播放",
     "live_play_reconnecting": "正在重连（第 {count} 次）",
     "live_play_record_failed": "录制操作失败，请重试",

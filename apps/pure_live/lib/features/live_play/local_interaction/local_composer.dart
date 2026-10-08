@@ -167,8 +167,10 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
             key: const ValueKey('local-composer-field'),
             duration: const Duration(milliseconds: 120),
             height: 48,
-            decoration: BoxDecoration(
-              color: scheme.surfaceContainerLow,
+            decoration: BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: BorderRadius.circular(22)),
+            // The outline on top, so the star and the field take the whole
+            // 48 to tap (A05.1).
+            foregroundDecoration: BoxDecoration(
               borderRadius: BorderRadius.circular(22),
               border: Border.all(color: focused ? scheme.primary : scheme.outline, width: focused ? 1.5 : 1),
             ),
@@ -216,8 +218,10 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
           key: const ValueKey('local-composer-video'),
           duration: const Duration(milliseconds: 120),
           height: 40,
-          decoration: BoxDecoration(
-            color: OnVideoColors.dim,
+          decoration: BoxDecoration(color: OnVideoColors.dim, borderRadius: BorderRadius.circular(20)),
+          // The outline on top, so the buttons and the field take the whole
+          // height (A05.1).
+          foregroundDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: focused ? localVideoFocusColor(scheme) : OnVideoColors.fieldOutline,
@@ -281,6 +285,9 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
           cursorColor: cursor,
           textInputAction: TextInputAction.send,
           onSubmitted: (_) => _send(),
+          // The field is as tall as its bar, the words in the middle: a tap
+          // anywhere on the bar's field types (A05.1).
+          textAlignVertical: TextAlignVertical.center,
           decoration:
               InputDecoration.collapsed(
                 hintText: localComposerHint(context, hint, constraints.maxWidth),
@@ -288,6 +295,7 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
               ).copyWith(
                 // A long hint ends in "…" instead of wrapping.
                 hintMaxLines: 1,
+                constraints: BoxConstraints(minHeight: constraints.maxHeight.isFinite ? constraints.maxHeight : 0),
               ),
         ),
       );
@@ -492,7 +500,8 @@ class LocalComposerChatStar extends ConsumerWidget {
       style: IconButton.styleFrom(
         fixedSize: const Size.square(40),
         minimumSize: const Size.square(40),
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // 40 to see, 48 to tap on every platform (A05.1).
+        tapTargetSize: MaterialTapTargetSize.padded,
         backgroundColor: scheme.secondaryContainer,
         foregroundColor: scheme.primary,
       ),
@@ -530,7 +539,8 @@ class LocalComposerBelow extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             child,
-            const Positioned(right: 12, bottom: 12, child: LocalComposerChatStar()),
+            // 12 from the corner to the star; its tap area reaches 4 further.
+            const Positioned(right: 8, bottom: 8, child: LocalComposerChatStar()),
           ],
         )
       : Column(

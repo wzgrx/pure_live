@@ -320,7 +320,10 @@ void main() {
       final sheet = tester.getRect(_key('live-play-portrait-sheet'));
       expect(sheet.height, closeTo(796 * 0.44, 0.5), reason: '"均衡" starts at the middle');
       expect(_key('local-composer-bar'), findsNothing);
-      final star = tester.getRect(_key('local-composer-chat-star'));
+      // 40 to see (12 from the corner), 48 to tap (A05.1).
+      final target = tester.getRect(_key('local-composer-chat-star'));
+      expect(target.size, const Size.square(48));
+      final star = target.deflate(4);
       final chat = tester.getRect(_key('live-play-chat-body'));
       expect(star.right, closeTo(chat.right - 12, 1));
       expect(star.bottom, closeTo(chat.bottom - 12, 1));

@@ -869,6 +869,8 @@
     "live_play_orientation_now": "Orientation: {value}",
     "live_play_orientation_portrait_desc": "Treat as a portrait stream: a tall picture over a draggable panel, with portrait fullscreen",
     "live_play_pause": "Pause",
+    "live_play_picture": "Stream picture",
+    "live_play_picture_tap_hint": "show or hide the controls",
     "live_play_play": "Play",
     "live_play_reconnecting": "Reconnecting (attempt {count})",
     "live_play_record_failed": "The recording action failed, please try again",

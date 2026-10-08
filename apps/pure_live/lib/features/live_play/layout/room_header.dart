@@ -148,60 +148,70 @@ class RoomTitle extends StatelessWidget {
       final scheme = theme.colorScheme;
       final platformLabel = platformName(platform);
       final placeholder = nick.isEmpty && loading;
-      return InkWell(
-        key: const ValueKey('live-play-title'),
-        onTap: onTap,
-        // The avatar is the keyboard's stop for the details (B09 c9); the
-        // names around it are more room for a finger.
-        canRequestFocus: false,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4),
-          child: Row(
-            children: [
-              // B09 c9 (U.1c c9): the tappable avatar darkens under the
-              // pointer and when pressed, and draws the keyboard frame.
-              CommonAvatar(
-                key: const ValueKey('live-play-avatar'),
-                avatarUrl: avatar,
-                radius: 16,
-                fallbackName: nick.isEmpty ? platformLabel : nick,
-                onTap: onTap,
-                tooltip: onTap == null ? null : i18n('live_play_room_details'),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: placeholder
-                    ? const Column(
-                        key: ValueKey('live-play-title-placeholder'),
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SkeletonBar(width: 72, height: 14),
-                          SizedBox(height: 6),
-                          SkeletonBar(width: 112, height: 10),
-                        ],
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            nick.isEmpty ? platformLabel : nick,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleMedium?.emphasis,
-                          ),
-                          Text(
-                            area.isEmpty ? platformLabel : '$platformLabel · ${platformAreaName(platform, area)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant),
-                          ),
-                        ],
-                      ),
-              ),
-            ],
+      // One stop for a screen reader (A05.1): the names and what a tap
+      // opens; the avatar inside (32, the keyboard's stop) does the same.
+      return Semantics(
+        container: true,
+        tooltip: onTap == null ? null : i18n('live_play_room_details'),
+        child: InkWell(
+          key: const ValueKey('live-play-title'),
+          onTap: onTap,
+          // The avatar is the keyboard's stop for the details (B09 c9); the
+          // names around it are more room for a finger.
+          canRequestFocus: false,
+          borderRadius: BorderRadius.circular(12),
+          // At least 48 to tap (A05.1): the two lines and the padding make 47.
+          child: Container(
+            constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                // B09 c9 (U.1c c9): the tappable avatar darkens under the
+                // pointer and when pressed, and draws the keyboard frame.
+                ExcludeSemantics(
+                  child: CommonAvatar(
+                    key: const ValueKey('live-play-avatar'),
+                    avatarUrl: avatar,
+                    radius: 16,
+                    fallbackName: nick.isEmpty ? platformLabel : nick,
+                    onTap: onTap,
+                    tooltip: onTap == null ? null : i18n('live_play_room_details'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: placeholder
+                      ? const Column(
+                          key: ValueKey('live-play-title-placeholder'),
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SkeletonBar(width: 72, height: 14),
+                            SizedBox(height: 6),
+                            SkeletonBar(width: 112, height: 10),
+                          ],
+                        )
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              nick.isEmpty ? platformLabel : nick,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium?.emphasis,
+                            ),
+                            Text(
+                              area.isEmpty ? platformLabel : '$platformLabel · ${platformAreaName(platform, area)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ],
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       );

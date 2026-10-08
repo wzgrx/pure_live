@@ -258,36 +258,47 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
           },
           onLongPress: _showMenu,
           onSecondaryTap: _showMenu,
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Head(view: view, wide: widget.wide, menu: _menuButton()),
-                const SizedBox(height: 10),
-                RecordStatusCard(
-                  facts: view.facts,
-                  changes: widget.changes,
-                  task: widget.task,
-                  chatCount: widget.chatCount,
-                  acting: _acting,
-                  compact: true,
-                  now: widget.now,
-                  onStart: () => run(actions.again),
-                  onStartTask: () => run(actions.startNow),
-                  onStop: () => run(actions.stop),
-                  onLimit: actions.limit,
-                  // "播放" while the file is there (the panel's rule).
-                  onPlay: output != null ? () => unawaited(playRecording(output)) : null,
-                  onFolder: () {
-                    if (widget.task() case final task?) actions.folder(task);
-                  },
-                  onReason: () {
-                    if (widget.task() case final task?) actions.reason(context, task);
-                  },
+          child: Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _Head(view: view, wide: widget.wide),
+                    const SizedBox(height: 10),
+                    RecordStatusCard(
+                      facts: view.facts,
+                      changes: widget.changes,
+                      task: widget.task,
+                      chatCount: widget.chatCount,
+                      acting: _acting,
+                      compact: true,
+                      now: widget.now,
+                      onStart: () => run(actions.again),
+                      onStartTask: () => run(actions.startNow),
+                      onStop: () => run(actions.stop),
+                      onLimit: actions.limit,
+                      // "播放" while the file is there (the panel's rule).
+                      onPlay: output != null ? () => unawaited(playRecording(output)) : null,
+                      onFolder: () {
+                        if (widget.task() case final task?) actions.folder(task);
+                      },
+                      onReason: () {
+                        if (widget.task() case final task?) actions.reason(context, task);
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              // "⋮" in the card's corner: 40 to see, 48 to tap (A05.1), its
+              // centre where the head keeps room for it.
+              Positioned(
+                top: 2,
+                right: 2,
+                child: SizedBox.square(dimension: 48, child: Center(child: _menuButton())),
+              ),
+            ],
           ),
         ),
       );
@@ -304,14 +315,13 @@ class _RecorderTaskCardState extends State<RecorderTaskCard> {
 }
 
 /// The card's head (U.7a c3): cover, the streamer with "自动录", the title,
-/// the platform and the audience; "⋮" at the top right. No state on the
+/// the platform and the audience; room for "⋮" at the top right. No state on the
 /// cover any more (the status card says it, P2).
 class _Head extends StatelessWidget {
-  const new({required this.view, required this.wide, required this.menu});
+  const new({required this.view, required this.wide});
 
   final _CardView view;
   final bool wide;
-  final Widget menu;
 
   @override
   Widget build(BuildContext context) {
@@ -385,11 +395,9 @@ class _Head extends StatelessWidget {
             ],
           ),
         ),
-        // "⋮" sits in the card's corner (40 × 40, the padding taken back).
-        Transform.translate(
-          offset: const Offset(6, -6),
-          child: SizedBox.square(dimension: 40, child: menu),
-        ),
+        // Room for "⋮", which the card puts in its corner (40 × 40, the
+        // padding taken back: its centre 14 in from this corner).
+        const SizedBox(width: 40),
       ],
     );
   }

@@ -225,28 +225,33 @@ class SettingSliderRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(title, style: _titleStyle(theme, enabled: enabled)),
-              ),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: scheme.primary.withValues(alpha: enabled ? 0.1 : 0.05),
-                  borderRadius: BorderRadius.circular(20),
+          // Greyed out, a screen reader says it is unavailable too (A05.1).
+          Semantics(
+            container: true,
+            enabled: enabled,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(title, style: _titleStyle(theme, enabled: enabled)),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  child: Text(
-                    display,
-                    key: ValueKey('danmaku-value-$settingKey'),
-                    style: theme.textTheme.labelMedium?.emphasis.tabular.copyWith(
-                      color: enabled ? scheme.primary : scheme.onSurface.withValues(alpha: 0.38),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: enabled ? 0.1 : 0.05),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    child: Text(
+                      display,
+                      key: ValueKey('danmaku-value-$settingKey'),
+                      style: theme.textTheme.labelMedium?.emphasis.tabular.copyWith(
+                        color: enabled ? scheme.primary : scheme.onSurface.withValues(alpha: 0.38),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Slider(
             key: ValueKey('danmaku-slider-$settingKey'),

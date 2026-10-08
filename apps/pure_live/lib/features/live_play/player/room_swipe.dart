@@ -11,28 +11,47 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// c14, U.2b2): the picture's gesture layer feeds the drag in the middle
 /// third ([start], [update], [end]); the [RoomSwipeStage] moves the picture
 /// with it and brings the next (or previous) room's cover and name along.
-/// Let go past a third of the screen (or after a fling) the picture moves
-/// out and [onSwitch] gets the step; otherwise it springs back. Only the
-/// picture and a cover move while dragging: the player switches once, after
-/// the release.
+///
+/// The picture follows the finger 1:1; towards a side without a room it
+/// resists more and more (the rubber band, at most a third of the screen).
+/// Let go past a third of the screen (or after a fling) [onSwitch] gets the
+/// step at once and the picture moves out at the finger's speed while the
+/// room switched to connects; otherwise it springs back (A03.3, research
+/// 2026-10-02 S2, S6). Only the picture and a cover move while dragging.
 class RoomSwipeController extends ChangeNotifier {
   /// Creates the controller; [onSwitch] gets 1 (the next room) or -1 (the
-  /// previous).
-  new({required this.onSwitch});
+  /// previous). [vsync] runs the motion after a release: the page's, since
+  /// the room switched to builds its stage afresh while the motion goes on.
+  new({required this.onSwitch, required TickerProvider vsync}) : _settle = AnimationController.unbounded(vsync: vsync) {
+    _settle.addListener(_onTick);
+  }
 
   /// Switches the room by a step.
   final void Function(int step) onSwitch;
 
+  final AnimationController _settle;
   LiveRoom? _previous;
   LiveRoom? _next;
   double _offset = 0;
+
+  /// How far the finger has moved the picture, before the rubber band.
+  double _drag = 0;
   double _extent = 0;
   bool _dragging = false;
-  AnimationController? _settle;
+  bool _disposed = false;
 
-  /// Where the running settle starts and ends, or null.
-  (double, double)? _settling;
-  int _step = 0;
+  /// The room switched to while the picture still moves out: it fills the
+  /// space the picture leaves until it lands (the page has already moved
+  /// its list on).
+  LiveRoom? _arriving;
+
+  /// Counts the motions started, so a caught one does not land.
+  int _runs = 0;
+
+  // From the stage, as it builds.
+  bool _still = false;
+  double _refreshRate = 60;
+  double _pixelRatio = 1;
 
   /// How far the picture has moved (upwards negative).
   double get offset => _offset;
@@ -46,9 +65,22 @@ class RoomSwipeController extends ChangeNotifier {
   /// A finger moves the picture.
   bool get dragging => _dragging;
 
+  /// The room the picture brings in: the one switched to while it lands,
+  /// else the neighbour on the side it moved towards.
+  LiveRoom? get incoming =>
+      _arriving ??
+      (_offset < 0
+          ? _next
+          : _offset > 0
+          ? _previous
+          : null);
+
   /// Where letting go now would go by the distance alone (the preview's
-  /// "松手换到这个直播间").
-  int get pendingStep => swipeSwitchStep(offset: _offset, extent: _extent, velocity: 0);
+  /// "松手换到这个直播间"); the switch made while the picture lands.
+  int get pendingStep {
+    if (_arriving != null) return _offset < 0 ? 1 : -1;
+    return _allowed(swipeSwitchStep(offset: _offset, extent: _extent, velocity: 0));
+  }
 
   /// Sets the rooms around the one shown (the page, as it builds).
   void neighbours({required LiveRoom? previous, required LiveRoom? next}) {
@@ -56,90 +88,131 @@ class RoomSwipeController extends ChangeNotifier {
     _next = next;
   }
 
-  /// A drag began in the middle of the picture.
+  /// A drag began in the middle of the picture; it catches a picture still
+  /// moving (a switch in flight lands at once and the finger drags the room
+  /// switched to).
   void start() {
-    _stopSettling();
+    if (_settle.isAnimating) {
+      _runs++;
+      _settle.stop();
+      if (_arriving != null) _rest();
+    }
     _dragging = true;
+    _drag = _past(_offset) ? rubberBandDrag(_offset, _extent) : _offset;
   }
 
   /// The finger moved by [dy] (downwards positive); the picture follows,
-  /// never towards a side without a room.
+  /// with a rubber band towards a side without a room.
   void update(double dy) {
     if (!_dragging) return;
-    var value = _offset + dy;
-    if (_next == null) value = math.max(value, 0);
-    if (_previous == null) value = math.min(value, 0);
-    if (_extent > 0) value = value.clamp(-_extent, _extent);
+    var drag = _drag + dy;
+    if (_extent > 0) drag = drag.clamp(-_extent, _extent);
+    _drag = drag;
+    final value = _past(drag) ? AppMotion.rubberBand(drag, _extent) : drag;
     if (value == _offset) return;
     _offset = value;
     notifyListeners();
   }
 
-  /// The finger left at [velocity] (downwards positive): the picture moves
-  /// out and the room switches, or it springs back.
+  /// The finger left at [velocity] (downwards positive): the room switches
+  /// at once and the picture moves out, or it springs back.
   void end(double velocity) {
     if (!_dragging) return;
     _dragging = false;
-    final step = swipeSwitchStep(offset: _offset, extent: _extent, velocity: velocity);
-    _settleTo(step);
+    final step = _allowed(swipeSwitchStep(offset: _offset, extent: _extent, velocity: velocity));
+    if (step == 0) {
+      _back(velocity);
+      return;
+    }
+    _arriving = step > 0 ? _next : _previous;
+    _settleTo(
+      -step * _extent,
+      spring: AppMotion.roomSwipeSpring,
+      velocity: velocity,
+      // Out of sight is the end: no slow tail at the edge.
+      beyond: _extent * 0.01,
+    );
+    onSwitch(step);
   }
 
   /// The drag was taken away: back to the room.
   void cancel() {
     if (!_dragging) return;
     _dragging = false;
-    _settleTo(0);
+    _back(0);
   }
 
-  void _settleTo(int step) {
-    _step = step;
-    final target = step == 0 ? 0.0 : -step * _extent;
-    final animation = _settle;
-    if (animation == null || animation.duration == Duration.zero || _offset == target) {
-      _finish();
+  @override
+  void dispose() {
+    _disposed = true;
+    _settle.dispose();
+    super.dispose();
+  }
+
+  /// Whether [offset] moves the picture towards a side without a room.
+  bool _past(double offset) => (offset < 0 && _next == null) || (offset > 0 && _previous == null);
+
+  /// [step] when there is a room that way, else 0.
+  int _allowed(int step) => switch (step) {
+    1 when _next != null => 1,
+    -1 when _previous != null => -1,
+    _ => 0,
+  };
+
+  void _back(double velocity) {
+    if (!_past(_offset)) {
+      _settleTo(0, spring: AppMotion.roomSwipeSpring, velocity: velocity);
       return;
     }
-    _settling = (_offset, target);
-    animation.forward(from: 0).whenCompleteOrCancel(() {
-      if (animation.status == AnimationStatus.completed) _finish();
-    });
+    // Past the end the band slowed the movement; it slows the speed alike.
+    final x = _extent > 0 ? math.min(_drag.abs() / _extent, 1) : 1;
+    _settleTo(0, spring: AppMotion.overscrollSpring, velocity: velocity * (1 - x) * (1 - x));
+  }
+
+  /// A spring from where the picture is to [target], leaving at the
+  /// finger's [velocity] and never past it; then the picture rests.
+  void _settleTo(double target, {required SpringDescription spring, required double velocity, double beyond = 0}) {
+    if (_still || _extent <= 0 || _offset == target) {
+      _rest();
+      return;
+    }
+    final run = ++_runs;
+    _settle.value = _offset;
+    _settle
+        .animateRelease(
+          ReleaseSpringSimulation(
+            spring: spring,
+            start: _offset,
+            end: target,
+            velocity: velocity,
+            beyond: beyond,
+            tolerance: AppMotion.tolerance(_pixelRatio),
+          ),
+          refreshRate: _refreshRate,
+        )
+        .whenCompleteOrCancel(() {
+          if (!_disposed && run == _runs && !_dragging) _rest();
+        });
   }
 
   void _onTick() {
-    final animation = _settle;
-    if (_settling case (final from, final to) when animation != null) {
-      _offset = from + (to - from) * Curves.easeOutCubic.transform(animation.value);
-      notifyListeners();
-    }
-  }
-
-  void _stopSettling() {
-    if (_settle?.isAnimating ?? false) _settle!.stop();
-    _settling = null;
-  }
-
-  void _finish() {
-    final step = _step;
-    _step = 0;
-    _settling = null;
-    _offset = 0;
+    if (_offset == _settle.value) return;
+    _offset = _settle.value;
     notifyListeners();
-    if (step != 0) onSwitch(step);
   }
 
-  void _attach(AnimationController animation) {
-    _settle = animation..addListener(_onTick);
-  }
-
-  void _detach(AnimationController animation) {
-    animation.removeListener(_onTick);
-    if (identical(_settle, animation)) _settle = null;
+  /// The picture back in its place: the room shown (a switched one by now).
+  void _rest() {
+    _arriving = null;
+    _offset = 0;
+    _drag = 0;
+    notifyListeners();
   }
 }
 
 /// Moves [child] (the player) with a [RoomSwipeController]'s drag and shows
 /// the room it brings in the space it leaves ([RoomSwipePreview]).
-class RoomSwipeStage extends StatefulWidget {
+class RoomSwipeStage extends StatelessWidget {
   /// Creates the stage.
   const new({required this.controller, required this.child, super.key});
 
@@ -150,37 +223,11 @@ class RoomSwipeStage extends StatefulWidget {
   final Widget child;
 
   @override
-  State<RoomSwipeStage> createState() => _RoomSwipeStageState();
-}
-
-class _RoomSwipeStageState extends State<RoomSwipeStage> with SingleTickerProviderStateMixin {
-  late final AnimationController _settle = AnimationController(vsync: this);
-
-  @override
-  void initState() {
-    super.initState();
-    widget.controller._attach(_settle);
-  }
-
-  @override
-  void didUpdateWidget(RoomSwipeStage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (identical(oldWidget.controller, widget.controller)) return;
-    oldWidget.controller._detach(_settle);
-    widget.controller._attach(_settle);
-  }
-
-  @override
-  void dispose() {
-    widget.controller._detach(_settle);
-    _settle.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    _settle.duration = MediaQuery.disableAnimationsOf(context) ? Duration.zero : const Duration(milliseconds: 220);
-    final controller = widget.controller;
+    controller
+      .._still = MediaQuery.disableAnimationsOf(context)
+      .._pixelRatio = MediaQuery.devicePixelRatioOf(context)
+      .._refreshRate = View.of(context).display.refreshRate;
     return LayoutBuilder(
       builder: (context, constraints) {
         final height = constraints.maxHeight;
@@ -190,11 +237,7 @@ class _RoomSwipeStageState extends State<RoomSwipeStage> with SingleTickerProvid
             listenable: controller,
             builder: (context, player) {
               final offset = controller.offset;
-              final room = offset < 0
-                  ? controller.next
-                  : offset > 0
-                  ? controller.previous
-                  : null;
+              final room = offset == 0 ? null : controller.incoming;
               return Stack(
                 fit: StackFit.expand,
                 children: [
@@ -210,7 +253,7 @@ class _RoomSwipeStageState extends State<RoomSwipeStage> with SingleTickerProvid
                 ],
               );
             },
-            child: widget.child,
+            child: child,
           ),
         );
       },

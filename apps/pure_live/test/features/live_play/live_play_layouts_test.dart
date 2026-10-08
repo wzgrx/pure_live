@@ -595,6 +595,8 @@ void main() {
       final room = await _pump(tester, portrait: true);
       final before = tester.getRect(_key('live-play-bottom-bar')).bottom;
       final drag = await tester.startGesture(tester.getCenter(_key('live-play-portrait-handle')));
+      // The first move takes the drag (A03.3: no jump of the slop).
+      await drag.moveBy(const Offset(0, -20));
       await drag.moveBy(const Offset(0, -60));
       await drag.moveBy(const Offset(0, -60));
       await tester.pump();
@@ -614,6 +616,39 @@ void main() {
       expect(find.byType(AppBar), findsNothing);
       expect(_key('live-play-bottom-first-row'), findsOneWidget);
       expect(room.orientations.last, ['DeviceOrientation.portraitUp']);
+      await _close(tester, room);
+    });
+
+    testWidgets('A03.3 c3: dragging the panel for 2 s rebuilds no RoomPlayer; it moves once let go', (tester) async {
+      final room = await _pump(tester, portrait: true);
+      final player = tester.widget<RoomPlayer>(find.byType(RoomPlayer));
+      var rebuilt = 0;
+      debugOnRebuildDirtyWidget = (element, builtOnce) {
+        if (element.widget is RoomPlayer) rebuilt++;
+      };
+      try {
+        final drag = await tester.startGesture(tester.getCenter(_key('live-play-portrait-handle')));
+        var time = Duration.zero;
+        // 240 frames at 120 Hz, up and down.
+        for (var i = 0; i < 240; i++) {
+          time += const Duration(microseconds: 8333);
+          await drag.moveBy(Offset(0, i.isEven ? -6 : 4), timeStamp: time);
+          await tester.pump(const Duration(microseconds: 8333));
+        }
+        expect(tester.getSize(_key('live-play-portrait-sheet')).height, greaterThan(796 * 0.44 + 100));
+        expect(rebuilt, 0);
+        expect(tester.widget<RoomPlayer>(find.byType(RoomPlayer)), same(player));
+        await drag.up(timeStamp: time);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+      } finally {
+        debugOnRebuildDirtyWidget = null;
+      }
+      expect(rebuilt, greaterThan(0), reason: 'the controls move above the stop it settled at');
+      expect(
+        tester.widget<RoomPlayer>(find.byType(RoomPlayer)).overlayBottom,
+        portraitPanelStops(796, 'balanced').maximum,
+      );
       await _close(tester, room);
     });
 

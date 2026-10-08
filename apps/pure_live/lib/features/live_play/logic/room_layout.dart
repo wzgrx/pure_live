@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:live_ui/live_ui.dart' show AppMotion;
+
 /// How the live room is shown (docs/specs/UI.md §5.3: one state for the
 /// room; the picture is mounted once and moves between them). Android's
 /// picture-in-picture is followed separately (the system's window).
@@ -169,14 +171,38 @@ const double portraitPanelLeast = 250;
 double nearestStop(double height, Iterable<double> stops) =>
     stops.reduce((a, b) => (a - height).abs() <= (b - height).abs() ? a : b);
 
+/// The stop a panel let go at [height] moving at [velocity] (downwards
+/// positive) settles on (A03.3): after a fling
+/// ([AppMotion.panelFlingVelocity]) the next stop the way it went (the last
+/// one when there is none), else the nearest ([nearestStop], 3.x).
+double releaseStop(double height, double velocity, List<double> stops) {
+  if (velocity.abs() < AppMotion.panelFlingVelocity) return nearestStop(height, stops);
+  final sorted = [...stops]..sort();
+  return velocity < 0
+      ? sorted.firstWhere((stop) => stop > height, orElse: () => sorted.last)
+      : sorted.lastWhere((stop) => stop < height, orElse: () => sorted.first);
+}
+
+/// The drag that [AppMotion.rubberBand] shows as [shown] past an edge, in
+/// a space [extent] long: where a finger catching something sprung back
+/// from past the edge carries on from.
+double rubberBandDrag(double shown, double extent) {
+  if (extent <= 0 || shown == 0) return 0;
+  // d = R/3 · (1 − (1 − x)³), so x = 1 − ∛(1 − 3d/R).
+  final rest = math.max(0, 1 - 3 * shown.abs() / extent).toDouble();
+  return shown.sign * extent * (1 - math.pow(rest, 1 / 3).toDouble());
+}
+
 /// Whether a drag of the panel that went [dismissed] past its lowest stop
 /// (and ended at [velocity], downwards positive) enters the portrait
 /// fullscreen (3.x `resolvePortraitPanelDragEnd`): 30 % of the panel
-/// (72–144), or a fling of 900 after at least 28.
+/// (72–144), or a fling of [AppMotion.panelFullscreenFlingVelocity] after
+/// at least [AppMotion.panelFullscreenFlingDistance].
 bool panelDragEntersFullscreen({required double dismissed, required double panelHeight, required double velocity}) {
   if (dismissed <= 0 || panelHeight <= 0) return false;
   final distance = (panelHeight * 0.30).clamp(72.0, 144.0);
-  return dismissed >= distance || (velocity >= 900 && dismissed >= 28);
+  return dismissed >= distance ||
+      (velocity >= AppMotion.panelFullscreenFlingVelocity && dismissed >= AppMotion.panelFullscreenFlingDistance);
 }
 
 /// Where an upward swipe brings the portrait fullscreen back to the panel:
@@ -184,9 +210,11 @@ bool panelDragEntersFullscreen({required double dismissed, required double panel
 const double portraitRestoreZone = 96;
 
 /// Whether an upward swipe of [upward] ending at [velocity] (upwards
-/// negative) restores the panel (3.x `shouldRestorePortraitPanelFromSwipe`).
+/// negative) restores the panel (3.x `shouldRestorePortraitPanelFromSwipe`):
+/// 64, or a fling of [AppMotion.panelRestoreFlingVelocity] after at least
+/// [AppMotion.panelRestoreFlingDistance].
 bool swipeRestoresPanel({required double upward, required double velocity}) =>
-    upward >= 64 || (velocity <= -850 && upward >= 24);
+    upward >= 64 || (velocity <= -AppMotion.panelRestoreFlingVelocity && upward >= AppMotion.panelRestoreFlingDistance);
 
 /// What a vertical drag on the picture changes.
 enum PictureDrag {
@@ -236,13 +264,14 @@ const double androidGestureFallback = 32;
 /// Where a swipe between rooms that moved the picture by [offset] (upwards
 /// negative) of a screen [extent] high and ended at [velocity] (upwards
 /// negative) goes (U.2b2): 1 to the next room (upwards), -1 to the previous
-/// (downwards), 0 back to this one. A third of the screen or a fling of 800
-/// after 48 switches; a fling back the other way keeps the room.
+/// (downwards), 0 back to this one. A third of the screen or a fling of
+/// [AppMotion.roomSwipeFlingVelocity] after [AppMotion.roomSwipeFlingDistance]
+/// switches; a fling back the other way keeps the room.
 int swipeSwitchStep({required double offset, required double extent, required double velocity}) {
   if (extent <= 0 || offset == 0) return 0;
-  final fling = velocity.abs() >= 800;
+  final fling = velocity.abs() >= AppMotion.roomSwipeFlingVelocity;
   if (fling && velocity.sign != offset.sign) return 0;
-  final far = offset.abs() >= extent / 3 || (fling && offset.abs() >= 48);
+  final far = offset.abs() >= extent / 3 || (fling && offset.abs() >= AppMotion.roomSwipeFlingDistance);
   if (!far) return 0;
   return offset < 0 ? 1 : -1;
 }

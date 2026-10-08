@@ -251,13 +251,24 @@ class RecordStatusCard extends StatelessWidget {
       height: height,
       onPressed: live(onStop),
     );
-    Widget row(List<Widget> buttons) => Row(
-      children: [
-        for (final (index, button) in buttons.indexed) ...[
-          if (index > 0) SizedBox(width: gap),
-          Expanded(child: button),
-        ],
-      ],
+    // Side by side while every label fits its share; else one under another,
+    // so large text (A04.1, 2×) shows "打开文件夹" whole instead of "打开…".
+    Widget row(List<Widget> buttons) => LayoutBuilder(
+      builder: (context, constraints) {
+        final share = (constraints.maxWidth - gap * (buttons.length - 1)) / buttons.length;
+        final fits = buttons.every((button) => _buttonWidth(context, button, compact: compact) <= share);
+        if (fits) {
+          return Row(
+            children: [
+              for (final (index, button) in buttons.indexed) ...[
+                if (index > 0) SizedBox(width: gap),
+                Expanded(child: button),
+              ],
+            ],
+          );
+        }
+        return Column(crossAxisAlignment: CrossAxisAlignment.stretch, spacing: 8, children: buttons);
+      },
     );
     final quality = facts.quality;
     // The head's glyph (docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标 c9): the room bar's picture of
@@ -544,7 +555,9 @@ class RecordStatusCard extends StatelessWidget {
                     style: theme.textTheme.titleMedium?.emphasis.copyWith(color: neutral ? scheme.onSurface : accent),
                   ),
                 ),
-                ?meta,
+                // Large text (A04.1) wraps the time instead of pushing it
+                // off the card.
+                if (meta != null) Flexible(child: meta),
               ],
             ),
             for (final child in texts) ...[SizedBox(height: textGap), child],
@@ -630,6 +643,28 @@ const double _compactButtonHeight = 40;
 const EdgeInsets _compactButtonPadding = EdgeInsets.symmetric(horizontal: 8);
 
 EdgeInsetsGeometry? _paddingFor(double height) => height == _compactButtonHeight ? _compactButtonPadding : null;
+
+/// The width [button] needs to show its whole label on one line: the label
+/// in the buttons' text style at the current text size, the padding and the
+/// record button's dot.
+double _buttonWidth(BuildContext context, Widget button, {required bool compact}) {
+  final (text, extra) = switch (button) {
+    _RecordButton(:final text, :final dot) => (text, dot ? 16.0 : 0.0),
+    _PlainButton(:final text) => (text, 0.0),
+    _StopButton(:final text) => (text, 26.0),
+    _ => ('', 0.0),
+  };
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: Theme.of(context).textTheme.labelLarge),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+    maxLines: 1,
+  )..layout();
+  final width = painter.width;
+  painter.dispose();
+  // The buttons' padding (8 a side compact, Material's 24) and outline.
+  return width + extra + (compact ? 16 : 48) + 2;
+}
 
 /// A red action that starts a recording ("● 开始录制").
 class _RecordButton extends StatelessWidget {

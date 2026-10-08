@@ -551,12 +551,15 @@ class CoverChip extends StatelessWidget {
         ],
       ),
     );
+    // On the picture like the player's controls: the words grow at most 1.3×
+    // so they stay inside the 22-high capsule (A04.1: 2× clipped them).
+    final capped = MediaQuery.withClampedTextScaling(maxScaleFactor: 1.3, child: chip);
     final message = tooltip;
-    if (message == null) return chip;
+    if (message == null) return capped;
     return Tooltip(
       message: message,
       triggerMode: TooltipTriggerMode.manual,
-      child: Semantics(label: message, container: true, excludeSemantics: true, child: chip),
+      child: Semantics(label: message, container: true, excludeSemantics: true, child: capped),
     );
   }
 }

@@ -412,21 +412,46 @@ class _FilterBar extends StatelessWidget {
     final row = ListenableSelector<RecorderCounts>(
       listenable: changes,
       selector: counts,
-      builder: (context, counts, _) => Row(
-        children: [
-          for (final filter in RecorderFilter.values)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(3),
-                child: _FilterChip(
-                  filter: filter,
-                  count: recorderCountOf(counts, filter),
-                  selected: filter == selected,
-                  onTap: () => onSelected(filter),
-                ),
-              ),
+      builder: (context, counts, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          Widget chip(RecorderFilter filter) => Padding(
+            padding: const EdgeInsets.all(3),
+            child: _FilterChip(
+              filter: filter,
+              count: recorderCountOf(counts, filter),
+              selected: filter == selected,
+              onTap: () => onSelected(filter),
             ),
-        ],
+          );
+          final widths = {
+            for (final filter in RecorderFilter.values)
+              filter: _FilterChip.labelWidth(context, filter, recorderCountOf(counts, filter)) + 16,
+          };
+          // Five equal shares, all the words one size: shrunk together by
+          // the one that needs it most (a phone at the default size needs
+          // about 0.7, the confirmed design). With larger text (A04.1) at most
+          // [_filterMinShrink]; beyond that each is as wide as its words and
+          // the strip scrolls sideways.
+          final share = constraints.maxWidth / RecorderFilter.values.length - 6;
+          final shrink = math.min(1, widths.values.map((width) => share / width).reduce(math.min)).toDouble();
+          final enlarged = MediaQuery.textScalerOf(context).scale(10) > 10;
+          if (!enlarged || shrink >= _filterMinShrink) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: _Shrunk(MediaQuery.textScalerOf(context), shrink)),
+              child: Row(children: [for (final filter in RecorderFilter.values) Expanded(child: chip(filter))]),
+            );
+          }
+          return SingleChildScrollView(
+            key: const ValueKey('recorder-filters-scroll'),
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (final filter in RecorderFilter.values)
+                  SizedBox(width: math.max(widths[filter]!, share) + 6, child: chip(filter)),
+              ],
+            ),
+          );
+        },
       ),
     );
     return ColoredBox(
@@ -446,8 +471,60 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
+/// The most the filter labels shrink to stay in one row of five once the
+/// user has enlarged the text.
+const double _filterMinShrink = 0.75;
+
+/// [base] times [factor]: the filters' words shrunk together.
+final class _Shrunk extends TextScaler {
+  const new(this.base, this.factor);
+
+  final TextScaler base;
+  final double factor;
+
+  @override
+  double scale(double fontSize) => base.scale(fontSize) * factor;
+
+  @override
+  // The interface still requires it.
+  // ignore: deprecated_member_use
+  double get textScaleFactor => base.textScaleFactor * factor;
+
+  @override
+  bool operator ==(Object other) => other is _Shrunk && other.base == base && other.factor == factor;
+
+  @override
+  int get hashCode => Object.hash(base, factor);
+}
+
 class _FilterChip extends StatelessWidget {
   const new({required this.filter, required this.count, required this.selected, required this.onTap});
+
+  /// The width of the words of [filter] with [count] at the current text size.
+  static double labelWidth(BuildContext context, RecorderFilter filter, int count) {
+    final theme = Theme.of(context);
+    final painter = TextPainter(
+      text: _label(theme, filter, count, theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
+
+  static TextSpan _label(ThemeData theme, RecorderFilter filter, int count, TextStyle? style, {Color? countColor}) =>
+      TextSpan(
+        style: style,
+        children: [
+          TextSpan(text: recorderFilterLabel(filter)),
+          TextSpan(
+            text: ' $count',
+            style: theme.textTheme.bodySmall?.tabular.copyWith(color: countColor, fontWeight: style?.fontWeight),
+          ),
+        ],
+      );
 
   final RecorderFilter filter;
   final int count;
@@ -481,23 +558,17 @@ class _FilterChip extends StatelessWidget {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(text: recorderFilterLabel(filter)),
-                        TextSpan(
-                          text: ' $count',
-                          style: theme.textTheme.bodySmall?.tabular.copyWith(
-                            // Softer only off the primary container, where
-                            // 80 % would fall under 4.5:1 (A05.1).
-                            color: selected ? foreground : foreground.withValues(alpha: 0.8),
-                            fontWeight: label.fontWeight,
-                          ),
-                        ),
-                      ],
+                    _label(
+                      theme,
+                      filter,
+                      count,
+                      label,
+                      // Softer only off the primary container, where 80 %
+                      // would fall under 4.5:1 (A05.1).
+                      countColor: selected ? foreground : foreground.withValues(alpha: 0.8),
                     ),
                     key: ValueKey('recorder-filter-${filter.name}-label'),
                     maxLines: 1,
-                    style: label,
                   ),
                 ),
               ),

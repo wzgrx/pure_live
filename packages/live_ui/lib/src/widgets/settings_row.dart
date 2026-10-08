@@ -642,6 +642,9 @@ class SettingsLinkRow extends StatelessWidget {
       tooltip: tooltip,
       subtitleMaxLines: subtitleMaxLines,
       onTap: onTap,
+      // Only a value moves under the title when narrow; a lone chevron stays
+      // at the end (the settings list beside its page is under 360 wide, A04.1).
+      stackTrailing: valueWidget != null || (!below && value != null && value.isNotEmpty),
       below: below
           ? Padding(
               padding: const EdgeInsets.only(top: 2),

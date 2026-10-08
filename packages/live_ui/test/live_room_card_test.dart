@@ -131,6 +131,22 @@ void main() {
       expect(title.style?.color, dark.onSurface);
     });
 
+    testWidgets('A04.1: the cover chips grow at most 1.3× with the text size and stay inside their capsule', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: _host(const LiveRoomCard(data: _live)),
+        ),
+      );
+      final text = find.descendant(of: find.byType(CoverChip), matching: find.text('84.7万'));
+      expect(MediaQuery.textScalerOf(tester.element(text)).scale(10) / 10, closeTo(1.3, 0.001));
+      // A line of the chip's words at that size fits the 22-high capsule.
+      final style = tester.widget<Text>(text).style!;
+      expect(style.fontSize! * style.height! * 1.3, lessThanOrEqualTo(22));
+    });
+
     testWidgets('appendix A 14: tap opens, long press and right click open the dialog', (tester) async {
       final calls = <String>[];
       await tester.pumpWidget(

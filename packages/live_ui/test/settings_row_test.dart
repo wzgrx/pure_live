@@ -207,6 +207,20 @@ void main() {
       );
     });
 
+    testWidgets('a lone chevron stays at the end when narrow or with 1.5× text (A04.1)', (tester) async {
+      Widget row() => SettingsLinkRow(title: '外观', subtitle: '主题模式和颜色', onTap: () {});
+      for (final (width, scale) in [(340.0, 1.0), (400.0, 1.5)]) {
+        await _pump(tester, row(), width: width, textScale: scale);
+        final chevron = tester.getRect(find.byIcon(AppIcons.navigate));
+        expect(chevron.left, greaterThan(tester.getTopRight(find.text('外观')).dx), reason: '$width × $scale');
+        expect(
+          chevron.top,
+          lessThan(tester.getBottomLeft(find.text(withoutOrphan('主题模式和颜色'))).dy),
+          reason: '$width × $scale',
+        );
+      }
+    });
+
     testWidgets('a counter: − and + with names, the number opens its dialog, ends disable', (tester) async {
       final calls = <String>[];
       await _pump(

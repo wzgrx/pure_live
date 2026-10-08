@@ -432,6 +432,28 @@ void main() {
     expect(_inCard('i', _key('record-panel-start')), findsOneWidget);
   });
 
+  testWidgets('A04.1: with 2× text the saved card\'s three buttons stack whole instead of "打开…"', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await _pumpNine(tester, size: const Size(393, 9000));
+    final saved = [
+      for (final key in ['record-panel-play', 'record-card-folder', 'record-panel-again'])
+        tester.getRect(_inCard('s', _key(key))),
+    ];
+    expect(saved[0].top, lessThan(saved[1].top));
+    expect(saved[1].top, lessThan(saved[2].top));
+    expect(saved.map((rect) => rect.left).toSet(), hasLength(1), reason: 'one column');
+    expect(_inCard('s', find.text('打开文件夹')), findsOneWidget);
+    // The five filters keep one size and scroll sideways instead of each
+    // shrinking differently.
+    expect(_key('recorder-filters-scroll'), findsOneWidget);
+    final sizes = {
+      for (final filter in RecorderFilter.values)
+        tester.getRect(_key('recorder-filter-${filter.name}-label')).height.round(),
+    };
+    expect(sizes, hasLength(1));
+  });
+
   // docs/A-界面设计/A10-录制界面/A10.3-录制按钮和状态图标 c9: the card heads draw the room bar's glyph.
   testWidgets("U.2a2: each card head draws the room bar's glyph; red only while recording", (tester) async {
     await _pumpNine(tester, size: const Size(393, 6000));

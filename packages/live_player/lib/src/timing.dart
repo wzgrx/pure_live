@@ -144,6 +144,9 @@ final class OpenTiming {
   MediaRoute? _route;
   bool? _reused;
 
+  /// Whether [index] was marked.
+  bool has(int index) => _marks[index] != null;
+
   /// Marks [index] now, once; a mark after a later one is dropped (that
   /// step then counts in the later one), so the steps never go negative.
   void mark(int index) {

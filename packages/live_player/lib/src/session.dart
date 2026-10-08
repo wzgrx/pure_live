@@ -224,6 +224,8 @@ final class PlaybackSession {
   /// G03.1: the timing of the open in progress (null when not timed or
   /// already reported); a new generation ([_begin]) drops it.
   OpenTiming? _timing;
+  bool _timingPlaying = false;
+  Duration? _timingFirstPosition;
 
   final Set<String> _errorSignatures = {};
   int? _recoveringSession;
@@ -314,13 +316,18 @@ final class PlaybackSession {
     _states.add(next);
   }
 
-  /// G03.1: the open being timed ends with its first `playing` (T8) or its
-  /// failure.
+  /// G03.1: the open being timed ends with its failure, or once it plays
+  /// and shows a picture (T8 after T7). mpv says "playing" as soon as it
+  /// loads (`MpvEngine.open`), before any frame: the K90's first lines read
+  /// `firstFrame=- playing=0`. A source without a picture (audio only) ends
+  /// at its first move instead ([_timingMoved]).
   void _reportTiming(PlaybackState state) {
     final timing = _timing!;
     final String? error;
     switch (state.status) {
       case PlaybackStatus.playing:
+        _timingPlaying = true;
+        if (!timing.has(OpenTiming.firstFrame)) return;
         timing.mark(OpenTiming.playing);
         error = null;
       case PlaybackStatus.error:
@@ -338,12 +345,29 @@ final class PlaybackSession {
           PlaybackStatus.stopped:
         return;
     }
+    _finishTiming(timing, error);
+  }
+
+  void _finishTiming(OpenTiming timing, String? error) {
     _timing = null;
+    _timingPlaying = false;
+    _timingFirstPosition = null;
     try {
       timing.sink(timing.finish(error: error));
     } on Object {
       // Timing never changes playback.
     }
+  }
+
+  /// G03.1: a source playing without a picture ends its timing when its
+  /// position first moves.
+  void _timingMoved(Duration position) {
+    final timing = _timing;
+    if (timing == null || !_timingPlaying) return;
+    final first = _timingFirstPosition ??= position;
+    if (position <= first) return;
+    timing.mark(OpenTiming.playing);
+    _finishTiming(timing, null);
   }
 
   /// Plays [request] (3.x's `playSource`), replacing whatever plays.
@@ -568,6 +592,8 @@ final class PlaybackSession {
     _leaveOffline();
     _pendingError = null;
     _timing = null;
+    _timingPlaying = false;
+    _timingFirstPosition = null;
     return _session;
   }
 
@@ -752,12 +778,18 @@ final class PlaybackSession {
         if (_accepting) _onCompleted(session);
       case EngineVideoSize(:final width, :final height):
         if (_accepting && width > 0 && height > 0) {
-          _timing?.mark(OpenTiming.firstFrame);
+          final timing = _timing;
+          timing?.mark(OpenTiming.firstFrame);
           _emit(_state.copyWith(videoWidth: width, videoHeight: height));
+          if (timing != null && identical(_timing, timing) && _timingPlaying) {
+            timing.mark(OpenTiming.playing);
+            _finishTiming(timing, null);
+          }
         }
       case EngineFrameRate(:final fps):
         if (_accepting && fps > 0) _emit(_state.copyWith(frameRate: fps));
       case EnginePosition(:final position):
+        if (_accepting) _timingMoved(position);
         if (_accepting && _state.onDemand) _emit(_state.copyWith(position: position));
         if (_accepting) {
           _onPosition(position, session);

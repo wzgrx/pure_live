@@ -80,3 +80,9 @@ playback-timing site=bilibili room=1a2b3c route=direct engine=new result=playing
   - `timing: an error reports its code`：空计划 `error:no_source`（`route=-`、`engine=-`）；打不开的来源 `error:source_open_timeout`。
 - `apps/pure_live/test/features/live_play/live_play_controller_test.dart` 新增 1 个：`G03.1: entering the room leaves one timing line, its marks in order`：假平台的详情和取地址各等 1 秒，应用日志里正好一行，字段顺序固定，`detail`≥1000、`qualities`<1000、`urls`≥1000（T0～T3 顺序对、各点在各自那一步之后），各段相加等于 `total`；之后换清晰度、刷新直播间不再写。
 - 结果：`live_player` 全部测试通过；`apps/pure_live` 全部 `flutter test` 通过；`dart analyze --fatal-infos`、`flutter analyze --fatal-infos`、格式检查通过。
+
+## 跟进：结束点改成“在播并且有画面”（2026-10-08）
+
+- K90 上第一行：`playback-timing site=bilibili … load=2 firstFrame=- playing=0 total=472`。mpv 加载完马上报“在播”（`MpvEngine.open` 末尾补发，G02.3 记过），计时在第一帧之前就结束了，`total` 偏小、`firstFrame` 总是空。
+- 改成：在播且已有第一帧（`EngineVideoSize`）时结束；先来画面、后报在播时照旧在“在播”时结束；没有画面的源（纯音频）在播放位置第一次前进时结束；出错照旧立即结束。
+- 测试：`session_test` 改了 3 条（补发画面）、新增 1 条（纯音频按位置前进结束）；`live_play_controller_test` 的打点用例补发画面并检查 `firstFrame`。`live_player` 55 个、`test/features/live_play` 325 个全过。

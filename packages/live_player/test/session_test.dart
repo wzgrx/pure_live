@@ -889,11 +889,30 @@ void main() {
         final timings = <PlaybackTiming>[];
         start(PlaybackRequest(site: 'douyu', plan: _plan([_a]), onTiming: timings.add), async);
         expect(session.state.status, PlaybackStatus.playing);
-        // No video size: that step counts in the next one.
+        // mpv's "playing" right after loading is not the end: the picture is.
+        expect(timings, isEmpty);
+        async.elapse(const Duration(seconds: 1));
+        engine.emit(const EngineVideoSize(1280, 720));
         expect(
           timings.single.line(),
           'playback-timing site=douyu room=- route=direct engine=new result=playing '
-          'detail=- qualities=- urls=- engineReady=0 input=0 load=0 firstFrame=- playing=0 total=0',
+          'detail=- qualities=- urls=- engineReady=0 input=0 load=0 firstFrame=1000 playing=0 total=1000',
+        );
+      });
+    });
+
+    test('timing: a source without a picture ends at its first move', () {
+      fakeAsync((async) {
+        final timings = <PlaybackTiming>[];
+        start(PlaybackRequest(site: 'ximalaya', plan: _plan([_a]), onTiming: timings.add), async);
+        engine.emit(const EnginePosition(Duration(seconds: 40)));
+        async.elapse(const Duration(seconds: 2));
+        expect(timings, isEmpty, reason: 'the first position is where it starts');
+        engine.emit(const EnginePosition(Duration(seconds: 41)));
+        expect(
+          timings.single.line(),
+          'playback-timing site=ximalaya room=- route=direct engine=new result=playing '
+          'detail=- qualities=- urls=- engineReady=0 input=0 load=0 firstFrame=- playing=2000 total=2000',
         );
       });
     });
@@ -911,6 +930,7 @@ void main() {
         unawaited(session.open(PlaybackRequest(site: 'huya', plan: _plan([_b]), onTiming: timings.add)));
         async.flushMicrotasks();
         expect(session.state.status, PlaybackStatus.playing);
+        engine.emit(const EngineVideoSize(1280, 720));
         expect(timings.map((timing) => timing.site), ['huya']);
 
         // A stop while opening, and a line switch, drop the open's timing too.
@@ -929,11 +949,13 @@ void main() {
       fakeAsync((async) {
         final timings = <PlaybackTiming>[];
         start(PlaybackRequest(site: 'douyu', plan: _plan([_a]), onTiming: timings.add), async);
+        engine.emit(const EngineVideoSize(1280, 720));
         unawaited(session.stop());
         async.elapse(const Duration(seconds: 10));
         expect(engine.disposed, isFalse);
         unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_b]), onTiming: timings.add)));
         async.flushMicrotasks();
+        engine.emit(const EngineVideoSize(1280, 720));
         expect(timings.map((timing) => timing.engineReused), [false, true]);
         expect(timings.last.line(), contains(' engine=reused '));
       });

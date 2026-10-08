@@ -777,6 +777,9 @@ void main() {
     expect(session.state.status, PlaybackStatus.playing);
     List<String> lines() =>
         [for (final entry in AppLog.instance.entries.where(timing)) entry.message].skip(before).toList();
+    expect(lines(), isEmpty, reason: 'mpv says playing before any picture');
+    engine.emit(const EngineVideoSize(1280, 720));
+    await settle();
 
     final line = lines().single;
     final fields = {for (final field in line.split(' ').skip(1)) field.split('=').first: field.split('=').last};
@@ -806,10 +809,9 @@ void main() {
     expect(ms('detail'), greaterThanOrEqualTo(1000));
     expect(ms('qualities'), inInclusiveRange(0, 999));
     expect(ms('urls'), greaterThanOrEqualTo(1000));
-    for (final name in ['engineReady', 'input', 'load', 'playing']) {
+    for (final name in ['engineReady', 'input', 'load', 'firstFrame', 'playing']) {
       expect(ms(name), isNonNegative, reason: name);
     }
-    expect(fields['firstFrame'], '-', reason: 'the fake engine reports no video size');
     // The steps add up to the total (each one rounded down to whole ms).
     final steps = [for (final name in PlaybackTiming.segmentNames) int.tryParse(fields[name]!) ?? 0];
     expect(ms('total') - steps.reduce((a, b) => a + b), inInclusiveRange(0, steps.length));

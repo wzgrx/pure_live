@@ -1,0 +1,392 @@
+# 归属表：每个代码文件、设置、来源、原生通道归哪个子分类管（Z03.2）。
+#
+# 手写；`python3 tools/docs/owners.py` 核对并生成 OWNERS.md，门禁的 `owners` 一步
+# 跑 `--check`。子分类编号必须在 docs/tasks.toml 的 [[sub]] 里。
+#
+# 怎么分（2026-10-08 第一版，冲突和拿不准的见 Z03.2 的 record.md）：
+# - 一个文件只有一个归属：改它最多、对它负责的子分类。
+# - 界面（页面、组件）归 A 组的界面子分类，逻辑、数据和平台代码归功能子分类
+#   （组说明“界面在 A07”这类写法）。先按目录写，混在一起的目录再按文件写例外，
+#   例外写在目录规则前面（第一条匹配的生效）。
+# - 路径从仓库根目录写；`**` 任意层目录，`*`、`?` 只在一层名字里，结尾的 `/`
+#   表示目录下的全部文件。一条规则一个文件都没匹配到（文件删了或被前面的规则
+#   全部拿走）也报错，所以删文件时一并删规则。
+# - 加新文件时：落在已有目录规则下就不用改；新目录或者归属不同时加一条。
+
+path = [
+  # ---- apps/pure_live/lib/app：应用入口和服务 ----
+  { glob = "apps/pure_live/lib/app/desktop/", sub = "A16" },
+  { glob = "apps/pure_live/lib/app/intake/", sub = "O03" },
+  { glob = "apps/pure_live/lib/app/fonts.dart", sub = "A01" },
+  { glob = "apps/pure_live/lib/app/image_cache.dart", sub = "R03" },
+  { glob = "apps/pure_live/lib/app/iptv_*.dart", sub = "L01" },
+  { glob = "apps/pure_live/lib/app/network.dart", sub = "Q04" },
+  { glob = "apps/pure_live/lib/app/platforms.dart", sub = "E06" },
+  { glob = "apps/pure_live/lib/app/recording.dart", sub = "H02" },
+  { glob = "apps/pure_live/lib/app/recording_notice.dart", sub = "H05" },
+  { glob = "apps/pure_live/lib/app/", sub = "I01" },
+  { glob = "apps/pure_live/lib/main.dart", sub = "I01" },
+  { glob = "apps/pure_live/lib/routes/tv_router.dart", sub = "A17" },
+  { glob = "apps/pure_live/lib/routes/", sub = "I01" },
+  { glob = "apps/pure_live/lib/i18n/", sub = "Z05" },
+  { glob = "apps/pure_live/lib/tv/", sub = "A17" },
+
+  # ---- apps/pure_live/lib/platform：原生通道的 Dart 一侧 ----
+  { glob = "apps/pure_live/lib/platform/display_mode.dart", sub = "O05" },
+  { glob = "apps/pure_live/lib/platform/screen_orientation.dart", sub = "O05" },
+  { glob = "apps/pure_live/lib/platform/native_http.dart", sub = "Q03" },
+  { glob = "apps/pure_live/lib/platform/twitch_webview_http.dart", sub = "Q03" },
+  { glob = "apps/pure_live/lib/platform/platform_services.dart", sub = "L01", note = "GBK 解码和组播锁" },
+  { glob = "apps/pure_live/lib/platform/plugins.dart", sub = "I01" },
+  { glob = "apps/pure_live/lib/platform/recording_platform.dart", sub = "H01" },
+  { glob = "apps/pure_live/lib/platform/secret_cipher.dart", sub = "J02" },
+  { glob = "apps/pure_live/lib/platform/share_channel.dart", sub = "O03" },
+  { glob = "apps/pure_live/lib/platform/system_*.dart", sub = "O04" },
+
+  # ---- 直播间（features/live_play）：界面 A07、A08、A10，逻辑 C、D、G、L、O、R 组 ----
+  { glob = "apps/pure_live/lib/features/live_play/danmaku/chat_feed.dart", sub = "D04" },
+  { glob = "apps/pure_live/lib/features/live_play/danmaku/", sub = "A08" },
+  { glob = "apps/pure_live/lib/features/live_play/local_interaction/", sub = "A08", note = "含 logic/，没有功能子分类，待定" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/audio_focus.dart", sub = "G05" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/background_playback.dart", sub = "C02" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/mini_window.dart", sub = "C02" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/iptv_guide_rows.dart", sub = "L02" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/predictive_back.dart", sub = "O06" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/room_refresh_rate.dart", sub = "R02" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/", sub = "C01" },
+  { glob = "apps/pure_live/lib/features/live_play/mini/room_mini_window.dart", sub = "C02" },
+  { glob = "apps/pure_live/lib/features/live_play/buttons/record_button.dart", sub = "A10" },
+  { glob = "apps/pure_live/lib/features/live_play/player/recording_badge.dart", sub = "A10" },
+  { glob = "apps/pure_live/lib/features/live_play/record/", sub = "A10" },
+  { glob = "apps/pure_live/lib/features/live_play/", sub = "A07" },
+
+  # ---- 其他功能目录：界面归 A 组，逻辑文件写在前面 ----
+  { glob = "apps/pure_live/lib/features/about/", sub = "A15" },
+  { glob = "apps/pure_live/lib/features/account/account_platforms.dart", sub = "K01" },
+  { glob = "apps/pure_live/lib/features/account/account_services.dart", sub = "K01" },
+  { glob = "apps/pure_live/lib/features/account/account_state.dart", sub = "K02" },
+  { glob = "apps/pure_live/lib/features/account/bilibili_web_cookies.dart", sub = "K01" },
+  { glob = "apps/pure_live/lib/features/account/", sub = "A12" },
+  { glob = "apps/pure_live/lib/features/auth/", sub = "A12" },
+  { glob = "apps/pure_live/lib/features/areas/area_catalog.dart", sub = "I03" },
+  { glob = "apps/pure_live/lib/features/areas/areas_common.dart", sub = "I03" },
+  { glob = "apps/pure_live/lib/features/areas/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/area_rooms/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/hot_areas/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/backup/", sub = "A12" },
+  { glob = "apps/pure_live/lib/features/favorite/favorite_controller.dart", sub = "I04" },
+  { glob = "apps/pure_live/lib/features/favorite/favorite_rules.dart", sub = "I04" },
+  { glob = "apps/pure_live/lib/features/favorite/follow_refresher.dart", sub = "I04" },
+  { glob = "apps/pure_live/lib/features/favorite/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/history/history_refresh.dart", sub = "I06" },
+  { glob = "apps/pure_live/lib/features/history/history_sections.dart", sub = "I06" },
+  { glob = "apps/pure_live/lib/features/history/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/home/home_menu.dart", sub = "I01" },
+  { glob = "apps/pure_live/lib/features/home/", sub = "A06" },
+  { glob = "apps/pure_live/lib/features/splash/", sub = "A06" },
+  { glob = "apps/pure_live/lib/features/iptv/iptv_data.dart", sub = "L01" },
+  { glob = "apps/pure_live/lib/features/iptv/", sub = "A13" },
+  { glob = "apps/pure_live/lib/features/multiview/logic/", sub = "N01" },
+  { glob = "apps/pure_live/lib/features/multiview/", sub = "A13" },
+  { glob = "apps/pure_live/lib/features/popular/popular_catalog.dart", sub = "I02" },
+  { glob = "apps/pure_live/lib/features/popular/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/record_settings/record_settings_texts.dart", sub = "H03" },
+  { glob = "apps/pure_live/lib/features/record_settings/", sub = "A10" },
+  { glob = "apps/pure_live/lib/features/recorder/logic/", sub = "H02" },
+  { glob = "apps/pure_live/lib/features/recorder/recorder_texts.dart", sub = "H02" },
+  { glob = "apps/pure_live/lib/features/recorder/", sub = "A10" },
+  { glob = "apps/pure_live/lib/features/remote_receiver/mdns_peers.dart", sub = "J05" },
+  { glob = "apps/pure_live/lib/features/remote_receiver/remote_sync_*.dart", sub = "J05" },
+  { glob = "apps/pure_live/lib/features/remote_receiver/", sub = "A12" },
+  { glob = "apps/pure_live/lib/features/search/search_capability.dart", sub = "I05" },
+  { glob = "apps/pure_live/lib/features/search/search_history.dart", sub = "I05" },
+  { glob = "apps/pure_live/lib/features/search/search_model.dart", sub = "I05" },
+  { glob = "apps/pure_live/lib/features/search/search_ranking.dart", sub = "I05" },
+  { glob = "apps/pure_live/lib/features/search/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/settings/danmaku_page.dart", sub = "A08" },
+  { glob = "apps/pure_live/lib/features/settings/loading_style_names.dart", sub = "J01" },
+  { glob = "apps/pure_live/lib/features/settings/settings_catalog.dart", sub = "J01" },
+  { glob = "apps/pure_live/lib/features/settings/settings_model.dart", sub = "J01" },
+  { glob = "apps/pure_live/lib/features/settings/", sub = "A11" },
+  { glob = "apps/pure_live/lib/features/shield/", sub = "A08" },
+  { glob = "apps/pure_live/lib/features/tags/", sub = "A09" },
+  { glob = "apps/pure_live/lib/features/toolbox/toolbox_actions.dart", sub = "I08" },
+  { glob = "apps/pure_live/lib/features/toolbox/", sub = "A15" },
+  { glob = "apps/pure_live/lib/features/version/app_version.dart", sub = "Y01" },
+  { glob = "apps/pure_live/lib/features/version/update_feed.dart", sub = "Y02" },
+  { glob = "apps/pure_live/lib/features/version/", sub = "A15" },
+  { glob = "apps/pure_live/lib/features/web_dav/web_dav_auth.dart", sub = "J04" },
+  { glob = "apps/pure_live/lib/features/web_dav/web_dav_client.dart", sub = "J04" },
+  { glob = "apps/pure_live/lib/features/web_dav/", sub = "A12" },
+
+  # ---- apps/pure_live/lib/shared：各功能共用 ----
+  { glob = "apps/pure_live/lib/shared/app_prompts.dart", sub = "A06" },
+  { glob = "apps/pure_live/lib/shared/backup/", sub = "J03" },
+  { glob = "apps/pure_live/lib/shared/danmaku/danmaku_overlay.dart", sub = "D03" },
+  { glob = "apps/pure_live/lib/shared/danmaku/emotes.dart", sub = "D03" },
+  { glob = "apps/pure_live/lib/shared/danmaku/danmaku_settings.dart", sub = "D05" },
+  { glob = "apps/pure_live/lib/shared/danmaku/danmaku_templates.dart", sub = "D05" },
+  { glob = "apps/pure_live/lib/shared/danmaku/masked_blocks.dart", sub = "D02" },
+  { glob = "apps/pure_live/lib/shared/danmaku/", sub = "A08" },
+  { glob = "apps/pure_live/lib/shared/images.dart", sub = "R03" },
+  { glob = "apps/pure_live/lib/shared/in_app_web.dart", sub = "I05", note = "网页搜索和哔哩哔哩网页登录共用" },
+  { glob = "apps/pure_live/lib/shared/links/", sub = "A15" },
+  { glob = "apps/pure_live/lib/shared/panels/", sub = "A02" },
+  { glob = "apps/pure_live/lib/shared/permission_prompts.dart", sub = "O04" },
+  { glob = "apps/pure_live/lib/shared/qr_scan.dart", sub = "A12" },
+  { glob = "apps/pure_live/lib/shared/record/record_actions.dart", sub = "H02" },
+  { glob = "apps/pure_live/lib/shared/record/record_state.dart", sub = "H02" },
+  { glob = "apps/pure_live/lib/shared/record/saved_file.dart", sub = "H02" },
+  { glob = "apps/pure_live/lib/shared/record/", sub = "A10" },
+  { glob = "apps/pure_live/lib/shared/rooms/play_quality.dart", sub = "C01" },
+  { glob = "apps/pure_live/lib/shared/rooms/room_cards.dart", sub = "I02" },
+  { glob = "apps/pure_live/lib/shared/rooms/room_feed.dart", sub = "I02" },
+  { glob = "apps/pure_live/lib/shared/rooms/room_texts.dart", sub = "I02" },
+  { glob = "apps/pure_live/lib/shared/rooms/share_code.dart", sub = "E04" },
+  { glob = "apps/pure_live/lib/shared/rooms/", sub = "A09" },
+  { glob = "apps/pure_live/lib/shared/under_construction.dart", sub = "A02" },
+
+  # ---- 原生：Android（Kotlin）和 Windows 运行器 ----
+  { glob = "apps/pure_live/android/**/MainActivity.kt", sub = "O02", note = "多个通道的宿主，待定" },
+  { glob = "apps/pure_live/android/**/AppChannelsPlugin.kt", sub = "Q03", note = "原生 HTTP、加密、GBK、组播锁，待定" },
+  { glob = "apps/pure_live/android/**/Recorder*.kt", sub = "O01" },
+  { glob = "apps/pure_live/android/**/ShareIntakePlugin.kt", sub = "O03" },
+  { glob = "apps/pure_live/android/**/PermissionsPlugin.kt", sub = "O04" },
+  { glob = "apps/pure_live/android/**/SystemAccessPlugin.kt", sub = "O04" },
+  { glob = "apps/pure_live/windows/runner/", sub = "X01" },
+
+  # ---- packages ----
+  { glob = "packages/live_cast/", sub = "N02" },
+  { glob = "packages/live_core/lib/src/sites/bilibili/", sub = "E01" },
+  { glob = "packages/live_core/lib/src/sites/douyu/", sub = "E01" },
+  { glob = "packages/live_core/lib/src/sites/huya/", sub = "E01" },
+  { glob = "packages/live_core/lib/src/sites/douyin/", sub = "E01" },
+  { glob = "packages/live_core/lib/src/sites/kuaishou/", sub = "E01" },
+  { glob = "packages/live_core/lib/src/sites/soop/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/twitch/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/picarto/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/twitcasting/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/niconico/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/showroom/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/chzzk/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/kick/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/liveme/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/tiktok/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/youtube/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/bigo/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/pandalive/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/fc2live/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/steambroadcast/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/seventeenlive/", sub = "E03" },
+  { glob = "packages/live_core/lib/src/sites/", sub = "E02", note = "其余都是国内平台" },
+  { glob = "packages/live_core/lib/src/links.dart", sub = "E04" },
+  { glob = "packages/live_core/", sub = "E05" },
+  { glob = "packages/live_danmaku/lib/src/filters/", sub = "D02" },
+  { glob = "packages/live_danmaku/", sub = "D01" },
+  { glob = "packages/live_iptv/lib/src/catchup.dart", sub = "L02" },
+  { glob = "packages/live_iptv/lib/src/guide/", sub = "L02" },
+  { glob = "packages/live_iptv/", sub = "L01" },
+  { glob = "packages/live_media/", sub = "G01" },
+  { glob = "packages/live_net/lib/src/proxy.dart", sub = "Q02" },
+  { glob = "packages/live_net/", sub = "Q01" },
+  { glob = "packages/live_player/lib/src/engine*.dart", sub = "G01" },
+  { glob = "packages/live_player/lib/src/mpv_*.dart", sub = "G01" },
+  { glob = "packages/live_player/lib/src/frame_rate.dart", sub = "R02" },
+  { glob = "packages/live_player/lib/src/screen_wake.dart", sub = "O05" },
+  { glob = "packages/live_player/", sub = "G02" },
+  { glob = "packages/live_record/lib/src/scheduler.dart", sub = "H04" },
+  { glob = "packages/live_record/lib/src/naming.dart", sub = "H03" },
+  { glob = "packages/live_record/lib/src/settings.dart", sub = "H03" },
+  { glob = "packages/live_record/lib/src/storage.dart", sub = "H03" },
+  { glob = "packages/live_record/", sub = "H01" },
+  { glob = "packages/live_store/lib/src/backup/", sub = "J03" },
+  { glob = "packages/live_store/lib/src/legacy/", sub = "J06" },
+  { glob = "packages/live_store/lib/src/settings/", sub = "J01" },
+  { glob = "packages/live_store/lib/src/webdav.dart", sub = "J04" },
+  { glob = "packages/live_store/", sub = "J02" },
+  { glob = "packages/live_ui/lib/src/theme/grid_columns.dart", sub = "A04" },
+  { glob = "packages/live_ui/lib/src/theme/motion.dart", sub = "A03" },
+  { glob = "packages/live_ui/lib/src/theme/", sub = "A01" },
+  { glob = "packages/live_ui/lib/src/icons/", sub = "A01" },
+  { glob = "packages/live_ui/lib/src/widgets/refresh_view.dart", sub = "A03" },
+  { glob = "packages/live_ui/lib/src/widgets/scrolling.dart", sub = "A03" },
+  { glob = "packages/live_ui/lib/src/widgets/refresh_rate.dart", sub = "R02" },
+  { glob = "packages/live_ui/", sub = "A02" },
+  { glob = "packages/live_vod/", sub = "L03" },
+
+  # ---- tools ----
+  { glob = "tools/brotli/", sub = "Q01" },
+  { glob = "tools/check_latest/", sub = "Z01" },
+  { glob = "tools/docs/", sub = "Z06" },
+  { glob = "tools/ffmpeg_kit/", sub = "Z04" },
+  { glob = "tools/gate/", sub = "Z02" },
+  { glob = "tools/live_cli/", sub = "E07" },
+  { glob = "tools/release/", sub = "Y01" },
+  { glob = "tools/timeshift/", sub = "S01" },
+  { glob = "tools/ui/inventory.py", sub = "Z03" },
+  { glob = "tools/ui/", sub = "Z06", note = "效果图和评审页工具，待定" },
+]
+
+# 来源：SiteIds.supported 的每一个。play 是播放（平台层），danmaku 是弹幕协议；
+# 没有弹幕实现、D01 也没有对应任务的写 "无"。
+site = [
+  { id = "bilibili", play = "E01", danmaku = "D01" },
+  { id = "douyu", play = "E01", danmaku = "D01" },
+  { id = "huya", play = "E01", danmaku = "D01" },
+  { id = "douyin", play = "E01", danmaku = "D01" },
+  { id = "kuaishou", play = "E01", danmaku = "D01" },
+  { id = "cc", play = "E02", danmaku = "无" },
+  { id = "twitch", play = "E03", danmaku = "D01" },
+  { id = "soop", play = "E03", danmaku = "D01" },
+  { id = "yy", play = "E02", danmaku = "D01" },
+  { id = "acfun", play = "E02", danmaku = "D01" },
+  { id = "picarto", play = "E03", danmaku = "D01" },
+  { id = "twitcasting", play = "E03", danmaku = "D01" },
+  { id = "missevan", play = "E02", danmaku = "D01" },
+  { id = "inke", play = "E02", danmaku = "无" },
+  { id = "kilakila", play = "E02", danmaku = "D01" },
+  { id = "xiaohongshu", play = "E02", danmaku = "无" },
+  { id = "niconico", play = "E03", danmaku = "D01" },
+  { id = "weibo", play = "E02", danmaku = "无" },
+  { id = "showroom", play = "E03", danmaku = "D01" },
+  { id = "chzzk", play = "E03", danmaku = "D01" },
+  { id = "kick", play = "E03", danmaku = "D01" },
+  { id = "liveme", play = "E03", danmaku = "D01" },
+  { id = "tiktok", play = "E03", danmaku = "D01" },
+  { id = "youtube", play = "E03", danmaku = "D01" },
+  { id = "bigo", play = "E03", danmaku = "D01" },
+  { id = "pandalive", play = "E03", danmaku = "D01" },
+  { id = "fc2live", play = "E03", danmaku = "D01" },
+  { id = "steambroadcast", play = "E03", danmaku = "D01" },
+  { id = "jdlive", play = "E02", danmaku = "D01" },
+  { id = "kugoulive", play = "E02", danmaku = "D01" },
+  { id = "baidulive", play = "E02", danmaku = "D01" },
+  { id = "sixroom", play = "E02", danmaku = "D01" },
+  { id = "looklive", play = "E02", danmaku = "D01" },
+  { id = "17live", play = "E03", danmaku = "D01" },
+  { id = "iptv", play = "L01", danmaku = "无" },
+]
+
+# 原生通道：Dart 和 Kotlin 里写的 `pure_live/...` 名字。
+channel = [
+  { name = "pure_live/app", sub = "O06", note = "回到后台、电视判断、遥控器输入、启动画面主题，待定" },
+  { name = "pure_live/background_playback", sub = "C02" },
+  { name = "pure_live/device_controls", sub = "G05" },
+  { name = "pure_live/display_mode", sub = "O05" },
+  { name = "pure_live/multicast_lock", sub = "N02" },
+  { name = "pure_live/native_http", sub = "Q03" },
+  { name = "pure_live/permissions", sub = "O04" },
+  { name = "pure_live/pip", sub = "O02" },
+  { name = "pure_live/predictive_back", sub = "O06" },
+  { name = "pure_live/recorder", sub = "O01" },
+  { name = "pure_live/secret_cipher", sub = "J02" },
+  { name = "pure_live/share_intake", sub = "O03" },
+  { name = "pure_live/system_access", sub = "O04" },
+  { name = "pure_live/text_codec", sub = "L01" },
+]
+
+# 单个设置的归属（键是存储用的键名），优先于下面的分节默认值。
+setting = [
+  # app 分节（默认 J01）
+  { key = "enableDenseFavorites", sub = "I04" },
+  { key = "enableBackgroundPlay", sub = "C02" },
+  { key = "enableAsmrSleepMode", sub = "C03" },
+  { key = "asmrSleepMinutes", sub = "C03" },
+  { key = "enableRotateScreen", sub = "O05" },
+  { key = "enableScreenKeepOn", sub = "O05" },
+  { key = "enableAutoCheckUpdate", sub = "Y02" },
+  { key = "useGitHubOriginForUpdates", sub = "Y02" },
+  { key = "skippedUpdateVersion", sub = "Y02" },
+  { key = "enableFullScreenDefault", sub = "C01" },
+  { key = "showSplashPage", sub = "I08" },
+  { key = "refreshRateMode", sub = "R02" },
+  { key = "matchVideoFrameRate", sub = "R02" },
+  { key = "preferRealOnlineCounts", sub = "I02" },
+  { key = "realOnlinePlatforms", sub = "I02" },
+  { key = "savedMenuIds", sub = "I01" },
+  { key = "enableMultiView", sub = "N01" },
+  { key = "enableNewWindowPlay", sub = "A16" },
+  { key = "showUnplayableInDiscover", sub = "I02" },
+  { key = "detectClipboardRooms", sub = "O03" },
+  { key = "douyuForceRenew", sub = "K02" },
+  { key = "twitchLanguages", sub = "E03" },
+  { key = "uiMode", sub = "X03" },
+  { key = "tvFocusZoom", sub = "A17" },
+  # favorite 分节（默认 I03）
+  { key = "preferPlatform", sub = "I02" },
+  # theme、font、meta 分节
+  { key = "language", sub = "Z05" },
+  { key = "danmakuFontFamilyFileName", sub = "D05" },
+  { key = "themeColorMigration", sub = "A01" },
+  # player 分节（默认 G01）
+  { key = "videoFitIndex", sub = "G04" },
+  { key = "enableRtxVsr", sub = "G04" },
+  { key = "showPortraitDiagnostics", sub = "G04" },
+  { key = "preferResolution", sub = "C01" },
+  { key = "preferResolutionCellular", sub = "C01" },
+  { key = "floatPlay", sub = "C02" },
+  { key = "windowsPipAlwaysOnTop", sub = "C02" },
+  { key = "autoPipOnLeave", sub = "C02" },
+  { key = "useHardStopOnExit", sub = "C02" },
+  { key = "enablePortraitStreamAdaptation", sub = "A07" },
+  { key = "portraitAdaptiveHeight", sub = "A07" },
+  { key = "portraitLayoutMode", sub = "A07" },
+  { key = "portraitFullscreenPolicy", sub = "A07" },
+  { key = "portraitFullscreenDisplayMode", sub = "A07" },
+  { key = "portraitPipFollowSource", sub = "A07" },
+  { key = "portraitDanmakuMode", sub = "A07" },
+  { key = "rememberPortraitRoomOverride", sub = "A07" },
+  { key = "portraitFullscreenSwipeSwitch", sub = "A07" },
+  { key = "portraitRoomOverrides", sub = "A07" },
+  { key = "livePlayChatCollapsed", sub = "A07" },
+  { key = "roomSwitcherLayout", sub = "A07" },
+  # danmaku 分节（默认 D05）
+  { key = "danmakuListStyle", sub = "A08" },
+  { key = "showChatGifts", sub = "A08" },
+  { key = "enableDanmakuTapInteraction", sub = "A08" },
+  { key = "enableDanmakuLongPressInteraction", sub = "A08" },
+  { key = "collapseRepeatedDanmaku", sub = "D02" },
+  { key = "repeatedDanmakuWindowSeconds", sub = "D02" },
+  { key = "filterDouyuSuspectedAutomatedMessages", sub = "D02" },
+  { key = "enableDanmakuSimilarityFilter", sub = "D02" },
+  { key = "danmakuSimilarityThreshold", sub = "D02" },
+  { key = "danmakuSimilarityCacheDuration", sub = "D02" },
+  { key = "danmakuSimilarityMaxCacheSize", sub = "D02" },
+  { key = "youtubeShowAllChat", sub = "D01" },
+  # exit 分节（默认 A16）
+  { key = "autoShutDownTime", sub = "J01" },
+  { key = "enableAutoShutDownTime", sub = "J01" },
+  # recorder 分节（默认 H03）
+  { key = "maxTaskCount", sub = "H04" },
+  { key = "enable_polling", sub = "H04" },
+  { key = "live_check_interval", sub = "H04" },
+  { key = "enable_backoff", sub = "H04" },
+  { key = "max_check_interval", sub = "H04" },
+  { key = "auto_start_on_boot", sub = "H04" },
+]
+
+# 每个分节（Setting 的 section）的默认子分类。新加分节要在这里加一行。
+[setting_sections]
+app = "J01"
+backup = "J03"
+cache = "Y02"
+cookie = "K02"
+danmaku = "D05"
+exit = "A16"
+favorite = "I03"
+font = "A01"
+history = "I06"
+iptv = "L01"
+localInteraction = "A08"
+log = "I01"
+meta = "J05"
+page = "A09"
+player = "G01"
+proxy = "Q02"
+recorder = "H03"
+refresh = "I04"
+roomCard = "A09"
+startup = "A16"
+theme = "A01"
+volume = "G05"
+windowSize = "A16"

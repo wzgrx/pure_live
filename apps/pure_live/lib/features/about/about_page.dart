@@ -111,7 +111,7 @@ class _AboutViewState extends State<AboutView> {
                 Text(
                   i18n('app_name'),
                   textAlign: TextAlign.center,
-                  style: styles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: 0.5),
+                  style: styles.t20.emphasis.copyWith(letterSpacing: 0.5),
                 ),
                 const SizedBox(height: 6),
                 Center(

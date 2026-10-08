@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/widgets/scrolling.dart';
 import 'package:live_ui/src/widgets/settings_tiles.dart';
@@ -19,7 +20,7 @@ PreferredSizeWidget settingsPageAppBar(
   bool centerTitle = false,
 }) {
   final short = MediaQuery.sizeOf(context).height < 480;
-  final heading = Text(title, style: context.textStyles.t18.copyWith(fontSize: 20, fontWeight: FontWeight.w600));
+  final heading = Text(title, style: context.textStyles.t20.emphasis);
   return AppBar(
     title: subtitle == null
         ? heading

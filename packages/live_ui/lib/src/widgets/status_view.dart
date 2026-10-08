@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_dialog.dart';
@@ -525,10 +526,7 @@ class StatusSkeleton extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         padding: padding,
         child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: scheme.surfaceContainerLow,
-            borderRadius: const BorderRadius.all(Radius.circular(16)),
-          ),
+          decoration: BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: AppRadii.card),
           child: Column(children: [for (var i = 0; i < (rows ?? 12); i++) row]),
         ),
       ),

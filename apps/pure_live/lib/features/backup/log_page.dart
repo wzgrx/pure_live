@@ -273,7 +273,7 @@ class _EntryRow extends StatelessWidget {
           children: [
             Text(
               '${time.length > 12 ? time.substring(0, 12) : time}  ${entry.level.name.toUpperCase()}  ${entry.tag}',
-              style: context.textStyles.t11.copyWith(color: color, fontWeight: FontWeight.w700),
+              style: context.textStyles.t11.emphasis.copyWith(color: color),
             ),
             const SizedBox(height: 2),
             Text(

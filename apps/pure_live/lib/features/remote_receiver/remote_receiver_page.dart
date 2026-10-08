@@ -490,7 +490,13 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
               SelectableText(
                 service.pairingCode,
                 key: const ValueKey('remote-sync-code'),
-                style: styles.t20.copyWith(fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: 6).tabular,
+                // 28 by default: the app bar title size × 28 / 20.
+                style: styles.t20.emphasis
+                    .copyWith(
+                      fontSize: LiveFontSizes.of(Theme.of(context).textTheme).titleLarge * 28 / 20,
+                      letterSpacing: 6,
+                    )
+                    .tabular,
               ),
               const SizedBox(height: 4),
               Text(i18n('remote_sync_scan_hint'), style: styles.t13.copyWith(color: colors.onSurfaceVariant)),

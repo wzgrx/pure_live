@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
 /// How far a list scrolls before "to top" shows (3.x `BasePageView`: 400).
@@ -114,7 +115,7 @@ class _ScrollJumpButtonsState extends State<ScrollJumpButtons> {
     final scheme = Theme.of(context).colorScheme;
     Widget button({required bool shown, required bool up}) => AnimatedScale(
       scale: shown ? 1 : 0,
-      duration: const Duration(milliseconds: 200),
+      duration: AppDurations.normal,
       child: ExcludeFocus(
         excluding: !shown,
         child: FocusRing(

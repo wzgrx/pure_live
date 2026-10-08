@@ -492,7 +492,6 @@ class _PreviewBody extends StatelessWidget {
       ('config_modules', modules),
     ];
     final title = (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-      fontSize: 13,
       fontWeight: FontWeight.w600,
       color: colors.primary,
     );
@@ -540,8 +539,9 @@ class _PreviewBody extends StatelessWidget {
                                   children: [
                                     Text(
                                       '$count',
+                                      // 22 by default: the app bar title size × 22 / 20.
                                       style: context.textStyles.t20.tabular.copyWith(
-                                        fontSize: 22,
+                                        fontSize: LiveFontSizes.of(theme.textTheme).titleLarge * 22 / 20,
                                         fontWeight: FontWeight.w600,
                                         color: colors.onSurface,
                                       ),

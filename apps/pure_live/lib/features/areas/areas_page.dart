@@ -242,7 +242,10 @@ class _FollowedAreasButton extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       label,
-                      style: context.textStyles.t12Bold.copyWith(color: theme.colorScheme.primary, letterSpacing: 0.5),
+                      style: context.textStyles.t12.emphasis.copyWith(
+                        color: theme.colorScheme.primary,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ],
                 ),

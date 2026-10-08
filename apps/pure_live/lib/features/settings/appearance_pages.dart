@@ -742,7 +742,6 @@ class _LoadingCell extends StatelessWidget {
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.t12.copyWith(
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: selected ? colors.primary : colors.onSurface,
                     ),

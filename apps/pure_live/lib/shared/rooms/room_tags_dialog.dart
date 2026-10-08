@@ -263,10 +263,7 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
             spacing: 6,
             children: [
               Icon(AppIcons.add, size: 20, color: scheme.primary),
-              Text(
-                i18n('room_tags_new'),
-                style: context.textStyles.t14.copyWith(color: scheme.primary, fontWeight: FontWeight.w500),
-              ),
+              Text(i18n('room_tags_new'), style: context.textStyles.t14.emphasis.copyWith(color: scheme.primary)),
             ],
           ),
         ),
@@ -420,7 +417,7 @@ class _TagTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: styles.t14.copyWith(
-                            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                             color: selected ? scheme.onSecondaryContainer : scheme.onSurface,
                           ),
                         ),

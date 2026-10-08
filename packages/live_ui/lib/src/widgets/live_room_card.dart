@@ -326,7 +326,7 @@ final class _Parts {
     overflow: TextOverflow.ellipsis,
     style: (dense ? styles.t12 : styles.t13).copyWith(
       height: 1.3,
-      fontWeight: FontWeight.w500,
+      fontWeight: FontWeight.w400,
       color: scheme.onSurfaceVariant,
     ),
   );
@@ -531,7 +531,6 @@ class CoverChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final ink = foreground ?? OnVideoColors.foreground;
     var style = (Theme.of(context).textTheme.labelMedium ?? const TextStyle()).copyWith(
-      fontSize: 12,
       height: 1.2,
       color: ink,
       fontWeight: FontWeight.w600,

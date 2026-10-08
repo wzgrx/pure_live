@@ -133,7 +133,7 @@ class _AreaCardState extends ConsumerState<AreaCard> {
                                 key: const ValueKey('area-card-caption'),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: styles.t12.copyWith(fontWeight: FontWeight.w500, height: 1.3),
+                                style: styles.t12.copyWith(fontWeight: FontWeight.w400, height: 1.3),
                               ),
                           ],
                         ),

@@ -653,7 +653,11 @@ PreferredSizeWidget settingsAppBar(
   return AppBar(
     title: Text(
       title,
-      style: context.textStyles.t18.copyWith(fontSize: embedded ? 18 : 20, fontWeight: FontWeight.w600),
+      // 18 when embedded in the two-pane settings by default: the app bar
+      // title size × 18 / 20.
+      style: context.textStyles.t20.emphasis.copyWith(
+        fontSize: embedded ? LiveFontSizes.of(Theme.of(context).textTheme).titleLarge * 18 / 20 : null,
+      ),
     ),
     leading: leading,
     automaticallyImplyLeading: leading == null,

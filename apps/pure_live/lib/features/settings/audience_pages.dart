@@ -142,7 +142,6 @@ class AudienceHeatOnlyTile extends ConsumerWidget {
     ];
     final theme = Theme.of(context);
     final small = (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-      fontSize: 12,
       height: 1.5,
       color: theme.colorScheme.onSurfaceVariant,
     );
@@ -156,7 +155,7 @@ class AudienceHeatOnlyTile extends ConsumerWidget {
           Text(
             i18n('settings_audience_heat_only_count', args: {'count': '${ids.length}'}),
             style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-              fontSize: 15,
+              fontSize: theme.textTheme.titleMedium?.fontSize,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -244,10 +243,21 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: base.copyWith(fontSize: 15, fontWeight: FontWeight.w600, color: colors.onSurface),
+                  style: base.copyWith(
+                    fontSize: Theme.of(context).textTheme.titleMedium?.fontSize,
+                    fontWeight: FontWeight.w600,
+                    color: colors.onSurface,
+                  ),
                 ),
                 for (final line in lines)
-                  Text(line, style: base.copyWith(fontSize: 12, height: 1.45, color: colors.onSurfaceVariant)),
+                  Text(
+                    line,
+                    style: base.copyWith(
+                      fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                      height: 1.45,
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
               ],
             ),
           ),

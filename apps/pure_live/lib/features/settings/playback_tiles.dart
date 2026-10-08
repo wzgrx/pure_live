@@ -389,7 +389,11 @@ class _DefaultTag extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
         child: Text(
           i18n('default_option'),
-          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: colors.onSecondaryContainer),
+          style: TextStyle(
+            fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+            fontWeight: FontWeight.w600,
+            color: colors.onSecondaryContainer,
+          ),
         ),
       ),
     );
@@ -409,7 +413,6 @@ class MpvDocsNote extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final style = (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-      fontSize: 12,
       height: 1.5,
       color: theme.colorScheme.onSurfaceVariant,
     );

@@ -137,7 +137,7 @@ class _PaginationBarState extends State<PaginationBar> {
             child: Text(
               '$page',
               style: selected
-                  ? styles.t13Bold.copyWith(color: theme.colorScheme.onPrimary)
+                  ? styles.t13.emphasis.copyWith(color: theme.colorScheme.onPrimary)
                   : styles.t13.copyWith(color: theme.colorScheme.onSurface),
             ),
           ),

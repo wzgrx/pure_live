@@ -250,10 +250,7 @@ class _NumberDialogState extends State<_NumberDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (widget.hint case final hint?) ...[
-              Text(
-                hint,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13, color: colors.onSurfaceVariant),
-              ),
+              Text(hint, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant)),
               const SizedBox(height: 12),
             ],
             if (widget.presets.isNotEmpty) ...[

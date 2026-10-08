@@ -194,7 +194,7 @@ Future<TagDetailsAction?> showTagDetails(BuildContext context, {required StoreTa
         final styles = dialogContext.textStyles;
         Widget label(String text) => Padding(
           padding: const EdgeInsets.only(top: 16, bottom: 6),
-          child: Text(text, style: styles.t12Bold.copyWith(color: colors.primary)),
+          child: Text(text, style: styles.t12.emphasis.copyWith(color: colors.primary)),
         );
         return AppDialog(
           key: const ValueKey('tag-details'),
@@ -203,7 +203,7 @@ Future<TagDetailsAction?> showTagDetails(BuildContext context, {required StoreTa
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(i18n('tag_name_label'), style: styles.t12Bold.copyWith(color: colors.primary)),
+              Text(i18n('tag_name_label'), style: styles.t12.emphasis.copyWith(color: colors.primary)),
               const SizedBox(height: 6),
               Text(tag.name, style: styles.t16.copyWith(fontWeight: FontWeight.w600)),
               if (tag.description.isNotEmpty) ...[

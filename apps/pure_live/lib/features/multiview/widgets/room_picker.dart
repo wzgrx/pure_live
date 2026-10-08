@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
@@ -94,7 +96,7 @@ class PickerHeader extends StatelessWidget {
               key: const ValueKey('multiview-picker-title'),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.emphasis.copyWith(fontSize: 15, color: scheme.onSurface),
+              style: theme.textTheme.titleMedium?.emphasis.copyWith(color: scheme.onSurface),
             ),
           ),
           if (hint case final text?) ...[
@@ -104,7 +106,7 @@ class PickerHeader extends StatelessWidget {
                 text,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodySmall?.regular.copyWith(fontSize: 12, color: scheme.onSurfaceVariant),
+                style: theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant),
               ),
             ),
           ] else
@@ -186,7 +188,7 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
           child: TextField(
             key: const ValueKey('multiview-picker-search'),
             onChanged: (value) => setState(() => _query = value),
-            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14),
+            style: theme.textTheme.bodyMedium?.copyWith(fontSize: theme.textTheme.bodyLarge?.fontSize),
             decoration: InputDecoration(
               isDense: true,
               prefixIcon: const Icon(AppIcons.search, size: 20),
@@ -238,7 +240,7 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
               return ListView.builder(
                 key: const ValueKey('multiview-picker-list'),
                 padding: const EdgeInsets.only(bottom: 16),
-                itemExtent: 56,
+                itemExtent: _RoomTile.extent(context),
                 itemCount: rooms.length,
                 itemBuilder: (context, index) {
                   final room = rooms[index];
@@ -255,6 +257,19 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
 
 class _RoomTile extends StatelessWidget {
   const new({required this.room, required this.shownIn, required this.onTap});
+
+  /// 56 high, or as high as its two lines and padding when larger font
+  /// settings or system text make them taller (A01.2).
+  static double extent(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final scaler = MediaQuery.textScalerOf(context);
+    double line(TextStyle? style) {
+      final size = style?.fontSize ?? 14;
+      return scaler.scale(size) * (style?.height ?? 1.2);
+    }
+
+    return math.max(56, (12 + line(text.bodyLarge) + line(text.bodySmall)).ceilToDouble());
+  }
 
   final LiveRoom room;
   final int? shownIn;
@@ -300,13 +315,13 @@ class _RoomTile extends StatelessWidget {
                     room.displayNick(platform),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyLarge?.emphasis.copyWith(fontSize: 14, color: scheme.onSurface),
+                    style: theme.textTheme.bodyLarge?.emphasis.copyWith(color: scheme.onSurface),
                   ),
                   Text(
                     room.title.trim().isEmpty ? platform : room.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.regular.copyWith(fontSize: 12, color: scheme.onSurfaceVariant),
+                    style: theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant),
                   ),
                 ],
               ),
@@ -320,7 +335,7 @@ class _RoomTile extends StatelessWidget {
                 decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(11)),
                 child: Text(
                   i18n('multiview_shown_in', args: {'index': '$index'}),
-                  style: theme.textTheme.bodySmall?.emphasis.copyWith(fontSize: 12, color: scheme.onPrimaryContainer),
+                  style: theme.textTheme.bodySmall?.emphasis.copyWith(color: scheme.onPrimaryContainer),
                 ),
               )
             else
@@ -356,7 +371,7 @@ class _LiveStatus extends StatelessWidget {
           decoration: BoxDecoration(shape: BoxShape.circle, color: color),
           child: const SizedBox.square(dimension: 7),
         ),
-        Text(i18n(key), style: theme.textTheme.bodySmall?.emphasis.copyWith(fontSize: 12, color: color)),
+        Text(i18n(key), style: theme.textTheme.bodySmall?.emphasis.copyWith(color: color)),
       ],
     );
   }

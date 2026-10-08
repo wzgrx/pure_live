@@ -332,8 +332,9 @@ class _VersionLine extends StatelessWidget {
           children: [
             Text(
               'v${release.version}',
+              // 17 by default: the card title size × 17 / 15.
               style: styles.t16.copyWith(
-                fontSize: 17,
+                fontSize: LiveFontSizes.of(styles.theme.textTheme).titleMedium * 17 / 15,
                 fontWeight: FontWeight.w600,
                 color: highlighted ? colors.primary : colors.onSurface,
               ),
@@ -394,7 +395,10 @@ class _ReleaseHeader extends StatelessWidget {
                 'v${release.version}',
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: styles.t16.copyWith(fontSize: 17, fontWeight: FontWeight.w600),
+                style: styles.t16.copyWith(
+                  fontSize: LiveFontSizes.of(styles.theme.textTheme).titleMedium * 17 / 15,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Text(
                 i18n('version_published_at', args: {'date': release.date}),

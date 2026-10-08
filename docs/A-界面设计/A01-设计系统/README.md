@@ -42,7 +42,7 @@
 - 完成度（和 3.x 对照）：
   - 一致的：五个字号和派生比例（`live_theme.dart:221-242` 对 3.x `lib/common/style/theme.dart:57-87`）、字重常量、组件主题的圆角、深色动态错误色、页面切换、`AppTextStyles` 的名字和字号（`t11`/`t12`、`t15`/`t16`、`t18`/`t20` 两两同号）、每个位置的图标。
   - 确认过的改动：品牌蓝和 fidelity、纯黑（A11.2 C-3、C-4）；文字大小乘系统字号（C-5）；标题对齐照 3.x 运行时（D-011）；焦点框（A02.1 c21）；对话框正文 14、标题 20/600（A02.2 c5）；底部面板顶角 24 → 16、表面色（A02.2）；列表行标题 15/400（A02.1 c16、C3）；画面上的颜色一组角色（A07.1）；不认识的平台给应用标志（A01.1 P9）。
-  - 还缺的：间距、圆角、动效时长没有常量，页面写数字；直播间以外还有写死的字号和字重；`live_ui` 组件和 `shared/` 还有直接写的图标；同一个图标两种意思的几组没处理（见“已知问题”）。
+  - 还缺的：间距没有常量，应用页面里的圆角和时长大多还写数字（`AppRadii`、`AppDurations` 只用在主题和 `live_ui` 组件）；直播间和画面上的字号还写死；同一个图标两种意思的几组等维护者定（见“已知问题”）。
 
 ## 代码地图
 
@@ -55,7 +55,7 @@
 | `packages/live_ui/lib/src/theme/live_colors.dart` | `OnVideoColors`（`:9`，画面上的前景、次要白、渐变、状态遮罩、手势卡片、芯片、黄色“非默认”）；`LiveSemanticColors`（`:160`，直播红、录制红、成功、警告、提醒底色，深浅各一套）；`WindowButtonColors`（`:248`，桌面关闭按钮红，A16.1）；`InkOnColor`（`:258`，平台给的颜色上按对比度选深字或白字）；`LiveTextStyleX`（`:299`，`tabular`、`regular`、`emphasis`）；`LivePureBlack`（`:314`，纯黑的几层表面）；`LivePalettes`（`:345`，颜色选择器的推荐色和 Material 色板）；`LiveTvColors`（`:394`，电视焦点框的近白） |
 | `packages/live_ui/lib/src/theme/dynamic_color.dart` | `toFlutterColorScheme`（`:14`，dynamic_color 2.x 的色板转成 Flutter 的 `ColorScheme`）；`toMaterialUiColorScheme`（`:74`）、`toMaterialUiThemeData`（`:152`）；`MaterialUiThemeBridge`（`:177`，把应用主题同步给 `material_ui`，否则颜色选择器等用浅色兜底）；`LiveDynamicColorBuilder`（`:195`） |
 | `packages/live_ui/lib/src/theme/tv_colors.dart` | `TvColors`（`:6`）：电视焦点环 `#F1F3F9`、对话框遮罩、关注的粉色（A17.1） |
-| `packages/live_ui/lib/src/icons/app_icons.dart` | `AppIcons`（`:12`）：483 个用途名、346 个字形，按区域分节（首页外壳 `:13`、直播间 `:84` 起、录制中心 `:312`、桌面标题栏 `:926`、切换直播间 `:1523`……）；每个名对应 3.x 在那个位置用的图标 |
+| `packages/live_ui/lib/src/icons/app_icons.dart` | `AppIcons`（`:12`）：485 个用途名、350 个字形，按区域分节（首页外壳 `:13`、直播间 `:84` 起、录制中心、桌面标题栏、切换直播间、`live_ui` 组件在最后）；每个名对应 3.x 在那个位置用的图标，每个名至少用一处（门禁第 4 条） |
 | `packages/live_ui/lib/src/icons/custom_icons.dart` | `CustomIcons`（`:10`）：3.x 自带图标字体的 13 个字形，`fontPackage: 'live_ui'` |
 | `packages/live_ui/lib/src/icons/danmaku_icon.dart` | `DanmakuIconKind`（`:5`，开、关、设置）、`DanmakuIcon`（`:24`）：3.x 的三张 SVG 像 `Icon` 一样画，带控制层的阴影 |
 | `packages/live_ui/lib/src/icons/platform_logo.dart` | `PlatformLogos`（`:6`，35 个平台 id 的标志路径，不认识的给 `app.png`）、`PlatformLogo`（`:34`） |
@@ -65,7 +65,7 @@
 | `apps/pure_live/lib/i18n/i18n.dart` | `:107` 把当前语言的翻译交给 `LiveUiStrings` |
 | `apps/pure_live/lib/app/fonts.dart` | 下载字体的注册（`resolveAppFontFamily` 用的 `registered`） |
 | `apps/pure_live/lib/app/launch_failure.dart` | `:74-75` 启动失败页用默认 `LiveTheme()` |
-| `apps/pure_live/lib/shared/danmaku/danmaku_color_dialog.dart` | `:8-19` 十个弹幕预设色（还写在应用里，A01.2 要移进 `LivePalettes`） |
+| `packages/live_ui/lib/src/theme/metrics.dart` | `AppRadii`（卡片 16、按钮 12、文字按钮 8、列表行 12、输入框 12、对话框 24、小菜单 8、芯片 8、面板顶角和侧边 16）、`AppDurations`（100、150、200、300 毫秒），A01.2 |
 | `tools/gate/check_ui_structure.py`、`tools/gate/ui_baseline.json` | 第 2 条：`features/**`、`tv/**` 不直接写颜色和图标（`scan` `:36`）；基线 `raw_styles` 现在是空的（0 处） |
 
 测试：
@@ -91,16 +91,10 @@
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 间距、圆角、动效时长没有常量，各处写数字 | `BorderRadius.circular(n)` 178 处 18 种数；`Duration(milliseconds: …)` 应用 62 处、`live_ui` 19 处 | 改圆角和时长要逐处找 | A01.2 第 3 阶段 |
-| 直播间以外写死字号、字重 | 应用 `fontSize: <数字>` 40 处（直播间另有 54 处）、`live_ui` 24 处；按条件写死 9 处；w500/w700/bold 应用 16 处、`live_ui` 4 处 | 调五个字号设置时这些地方不变；Windows 上 500 发虚 | A01.2 第 3 阶段 |
-| 设置行的标题和说明字号写死 | `packages/live_ui/lib/src/widgets/settings_row.dart:363`（`tv ? 17 : 15`）、`:369`（`tv ? 14 : 12`） | 所有设置页的行不跟五个字号设置走（只跟“文字大小”） | A01.2 第 3 阶段 |
-| 主题本身用 500 字重（规范 8.2 说只用 400、600） | `live_theme.dart:233`、`:234`、`:238`；`text_styles.dart:38-163` 的 `*Medium`/`*Bold`（页面用 11 处） | 卡片标题、按钮字是 500 | A01.2，改不改由维护者定（看得见的改动） |
-| `live_ui` 组件直接写图标 22 处、`shared/rooms/paging.dart` 3 处 | 清单见 A01.3 任务书 | `AppIcons` 不是唯一入口，以后换图标库漏改 | A01.3 第 3 阶段 |
-| “在平台打开”和“在新窗口播放”同一个 ↗ | `app_icons.dart:184`、`:289` | 直播间菜单里两项挨着看不出区别 | A01.3（A16.1 c12 已定 `add_to_photos`） |
-| 15 个没人用的图标名；同一字形几种意思（`tv_2_line` 4 种、`cloud_line` 3 种、`heart_3_line` 4 种） | `app_icons.dart`，清单见 A01.3 README | 维护时看不清哪个在用 | A01.3 |
-| 弹幕预设色写在应用里 | `apps/pure_live/lib/shared/danmaku/danmaku_color_dialog.dart:8-19` | 门禁不扫 `shared/`，颜色不在 `live_ui` | A01.2 |
-| 门禁只扫 `features/`、`tv/` | `tools/gate/check_ui_structure.py:39` | `shared/` 和 `live_ui` 的直接写法不被拦 | A01.3（扩到 `shared/`）；`live_ui` 内部由各任务自查 |
-| 电视的焦点白有两份、值不同 | `live_colors.dart:396`（`LiveTvColors.focusFrame` `#F2F2F2`，`settings_row.dart:480` 用）和 `tv_colors.dart:10`（`TvColors.focusRing` `#F1F3F9`，电视外壳用） | 设置行在电视上的焦点框和其他电视控件差一点点 | 没有任务管，建议在 A17 登记一个小任务合成一个 |
+| 应用页面的圆角、时长还写数字；间距没有常量 | `BorderRadius.circular(n)` 应用 139 处（直播间另有 56 处）；`Duration(milliseconds: …)` 应用 36 处（直播间另有 23 处，含计时器） | 改圆角和时长要逐处找 | 常量已有（A01.2），改到哪个页面顺手换 |
+| 直播间和画面上的字号写死 | `features/live_play/` 的 `fontSize: <数字>` 54 处；`live_ui` 的 `video_state_view`、`record_glyph`、`pip_danmaku_preview` | 调五个字号设置时直播间的字不变 | 直播间任务定要不要跟（规范只说画面上随系统放大最多 1.3 倍）；其余页面 A01.2 已改，门禁第 5 条锁住 |
+| 同一字形几种意思（`tv_2_line` 4 种、`cloud_line` 3 种、`heart_3_line` 4 种） | `app_icons.dart`，建议见 A01.3 README“待选和决定” | 设置、网络电视、多画面里同一个图标表示不同的事 | 维护者按 D-003 定，定了只改 `app_icons.dart` |
+| 电视的焦点白有两份、值不同 | `live_colors.dart:417`（`LiveTvColors.focusFrame` `#F2F2F2`，`settings_row.dart:513` 用）和 `tv_colors.dart:10`（`TvColors.focusRing` `#F1F3F9`，电视外壳用） | 设置行在电视上的焦点框和其他电视控件差一点点 | 没有任务管，建议在 A17 登记一个小任务合成一个 |
 | 代码注释里还有旧编号和旧文件名（`U.1c`、`U.6b C-3`、`UI_PLAN §5.3`、`P02` 等） | `packages/live_ui/lib` 147 处，其中 `UI_PLAN` 在 `live_ui` 和应用共 52 处 | 按注释找文档时要先查 [MAPPING.md](../../MAPPING.md) | 没有任务管，建议在 Z 组登记一次性替换 |
 
 ## 相关决定和规范
@@ -111,13 +105,13 @@
 
 ## 测试和验证
 
-- 自动测试：`cd packages/live_ui && flutter test`（主题、图标、颜色角色的测试见上表）；`python3 tools/gate/check_ui_structure.py`（第 2 条，直接写的颜色和图标）。缺的：没有测试锁住“页面不写死字号和字重”（A01.2 验收第 5 条要加）；没有测试检查每个 `AppIcons` 名至少用一次（A01.3 要加）。
+- 自动测试：`cd packages/live_ui && flutter test`（主题、图标、颜色角色的测试见上表；`metrics_test.dart` 是圆角、时长、字重和字号跟设置走）；`python3 tools/gate/check_ui_structure.py`（第 2 条直接写的颜色和图标，扫 `features/`、`shared/`、`tv/` 和 `live_ui` 组件；第 4 条每个 `AppIcons` 名至少用一处；第 5 条直播间、电视以外不写死字号、字重只有 400/600）。
 - 真机：没有单独的清单；主题和图标随 [S02.2](../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md) 的 K90 冒烟看过（首页卡片、直播间控制层图标、设置总览和视频页“通过”）。[S02 的真机清单](../../S-质量和验证/S02-真机验证/CHECKLIST.md)里相关的：第 1 节第 19 条（深浅色下状态栏、导航栏图标看得清）、第 5 节第 5 条（下载字体设为应用字体，重启后还在）。A01.2、A01.3 完成后照它们的任务书看。
 
 ## 路线
 
-1. [A01.2](A01.2-颜色、文字、间距、动效/README.md) 第 3 阶段（第二档）：圆角和时长常量 → 直播间以外的字号改成角色（设置行最显眼）→ 字重只留 400、600，并加扫描测试；主题那一层的 500 先交维护者定。和 A04.1 都改设置页，不要并行。
-2. [A01.3](A01.3-图标/README.md) 第 3 阶段（第二档）：`live_ui` 组件和翻页栏改用 `AppIcons`、`newWindow` 换图标、没人用的名字接上或删掉、门禁扩到 `shared/`；同一字形多种意思的几组写建议交维护者。
+1. [A01.2](A01.2-颜色、文字、间距、动效/README.md)、[A01.3](A01.3-图标/README.md) 第 3 阶段做完（2026-10-08，待真机）：照两个任务书的“真机验证”在 K90 上看；字重从 500 改成 600 / 400 是看得见的改动，看着别扭可以改回。
+2. 等维护者定：A01.3 README 里同一字形几种意思的 G2～G4；直播间的字号要不要跟五个字号设置走（直播间任务）。
 3. 以后：C-2（全换 Material Symbols Rounded）待定，`AppIcons` 已经是换库只改一处的结构；电视焦点白合并（A17）；代码注释的旧编号（Z）。新想法写进 V01 提议。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
@@ -127,20 +121,14 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：`packages/live_ui/lib/src/theme/`、`icons/`
-- 进度：`██████████████████░░` 92%
+- 进度：`███████████████████░` 97%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | A01.1 | 界面基础：主题、通用组件、图标（模块重构） | 界面 | 完成 | 2026-10-01 | c8f1ca08d | [设计或说明](A01.1-界面基础/README.md)、[记录](A01.1-界面基础/record.md) |
-| A01.2 | 颜色、文字、间距、动效 | 界面 | 开发中 | — | — | [设计或说明](A01.2-颜色、文字、间距、动效/README.md)、[任务书](A01.2-颜色、文字、间距、动效/brief.md) |
+| A01.2 | 颜色、文字、间距、动效 | 界面 | 待真机 | 2026-10-08 | — | [设计或说明](A01.2-颜色、文字、间距、动效/README.md)、[任务书](A01.2-颜色、文字、间距、动效/brief.md)、[记录](A01.2-颜色、文字、间距、动效/record.md) |
 | A01.3 | 图标 | 界面 | 待真机 | 2026-10-08 | — | [设计或说明](A01.3-图标/README.md)、[任务书](A01.3-图标/brief.md)、[记录](A01.3-图标/record.md) |
 | A01.4 | 全局细节打磨：单字折行、说明截断、空状态标点、图标含义、最小字号、输入框计数位置 | 界面 | 完成 | 2026-10-08 | 24142b783 | [设计或说明](A01.4-全局细节打磨/README.md)、[任务书](A01.4-全局细节打磨/brief.md)、[记录](A01.4-全局细节打磨/record.md) |
-
-## 还没完成的
-
-- **A01.2 颜色、文字、间距、动效**（开发中，第二档，规模 小）
-  - 阶段：✓ 设计 → ✓ 直播间要用的部分 → 其余页面
-  - 接着做：直播间以外页面的颜色和文字角色收尾
 
 <!-- docs:生成结束 -->

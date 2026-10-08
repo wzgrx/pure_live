@@ -128,7 +128,7 @@ class MultiviewCellView extends StatelessWidget {
                       bottom: 6,
                       child: _Mark(
                         key: const ValueKey('multiview-saver-mark'),
-                        child: Text(i18n('multiview_saver_mark'), style: _markStyle(context, 12)),
+                        child: Text(i18n('multiview_saver_mark'), style: _markStyle(context)),
                       ),
                     ),
                   if (footer case final bar? when video) Positioned(left: 8, right: 8, bottom: 8, child: bar),
@@ -153,9 +153,17 @@ class MultiviewCellView extends StatelessWidget {
   }
 }
 
-TextStyle _markStyle(BuildContext context, double size, {FontWeight weight = FontWeight.w600}) =>
-    Theme.of(context).textTheme.bodySmall!
-        .copyWith(fontSize: size, height: 1.2, fontWeight: weight, color: OnVideoColors.foreground);
+/// A mark's text: the small size, or the body size with [body] (12 and 13
+/// by default, A01.2), semi-bold unless [weight] says otherwise.
+TextStyle _markStyle(BuildContext context, {bool body = false, FontWeight weight = FontWeight.w600}) {
+  final text = Theme.of(context).textTheme;
+  return text.bodySmall!.copyWith(
+    fontSize: body ? text.bodyMedium?.fontSize : null,
+    height: 1.2,
+    fontWeight: weight,
+    color: OnVideoColors.foreground,
+  );
+}
 
 /// A dark rounded mark on the picture (number, name, "省流").
 class _Mark extends StatelessWidget {
@@ -197,7 +205,7 @@ class _CornerMarks extends StatelessWidget {
         _Mark(
           key: ValueKey('multiview-cell-number-$position'),
           padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Text('$position', style: _markStyle(context, 12, weight: FontWeight.w700).tabular),
+          child: Text('$position', style: _markStyle(context).tabular),
         ),
         if (room != null) ...[
           const SizedBox(width: 4),
@@ -214,7 +222,7 @@ class _CornerMarks extends StatelessWidget {
                       room.displayNick(platformName(room.platform)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: _markStyle(context, 12),
+                      style: _markStyle(context),
                     ),
                   ),
                 ],
@@ -237,7 +245,7 @@ class _CornerMarks extends StatelessWidget {
                     const SizedBox(width: 3),
                     Text(
                       i18n('multiview_audio_focus_badge'),
-                      style: _markStyle(context, 12, weight: FontWeight.w700).copyWith(color: scheme.onPrimary),
+                      style: _markStyle(context).copyWith(color: scheme.onPrimary),
                     ),
                   ],
                 ],
@@ -268,8 +276,8 @@ class _Placeholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = _markStyle(context, 13);
-    final muted = _markStyle(context, 12, weight: FontWeight.w400).copyWith(color: OnVideoColors.secondary);
+    final title = _markStyle(context, body: true);
+    final muted = _markStyle(context, weight: FontWeight.w400).copyWith(color: OnVideoColors.secondary);
     final room = cell.room;
     if (small && cell.stage == CellStage.empty) {
       // A small empty cell puts the + beside its words, so both keep their
@@ -297,7 +305,7 @@ class _Placeholder extends StatelessWidget {
                 Text(
                   i18n(pickTarget ? 'multiview_pick_target_short' : 'multiview_empty_cell_hint'),
                   key: const ValueKey('multiview-cell-hint'),
-                  style: _markStyle(context, 12, weight: FontWeight.w500),
+                  style: _markStyle(context),
                 ),
               ],
             ),
@@ -319,7 +327,7 @@ class _Placeholder extends StatelessWidget {
         Text(
           i18n(pickTarget ? 'multiview_pick_target' : 'multiview_empty_cell_hint'),
           textAlign: TextAlign.center,
-          style: title.copyWith(fontWeight: FontWeight.w500),
+          style: title,
         ),
       ],
       CellStage.resolving || CellStage.playing => [
@@ -385,7 +393,7 @@ class _RetryButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         minimumSize: const Size(0, 32),
         padding: const EdgeInsets.only(left: 10, right: 14),
-        textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 13, fontWeight: FontWeight.w600),
+        textStyle: Theme.of(context).textTheme.bodyMedium?.emphasis,
         tapTargetSize: MaterialTapTargetSize.padded,
       ),
       onPressed: onPressed,
@@ -433,7 +441,7 @@ class _PlaybackLayer extends StatelessWidget {
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: _markStyle(context, 12, weight: FontWeight.w400),
+                      style: _markStyle(context, weight: FontWeight.w400),
                     ),
                     if (!small) _RetryButton(onPressed: onRetry),
                   ],
@@ -471,7 +479,7 @@ class _PlaybackLayer extends StatelessWidget {
                 spacing: 6,
                 children: [
                   const Icon(AppIcons.cellPause, size: 18, color: OnVideoColors.foreground),
-                  Text(i18n('multiview_paused'), style: _markStyle(context, 13)),
+                  Text(i18n('multiview_paused'), style: _markStyle(context, body: true)),
                 ],
               ),
             ),
@@ -543,7 +551,7 @@ class AddCellSlot extends StatelessWidget {
                   spacing: 6,
                   children: [
                     Icon(AppIcons.addCell, size: 22, color: accent),
-                    Text(i18n('multiview_add_cell'), style: _markStyle(context, 12).copyWith(color: accent)),
+                    Text(i18n('multiview_add_cell'), style: _markStyle(context).copyWith(color: accent)),
                   ],
                 ),
               ),

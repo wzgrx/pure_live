@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/widgets/dialog_buttons_theme.dart';
 import 'package:live_ui/src/widgets/dialog_keys.dart';
 
@@ -374,7 +375,7 @@ class DialogOptionRow extends StatelessWidget {
                       Text(
                         label,
                         style: base.copyWith(
-                          fontSize: 15,
+                          fontSize: theme.textTheme.titleMedium?.fontSize,
                           fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
                           color: ink,
                         ),
@@ -387,7 +388,7 @@ class DialogOptionRow extends StatelessWidget {
                             description,
                             maxLines: descriptionMaxLines,
                             overflow: descriptionMaxLines == null ? null : TextOverflow.ellipsis,
-                            style: base.copyWith(fontSize: 14, height: 1.4, color: colors.onSurfaceVariant),
+                            style: base.copyWith(height: 1.4, color: colors.onSurfaceVariant),
                           ),
                         ),
                     ],
@@ -422,7 +423,7 @@ InputDecoration dialogFieldDecoration(
 }) {
   final scheme = Theme.of(context).colorScheme;
   OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
-    borderRadius: BorderRadius.circular(12),
+    borderRadius: AppRadii.input,
     borderSide: BorderSide(color: color, width: width),
   );
   return InputDecoration(

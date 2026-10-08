@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/live_theme.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 
 /// The width of a panel on the right (docs/specs/UI.md §7).
 const double sidePanelWidth = 360;
@@ -88,7 +90,7 @@ Future<T?> showAdaptivePanel<T>(
           child: Material(
             color: scheme.surface,
             elevation: 2,
-            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left: Radius.circular(16))),
+            shape: const RoundedRectangleBorder(borderRadius: AppRadii.panelSide),
             clipBehavior: Clip.antiAlias,
             child: SafeArea(left: false, child: Builder(builder: builder)),
           ),
@@ -162,7 +164,12 @@ class PanelHeader extends StatelessWidget {
                   key: titleKey,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.emphasis.copyWith(fontSize: 17, color: scheme.onSurface),
+                  // 17 by default: the card title size × 17 / 15, so it follows the
+                  // font settings (A01.2).
+                  style: theme.textTheme.titleMedium?.emphasis.copyWith(
+                    fontSize: LiveFontSizes.of(theme.textTheme).titleMedium * 17 / 15,
+                    color: scheme.onSurface,
+                  ),
                 ),
               ),
             ),

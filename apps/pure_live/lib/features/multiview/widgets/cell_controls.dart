@@ -216,9 +216,7 @@ class _RoomRow extends StatelessWidget {
                       ),
                       child: Text(
                         '$position',
-                        style: theme.textTheme.bodySmall
-                            ?.copyWith(fontSize: 12, fontWeight: FontWeight.w700, color: scheme.onSurface)
-                            .tabular,
+                        style: theme.textTheme.bodySmall?.emphasis.copyWith(color: scheme.onSurface).tabular,
                       ),
                     ),
                     Flexible(
@@ -226,7 +224,7 @@ class _RoomRow extends StatelessWidget {
                         room.displayNick(platform),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.emphasis.copyWith(fontSize: 15, color: scheme.onSurface),
+                        style: theme.textTheme.titleMedium?.emphasis.copyWith(color: scheme.onSurface),
                       ),
                     ),
                   ],
@@ -235,7 +233,7 @@ class _RoomRow extends StatelessWidget {
                   title.isEmpty ? platform : '$platform · $title',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.regular.copyWith(fontSize: 12, color: scheme.onSurfaceVariant),
+                  style: theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -441,9 +439,7 @@ class _VolumeRowState extends State<_VolumeRow> {
               '${(value * 100).round()}%',
               key: const ValueKey('multiview-volume-value'),
               textAlign: TextAlign.end,
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(fontSize: 13, fontWeight: FontWeight.w500, color: scheme.onSurfaceVariant)
-                  .tabular,
+              style: theme.textTheme.bodyMedium?.regular.copyWith(color: scheme.onSurfaceVariant).tabular,
             ),
           ),
         ],

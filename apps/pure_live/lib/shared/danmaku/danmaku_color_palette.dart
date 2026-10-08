@@ -4,20 +4,9 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/danmaku/setting_rows.dart';
 
-/// The colours offered for danmaku (the usual danmaku colours of the
-/// platforms; any other is typed as hex).
-const List<Color> danmakuColorSwatches = [
-  Color(0xFFFFFFFF),
-  Color(0xFF000000),
-  Color(0xFFFE0302),
-  Color(0xFFFF7204),
-  Color(0xFFFFAA02),
-  Color(0xFFFFD302),
-  Color(0xFF00CD00),
-  Color(0xFF00A2FF),
-  Color(0xFF4266BE),
-  Color(0xFFCC0273),
-];
+/// The colours offered for danmaku ([LivePalettes.danmaku]; any other is
+/// typed as hex).
+const List<Color> danmakuColorSwatches = LivePalettes.danmaku;
 
 /// `#FFFFFFFF` (3.x's form of a danmaku colour).
 String danmakuColorText(Color color) => '#${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';

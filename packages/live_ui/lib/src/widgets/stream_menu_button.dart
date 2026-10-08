@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/widgets/anchored_menu.dart';
 
 // Moved from the live room (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗) so the multi-view page
@@ -111,7 +112,7 @@ class _StreamMenuButtonState extends State<StreamMenuButton> {
     return Tooltip(
       message: widget.tooltip,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: AppRadii.chip,
         onTap: enabled ? () => unawaited(_show()) : null,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: kMinInteractiveDimension, minWidth: kMinInteractiveDimension),
@@ -129,7 +130,7 @@ class _StreamMenuButtonState extends State<StreamMenuButton> {
                           ? scheme.primary
                           : (onVideo ? OnVideoColors.chipOutline : scheme.outlineVariant),
                     ),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: AppRadii.chip,
                   ),
                   child: Padding(
                     padding: const EdgeInsets.only(left: 10, right: 6),
@@ -184,8 +185,8 @@ Future<int?> showSmallMenu(
 }) {
   final theme = Theme.of(anchor);
   final scheme = theme.colorScheme;
-  final text = theme.textTheme.bodyMedium?.copyWith(fontSize: 14);
-  final small = theme.textTheme.bodySmall?.regular.copyWith(fontSize: 12, color: scheme.onSurfaceVariant);
+  final text = theme.textTheme.bodyMedium?.copyWith(fontSize: theme.textTheme.bodyLarge?.fontSize);
+  final small = theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant);
   final rowHeight = descriptions == null ? kMinInteractiveDimension : 64.0;
   final currentRow = GlobalKey();
   return showAnchoredMenu<int>(
@@ -252,7 +253,10 @@ class _SmallMenuTitle extends StatelessWidget {
       child: Text(
         title,
         key: const ValueKey('small-menu-title'),
-        style: theme.textTheme.labelLarge?.emphasis.copyWith(fontSize: 13, color: theme.colorScheme.onSurfaceVariant),
+        style: theme.textTheme.labelLarge?.emphasis.copyWith(
+          fontSize: theme.textTheme.bodyMedium?.fontSize,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

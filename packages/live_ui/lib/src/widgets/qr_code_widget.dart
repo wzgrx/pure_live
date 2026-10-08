@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:qr/qr.dart';
 
 /// The colours around a QR code: it is always dark on white, whatever the
@@ -135,8 +136,8 @@ class QrCodeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ink = (theme.textTheme.bodyLarge ?? const TextStyle()).copyWith(fontSize: 14, color: QrColors.ink);
-    final heading = ink.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
+    final ink = (theme.textTheme.bodyLarge ?? const TextStyle()).copyWith(color: QrColors.ink);
+    final heading = ink.copyWith(fontSize: theme.textTheme.titleMedium?.fontSize, fontWeight: FontWeight.w600);
     // The veil is white in every theme: the dark theme's light primary
     // would fade on it.
     final mark = scheme.brightness == Brightness.dark ? QrColors.ink : scheme.primary;
@@ -174,10 +175,7 @@ class QrCodeCard extends StatelessWidget {
       child: Container(
         key: const ValueKey('qr-card'),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
-          borderRadius: const BorderRadius.all(Radius.circular(16)),
-        ),
+        decoration: BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: AppRadii.card),
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           child: SizedBox.square(

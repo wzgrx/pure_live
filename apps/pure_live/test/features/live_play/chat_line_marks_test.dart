@@ -136,7 +136,8 @@ void main() {
         _chat(color: red, nameColor: comment.nameColor),
         style: ChatListStyle.card,
       );
-      expect(_spanColour(tester, '观众: '), chatNameColor(comment.nameColor!, theme.colorScheme.surfaceContainerLowest));
+      // A08.10: the card's name ends as the compact line's does.
+      expect(_spanColour(tester, '观众：'), chatNameColor(comment.nameColor!, theme.colorScheme.surfaceContainerLowest));
     });
 
     testWidgets('a pale name colour keeps 4.5:1; white takes the secondary colour', (tester) async {

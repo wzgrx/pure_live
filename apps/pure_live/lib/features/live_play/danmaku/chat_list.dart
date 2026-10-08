@@ -12,6 +12,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
 import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
 import 'package:pure_live/features/live_play/layout/room_view_memory.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_chat_line.dart';
@@ -66,6 +67,14 @@ Color _readableOn(Color color, Color background) {
     if (contrastRatio(next, background) >= chatNameContrast || lightness == 0 || lightness == 1) return next;
   }
 }
+
+/// The colour of [message]'s sender name on [background] (A08.10 G3, the
+/// same rule on every line that names a sender): the platform's name colour
+/// (B-14: 17LIVE), else the message's own colour (a coloured danmaku), each
+/// made readable by [chatNameColor]; plain white or black ones take the
+/// name role's secondary ink.
+Color chatNameInk(LiveMessage message, Color background, ColorScheme scheme) =>
+    chatNameColor(message.nameColor ?? message.color, background) ?? scheme.onSurfaceVariant;
 
 /// The text a double tap copies (3.x: "用户名: 内容").
 String chatCopyText(LiveMessage message) {
@@ -331,14 +340,15 @@ class _ChatListState extends ConsumerState<ChatList> {
     if (_scroll.hasClients) _scroll.jumpTo(0);
   }
 
-  ChatLineView _view(ChatLine line, ChatListStyle style) {
+  ChatLineView _view(ChatLine line, ChatListStyle style, {required bool names}) {
     final made = _views[line];
-    if (made != null && made.style == style && identical(made.emotes, _emotes)) return made;
+    if (made != null && made.style == style && made.showName == names && identical(made.emotes, _emotes)) return made;
     final message = line.kind == ChatLineKind.chat ? line.message : null;
     return _views[line] = ChatLineView(
       key: ValueKey(line.id),
       line: line,
       style: style,
+      showName: names,
       emotes: _emotes,
       onActions: message == null ? null : () => unawaited(_actions(line)),
       onCopy: message == null ? null : () => unawaited(_copy(message)),
@@ -387,6 +397,9 @@ class _ChatListState extends ConsumerState<ChatList> {
       );
     }
     final style = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
+    // A08.10: one switch for every layout's list (portrait, the phone held
+    // sideways, the wide chat column are this one component).
+    final names = watchSetting(ref, Settings.showChatNames);
     final hint = _nameHint();
     // B06 c1: the hint stays above the lines (and the empty states); the
     // list keeps its place in the tree, so its scroll position, when the
@@ -399,14 +412,14 @@ class _ChatListState extends ConsumerState<ChatList> {
           key: const ValueKey('live-play-chat-body'),
           child: ValueListenableBuilder<List<ChatLine>>(
             valueListenable: _shown,
-            builder: (context, lines, _) => _content(style, lines),
+            builder: (context, lines, _) => _content(style, lines, names: names),
           ),
         ),
       ],
     );
   }
 
-  Widget _content(ChatListStyle style, List<ChatLine> lines) {
+  Widget _content(ChatListStyle style, List<ChatLine> lines, {required bool names}) {
     if (!lines.any((line) => line.kind != ChatLineKind.system)) {
       // U.2e c2, U.2g c7: until the first message the list says where the
       // danmaku is (3.x: blank, or a few "系统消息" cards).
@@ -439,7 +452,7 @@ class _ChatListState extends ConsumerState<ChatList> {
                 final at = _indexOfId(lines, key.value);
                 return at < 0 ? null : count - 1 - at;
               },
-              itemBuilder: (context, index) => _view(lines[count - 1 - index], style),
+              itemBuilder: (context, index) => _view(lines[count - 1 - index], style, names: names),
             ),
           ),
           if (!_following)
@@ -571,11 +584,20 @@ class ChatNameHintBar extends StatelessWidget {
 }
 
 /// One line of the chat list.
+///
+/// A08.10: every line that names a sender draws the name and the content in
+/// the two [ChatText] roles, in both styles; what comes before the name is
+/// always in one order (G5): "本地" or "对方", the platform's badges, the fan
+/// medal, the name. With [showName] off ("显示用户名") the sender's name and
+/// what belongs to them (badges, fan medal, avatar) are left out and the
+/// line starts with what was said; "本地" and "对方" stay, they are about
+/// the message.
 class ChatLineView extends StatelessWidget {
   /// Creates the line.
   const new({
     required this.line,
     this.style = ChatListStyle.compact,
+    this.showName = true,
     this.emotes = EmoteTable.empty,
     this.onActions,
     this.onCopy,
@@ -591,6 +613,9 @@ class ChatLineView extends StatelessWidget {
 
   /// Compact line or card.
   final ChatListStyle style;
+
+  /// Whether the line names its sender (the `showChatNames` setting).
+  final bool showName;
 
   /// The platform's emoticons.
   final EmoteTable emotes;
@@ -609,7 +634,7 @@ class ChatLineView extends StatelessWidget {
     // U.2k c10: a local danmaku or gift has its own line; a local danmaku
     // keeps the long press, right click and double tap (3.x).
     if (line.message case final message? when message.isLocal) {
-      final local = LocalChatLine(message: message);
+      final local = LocalChatLine(message: message, showName: showName);
       if (line.kind != ChatLineKind.chat) return local;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -655,8 +680,10 @@ class ChatLineView extends StatelessWidget {
           ),
         );
       case ChatLineKind.gift:
+        // Kept as it was (its redesign follows V03.5); the name takes the
+        // name role, without the colon: "名字 送出 …".
         final message = line.message!;
-        final name = message.userName.trim();
+        final name = showName ? message.userName.trim() : '';
         return Padding(
           key: const ValueKey('live-play-gift-line'),
           padding: const EdgeInsets.symmetric(vertical: 3),
@@ -671,11 +698,7 @@ class ChatLineView extends StatelessWidget {
                 child: Text.rich(
                   TextSpan(
                     children: [
-                      if (name.isNotEmpty)
-                        TextSpan(
-                          text: '$name ',
-                          style: body?.copyWith(color: scheme.onSurfaceVariant),
-                        ),
+                      if (name.isNotEmpty) TextSpan(text: '$name ', style: ChatText.name(theme)),
                       TextSpan(
                         text: line.text,
                         style: body?.copyWith(color: scheme.tertiary),
@@ -690,18 +713,30 @@ class ChatLineView extends StatelessWidget {
       case ChatLineKind.superChat:
         final superChat = line.superChat!;
         final background = parsePlatformColor(superChat.backgroundColor) ?? scheme.tertiaryContainer;
+        final ink = InkOnColor.on(background);
+        final name = showName ? superChat.userName.trim() : '';
         return Container(
+          key: const ValueKey('live-play-super-chat-line'),
           margin: const EdgeInsets.symmetric(vertical: 3),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(6)),
-          child: Text(
-            '${superChat.userName} · ${superChatPrice(superChat)}：${superChat.message}',
-            style: body?.copyWith(color: InkOnColor.on(background)),
+          child: Text.rich(
+            TextSpan(
+              children: [
+                // The card's own ink: the name role's weight, not its colour.
+                if (name.isNotEmpty) TextSpan(text: '$name · ', style: ChatText.name(theme, ink)),
+                TextSpan(text: '${superChatPrice(superChat)}${ChatText.nameEnd}', style: ChatText.name(theme, ink)),
+                TextSpan(
+                  text: superChat.message,
+                  style: body?.copyWith(color: ink),
+                ),
+              ],
+            ),
           ),
         );
       case ChatLineKind.chat:
         final message = line.message!;
-        final text = style == ChatListStyle.card ? _card(context, message, body) : _compact(context, message, body);
+        final text = style == ChatListStyle.card ? _card(context, message) : _compact(context, message);
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
           onLongPress: onActions,
@@ -712,7 +747,8 @@ class ChatLineView extends StatelessWidget {
     }
   }
 
-  List<InlineSpan> _tag(ThemeData theme, LiveMessage message) => [
+  /// G5: what comes before the name, in one order on both styles.
+  List<InlineSpan> _lead(ThemeData theme, LiveMessage message) => [
     if (tag case final mark?) ...[
       WidgetSpan(alignment: PlaceholderAlignment.middle, child: mark),
       const TextSpan(text: ' '),
@@ -728,6 +764,7 @@ class ChatLineView extends StatelessWidget {
           style: ChatChip.styleOf(theme)?.copyWith(color: theme.colorScheme.onTertiaryContainer),
         ),
       ),
+    if (showName) ...[..._badges(message), ..._fans(theme, message)],
   ];
 
   /// B-14 (E06.2 c2): the platform's badges before the name, in its order.
@@ -740,47 +777,55 @@ class ChatLineView extends StatelessWidget {
         ),
   ];
 
+  /// B06 c2: the fan medal ("粉丝牌 等级"), in the same block as the other
+  /// marks (A08.10 G5; it was a highlighted run of text).
   List<InlineSpan> _fans(ThemeData theme, LiveMessage message) {
-    if (message.fansName.trim().isEmpty) return const [];
+    final fans = message.fansName.trim();
+    if (fans.isEmpty) return const [];
+    final level = message.fansLevel.trim();
     final scheme = theme.colorScheme;
     return [
-      TextSpan(
-        text: ' ${message.fansName}${message.fansLevel.isEmpty ? '' : ' ${message.fansLevel}'} ',
-        style: theme.textTheme.labelSmall?.copyWith(color: scheme.onPrimary, backgroundColor: scheme.primary),
+      WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: ChatChip(
+          key: const ValueKey('live-play-chat-fans'),
+          text: level.isEmpty ? fans : '$fans $level',
+          background: scheme.primary,
+          style: ChatChip.styleOf(theme)?.copyWith(color: scheme.onPrimary),
+        ),
       ),
-      const TextSpan(text: ' '),
     ];
   }
 
-  /// U.2a change 11: "用户名：" in the secondary colour (or the platform's
-  /// name colour, B-14, else the message's own colour, B08: readable on the
-  /// panel's surface), the message in the normal colour.
-  Widget _compact(BuildContext context, LiveMessage message, TextStyle? body) {
-    final theme = Theme.of(context);
+  /// The name ("用户名：") in the name role, or nothing.
+  List<InlineSpan> _name(ThemeData theme, LiveMessage message, Color background) {
     final name = message.userName.trim();
-    final nameColor =
-        chatNameColor(message.nameColor ?? message.color, theme.colorScheme.surface) ??
-        theme.colorScheme.onSurfaceVariant;
+    if (!showName || name.isEmpty) return const [];
+    return [
+      TextSpan(
+        text: '$name${ChatText.nameEnd}',
+        style: ChatText.name(theme, chatNameInk(message, background, theme.colorScheme)),
+      ),
+    ];
+  }
+
+  /// What was said, with the platform's emoticons, in the content role.
+  InlineSpan _words(ThemeData theme) => WidgetSpan(
+    alignment: PlaceholderAlignment.baseline,
+    baseline: TextBaseline.alphabetic,
+    child: EmoteText(line.segments(emotes), style: ChatText.content(theme)),
+  );
+
+  /// U.2a change 11, A08.10: "用户名：" in the name role (readable on the
+  /// panel's surface, B08), then the message in the content role.
+  Widget _compact(BuildContext context, LiveMessage message) {
+    final theme = Theme.of(context);
     return Padding(
       key: const ValueKey('live-play-chat-line'),
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Text.rich(
         TextSpan(
-          children: [
-            ..._tag(theme, message),
-            ..._badges(message),
-            ..._fans(theme, message),
-            if (name.isNotEmpty)
-              TextSpan(
-                text: '$name：',
-                style: body?.copyWith(color: nameColor),
-              ),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.baseline,
-              baseline: TextBaseline.alphabetic,
-              child: EmoteText(line.segments(emotes), style: body?.copyWith(color: theme.colorScheme.onSurface)),
-            ),
-          ],
+          children: [..._lead(theme, message), ..._name(theme, message, theme.colorScheme.surface), _words(theme)],
         ),
       ),
     );
@@ -788,20 +833,16 @@ class ChatLineView extends StatelessWidget {
 
   /// 3.x `DanmakuItem`, on the theme's surfaces instead of fixed white.
   /// With the sender's avatar (B06 c2: Bilibili's `user.base.face`) the
-  /// avatar takes the dot's place and the name takes its colour.
-  Widget _card(BuildContext context, LiveMessage message, TextStyle? body) {
+  /// avatar takes the dot's place. The dot keeps the message's colour; the
+  /// name and the words take the same roles as the compact line (A08.10).
+  Widget _card(BuildContext context, LiveMessage message) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final colour = chatNameColor(message.color, scheme.surfaceContainerLowest);
-    final dot = colour ?? scheme.onSurface;
-    // B-14: the platform's name colour, when it gives one, colours the name.
-    final named = switch (message.nameColor) {
-      final given? => chatNameColor(given, scheme.surfaceContainerLowest),
-      null => null,
-    };
+    final ground = scheme.surfaceContainerLowest;
+    final dot = chatNameColor(message.color, ground) ?? scheme.onSurface;
     final name = message.userName.trim();
     final avatar = switch (message.data) {
-      DanmakuSender(:final avatar) when avatar.isNotEmpty => avatar,
+      DanmakuSender(:final avatar) when showName && avatar.isNotEmpty => avatar,
       _ => '',
     };
     return Padding(
@@ -809,7 +850,7 @@ class ChatLineView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerLowest,
+          color: ground,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: scheme.outlineVariant, width: 0.5),
         ),
@@ -833,25 +874,7 @@ class ChatLineView extends StatelessWidget {
                 ),
               Expanded(
                 child: Text.rich(
-                  TextSpan(
-                    children: [
-                      ..._tag(theme, message),
-                      ..._badges(message),
-                      ..._fans(theme, message),
-                      if (name.isNotEmpty)
-                        TextSpan(
-                          text: '$name: ',
-                          style: body?.emphasis.copyWith(
-                            color: named ?? (avatar.isEmpty ? scheme.onSurface : colour ?? scheme.onSurface),
-                          ),
-                        ),
-                      WidgetSpan(
-                        alignment: PlaceholderAlignment.baseline,
-                        baseline: TextBaseline.alphabetic,
-                        child: EmoteText(line.segments(emotes), style: body?.copyWith(color: scheme.onSurface)),
-                      ),
-                    ],
-                  ),
+                  TextSpan(children: [..._lead(theme, message), ..._name(theme, message, ground), _words(theme)]),
                 ),
               ),
             ],

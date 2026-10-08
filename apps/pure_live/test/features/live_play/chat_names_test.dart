@@ -186,7 +186,10 @@ void main() {
     const face = 'https://i0.hdslb.com/bfs/face/a.jpg@96w_96h.jpg';
     danmaku.emit(DanmakuReceived(_chat('观***', '有牌子', fans: '小路泥', level: '22', avatar: face)));
     await tester.pump();
-    expect(find.textContaining(' 小路泥 22 ', findRichText: true), findsOneWidget);
+    // A08.10 G5: the medal is a chip like "本地" and "对方".
+    final medal = find.byKey(const ValueKey('live-play-chat-fans'));
+    expect(medal, findsOneWidget);
+    expect(find.descendant(of: medal, matching: find.text('小路泥 22')), findsOneWidget);
     expect(find.byKey(const ValueKey('live-play-chat-avatar')), findsNothing, reason: 'compact lines have none');
 
     await tester.runAsync(() => services.store.settings.set(Settings.danmakuListStyle, 'card'));

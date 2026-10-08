@@ -283,6 +283,7 @@ const Map<String, Object> newInV4 = {
   'roomSwitcherLayout': 'grid', // A07.13, D-022
   'danmakuListStyle': 'compact', // A07.1
   'showChatGifts': true, // A08.6
+  'showChatNames': true, // A08.10: names shown, as 3.x
   'danmakuPausedBehavior': 'pause', // A07.10
   'danmakuMaxVisibleCount': 48, // D05.2 (V01.4; 3.x's fixed 48)
   'holdDanmakuOnPress': true, // D03.4 (V01.3), on by default (D-039)

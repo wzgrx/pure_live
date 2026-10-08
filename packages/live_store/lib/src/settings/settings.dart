@@ -532,6 +532,12 @@ abstract final class Settings {
   /// the store opens.
   static const showChatGifts = BoolSetting('showChatGifts', section: 'danmaku', defaultValue: true);
 
+  /// New (docs/A-界面设计/A08-弹幕界面/A08.10-弹幕列表名字和内容分开; 3.x has no such setting): the
+  /// room's chat list names who sent each line ("显示用户名"); off, it shows
+  /// only what was said. On by default, as 3.x and before. The flying
+  /// danmaku never show names; the long-press card always does.
+  static const showChatNames = BoolSetting('showChatNames', section: 'danmaku', defaultValue: true);
+
   /// New (docs/A-界面设计/A07-直播间界面/A07.10-暂停状态/brief.md c3; 3.x has no such setting): what the
   /// platform's flying danmaku do while the video is paused ("暂停时的弹幕"):
   /// `pause` stands them with the video (the default, as 3.x's main
@@ -1658,6 +1664,7 @@ abstract final class Settings {
     enableDanmakuStroke,
     danmakuListStyle,
     showChatGifts,
+    showChatNames,
     danmakuPausedBehavior,
     danmakuFps,
     danmakuAutoFps,

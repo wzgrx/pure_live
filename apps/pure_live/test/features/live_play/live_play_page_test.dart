@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -316,23 +317,44 @@ void main() {
       await _close(tester, services);
     });
 
-    testWidgets('B09 c1: a tap opens the actions at once; a double tap takes them back for the fullscreen', (
+    testWidgets('A07.14: a tap opens the actions once a double tap is ruled out; a double tap only toggles', (
       tester,
     ) async {
       final danmaku = FakeDanmaku();
       final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
       AppNavigator.toast = (_) {};
+      final sheet = find.byKey(const ValueKey('live-play-message-sheet'));
       final (_, at) = await fly(tester, danmaku);
       await tester.tapAt(at);
       await tester.pump();
-      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsOneWidget, reason: 'no double tap wait');
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.tapAt(at);
-      await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
-      expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
+      expect(sheet, findsNothing, reason: 'a second tap may still come');
       expect(overlay(tester).held, isFalse);
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pump(const Duration(seconds: 1));
+      expect(sheet, findsOneWidget, reason: 'the message the tap went down on');
+      expect(overlay(tester).held, isTrue);
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+
+      // The double tap: not a frame of the sheet, the danmaku never stand.
+      final (_, again) = await fly(tester, danmaku);
+      await tester.tapAt(again);
+      await tester.pump();
+      expect(sheet, findsNothing);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(sheet, findsNothing);
+      expect(overlay(tester).held, isFalse);
+      await tester.tapAt(again);
+      await tester.pump();
+      expect(sheet, findsNothing);
+      expect(overlay(tester).held, isFalse);
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(sheet, findsNothing);
+        expect(overlay(tester).held, isFalse);
+      }
+      expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
       await _close(tester, services);
     });
 

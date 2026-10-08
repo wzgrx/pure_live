@@ -2,7 +2,7 @@
 
 - 日期：2026-10-08
 - 执行者：Claude（Opus 5.5）
-- 分支和提交：本机工作区（从 master `ce7640a5b` 开始），提交见[登记表](../../../tasks.toml)
+- 分支和提交：本机工作区（从 master `ce7640a5b` 开始），代码提交 `cf5988255`
 - 任务书：[brief.md](brief.md)；设计或说明：[README.md](README.md)
 - 同时在做的：A03.3（直播间拖动手感）、A04.1（尺寸和字号适配）。本任务没有改 `features/live_play/`；`live_ui` 组件文件和 A04.1 可能都改到（见最后）。
 

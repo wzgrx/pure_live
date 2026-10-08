@@ -11,7 +11,7 @@
 |---|---|---|
 | 1 打点 | 做了 | 冷启动时首页第一屏内容出现后写一行 `startup-timing …`，进应用日志（info，标签 `startup`）并 `debugPrint`；温启动（进程还在，Activity 重建后 Dart 重新跑 `main`，或同一进程里 Dart 重启）不写 |
 | 2 `reportFullyDrawn` | 做了 | `pure_live/app` 通道加 `reportFullyDrawn`；首页第一屏内容出现时调用一次（规则见下） |
-| 3 现状表 | 没做（真机） | 见“测量计划” |
+| 3 现状表 | 部分（开启动页的冷启动 10 次，见“现状表”） | 关启动页、温启动和修正后的 `Fully drawn` 待测 |
 | 4 v3bench（可选） | 没做（真机） | 见“测量计划” |
 
 ### 偏差和原因
@@ -123,6 +123,31 @@ adb -s 192.168.1.2:5555 shell am start -W -n com.mystyle.purelive.v4dev/com.myst
 
 7. （可选，第 4 条）v3bench 包：任务书“3.x 基线”的做法，冷启动、温启动各 10 次只有 `TotalTime`（3.x 没有 `Fully drawn`，首页出现用录屏数帧）；测完卸载。做不了写原因。
 8. 第 6 步之后再看 `firstFrame`：开启动页时它是启动页的第一帧，关启动页时是首页的第一帧；阶段 2 的目标“`main` → 第一帧少 20%”用关启动页的那组。
+
+## 现状表（K90，2026-10-08）
+
+设备：Redmi K90 Pro Max，开机约 106 小时，电量 80%，电池 33 ℃；profile 包（提交 `9569981c7`），首页第一个标签是“关注”（2 个在播），开启动页。命令：`am force-stop` 后隔 3 秒 `am start -W`，等 9 秒读日志，连续 10 次。
+
+| 项 | 中位数 | P90 |
+|---|---:|---:|
+| `TotalTime`（am start -W） | 367 ms | 383 ms |
+| process（进程启动 → `main`） | 238 ms | 261 ms |
+| tvDetect | 21 ms | 22 ms |
+| store | 17 ms | 19 ms |
+| strings | 13 ms | 15 ms |
+| legacy | 2 ms | 2 ms |
+| binding、imageCache、dataRoot、wire、log、fonts、desktop | 0 ms | 0 ms |
+| runApp（`main` 起累计） | 56 ms | 58 ms |
+| firstFrame（`main` 起累计） | 74 ms | 78 ms |
+| home = firstPage（`main` 起累计，关注从本地读出） | 1087 ms | 1091 ms |
+| total（进程启动 → 首页第一屏） | 1322 ms | 1349 ms |
+
+看法：
+
+- `main` 到第一帧只有约 74 ms，各步都不到 25 ms，没有“单段 ≥50 毫秒”的 Dart 步骤；进程启动到 `main` 的约 238 ms 是 Flutter 引擎和 Dart VM 的启动，应用代码改不到。
+- 第一帧到首页的约 1 秒是启动页停留（A06.4 定的 1 秒，不在本任务范围）。
+- **`Fully drawn` 原来不准**：日志里 `Fully drawn … +360ms` 和 `TotalTime` 一样，而首页约 1.3 秒才出现。原因：`FlutterActivity.onFlutterUiDisplayed()` 在 API 29 以上第一帧就调 `reportFullyDrawn()`（Flutter 3.47.6 `FlutterActivity.java:1443-1453`），Android 一次启动只记第一次，我们在首页内容出现时的上报被忽略。已在 `MainActivity.kt` 把 `onFlutterUiDisplayed` 覆盖成空，只留应用自己的上报；装新包后重测。
+- 原始数据：10 行 `startup-timing` 都是 `cold=true splash=on tab=favorites content=rooms`。
 
 ## 停在哪
 

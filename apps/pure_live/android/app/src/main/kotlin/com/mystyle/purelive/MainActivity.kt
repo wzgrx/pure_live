@@ -196,6 +196,15 @@ class MainActivity : AudioServiceActivity() {
             null
         }
 
+    /**
+     * R04.1: FlutterActivity reports "fully drawn" at the first Flutter frame
+     * (API 29+), and Android keeps only the first report of a launch, so the
+     * app's own report when home's first content shows (`reportFullyDrawn`
+     * on `pure_live/app`) was ignored: K90 logged "Fully drawn" equal to
+     * TotalTime (~360 ms) while home came at ~1.1 s. Only the app reports.
+     */
+    override fun onFlutterUiDisplayed() {}
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         if (!flutterEngine.plugins.has(AppChannelsPlugin::class.java)) {

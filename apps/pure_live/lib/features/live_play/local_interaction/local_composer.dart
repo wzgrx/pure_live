@@ -7,6 +7,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// Where a local danmaku composer sits (U.2k c6: one composer, three places).
@@ -21,7 +22,7 @@ enum LocalComposerPlace {
   video,
 }
 
-/// The middle of the fullscreen bar narrower than this shows the star button
+/// The middle of the fullscreen bar narrower than this shows the compose button
 /// instead of the field (U.2c c3, U.2k c14).
 const double localComposerCollapseWidth = 180;
 
@@ -37,14 +38,16 @@ void openLocalDanmakuStyle(BuildContext context) => RoomPanelScope.maybeOf(conte
 /// the star opens the local danmaku style, the field takes the words
 /// ("发送本地弹幕，只有你看得到"), the round button (or Enter) sends. A sent
 /// message shows at once (K1). Nothing is drawn while the local interaction
-/// is off or outside a live room.
+/// is off or outside a live room. A08.13: at most
+/// [LocalCatalog.danmakuLimit] characters (more are not taken, a paste is
+/// cut); from [LocalCatalog.danmakuCountFrom] on the field ends in "n / 40".
 ///
 /// [LocalComposerPlace.video] is the fullscreen bar's (U.2c places it in the
 /// bar's middle): a dark field on the picture, the star in the local danmaku
 /// colour, the words in the local style, a light blue outline while typing
 /// (c13); when the bar's middle is narrower than
-/// [localComposerCollapseWidth] it collapses into the star button whose row
-/// opens above the bar (c14). [onHold] tells the bar to keep the controls up
+/// [localComposerCollapseWidth] it collapses into the compose button whose
+/// row opens above the bar (c14). [onHold] tells the bar to keep the controls up
 /// while the field has the focus or the row is open (3.x).
 class LocalDanmakuComposer extends ConsumerStatefulWidget {
   /// Creates a composer at [place].
@@ -136,7 +139,7 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
         type: MaterialType.transparency,
         child: LayoutBuilder(
           builder: (context, constraints) => constraints.maxWidth < localComposerCollapseWidth
-              ? _LocalComposerStar(session: session, onHold: widget.onHold)
+              ? _LocalComposerButton(session: session, onHold: widget.onHold)
               : _videoField(context, session),
         ),
       ),
@@ -252,6 +255,7 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
                       ),
                       hint: theme.textTheme.bodyMedium?.regular.copyWith(fontSize: 13, color: OnVideoColors.secondary),
                       cursor: localVideoFocusColor(scheme),
+                      count: OnVideoColors.secondary,
                     ),
                   ),
                   SizedBox(
@@ -274,7 +278,22 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
     );
   }
 
-  Widget _field(BuildContext context, {required TextStyle? style, required TextStyle? hint, Color? cursor}) =>
+  Widget _field(
+    BuildContext context, {
+    required TextStyle? style,
+    required TextStyle? hint,
+    Color? cursor,
+    Color? count,
+  }) => Row(
+    children: [
+      Expanded(
+        child: _input(context, style: style, hint: hint, cursor: cursor),
+      ),
+      _LocalComposerCount(text: _text, color: count),
+    ],
+  );
+
+  Widget _input(BuildContext context, {required TextStyle? style, required TextStyle? hint, Color? cursor}) =>
       LayoutBuilder(
         builder: (context, constraints) => TextField(
           key: const ValueKey('local-composer-input'),
@@ -283,6 +302,9 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
           autofocus: widget.autofocus,
           style: style,
           cursorColor: cursor,
+          // A08.13: the platforms' length; the count is ours, in the row.
+          maxLength: LocalCatalog.danmakuLimit,
+          buildCounter: _noCounter,
           textInputAction: TextInputAction.send,
           onSubmitted: (_) => _send(),
           // The field is as tall as its bar, the words in the middle: a tap
@@ -301,6 +323,41 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
       );
 }
 
+Widget? _noCounter(BuildContext context, {required int currentLength, required bool isFocused, int? maxLength}) => null;
+
+/// "n / 40" at the end of a composer's field once the words reach
+/// [LocalCatalog.danmakuCountFrom] (A08.13; the nickname field's way of
+/// counting), in the error colour at the limit.
+class _LocalComposerCount extends StatelessWidget {
+  const new({required this.text, this.color});
+
+  final TextEditingController text;
+
+  /// The count's colour (the picture's grey on the picture).
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<TextEditingValue>(
+    valueListenable: text,
+    builder: (context, value, _) {
+      final length = value.text.characters.length;
+      if (length < LocalCatalog.danmakuCountFrom) return const SizedBox.shrink();
+      final theme = Theme.of(context);
+      final full = length >= LocalCatalog.danmakuLimit;
+      return Padding(
+        padding: const EdgeInsetsDirectional.only(start: 6),
+        child: Text(
+          '$length / ${LocalCatalog.danmakuLimit}',
+          key: const ValueKey('local-composer-count'),
+          style: theme.textTheme.bodySmall?.tabular.copyWith(
+            color: full ? theme.colorScheme.error : color ?? theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      );
+    },
+  );
+}
+
 /// The composer's hint for a field [width] wide (A07.17 c4): the long one
 /// ("发送本地弹幕，只有你看得到") where it fits, else the short "发送一条本地字幕"
 /// (3.x's), so a narrow field (the portrait fullscreen's) is not cut short.
@@ -317,7 +374,9 @@ String localComposerHint(BuildContext context, TextStyle? style, double width) {
   return fits ? long : i18n('local_message_hint_short');
 }
 
-/// The composer's star: opens the local danmaku style (U.2k #1).
+/// The composer's star: opens the local danmaku style (U.2k #1). The star
+/// means only this (A08.13); the buttons that open a composer show
+/// [AppIcons.localCompose].
 class _StarButton extends StatelessWidget {
   const new({required this.color, required this.size, required this.width, this.shadows});
 
@@ -351,17 +410,17 @@ Color localVideoFocusColor(ColorScheme scheme) {
 
 final Map<Color, Color> _darkPrimary = {};
 
-/// U.2k #27: the narrow fullscreen bar's star button; its row opens above
-/// the bar with the keyboard up, and closes when a message is sent or the
-/// user taps elsewhere.
-class _LocalComposerStar extends StatefulWidget {
+/// U.2k #27: the narrow fullscreen bar's compose button (a star until
+/// A08.13); its row opens above the bar with the keyboard up, and closes
+/// when a message is sent or the user taps elsewhere.
+class _LocalComposerButton extends StatefulWidget {
   const new({required this.session, this.onHold});
 
   final LocalRoomSession session;
   final ValueChanged<bool>? onHold;
 
   @override
-  State<_LocalComposerStar> createState() => _LocalComposerStarState();
+  State<_LocalComposerButton> createState() => _LocalComposerButtonState();
 }
 
 /// Opens the composer's row over [context]'s page until a message is sent or
@@ -381,7 +440,7 @@ Future<void> _showComposerRow(BuildContext context, LocalRoomSession session, Lo
   );
 }
 
-class _LocalComposerStarState extends State<_LocalComposerStar> {
+class _LocalComposerButtonState extends State<_LocalComposerButton> {
   bool _open = false;
 
   Future<void> _openRow() async {
@@ -410,7 +469,7 @@ class _LocalComposerStarState extends State<_LocalComposerStar> {
             child: const SizedBox.square(
               dimension: 40,
               child: Icon(
-                AppIcons.localStyle,
+                AppIcons.localCompose,
                 size: 18,
                 color: OnVideoColors.foreground,
                 shadows: OnVideoColors.shadows,
@@ -424,7 +483,7 @@ class _LocalComposerStarState extends State<_LocalComposerStar> {
 }
 
 /// The row of the narrow screen: above the bar, or on the keyboard when it
-/// is up (iOS too); from the chat list's star (A07.17 c3), the chat list's
+/// is up (iOS too); from the chat list's button (A07.17 c3), the chat list's
 /// bar along the bottom, on the keyboard when it is up.
 class _ComposerRow extends StatelessWidget {
   const new({required this.session, required this.panels, required this.onSent, required this.place});
@@ -481,12 +540,14 @@ class _ComposerRow extends StatelessWidget {
   }
 }
 
-/// A07.17 c3: the composer folded into a star at the lower right of the
-/// chat list (the portrait room's panel, where its bar left two lines of
-/// chat); a tap opens the composer's bar along the bottom with the
+/// A07.17 c3: the composer folded into a round button at the lower right of
+/// the chat list (the portrait room's panel, where its bar left two lines
+/// of chat); a tap opens the composer's bar along the bottom with the
 /// keyboard. Nothing while the local interaction is off or outside a room.
+/// It shows [AppIcons.localCompose] (A08.13: the star is the style's); the
+/// class keeps its name from A07.17.
 class LocalComposerChatStar extends ConsumerWidget {
-  /// Creates the star.
+  /// Creates the button.
   const new({super.key});
 
   @override
@@ -506,7 +567,7 @@ class LocalComposerChatStar extends ConsumerWidget {
         foregroundColor: scheme.primary,
       ),
       onPressed: () => unawaited(_showComposerRow(context, session, LocalComposerPlace.chat)),
-      icon: const Icon(AppIcons.localStyle, size: 20),
+      icon: const Icon(AppIcons.localCompose, size: 20),
     );
   }
 }
@@ -517,7 +578,7 @@ bool localOverlayShown(SettingsStore settings) =>
     settings.get(Settings.enableDanmakuDisplay) && !settings.get(Settings.hideDanmaku);
 
 /// The composer under the chat list of [child] (the list's tab, U.2k-a), or
-/// with [collapsed] its star at the list's lower right
+/// with [collapsed] its compose button at the list's lower right
 /// ([LocalComposerChatStar], A07.17 c3: the portrait room's panel).
 class LocalComposerBelow extends StatelessWidget {
   /// Creates the column.
@@ -526,10 +587,10 @@ class LocalComposerBelow extends StatelessWidget {
   /// The chat list.
   final Widget child;
 
-  /// The composer is a star on the list instead of a bar under it.
+  /// The composer is a button on the list instead of a bar under it.
   final bool collapsed;
 
-  /// How far the star pushes the list's own lower-right button (the new
+  /// How far the compose button pushes the list's own lower-right button (the new
   /// messages) to the left.
   static const double starInset = 52;
 
@@ -539,7 +600,7 @@ class LocalComposerBelow extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             child,
-            // 12 from the corner to the star; its tap area reaches 4 further.
+            // 12 from the corner to the button; its tap area reaches 4 further.
             const Positioned(right: 8, bottom: 8, child: LocalComposerChatStar()),
           ],
         )

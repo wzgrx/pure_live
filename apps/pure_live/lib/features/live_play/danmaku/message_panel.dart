@@ -47,7 +47,10 @@ Future<void> showRoomMessageActions(BuildContext context, LiveRoomController con
 /// fullscreen): ← back, the field filled with the message to cut down to the
 /// word (one line, at most 40, U.1d c8) and "屏蔽". A local danmaku and a
 /// masked name (a Bilibili guest's `观***`, [isMaskedViewerName], B01 c1)
-/// have no "屏蔽此用户".
+/// have no "屏蔽此用户". A local danmaku or gift has no "屏蔽关键词…"
+/// either (A08.13): local messages do not pass the filters
+/// (`LiveRoomController.addLocal`), so the word would only take the lines
+/// off the list and never stop the next one; only "复制" stays.
 class RoomMessagePanel extends StatefulWidget {
   /// Creates the panel.
   const new({
@@ -115,6 +118,7 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
     final scheme = theme.colorScheme;
     final message = _message;
     final name = message.userName.trim();
+    final shownName = chatSenderName(message);
     final hint = theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant);
     final level = message.userLevel.trim();
     final text = Text.rich(
@@ -122,9 +126,9 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
         children: [
           // A08.10: the chat list's two roles; the name shows here even
           // with "显示用户名" off (this is where the sender is blocked).
-          if (name.isNotEmpty)
+          if (shownName.isNotEmpty)
             TextSpan(
-              text: '$name${ChatText.nameEnd}',
+              text: '$shownName${ChatText.nameEnd}',
               style: ChatText.name(theme, chatNameInk(message, scheme.surfaceContainerLowest, scheme)),
             ),
           TextSpan(text: message.message, style: ChatText.content(theme)),
@@ -199,13 +203,16 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
               AppNavigator.toast(i18n('live_play_user_blocked', args: {'name': name}));
             },
           ),
-        ListTile(
-          key: const ValueKey('live-play-block-keyword'),
-          leading: const Icon(AppIcons.blockKeyword),
-          title: Text(i18n('live_play_block_word')),
-          subtitle: Text(withoutOrphan(i18n('live_play_block_word_desc')), style: hint),
-          onTap: () => setState(() => _keyword = true),
-        ),
+        // A08.13: the filters never see a local message, so blocking its
+        // words would do nothing for the next one.
+        if (!message.isLocal)
+          ListTile(
+            key: const ValueKey('live-play-block-keyword'),
+            leading: const Icon(AppIcons.blockKeyword),
+            title: Text(i18n('live_play_block_word')),
+            subtitle: Text(withoutOrphan(i18n('live_play_block_word_desc')), style: hint),
+            onTap: () => setState(() => _keyword = true),
+          ),
       ],
     );
   }

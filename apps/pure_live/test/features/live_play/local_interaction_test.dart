@@ -81,6 +81,29 @@ void main() {
       expect(LocalCatalog.levelFor(1499), 3);
       expect(LocalCatalog.normalizeName('  ${'字' * 25}  '), '字' * 20);
       expect(LocalCatalog.normalizeName('   '), '');
+      // A08.13 P16: "粗体" there and back keeps the template's weight (3.x
+      // wrote 800 and 500: "清爽" 600 came back as 500).
+      for (final preset in LocalCatalog.presets) {
+        final weight = preset.fontWeight;
+        final bold = weight >= 700;
+        final toggled = bold ? LocalCatalog.regularWeight(weight) : LocalCatalog.boldWeight(weight);
+        expect(toggled >= 700, !bold, reason: preset.id);
+        final back = bold ? LocalCatalog.boldWeight(toggled) : LocalCatalog.regularWeight(toggled);
+        expect(back, weight, reason: preset.id);
+      }
+      expect(
+        [
+          for (final w in [400, 500, 600]) LocalCatalog.boldWeight(w),
+        ],
+        [700, 700, 800],
+      );
+      expect(
+        [
+          for (final w in [700, 800, 900]) LocalCatalog.regularWeight(w),
+        ],
+        [500, 600, 600],
+      );
+      expect(LocalCatalog.danmakuLimit, 40);
     });
 
     test("3.x's keys and defaults; gifts, coins, history and the style", () async {
@@ -131,6 +154,19 @@ void main() {
       expect(store.settings.get(Settings.localInteractionUserName), '阿明');
       expect(store.settings.get(Settings.localInteractionCoins), 1530);
       expect(store.settings.get(Settings.localDanmakuPreset), 'clean');
+      // A08.13 P4: a clear hands back what it took; the undo puts it under
+      // what came since, still 30 at most.
+      final cleared = local.clearHistory();
+      expect(cleared, hasLength(30));
+      expect(local.history, isEmpty);
+      local
+        ..recharge(7)
+        ..restoreHistory(cleared);
+      expect(local.history, hasLength(30));
+      expect(local.history.first, '增加本地体验币 +7');
+      expect(local.history[1], cleared.first);
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      expect(store.settings.get(Settings.localInteractionHistory), local.history);
     });
   });
 
@@ -186,9 +222,7 @@ void main() {
       await closeLocalRoom(tester, room);
     });
 
-    testWidgets('appendix A 6: a long press on a local danmaku: copy and block a word, not block the sender', (
-      tester,
-    ) async {
+    testWidgets('appendix A 6: a long press on a local danmaku: copy only, no blocking (A08.13 P17)', (tester) async {
       String? copied;
       tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
         if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
@@ -200,7 +234,9 @@ void main() {
       await tester.longPress(_key('live-play-local-line'));
       await tester.pumpAndSettle();
       expect(_key('live-play-copy-message'), findsOneWidget);
-      expect(_key('live-play-block-keyword'), findsOneWidget);
+      // A08.13 P17: local messages skip the filters, so a blocked word would
+      // never stop the next one; the panel does not offer it.
+      expect(_key('live-play-block-keyword'), findsNothing);
       expect(_key('live-play-block-user'), findsNothing);
       await tester.tap(_key('live-play-copy-message'));
       await tester.pumpAndSettle();
@@ -444,6 +480,10 @@ void main() {
         expect(tester.getSize(_in('wide-bar', _key('local-composer-video'))).width, localComposerVideoMaxWidth);
         expect(_in('narrow-bar', _key('local-composer-star')), findsOneWidget);
         expect(_in('narrow-bar', find.byType(EditableText)), findsNothing);
+        // A08.13 P8: the folded composer shows "write", the star stays the style's.
+        expect(_in('narrow-bar', find.byIcon(AppIcons.localCompose)), findsOneWidget);
+        expect(_in('narrow-bar', find.byIcon(AppIcons.localStyle)), findsNothing);
+        expect(_in('wide-bar', find.byIcon(AppIcons.localCompose)), findsNothing);
         // The field: star, words, send; the star is the local danmaku colour.
         final star = tester.widget<Icon>(_in('wide-bar', find.byIcon(AppIcons.localStyle)));
         expect(star.color, Color(LocalCatalog.defaultPreset.color));
@@ -542,6 +582,14 @@ void main() {
       await tester.tap(_key('local-history-clear'));
       await tester.pump();
       expect(_in('local-history', find.text('还没有互动记录')), findsOneWidget);
+      // A08.13 P4: the same undo on the settings page.
+      expect(_in('local-history-undo', find.text('已清空 1 条本地互动记录')), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(_in('local-history-undo', find.text('撤销')));
+      await tester.pump();
+      expect(_in('local-history', find.text('增加本地体验币 +500')), findsOneWidget);
+      await tester.tap(_key('local-history-clear'));
+      await tester.pump();
       await tester.tap(_key('local-recharge-2000'));
       await tester.pump();
       expect(_in('local-settings-status', find.text('本地等级 Lv.1 · 3000 本地体验币')), findsOneWidget);
@@ -560,6 +608,124 @@ void main() {
       expect(services.store.settings.get(Settings.localInteractionEnabled), isFalse);
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.runAsync(services.close);
+    });
+  });
+
+  group('A08.13 small fixes', () {
+    String? copied;
+    void watchClipboard(WidgetTester tester) {
+      copied = null;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+        if (call.method == 'Clipboard.setData') copied = (call.arguments as Map)['text'] as String?;
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    }
+
+    testWidgets('P4: clearing the history in the panel says how many and undoes for 4 s', (tester) async {
+      final room = await pumpLocalRoom(tester);
+      await _openPanel(tester);
+      await tester.tap(_key('local-recharge-500'));
+      await tester.pump();
+      await tester.tap(_key('local-gift-bili_snack'));
+      await tester.pump();
+      final local = _session(tester).interaction;
+      final before = local.history;
+      expect(before, hasLength(2));
+      await tester.drag(_key('local-panel-list'), const Offset(0, -1200));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('local-history-clear'));
+      await tester.pump();
+      expect(local.history, isEmpty);
+      expect(_in('local-history', find.text('还没有互动记录')), findsOneWidget);
+      final toast = _key('local-history-undo');
+      expect(_in('local-history-undo', find.text('已清空 2 条本地互动记录')), findsOneWidget);
+      expect(tester.widget<SnackBar>(toast).duration, AppToast.actionDuration);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(_in('local-history-undo', find.text('撤销')));
+      await tester.pumpAndSettle();
+      expect(local.history, before);
+      expect(_in('local-history', find.text('增加本地体验币 +500')), findsOneWidget);
+      expect(toast, findsNothing);
+      await closeLocalRoom(tester, room);
+    });
+
+    testWidgets('P9: at most 40 characters; the count shows from 30 and turns red at 40', (tester) async {
+      final room = await pumpLocalRoom(tester);
+      final input = _in('local-composer-bar', find.byType(EditableText));
+      final count = _in('local-composer-bar', _key('local-composer-count'));
+      await tester.enterText(input, '字' * 29);
+      await tester.pump();
+      expect(count, findsNothing, reason: 'room for the words');
+      await tester.enterText(input, '字' * 30);
+      await tester.pump();
+      expect(tester.widget<Text>(count).data, '30 / 40');
+      // A paste of 60 keeps the first 40; an emoji is one character.
+      await tester.enterText(input, '${'😀' * 10}${'字' * 50}');
+      await tester.pump();
+      expect(tester.widget<EditableText>(input).controller.text.characters.length, 40);
+      final full = tester.widget<Text>(count);
+      expect(full.data, '40 / 40');
+      expect(full.style?.color, Theme.of(tester.element(count)).colorScheme.error);
+      // The count sits inside the field, after the words.
+      final field = tester.getRect(_key('local-composer-field'));
+      expect(field.contains(tester.getCenter(count)), isTrue);
+      expect(tester.getCenter(count).dx, greaterThan(tester.getCenter(input).dx));
+      await tester.tap(_in('local-composer-bar', _key('local-composer-send')));
+      await tester.pump();
+      expect(find.textContaining('${'😀' * 10}${'字' * 30}', findRichText: true), findsWidgets);
+      expect(count, findsNothing, reason: 'the field is empty again');
+      await closeLocalRoom(tester, room);
+    });
+
+    testWidgets('P12: a local gift line has the long press and the double tap: copy, the name once', (tester) async {
+      watchClipboard(tester);
+      final room = await pumpLocalRoom(tester);
+      await _openPanel(tester);
+      await tester.tap(_key('local-gift-bili_snack'));
+      await tester.pump();
+      _panels(tester).close();
+      await tester.pumpAndSettle();
+      final line = _key('live-play-local-line');
+      expect(line, findsOneWidget);
+      await tester.longPress(line);
+      await tester.pumpAndSettle();
+      expect(_key('live-play-message-panel'), findsOneWidget);
+      expect(_in('live-play-message-card', find.text('Pure Live 送出 辣条 ×1', findRichText: true)), findsOneWidget);
+      expect(_key('live-play-copy-message'), findsOneWidget);
+      expect(_key('live-play-block-keyword'), findsNothing);
+      expect(_key('live-play-block-user'), findsNothing);
+      await tester.tap(_key('live-play-copy-message'));
+      await tester.pumpAndSettle();
+      expect(copied, 'Pure Live 送出 辣条 ×1');
+      copied = null;
+      await tester.tap(line);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(line);
+      await tester.pumpAndSettle();
+      expect(copied, 'Pure Live 送出 辣条 ×1');
+      await closeLocalRoom(tester, room);
+    });
+
+    testWidgets('P16: "粗体" on and off gives back the template\'s weight', (tester) async {
+      final room = await pumpLocalRoom(tester);
+      await tester.tap(_in('local-composer-bar', _key('local-composer-style')));
+      await tester.pumpAndSettle();
+      final local = _session(tester).interaction;
+      expect(local.fontWeight, 600, reason: '"清爽"');
+      final bold = _key('local-style-bold');
+      await tester.drag(_key('local-style-controls'), const Offset(0, -600));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(bold);
+      await tester.pumpAndSettle();
+      expect(tester.widget<ChoiceChip>(bold).selected, isFalse);
+      await tester.tap(bold);
+      await tester.pumpAndSettle();
+      expect((local.fontWeight, tester.widget<ChoiceChip>(bold).selected), (800, true));
+      await tester.tap(bold);
+      await tester.pumpAndSettle();
+      expect((local.fontWeight, tester.widget<ChoiceChip>(bold).selected), (600, false));
+      await closeLocalRoom(tester, room);
     });
   });
 

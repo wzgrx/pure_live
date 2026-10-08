@@ -248,6 +248,7 @@
 - 自动测试：`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个，内容见记录“测试”）；改了 `live_play_popups_test`（菜单第三组）、`home_test`（路由表）、`live_store` 的 `migration_test` 和 `backup_test`、`live_ui` 图标对照表。合并时 `apps/pure_live` 293 个、`live_store` 33 个、`live_ui` 45 个通过。
 - 真机：没有单独的 `verify.md`。S02.2 冒烟（2026-10-02，K90，`288fec0ec`）“进直播间……本地弹幕输入框”通过；S02.3 看过右上角菜单里的“本地互动体验”（只看了菜单）。发本地弹幕、送礼特效、样式面板、设置页在真机上没有记录，对应 [CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 2 节第 8 条。Windows 上的礼物 emoji（Windows 10 可能空白）没看过。
 - 留下的问题：
-  - 本地礼物在列表里那一行没有长按菜单（3.x 的礼物和弹幕同一种卡片可以长按）：影响小，不做。
+  - 本地礼物在列表里那一行没有长按菜单（3.x 的礼物和弹幕同一种卡片可以长按）：A08.13 补上（长按、双击复制）。
+  - 后续小改（V03.6 E2）由 [A08.13](../A08.13-本地互动小问题修复/README.md) 做：清空记录可撤销、打开输入框的按钮不再用星形、输入框 40 字、粗体不丢字重、本地消息的长按只留“复制”。
   - Windows 10 的 COLRv1 emoji：在 X01（Windows）验证，有问题就让 `_bundledEmoji` 对 Windows 也返回假。
   - 本地互动的逻辑没有登记归属（见[子分类页](../README.md)“已知问题”）。

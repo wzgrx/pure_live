@@ -76,11 +76,23 @@ Color _readableOn(Color color, Color background) {
 Color chatNameInk(LiveMessage message, Color background, ColorScheme scheme) =>
     chatNameColor(message.nameColor ?? message.color, background) ?? scheme.onSurfaceVariant;
 
-/// The text a double tap copies (3.x: "用户名: 内容").
+/// The text a double tap copies (3.x: "用户名: 内容"). A local gift's words
+/// already start with the name ("Pure Live 送出 辣条 ×1", A08.13).
 String chatCopyText(LiveMessage message) {
-  final name = message.userName.trim();
+  final name = chatSenderName(message);
   return name.isEmpty ? message.message : '$name: ${message.message}';
 }
+
+/// The name shown before [message]'s words in its panel and copied with
+/// them: none for a local gift, whose words name the sender (U.2k c10).
+String chatSenderName(LiveMessage message) =>
+    message.isLocal && message.type == LiveMessageType.gift ? '' : message.userName.trim();
+
+/// Whether [line] has the long press, right click and double tap: a chat
+/// line, and a local gift's (A08.13; 3.x's local gift was a danmaku card).
+bool chatLineActionable(ChatLine line) =>
+    line.message != null &&
+    (line.kind == ChatLineKind.chat || (line.kind == ChatLineKind.gift && line.message!.isLocal));
 
 /// The chat list (3.x `DanmakuListView`): follows new lines while at the
 /// bottom; scrolled up it stays put and offers "N 条新弹幕" (3.x's button).
@@ -343,7 +355,7 @@ class _ChatListState extends ConsumerState<ChatList> {
   ChatLineView _view(ChatLine line, ChatListStyle style, {required bool names}) {
     final made = _views[line];
     if (made != null && made.style == style && made.showName == names && identical(made.emotes, _emotes)) return made;
-    final message = line.kind == ChatLineKind.chat ? line.message : null;
+    final message = chatLineActionable(line) ? line.message : null;
     return _views[line] = ChatLineView(
       key: ValueKey(line.id),
       line: line,
@@ -631,11 +643,10 @@ class ChatLineView extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final body = theme.textTheme.bodyLarge?.regular;
-    // U.2k c10: a local danmaku or gift has its own line; a local danmaku
-    // keeps the long press, right click and double tap (3.x).
+    // U.2k c10: a local danmaku or gift has its own line; both keep the
+    // long press, right click and double tap (3.x; the gift's since A08.13).
     if (line.message case final message? when message.isLocal) {
       final local = LocalChatLine(message: message, showName: showName);
-      if (line.kind != ChatLineKind.chat) return local;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onLongPress: onActions,

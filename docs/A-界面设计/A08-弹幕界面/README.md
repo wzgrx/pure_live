@@ -25,10 +25,10 @@
   - **醒目留言**：新的在上；卡片头部平台色、内容第二色，字色按对比度选深浅墨（`InkOnColor.contrastOn`），没有阴影，价格前金色图标（`LiveSemanticColors.superChatGold` `#FFC107`）和“SC”小块，右侧倒计时；整个列表一个每秒的时钟（`super_chats.dart:75`）；栏窄于 280 或字体放大时头部竖排（`:227`）；内容可选中、双击复制。空时“暂无醒目留言”，平台不提供时写“{平台}的直播间没有醒目留言。”（`:88-93`，按 `LiveSite.hasSuperChats`，`packages/live_core/lib/src/live_site.dart:64`，只有哔哩哔哩、虎牙、斗鱼为真 `:70`）。
   - **弹幕设置**：标签和画面上的面板是同一份内容 `RoomDanmakuSettings`：先是共用的 `DanmakuSettingsContent`（观看模板、显示范围、样式、重复弹幕、画面弹幕交互、流畅度），后面“弹幕列表”（列表样式分段按钮、显示用户名、在聊天列表显示礼物）和“小窗弹幕”（3.x 的 12 项，“小窗显示弹幕”关闭时其余收起，数值带单位 px、px/s、秒）（`danmaku_settings_panel.dart:76-137`、`:143` 起）。标签里“改动立即生效”在第一组标题右边，面板里在标题栏。“统一弹幕颜色”点开是居中的颜色对话框（`showDanmakuColorDialog`，`shared/danmaku/danmaku_color_dialog.dart:66`），全屏时压在画面中间（A08.7 要改）。
   - **屏蔽管理**：一页四组，顺序是弹幕关键词屏蔽（输入框最多 40 字 + “添加”，下面是已加的词）→ 已屏蔽用户 → 平台弹幕过滤（斗鱼疑似自动弹幕）→ 相似弹幕过滤（开关 + 三个滑块，关着时变灰）（`block_manager.dart:212-388`）。词和用户都是小标签，只有 × 能删（点击区 40×48，悬停“点击移除: 词”，`BlockChip` `:402`），删除后 4 秒内可撤销且放回原位（`restoreBlockEntry` `:392`）；重复的词在输入框下面提示、不清空；两节为空时写说明。第一次打开时如果 D02.1 清理过打码昵称，顶上说一次（`_maskedNotice` `:90`）。直播间“屏蔽管理”标签和设置里的“弹幕屏蔽”页是这同一个组件、同一份存储。
-  - **长按弹幕**：列表长按、画面弹幕点按或长按都打开同一个面板（`showRoomMessageActions`，`message_panel.dart:20`）：竖屏在画面下方、横屏在右侧；“复制”“屏蔽此用户”“屏蔽关键词…”（第二页输入，A07.11）；本地弹幕和打码昵称（`观***`）没有“屏蔽此用户”（`:169`，D-013）。面板开着时飞行弹幕整层停住（`DanmakuOverlay.held`），关了继续。
+  - **长按弹幕**：列表长按、画面弹幕点按或长按都打开同一个面板（`showRoomMessageActions`，`message_panel.dart:20`）：竖屏在画面下方、横屏在右侧；“复制”“屏蔽此用户”“屏蔽关键词…”（第二页输入，A07.11）；本地弹幕和打码昵称（`观***`）没有“屏蔽此用户”（D-013）；本地弹幕和本地礼物只有“复制”（本地消息不过过滤，A08.13）。面板开着时飞行弹幕整层停住（`DanmakuOverlay.held`），关了继续。
   - **画面弹幕的点按和长按**：设置里“点按 / 长按”两个开关（默认开）打开时，点按在按下那一刻、长按在长按时问弹幕层“这个点上是哪条”（`player_view.dart:416-440`，`DanmakuOverlayState.messageAt` `shared/danmaku/danmaku_overlay.dart:292`）；控制条显示时上下控制条范围不算（`danmakuTapAllowed` `player_view.dart:839`）；没点中照常显示或隐藏控制层。**单击**只在控制层显示着、没有暂停时才打开面板，控制层隐藏时（淡出一开始就算）单击一律只调出控制层（`_onTap` `player_view.dart:360`，D-038，A08.9）；长按不受影响。
   - **设置里的两页**：设置 → 弹幕（`DanmakuSettingsPage`，`features/settings/danmaku_page.dart:32`，路由 `/danmaku_settings`）正文就是 `DanmakuSettingsContent`，末尾“更多”一组（显示弹幕、在画面上显示飞行弹幕、YouTube 显示全部聊天、更换弹幕字体、弹幕屏蔽），最宽 720，宽屏在右栏；**没有**直播间的“弹幕列表”“小窗弹幕”两组（A08.6）。设置 → 弹幕屏蔽（`ShieldPage`，`features/shield/shield_page.dart:21`，路由 `/shield`）就是 `DanmakuBlockManager`，最宽 720 居中，带 `BlockKind.user` 打开时滚到“已屏蔽用户”。
-  - **本地互动**（总开关默认开）：弹幕列表下面一行输入框（星形打开本地弹幕样式、发送按钮），全屏下栏中间也有一个（窄于 180 收成星形按钮，`local_composer.dart:26`、`:29`），发出立即进列表、飞过（不再等 2 秒）；右上角菜单第三组“本地互动体验”打开互动面板（竖屏画面下方、横屏和宽屏右侧 360）：身份卡、发送框、礼物（余额不够变淡）、加体验币、我的资料、画面上、记录；本地弹幕样式是面板的下一页，预览固定在顶上；送礼时礼物横幅在画面中间 3 秒（`LocalGiftLayer`，`player_view.dart:699`）；列表里本地弹幕有“本地”标签和徽章胶囊；设置里“本地用户与互动”页（`/local_interaction`）。礼物和徽章的 emoji 用应用自带的 Noto 子集字体（iOS、macOS 用系统 emoji）。
+  - **本地互动**（总开关默认开）：弹幕列表下面一行输入框（星形打开本地弹幕样式、发送按钮，最多 40 字，30 字起显示计数），全屏下栏中间也有一个（窄于 180 收成“写弹幕”按钮 `AppIcons.localCompose`，竖屏直播间的列表右下角同一个按钮，A08.13；`local_composer.dart:27`、`:30`），发出立即进列表、飞过（不再等 2 秒）；右上角菜单第三组“本地互动体验”打开互动面板（竖屏画面下方、横屏和宽屏右侧 360）：身份卡、发送框、礼物（余额不够变淡）、加体验币、我的资料、画面上、记录；本地弹幕样式是面板的下一页，预览固定在顶上；送礼时礼物横幅在画面中间 3 秒（`LocalGiftLayer`，`player_view.dart:699`）；列表里本地弹幕有“本地”标签和徽章胶囊；设置里“本地用户与互动”页（`/local_interaction`）。礼物和徽章的 emoji 用应用自带的 Noto 子集字体（iOS、macOS 用系统 emoji）。
 - 内部怎么工作：
   - 数据：`LiveRoomController`（`features/live_play/logic/room_controller.dart`）持有 `chat`（`ChatFeed`，`features/live_play/danmaku/chat_feed.dart:101`，最多 500 条，每帧最多通知一次）、`superChats`、`chatConnection`（空闲、连接中、已连接、超时、失败、平台不提供）、`showGifts`（存在 meta 的 `live_play.showGifts`，`room_controller.dart:189`）。`ChatList` 只听 `ChatFeed` 和它要显示的几项房间状态（`_RoomFacts` `chat_list.dart:499`），不随人数、音量重建；列表倒序（最新是第 0 行）、每行组件建一次（`Expando`）。
   - 设置：弹幕设置、屏蔽列表、相似过滤都在 `live_store` 的设置和 `BlockListStore` 里，直播间、设置页、多画面读同一份；`watchSetting` 只重建用到的行。
@@ -114,7 +114,6 @@
 | 两个小窗弹幕颜色选择器：直播间是 `showDanmakuColorDialog`（10 个色块 + 十六进制），设置的小窗弹幕页是 `showColorDialog`（`LiveColorPicker`） | `shared/danmaku/danmaku_color_dialog.dart:66`；`features/settings/playback_tiles.dart:510-538`（`PipColorTile`）、`settings_dialogs.dart:317`（`showColorDialog`） | 同一个设置两种选色方式 | A08.7 一起定（统一成一个面板式选择） |
 | A08.3、A08.4 登记为“完成”，记录里没有 K90 结果；A08.1 的列表状态（超时、平台不提供、醒目留言卡片）只在 S02.2 冒烟里看过“四个标签、系统提示” | 各任务 `record.md`；[S02.2 记录](../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md) | 不符合 PROCESS 3.2“完成必须有真机结果” | 写进本单元报告；建议这些检查并入 S02.6 或改回“待真机” |
 | 本地互动的礼物和徽章 emoji 是 COLRv1 字体，Windows 10 的 DirectWrite 可能画成空白 | `local_interaction/local_interaction_scope.dart:58`（`_bundledEmoji`：除 iOS、macOS 外都用自带字体） | Windows 10 上礼物图案看不见 | 没在 Windows 上看过；X01（Windows）验证，不行时让 Windows 用系统 emoji |
-| 本地礼物在列表里那一行没有长按菜单（3.x 的礼物和弹幕是同一种卡片，可以长按） | `features/live_play/danmaku/chat_list.dart:609-618`（本地礼物直接返回 `LocalChatLine`） | 不能复制礼物那一行 | A08.2 记录“没做的”；没有任务管，影响小，不做 |
 | 本地互动的数据和规则（`local_interaction/logic/`）没有登记在哪个功能子分类 | `features/live_play/local_interaction/logic/` | 以后改数据和规则时不知道在哪开任务 | 需要维护者决定（建议归 D 组新开子分类或并入 D05） |
 | 设置的弹幕屏蔽页、弹幕页、本地互动设置页在电脑上按 Esc 不返回（没有 `EscapeBack`） | `features/shield/shield_page.dart:31`、`features/settings/danmaku_page.dart:46`、`local_interaction_settings_page.dart` | 规范 5.4 的 Esc 返回链不全 | A05.1 c3 |
 | A08.5 c3（清理翻译键）没做：旧弹幕目录行用过的 18 个键现在没有字面引用；A08.3 删掉的两个标签页用的 `shield_tab_*`、`shield_clear*`、`shield_duplicate` 已被 `00f5edf18`（2026-10-02 清理不用的键）删掉，`shield_*` 现在只剩在用的 `shield_title`、`shield_removed`（2026-10-07 核对） | 键名清单在 [A08.5 记录](A08.5-设置里的弹幕页/record.md)“留给以后” | 翻译文件里有不用的键 | D-024：这次不清理；以后按 D-016 先列清单（Z05） |
@@ -149,7 +148,7 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：`features/live_play/danmaku/`、`shared/danmaku/`、`local_interaction/`
-- 进度：`██████████████░░░░░░` 70%
+- 进度：`██████████████░░░░░░` 72%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -166,6 +165,7 @@
 | A08.10 | 弹幕列表里用户名和内容分开显示，各平台一个样子；加“显示用户名”开关 | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A08.10-弹幕列表名字和内容分开/README.md)、[任务书](A08.10-弹幕列表名字和内容分开/brief.md)、[记录](A08.10-弹幕列表名字和内容分开/record.md)、[真机验证](A08.10-弹幕列表名字和内容分开/verify.md) |
 | A08.11 | 礼物行的样子：全平台统一（礼物图、名字、礼物名、×N、价值、档位线） | 界面 | 未开始 | — | — | [设计或说明](A08.11-礼物行的样子/README.md)、[任务书](A08.11-礼物行的样子/brief.md) |
 | A08.12 | 礼物开关和飞行弹幕里的礼物：只显示值钱的礼物、飞行弹幕显示礼物、价值换算成元 | 界面 | 未开始 | — | — | [设计或说明](A08.12-礼物开关和飞行弹幕里的礼物/README.md)、[任务书](A08.12-礼物开关和飞行弹幕里的礼物/brief.md) |
+| A08.13 | 本地互动小问题修复：清空记录可撤销、星形只表示样式、输入框 40 字、礼物行能长按、粗体不丢字重、本地弹幕不给屏蔽关键词 | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A08.13-本地互动小问题修复/README.md)、[任务书](A08.13-本地互动小问题修复/brief.md)、[记录](A08.13-本地互动小问题修复/record.md) |
 | A08.14 | 长按弹幕面板加“+1（本地）”：用本地身份和样式再发一次 | 界面 | 未开始 | — | — | [设计或说明](A08.14-长按弹幕面板加一/README.md)、[任务书](A08.14-长按弹幕面板加一/brief.md) |
 | A08.15 | 聊天列表字号和行距（接 A08.10） | 界面 | 未开始 | — | — | [设计或说明](A08.15-聊天列表字号和行距/README.md)、[任务书](A08.15-聊天列表字号和行距/brief.md) |
 

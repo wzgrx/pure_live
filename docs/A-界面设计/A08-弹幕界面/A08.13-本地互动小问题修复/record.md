@@ -68,7 +68,7 @@
 
 ## 门禁
 
-- 见下一次提交的说明（`bash tools/gate/gate.sh --all`）。
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `5388f612c`，两个 `[A08.13]` 提交的内容）：`gate: passed (all, 14 members)`。
 
 ## 真机上要看的
 

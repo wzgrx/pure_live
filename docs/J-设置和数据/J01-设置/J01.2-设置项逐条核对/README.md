@@ -35,6 +35,30 @@
 - c6 **处理不一致**：注册表的默认值或范围写错的，在本任务里改（改默认值要在表里写依据，3.x 的键名不动）；行为不对的开修复任务到对应组；有意的改动写进 DECISIONS。
 - c7 **守住**：加表驱动测试 `packages/live_store/test/settings_defaults_test.dart`：每个沿用 3.x 的设置，默认值等于表里的 3.x 默认值（确认改动的列出例外和决定编号）。
 
+## 结果
+
+逐条的对照表：[settings.md](settings.md)（`python3 tools/docs/settings_audit.py` 生成，手写的部分在 `tools/docs/settings_audit_notes.py`）。详细见 [record.md](record.md)。
+
+- **数量**：现在是 219 个（A08.6 加了 `showChatGifts`）。198 个沿用 3.x 的键，21 个 v4 新加。3.x 的默认值：脚本直接取到 166 个（`hive*` 的字面值或同一文件的常量 157 个，录制的 `RecorderConfig` 9 个；常量键 `historyLimitKey`、`autoSyncHoursIntervalKey` 和 `RecorderKeys.*` 也解开了，所以和清点第 15 节的“172 / 64 / 46”分法不同），手工展开 32 个（3.x 的表达式、别的文件的常量、不经 `hive*` 读写的键，每个写了 3.x 的文件:行）。
+- **结论**：198 个一样；3 个确认改动；14 个不一样，已改；4 个不一样，开了 J01.3。
+
+| 结论 | 设置 | 3.x | 改之前的 v4 | 现在 | 依据 |
+|---|---|---|---|---|---|
+| 确认改动 | `hotAreasList` | 34 个平台 | 35 个（多 Kick） | 不变 | UPGRADES X-1 |
+| 确认改动 | `themeColorSwitch` | `FF2196F3` | `FF2E6FE0` | 不变 | A11.2 C-3 |
+| 确认改动 | `page_default_size` | 手机 12、宽屏 20（启动时算） | 0 = 界面按宽度定（结果一样） | 不变 | J02.1 有意差异；3.x 读到 0 时取第一个可选条数，也是 12 或 20 |
+| 已改（范围） | `danmakuSpeed`、`danmakuFontSize`、`danmakuFontWeight` | 20～400、10～30、100～900 | 不限 | 同 3.x | 3.x 启动和导入时都夹（`danmaku_settings_controller.dart:118-120`），设置页滑块也是这个范围 |
+| 已改（范围） | `repeatedDanmakuWindowSeconds` | 1～30 | ≥ 1 | 1～30 | 3.x 导入时夹，滑块 1～30 |
+| 已改（范围） | 小窗弹幕 8 个：字号、粗细、速度、透明度、区域、条数、间隔、帧率 | 8～24、100～900、20～400、0.1～1、0.1～1、1～20、0.05～2、15～240 | 不限，或透明度、区域 0～1，条数 ≥ 1 | 同 3.x | 3.x 导入时夹（`:272-291`），3.x 和 v4 的滑块也是这个范围 |
+| 已改（范围） | `windows_pip_width`、`windows_pip_height` | 0～16384 | 不限 | 0～16384 | `window_size_controller.dart:308`（只有 Windows 用） |
+| 开 J01.3 | `historyLimit`、`videoFitIndex`、`proxyPort`、`appProxyPort` | 越界回到默认值 | 夹到一端 | 不变 | 要给 `IntSetting` 加参数（不在本任务可改的范围）；同时做弹幕粗细取整到整百 |
+
+- 改范围只影响存着越界值的人（3.x 的数据、备份、手改）：读出来和 3.x 一样被夹住。没有改任何默认值，所以不用上真机。
+- **目录登记**：`SettingsEntry.settings` 现在没有使用方（设置页没有“已修改”计数，“恢复本页默认”用各页自己的清单 `pipDanmakuSettings`、`portraitSettings`、`kernelSettings`）。照“打开一页的行登记那一页的设置”（例如“平台显示”登记 `hotAreasList`），屏蔽页入口 `video_block_list` 补登记了在屏蔽页上设置的 5 个过滤设置。其余没登记的 72 个都是本机记录、没有界面的（3.x 也没有），或在自己的页面上设置（网络电视、录制、本地互动、日志、电视界面、直播间里的状态）。
+- **生效时机抽查**（和 3.x 一样）：弹幕外观、竖屏、卡片、字体和主题改了立即生效（界面 `watchSetting`）；刷新间隔改了立即重排定时器（`favorite_controller.dart` 的 `_settingChanged`，3.x 是 `ever`）；直播间的重复和相似过滤改了立即重建过滤器（`room_controller.dart` 监听 `_filterSettings`）；代理每个请求都读（3.x 改了重建 dio，效果一样）；画质、硬解、音量在进房时读（3.x 同样）；录制设置在下一次录制开始时读（3.x 的 `RecorderConfig` 同样）。
+- **没人读的**：`autoRefreshTime`、`enableRotateScreen`、`m3uDirectory` 3.x 也不读；`videoPlayerKey` 只为备份往返（J02.1）。`defaultMobileVolume` 只有多画面读，直播间手机音量固定 1，和 3.x 一样（G05 说明）。
+- **测试**：新增 `packages/live_store/test/settings_defaults_test.dart`（4 个用例：每个设置要么沿用 3.x 要么登记为新加；沿用的默认值等于 3.x 的，3 个确认改动列为例外；新加的默认值等于来源任务的；76 个数值设置的范围逐个列出）；`stores_test.dart` 加 1 个（14 个改了范围的设置存越界值，读出、重新打开、按 3.x 数据导入都被夹住）；`settings_page_test.dart` 加 1 个（屏蔽页入口登记的设置）。
+
 ## 验证
 
 - 自动测试：新的 `settings_defaults_test.dart`；`packages/live_store` 和 `apps/pure_live` 的全部测试照常通过。
@@ -42,5 +66,5 @@
 
 ## 留下的问题
 
-- 现在已知要特别看的：`refreshRateMode`（3.x 新装默认由 `_initialRefreshRateMode` 推出，v4 写 `'powerSaving'`）、`page_default_size`（3.x 按屏幕宽度，v4 为 0 = 由界面决定，3.x 读回 v4 备份时的行为）、`themeColorSwitch`（确认改动：品牌蓝，A11.2 C-3）、`preferResolution`（3.x `PlayerConsts.resolutions.first`）。
+- 越界值的修法和 3.x 不同的 4 个设置、弹幕粗细取整：J01.3（第三档）。
 - 无其他。

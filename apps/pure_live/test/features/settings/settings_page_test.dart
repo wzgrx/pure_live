@@ -575,6 +575,17 @@ void main() {
     }
   });
 
+  test('J01.2: the block page row carries the filters set on that page, as other rows that open a page', () {
+    final block = settingsCatalog.firstWhere((entry) => entry.id == 'video_block_list');
+    expect(block.settings, [
+      Settings.filterDouyuSuspectedAutomatedMessages,
+      Settings.enableDanmakuSimilarityFilter,
+      Settings.danmakuSimilarityThreshold,
+      Settings.danmakuSimilarityCacheDuration,
+      Settings.danmakuSimilarityMaxCacheSize,
+    ]);
+  });
+
   test('search needs every word and ignores blanks', () {
     expect(searchSettings(settingsCatalog, '   '), isEmpty);
     expect(formatMinutes(30), '30 分钟');

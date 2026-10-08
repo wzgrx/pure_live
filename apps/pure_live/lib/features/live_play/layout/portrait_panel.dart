@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
@@ -38,6 +40,7 @@ class PortraitPanelLayout extends StatefulWidget {
     this.least = portraitPanelLeast,
     this.stop,
     this.onStop,
+    this.keyboard = 0,
     super.key,
   });
 
@@ -60,6 +63,11 @@ class PortraitPanelLayout extends StatefulWidget {
 
   /// The record and danmaku settings panels: over this panel when open.
   final Widget panels;
+
+  /// The keyboard's height (A07.18): an open [panels] grows up by as much
+  /// (at most to the top of the area), so a filter's results stay above
+  /// it; the chat panel under it stays where it is.
+  final double keyboard;
 
   /// The room layout setting (`portraitLayoutMode`): "immersive" starts at
   /// the lowest stop.
@@ -219,24 +227,28 @@ class _PortraitPanelLayoutState extends State<PortraitPanelLayout> {
             bottom: -_dismiss,
             height: current,
             onEnd: _slid,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Material(
-                  color: Theme.of(context).colorScheme.surface,
-                  elevation: 3,
-                  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _handle(context, stops, current),
-                      Expanded(child: widget.content),
-                    ],
-                  ),
-                ),
-                widget.panels,
-              ],
+            child: Material(
+              color: Theme.of(context).colorScheme.surface,
+              elevation: 3,
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _handle(context, stops, current),
+                  Expanded(child: widget.content),
+                ],
+              ),
             ),
+          ),
+          AnimatedPositioned(
+            key: const ValueKey('live-play-portrait-panels'),
+            duration: duration,
+            curve: Curves.easeOutCubic,
+            left: 0,
+            right: 0,
+            bottom: -_dismiss,
+            height: math.min(math.max(0, constraints.maxHeight), current + widget.keyboard),
+            child: widget.panels,
           ),
         ],
       );

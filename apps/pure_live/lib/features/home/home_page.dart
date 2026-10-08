@@ -57,15 +57,9 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (Platform.isAndroid) {
-        SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(
-            statusBarColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0),
-            systemNavigationBarColor: Theme.of(context).navigationBarTheme.backgroundColor,
-          ),
-        );
-        unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
-      }
+      // Edge to edge (3.x); the bars' style is the app's SystemBarsScope
+      // (A06.5).
+      if (Platform.isAndroid) unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
       final launch = ref.read(appServicesProvider).launch;
       if (launch.room case final room?) unawaited(AppNavigator.toLiveRoomDetail(liveRoom: room));
       if (launch.isPrimary) _updateTimer = Timer(startupUpdateCheckDelay, _checkForUpdate);

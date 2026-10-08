@@ -44,6 +44,7 @@
 | 版 | 内容 | 用户意见 |
 |---|---|---|
 | 第 0 版 | 只有上面的代码核对，还没截图、没出图 | — |
+| 第 1 版（2026-10-08） | 维护者按任务说明（“3.x 启动时全局设透明，v4 启动页留下黑色导航栏和浅色导航栏图标”）直接改：X1、X2 都按建议 A，c1、c2 做了，c3 并进 c1；截图核对留给真机验证 | 待 K90 看 |
 
 ## 对比页（按章节导出）
 
@@ -55,13 +56,13 @@
 
 ## 确认的改动
 
-还没确认。建议（待 K90 截图后定）：
+维护者 2026-10-08 按建议定下（X1 A、X2 A），不等截图先改，K90 截图放到真机验证：
 
 | 编号 | 类型 | 内容 | 对应问题 |
 |---|---|---|---|
 | c1 | 修改 | 启动时全局设一次系统栏样式（照 3.x `MobileManager.initialize`）：状态栏、导航栏透明，导航栏分隔线透明；**图标深浅跟主题**（不照 3.x 固定深色），主题切换时重设 | P1、P2 |
 | c2 | 修改 | 启动页的 `AnnotatedRegion` 不再用 Flutter 的 `SystemUiOverlayStyle.light/dark` 常量（带黑色导航栏），改成只设状态栏和导航栏图标深浅、导航栏透明 | P2 |
-| c3 | 保留 | 首页 `home_page.dart:58-67` 那一段照 3.x 留着（或并进 c1，去掉重复） | — |
+| c3 | 修改 | 首页 `home_page.dart:58-67` 那一段并进 c1：样式由 `SystemBarsScope` 给，首页只留 `edgeToEdge`（同 3.x） | — |
 
 ## 按钮的作用和用法
 
@@ -78,9 +79,12 @@
 
 ## 待选和决定
 
-- X1：导航栏图标深浅。A（建议）跟主题（浅色主题深色图标、深色主题浅色图标）；B 照 3.x 固定深色。理由：B 是 P1，深色主题下三键导航看不清。
-- X2（V03.3 报告里请维护者决定的）：K90 截图如果确认首页导航栏和 3.x 不同（例如一条黑带或主题色带，3.x 是透明），这个差别是不是有意的。A（建议）不是，照 c1、c2 改回透明；B 是有意的，保留现在的样子，把它写进“确认的改动”并在 F-APP-23 的备注里说明。截图前不能定。
+- X1（定了 A）：导航栏图标深浅。A（建议）跟主题（浅色主题深色图标、深色主题浅色图标）；B 照 3.x 固定深色。理由：B 是 P1，深色主题下三键导航看不清。
+- X2（定了 A，2026-10-08）（V03.3 报告里请维护者决定的）：K90 截图如果确认首页导航栏和 3.x 不同（例如一条黑带或主题色带，3.x 是透明），这个差别是不是有意的。A（建议）不是，照 c1、c2 改回透明；B 是有意的，保留现在的样子，把它写进“确认的改动”并在 F-APP-23 的备注里说明。截图前不能定。
 
 ## 实现和验证（开发后补）
 
-- 还没开始。真机核对步骤和代码改动见 [brief.md](brief.md)。
+- 根因（读代码，Flutter SDK 3.47.5）：Flutter 每帧按页面顶部和底部的 `AnnotatedRegion` 设系统栏（`rendering/view.dart` 的 `_updateSystemChrome`）；底部没有区域时只用顶部的样式，`AppBar` 的样式不含导航栏字段（`null` 表示不改）。启动页整页的区域用 `SystemUiOverlayStyle.light/dark`（`system_chrome.dart:316-330`，黑色导航栏、浅色图标），离开后没有任何区域或调用再设导航栏图标；首页那一段（3.x 照搬）只设状态栏透明和 `null` 的导航栏颜色。所以浅色主题下导航栏图标一直是启动页留下的浅色（Android 15 起底色不生效，但图标深浅生效），Android 14 及以下还有一块黑色导航栏。
+- 改动：新文件 `apps/pure_live/lib/app/system_bars.dart`：`systemBarsStyle(brightness)`（状态栏、导航栏、分隔线透明，图标跟主题）和 `SystemBarsScope`（整页的 `AnnotatedRegion`）；`app/app.dart` 的 `MaterialApp.builder` 用它包住所有页面，主题变化时随之重建；启动页的区域改用 `systemBarsStyle`；首页去掉那一段 `setSystemUIOverlayStyle`，只留 `edgeToEdge`。不碰全屏进出（A07.4）、原生 `styles.xml`、`systemNavigationBarContrastEnforced`（三键导航的系统遮罩照旧）。
+- 测试：`test/features/splash/splash_page_test.dart`（浅色、深色下启动页的样式：导航栏和分隔线透明、图标跟主题）、`test/features/home/home_test.dart`（Android 目标平台下 `SystemChrome.latestStyle`：浅色、深色切换不重启都对）；改之前都失败。
+- 真机：照 [brief.md](brief.md)“真机验证”1～5 看，截图放 `verify/`；三键导航的系统遮罩如果难看，再决定要不要关。

@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -81,6 +83,27 @@ void main() {
     expect(visibleHomeMenus(['record', 'popular']), [HomeMenu.record, HomeMenu.popular]);
     // Nothing usable saved: every destination (3.x showed an empty page).
     expect(visibleHomeMenus(['bogus']), HomeMenu.values);
+  });
+
+  testWidgets('A06.5 c1: Android system bars are see-through; their icons follow the theme, also when it changes', (
+    tester,
+  ) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    try {
+      final services = await _pump(tester, width: 400);
+      for (final (mode, icons) in [('Light', Brightness.dark), ('Dark', Brightness.light)]) {
+        await tester.runAsync(() => services.store.settings.set(Settings.themeMode, mode));
+        await tester.pumpAndSettle();
+        final style = SystemChrome.latestStyle!;
+        expect(style.systemNavigationBarColor, const Color(0x00000000), reason: mode);
+        expect(style.systemNavigationBarDividerColor, const Color(0x00000000), reason: mode);
+        expect(style.systemNavigationBarIconBrightness, icons, reason: mode);
+        expect(style.statusBarColor, const Color(0x00000000), reason: mode);
+        expect(style.statusBarIconBrightness, icons, reason: mode);
+      }
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   testWidgets('phone: bottom bar of the saved menus; follows again refreshes them', (tester) async {

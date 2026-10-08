@@ -2688,12 +2688,13 @@ from = "S02.5 清单 1A-06（2026-10-08 K90）"
 id = "G03.1"
 title = "起播速度和弱网：测首帧时间，找出慢的环节，改进后真机对比"
 type = "性能"
-status = "未开始"
+status = "开发中"
 size = "中"
 tier = 1
 old = ["T04c.1"]
 stages = ["测量现状", "找出慢的环节", "改进", "真机对比"]
 done = 0
+next = "阶段 1 c2：K90 上按 README“真机验证”测量（c1 打点已做，收集：adb logcat -s flutter | grep playback-timing）"
 
 [[task]]
 id = "G04.1"

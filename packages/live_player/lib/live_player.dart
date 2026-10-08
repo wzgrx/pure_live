@@ -13,4 +13,5 @@ export 'src/policies.dart';
 export 'src/screen_wake.dart';
 export 'src/session.dart';
 export 'src/state.dart';
+export 'src/timing.dart' hide OpenTiming;
 export 'src/video_view.dart';

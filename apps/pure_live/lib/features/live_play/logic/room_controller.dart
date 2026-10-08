@@ -195,6 +195,16 @@ class LiveRoomController extends ChangeNotifier {
   bool _servedToastShown = false;
   int _loggedRecovery = 0;
 
+  /// G03.1: the start-up marks of entering the room (T0 is this
+  /// controller's creation: the page's `initState`, or the release of a
+  /// swipe); only the first load's open is timed, so a refresh, a retry or
+  /// a quality switch writes no timing line. Null once handed to the
+  /// session or once the first load did not open a stream.
+  StartupMarks? _startup = StartupMarks();
+
+  /// The epoch of the first load, the one [_startup] times.
+  int? _startupEpoch;
+
   LiveRoom _room;
   RoomStage _stage = RoomStage.loading;
   Object? _failure;
@@ -346,6 +356,37 @@ class LiveRoomController extends ChangeNotifier {
     _loggedRecovery = attempt;
   }
 
+  /// G03.1: one app log line per timed open (the room's entry), also on
+  /// logcat (`adb logcat -s flutter | grep playback-timing`):
+  /// `playback-timing site=bilibili room=1a2b3c route=direct engine=new
+  /// result=playing detail=312 qualities=0 urls=405 engineReady=180 input=2
+  /// load=96 firstFrame=640 playing=702 total=1697`.
+  void _logTiming(PlaybackTiming timing) {
+    final line = timing.line(room: roomTag(_room.platform, _room.roomId));
+    AppLog.instance.info('playback', line);
+    debugPrint(line);
+  }
+
+  /// A short tag of a room for the timing line (no room number in the log):
+  /// the first six hex digits of the 32-bit FNV-1a hash of
+  /// `platform:roomId`.
+  @visibleForTesting
+  static String roomTag(String platform, String roomId) {
+    var hash = 0x811c9dc5;
+    for (final unit in '$platform:$roomId'.codeUnits) {
+      hash = ((hash ^ unit) * 0x01000193) & 0xffffffff;
+    }
+    return hash.toRadixString(16).padLeft(8, '0').substring(0, 6);
+  }
+
+  /// The start-up marks for an open of [epoch], handed over once.
+  StartupMarks? _takeStartup(int epoch) {
+    if (epoch != _startupEpoch) return null;
+    final startup = _startup;
+    _startup = null;
+    return startup;
+  }
+
   /// Subscribes to the session's recoveries, danmaku and settings, loads
   /// the room and starts the periodic refresh.
   Future<void> start() async {
@@ -413,6 +454,12 @@ class LiveRoomController extends ChangeNotifier {
   Future<void> load() async {
     if (_disposed) return;
     final epoch = ++_epoch;
+    // G03.1: only the first load is the room's entry.
+    if (_startupEpoch == null) {
+      _startupEpoch = epoch;
+    } else {
+      _startup = null;
+    }
     _startWhenBack = false;
     _sawOffline = false;
     _stage = RoomStage.loading;
@@ -431,16 +478,19 @@ class LiveRoomController extends ChangeNotifier {
       _room = requested.pendingAfterError();
       _stage = RoomStage.failed;
       _failure = error;
+      _startup = null;
       await _stopStream();
       _notify();
       return;
     }
     if (!_current(epoch)) return;
+    _startup?.markDetail();
     _room = fetched.withAudienceFallbackFrom(requested).fillFromDetail(requested);
     _notify();
     unawaited(_saveFollowSnapshot());
     if (!_room.isPlayableNow) {
       _stage = RoomStage.offline;
+      _startup = null;
       await _stopStream();
       _notify();
       return;
@@ -478,6 +528,7 @@ class LiveRoomController extends ChangeNotifier {
       return;
     }
     if (!_current(epoch)) return;
+    _startup?.markQualities();
     if (found.isEmpty) {
       _unplayable(StreamUnavailable(site.id, 'no qualities'));
       return;
@@ -504,6 +555,7 @@ class LiveRoomController extends ChangeNotifier {
     developer.log('Room cannot play', name: 'LivePlay', error: error);
     _stage = RoomStage.unplayable;
     _failure = error;
+    _startup = null;
     unawaited(session.stop());
     _notify();
     // U.2g c11: the room is on air, so its danmaku and super chats show
@@ -533,6 +585,7 @@ class LiveRoomController extends ChangeNotifier {
       return false;
     }
     if (!_current(epoch)) return false;
+    if (!userChoice) _startup?.markUrls();
     if (!resolution.hasSources) {
       if (userChoice && _stage == RoomStage.playing) {
         toast?.call(i18n('cannot_read_play_url'));
@@ -566,6 +619,7 @@ class LiveRoomController extends ChangeNotifier {
     _failure = null;
     _notify();
     final quality = _qualities[playing];
+    final startup = userChoice ? null : _takeStartup(epoch);
     await session.open(
       PlaybackRequest(
         site: site.id,
@@ -573,6 +627,8 @@ class LiveRoomController extends ChangeNotifier {
         refresh: () => _refreshPlan(quality),
         audioOnly: _audioOnly,
         volume: _volume(),
+        startup: startup,
+        onTiming: startup == null ? null : _logTiming,
       ),
     );
     return _current(epoch);

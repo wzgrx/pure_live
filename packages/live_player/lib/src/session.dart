@@ -5,6 +5,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/src/engine.dart';
 import 'package:live_player/src/state.dart';
+import 'package:live_player/src/timing.dart';
 import 'package:meta/meta.dart';
 
 const _playbackStallCode = 'playback_stall_timeout';
@@ -18,7 +19,15 @@ typedef PlanRefresher = Future<PlaybackPlan> Function();
 @immutable
 final class PlaybackRequest {
   /// Creates a request.
-  const new({required this.site, required this.plan, this.refresh, this.audioOnly = false, this.volume = 1});
+  const new({
+    required this.site,
+    required this.plan,
+    this.refresh,
+    this.audioOnly = false,
+    this.volume = 1,
+    this.startup,
+    this.onTiming,
+  });
 
   /// The platform id: the proxy route key and the relay's site.
   final String site;
@@ -36,6 +45,14 @@ final class PlaybackRequest {
 
   /// Volume, 0 to 1 (3.x restored the room's saved volume on desktop).
   final double volume;
+
+  /// G03.1: the room's marks before this open (T0 to T3), for [onTiming].
+  final StartupMarks? startup;
+
+  /// G03.1: receives this open's timing once it plays for the first time or
+  /// fails; an open replaced before that (a new open, another line, a stop)
+  /// reports nothing. Without it the open is not timed.
+  final PlaybackTimingSink? onTiming;
 }
 
 /// The session's deadlines, 3.x's `PlayerManager` defaults.
@@ -204,6 +221,10 @@ final class PlaybackSession {
   bool _buffering = false;
   PlayerException? _openingError;
 
+  /// G03.1: the timing of the open in progress (null when not timed or
+  /// already reported); a new generation ([_begin]) drops it.
+  OpenTiming? _timing;
+
   final Set<String> _errorSignatures = {};
   int? _recoveringSession;
   PlayerException? _pendingError;
@@ -289,13 +310,49 @@ final class PlaybackSession {
   void _emit(PlaybackState next) {
     if (_disposed) return;
     _state = next;
+    if (_timing != null) _reportTiming(next);
     _states.add(next);
+  }
+
+  /// G03.1: the open being timed ends with its first `playing` (T8) or its
+  /// failure.
+  void _reportTiming(PlaybackState state) {
+    final timing = _timing!;
+    final String? error;
+    switch (state.status) {
+      case PlaybackStatus.playing:
+        timing.mark(OpenTiming.playing);
+        error = null;
+      case PlaybackStatus.error:
+        error = switch (state.error) {
+          PlayerException(:final code?) => code,
+          PlayerException(:final type) => type.name,
+          null => 'unknown',
+          final Object other => other.runtimeType.toString(),
+        };
+      case PlaybackStatus.idle ||
+          PlaybackStatus.opening ||
+          PlaybackStatus.buffering ||
+          PlaybackStatus.paused ||
+          PlaybackStatus.completed ||
+          PlaybackStatus.stopped:
+        return;
+    }
+    _timing = null;
+    try {
+      timing.sink(timing.finish(error: error));
+    } on Object {
+      // Timing never changes playback.
+    }
   }
 
   /// Plays [request] (3.x's `playSource`), replacing whatever plays.
   Future<void> open(PlaybackRequest request) async {
     _checkAlive();
     final session = _begin();
+    if (request.onTiming case final sink?) {
+      _timing = OpenTiming(site: request.site, startup: request.startup, sink: sink);
+    }
     _request = request;
     _plan = request.plan;
     _prefetched = null;
@@ -510,6 +567,7 @@ final class PlaybackSession {
     _idleTimer?.cancel();
     _leaveOffline();
     _pendingError = null;
+    _timing = null;
     return _session;
   }
 
@@ -590,8 +648,10 @@ final class PlaybackSession {
       ),
     );
     try {
+      final reused = _engine != null;
       final engine = await _engineNow();
       if (!_current(session) || _fence.generation != generation) return;
+      _timing?.engineReadyAt(reused: reused);
       final refresh = request.refresh;
       await _transport
           .open(
@@ -607,7 +667,11 @@ final class PlaybackSession {
               start: plan.start,
               cancel: cancel,
             ),
-            (input) => engine.open(EngineMedia.of(input, decoder: _decoder, audioOnly: _state.audioOnly)),
+            (input) async {
+              if (_current(session)) _timing?.inputOpened(input.route);
+              await engine.open(EngineMedia.of(input, decoder: _decoder, audioOnly: _state.audioOnly));
+              if (_current(session)) _timing?.mark(OpenTiming.loaded);
+            },
           )
           .timeout(
             timings.sourceOpen,
@@ -687,7 +751,10 @@ final class PlaybackSession {
       case EngineCompleted():
         if (_accepting) _onCompleted(session);
       case EngineVideoSize(:final width, :final height):
-        if (_accepting && width > 0 && height > 0) _emit(_state.copyWith(videoWidth: width, videoHeight: height));
+        if (_accepting && width > 0 && height > 0) {
+          _timing?.mark(OpenTiming.firstFrame);
+          _emit(_state.copyWith(videoWidth: width, videoHeight: height));
+        }
       case EngineFrameRate(:final fps):
         if (_accepting && fps > 0) _emit(_state.copyWith(frameRate: fps));
       case EnginePosition(:final position):

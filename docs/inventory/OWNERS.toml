@@ -193,6 +193,7 @@ path = [
   { glob = "packages/live_player/lib/src/mpv_*.dart", sub = "G01" },
   { glob = "packages/live_player/lib/src/frame_rate.dart", sub = "R02" },
   { glob = "packages/live_player/lib/src/screen_wake.dart", sub = "O05" },
+  { glob = "packages/live_player/lib/src/timing.dart", sub = "G03" },
   { glob = "packages/live_player/", sub = "G02" },
   { glob = "packages/live_record/lib/src/scheduler.dart", sub = "H04" },
   { glob = "packages/live_record/lib/src/naming.dart", sub = "H03" },

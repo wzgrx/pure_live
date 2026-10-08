@@ -485,7 +485,7 @@ void main() {
     expect(controller.qualityIndex, 1);
     expect(toasts, ['平台实际返回 超清，已按真实画质播放'], reason: 'C01.4: entering the room says it once');
 
-    await controller.selectQuality(0);
+    await controller.selectQuality(controller.qualityIndex == 0 ? 1 : 0);
     expect(controller.qualityIndex, 1);
     expect(toasts, hasLength(2), reason: 'a quality picked by hand is answered every time');
     expect(toasts.last, contains('超清'));
@@ -767,6 +767,63 @@ void main() {
     controller.dispose();
   });
 
+  test('G03.1: entering the room leaves one timing line, its marks in order', () async {
+    final site = _SlowSteps(liveRoom());
+    final controller = controllerFor(site);
+    bool timing(LogEntry entry) => entry.tag == 'playback' && entry.message.startsWith('playback-timing ');
+    final before = AppLog.instance.entries.where(timing).length;
+    await controller.start();
+    await settle();
+    expect(session.state.status, PlaybackStatus.playing);
+    List<String> lines() =>
+        [for (final entry in AppLog.instance.entries.where(timing)) entry.message].skip(before).toList();
+
+    final line = lines().single;
+    final fields = {for (final field in line.split(' ').skip(1)) field.split('=').first: field.split('=').last};
+    expect(fields.keys, [
+      'site',
+      'room',
+      'route',
+      'engine',
+      'result',
+      'detail',
+      'qualities',
+      'urls',
+      'engineReady',
+      'input',
+      'load',
+      'firstFrame',
+      'playing',
+      'total',
+    ]);
+    expect(fields['site'], SiteIds.bilibili);
+    expect(fields['room'], LiveRoomController.roomTag(SiteIds.bilibili, '6'));
+    expect(fields['room'], hasLength(6));
+    expect((fields['route'], fields['engine'], fields['result']), ('direct', 'new', 'playing'));
+    int ms(String name) => int.parse(fields[name]!);
+    // T0 -> T1 holds the detail's second, T2 -> T3 the URLs' second: the
+    // marks are taken in order, each after its step.
+    expect(ms('detail'), greaterThanOrEqualTo(1000));
+    expect(ms('qualities'), inInclusiveRange(0, 999));
+    expect(ms('urls'), greaterThanOrEqualTo(1000));
+    for (final name in ['engineReady', 'input', 'load', 'playing']) {
+      expect(ms(name), isNonNegative, reason: name);
+    }
+    expect(fields['firstFrame'], '-', reason: 'the fake engine reports no video size');
+    // The steps add up to the total (each one rounded down to whole ms).
+    final steps = [for (final name in PlaybackTiming.segmentNames) int.tryParse(fields[name]!) ?? 0];
+    expect(ms('total') - steps.reduce((a, b) => a + b), inInclusiveRange(0, steps.length));
+    expect(AppLog.instance.entries.where(timing).last.format(), endsWith('[INFO] playback: $line'));
+
+    // A quality switch or a reload of the room is no entry: no line.
+    await controller.selectQuality(controller.qualityIndex == 0 ? 1 : 0);
+    await controller.load();
+    await settle();
+    expect(engine.opens, hasLength(3));
+    expect(lines(), [line]);
+    controller.dispose();
+  }, timeout: const Timeout(Duration(seconds: 30)));
+
   test('texts: time on air, audience numbers', () {
     expect(startedAgo(now.subtract(const Duration(minutes: 80)), now), '已开播 1 小时 20 分');
     expect(startedAgo(now.subtract(const Duration(seconds: 20)), now), '刚刚开播');
@@ -795,4 +852,21 @@ class _UnconfirmedSite extends FakeSite implements LivePlayUrlResolver {
     required LiveRoom detail,
     required LivePlayQuality quality,
   }) async => LivePlayUrlResolution(urls: ['https://a.example/${quality.id}.flv'], qualityUnconfirmed: true);
+}
+
+/// A platform whose detail and play URLs take a second each (G03.1).
+class _SlowSteps extends FakeSite {
+  new(super.room);
+
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId}) async {
+    await Future<void>.delayed(const Duration(seconds: 1));
+    return await super.getRoomDetail(roomId: roomId);
+  }
+
+  @override
+  Future<List<String>> getPlayUrls({required LiveRoom detail, required LivePlayQuality quality}) async {
+    await Future<void>.delayed(const Duration(seconds: 1));
+    return await super.getPlayUrls(detail: detail, quality: quality);
+  }
 }

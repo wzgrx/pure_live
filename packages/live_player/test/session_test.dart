@@ -816,4 +816,150 @@ void main() {
       });
     });
   });
+
+  group('G03.1 timing', () {
+    test('timing: one line per open, each mark once', () {
+      fakeAsync((async) {
+        const second = Duration(seconds: 1);
+        final timings = <PlaybackTiming>[];
+        engine = FakeEngine();
+        final creating = Completer<PlayerEngine>();
+        session = PlaybackSession(engine: () => creating.future, opener: MediaOpener());
+        final loading = Completer<void>();
+        engine.onOpen = (_) => loading.future;
+
+        // The room: T0, then its detail, qualities and URLs a second apart.
+        final startup = StartupMarks();
+        async.elapse(second);
+        startup.markDetail();
+        async.elapse(second);
+        startup
+          ..markQualities()
+          ..markQualities();
+        async.elapse(second);
+        startup.markUrls();
+        unawaited(
+          session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]), startup: startup, onTiming: timings.add)),
+        );
+        async.elapse(second);
+        creating.complete(engine);
+        async
+          ..flushMicrotasks()
+          ..elapse(second);
+        loading.complete();
+        async
+          ..flushMicrotasks()
+          ..elapse(second);
+        engine
+          ..emit(const EngineVideoSize(1920, 1080))
+          ..emit(const EngineVideoSize(1280, 720));
+        async.elapse(second);
+        expect(timings, isEmpty);
+        engine.playing();
+        expect(session.state.status, PlaybackStatus.playing);
+
+        final timing = timings.single;
+        expect(
+          timing.line(room: 'abc123'),
+          [
+            'playback-timing site=douyu room=abc123 route=direct engine=new result=playing',
+            'detail=1000 qualities=1000 urls=1000 engineReady=1000 input=0 load=1000 firstFrame=1000 playing=1000',
+            'total=7000',
+          ].join(' '),
+        );
+        for (final name in PlaybackTiming.segmentNames) {
+          expect(timing.segment(name), isNotNull, reason: name);
+          expect(timing.segment(name)!.isNegative, isFalse, reason: name);
+        }
+
+        // Later events and recoveries of the same open report nothing more.
+        engine
+          ..onOpen = null
+          ..emit(const EngineVideoSize(640, 360))
+          ..emit(const EngineError(_network));
+        async.flushMicrotasks();
+        engine.playing();
+        async.elapse(const Duration(seconds: 5));
+        expect(timings, hasLength(1));
+      });
+    });
+
+    test('timing: an open without a room times from the session open', () {
+      fakeAsync((async) {
+        final timings = <PlaybackTiming>[];
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a]), onTiming: timings.add), async);
+        expect(session.state.status, PlaybackStatus.playing);
+        // No video size: that step counts in the next one.
+        expect(
+          timings.single.line(),
+          'playback-timing site=douyu room=- route=direct engine=new result=playing '
+          'detail=- qualities=- urls=- engineReady=0 input=0 load=0 firstFrame=- playing=0 total=0',
+        );
+      });
+    });
+
+    test('timing: a superseded open writes nothing', () {
+      fakeAsync((async) {
+        final timings = <PlaybackTiming>[];
+        engine = FakeEngine()..onOpen = (_) => Completer<void>().future;
+        session = PlaybackSession(engine: () async => engine, opener: MediaOpener());
+        unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]), onTiming: timings.add)));
+        async.elapse(const Duration(seconds: 1));
+        expect(engine.opens, hasLength(1));
+
+        engine.onOpen = null;
+        unawaited(session.open(PlaybackRequest(site: 'huya', plan: _plan([_b]), onTiming: timings.add)));
+        async.flushMicrotasks();
+        expect(session.state.status, PlaybackStatus.playing);
+        expect(timings.map((timing) => timing.site), ['huya']);
+
+        // A stop while opening, and a line switch, drop the open's timing too.
+        engine.onOpen = (_) => Completer<void>().future;
+        unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b]), onTiming: timings.add)));
+        async.flushMicrotasks();
+        unawaited(session.selectLine(1));
+        async.flushMicrotasks();
+        unawaited(session.stop());
+        async.elapse(const Duration(seconds: 30));
+        expect(timings, hasLength(1));
+      });
+    });
+
+    test('timing: a reused engine says reused', () {
+      fakeAsync((async) {
+        final timings = <PlaybackTiming>[];
+        start(PlaybackRequest(site: 'douyu', plan: _plan([_a]), onTiming: timings.add), async);
+        unawaited(session.stop());
+        async.elapse(const Duration(seconds: 10));
+        expect(engine.disposed, isFalse);
+        unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_b]), onTiming: timings.add)));
+        async.flushMicrotasks();
+        expect(timings.map((timing) => timing.engineReused), [false, true]);
+        expect(timings.last.line(), contains(' engine=reused '));
+      });
+    });
+
+    test('timing: an error reports its code', () {
+      fakeAsync((async) {
+        final timings = <PlaybackTiming>[];
+        start(PlaybackRequest(site: 'douyu', plan: _plan(const []), onTiming: timings.add), async);
+        expect(session.state.status, PlaybackStatus.error);
+        expect(
+          timings.single.line(),
+          'playback-timing site=douyu room=- route=- engine=- result=error:no_source '
+          'detail=- qualities=- urls=- engineReady=- input=- load=- firstFrame=- playing=- total=0',
+        );
+
+        // A source that never opens: the deadline's code, after the walk.
+        engine = FakeEngine()..onOpen = (_) => Completer<void>().future;
+        session = PlaybackSession(engine: () async => engine, opener: MediaOpener());
+        unawaited(session.open(PlaybackRequest(site: 'douyu', plan: _plan([_a]), onTiming: timings.add)));
+        async.elapse(const Duration(minutes: 2));
+        expect(session.state.status, PlaybackStatus.error);
+        expect(timings, hasLength(2));
+        expect(timings.last.error, 'source_open_timeout');
+        expect(timings.last.line(), contains('route=direct engine=new result=error:source_open_timeout'));
+      });
+    });
+  });
 }

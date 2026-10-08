@@ -303,7 +303,8 @@ final class PlatformPatrol {
     SearchKind.liveOnly ||
     SearchKind.channelLookup => target.keyword.isEmpty ? null : target.keyword,
     SearchKind.recommendFilter => _recommended.where((room) => room.hasNick).firstOrNull?.nick,
-    SearchKind.roomLookup => _recommended.firstOrNull?.roomId,
+    // Without a directory (Xiaohongshu) the fixed room is the only id known.
+    SearchKind.roomLookup => _recommended.firstOrNull?.roomId ?? target.fixedRooms.firstOrNull?.roomId,
   };
 
   Future<String> _searchRooms() async {

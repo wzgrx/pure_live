@@ -124,6 +124,31 @@ void main() {
     expect(site.keywords, ['1']);
   });
 
+  test('P4 of a room-lookup platform without recommendations looks up its first fixed room (E02.14)', () async {
+    final site = _healthy()
+      ..details['100'] = room('100', status: LiveStatus.offline)
+      ..rooms = [room('100', status: LiveStatus.offline)];
+    const target = PatrolTarget(
+      site: 'xiaohongshu',
+      name: '小红书',
+      search: SearchKind.roomLookup,
+      fixedRooms: [FixedRoom('100', note: '已结束')],
+      unsupported: {CheckId.p1: '没有公开目录', CheckId.p2: '没有分区', CheckId.p3: '没有分区'},
+    );
+    final run = await patrolOf(site, target).run();
+    expect(resultOf(run, CheckId.p1).outcome, Outcome.unsupported);
+    expect(site.keywords, ['100']);
+    expect(resultOf(run, CheckId.p4).outcome, Outcome.ok);
+    expect(resultOf(run, CheckId.p6).outcome, Outcome.notRun, reason: 'no live room reachable anonymously');
+  });
+
+  test("Xiaohongshu's object row: no public directory (P1), lookups by its ended room (E02.14)", () {
+    final row = patrolTargets.singleWhere((target) => target.site == SiteIds.xiaohongshu);
+    expect(row.unsupported.keys, containsAll([CheckId.p1, CheckId.p2, CheckId.p3]));
+    expect(row.search, SearchKind.roomLookup);
+    expect(row.fixedRooms, isNotEmpty);
+  });
+
   test('P5 is unsupported without streamer search, and listed reasons win', () async {
     const target = PatrolTarget(site: 'x', name: 'x', keyword: 'k', unsupported: {CheckId.p2: '没有分区'});
     final run = await patrolOf(_healthy(), target).run();

@@ -1,0 +1,385 @@
+flv site=bilibili room=583846 run=0 ttfb=309 keyframe=359 audio=359 keyframeBytes=79833 streamBy500=34 streamBy1000=700 streamBy2000=1634
+ffmpeg site=bilibili room=583846 run=0 set=A probe=1713 firstFrame=1777 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=0 set=B probe=284 firstFrame=344 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=0 set=C probe=695 firstFrame=757 video=yes audio=yes
+flv site=bilibili room=7a1cd9 run=0 ttfb=480 keyframe=527 audio=527 keyframeBytes=75985 streamBy500=0 streamBy1000=1900 streamBy2000=2600
+ffmpeg site=bilibili room=7a1cd9 run=0 set=A probe=1122 firstFrame=1155 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=0 set=B probe=400 firstFrame=865 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=0 set=C probe=401 firstFrame=434 video=yes audio=yes
+flv site=bilibili room=f5be51 run=0 ttfb=559 keyframe=611 audio=611 keyframeBytes=45966 streamBy500=0 streamBy1000=1700 streamBy2000=2700
+ffmpeg site=bilibili room=f5be51 run=0 set=A probe=509 firstFrame=606 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=0 set=B probe=296 firstFrame=385 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=0 set=C probe=850 firstFrame=942 video=yes audio=yes
+flv site=bilibili room=9c2a29 run=0 ttfb=562 keyframe=709 audio=709 keyframeBytes=273099 streamBy500=0 streamBy1000=1983 streamBy2000=3467
+ffmpeg site=bilibili room=9c2a29 run=0 set=A probe=391 firstFrame=485 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=0 set=B probe=864 firstFrame=962 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=0 set=C probe=393 firstFrame=485 video=yes audio=yes
+flv site=bilibili room=97a84c run=0 ttfb=94 keyframe=150 audio=150 keyframeBytes=122783 streamBy500=967 streamBy1000=1533 streamBy2000=2583
+ffmpeg site=bilibili room=97a84c run=0 set=A probe=290 firstFrame=376 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=0 set=B probe=330 firstFrame=419 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=0 set=C probe=277 firstFrame=367 video=yes audio=yes
+flv site=douyu room=9f1c10 run=0 result=failed
+ffmpeg site=douyu room=9f1c10 run=0 set=A probe=182 firstFrame=267 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=0 set=B probe=198 firstFrame=296 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=0 set=C probe=174 firstFrame=252 video=yes audio=yes
+flv site=douyu room=a0ee0e run=0 ttfb=182 keyframe=332 audio=332 keyframeBytes=379036 streamBy500=5900 streamBy1000=6366 streamBy2000=7366
+ffmpeg site=douyu room=a0ee0e run=0 set=A probe=232 firstFrame=341 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=0 set=B probe=196 firstFrame=299 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=0 set=C probe=245 firstFrame=345 video=yes audio=yes
+flv site=douyu room=8b7a1e run=0 ttfb=133 keyframe=278 audio=278 keyframeBytes=323088 streamBy500=6366 streamBy1000=6866 streamBy2000=7900
+ffmpeg site=douyu room=8b7a1e run=0 set=A probe=204 firstFrame=282 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=0 set=B probe=210 firstFrame=285 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=0 set=C probe=215 firstFrame=297 video=yes audio=yes
+flv site=huya room=e12d61 run=0 ttfb=296 keyframe=346 audio=346 keyframeBytes=72366 streamBy500=1456 streamBy1000=7700 streamBy2000=8700
+ffmpeg site=huya room=e12d61 run=0 set=A probe=566 firstFrame=730 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=0 set=B probe=556 firstFrame=702 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=0 set=C probe=553 firstFrame=721 video=yes audio=yes
+flv site=huya room=5c6984 run=0 ttfb=411 keyframe=471 audio=471 keyframeBytes=138762 streamBy500=250 streamBy1000=7034 streamBy2000=8167
+ffmpeg site=huya room=5c6984 run=0 set=A probe=546 firstFrame=647 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=0 set=B probe=532 firstFrame=640 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=0 set=C probe=493 firstFrame=593 video=yes audio=yes
+flv site=huya room=7957e5 run=0 ttfb=298 keyframe=424 audio=424 keyframeBytes=210347 streamBy500=367 streamBy1000=6773 streamBy2000=7724
+ffmpeg site=huya room=7957e5 run=0 set=A probe=902 firstFrame=1046 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=0 set=B probe=472 firstFrame=655 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=0 set=C probe=463 firstFrame=620 video=yes audio=yes
+flv site=douyin room=165c50 run=0 ttfb=224 keyframe=282 audio=284 keyframeBytes=86634 streamBy500=3600 streamBy1000=4160 streamBy2000=5120
+ffmpeg site=douyin room=165c50 run=0 set=A probe=325 firstFrame=376 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=0 set=B probe=342 firstFrame=395 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=0 set=C probe=248 firstFrame=300 video=yes audio=yes
+flv site=douyin room=0eac78 run=0 ttfb=146 keyframe=185 audio=190 keyframeBytes=78436 streamBy500=4092 streamBy1000=4455 streamBy2000=5592
+ffmpeg site=douyin room=0eac78 run=0 set=A probe=274 firstFrame=426 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=0 set=B probe=246 firstFrame=347 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=0 set=C probe=239 firstFrame=335 video=yes audio=yes
+flv site=douyin room=e03766 run=0 ttfb=130 keyframe=187 audio=193 keyframeBytes=113107 streamBy500=3274 streamBy1000=3684 streamBy2000=4729
+ffmpeg site=douyin room=e03766 run=0 set=A probe=281 firstFrame=329 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=0 set=B probe=188 firstFrame=232 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=0 set=C probe=192 firstFrame=236 video=yes audio=yes
+flv site=kuaishou room=9c7bad run=0 ttfb=409 keyframe=488 audio=490 keyframeBytes=104668 streamBy500=1566 streamBy1000=6733 streamBy2000=7866
+ffmpeg site=kuaishou room=9c7bad run=0 set=A probe=739 firstFrame=791 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=0 set=B probe=341 firstFrame=401 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=0 set=C probe=338 firstFrame=392 video=yes audio=yes
+flv site=kuaishou room=843bb6 run=0 ttfb=2086 keyframe=2580 audio=2667 keyframeBytes=189002 streamBy500=0 streamBy1000=0 streamBy2000=0
+ffmpeg site=kuaishou room=843bb6 run=0 set=A probe=731 firstFrame=842 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=0 set=B probe=699 firstFrame=830 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=0 set=C probe=565 firstFrame=677 video=yes audio=yes
+flv site=kuaishou room=d7e789 run=0 ttfb=1060 keyframe=1064 audio=1094 keyframeBytes=54922 streamBy500=0 streamBy1000=0 streamBy2000=1466
+ffmpeg site=kuaishou room=d7e789 run=0 set=A probe=330 firstFrame=425 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=0 set=B probe=294 firstFrame=393 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=0 set=C probe=280 firstFrame=380 video=yes audio=yes
+flv site=bilibili room=583846 run=1 ttfb=274 keyframe=322 audio=322 keyframeBytes=78090 streamBy500=1434 streamBy1000=1767 streamBy2000=2800
+ffmpeg site=bilibili room=583846 run=1 set=A probe=338 firstFrame=450 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=1 set=B probe=359 firstFrame=466 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=1 set=C probe=847 firstFrame=935 video=yes audio=yes
+flv site=bilibili room=7a1cd9 run=1 ttfb=250 keyframe=301 audio=301 keyframeBytes=71439 streamBy500=1300 streamBy1000=1900 streamBy2000=3100
+ffmpeg site=bilibili room=7a1cd9 run=1 set=A probe=774 firstFrame=822 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=1 set=B probe=1094 firstFrame=1143 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=1 set=C probe=499 firstFrame=572 video=yes audio=yes
+flv site=bilibili room=f5be51 run=1 ttfb=602 keyframe=740 audio=740 keyframeBytes=56709 streamBy500=0 streamBy1000=733 streamBy2000=2533
+ffmpeg site=bilibili room=f5be51 run=1 set=A probe=302 firstFrame=422 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=1 set=B probe=306 firstFrame=459 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=1 set=C probe=862 firstFrame=1027 video=yes audio=yes
+flv site=bilibili room=9c2a29 run=1 ttfb=491 keyframe=629 audio=629 keyframeBytes=292406 streamBy500=0 streamBy1000=2167 streamBy2000=3400
+ffmpeg site=bilibili room=9c2a29 run=1 set=A probe=925 firstFrame=1365 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=1 set=B probe=412 firstFrame=517 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=1 set=C probe=362 firstFrame=639 video=yes audio=yes
+flv site=bilibili room=97a84c run=1 ttfb=282 keyframe=325 audio=329 keyframeBytes=74303 streamBy500=967 streamBy1000=2333 streamBy2000=3367
+ffmpeg site=bilibili room=97a84c run=1 set=A probe=1042 firstFrame=1130 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=1 set=B probe=312 firstFrame=404 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=1 set=C probe=294 firstFrame=381 video=yes audio=yes
+flv site=douyu room=9f1c10 run=1 result=failed
+ffmpeg site=douyu room=9f1c10 run=1 set=A probe=265 firstFrame=352 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=1 set=B probe=202 firstFrame=298 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=1 set=C probe=213 firstFrame=302 video=yes audio=yes
+flv site=douyu room=a0ee0e run=1 result=failed
+ffmpeg site=douyu room=a0ee0e run=1 set=A result=failed
+ffmpeg site=douyu room=a0ee0e run=1 set=B probe=210 firstFrame=315 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=1 set=C probe=228 firstFrame=335 video=yes audio=yes
+flv site=douyu room=8b7a1e run=1 result=failed
+ffmpeg site=douyu room=8b7a1e run=1 set=A result=failed
+ffmpeg site=douyu room=8b7a1e run=1 set=B probe=245 firstFrame=315 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=1 set=C probe=218 firstFrame=294 video=yes audio=yes
+flv site=huya room=e12d61 run=1 ttfb=297 keyframe=298 audio=298 keyframeBytes=13081 streamBy500=1467 streamBy1000=7789 streamBy2000=8156
+ffmpeg site=huya room=e12d61 run=1 set=A probe=442 firstFrame=607 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=1 set=B probe=458 firstFrame=608 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=1 set=C probe=520 firstFrame=674 video=yes audio=yes
+flv site=huya room=5c6984 run=1 ttfb=365 keyframe=423 audio=423 keyframeBytes=163038 streamBy500=1150 streamBy1000=6533 streamBy2000=7416
+ffmpeg site=huya room=5c6984 run=1 set=A probe=508 firstFrame=614 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=1 set=B probe=500 firstFrame=589 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=1 set=C probe=504 firstFrame=598 video=yes audio=yes
+flv site=huya room=7957e5 run=1 ttfb=281 keyframe=390 audio=390 keyframeBytes=230662 streamBy500=2286 streamBy1000=6824 streamBy2000=7792
+ffmpeg site=huya room=7957e5 run=1 set=A probe=475 firstFrame=611 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=1 set=B probe=473 firstFrame=626 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=1 set=C probe=435 firstFrame=571 video=yes audio=yes
+flv site=douyin room=165c50 run=1 ttfb=184 keyframe=252 audio=257 keyframeBytes=121960 streamBy500=4560 streamBy1000=4960 streamBy2000=6000
+ffmpeg site=douyin room=165c50 run=1 set=A probe=371 firstFrame=421 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=1 set=B probe=312 firstFrame=362 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=1 set=C probe=286 firstFrame=337 video=yes audio=yes
+flv site=douyin room=0eac78 run=1 ttfb=105 keyframe=151 audio=154 keyframeBytes=106289 streamBy500=3181 streamBy1000=3591 streamBy2000=4681
+ffmpeg site=douyin room=0eac78 run=1 set=A probe=297 firstFrame=393 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=1 set=B probe=205 firstFrame=293 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=1 set=C probe=181 firstFrame=277 video=yes audio=yes
+flv site=douyin room=e03766 run=1 ttfb=126 keyframe=191 audio=196 keyframeBytes=138722 streamBy500=4364 streamBy1000=4909 streamBy2000=5909
+ffmpeg site=douyin room=e03766 run=1 set=A probe=253 firstFrame=301 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=1 set=B probe=228 firstFrame=274 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=1 set=C probe=215 firstFrame=263 video=yes audio=yes
+flv site=kuaishou room=9c7bad run=1 ttfb=407 keyframe=499 audio=499 keyframeBytes=104667 streamBy500=1033 streamBy1000=7500 streamBy2000=8466
+ffmpeg site=kuaishou room=9c7bad run=1 set=A probe=853 firstFrame=998 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=1 set=B probe=250 firstFrame=462 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=1 set=C probe=268 firstFrame=455 video=yes audio=yes
+flv site=kuaishou room=843bb6 run=1 ttfb=459 keyframe=857 audio=857 keyframeBytes=157365 streamBy500=0 streamBy1000=267 streamBy2000=4267
+ffmpeg site=kuaishou room=843bb6 run=1 set=A probe=854 firstFrame=1006 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=1 set=B probe=653 firstFrame=793 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=1 set=C probe=553 firstFrame=652 video=yes audio=yes
+flv site=kuaishou room=d7e789 run=1 ttfb=141 keyframe=146 audio=146 keyframeBytes=30232 streamBy500=7534 streamBy1000=7900 streamBy2000=8900
+ffmpeg site=kuaishou room=d7e789 run=1 set=A probe=254 firstFrame=371 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=1 set=B probe=259 firstFrame=388 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=1 set=C probe=195 firstFrame=289 video=yes audio=yes
+flv site=bilibili room=583846 run=2 ttfb=244 keyframe=297 audio=298 keyframeBytes=81521 streamBy500=2100 streamBy1000=2800 streamBy2000=3634
+ffmpeg site=bilibili room=583846 run=2 set=A probe=1836 firstFrame=1954 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=2 set=B probe=1501 firstFrame=1617 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=2 set=C probe=1156 firstFrame=1243 video=yes audio=yes
+flv site=bilibili room=7a1cd9 run=2 ttfb=501 keyframe=538 audio=538 keyframeBytes=72663 streamBy500=0 streamBy1000=1900 streamBy2000=2700
+ffmpeg site=bilibili room=7a1cd9 run=2 set=A probe=1200 firstFrame=1253 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=2 set=B probe=740 firstFrame=1010 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=2 set=C probe=458 firstFrame=505 video=yes audio=yes
+flv site=bilibili room=f5be51 run=2 ttfb=493 keyframe=546 audio=546 keyframeBytes=42122 streamBy500=0 streamBy1000=1967 streamBy2000=8567
+ffmpeg site=bilibili room=f5be51 run=2 set=A probe=358 firstFrame=519 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=2 set=B probe=334 firstFrame=440 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=2 set=C probe=862 firstFrame=1067 video=yes audio=yes
+flv site=bilibili room=9c2a29 run=2 ttfb=496 keyframe=600 audio=610 keyframeBytes=130234 streamBy500=0 streamBy1000=767 streamBy2000=1800
+ffmpeg site=bilibili room=9c2a29 run=2 set=A probe=867 firstFrame=988 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=2 set=B probe=399 firstFrame=502 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=2 set=C probe=399 firstFrame=514 video=yes audio=yes
+flv site=bilibili room=97a84c run=2 ttfb=652 keyframe=686 audio=691 keyframeBytes=67369 streamBy500=0 streamBy1000=1550 streamBy2000=3033
+ffmpeg site=bilibili room=97a84c run=2 set=A probe=514 firstFrame=621 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=2 set=B probe=846 firstFrame=996 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=2 set=C probe=469 firstFrame=570 video=yes audio=yes
+flv site=douyu room=9f1c10 run=2 result=failed
+ffmpeg site=douyu room=9f1c10 run=2 set=A probe=180 firstFrame=310 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=2 set=B probe=173 firstFrame=335 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=2 set=C probe=156 firstFrame=304 video=yes audio=yes
+flv site=douyu room=a0ee0e run=2 result=failed
+ffmpeg site=douyu room=a0ee0e run=2 set=A result=failed
+ffmpeg site=douyu room=a0ee0e run=2 set=B probe=235 firstFrame=341 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=2 set=C probe=207 firstFrame=318 video=yes audio=yes
+flv site=douyu room=8b7a1e run=2 result=failed
+ffmpeg site=douyu room=8b7a1e run=2 set=A probe=294 firstFrame=373 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=2 set=B probe=235 firstFrame=313 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=2 set=C probe=231 firstFrame=302 video=yes audio=yes
+flv site=huya room=e12d61 run=2 ttfb=300 keyframe=358 audio=358 keyframeBytes=136786 streamBy500=5534 streamBy1000=6923 streamBy2000=7889
+ffmpeg site=huya room=e12d61 run=2 set=A probe=409 firstFrame=591 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=2 set=B probe=427 firstFrame=616 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=2 set=C probe=372 firstFrame=555 video=yes audio=yes
+flv site=huya room=5c6984 run=2 ttfb=302 keyframe=362 audio=362 keyframeBytes=150518 streamBy500=1766 streamBy1000=6966 streamBy2000=8083
+ffmpeg site=huya room=5c6984 run=2 set=A probe=475 firstFrame=606 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=2 set=B probe=496 firstFrame=693 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=2 set=C probe=1167 firstFrame=1347 video=yes audio=yes
+flv site=huya room=7957e5 run=2 ttfb=323 keyframe=404 audio=404 keyframeBytes=246717 streamBy500=4004 streamBy1000=6724 streamBy2000=7708
+ffmpeg site=huya room=7957e5 run=2 set=A probe=530 firstFrame=735 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=2 set=B probe=533 firstFrame=712 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=2 set=C probe=501 firstFrame=702 video=yes audio=yes
+flv site=douyin room=165c50 run=2 ttfb=185 keyframe=197 audio=251 keyframeBytes=58122 streamBy500=3560 streamBy1000=4160 streamBy2000=5040
+ffmpeg site=douyin room=165c50 run=2 set=A probe=333 firstFrame=448 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=2 set=B probe=288 firstFrame=473 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=2 set=C probe=275 firstFrame=359 video=yes audio=yes
+flv site=douyin room=0eac78 run=2 ttfb=130 keyframe=196 audio=228 keyframeBytes=167558 streamBy500=3000 streamBy1000=3365 streamBy2000=4455
+ffmpeg site=douyin room=0eac78 run=2 set=A probe=333 firstFrame=721 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=2 set=B probe=345 firstFrame=645 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=2 set=C probe=294 firstFrame=547 video=yes audio=yes
+flv site=douyin room=e03766 run=2 ttfb=141 keyframe=192 audio=194 keyframeBytes=78072 streamBy500=4318 streamBy1000=4908 streamBy2000=5908
+ffmpeg site=douyin room=e03766 run=2 set=A probe=331 firstFrame=510 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=2 set=B probe=285 firstFrame=465 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=2 set=C probe=272 firstFrame=499 video=yes audio=yes
+flv site=kuaishou room=9c7bad run=2 ttfb=371 keyframe=433 audio=433 keyframeBytes=113932 streamBy500=8066 streamBy1000=8566 streamBy2000=9400
+ffmpeg site=kuaishou room=9c7bad run=2 set=A probe=311 firstFrame=452 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=2 set=B probe=326 firstFrame=531 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=2 set=C probe=283 firstFrame=404 video=yes audio=yes
+flv site=kuaishou room=843bb6 run=2 ttfb=487 keyframe=872 audio=872 keyframeBytes=154939 streamBy500=0 streamBy1000=300 streamBy2000=3967
+ffmpeg site=kuaishou room=843bb6 run=2 set=A probe=724 firstFrame=1052 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=2 set=B probe=719 firstFrame=1066 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=2 set=C probe=487 firstFrame=771 video=yes audio=yes
+flv site=kuaishou room=d7e789 run=2 ttfb=396 keyframe=433 audio=433 keyframeBytes=63263 streamBy500=1366 streamBy1000=7800 streamBy2000=8733
+ffmpeg site=kuaishou room=d7e789 run=2 set=A probe=291 firstFrame=603 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=2 set=B probe=774 firstFrame=1062 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=2 set=C probe=261 firstFrame=457 video=yes audio=yes
+flv site=bilibili room=583846 run=3 ttfb=232 keyframe=286 audio=286 keyframeBytes=117533 streamBy500=2034 streamBy1000=2534 streamBy2000=3100
+ffmpeg site=bilibili room=583846 run=3 set=A probe=1499 firstFrame=1679 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=3 set=B probe=409 firstFrame=546 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=3 set=C probe=589 firstFrame=715 video=yes audio=yes
+flv site=bilibili room=7a1cd9 run=3 ttfb=387 keyframe=441 audio=441 keyframeBytes=79102 streamBy500=1600 streamBy1000=1900 streamBy2000=2800
+ffmpeg site=bilibili room=7a1cd9 run=3 set=A probe=675 firstFrame=742 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=3 set=B probe=1256 firstFrame=1466 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=3 set=C probe=1099 firstFrame=1614 video=yes audio=yes
+flv site=bilibili room=f5be51 run=3 ttfb=525 keyframe=596 audio=596 keyframeBytes=59879 streamBy500=0 streamBy1000=1367 streamBy2000=2400
+ffmpeg site=bilibili room=f5be51 run=3 set=A probe=2922 firstFrame=3185 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=3 set=B probe=337 firstFrame=692 video=yes audio=yes
+ffmpeg site=bilibili room=f5be51 run=3 set=C probe=502 firstFrame=752 video=yes audio=yes
+flv site=bilibili room=9c2a29 run=3 ttfb=498 keyframe=606 audio=606 keyframeBytes=143292 streamBy500=0 streamBy1000=833 streamBy2000=1767
+ffmpeg site=bilibili room=9c2a29 run=3 set=A probe=899 firstFrame=1084 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=3 set=B probe=472 firstFrame=665 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=3 set=C probe=497 firstFrame=755 video=yes audio=yes
+flv site=bilibili room=97a84c run=3 ttfb=236 keyframe=278 audio=278 keyframeBytes=69247 streamBy500=1217 streamBy1000=2267 streamBy2000=3367
+ffmpeg site=bilibili room=97a84c run=3 set=A probe=443 firstFrame=623 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=3 set=B probe=548 firstFrame=738 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=3 set=C probe=496 firstFrame=727 video=yes audio=yes
+flv site=douyu room=9f1c10 run=3 result=failed
+ffmpeg site=douyu room=9f1c10 run=3 set=A probe=286 firstFrame=500 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=3 set=B probe=224 firstFrame=667 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=3 set=C probe=228 firstFrame=484 video=yes audio=yes
+flv site=douyu room=a0ee0e run=3 result=failed
+ffmpeg site=douyu room=a0ee0e run=3 set=A probe=192 firstFrame=349 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=3 set=B probe=219 firstFrame=429 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=3 set=C probe=208 firstFrame=471 video=yes audio=yes
+flv site=douyu room=8b7a1e run=3 result=failed
+ffmpeg site=douyu room=8b7a1e run=3 set=A probe=378 firstFrame=579 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=3 set=B probe=270 firstFrame=403 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=3 set=C probe=918 firstFrame=1027 video=yes audio=yes
+flv site=huya room=e12d61 run=3 ttfb=418 keyframe=502 audio=502 keyframeBytes=171877 streamBy500=0 streamBy1000=7866 streamBy2000=8855
+ffmpeg site=huya room=e12d61 run=3 set=A probe=611 firstFrame=1082 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=3 set=B probe=557 firstFrame=1057 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=3 set=C probe=532 firstFrame=1186 video=yes audio=yes
+flv site=huya room=5c6984 run=3 ttfb=449 keyframe=515 audio=515 keyframeBytes=160665 streamBy500=0 streamBy1000=8016 streamBy2000=9133
+ffmpeg site=huya room=5c6984 run=3 set=A probe=530 firstFrame=716 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=3 set=B probe=494 firstFrame=771 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=3 set=C probe=650 firstFrame=957 video=yes audio=yes
+flv site=huya room=7957e5 run=3 ttfb=298 keyframe=398 audio=398 keyframeBytes=212543 streamBy500=1886 streamBy1000=7374 streamBy2000=8292
+ffmpeg site=huya room=7957e5 run=3 set=A probe=501 firstFrame=1206 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=3 set=B probe=598 firstFrame=982 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=3 set=C probe=1165 firstFrame=2191 video=yes audio=yes
+flv site=douyin room=165c50 run=3 ttfb=306 keyframe=307 audio=307 keyframeBytes=64750 streamBy500=3560 streamBy1000=4000 streamBy2000=5000
+ffmpeg site=douyin room=165c50 run=3 set=A probe=369 firstFrame=560 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=3 set=B probe=372 firstFrame=586 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=3 set=C probe=275 firstFrame=388 video=yes audio=yes
+flv site=douyin room=0eac78 run=3 ttfb=127 keyframe=132 audio=176 keyframeBytes=44557 streamBy500=4636 streamBy1000=5046 streamBy2000=6136
+ffmpeg site=douyin room=0eac78 run=3 set=A probe=263 firstFrame=697 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=3 set=B probe=267 firstFrame=490 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=3 set=C probe=218 firstFrame=378 video=yes audio=yes
+flv site=douyin room=e03766 run=3 ttfb=140 keyframe=141 audio=141 keyframeBytes=17985 streamBy500=3091 streamBy1000=3501 streamBy2000=4455
+ffmpeg site=douyin room=e03766 run=3 set=A probe=334 firstFrame=468 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=3 set=B probe=313 firstFrame=456 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=3 set=C probe=247 firstFrame=345 video=yes audio=yes
+flv site=kuaishou room=9c7bad run=3 ttfb=370 keyframe=446 audio=446 keyframeBytes=113932 streamBy500=7566 streamBy1000=8166 streamBy2000=9200
+ffmpeg site=kuaishou room=9c7bad run=3 set=A probe=245 firstFrame=368 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=3 set=B probe=318 firstFrame=437 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=3 set=C probe=273 firstFrame=386 video=yes audio=yes
+flv site=kuaishou room=843bb6 run=3 ttfb=543 keyframe=986 audio=986 keyframeBytes=157155 streamBy500=0 streamBy1000=0 streamBy2000=2000
+ffmpeg site=kuaishou room=843bb6 run=3 set=A probe=791 firstFrame=977 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=3 set=B probe=725 firstFrame=887 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=3 set=C probe=493 firstFrame=671 video=yes audio=yes
+flv site=kuaishou room=d7e789 run=3 ttfb=381 keyframe=435 audio=436 keyframeBytes=63331 streamBy500=2366 streamBy1000=7125 streamBy2000=8358
+ffmpeg site=kuaishou room=d7e789 run=3 set=A probe=276 firstFrame=369 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=3 set=B probe=322 firstFrame=482 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=3 set=C probe=270 firstFrame=359 video=yes audio=yes
+flv site=bilibili room=583846 run=4 ttfb=285 keyframe=326 audio=326 keyframeBytes=79870 streamBy500=634 streamBy1000=967 streamBy2000=2000
+ffmpeg site=bilibili room=583846 run=4 set=A probe=1057 firstFrame=1146 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=4 set=B probe=422 firstFrame=589 video=yes audio=yes
+ffmpeg site=bilibili room=583846 run=4 set=C probe=641 firstFrame=708 video=yes audio=yes
+flv site=bilibili room=7a1cd9 run=4 ttfb=866 keyframe=902 audio=902 keyframeBytes=75244 streamBy500=0 streamBy1000=1900 streamBy2000=2600
+ffmpeg site=bilibili room=7a1cd9 run=4 set=A probe=809 firstFrame=909 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=4 set=B probe=1102 firstFrame=1336 video=yes audio=yes
+ffmpeg site=bilibili room=7a1cd9 run=4 set=C probe=198 firstFrame=348 video=yes audio=yes
+flv site=bilibili room=f5be51 run=4 result=failed
+ffmpeg site=bilibili room=f5be51 run=4 set=A probe=2614 firstFrame=2632 video=yes audio=no
+ffmpeg site=bilibili room=f5be51 run=4 set=B probe=2602 firstFrame=2610 video=yes audio=no
+ffmpeg site=bilibili room=f5be51 run=4 set=C probe=2615 firstFrame=2644 video=yes audio=no
+flv site=bilibili room=9c2a29 run=4 ttfb=526 keyframe=662 audio=666 keyframeBytes=188138 streamBy500=0 streamBy1000=1033 streamBy2000=2350
+ffmpeg site=bilibili room=9c2a29 run=4 set=A probe=1427 firstFrame=1556 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=4 set=B probe=907 firstFrame=1226 video=yes audio=yes
+ffmpeg site=bilibili room=9c2a29 run=4 set=C probe=382 firstFrame=506 video=yes audio=yes
+flv site=bilibili room=97a84c run=4 ttfb=114 keyframe=146 audio=146 keyframeBytes=53892 streamBy500=1100 streamBy1000=1767 streamBy2000=2650
+ffmpeg site=bilibili room=97a84c run=4 set=A probe=548 firstFrame=720 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=4 set=B probe=299 firstFrame=498 video=yes audio=yes
+ffmpeg site=bilibili room=97a84c run=4 set=C probe=579 firstFrame=700 video=yes audio=yes
+flv site=douyu room=9f1c10 run=4 result=failed
+ffmpeg site=douyu room=9f1c10 run=4 set=A result=failed
+ffmpeg site=douyu room=9f1c10 run=4 set=B probe=241 firstFrame=392 video=yes audio=yes
+ffmpeg site=douyu room=9f1c10 run=4 set=C probe=225 firstFrame=386 video=yes audio=yes
+flv site=douyu room=a0ee0e run=4 result=failed
+ffmpeg site=douyu room=a0ee0e run=4 set=A result=failed
+ffmpeg site=douyu room=a0ee0e run=4 set=B probe=262 firstFrame=461 video=yes audio=yes
+ffmpeg site=douyu room=a0ee0e run=4 set=C probe=239 firstFrame=462 video=yes audio=yes
+flv site=douyu room=8b7a1e run=4 result=failed
+ffmpeg site=douyu room=8b7a1e run=4 set=A probe=292 firstFrame=389 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=4 set=B probe=245 firstFrame=341 video=yes audio=yes
+ffmpeg site=douyu room=8b7a1e run=4 set=C probe=271 firstFrame=364 video=yes audio=yes
+flv site=huya room=e12d61 run=4 result=failed
+ffmpeg site=huya room=e12d61 run=4 set=A result=failed
+ffmpeg site=huya room=e12d61 run=4 set=B probe=634 firstFrame=847 video=yes audio=yes
+ffmpeg site=huya room=e12d61 run=4 set=C result=failed
+flv site=huya room=5c6984 run=4 result=failed
+ffmpeg site=huya room=5c6984 run=4 set=A result=failed
+ffmpeg site=huya room=5c6984 run=4 set=B probe=439 firstFrame=548 video=yes audio=yes
+ffmpeg site=huya room=5c6984 run=4 set=C result=failed
+flv site=huya room=7957e5 run=4 result=failed
+ffmpeg site=huya room=7957e5 run=4 set=A probe=343 firstFrame=351 video=yes audio=yes
+ffmpeg site=huya room=7957e5 run=4 set=B result=failed
+ffmpeg site=huya room=7957e5 run=4 set=C probe=482 firstFrame=650 video=yes audio=yes
+flv site=douyin room=165c50 run=4 ttfb=197 keyframe=201 audio=203 keyframeBytes=35177 streamBy500=2280 streamBy1000=2880 streamBy2000=3760
+ffmpeg site=douyin room=165c50 run=4 set=A probe=335 firstFrame=400 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=4 set=B probe=343 firstFrame=404 video=yes audio=yes
+ffmpeg site=douyin room=165c50 run=4 set=C probe=317 firstFrame=373 video=yes audio=yes
+flv site=douyin room=0eac78 run=4 ttfb=163 keyframe=192 audio=223 keyframeBytes=159308 streamBy500=4682 streamBy1000=5229 streamBy2000=6137
+ffmpeg site=douyin room=0eac78 run=4 set=A probe=315 firstFrame=422 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=4 set=B probe=258 firstFrame=362 video=yes audio=yes
+ffmpeg site=douyin room=0eac78 run=4 set=C probe=245 firstFrame=340 video=yes audio=yes
+flv site=douyin room=e03766 run=4 ttfb=137 keyframe=194 audio=200 keyframeBytes=114799 streamBy500=4273 streamBy1000=4726 streamBy2000=5863
+ffmpeg site=douyin room=e03766 run=4 set=A probe=270 firstFrame=334 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=4 set=B probe=260 firstFrame=318 video=yes audio=yes
+ffmpeg site=douyin room=e03766 run=4 set=C probe=222 firstFrame=264 video=yes audio=yes
+flv site=kuaishou room=9c7bad run=4 ttfb=491 keyframe=558 audio=558 keyframeBytes=113932 streamBy500=0 streamBy1000=7833 streamBy2000=8866
+ffmpeg site=kuaishou room=9c7bad run=4 set=A probe=220 firstFrame=283 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=4 set=B probe=226 firstFrame=279 video=yes audio=yes
+ffmpeg site=kuaishou room=9c7bad run=4 set=C probe=256 firstFrame=343 video=yes audio=yes
+flv site=kuaishou room=843bb6 run=4 ttfb=551 keyframe=967 audio=968 keyframeBytes=157971 streamBy500=0 streamBy1000=0 streamBy2000=2934
+ffmpeg site=kuaishou room=843bb6 run=4 set=A probe=774 firstFrame=1081 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=4 set=B probe=636 firstFrame=936 video=yes audio=yes
+ffmpeg site=kuaishou room=843bb6 run=4 set=C probe=555 firstFrame=845 video=yes audio=yes
+flv site=kuaishou room=d7e789 run=4 ttfb=386 keyframe=387 audio=411 keyframeBytes=32772 streamBy500=3267 streamBy1000=8434 streamBy2000=9367
+ffmpeg site=kuaishou room=d7e789 run=4 set=A probe=283 firstFrame=1013 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=4 set=B probe=225 firstFrame=1211 video=yes audio=yes
+ffmpeg site=kuaishou room=d7e789 run=4 set=C probe=246 firstFrame=439 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=0 set=A probe=2780 firstFrame=3225 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=0 set=B probe=641 firstFrame=1004 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=0 set=C probe=518 firstFrame=804 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=0 set=A probe=3825 firstFrame=4175 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=0 set=B probe=581 firstFrame=851 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=0 set=C probe=542 firstFrame=751 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=0 set=A probe=2256 firstFrame=2698 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=0 set=B probe=321 firstFrame=702 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=0 set=C probe=452 firstFrame=1000 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=1 set=A probe=535 firstFrame=1032 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=1 set=B probe=1229 firstFrame=1816 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=1 set=C probe=675 firstFrame=1229 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=1 set=A probe=471 firstFrame=831 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=1 set=B probe=472 firstFrame=708 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=1 set=C probe=456 firstFrame=818 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=1 set=A probe=361 firstFrame=854 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=1 set=B probe=342 firstFrame=962 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=1 set=C probe=331 firstFrame=715 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=2 set=A probe=641 firstFrame=1014 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=2 set=B probe=553 firstFrame=812 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=2 set=C probe=521 firstFrame=808 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=2 set=A probe=423 firstFrame=575 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=2 set=B probe=430 firstFrame=568 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=2 set=C probe=375 firstFrame=616 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=2 set=A probe=313 firstFrame=587 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=2 set=B probe=337 firstFrame=634 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=2 set=C probe=316 firstFrame=587 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=3 set=A probe=624 firstFrame=968 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=3 set=B probe=619 firstFrame=968 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=3 set=C probe=517 firstFrame=828 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=3 set=A probe=455 firstFrame=741 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=3 set=B probe=460 firstFrame=715 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=3 set=C probe=567 firstFrame=896 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=3 set=A probe=311 firstFrame=687 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=3 set=B probe=365 firstFrame=816 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=3 set=C probe=941 firstFrame=1259 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=4 set=A probe=622 firstFrame=1124 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=4 set=B probe=556 firstFrame=952 video=yes audio=yes
+ffmpeg site=huya-hevc room=e12d61 run=4 set=C probe=509 firstFrame=898 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=4 set=A probe=522 firstFrame=786 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=4 set=B probe=574 firstFrame=824 video=yes audio=yes
+ffmpeg site=huya-hevc room=5c6984 run=4 set=C probe=468 firstFrame=796 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=4 set=A probe=317 firstFrame=616 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=4 set=B probe=728 firstFrame=1049 video=yes audio=yes
+ffmpeg site=huya-hevc room=7957e5 run=4 set=C probe=485 firstFrame=722 video=yes audio=yes

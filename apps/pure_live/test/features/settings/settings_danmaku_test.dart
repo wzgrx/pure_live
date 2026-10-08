@@ -10,7 +10,9 @@ import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/routes/app_router.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
+import 'package:pure_live/shared/danmaku/pip_danmaku_settings.dart';
 
 import '../../support.dart';
 import 'settings_harness.dart';
@@ -23,7 +25,7 @@ void main() {
   setUpAll(loadStrings);
 
   testWidgets("the overview row opens the room's danmaku settings, the same component", (tester) async {
-    await pumpSettings(tester, height: 4000);
+    await pumpSettings(tester, height: 6000);
     await tapSettings(tester, settingsSection(SettingsSection.danmaku));
     expect(_page(), findsOneWidget);
     expect(find.widgetWithText(AppBar, '弹幕'), findsOneWidget);
@@ -31,9 +33,10 @@ void main() {
     // As in the room's tab: "改动立即生效" right of the first group's title.
     expect(find.byKey(const ValueKey('panel-group-note')), findsOneWidget);
     expect(find.text('改动立即生效'), findsOneWidget);
-    // The room's groups in its order, then "更多".
+    // The room's groups in its order, its chat list and mini window groups
+    // too (A08.6 c2), then "更多".
     expectInOrder(tester, [
-      for (final title in ['观看模板', '显示范围', '样式', '重复弹幕', '画面弹幕交互', '流畅度', '更多']) find.text(title),
+      for (final title in ['观看模板', '显示范围', '样式', '重复弹幕', '画面弹幕交互', '流畅度', '弹幕列表', '小窗弹幕', '更多']) find.text(title),
     ]);
     expect(find.byKey(const ValueKey('danmaku-paused-behavior')), findsOneWidget);
     // The catalogue's rows are not drawn on the page (they are for search).
@@ -74,6 +77,45 @@ void main() {
     expect(h.opened, [RoutePath.kSettingsDanmuShield]);
   });
 
+  testWidgets('A08.6: "弹幕列表样式" and "小窗显示弹幕" are on the page, the same groups as the room\'s', (tester) async {
+    final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+    expect(find.byType(ChatListSettings), findsOneWidget);
+    expect(find.byType(PipDanmakuSettings), findsOneWidget);
+    expect(find.text('弹幕列表样式'), findsOneWidget);
+    expect(find.text('小窗显示弹幕'), findsOneWidget);
+
+    // The list's look and the gift switch are settings of every room.
+    await tapSettings(
+      tester,
+      find.descendant(of: find.byKey(const ValueKey('danmaku-list-style')), matching: find.text('卡片')),
+    );
+    expect(h.settings.get(Settings.danmakuListStyle), 'card');
+    expect(tester.widget<Switch>(_switch('gifts')).value, isTrue);
+    await tapSettings(tester, _switch('gifts'));
+    expect(h.settings.get(Settings.showChatGifts), isFalse);
+    expect(tester.widget<Switch>(_switch('gifts')).value, isFalse);
+
+    // Mini window danmaku: the rest folds away while it is off (3.x).
+    expect(find.byKey(const ValueKey('danmaku-setting-pipFontSize')), findsOneWidget);
+    await tapSettings(tester, _switch('pip'));
+    expect(h.settings.get(Settings.enablePipDanmaku), isFalse);
+    expect(find.byKey(const ValueKey('danmaku-setting-pipFontSize')), findsNothing);
+  });
+
+  testWidgets('A08.6: portrait 393×852 scrolls down to the two groups before "更多"', (tester) async {
+    await pumpSettings(tester, width: 393, height: 852, arguments: 'danmaku');
+    final list = find.descendant(of: find.byType(DanmakuSettingsContent), matching: find.byType(Scrollable)).first;
+    await tester.scrollUntilVisible(find.byKey(const ValueKey('danmaku-settings-more')), 300, scrollable: list);
+    await settleSettings(tester);
+    expect(find.byType(PipDanmakuSettings), findsOneWidget);
+    expect(
+      topOf(tester, find.byType(PipDanmakuSettings)),
+      lessThan(topOf(tester, find.byKey(const ValueKey('danmaku-settings-more')))),
+    );
+    expect(tester.getSize(find.byType(PipDanmakuSettings)).width, lessThanOrEqualTo(393));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('wide: the page opens in the right pane', (tester) async {
     await pumpSettings(tester, width: 1280, height: 800);
     await tapSettings(tester, settingsSection(SettingsSection.danmaku));
@@ -91,6 +133,13 @@ void main() {
 
     await searchSettingsFor(tester, '暂停');
     expect(settingsRow('danmaku_paused'), findsOneWidget);
+
+    // A08.6: the chat list's settings are found under "弹幕 › 弹幕列表".
+    await searchSettingsFor(tester, '礼物');
+    expect(settingsRow('danmaku_show_gifts'), findsOneWidget);
+    expect(find.text('弹幕 › 弹幕列表'), findsOneWidget);
+    await searchSettingsFor(tester, '列表样式');
+    expect(settingsRow('danmaku_list_style'), findsOneWidget);
 
     // The similarity and Douyu filters live on the block page (U.12d).
     await searchSettingsFor(tester, '相似');

@@ -461,6 +461,12 @@ abstract final class Settings {
     allowed: {'compact', 'card'},
   );
 
+  /// Gifts appear as lines in the room's chat list (B-21; A08.6 c3, G1 A).
+  /// New in v4 (3.x had no gift lines); the room kept it in `meta`
+  /// (`live_play.showGifts`) before it was a setting, taken over once when
+  /// the store opens.
+  static const showChatGifts = BoolSetting('showChatGifts', section: 'danmaku', defaultValue: true);
+
   /// New (docs/A-界面设计/A07-直播间界面/A07.10-暂停状态/brief.md c3; 3.x has no such setting): what the
   /// platform's flying danmaku do while the video is paused ("暂停时的弹幕"):
   /// `pause` stands them with the video (the default, as 3.x's main
@@ -1498,6 +1504,7 @@ abstract final class Settings {
     enableDanmakuDisplay,
     enableDanmakuStroke,
     danmakuListStyle,
+    showChatGifts,
     danmakuPausedBehavior,
     danmakuFps,
     danmakuAutoFps,

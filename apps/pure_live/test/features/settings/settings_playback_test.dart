@@ -8,6 +8,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/playback_tiles.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
+import 'package:pure_live/shared/danmaku/pip_danmaku_settings.dart';
 
 import '../../support.dart';
 import 'settings_harness.dart';
@@ -387,52 +388,59 @@ void main() {
     });
   });
 
-  group('floating-window danmaku page (c13, c14)', () {
-    testWidgets('phone: the preview above the rows; groups in order; off greys every row', (tester) async {
+  group("floating-window danmaku page (c13; A08.6 c4: the room's component)", () {
+    Finder pipRow(String key) => find.byKey(ValueKey('danmaku-setting-$key'));
+    String? value(WidgetTester tester, String key) =>
+        tester.widget<Text>(find.byKey(ValueKey('danmaku-value-$key'))).data;
+
+    testWidgets("phone: the preview above the room's mini window group, in its order; off folds the rest", (
+      tester,
+    ) async {
       final h = await pumpSettings(tester, width: 393, height: 2600, arguments: 'pipDanmaku');
       expect(find.byKey(const ValueKey('settings-pip-one-column')), findsOneWidget);
       expect(_text(withoutOrphan('配置系统画中画、桌面小窗和应用内小窗的弹幕样式')), findsOneWidget);
+      // A08.6 c4 (G3 A): the same component as the room's "小窗弹幕" group.
+      expect(find.byType(PipDanmakuSettings), findsOneWidget);
       final preview = find.byKey(const ValueKey('settings-pip-preview'));
-      expect(topOf(tester, preview), lessThan(topOf(tester, settingsRow('pip_danmaku'))));
+      expect(topOf(tester, preview), lessThan(topOf(tester, pipRow('pip'))));
+      // 3.x's order (`PipDanmakuSettingsSection`), as in the room; the
+      // restore row of the settings page last.
       expectInOrder(tester, [
-        for (final title in ['样式', '显示范围', '流畅度']) _text(title),
-      ]);
-      expectInOrder(tester, [
-        for (final id in [
-          'pip_danmaku',
-          'pip_opacity',
-          'pip_speed',
-          'pip_size',
-          'pip_weight',
-          'pip_auto_scale',
-          'pip_no_emoji',
-          'pip_original_color',
-          'pip_color',
-          'pip_area',
-          'pip_max_visible',
-          'pip_interval',
-          'pip_auto_fps',
-          'pip_fps',
-          'pip_reset',
+        for (final key in [
+          'pip',
+          'pipNoEmoji',
+          'pipAutoScale',
+          'pipOriginalColor',
+          'pipColor',
+          'pipFontSize',
+          'pipFontWeight',
+          'pipSpeed',
+          'pipOpacity',
+          'pipArea',
+          'pipMaxVisible',
+          'pipInterval',
+          'pipAutoFps',
+          'pipFps',
         ])
-          settingsRow(id),
+          pipRow(key),
+        settingsRow('pip_reset'),
       ]);
+      // The catalogue's rows are only for search.
+      expect(settingsRow('pip_speed'), findsNothing);
       // Values carry their units (c6).
-      expect(_inRow('pip_speed', _text('90 px/s')), findsOneWidget);
-      expect(_inRow('pip_size', _text('12.0 px')), findsOneWidget);
-      expect(_inRow('pip_interval', _text('0.35 秒')), findsOneWidget);
-      expect(_inRow('pip_auto_scale', _text(withoutOrphan('小窗越小字越小，最小 10 px'))), findsOneWidget);
-      // The colour waits for "keep the platform's colours" off; the frame
-      // rate says which policy it follows.
-      expect(_rowWidget(tester, 'pip_color').enabled, isFalse);
-      expect(_rowWidget(tester, 'pip_fps').enabled, isFalse);
-      expect(_inRow('pip_fps', _text(withoutOrphan('现在跟随“通用”里的“省电”档位'))), findsOneWidget);
-      expect(_inRow('pip_fps', _text('30 FPS')), findsOneWidget);
-      // Off: everything below is greyed out, the preview says so.
-      await tapSettings(tester, settingsRow('pip_danmaku'));
+      expect(value(tester, 'pipSpeed'), '90 px/s');
+      expect(value(tester, 'pipFontSize'), '12.0 px');
+      expect(value(tester, 'pipInterval'), '0.35 秒');
+      // The frame rate follows the policy: its slider is greyed out at the
+      // rate in use.
+      expect(tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-pipFps'))).onChanged, isNull);
+      expect(value(tester, 'pipFps'), '30 FPS');
+      // Off: the rest folds away (3.x), the preview says so.
+      await tapSettings(tester, find.byKey(const ValueKey('danmaku-switch-pip')));
       expect(h.settings.get(Settings.enablePipDanmaku), isFalse);
-      expect(_rowWidget(tester, 'pip_opacity').enabled, isFalse);
+      expect(pipRow('pipFontSize'), findsNothing);
       expect(_text('小窗弹幕已关闭'), findsOneWidget);
+      expect(settingsRow('pip_reset'), findsOneWidget);
     });
 
     testWidgets('wide and short screens: the preview on the left', (tester) async {
@@ -441,15 +449,24 @@ void main() {
       await pumpSettings(tester, width: 1280, height: 800, arguments: 'pipDanmaku');
       expect(find.byKey(const ValueKey('settings-pip-two-columns')), findsOneWidget);
       final preview = find.byKey(const ValueKey('settings-pip-preview'));
-      expect(tester.getCenter(preview).dx, lessThan(tester.getCenter(settingsRow('pip_danmaku')).dx));
+      expect(tester.getCenter(preview).dx, lessThan(tester.getCenter(pipRow('pip')).dx));
+      expect(tester.getSize(find.byType(PipDanmakuSettings)).width, lessThanOrEqualTo(720));
     });
 
     testWidgets('count: − and +; restore asks and brings everything back', (tester) async {
       final h = await pumpSettings(tester, width: 393, height: 2600, arguments: 'pipDanmaku');
-      await tapSettings(tester, find.byKey(const ValueKey('settings-entry-pip_max_visible-increase')));
+      await tapSettings(
+        tester,
+        find
+            .descendant(
+              of: find.byKey(const ValueKey('danmaku-counter-pipMaxVisible')),
+              matching: find.byType(IconButton),
+            )
+            .last,
+      );
       expect(h.settings.get(Settings.pipDanmakuMaxVisibleCount), Settings.pipDanmakuMaxVisibleCount.defaultValue + 1);
-      await tapSettings(tester, settingsRow('pip_original_color'));
-      expect(_rowWidget(tester, 'pip_color').enabled, isTrue);
+      await tapSettings(tester, find.byKey(const ValueKey('danmaku-switch-pipOriginalColor')));
+      expect(h.settings.get(Settings.pipDanmakuUseOriginalColor), isFalse);
       await tapSettings(tester, settingsRow('pip_reset'));
       expect(find.textContaining('将全部恢复为默认值'), findsOneWidget);
       await tapSettings(tester, find.byKey(const ValueKey('settings-confirm')));

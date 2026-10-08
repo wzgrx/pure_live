@@ -8,6 +8,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
@@ -18,6 +19,7 @@ import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
+import 'package:pure_live/shared/danmaku/pip_danmaku_settings.dart';
 import 'package:pure_live/shared/permission_prompts.dart';
 
 // The rows of the playback pages that draw more than a plain switch, slider
@@ -596,15 +598,15 @@ class PipFpsTile extends ConsumerWidget {
 }
 
 /// The floating-window danmaku page (3.x `PipDanmakuSettingsPage`, U.6c
-/// c13, c14): the explanation and the live preview above the rows on
-/// phones; from 840 wide, or below 480 high (a phone held sideways), the
-/// preview stays on the left and the rows scroll on the right.
+/// c13): the explanation and the live preview above the rows on phones;
+/// from 840 wide, or below 480 high (a phone held sideways), the preview
+/// stays on the left and the rows scroll on the right. The rows are the
+/// room's "小窗弹幕" group ([PipDanmakuSettings], 3.x's one
+/// `PipDanmakuSettingsSection`; A08.6 c4, G3 A), then the page's "恢复默认";
+/// the catalogue's rows are only for search.
 class PipDanmakuPage extends ConsumerWidget {
   /// Creates the page.
-  const new({this.highlight, this.onBack, super.key});
-
-  /// The row to highlight (search).
-  final String? highlight;
+  const new({this.onBack, super.key});
 
   /// The back button of the one-column layout's first page.
   final VoidCallback? onBack;
@@ -627,7 +629,7 @@ class PipDanmakuPage extends ConsumerWidget {
             i18n('settings_pip_danmaku_intro'),
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
           );
-          final rows = SettingsSectionView(section: SettingsSection.pipDanmaku, highlight: highlight);
+          final rows = _PipDanmakuRows(start: embedded || side);
           if (side) {
             final previewWidth = (constraints.maxWidth * 0.43).clamp(240.0, 520.0);
             return Row(
@@ -680,6 +682,42 @@ class PipDanmakuPage extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// The rows of [PipDanmakuPage]: the shared group, then "恢复默认".
+class _PipDanmakuRows extends StatelessWidget {
+  const new({required this.start});
+
+  /// Kept at the start (the right pane, or right of the preview).
+  final bool start;
+
+  @override
+  Widget build(BuildContext context) {
+    final reset = settingsCatalog.firstWhere((entry) => entry.id == 'pip_reset');
+    return ListView(
+      key: const ValueKey('settings-pip-rows'),
+      physics: const PureLiveScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(start ? 12 : 4, 8, start ? 12 : 4, 32),
+      children: [
+        Align(
+          alignment: start ? Alignment.topLeft : Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const PipDanmakuSettings(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
+                  child: SettingsGroup(children: [reset.build(context, reset)]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

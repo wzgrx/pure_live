@@ -212,3 +212,9 @@ playback-timing site=bilibili room=1a2b3c route=direct engine=new result=playing
 - C（512 KiB / 0.5 s）没在手机上试：B 已经达标，C 在电脑上对哔哩哔哩没有更快（704 vs 627 ms）。
 - 快手：这一轮 3 次里只有 1 次开出来（`detail=2485`），另外两次没有计时行——电脑上量快手时触发了同一出口的“请求过快”风控，K90 也受影响。快手第一次进房省掉第二次取房间页（`8432f9910`）的效果要等风控过去再看。
 - 没测：上下滑换房、弱网（K90 上没有只限测试包的限速办法）。
+
+## 2026-10-08 计时总数和各段对不上（门禁偶发失败）
+
+- 现象：门禁里 `live_play_controller_test.dart`“G03.1: entering the room leaves one timing line”偶尔失败：总数减去各段之和应在 0～8 毫秒（各段向下取整），机器忙时是 11。
+- 根因：`packages/live_player/lib/src/timing.dart` 的 `OpenTiming.finish` 用调用那一刻的 `timingNow()` 当结束，而各段只到最后一个标记（T7 第一帧 / T8 播放）；`finish` 在同一个事件里稍后才被调，机器忙时差几毫秒，总数就多出一段不属于任何一步的时间。真机上的日志行同样受影响（总数略大于各段之和）。
+- 改法：播放成功时结束在最后一个标记，各段正好加起来等于总数；失败时仍以失败那一刻为结束。测试 `packages/live_player/test/timing_test.dart`（最后一个标记后 40 毫秒才 `finish`：总数等于各段之和、900 毫秒；失败的总数到失败为止），改之前失败（940 毫秒）。

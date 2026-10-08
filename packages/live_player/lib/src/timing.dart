@@ -185,9 +185,12 @@ final class OpenTiming {
     mark(input);
   }
 
-  /// Ends the open now: [error] is the failure's code, null when it plays.
+  /// Ends the open: [error] is the failure's code, null when it plays. A
+  /// played open ends at its last mark, so the steps add up to the total
+  /// (the call can come a few milliseconds later on a busy device: G03.1's
+  /// test saw 11 ms more); a failed one ends now.
   PlaybackTiming finish({String? error}) {
-    final end = timingNow();
+    final now = timingNow();
     final room = startup;
     final start = room?.started ?? opened;
     var previous = start;
@@ -200,6 +203,7 @@ final class OpenTiming {
       segments.add(at.difference(previous));
       previous = at;
     }
+    final end = error == null ? previous : now;
     return PlaybackTiming(
       site: site,
       route: _route,

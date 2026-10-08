@@ -151,9 +151,11 @@ abstract final class TwitchApi {
   /// The busiest live streams of the whole site, in the broadcast
   /// `languages` when given (the recommendations, 8-3). The web client has
   /// no persisted query for it; `first` is at most 30 and pages after the
-  /// first need a browser's integrity token.
+  /// first need a browser's integrity token. `$languages` is the
+  /// `Language` enum: since 2026-10 the schema rejects the query when it is
+  /// declared `[String!]`, sent or not (E03.17).
   static const String streamsQuery =
-      r'query($first: Int!, $after: Cursor, $languages: [String!]) { streams(first: $first, after: $after, '
+      r'query($first: Int!, $after: Cursor, $languages: [Language!]) { streams(first: $first, after: $after, '
       r'options: {broadcasterLanguages: $languages}) { edges { cursor node { id title type viewersCount '
       'createdAt previewImageURL(width: 440, height: 248) restriction { type } broadcaster { id login '
       'displayName profileImageURL(width: 70) } game { id name displayName slug } } } '

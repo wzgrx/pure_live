@@ -1,0 +1,634 @@
+{
+  "data": {
+    "streams": {
+      "edges": [
+        {
+          "cursor": "eyJzIjoxMzM1LjUyMjAyMjQ4MzUyNjQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315595689968",
+            "title": "Qttsix｜OHO伺服器 day5，4呢?｜!ExitLag",
+            "type": "live",
+            "viewersCount": 1335,
+            "createdAt": "2026-10-07T17:45:43Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_qttsix-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "16677765",
+              "login": "qttsix",
+              "displayName": "六希夫",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/28a06cd5-85a5-409f-87a1-2bdd84ee2584-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo3NTEuMzA2MjQ4MzM1NDcxOSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316615814131",
+            "title": "美沙酮之亂｜10/8【KYO】!VPN !清潔劑 !蜂蜜 !燒肉 !優格",
+            "type": "live",
+            "viewersCount": 751,
+            "createdAt": "2026-10-08T00:14:07Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_kyo1984123-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "119497908",
+              "login": "kyo1984123",
+              "displayName": "kyo1984123",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/f5a8c748-3194-47e4-87d4-1b5bf9b10442-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo3MDkuOTI5MjE0NDUzMDc1NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316557594610",
+            "title": "【朔Sakuro】練等",
+            "type": "live",
+            "viewersCount": 709,
+            "createdAt": "2026-10-07T11:59:48Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_sakuro_moonlit-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1077670438",
+              "login": "sakuro_moonlit",
+              "displayName": "朔さくろ_月蝕屋",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/d5b143ac-087e-462f-a8c9-21246b8e0606-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo2NTEuOTU4ODY1MDY2MDQ5NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316610939123",
+            "title": "🔞🈲恐怖之夜D125⏰每晚6~7點🎁看台免費拿MyCard/Steam點數!MY🔴 【🍊蝦愛橘子】",
+            "type": "live",
+            "viewersCount": 651,
+            "createdAt": "2026-10-06T18:45:36Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_shuteye_orange-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "25202416",
+              "login": "shuteye_orange",
+              "displayName": "蝦愛橘子",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/e496689c-5e8f-44a6-8733-b3c5b6e17e19-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo1MzkuNDYyMzAzNjU3NjU4LCJkIjpmYWxzZSwidCI6dHJ1ZX0=",
+          "node": {
+            "id": "315561589230",
+            "title": "【哈瓜Jongie🍈】柯南OHO服，早安 !7tv | @jongie | 2026/10/08 |",
+            "type": "live",
+            "viewersCount": 539,
+            "createdAt": "2026-10-07T19:27:41Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_jongie-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "129440913",
+              "login": "jongie",
+              "displayName": "哈瓜哈瓜",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/63c5c6f8-8d02-48fc-ba45-d0b0b1f0893c-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo1MjkuMTM0NDE4ODkzMTcxMSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315573534447",
+            "title": "🐈貓糰🔸𝟣𝟢𝟢𝟩 ⸝ 回歸瓦第一天｜!糰寶T !訂閱 !OHO !ExitLag @umidan1207",
+            "type": "live",
+            "viewersCount": 529,
+            "createdAt": "2026-10-07T10:58:32Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_umidan1207-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "862365494",
+              "login": "umidan1207",
+              "displayName": "貓糰",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/c5881fc4-5028-46f1-ae61-8c3684ccf123-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo1MTAuNTczNTkyNDQwNTkxNTQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316615024883",
+            "title": "[貓宮香草] 10/8  快充  ，，!DC  !魔儲",
+            "type": "live",
+            "viewersCount": 510,
+            "createdAt": "2026-10-07T17:50:15Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_vanilla_shironeko-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "124430873",
+              "login": "vanilla_shironeko",
+              "displayName": "香草貓咪",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/f0420f62-10b1-43a3-a032-e25d5049c5ad-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo0ODEuOTQxMjIwNDU5MDQ4OSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315595190000",
+            "title": "【EN/TC/JP】先跟其他朋朋玩一下遊戲 晚點等隊友們上線回OHO | !OHO隊友 !周邊 !簽  !委託 !點歌單 |",
+            "type": "live",
+            "viewersCount": 481,
+            "createdAt": "2026-10-07T13:51:42Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_dinosrosaur7-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "715125135",
+              "login": "dinosrosaur7",
+              "displayName": "荻諾斯",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/93800162-b2b7-488c-a2af-58ebd5217adb-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo0NzUuMjM1OTE4NDc4MTYzODUsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315560844270",
+            "title": "10/7 OHO 魔法世界   !椅子 !settings !天賦",
+            "type": "live",
+            "viewersCount": 475,
+            "createdAt": "2026-10-07T13:44:04Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_dd87878-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "56691819",
+              "login": "dd87878",
+              "displayName": "簡到槍",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/a8bce563-d871-468c-94fb-c59f26610f45-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjo0NDcuNDU0MzUyMTI0MDAxNDUsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315562207214",
+            "title": "【10/08】早安~正常作息 @moondogs_celestial",
+            "type": "live",
+            "viewersCount": 447,
+            "createdAt": "2026-10-08T00:29:56Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_moondogs_celestial-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1001266615",
+              "login": "moondogs_celestial",
+              "displayName": "幻月_",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/723e60a4-3319-49bd-b13d-39e0d952ce04-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjozNzkuNTUxNDM2OTc4NzUzNTQsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316559712114",
+            "title": "戶外_騎車環島DAY1_ fit. 浪浪 優姬 雷夢",
+            "type": "live",
+            "viewersCount": 379,
+            "createdAt": "2026-10-08T00:26:42Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_tenshendada-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "61657584",
+              "login": "tenshendada",
+              "displayName": "黑儀",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/9427e117-be5d-4e59-b529-3cfe4faa896f-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509672",
+              "name": "IRL",
+              "displayName": "IRL",
+              "slug": "irl"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjozNTguODIxMTY0NjkxNzc5MSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316548267761",
+            "title": "10/8 陪老婆練世紀帝國DAY2 !gearup",
+            "type": "live",
+            "viewersCount": 358,
+            "createdAt": "2026-10-08T00:17:48Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_xargon0731-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "47250099",
+              "login": "xargon0731",
+              "displayName": "殺梗",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/xargon0731-profile_image-4eda4dc86e93e0e0-70x70.jpeg"
+            },
+            "game": {
+              "id": "13389",
+              "name": "Age of Empires II",
+              "displayName": "Age of Empires II",
+              "slug": "age-of-empires-ii"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjozNTYuMDEyMTM4MTczNjg1NDYsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "315594931440",
+            "title": "挖",
+            "type": "live",
+            "viewersCount": 356,
+            "createdAt": "2026-10-07T12:08:01Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_slrabbit99-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "28990891",
+              "login": "slrabbit99",
+              "displayName": "貝克",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/92d2aea4-72bc-4669-a7ba-6a8adcfe7022-profile_image-70x70.png"
+            },
+            "game": null
+          }
+        },
+        {
+          "cursor": "eyJzIjozMzIuODc4NDk3OTAyNTA4NDYsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316548272625",
+            "title": "《福爾摩沙之旅》DAY1｜四位實況主正式出發！機車環島挑戰開始🏍️｜ FT. 優姬、雷夢、黑儀、浪浪",
+            "type": "live",
+            "viewersCount": 332,
+            "createdAt": "2026-10-08T00:20:21Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_ugugugg-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "49928076",
+              "login": "ugugugg",
+              "displayName": "優姬",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/1eb0e4fa-61ec-4868-b6e0-f2fe0dc440ad-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509672",
+              "name": "IRL",
+              "displayName": "IRL",
+              "slug": "irl"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyNjcuNzI5NDUxMjUwOTIwNCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315574298479",
+            "title": "Re !link",
+            "type": "live",
+            "viewersCount": 267,
+            "createdAt": "2026-10-07T16:18:00Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_serimm11-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "907334098",
+              "login": "serimm11",
+              "displayName": "세림잉",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/afd176c2-5cf6-4ef1-82c0-dd6a208bf381-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyNTYuNjQwMDAzOTYxMTk0MywiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316544418417",
+            "title": "鴨鴨陪伴台｜鴨鴨直播🦆 ｜Duck 🦆 LIVE Camera｜ダック🦆ライブカメラ",
+            "type": "live",
+            "viewersCount": 256,
+            "createdAt": "2026-10-07T02:50:40Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_neipuduck-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "1066806174",
+              "login": "neipuduck",
+              "displayName": "內埔薑母鴨",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/5ccaf587-c54c-4d3c-9809-71301330d294-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "272263131",
+              "name": "Animals, Aquariums, and Zoos",
+              "displayName": "动物、水族馆和动物园",
+              "slug": "animals-aquariums-and-zoos"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMDkuMjU3MDIzNjQ5MzUwMDYsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316153727081",
+            "title": "競技場系統搞(亞美服已雙傳說)，最爽的鋼哥團，請加入DC了解詳情，鋼哥國際旅行社周年慶等你",
+            "type": "live",
+            "viewersCount": 209,
+            "createdAt": "2026-10-07T16:18:01Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_khsjohnny-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "66086067",
+              "login": "khsjohnny",
+              "displayName": "鋼琴殺手",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/khsjohnny-profile_image-873b7f9cfd19bd24-70x70.jpeg"
+            },
+            "game": {
+              "id": "138585",
+              "name": "Hearthstone",
+              "displayName": "Hearthstone",
+              "slug": "hearthstone"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoyMDYuMjAwMzI3MjY4MTQ5NzgsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316615262195",
+            "title": "𖦹°‧10/8 蝦仁豬心",
+            "type": "live",
+            "viewersCount": 206,
+            "createdAt": "2026-10-07T19:50:05Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_sawaa0816-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "983789976",
+              "login": "sawaa0816",
+              "displayName": "起司帕尼尼",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/123786e5-9d6a-48f0-8117-13d24afbf3e8-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "513143",
+              "name": "Teamfight Tactics",
+              "displayName": "Teamfight Tactics",
+              "slug": "teamfight-tactics"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxOTguOTYyNDU0MjI0OTI3OSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316154526697",
+            "title": "10/8",
+            "type": "live",
+            "viewersCount": 198,
+            "createdAt": "2026-10-07T22:42:16Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_sophroseeeeee-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "901642439",
+              "login": "sophroseeeeee",
+              "displayName": "小熙肉絲",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/984b3567-1e67-4d1f-966d-92277a17b365-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "1286077738",
+              "name": "Monster Hunter Wilds",
+              "displayName": "Monster Hunter Wilds",
+              "slug": "monster-hunter-wilds"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxODcuMjc1NjI2NzgzNzg5MDUsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "317935918434",
+            "title": "周四隨便開(2026/10/08)",
+            "type": "live",
+            "viewersCount": 187,
+            "createdAt": "2026-10-07T20:30:22Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_kardiccino-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "53024915",
+              "login": "kardiccino",
+              "displayName": "卡狄",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/d49700ea-d232-40df-9e34-31181bc2913a-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "1267582829",
+              "name": "Aniimo",
+              "displayName": "Aniimo",
+              "slug": "animo"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxODQuNzM4NDE4MzE2NjQwNTIsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316615208563",
+            "title": "｜1008｜樂優只是遲到 沒有味道｜!自主訂閱 !海洋燒",
+            "type": "live",
+            "viewersCount": 184,
+            "createdAt": "2026-10-07T19:22:52Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_iloveuu0408-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "41383640",
+              "login": "iloveuu0408",
+              "displayName": "樂優",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/874229d8-9b8f-4f42-9735-c175baa1852d-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "511224",
+              "name": "Apex Legends",
+              "displayName": "Apex Legends",
+              "slug": "apex-legends"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNzEuMTQxMTYyOTY1OTQ1MjMsImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316557239666",
+            "title": "OHO 柯南的流亡!! | !簽到",
+            "type": "live",
+            "viewersCount": 171,
+            "createdAt": "2026-10-07T10:42:25Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_mimiimiiiii-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "54976985",
+              "login": "mimiimiiiii",
+              "displayName": "米米米大師",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/6aca371a-f47f-474d-a7dc-269515be79ae-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "493551",
+              "name": "Conan Exiles",
+              "displayName": "Conan Exiles",
+              "slug": "conan-exiles"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNjIuMDg0MDA3NjYwMTc5NCwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "315560839662",
+            "title": "『染』謝謝自主訂閱幫qq !層三訂閱｜早安晚安機器人><｜10/7 !YT !滑鼠墊 !LINE貼圖  !RX計劃 !小熊電競",
+            "type": "live",
+            "viewersCount": 162,
+            "createdAt": "2026-10-07T13:41:28Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_renran_-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "683025183",
+              "login": "renran_",
+              "displayName": "嶺上荏染",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/5c539bc0-d898-4a83-852f-a3881e1f98e9-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "1282866981",
+              "name": "Delta Force",
+              "displayName": "Delta Force",
+              "slug": "delta-force-hawk-ops"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNjAuNTY3NTA4OTIwOTI2NDksImQiOmZhbHNlLCJ0Ijp0cnVlfQ==",
+          "node": {
+            "id": "316154554601",
+            "title": "【れい】26/10/08✨ 我今天一定文質彬彬 ✨ただいま配信中🐰",
+            "type": "live",
+            "viewersCount": 160,
+            "createdAt": "2026-10-07T22:57:24Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_eve_202510-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "163445025",
+              "login": "eve_202510",
+              "displayName": "れい丨澪",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/397c5acd-0f6e-4c96-a416-9caddec0d7f9-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "516575",
+              "name": "VALORANT",
+              "displayName": "VALORANT",
+              "slug": "valorant"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxNTMuNTA5NjcwOTkwNjM3OSwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316615165427",
+            "title": "【比較長的木棉花馬拉松】無職轉生 S1+S2 馬拉松連播",
+            "type": "live",
+            "viewersCount": 153,
+            "createdAt": "2026-10-07T19:00:27Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_muse_tw-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "451374597",
+              "login": "muse_tw",
+              "displayName": "木棉花官方頻道",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/17be194f-2fba-4c43-95b3-bf9402a94e31-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "509658",
+              "name": "Just Chatting",
+              "displayName": "谈天说地",
+              "slug": "just-chatting"
+            }
+          }
+        },
+        {
+          "cursor": "eyJzIjoxMzkuNjk1NTcwNDg0NjY0MiwiZCI6ZmFsc2UsInQiOnRydWV9",
+          "node": {
+            "id": "316149455721",
+            "title": "【凜】🔴10/6 💎掉寶台",
+            "type": "live",
+            "viewersCount": 139,
+            "createdAt": "2026-10-06T13:38:10Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_shiyu2615-440x248.jpg",
+            "restriction": null,
+            "broadcaster": {
+              "id": "73525495",
+              "login": "shiyu2615",
+              "displayName": "凜丶",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/839fb1fc-3933-4a53-b64f-5a43a0fb9718-profile_image-70x70.png"
+            },
+            "game": {
+              "id": "386821",
+              "name": "Black Desert",
+              "displayName": "Black Desert",
+              "slug": "black-desert"
+            }
+          }
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": true
+      }
+    }
+  },
+  "extensions": {
+    "durationMilliseconds": 66,
+    "requestID": "01M4CFKWBN9K0MG8PN18N4BM0J"
+  }
+}

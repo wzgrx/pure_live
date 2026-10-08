@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "platform": "twitch",
+  "sample": "S03-top-string-rejected",
+  "capturedAt": "2026-10-08T00:46:33.652589Z",
+  "route": "proxy:127.0.0.1:7897",
+  "request": {
+    "method": "POST",
+    "url": "https://gql.twitch.tv/gql",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
+      "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+      "Accept": "application/vnd.twitchtv.v5+json",
+      "Client-ID": "kimne78kx3ncx6brgo4mv6wki5h1ko",
+      "Origin": "https://www.twitch.tv",
+      "Referer": "https://www.twitch.tv/",
+      "Device-Id": "5f0c3e9a7b2d4e6f8a1c3e5f7a9b1d3f",
+      "Content-Type": "text/plain;charset=UTF-8"
+    },
+    "body": "{\"query\":\"query($first: Int!, $after: Cursor, $languages: [String!]) { streams(first: $first, after: $after, options: {broadcasterLanguages: $languages}) { edges { cursor node { id title type viewersCount createdAt previewImageURL(width: 440, height: 248) restriction { type } broadcaster { id login displayName profileImageURL(width: 70) } game { id name displayName slug } } } pageInfo { hasNextPage } } }\",\"variables\":{\"first\":30,\"languages\":[\"ZH\",\"KO\"]}}"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "connection": "close",
+      "content-length": "182",
+      "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "cache-control": "no-store, no-cache, must-revalidate",
+      "x-amzn-trace-id": "Self=1-6ac6e7eb-56316f1f551803a517daec41;Root=1-6ac6e7eb-c68e90481fc6200f3f0d1d1c",
+      "x-gateway-trace": "38baa9613bcadef5cdd1eb84c29e1b7d",
+      "x-router-config-version": "a89adfc3-40fd-45fb-ae84-4259ed20934e",
+      "date": "Thu, 08 Oct 2026 00:46:35 GMT",
+      "timing-allow-origin": "*",
+      "alt-svc": "h3=\":443\";ma=3600,\"h3-29\"=\":443\";ma=3600,\"h3-27\"=\":443\";ma=3600",
+      "x-served-by": "gateway"
+    }
+  },
+  "raw": {
+    "sha256": "1e4cb21c0f479dbc9b70d1b933b35b2ff061ca19c94b0908071bea7c86c7332a",
+    "length": 182
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "scratch capture script (python urllib, schema 1, E03.17): the 3.x-era query with $languages as [String!], rejected; Device-Id is the synthetic one of S03-top-zh-ko"
+}

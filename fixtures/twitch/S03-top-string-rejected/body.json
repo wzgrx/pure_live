@@ -1,0 +1,17 @@
+{
+  "errors": [
+    {
+      "message": "Variable \"$languages\" of type \"[String!]\" used in position expecting type \"[Language!]\".",
+      "locations": [
+        {
+          "line": 1,
+          "column": 37
+        },
+        {
+          "line": 1,
+          "column": 132
+        }
+      ]
+    }
+  ]
+}

@@ -2385,11 +2385,12 @@ old = ["M4.34", "T02c.16"]
 id = "E03.17"
 title = "接 E07.1：Twitch 推荐的 GraphQL 语言参数类型变了"
 type = "平台"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 1
+date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08，经代理）：P1 推荐 ApiChanged：Variable \"$languages\" of type \"[String!]\" used in position expecting type \"[Language!]\""
-note = "twitch_api.dart:156 的查询把 $languages 声明成 [String!]，平台改成了 [Language!] 枚举；推荐页（和用它的分区）打不开。修完在 K90 上看热门里的 Twitch"
+note = "twitch_api.dart:157 的 $languages 改成 [Language!]，巡检 P1 恢复正常（分区用持久化查询，本来不受影响）；K90 经代理看热门里的 Twitch 和语言筛选"
 
 [[task]]
 id = "E03.18"

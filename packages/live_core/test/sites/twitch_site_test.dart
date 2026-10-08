@@ -51,6 +51,18 @@ ReplaySample _usher(String login, String name, {bool preferH264 = true}) {
   );
 }
 
+/// The site-wide streams without a language filter: S03-top, then its next
+/// chunk (S03-top-cursor). Both were recorded with the query that declared
+/// `$languages` as `[String!]` (before E03.17); their answers are replayed
+/// as answers to the adapter's query.
+List<ReplaySample> _top() => [
+  _answer(TwitchApi.streamsOperation(limit: 30), name: 'S03-top'),
+  _answer(
+    TwitchApi.streamsOperation(limit: 30, cursor: 'eyJzIjo3NTQ3LjQ3NjY5MjE0OTI5NCwiZCI6ZmFsc2UsInQiOnRydWV9'),
+    name: 'S03-top-cursor',
+  ),
+];
+
 /// An integrity challenge for a batch of [count] operations (the shape of
 /// S02-game-cursor).
 List<Object?> _challenge(int count) => [
@@ -597,7 +609,7 @@ void main() {
   group('recommendations (8-3: the whole site)', () {
     test("the site's busiest streams, 30 asked (S03-top), with start times and restrictions; the next chunk's "
         'challenge ends the list', () async {
-      final setup = _setup([_recorded('S03-top'), _recorded('S03-top-cursor')]);
+      final setup = _setup(_top());
       final first = await setup.site.getRecommendRooms();
       expect(first, hasLength(29));
       expect(first.every((room) => room.startedAt != null && room.restriction == LiveRestriction.none), isTrue);
@@ -610,13 +622,13 @@ void main() {
     });
 
     test("3.x's popular page asks for 100: it gets the 29, in one request", () async {
-      final setup = _setup([_recorded('S03-top'), _recorded('S03-top-cursor')]);
+      final setup = _setup(_top());
       expect(await setup.site.getRecommendRooms(pageSize: 100), hasLength(29));
       expect(setup.http.requests, hasLength(1));
     });
 
     test('small pages continue where the last one ended', () async {
-      final setup = _setup([_recorded('S03-top'), _recorded('S03-top-cursor')]);
+      final setup = _setup(_top());
       final pages = [
         for (var number = 1; number <= 4; number++) await setup.site.getRecommendRooms(page: number, pageSize: 10),
       ];
@@ -626,7 +638,7 @@ void main() {
 
     test('the language setting (S03-top-zh-ko); recommendations and areas keep their own snapshots', () async {
       final setup = _setup([
-        _recorded('S03-top-zh-ko'),
+        _recorded('S03-top-zh-ko-language'),
         _answer([
           TwitchApi.gameOperation('just-chatting', limit: 100, languages: ['ZH', 'KO']),
         ], name: 'S02-game'),
@@ -639,6 +651,16 @@ void main() {
       expect(again, hasLength(10), reason: "the recommendations' own snapshot");
       expect(again.first.roomId, isNot(recommended.first.roomId));
       expect(setup.http.requests, hasLength(2));
+    });
+
+    test('the languages are declared as the Language enum (E03.17): the platform rejects [String!] '
+        '(S03-top-string-rejected) whether or not any are sent', () async {
+      expect(TwitchApi.streamsQuery, contains(r'$languages: [Language!]'));
+      final setup = _setup([_answer(TwitchApi.streamsOperation(limit: 30), name: 'S03-top-string-rejected')]);
+      await expectLater(
+        setup.site.getRecommendRooms(),
+        throwsA(isA<ApiChanged>().having((error) => error.detail, 'detail', contains('[Language!]'))),
+      );
     });
 
     test('a first page answered with a challenge is RiskControl', () async {

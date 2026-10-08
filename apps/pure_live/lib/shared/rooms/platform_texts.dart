@@ -209,6 +209,15 @@ String _line(String line) {
   return line;
 }
 
+/// The area of a room of [platform] worth showing next to the platform's
+/// name: trimmed, and empty for the stand-in names 3.x wrote and the JD
+/// adapter still gives (`legacyPlaceholderNames`, A07.21: the room header
+/// read "京东直播 · JD Live").
+String roomAreaShown(String platform, String? area) {
+  final name = area?.trim() ?? '';
+  return (legacyPlaceholderNames[platform]?.contains(name) ?? false) ? '' : name;
+}
+
 /// The area or category [name] of [platform] in the interface language,
 /// when the adapter named it; else as it is.
 String platformAreaName(String platform, String name) {

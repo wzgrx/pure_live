@@ -74,6 +74,11 @@ void main() {
     // A domestic platform's own area of the same name stays.
     expect(platformAreaName(SiteIds.douyu, PandaLiveApi.areaNames['talk']!), PandaLiveApi.areaNames['talk']);
     expect(platformQualityName('原画'), en['quality_name_original']);
+    // A07.21: a platform's stand-in name is no area ("京东直播 · JD Live").
+    expect(roomAreaShown(SiteIds.jdLive, 'JD Live'), '');
+    expect(roomAreaShown(SiteIds.jdLive, ' 数码 '), '数码');
+    expect(roomAreaShown(SiteIds.douyu, 'JD Live'), 'JD Live');
+    expect(roomAreaShown(SiteIds.kugouLive, null), '');
     expect(platformQualityName('原画 · FLV'), '${en['quality_name_original']} · FLV');
     expect(platformQualityName('蓝光4M'), '蓝光4M');
 

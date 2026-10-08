@@ -1128,6 +1128,16 @@ tier = 3
 from = "上游 pure_live 559690d48、01fd4fec5（W01.3 对照）"
 note = "封面层已有（纯音频模式的 AudioOnlyCover），只是只在纯音频模式下显示；3.x 也是拉满占位画面"
 
+
+[[task]]
+id = "A07.21"
+title = "直播间顶栏和详情不显示平台的占位分区名（京东直播间写成“京东直播 · JD Live”）"
+type = "界面"
+status = "待真机"
+size = "小"
+tier = 3
+from = "K90 复查 A07.16（2026-10-08）"
+date = "2026-10-08"
 [[task]]
 id = "A08.1"
 title = "弹幕列表和弹幕设置页"

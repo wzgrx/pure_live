@@ -138,7 +138,7 @@ class RoomTitle extends StatelessWidget {
         room.nick.trim(),
         room.avatar,
         room.platform,
-        room.area?.trim() ?? '',
+        roomAreaShown(room.platform, room.area),
         controller.stage == RoomStage.loading,
       );
     },

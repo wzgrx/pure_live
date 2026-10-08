@@ -254,7 +254,7 @@ class _StreamerState extends State<_Streamer> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final platform = platformName(room.platform);
-    final area = room.area?.trim() ?? '';
+    final area = roomAreaShown(room.platform, room.area);
     final secondary = theme.textTheme.bodyMedium?.regular.copyWith(color: scheme.onSurfaceVariant);
     return Row(
       children: [

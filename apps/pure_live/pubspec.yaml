@@ -18,6 +18,10 @@ dependencies:
   # plays in the background (3.x's engine; the Android activity is its
   # AudioServiceActivity, which keeps the engine cached).
   audio_service: ^0.18.19
+  # The room's audio focus (G05.1, 3.x's engine): a call pauses and resumes,
+  # a prompt lowers the volume, unplugged headphones pause. audio_service
+  # already brought it in (same version); now it is used directly.
+  audio_session: ^0.2.4
   # mDNS discovery with 3.x devices for device sync (`_purelive-sync._tcp`).
   bonsoir: ^7.1.5
   # The flying danmaku's network emoticons through the app's image cache

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
+import 'package:pure_live/features/live_play/logic/audio_focus.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -12,7 +13,7 @@ import 'package:pure_live/routes/route_observer.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 /// Everything a playing room owns: its logic, its one player, the stream's
-/// drops, the background policy and the orientation choice. The room page
+/// drops, the background policy, the audio focus and the orientation choice. The room page
 /// creates it; the in-app floating window ([FloatingRoom]) takes it over when
 /// the page closes and gives it back when the same room opens again, so the
 /// player and the danmaku are never built twice (UI_PLAN §9.3, U.2j).
@@ -24,6 +25,7 @@ final class RoomRuntime {
     required this.reconnect,
     required this.background,
     required this.orientation,
+    this.audioFocus,
     this.playerConfig,
   });
 
@@ -41,6 +43,9 @@ final class RoomRuntime {
 
   /// The room's orientation choice.
   final RoomOrientationChoice orientation;
+
+  /// Calls, prompts and unplugged headphones (G05.1; Android only).
+  final RoomAudioFocus? audioFocus;
 
   /// How [session]'s player was configured (compared with `==`): a player
   /// kept for the next room fits only a room configured the same way
@@ -63,6 +68,9 @@ final class RoomRuntime {
   Future<void> dispose({void Function(PlaybackSession session)? keep}) async {
     if (_disposed) return;
     _disposed = true;
+    // Given back when the room is left (not awaited: the system answers
+    // in its own time).
+    unawaited(audioFocus?.dispose());
     background.dispose();
     reconnect.dispose();
     orientation.dispose();

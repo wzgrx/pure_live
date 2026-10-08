@@ -29,6 +29,7 @@ import 'package:pure_live/features/live_play/layout/room_view_memory.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/logic/audio_focus.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/player_standby.dart';
@@ -285,12 +286,27 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       sleepSessionOnStart: _platform.android && store.settings.get(Settings.enableAsmrSleepMode),
       network: ref.read(networkProbeProvider),
     );
+    final background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
     return RoomRuntime(
       controller: controller,
       session: session,
       orientation: RoomOrientationChoice(settings: store.settings, room: room),
       reconnect: ReconnectWatch(session.states),
-      background: RoomBackgroundPolicy(controller: controller, settings: store.settings)..start(),
+      background: background,
+      audioFocus: SystemAudioFocus.available
+          ? (RoomAudioFocus(
+              session: session,
+              port: SystemAudioFocus.instance,
+              // Where the background policy would not let it play, the end
+              // of a call waits for the app to come back.
+              mayPlayNow: () =>
+                  background.mayStartInBackground ||
+                  shouldContinueInBackground(
+                    backgroundPlaybackEnabled: store.settings.get(Settings.enableBackgroundPlay),
+                    sleepSessionActive: controller.sleepSessionActive,
+                  ),
+            )..start())
+          : null,
       playerConfig: playerConfig,
     );
   }

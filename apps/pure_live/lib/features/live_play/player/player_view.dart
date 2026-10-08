@@ -218,6 +218,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   Offset? _firstTapAt;
   VoidCallback? _undoTap;
 
+  /// A07.14: the flying danmaku a tap went down on, opened once the double
+  /// tap's window runs out without a second tap (a double tap only toggles
+  /// the fullscreen: the sheet used to slide out and back, the danmaku
+  /// stood a moment).
+  LiveMessage? _pendingMessage;
+
   /// The controls a tap just showed take no taps while a second one may
   /// come: a double tap near the bars would press the button that appeared
   /// under it (they used to show only after the timeout).
@@ -341,7 +347,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// still picture can be seen without them.
   ///
   /// A tap on a flying danmaku (its switch on) opens its actions instead,
-  /// but only while the controls show and the stream is not paused (D-038).
+  /// but only while the controls show and the stream is not paused (D-038),
+  /// and only once a double tap is ruled out (A07.14; 3.x waited too).
   ///
   /// B09 c1 (audit B-8): the tap acts at once (3.x, and 4.0.0, held every
   /// tap back by the double tap's timeout, about 300 ms). A second tap
@@ -365,7 +372,11 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
       widget.onToggleFullscreen();
       return;
     }
+    // Too far from a pending danmaku tap to be its double tap: that one was
+    // a tap after all.
+    final pending = _pendingMessage;
     _closeDoubleTap();
+    if (pending != null) unawaited(_openMessage(pending));
     final shownBefore = _controls;
     // D-038 (A08.9): with many danmaku nearly every tap lands on one, so a
     // tap brings hidden controls whatever it lands on; a flying danmaku
@@ -373,7 +384,18 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     // to fade), and never while paused (A07.10: the tap only shows or hides
     // them).
     final message = shownBefore && !_paused ? hit : null;
-    final undo = message != null ? _tapMessage(message) : _tapControls();
+    if (message != null) {
+      // Never while locked (no danmaku is hit then).
+      if (at == null) {
+        unawaited(_openMessage(message));
+        return;
+      }
+      _firstTapAt = at;
+      _pendingMessage = message;
+      _doubleTapWindow = Timer(kDoubleTapTimeout, _openPendingMessage);
+      return;
+    }
+    final undo = _tapControls();
     if (_locked || at == null) return;
     _firstTapAt = at;
     _undoTap = undo;
@@ -386,6 +408,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     _doubleTapWindow = null;
     _firstTapAt = null;
     _undoTap = null;
+    _pendingMessage = null;
     if (_controlsSettling && mounted) setState(() => _controlsSettling = false);
   }
 
@@ -408,16 +431,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     };
   }
 
-  /// A tap on a flying danmaku opens its actions at once; returns what
-  /// closes them again.
-  VoidCallback _tapMessage(LiveMessage message) {
-    unawaited(_openMessage(message));
-    return () {
-      final panels = mounted ? RoomPanelScope.maybeOf(context) : null;
-      if (panels != null && panels.value == RoomPanelKind.message && identical(panels.message, message)) {
-        panels.close();
-      }
-    };
+  /// No second tap came: the danmaku the tap went down on opens its
+  /// actions (A07.14), the one it hit then, not where it has flown since.
+  void _openPendingMessage() {
+    final message = _pendingMessage;
+    _closeDoubleTap();
+    if (message != null && mounted) unawaited(_openMessage(message));
   }
 
   void _touch() {

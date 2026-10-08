@@ -403,6 +403,84 @@ void main() {
       expect(find.byType(SnackBar), findsNothing);
     });
 
+    // A02.4: an accessibility service on (K90's select-to-speak) kept a toast
+    // with an action up for good and without ✕.
+    Future<void> accessiblePage(WidgetTester tester, AppToast toast) async {
+      final messenger = GlobalKey<ScaffoldMessengerState>();
+      tester.view
+        ..physicalSize = _portrait
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(
+        accessibleNavigation: true,
+      );
+      addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+      await tester.pumpWidget(
+        MaterialApp(
+          scaffoldMessengerKey: messenger,
+          theme: const LiveTheme().light,
+          home: const Scaffold(body: SizedBox.expand()),
+        ),
+      );
+      showAppToastOn(messenger.currentState!, toast);
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('an action with an accessibility service on: ✕, and gone after 30 s', (tester) async {
+      await accessiblePage(tester, AppToast('已取消关注“前排”', actionLabel: '撤销', onAction: () {}));
+      expect(find.byKey(const ValueKey('app-toast-close')), findsOneWidget);
+      await tester.pump(const Duration(seconds: 29));
+      await tester.pump();
+      expect(find.text('撤销'), findsOneWidget);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('an action with an accessibility service on: ✕ closes it', (tester) async {
+      await accessiblePage(tester, AppToast('已取消关注“前排”', actionLabel: '撤销', onAction: () {}));
+      await tester.tap(find.byKey(const ValueKey('app-toast-close')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('no action with an accessibility service on: no ✕, gone after 3 s as before', (tester) async {
+      await accessiblePage(tester, const AppToast('已复制'));
+      expect(find.byKey(const ValueKey('app-toast-close')), findsNothing);
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('a new page closes a toast with an action, not a plain one or one to answer', (tester) async {
+      final messenger = GlobalKey<ScaffoldMessengerState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          scaffoldMessengerKey: messenger,
+          theme: const LiveTheme().light,
+          home: const Scaffold(body: SizedBox.expand()),
+        ),
+      );
+      final state = messenger.currentState!;
+      showAppToastOn(state, AppToast('已取消关注“前排”', actionLabel: '撤销', onAction: () {}));
+      await tester.pumpAndSettle();
+      closePageAppToast(state);
+      await tester.pumpAndSettle();
+      expect(find.byType(SnackBar), findsNothing);
+
+      showAppToastOn(state, const AppToast('已复制'));
+      await tester.pumpAndSettle();
+      closePageAppToast(state);
+      await tester.pumpAndSettle();
+      expect(find.text('已复制'), findsOneWidget);
+
+      showAppToastOn(state, AppToast('画中画已关闭', actionLabel: '去设置', onAction: () {}, persistent: true));
+      await tester.pumpAndSettle();
+      closePageAppToast(state);
+      await tester.pumpAndSettle();
+      expect(find.text('画中画已关闭'), findsOneWidget);
+    });
+
     for (final dark in [false, true]) {
       testWidgets('the ${dark ? 'dark' : 'light'} theme: the inverse colours', (tester) async {
         await _page(tester, dark: dark, (context) => showAppToast(context, const AppToast('已复制')));

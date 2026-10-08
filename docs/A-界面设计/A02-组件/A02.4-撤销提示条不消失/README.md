@@ -23,5 +23,5 @@
 
 ## 实现和验证
 
-- 未开始。测试：`packages/live_ui/test/` 的提示条测试加 `accessibleNavigation: true` 的情况：有 ✕、30 秒后消失。
+- 已做，待真机，见 [record.md](record.md)。测试：`packages/live_ui/test/` 的提示条测试加 `accessibleNavigation: true` 的情况：有 ✕、30 秒后消失。
 - 真机：K90（开着选择朗读）取消关注一个直播间，提示条有 ✕，30 秒内消失；离开直播间时消失。

@@ -560,6 +560,104 @@ void main() {
       await _close(tester, again);
     });
 
+    // A07.18: on K90 the keyboard left no room under the filter field for
+    // the results or "没有名字包含……的主播".
+    testWidgets('A07.18 c1, c2: with the keyboard up the panel rises over the picture; results show above it', (
+      tester,
+    ) async {
+      tester.view.padding = const FakeViewPadding(top: 40);
+      final room = await _pump(
+        tester,
+        follows: [
+          _room('5').copyWith(nick: 'Aki'),
+          _room('7').copyWith(nick: '星河'),
+        ],
+      );
+      await _openFromMenu(tester);
+      final panel = _key('live-play-switch-panel');
+      final resting = tester.getRect(panel);
+      final picture = tester.getRect(_key('live-play-video-box'));
+      expect(resting.top, closeTo(picture.bottom, 0.5));
+      await _tap(tester, 'switch-search');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 360);
+      await tester.enterText(_key('switch-search-field'), 'zzz');
+      await tester.pump();
+      const keyboardTop = 852.0 - 360;
+      final words = find.text('没有名字包含“zzz”的主播');
+      final message = tester.getRect(_key('switch-no-match'));
+      final text = tester.getRect(words);
+      expect(text.top, greaterThanOrEqualTo(message.top));
+      expect(text.bottom, lessThanOrEqualTo(math.min(message.bottom, keyboardTop)), reason: 'above the keyboard');
+      expect(tester.getRect(panel).top, lessThan(picture.bottom), reason: 'over the picture');
+      expect(tester.getRect(panel).bottom, lessThanOrEqualTo(keyboardTop));
+
+      // c2: a row of cards shows too.
+      await tester.enterText(_key('switch-search-field'), 'aki');
+      await tester.pump();
+      final card = tester.getRect(_key('switch-room-bilibili-5'));
+      expect(card.bottom, lessThanOrEqualTo(keyboardTop));
+      expect(card.top, greaterThanOrEqualTo(tester.getRect(_key('switch-search-field')).bottom));
+
+      // Without the keyboard the panel is back where it was.
+      tester.view.resetViewInsets();
+      await tester.pump();
+      expect(tester.getRect(panel), resting);
+      await _close(tester, room);
+    });
+
+    for (final fullscreen in [false, true]) {
+      testWidgets('A07.18: a portrait stream${fullscreen ? "'s fullscreen" : ''}: the panel grows up by the keyboard', (
+        tester,
+      ) async {
+        tester.view.padding = const FakeViewPadding(top: 40);
+        final room = await _pump(tester, portraitStream: true, follows: [_room('5'), _room('7')]);
+        if (fullscreen) {
+          await _tap(tester, 'live-play-fullscreen');
+          await _tap(tester, 'live-play-switch-room');
+          await _settle(tester);
+        } else {
+          await _openFromMenu(tester);
+          expect(
+            find.descendant(of: _key('live-play-portrait-panels'), matching: _key('live-play-switch-panel')),
+            findsOneWidget,
+          );
+        }
+        final panel = _key('live-play-switch-panel');
+        final resting = tester.getRect(panel);
+        await _tap(tester, 'switch-search');
+        tester.view.viewInsets = const FakeViewPadding(bottom: 360);
+        await tester.enterText(_key('switch-search-field'), 'zzz');
+        await tester.pump();
+        const keyboardTop = 852.0 - 360;
+        final text = tester.getRect(find.text('没有名字包含“zzz”的主播'));
+        expect(text.bottom, lessThanOrEqualTo(math.min(tester.getRect(_key('switch-no-match')).bottom, keyboardTop)));
+        expect(tester.getRect(panel).bottom, lessThanOrEqualTo(keyboardTop));
+        tester.view.resetViewInsets();
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(tester.getRect(panel), resting);
+        await _close(tester, room);
+      });
+    }
+
+    testWidgets('A07.18: the landscape fullscreen keeps its panel on the right with the keyboard up', (tester) async {
+      final room = await _pump(tester, width: 852, height: 393, follows: [_room('5')]);
+      await _tap(tester, 'live-play-fullscreen');
+      await _tap(tester, 'live-play-switch-room');
+      await _settle(tester);
+      final panel = _key('live-play-switch-panel');
+      await _tap(tester, 'switch-search');
+      tester.view.viewInsets = const FakeViewPadding(bottom: 200);
+      await tester.pump();
+      final rect = tester.getRect(panel);
+      expect((rect.left, rect.top, rect.width), (852 - 360.0, 0.0, 360.0));
+      expect(find.descendant(of: _key('live-play-side-panel'), matching: panel), findsOneWidget);
+      tester.view.resetViewInsets();
+      await tester.pump();
+      expect(tester.getRect(panel), const Rect.fromLTWH(852 - 360, 0, 360, 393));
+      await _close(tester, room);
+    });
+
     testWidgets('c8: the refresh shows the last time, a spinner meanwhile, and failures in red with a message', (
       tester,
     ) async {

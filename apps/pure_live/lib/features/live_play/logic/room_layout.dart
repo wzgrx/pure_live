@@ -210,6 +210,19 @@ PictureDrag pictureDragAt({required double x, required double width, bool switch
   return x > width * 2 / 3 ? PictureDrag.volume : PictureDrag.switchRoom;
 }
 
+/// Whether a drag starting [globalY] down a screen [screenHeight] high is in
+/// the system's gesture area at its bottom or top edge ([insets], the
+/// view's `systemGestureInsets`; A07.15): going home or pulling down the
+/// status bar from there should not also change the brightness, the volume
+/// or the room. The side edges (Back) are left out: that gesture is
+/// sideways. A system reporting 0 (desktops, three-button navigation)
+/// leaves every drag as it was; there is no fixed fallback height.
+bool inSystemGestureArea({
+  required double globalY,
+  required double screenHeight,
+  required ({double top, double bottom}) insets,
+}) => (insets.bottom > 0 && globalY >= screenHeight - insets.bottom) || (insets.top > 0 && globalY < insets.top);
+
 /// Where a swipe between rooms that moved the picture by [offset] (upwards
 /// negative) of a screen [extent] high and ended at [velocity] (upwards
 /// negative) goes (U.2b2): 1 to the next room (upwards), -1 to the previous

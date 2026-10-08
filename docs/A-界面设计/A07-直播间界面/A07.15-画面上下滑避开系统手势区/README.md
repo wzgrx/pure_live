@@ -36,7 +36,7 @@
 
 ## 验证
 
-- 自动测试（做的时候写，先写改之前会失败的）：
+- 已做（X1、X2 都按 A），待真机，见 [record.md](record.md)。自动测试：
   - 纯函数：给定屏幕大小、手势区和全局坐标，底边区内为真、区外为假、手势区为 0 时总是假（`apps/pure_live/test/features/live_play/room_swipe_test.dart`，`pictureDragAt` 的用例在 `:237-241`）。
   - 组件：横屏全屏、`DeviceControls.debugAvailable = true`、假的 `pure_live/device_controls` 通道（同 `room_popups_test.dart:250` 那条的做法），`MediaQueryData.systemGestureInsets` 底部 32：从底边 10 以内往上拖，没有 `gesture-level-volume`、通道没收到 `setVolume`；从画面中间往上拖，照旧调音量。竖屏全屏从底边上拖仍按 `swipeRestoresPanel` 回到面板。X1 选 A 时加顶边一条。
 - 真机：待真机（K90，全面屏手势）：横屏全屏从底边上滑回桌面后回来，音量和亮度没变；竖屏全屏同样；画面中间上下滑照常；三键导航下各看一次。记下 K90 报告的手势区高度。

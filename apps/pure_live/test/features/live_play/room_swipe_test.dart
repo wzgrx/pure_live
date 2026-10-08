@@ -241,6 +241,23 @@ void main() {
       expect(pictureDragAt(x: 300, width: 393, switchRooms: true), PictureDrag.volume);
     });
 
+    test("A07.15: the system's gesture area at the bottom and top edges; none when it reports 0", () {
+      const insets = (top: 24.0, bottom: 32.0);
+      expect(inSystemGestureArea(globalY: 393 - 10, screenHeight: 393, insets: insets), isTrue);
+      expect(inSystemGestureArea(globalY: 393 - 32, screenHeight: 393, insets: insets), isTrue);
+      expect(inSystemGestureArea(globalY: 393 - 33, screenHeight: 393, insets: insets), isFalse);
+      expect(inSystemGestureArea(globalY: 200, screenHeight: 393, insets: insets), isFalse);
+      expect(
+        inSystemGestureArea(globalY: 10, screenHeight: 393, insets: insets),
+        isTrue,
+        reason: 'the top edge (X1 A)',
+      );
+      expect(inSystemGestureArea(globalY: 24, screenHeight: 393, insets: insets), isFalse);
+      for (final y in <double>[0, 10, 200, 383, 393]) {
+        expect(inSystemGestureArea(globalY: y, screenHeight: 393, insets: (top: 0, bottom: 0)), isFalse);
+      }
+    });
+
     test('c4: a third of the screen or a fling switches; a fling back keeps the room', () {
       expect(swipeSwitchStep(offset: -290, extent: 852, velocity: 0), 1, reason: 'up: the next room');
       expect(swipeSwitchStep(offset: 290, extent: 852, velocity: 0), -1, reason: 'down: the previous room');

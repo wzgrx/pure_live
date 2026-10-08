@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -923,21 +924,43 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     },
   );
 
-  /// [below] (everything under the picture) with the panel over all of it
-  /// (portrait).
-  Widget _withPanelBelow(LiveRoomController controller, Widget below) => ClipRect(
-    child: Stack(
-      fit: StackFit.expand,
-      children: [
-        below,
-        Positioned.fill(key: const ValueKey('live-play-below-panel'), child: _panelLayer(controller, portrait: true)),
-      ],
-    ),
-  );
+  /// [child] (the chat under the picture) keeps the height it had without
+  /// the keyboard while an open panel covers it (A07.18): squeezed by a
+  /// panel's keyboard it only overflowed (the guest hint over the lines),
+  /// out of sight. The same tree either way, so the chat keeps its state.
+  Widget _coveredByPanel(Widget child, {required double keyboard}) {
+    final extra = _panels.value == null ? 0.0 : keyboard;
+    return ClipRect(
+      child: LayoutBuilder(
+        builder: (context, box) => OverflowBox(
+          alignment: Alignment.topCenter,
+          minHeight: box.maxHeight + extra,
+          maxHeight: box.maxHeight + extra,
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  /// The panel over everything under the picture, whose lower edge is
+  /// [top] from the top of the area (portrait). The keyboard ([keyboard]
+  /// high, A07.18) pushes the panel up over the picture by as much, so it
+  /// keeps its height and a filter's results stay above the keyboard; it
+  /// is back under the picture once the keyboard goes.
+  Widget _panelUnderPicture(LiveRoomController controller, {required double top, required double keyboard, Key? key}) =>
+      Positioned(
+        key: key,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        top: math.max(0, top - keyboard),
+        child: ClipRect(child: _panelLayer(controller, portrait: true)),
+      );
 
   /// [below] with the panel over its lower part (a channel without chat on
-  /// a phone, the portrait fullscreen).
-  Widget _withPanelAtBottom(LiveRoomController controller, Widget below) => LayoutBuilder(
+  /// a phone, the portrait fullscreen); the area shrinks by the [keyboard]
+  /// while it is up and the panel keeps its height (A07.18).
+  Widget _withPanelAtBottom(LiveRoomController controller, Widget below, {double keyboard = 0}) => LayoutBuilder(
     builder: (context, constraints) => Stack(
       fit: StackFit.expand,
       children: [
@@ -947,7 +970,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
           left: 0,
           right: 0,
           bottom: 0,
-          height: constraints.maxHeight * 0.6,
+          height: math.min(constraints.maxHeight, (constraints.maxHeight + keyboard) * 0.6),
           child: ClipRect(child: _panelLayer(controller, portrait: true)),
         ),
       ],
@@ -983,54 +1006,63 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   Widget _buildFullscreen(LiveRoomController controller, _LayoutSettings settings) =>
       _toastsAboveBars(_fullscreen(controller, settings));
 
-  Widget _fullscreen(LiveRoomController controller, _LayoutSettings settings) => Scaffold(
-    backgroundColor: OnVideoColors.ground,
-    body: LayoutBuilder(
-      builder: (context, constraints) {
-        final arrangement = controlsArrangement(
-          display: _display,
-          page: RoomPageLayout.landscape,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          mobile: _platform.mobile,
-        );
-        final portrait = _portraitStream(settings);
-        final upright = arrangement == ControlsArrangement.portraitFullscreen;
-        // U.2b2: the portrait fullscreen swipes through the list the room
-        // came from, with its setting on.
-        final playlist = _playlist;
-        final swipe =
-            upright &&
-                _display == RoomDisplay.portraitFullscreen &&
-                settings.swipe &&
-                _platform.mobile &&
-                playlist != null &&
-                playlist.swipeable
-            ? (_swipe..neighbours(previous: playlist.neighbour(-1), next: playlist.neighbour(1)))
-            : null;
-        final player = _player(
-          controller,
-          settings,
-          arrangement: arrangement,
-          presentation: portrait
-              ? (upright ? PicturePresentation.portraitModes : PicturePresentation.ambient)
-              // A landscape stream in the portrait fullscreen (swiped to, or
-              // forced landscape) sits in the middle over the ambient
-              // background (U.2b2).
-              : _display == RoomDisplay.portraitFullscreen && upright
-              ? PicturePresentation.ambient
-              : PicturePresentation.plain,
-          swipe: swipe,
-        );
-        final picture = swipe == null
-            ? player
-            : RoomSwipeStage(key: const ValueKey('live-play-swipe-stage'), controller: swipe, child: player);
-        // Panels in the portrait fullscreen rise from the bottom (U.2b →
-        // U.2f), elsewhere they come in from the right.
-        return upright ? _withPanelAtBottom(controller, picture) : _withSidePanel(controller, picture);
-      },
-    ),
+  // The keyboard's height is read above the Scaffold, whose body no longer
+  // sees it (A07.18).
+  Widget _fullscreen(LiveRoomController controller, _LayoutSettings settings) => Builder(
+    builder: (context) => _fullscreenScaffold(controller, settings, keyboard: MediaQuery.viewInsetsOf(context).bottom),
   );
+
+  Widget _fullscreenScaffold(LiveRoomController controller, _LayoutSettings settings, {required double keyboard}) =>
+      Scaffold(
+        backgroundColor: OnVideoColors.ground,
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final arrangement = controlsArrangement(
+              display: _display,
+              page: RoomPageLayout.landscape,
+              width: constraints.maxWidth,
+              height: constraints.maxHeight,
+              mobile: _platform.mobile,
+            );
+            final portrait = _portraitStream(settings);
+            final upright = arrangement == ControlsArrangement.portraitFullscreen;
+            // U.2b2: the portrait fullscreen swipes through the list the room
+            // came from, with its setting on.
+            final playlist = _playlist;
+            final swipe =
+                upright &&
+                    _display == RoomDisplay.portraitFullscreen &&
+                    settings.swipe &&
+                    _platform.mobile &&
+                    playlist != null &&
+                    playlist.swipeable
+                ? (_swipe..neighbours(previous: playlist.neighbour(-1), next: playlist.neighbour(1)))
+                : null;
+            final player = _player(
+              controller,
+              settings,
+              arrangement: arrangement,
+              presentation: portrait
+                  ? (upright ? PicturePresentation.portraitModes : PicturePresentation.ambient)
+                  // A landscape stream in the portrait fullscreen (swiped to, or
+                  // forced landscape) sits in the middle over the ambient
+                  // background (U.2b2).
+                  : _display == RoomDisplay.portraitFullscreen && upright
+                  ? PicturePresentation.ambient
+                  : PicturePresentation.plain,
+              swipe: swipe,
+            );
+            final picture = swipe == null
+                ? player
+                : RoomSwipeStage(key: const ValueKey('live-play-swipe-stage'), controller: swipe, child: player);
+            // Panels in the portrait fullscreen rise from the bottom (U.2b →
+            // U.2f), elsewhere they come in from the right.
+            return upright
+                ? _withPanelAtBottom(controller, picture, keyboard: keyboard)
+                : _withSidePanel(controller, picture);
+          },
+        ),
+      );
 
   Widget _infoBar(LiveRoomController controller) =>
       RoomInfoBar(controller: controller, detailsOpen: _details, onToggleDetails: _toggleDetails);
@@ -1090,6 +1122,8 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   Widget _buildInline(BuildContext context, LiveRoomController controller, _LayoutSettings settings) => LayoutBuilder(
     builder: (context, page) {
       final portrait = _portraitStream(settings);
+      // Above the Scaffold, whose body no longer sees it (A07.18).
+      final keyboard = MediaQuery.viewInsetsOf(context).bottom;
       final layout = roomPageLayout(
         width: page.maxWidth,
         height: page.maxHeight,
@@ -1114,12 +1148,14 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
         body: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              if (controller.site.id == SiteIds.iptv) return _channel(controller, settings, layout, constraints);
+              if (controller.site.id == SiteIds.iptv) {
+                return _channel(controller, settings, layout, constraints, keyboard: keyboard);
+              }
               return switch (layout) {
                 RoomPageLayout.wide => _wide(controller, settings, constraints, portrait: portrait),
                 RoomPageLayout.landscape => _phoneLandscape(controller, settings, portrait: portrait),
-                RoomPageLayout.portraitPanel => _portraitPanel(controller, settings),
-                RoomPageLayout.phone => _phone(controller, settings, constraints),
+                RoomPageLayout.portraitPanel => _portraitPanel(controller, settings, keyboard: keyboard),
+                RoomPageLayout.phone => _phone(controller, settings, constraints, keyboard: keyboard),
               };
             },
           ),
@@ -1136,8 +1172,9 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
     LiveRoomController controller,
     _LayoutSettings settings,
     RoomPageLayout layout,
-    BoxConstraints constraints,
-  ) {
+    BoxConstraints constraints, {
+    double keyboard = 0,
+  }) {
     final guide = IptvGuideView(
       key: const ValueKey('live-play-guide-view'),
       controller: controller,
@@ -1189,31 +1226,39 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
       fit: StackFit.expand,
       children: [
         channel,
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          top: height,
-          child: ClipRect(child: _panelLayer(controller, portrait: true)),
-        ),
+        _panelUnderPicture(controller, top: height, keyboard: keyboard),
       ],
     );
   }
 
   /// A phone, a tablet held upright, a narrow window (U.2d change 2): the
   /// 16:9 picture over the strip and the chat; panels cover everything under
-  /// the picture (U.2f).
-  Widget _phone(LiveRoomController controller, _LayoutSettings settings, BoxConstraints constraints) => Column(
-    key: const ValueKey('live-play-portrait-stack'),
-    children: [
-      SizedBox(
-        key: const ValueKey('live-play-video-box'),
-        height: (constraints.maxWidth * 9 / 16).clamp(0.0, constraints.maxHeight * 0.6),
-        child: _player(controller, settings, arrangement: ControlsArrangement.inline),
-      ),
-      Expanded(child: _withPanelBelow(controller, _chatColumn(controller))),
-    ],
-  );
+  /// the picture (U.2f), rising over it with the keyboard (A07.18).
+  Widget _phone(
+    LiveRoomController controller,
+    _LayoutSettings settings,
+    BoxConstraints constraints, {
+    double keyboard = 0,
+  }) {
+    final height = (constraints.maxWidth * 9 / 16).clamp(0.0, constraints.maxHeight * 0.6);
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        Column(
+          key: const ValueKey('live-play-portrait-stack'),
+          children: [
+            SizedBox(
+              key: const ValueKey('live-play-video-box'),
+              height: height,
+              child: _player(controller, settings, arrangement: ControlsArrangement.inline),
+            ),
+            Expanded(child: _coveredByPanel(_chatColumn(controller), keyboard: keyboard)),
+          ],
+        ),
+        _panelUnderPicture(controller, top: height, keyboard: keyboard, key: const ValueKey('live-play-below-panel')),
+      ],
+    );
+  }
 
   /// A portrait stream on a phone or a narrow window (U.2b): the picture
   /// under the three-stop panel.
@@ -1222,24 +1267,26 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// area's extra height left a black strip over it and hid as much more
   /// under the panel), and the local composer is a star on the chat list,
   /// so the middle stop keeps five lines of chat in view.
-  Widget _portraitPanel(LiveRoomController controller, _LayoutSettings settings) => PortraitPanelLayout(
-    key: const ValueKey('live-play-portrait-panel'),
-    mode: settings.mode,
-    mobile: _platform.mobile,
-    onPortraitFullscreen: _platform.mobile ? () => unawaited(_enterPortraitFullscreen()) : null,
-    onFullscreen: () => unawaited(_enterFullscreen(landscape: _platform.mobile)),
-    player: (covered) => _player(
-      controller,
-      settings,
-      arrangement: ControlsArrangement.inline,
-      covered: covered,
-      alignment: Alignment.topCenter,
-    ),
-    stop: _memory.panelStop,
-    onStop: (stop) => _memory.panelStop = stop,
-    content: _chatColumn(controller, composerCollapsed: true),
-    panels: _panelLayer(controller, portrait: true),
-  );
+  Widget _portraitPanel(LiveRoomController controller, _LayoutSettings settings, {double keyboard = 0}) =>
+      PortraitPanelLayout(
+        key: const ValueKey('live-play-portrait-panel'),
+        mode: settings.mode,
+        mobile: _platform.mobile,
+        onPortraitFullscreen: _platform.mobile ? () => unawaited(_enterPortraitFullscreen()) : null,
+        onFullscreen: () => unawaited(_enterFullscreen(landscape: _platform.mobile)),
+        player: (covered) => _player(
+          controller,
+          settings,
+          arrangement: ControlsArrangement.inline,
+          covered: covered,
+          alignment: Alignment.topCenter,
+        ),
+        stop: _memory.panelStop,
+        onStop: (stop) => _memory.panelStop = stop,
+        content: _chatColumn(controller, composerCollapsed: true),
+        panels: _panelLayer(controller, portrait: true),
+        keyboard: keyboard,
+      );
 
   /// A07.17 c2 (choice A): a phone held sideways, not in fullscreen. The
   /// picture takes the full height under the app bar; on its right only the

@@ -246,6 +246,64 @@ void main() {
     });
   });
 
+  group("A07.15: drags from the system's gesture area", () {
+    testWidgets('landscape fullscreen: from the bottom or top edge nothing changes; from the middle as before', (
+      tester,
+    ) async {
+      var volume = 0.5;
+      final calls = <String>[];
+      DeviceControls.debugAvailable = true;
+      const channel = MethodChannel('pure_live/device_controls');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
+        calls.add(call.method);
+        switch (call.method) {
+          case 'getVolume':
+            return volume;
+          case 'getBrightness':
+            return 0.5;
+          case 'setVolume':
+            volume = ((call.arguments as Map)['value'] as num).toDouble();
+        }
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, null));
+      final room = await _pump(tester, width: 852, height: 393);
+      await tester.tap(_key('live-play-fullscreen'));
+      await tester.pump();
+      await _settle(tester);
+      // Gesture navigation: the system takes the lowest 32 and the top 24.
+      tester.view.systemGestureInsets = const FakeViewPadding(top: 24, bottom: 32);
+      addTearDown(tester.view.resetSystemGestureInsets);
+      // The controls hide after 4 s: the drags land on the picture.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump();
+
+      Future<void> drag(Offset from, double dy) async {
+        final gesture = await tester.startGesture(from);
+        for (var i = 0; i < 4; i++) {
+          await gesture.moveBy(Offset(0, dy / 4));
+          await _settle(tester);
+        }
+        await gesture.up();
+        await _settle(tester);
+      }
+
+      // Going home from the bottom edge on the right half.
+      await drag(const Offset(700, 393 - 8), -120);
+      expect(calls, isNot(contains('setVolume')));
+      expect(_key('gesture-level-volume'), findsNothing);
+      // Pulling down the status bar from the top edge on the left half.
+      await drag(const Offset(150, 6), 120);
+      expect(calls, isNot(contains('setBrightness')));
+      expect(_key('gesture-level-brightness'), findsNothing);
+      // The middle of the right half: the volume as before.
+      await drag(const Offset(700, 260), -120);
+      expect(calls, contains('setVolume'));
+      expect(volume, greaterThan(0.5));
+      await _close(tester, room);
+    });
+  });
+
   group('U.2n c2, c3 (B-3, B-14): the room volume', () {
     testWidgets('Android: the system media volume, the same one the drag on the picture changes', (tester) async {
       var system = 0.8;

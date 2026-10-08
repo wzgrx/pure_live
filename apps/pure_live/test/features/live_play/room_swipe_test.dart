@@ -256,6 +256,16 @@ void main() {
       for (final y in <double>[0, 10, 200, 383, 393]) {
         expect(inSystemGestureArea(globalY: y, screenHeight: 393, insets: (top: 0, bottom: 0)), isFalse);
       }
+      // HyperOS (the K90) reports no bottom gesture area at all: Android
+      // phones keep a band of their own there.
+      const hyperOs = (top: 48.0, bottom: 0.0);
+      expect(inSystemGestureArea(globalY: 393 - 2, screenHeight: 393, insets: hyperOs, bottomFallback: 32), isTrue);
+      expect(inSystemGestureArea(globalY: 393 - 33, screenHeight: 393, insets: hyperOs, bottomFallback: 32), isFalse);
+      expect(
+        inSystemGestureArea(globalY: 393 - 40, screenHeight: 393, insets: insets, bottomFallback: 32),
+        isFalse,
+        reason: 'a reported area wins',
+      );
     });
 
     test('c4: a third of the screen or a fling switches; a fling back keeps the room', () {

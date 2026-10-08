@@ -50,3 +50,8 @@
 | 6. 换成三键导航重复 1 | 记下结果（系统可能报告 0，这时和改之前一样） |
 
 - K90 报告的手势区高度：没有真机，待维护者记下（可以临时打日志看 `MediaQuery.systemGestureInsetsOf`）。
+
+## K90 复查（2026-10-08，master fc9ee0ea4）和跟进
+
+- 横屏全屏，右半边从屏幕最底边（离底 5 px）往上划：音量 37% → 84%，**没挡住**。`adb shell dumpsys window`：HyperOS 只报了顶部的 `mandatorySystemGestures`（`[0,0][2608,144]`，即 48 dp），底部根本没有手势区来源，Flutter 拿到的 `systemGestureInsets.bottom` 是 0，于是按验收 4“系统报 0 时不变”放行了。
+- 跟进：`inSystemGestureArea(bottomFallback:)`，Android 上系统报 0 时底部按 32 dp（`androidGestureFallback`）算；系统报了就用系统的；桌面不变。`room_swipe_test.dart` 加了 HyperOS 的情况；`test/features/live_play` 310 个全过。待 K90 再看。

@@ -215,13 +215,23 @@ PictureDrag pictureDragAt({required double x, required double width, bool switch
 /// view's `systemGestureInsets`; A07.15): going home or pulling down the
 /// status bar from there should not also change the brightness, the volume
 /// or the room. The side edges (Back) are left out: that gesture is
-/// sideways. A system reporting 0 (desktops, three-button navigation)
-/// leaves every drag as it was; there is no fixed fallback height.
+/// sideways. A system reporting 0 at the bottom gets [bottomFallback]
+/// instead: HyperOS on the K90 reports only the top (144 px) while its
+/// bottom edge still goes home, so Android phones pass
+/// [androidGestureFallback]; desktops pass 0 and every drag stays as it was.
 bool inSystemGestureArea({
   required double globalY,
   required double screenHeight,
   required ({double top, double bottom}) insets,
-}) => (insets.bottom > 0 && globalY >= screenHeight - insets.bottom) || (insets.top > 0 && globalY < insets.top);
+  double bottomFallback = 0,
+}) {
+  final bottom = insets.bottom > 0 ? insets.bottom : bottomFallback;
+  return (bottom > 0 && globalY >= screenHeight - bottom) || (insets.top > 0 && globalY < insets.top);
+}
+
+/// The bottom band an Android phone keeps for going home when the system
+/// reports none (Android's own gesture area is about this high).
+const double androidGestureFallback = 32;
 
 /// Where a swipe between rooms that moved the picture by [offset] (upwards
 /// negative) of a screen [extent] high and ended at [velocity] (upwards

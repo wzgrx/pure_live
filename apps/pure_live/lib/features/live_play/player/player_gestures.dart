@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
@@ -161,6 +162,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
       globalY: _downY ?? details.globalPosition.dy,
       screenHeight: MediaQuery.sizeOf(context).height,
       insets: (top: edges.top, bottom: edges.bottom),
+      bottomFallback: defaultTargetPlatform == TargetPlatform.android ? androidGestureFallback : 0,
     )) {
       return;
     }

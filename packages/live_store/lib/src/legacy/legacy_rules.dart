@@ -27,6 +27,40 @@ abstract final class LegacyRules {
   /// [room] without a stale notice.
   static LiveRoom clearStaleNotice(LiveRoom room) => isStaleNotice(room.notice) ? room.copyWith(notice: '') : room;
 
+  /// The names 3.x stored for JD, Kugou and Baidu rooms whose name or title
+  /// it did not get (UPGRADES X-2, 28-2; 3.x `jd_live_api.dart:231-232`,
+  /// `kugou_live_api.dart:396-397`, `baidu_live_api.dart:390`). v4's
+  /// adapters leave them empty instead, and [LiveRoom.mergeFrom] keeps a
+  /// stored value against an empty one, so a stored stand-in would stay.
+  /// (E05.4 may move this table to live_core.)
+  static const Map<String, String> placeholderNames = {
+    SiteIds.jdLive: 'JD Live',
+    SiteIds.kugouLive: 'Kugou Live',
+    SiteIds.baiduLive: 'Baidu Live',
+  };
+
+  /// [room] without 3.x's stand-ins: a nick or title equal to its platform's
+  /// [placeholderNames] becomes empty; JD's also lose the broadcast id 3.x
+  /// used as the user id and the cover it used as the avatar
+  /// (`jd_live_site.dart:85`, `:88`). Other platforms and fields stay; the
+  /// same room comes back when there is nothing to clear.
+  static LiveRoom clearPlaceholders(LiveRoom room) {
+    final standIn = placeholderNames[room.platform];
+    if (standIn == null) return room;
+    final jd = room.platform == SiteIds.jdLive;
+    final nick = room.nick.trim() == standIn;
+    final title = room.title.trim() == standIn;
+    final userId = jd && room.userId != null && room.userId!.isNotEmpty && room.userId == room.roomId;
+    final avatar = jd && room.avatar.isNotEmpty && room.avatar == room.cover;
+    if (!nick && !title && !userId && !avatar) return room;
+    return room.copyWith(
+      nick: nick ? '' : null,
+      title: title ? '' : null,
+      userId: userId ? '' : null,
+      avatar: avatar ? '' : null,
+    );
+  }
+
   /// A 3.x quality id of [platform] as the platform names it now
   /// (`*Api.qualityIdFromLegacy`: CC, LiveMe, Missevan, Kilakila,
   /// Xiaohongshu, PandaTV, TikTok, Baidu, 17LIVE); other platforms kept

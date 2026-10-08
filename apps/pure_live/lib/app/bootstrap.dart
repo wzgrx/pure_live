@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -74,6 +75,154 @@ int? readTotalMemoryBytes({String path = '/proc/meminfo'}) {
   return null;
 }
 
+/// The `meta` key of the last 3.x import's summary (J06.2, JSON):
+/// [legacyImportHeader] puts it at the top of exported logs.
+const String legacyLastImportKey = 'legacy.lastImport';
+
+/// The app log's tag of the 3.x import.
+const String legacyLogTag = 'legacy';
+
+/// Imports 3.x's settings box and IPTV databases into [store] (main window
+/// only; read-only, recorded in ledgers), then clears 3.x's stand-in names
+/// once ([LegacyMigration.clearPlaceholdersOnce]).
+///
+/// What happened goes to [appLog] (tag [legacyLogTag]), so release builds
+/// show it on the log page: a run that read a source writes its report
+/// (counts, failed sources, names of unreadable values and of sign-ins that
+/// could not be encrypted, never a value), a warning when something was
+/// left behind, and its summary to `meta` [legacyLastImportKey]. An
+/// ordinary start writes nothing. [importHive] is
+/// [LegacyMigration.importHiveFiles] (tests replace it).
+Future<void> importLegacyData(
+  LiveStore store,
+  IptvLibrary iptvLibrary, {
+  required Future<List<String>> Function() hiveFiles,
+  required Directory playlistDirectory,
+  List<String> Function(List<String> hiveFiles) iptvDatabases = legacyIptvDatabases,
+  Future<LegacyImportReport> Function(LiveStore store, List<String> files) importHive = LegacyMigration.importHiveFiles,
+  AppLog? appLog,
+  DateTime Function() now = DateTime.now,
+}) async {
+  final logs = appLog ?? AppLog.instance;
+  var files = const <String>[];
+  LegacyImportReport? report;
+  try {
+    files = await hiveFiles();
+    report = await importHive(store, files);
+    log('3.x import: $report', name: 'AppBootstrap');
+    await LegacyReloginNotice.record(store.meta, report);
+  } on Object catch (error, stack) {
+    log('3.x import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
+    logs.warning(legacyLogTag, '3.x import failed', error);
+  }
+  LegacyIptvReport? iptv;
+  try {
+    iptv = await LegacyIptvMigration.importDatabases(
+      store,
+      iptvLibrary,
+      iptvDatabases(files),
+      playlistDirectory: playlistDirectory,
+    );
+    log('3.x IPTV import: $iptv', name: 'AppBootstrap');
+  } on Object catch (error, stack) {
+    log('3.x IPTV import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
+    logs.warning(legacyLogTag, '3.x IPTV import failed', error);
+  }
+
+  final settingsRead = report != null && report.read;
+  final iptvRead = iptv != null && (iptv.importedSources > 0 || iptv.failedSources.isNotEmpty);
+  if (settingsRead) {
+    logs.add(report.hasProblems ? LogLevel.warning : LogLevel.info, legacyLogTag, '3.x import: ${report.summary()}');
+  }
+  if (iptvRead) {
+    final problems = iptv.failedSources.isNotEmpty || iptv.skipped.isNotEmpty;
+    logs.add(problems ? LogLevel.warning : LogLevel.info, legacyLogTag, '3.x IPTV import: ${_iptvSummary(iptv)}');
+  }
+  if (settingsRead || iptvRead) {
+    try {
+      await store.meta.set(
+        legacyLastImportKey,
+        jsonEncode({
+          'time': now().toIso8601String(),
+          if (settingsRead)
+            'settings': {
+              'sources': report.importedSources,
+              'before': report.alreadyImported,
+              'failed': report.failedSources.length,
+              'follows': report.follows,
+              'history': report.history,
+              'unreadable': report.skipped.length,
+              'signInsNotStored': report.skippedSecrets.length,
+            },
+          if (iptvRead)
+            'iptv': {
+              'sources': iptv.importedSources,
+              'before': iptv.alreadyImported,
+              'failed': iptv.failedSources.length,
+              'playlists': iptv.playlists,
+              'channels': iptv.channels,
+              'guides': iptv.guides,
+              'skipped': iptv.skipped.length,
+            },
+        }),
+      );
+    } on Object catch (error) {
+      logs.warning(legacyLogTag, '3.x import summary not stored', error);
+    }
+  }
+
+  try {
+    final cleared = await LegacyMigration.clearPlaceholdersOnce(store);
+    if (cleared != null && cleared > 0) {
+      logs.info(legacyLogTag, '3.x stand-in names (JD Live, Kugou Live, Baidu Live) cleared from $cleared rooms');
+    }
+  } on Object catch (error) {
+    // Tried again next start.
+    logs.warning(legacyLogTag, '3.x stand-in names not cleared', error);
+  }
+}
+
+String _iptvSummary(LegacyIptvReport report) {
+  final failed = report.failedSources;
+  return 'sources ${report.importedSources}, before ${report.alreadyImported}, '
+      'failed ${failed.isEmpty ? '0' : '${failed.length} (${failed.join(', ')})'}, '
+      'playlists ${report.playlists}, channels ${report.channels}, guides ${report.guides}, '
+      'skipped ${report.skipped.length}';
+}
+
+/// The first line of an exported log from the stored [summary]
+/// ([legacyLastImportKey]): `3.x import (<time>): …`; null without one.
+String? legacyImportHeader(String? summary) {
+  if (summary == null || summary.isEmpty) return null;
+  try {
+    final json = jsonDecode(summary);
+    if (json is! Map) return null;
+    final time = DateTime.tryParse('${json['time']}')?.toLocal();
+    final stamp = time == null ? '?' : time.toIso8601String().substring(0, 16).replaceFirst('T', ' ');
+    String counts(Object? part, List<(String, String)> names) {
+      if (part is! Map) return '';
+      return [for (final (key, label) in names) '$label ${part[key] ?? 0}'].join(', ');
+    }
+
+    final parts = [
+      if (json['settings'] case final Map<Object?, Object?> settings)
+        counts(settings, const [
+          ('sources', 'sources'),
+          ('follows', 'follows'),
+          ('history', 'history'),
+          ('unreadable', 'unreadable'),
+          ('signInsNotStored', 'sign-ins not stored'),
+          ('failed', 'failed'),
+        ]),
+      if (json['iptv'] case final Map<Object?, Object?> iptv)
+        'IPTV: ${counts(iptv, const [('sources', 'sources'), ('playlists', 'playlists'), ('channels', 'channels'), ('guides', 'guides'), ('skipped', 'skipped'), ('failed', 'failed')])}',
+    ];
+    return '3.x import ($stamp): ${parts.join('; ')}';
+  } on FormatException {
+    return null;
+  }
+}
+
 /// The start of the app (3.x `AppInitializer.initialize`), in order:
 ///
 /// 1. the command line (extra desktop windows) and the data folder, which
@@ -111,27 +260,15 @@ abstract final class AppBootstrap {
     final store = await LiveStore.open(dataRoot, cipher: cipher, shared: true);
     final iptvLibrary = StoreIptvLibrary(store);
 
+    // Every window's exported log starts with the last 3.x import (J06.2).
+    AppLog.instance.header = () async => legacyImportHeader(await store.meta.get(legacyLastImportKey));
     if (launch.isPrimary) {
-      var hiveFiles = const <String>[];
-      try {
-        hiveFiles = await legacyHiveFiles();
-        final report = await LegacyMigration.importHiveFiles(store, hiveFiles);
-        log('3.x import: $report', name: 'AppBootstrap');
-        await LegacyReloginNotice.record(store.meta, report);
-      } on Object catch (error, stack) {
-        log('3.x import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
-      }
-      try {
-        final report = await LegacyIptvMigration.importDatabases(
-          store,
-          iptvLibrary,
-          legacyIptvDatabases(hiveFiles),
-          playlistDirectory: iptvPlaylistDirectory(dataRoot),
-        );
-        log('3.x IPTV import: $report', name: 'AppBootstrap');
-      } on Object catch (error, stack) {
-        log('3.x IPTV import failed', name: 'AppBootstrap', error: error, stackTrace: stack);
-      }
+      await importLegacyData(
+        store,
+        iptvLibrary,
+        hiveFiles: legacyHiveFiles,
+        playlistDirectory: iptvPlaylistDirectory(dataRoot),
+      );
     }
     return wire(store: store, cipher: cipher, launch: launch, dataRoot: dataRoot, iptvLibrary: iptvLibrary);
   }

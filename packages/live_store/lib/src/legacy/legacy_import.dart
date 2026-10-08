@@ -114,6 +114,23 @@ final class LegacyImportReport {
   /// in again.
   final List<String> skippedSecrets = [];
 
+  /// Whether this run read a source or failed to (an ordinary start reads
+  /// nothing).
+  bool get read => importedSources > 0 || failedSources.isNotEmpty;
+
+  /// Whether something was left behind: a source, a value or a sign-in.
+  bool get hasProblems => failedSources.isNotEmpty || skipped.isNotEmpty || skippedSecrets.isNotEmpty;
+
+  /// The report in words for the app log (J06.2): counts, the failed
+  /// sources, the names of unreadable values and of sign-ins that could not
+  /// be encrypted; never a value.
+  String summary() {
+    String named(int count, List<String> names) => names.isEmpty ? '$count' : '$count (${names.join(', ')})';
+    return 'sources $importedSources, before $alreadyImported, failed ${named(failedSources.length, failedSources)}, '
+        'follows $follows, history $history, unreadable ${named(skipped.length, skipped)}, '
+        'sign-ins not stored ${named(skippedSecrets.length, skippedSecrets)}';
+  }
+
   @override
   String toString() =>
       'LegacyImportReport(imported: $importedSources, before: $alreadyImported, failed: ${failedSources.length}, '
@@ -170,6 +187,32 @@ abstract final class LegacyMigration {
       ..follows = await store.follows.count()
       ..history = (await store.history.all()).length;
     return report;
+  }
+
+  /// `meta` key set once 3.x's stand-in names were cleared from the stored
+  /// rooms ([clearPlaceholdersOnce]).
+  static const placeholdersClearedKey = 'legacy.placeholdersCleared';
+
+  /// Clears 3.x's stand-in names ([LegacyRules.clearPlaceholders]) from the
+  /// follows and history once: rooms an earlier import (4.0.0) brought in
+  /// before the import cleared them itself. Only the rooms with a stand-in
+  /// change; the marker is written after both writes, so a failed write is
+  /// tried again next start. Returns the rooms changed, or null when it ran
+  /// before.
+  static Future<int?> clearPlaceholdersOnce(LiveStore store) async {
+    if (await store.meta.get(placeholdersClearedKey) != null) return null;
+    var changed = 0;
+    List<LiveRoom>? cleared(List<LiveRoom> rooms) {
+      final result = [for (final room in rooms) LegacyRules.clearPlaceholders(room)];
+      final count = [for (var i = 0; i < rooms.length; i++) !identical(rooms[i], result[i])].where((c) => c).length;
+      changed += count;
+      return count == 0 ? null : result;
+    }
+
+    if (cleared(await store.follows.all()) case final follows?) await store.follows.replaceAll(follows);
+    if (cleared(await store.history.all()) case final history?) await store.history.replaceAll(history);
+    await store.meta.set(placeholdersClearedKey, '1');
+    return changed;
   }
 
   static List<String>? _decodeLedger(Object? raw) {

@@ -263,7 +263,8 @@ final class LegacySnapshot {
     }
   }
 
-  LiveRoom _room(Map<String, Object?> json) => LegacyRules.clearStaleNotice(LiveRoom.fromJson(json));
+  LiveRoom _room(Map<String, Object?> json) =>
+      LegacyRules.clearPlaceholders(LegacyRules.clearStaleNotice(LiveRoom.fromJson(json)));
 
   /// 3.x keyed group assignments `platform:roomId` (lower-case platform,
   /// case kept) and, before that, by the room id alone. Keys become v4

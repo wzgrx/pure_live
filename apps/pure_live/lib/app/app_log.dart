@@ -164,6 +164,11 @@ final class AppLog extends ChangeNotifier {
   File? _file;
   LogLevel _level = LogLevel.info;
 
+  /// The first line of an [export], or null for none (the app gives the
+  /// last 3.x import's summary, J06.2; the log itself does not read the
+  /// store).
+  Future<String?> Function()? header;
+
   /// The entries in memory, oldest first.
   List<LogEntry> get entries => List.unmodifiable(_entries);
 
@@ -298,12 +303,23 @@ final class AppLog extends ChangeNotifier {
     return files;
   }
 
-  /// Writes the entries in memory to a file in [into] for sharing; returns it.
+  /// Writes the entries in memory to a file in [into] for sharing, after
+  /// the [header] line when there is one; returns it.
   Future<File> export(Directory into) async {
     await into.create(recursive: true);
     final stamp = _now().toIso8601String().replaceAll(':', '-').split('.').first.replaceFirst('T', '_');
     final file = File(p.join(into.path, 'pure_live_log_$stamp.txt'));
-    await file.writeAsString([for (final entry in _entries) entry.format()].join('\n'), flush: true);
+    String? first;
+    try {
+      first = await header?.call();
+    } on Object catch (error) {
+      debugPrint('Log header failed: $error');
+    }
+    final lines = [
+      if (first != null && first.isNotEmpty) redactSecrets(first),
+      for (final entry in _entries) entry.format(),
+    ];
+    await file.writeAsString(lines.join('\n'), flush: true);
     return file;
   }
 

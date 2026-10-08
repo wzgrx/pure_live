@@ -1,4 +1,4 @@
-"""Builds a comparison / review page from a task's spec (docs/TASKS.md/<id>/page.json).
+"""Builds a comparison / review page from a task's spec (the task folder's page.json).
 
 The page is one self-contained HTML file (pictures embedded) to publish as a
 claude.ai page with the `db` capability. On that page every change has

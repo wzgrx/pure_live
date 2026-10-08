@@ -8,20 +8,18 @@ import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from uri
-/// 6501 (`SendItemSubBroadcastPacket`, a gift sent in this room).
+/// 6501 (`SendItemSubBroadcastPacket`, a gift sent in this room), as a
+/// [LiveGift] (E05.5): [combo] is its combo total, [payTotal] its value in
+/// [LiveGiftUnit.other] (the unit is not documented).
 @immutable
-final class HuyaGift {
+final class HuyaGift extends LiveGift {
   /// Creates the gift.
-  const new({required this.id, required this.name, required this.count, required this.combo, required this.payTotal});
-
-  /// `iItemType`, the gift's id (`4` is 虎粮).
-  final int id;
-
-  /// `sPropsName` (`虎粮`, `粉丝通行证`).
-  final String name;
-
+  ///
+  /// [id] is `iItemType`, the gift's id (`4` is 虎粮), empty when 0 (E05.5:
+  /// was the number); [name] `sPropsName` (`虎粮`, `粉丝通行证`); [count]
   /// `iItemCount`, at least 1: how many this send gave.
-  final int count;
+  const new({required super.id, required super.name, required super.count, required this.combo, required this.payTotal})
+    : super(comboTotal: combo, totalValue: payTotal > 0 ? payTotal : null);
 
   /// `iItemGroup`, at least 1: the combo counter. A combo sends one packet
   /// per hit with the same `lComboSeqId`, counting 1, 2, 3…
@@ -33,15 +31,10 @@ final class HuyaGift {
 
   @override
   bool operator ==(Object other) =>
-      other is HuyaGift &&
-      other.id == id &&
-      other.name == name &&
-      other.count == count &&
-      other.combo == combo &&
-      other.payTotal == payTotal;
+      super == other && other is HuyaGift && other.combo == combo && other.payTotal == payTotal;
 
   @override
-  int get hashCode => Object.hash(id, name, count, combo, payTotal);
+  int get hashCode => Object.hash(super.hashCode, combo, payTotal);
 
   @override
   String toString() => 'HuyaGift($name ×$count, combo $combo)';
@@ -251,8 +244,8 @@ abstract final class HuyaDanmakuProtocol {
   /// tag 0 `iItemType`, 2 `iItemCount`, 4 `lSenderUid`, 6 `sSenderNick`, 9
   /// `iItemGroup` (the combo counter), 20 `sPropsName`, 41 `lPayTotal`. A
   /// gift without a name is not reported (the web client names it from a
-  /// gift table this client does not load). Reported as a gift (not shown
-  /// yet, appendix B-21); the text is `虎粮 ×1`.
+  /// gift table this client does not load). Reported as a gift holding a
+  /// [HuyaGift]; the text is `虎粮 ×1`.
   static LiveMessage? gift(Uint8List? body, int eventId) {
     final packet = TarsStruct.decode(body ?? const []);
     final name = (packet.string(20) ?? '').trim();
@@ -260,8 +253,9 @@ abstract final class HuyaDanmakuProtocol {
     final count = packet.integer(2) ?? 0;
     final combo = packet.integer(9) ?? 0;
     final payTotal = packet.integer(41) ?? 0;
+    final id = packet.integer(0) ?? 0;
     final data = HuyaGift(
-      id: packet.integer(0) ?? 0,
+      id: id == 0 ? '' : '$id',
       name: name,
       count: count > 0 ? count : 1,
       combo: combo > 0 ? combo : 1,
@@ -271,7 +265,7 @@ abstract final class HuyaDanmakuProtocol {
       type: LiveMessageType.gift,
       userName: packet.string(6) ?? '',
       userId: '${packet.integer(4) ?? 0}',
-      message: '${data.name} ×${data.count}',
+      message: data.plainText,
       color: LiveMessageColor.white,
       messageId: _messageId(eventId),
       data: data,

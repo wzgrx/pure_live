@@ -9,40 +9,33 @@ import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from a
-/// `dgb` packet ([DouyuDanmakuProtocol.gift]). Reported, not shown yet
-/// (M5 appendix B-21).
+/// `dgb` packet ([DouyuDanmakuProtocol.gift]), as a [LiveGift] (E05.5):
+/// [combo] is its combo total; the packet has no price.
 @immutable
-final class DouyuGift {
+final class DouyuGift extends LiveGift {
   /// Creates the gift.
-  const new({required this.id, required this.name, required this.count, this.combo = 0, this.receiverName = ''});
-
-  /// `gfid`; empty when missing or 0 (a backpack prop such as 陪伴印章, whose
-  /// id is `pid`).
-  final String id;
-
-  /// `gfn` (`粉丝荧光棒`).
-  final String name;
-
-  /// `gfcnt`, at least 1.
-  final int count;
+  ///
+  /// [id] is `gfid`, empty when missing or 0 (a backpack prop such as
+  /// 陪伴印章, whose id is `pid`); [name] `gfn` (`粉丝荧光棒`); [count]
+  /// `gfcnt`, at least 1; [receiverName] `receive_nn`, the broadcaster or a
+  /// guest, empty when missing.
+  const new({
+    required super.id,
+    required super.name,
+    required super.count,
+    this.combo = 0,
+    super.receiverName,
+    super.comboKey,
+  }) : super(comboTotal: combo > 0 ? combo : null);
 
   /// `hits`, the combo so far including this send; 0 when missing.
   final int combo;
 
-  /// `receive_nn`: the broadcaster, or a guest; empty when missing.
-  final String receiverName;
+  @override
+  bool operator ==(Object other) => super == other && other is DouyuGift && other.combo == combo;
 
   @override
-  bool operator ==(Object other) =>
-      other is DouyuGift &&
-      other.id == id &&
-      other.name == name &&
-      other.count == count &&
-      other.combo == combo &&
-      other.receiverName == receiverName;
-
-  @override
-  int get hashCode => Object.hash(id, name, count, combo, receiverName);
+  int get hashCode => Object.hash(super.hashCode, combo);
 
   @override
   String toString() => 'DouyuGift($name ×$count, combo $combo)';
@@ -293,9 +286,10 @@ abstract final class DouyuDanmakuProtocol {
   }
 
   /// `dgb`: a gift sent in this room, reported as a [LiveMessageType.gift]
-  /// holding a [DouyuGift] (not shown yet, M5 appendix B-21; the archived v4
-  /// read the same fields). The sender is `nn`/`uid`, the text
-  /// `<gfn> ×<gfcnt>`. Another room's packet and a gift without a name give
+  /// holding a [DouyuGift] (the archived v4 read the same fields). The
+  /// sender is `nn`/`uid`, the text `<gfn> ×<gfcnt>`; while `hits` counts,
+  /// the combo key is the sender and the gift (`gfid`, or `gfn` for a
+  /// backpack prop), as the packet has no combo id. Another room's packet and a gift without a name give
   /// nothing. The packet has no id and no time.
   static LiveMessage? gift(Map<String, String> fields, String roomId) {
     final packetRoomId = fields['rid'] ?? '';
@@ -305,18 +299,21 @@ abstract final class DouyuDanmakuProtocol {
     final id = fields['gfid'] ?? '';
     final count = int.tryParse(fields['gfcnt'] ?? '') ?? 0;
     final combo = int.tryParse(fields['hits'] ?? '') ?? 0;
+    final giftId = id == '0' ? '' : id;
+    final senderId = fields['uid'] ?? '';
     final present = DouyuGift(
-      id: id == '0' ? '' : id,
+      id: giftId,
       name: name,
       count: count > 0 ? count : 1,
       combo: combo > 0 ? combo : 0,
       receiverName: fields['receive_nn'] ?? '',
+      comboKey: combo > 0 && senderId.isNotEmpty ? '$senderId:${giftId.isEmpty ? name : giftId}' : '',
     );
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: fields['nn'] ?? '',
-      userId: fields['uid'] ?? '',
-      message: '${present.name} ×${present.count}',
+      userId: senderId,
+      message: present.plainText,
       color: LiveMessageColor.white,
       data: present,
     );

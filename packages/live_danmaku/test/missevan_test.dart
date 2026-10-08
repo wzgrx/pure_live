@@ -1721,6 +1721,13 @@ void main() {
         ),
       );
       expect('$lucky', 'MissevanGift(书写星辰 ×1)');
+      // E05.5: the shared gift: diamonds each and together, the icon, free at
+      // price 0.
+      expect(
+        (lucky.unitPrice, lucky.totalValue, lucky.unit, lucky.free, lucky.iconUrl, lucky.tier),
+        (28, 28, LiveGiftUnit.diamond, false, lucky.icon, LiveGiftTier.normal),
+      );
+      expect((first.gift?.free, first.gift?.totalValue), (true, 0));
       expect(lucky.hashCode, isNot(first.data.hashCode));
       final odd = MissevanDanmakuProtocol.gift({
         'gift': {'name': ' 花 ', 'num': 0, 'price': -3, 'icon_url': 'http://static.maoercdn.com/g.png'},
@@ -1730,6 +1737,10 @@ void main() {
       })!;
       expect(odd.data, const MissevanGift(id: '', name: '花', count: 1, price: 0));
       expect([odd.userName, odd.userId, odd.messageId, odd.message], ['', '', '7', '花 ×1']);
+      final three = MissevanDanmakuProtocol.gift({
+        'gift': {'name': '花', 'num': '3', 'price': '1000'},
+      })!.gift!;
+      expect((three.unitPrice, three.totalValue, three.tier), (1000, 3000, LiveGiftTier.precious), reason: '300 yuan');
       expect(odd.sentAt, isNull);
       expect(
         (MissevanDanmakuProtocol.gift({

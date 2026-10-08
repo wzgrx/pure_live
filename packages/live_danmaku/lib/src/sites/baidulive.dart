@@ -10,38 +10,25 @@ import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
-/// the reliable list's notice 107/10024.
+/// the reliable list's notice 107/10024, as a [LiveGift] (E05.5) with
+/// [icon] its picture. No value: the unit of `total_value` is not known.
 @immutable
-final class BaiduLiveGift {
+final class BaiduLiveGift extends LiveGift {
   /// Creates the gift.
-  const new({required this.id, required this.name, required this.count, required this.free, this.icon});
-
-  /// `gift_id`, or empty.
-  final String id;
-
-  /// `gift_name` (`拍拍`).
-  final String name;
-
-  /// `gift_count`, at least 1.
-  final int count;
-
-  /// `is_free` is 1.
-  final bool free;
+  ///
+  /// [id] is `gift_id`, or empty; [name] `gift_name` (`拍拍`); [count]
+  /// `gift_count`, at least 1; [free] `is_free` is 1.
+  const new({required super.id, required super.name, required super.count, required super.free, this.icon})
+    : super(iconUrl: icon);
 
   /// `gift_url` when it is an https URL.
   final Uri? icon;
 
   @override
-  bool operator ==(Object other) =>
-      other is BaiduLiveGift &&
-      other.id == id &&
-      other.name == name &&
-      other.count == count &&
-      other.free == free &&
-      other.icon == icon;
+  bool operator ==(Object other) => super == other && other is BaiduLiveGift && other.icon == icon;
 
   @override
-  int get hashCode => Object.hash(id, name, count, free, icon);
+  int get hashCode => Object.hash(super.hashCode, icon);
 
   @override
   String toString() => 'BaiduLiveGift($name ×$count)';
@@ -311,7 +298,7 @@ abstract final class BaiduLiveDanmakuProtocol {
       type: LiveMessageType.gift,
       userName: _string(service['user_name']).trim(),
       userId: _id(service['user_id']),
-      message: '${gift.name} ×${gift.count}',
+      message: gift.plainText,
       messageId: _id(outer['msgid']),
       sentAt: _time(outer['create_time']),
       data: gift,

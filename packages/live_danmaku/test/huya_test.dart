@@ -616,13 +616,19 @@ void main() {
       expect(gifts.every((message) => RegExp(r'^huya:[1-9][0-9]+$').hasMatch(message.messageId)), isTrue);
       final first = gifts.first;
       expect((first.userName, first.userId, first.message), ('观众1', '9540329646482', '粉丝通行证 ×1'));
-      expect(first.data, const HuyaGift(id: 22225, name: '粉丝通行证', count: 1, combo: 1, payTotal: 10));
+      expect(first.data, const HuyaGift(id: '22225', name: '粉丝通行证', count: 1, combo: 1, payTotal: 10));
+      // E05.5: the shared gift; `lPayTotal`'s unit is not documented.
+      expect(
+        (first.gift?.comboTotal, first.gift?.totalValue, first.gift?.unit, first.gift?.tier),
+        (1, 10, LiveGiftUnit.other, LiveGiftTier.normal),
+      );
       // One viewer's 虎粮 combo: a packet per hit, counting up.
       final combo = [
         for (final message in gifts.skip(1).take(5)) (message.userName, (message.data! as HuyaGift).combo),
       ];
       expect(combo, [for (var hit = 1; hit <= 5; hit++) ('观众2', hit)]);
       expect((gifts[1].data! as HuyaGift).payTotal, 0, reason: '虎粮 is free');
+      expect(gifts[1].gift?.totalValue, isNull);
     });
 
     test('a gift without a name, or a body that is not Tars, gives no message; the frame goes on', () {
@@ -649,7 +655,7 @@ void main() {
       final named = (TarsWriter()..writeString(20, ' 虎粮 ')).toBytes();
       final gift = HuyaDanmakuProtocol.decode(push(named)).messages.single;
       expect((gift.message, gift.userId, gift.messageId), ('虎粮 ×1', '0', 'huya:7'));
-      expect(gift.data, const HuyaGift(id: 0, name: '虎粮', count: 1, combo: 1, payTotal: 0));
+      expect(gift.data, const HuyaGift(id: '', name: '虎粮', count: 1, combo: 1, payTotal: 0));
     });
   });
 

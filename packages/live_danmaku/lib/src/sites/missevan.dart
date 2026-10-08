@@ -11,27 +11,22 @@ import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
-/// `gift`/`send` ([MissevanDanmakuProtocol.gift]).
+/// `gift`/`send` ([MissevanDanmakuProtocol.gift]), as a [LiveGift] (E05.5):
+/// [price] diamonds each, free at 0, [icon] its picture.
 @immutable
-final class MissevanGift {
+final class MissevanGift extends LiveGift {
   /// Creates the gift.
+  ///
+  /// [id] is `gift_id`, or empty; [name] `name` (`幻彩礼炮`); [count] `num`,
+  /// at least 1.
   const new({
-    required this.id,
-    required this.name,
-    required this.count,
+    required super.id,
+    required super.name,
+    required super.count,
     required this.price,
     this.icon,
     this.luckyGift,
-  });
-
-  /// `gift_id`, or empty.
-  final String id;
-
-  /// `name` (`幻彩礼炮`).
-  final String name;
-
-  /// `num`, at least 1.
-  final int count;
+  }) : super(unitPrice: price, totalValue: price * count, unit: LiveGiftUnit.diamond, free: price == 0, iconUrl: icon);
 
   /// `price` of one, in diamonds (钻石, ten to a yuan); 0 for a free gift.
   final int price;
@@ -45,16 +40,14 @@ final class MissevanGift {
 
   @override
   bool operator ==(Object other) =>
+      super == other &&
       other is MissevanGift &&
-      other.id == id &&
-      other.name == name &&
-      other.count == count &&
       other.price == price &&
       other.icon == icon &&
       other.luckyGift == luckyGift;
 
   @override
-  int get hashCode => Object.hash(id, name, count, price, icon, luckyGift);
+  int get hashCode => Object.hash(super.hashCode, price, icon, luckyGift);
 
   @override
   String toString() => 'MissevanGift($name ×$count)';
@@ -524,7 +517,7 @@ abstract final class MissevanDanmakuProtocol {
       type: LiveMessageType.gift,
       userName: _scalar(user['username']),
       userId: _scalar(user['user_id']),
-      message: '${data.name} ×${data.count}',
+      message: data.plainText,
       color: LiveMessageColor.white,
       messageId: order.contains(_nonZero) ? order : '',
       sentAt: _time(item['time']),

@@ -22,8 +22,9 @@ const double releaseHistorySplitWidth = 840;
 /// Every release with its notes and files (3.x `VersionHistoryPage`,
 /// docs/A-界面设计/A15-小页面/A15.2-关于和版本 "版本历史"): a list (a release opens in a dialog
 /// whose close button is at the top right), or the list and the details
-/// side by side from [releaseHistorySplitWidth]. The newest release is
-/// marked "最新", the installed one "当前" (c11).
+/// side by side from [releaseHistorySplitWidth], or on the two halves of a
+/// fold that splits the page (a foldable half open like a book; A04.1). The
+/// newest release is marked "最新", the installed one "当前" (c11).
 class ReleaseHistoryView extends ConsumerStatefulWidget {
   /// Creates the view.
   const new({super.key});
@@ -72,10 +73,9 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
 
   @override
   Widget build(BuildContext context) {
-    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: short ? 48 : null,
+        toolbarHeight: WindowClassScope.toolbarHeightOf(context),
         title: Text(i18n('version_history'), maxLines: 2, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(
@@ -92,13 +92,15 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           final textScale = MediaQuery.textScalerOf(context).scale(1);
-          return _body(constraints.maxWidth >= releaseHistorySplitWidth && textScale <= 1.5);
+          final fold = DisplayHinge.maybeOf(context)?.splitRow(left: 0, width: constraints.maxWidth);
+          final wide = (constraints.maxWidth >= releaseHistorySplitWidth || fold != null) && textScale <= 1.5;
+          return _body(wide, fold);
         },
       ),
     );
   }
 
-  Widget _body(bool wide) {
+  Widget _body(bool wide, ({double start, double gap})? fold) {
     if (_releases.isEmpty) {
       if (_loading) return const AppStatusView(type: AppStatusType.loading);
       if (_failed) return AppStatusView(type: AppStatusType.error, onButtonPressed: _load);
@@ -107,7 +109,7 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
     final selected = _releases.firstWhere((release) => release.version == _selected, orElse: () => _releases.first);
     return Stack(
       children: [
-        Positioned.fill(child: wide ? _wide(selected) : _narrow()),
+        Positioned.fill(child: wide ? _wide(selected, fold) : _narrow()),
         if (_loading)
           const Positioned(
             top: 0,
@@ -122,14 +124,16 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
   /// The newest release is the first (by date, then version).
   bool _latest(ReleaseInfo release) => identical(release, _releases.first);
 
-  Widget _wide(ReleaseInfo selected) {
+  /// The list and the details side by side; with a [fold], the list fills
+  /// the half before it.
+  Widget _wide(ReleaseInfo selected, ({double start, double gap})? fold) {
     final colors = Theme.of(context).colorScheme;
     return Row(
       key: const ValueKey('release-history-desktop-layout'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(
-          width: 320,
+          width: fold?.start ?? 320,
           child: ListView.builder(
             physics: const PureLiveScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
@@ -159,7 +163,10 @@ class _ReleaseHistoryViewState extends ConsumerState<ReleaseHistoryView> {
             },
           ),
         ),
-        VerticalDivider(width: 1, thickness: 1, color: colors.outlineVariant.withValues(alpha: 0.6)),
+        if (fold == null)
+          VerticalDivider(width: 1, thickness: 1, color: colors.outlineVariant.withValues(alpha: 0.6))
+        else
+          SizedBox(width: fold.gap),
         Expanded(
           child: Align(
             alignment: Alignment.topLeft,

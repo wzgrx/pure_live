@@ -500,6 +500,14 @@ class _PreviewBody extends StatelessWidget {
         final content = math.min(720, constraints.maxWidth - (start ? 48 : 32)).toDouble();
         final side = start ? 24.0 : math.max(16, (constraints.maxWidth - content) / 2).toDouble();
         final columns = content >= 560 ? 4 : 2;
+        // The tiles keep their shape, and grow with large text so the count
+        // and its name fit (A04.1; a fixed shape cut them off).
+        final scaler = MediaQuery.textScalerOf(context);
+        final tileWidth = (content - 8 * (columns - 1)) / columns;
+        final tileHeight = math.max(
+          tileWidth / (columns == 4 ? 1.7 : 2.2),
+          20 + scaler.scale(22) * 1.4 + scaler.scale(12) * 1.4,
+        );
         return CustomScrollView(
           key: const ValueKey('settings-config-scroll'),
           physics: const PureLiveScrollPhysics(),
@@ -516,13 +524,15 @@ class _PreviewBody extends StatelessWidget {
                         padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
                         child: Text(i18n('settings_config_overview'), style: title),
                       ),
-                      GridView.count(
-                        crossAxisCount: columns,
+                      GridView(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 8,
-                        crossAxisSpacing: 8,
-                        childAspectRatio: columns == 4 ? 1.7 : 2.2,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: columns,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          mainAxisExtent: tileHeight,
+                        ),
                         children: [
                           for (final (label, count) in stats)
                             DecoratedBox(
@@ -548,6 +558,8 @@ class _PreviewBody extends StatelessWidget {
                                     ),
                                     Text(
                                       i18n(label),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                       style: context.textStyles.t12.copyWith(color: colors.onSurfaceVariant),
                                     ),
                                   ],

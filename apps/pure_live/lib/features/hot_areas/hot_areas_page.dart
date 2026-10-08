@@ -213,10 +213,14 @@ class HotAreasPage extends ConsumerWidget {
                             padding: const EdgeInsetsDirectional.fromSTEB(16, 0, 16, 0),
                           ),
                         ),
-                        TextButton(
-                          key: const ValueKey('hot-areas-reset'),
-                          onPressed: () => _reset(context, ref).ignore(),
-                          child: Text(i18n('hot_areas_reset')),
+                        // Shares the line with the title; large text wraps it
+                        // instead of pushing it off the page (A04.1).
+                        Flexible(
+                          child: TextButton(
+                            key: const ValueKey('hot-areas-reset'),
+                            onPressed: () => _reset(context, ref).ignore(),
+                            child: Text(i18n('hot_areas_reset'), textAlign: TextAlign.end),
+                          ),
                         ),
                       ],
                     ),

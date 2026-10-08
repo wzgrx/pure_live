@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 /// The named text styles of 3.x (`AppTextStyles.t13`, `t15SemiBold`, ...),
@@ -117,12 +119,20 @@ extension AppTextStylesContext on BuildContext {
   AppTextStyles get textStyles => AppTextStyles.of(this);
 }
 
+/// The most the app's text grows: the system's text size and the app's
+/// "文字大小" together (A04.1, research V03.2 §3.3 D3). Both at 2× once came
+/// to about 4×, and pages could not hold their words; 3.x also stopped at
+/// 2× (its factor replaced the system's).
+const double appTextScaleLimit = 2;
+
 /// The system's text size times the app's "文字大小" (U.6b C-5): 3.x
 /// replaced the system size with its own factor, so a larger system font did
-/// nothing inside the app. Keeps the system's (possibly non-linear) curve.
+/// nothing inside the app. Keeps the system's (possibly non-linear) curve,
+/// and never grows a font more than [maxScale] times ([appTextScaleLimit]).
+/// The picture's controls keep their own lower limit (1.3).
 final class AppTextScaler extends TextScaler {
-  /// [system] scaled by [factor].
-  const new(this.system, this.factor);
+  /// [system] scaled by [factor], at most [maxScale] times.
+  const new(this.system, this.factor, {this.maxScale = appTextScaleLimit});
 
   /// The platform's scaler (`MediaQuery.textScalerOf`).
   final TextScaler system;
@@ -130,17 +140,21 @@ final class AppTextScaler extends TextScaler {
   /// The app's factor (`textScaleFactor`, 0.5–2).
   final double factor;
 
+  /// The most a font grows, both factors together.
+  final double maxScale;
+
   @override
-  double scale(double fontSize) => system.scale(fontSize) * factor;
+  double scale(double fontSize) => math.min(system.scale(fontSize) * factor, fontSize * maxScale);
 
   @override
   // The interface still requires it; it is the linear equivalent.
   // ignore: deprecated_member_use
-  double get textScaleFactor => system.textScaleFactor * factor;
+  double get textScaleFactor => math.min(system.textScaleFactor * factor, maxScale);
 
   @override
-  bool operator ==(Object other) => other is AppTextScaler && other.system == system && other.factor == factor;
+  bool operator ==(Object other) =>
+      other is AppTextScaler && other.system == system && other.factor == factor && other.maxScale == maxScale;
 
   @override
-  int get hashCode => Object.hash(system, factor);
+  int get hashCode => Object.hash(system, factor, maxScale);
 }

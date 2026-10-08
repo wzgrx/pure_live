@@ -150,11 +150,10 @@ class _ToolboxPageState extends ConsumerState<ToolboxPage> {
 
   @override
   Widget build(BuildContext context) {
-    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
         centerTitle: centredPageTitle,
-        toolbarHeight: short ? 48 : null,
+        toolbarHeight: WindowClassScope.toolbarHeightOf(context),
         title: Text(i18n('toolbox_title')),
       ),
       body: ListView(

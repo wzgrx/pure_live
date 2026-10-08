@@ -153,11 +153,10 @@ class _UpdateViewState extends ConsumerState<UpdateView> {
 
   @override
   Widget build(BuildContext context) {
-    final short = MediaQuery.sizeOf(context).height < 480;
     final platform = ref.read(updateFeedProvider).platform;
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: short ? 48 : null,
+        toolbarHeight: WindowClassScope.toolbarHeightOf(context),
         title: Text(i18n('version_update'), maxLines: 2, overflow: TextOverflow.ellipsis),
         actions: [
           IconButton(

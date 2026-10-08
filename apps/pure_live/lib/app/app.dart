@@ -232,14 +232,18 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           builder: (context, child) {
             // The room's in-app floating window over every page (U.2j); not
-            // on the television, whose room is always full screen.
+            // on the television, whose room is always full screen. The pages
+            // read their size classes from the area they get (A04.1), not
+            // from the whole screen.
             Widget result = MaterialUiThemeBridge(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  child ?? const SizedBox.shrink(),
-                  if (!tv) const Positioned.fill(child: FloatingRoomLayer()),
-                ],
+              child: WindowClassScope(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    child ?? const SizedBox.shrink(),
+                    if (!tv) const Positioned.fill(child: FloatingRoomLayer()),
+                  ],
+                ),
               ),
             );
             if (Platform.isAndroid && refreshMode != null) {
@@ -251,7 +255,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
               config: uiConfig,
               child: MediaQuery(
                 // On top of the system's text size (3.x replaced it, U.6b
-                // C-5).
+                // C-5); both together at most 2× (A04.1, appTextScaleLimit).
                 data: MediaQuery.of(context)
                     .copyWith(textScaler: AppTextScaler(MediaQuery.textScalerOf(context), textScale)),
                 // See-through system bars, icons for the theme (A06.5).

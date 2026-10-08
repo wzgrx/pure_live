@@ -867,14 +867,14 @@ note = "本地工作区，提交 e8f856b60（阶段 1～3）、5dbfbfd4d（阶�
 id = "A04.1"
 title = "尺寸和字号适配：高度分档、分屏、折叠屏、字号上限、触控区域"
 type = "性能"
-status = "暂停"
+status = "待真机"
+date = "2026-10-08"
 size = "中"
 tier = 2
 old = ["P06", "T14g.1"]
 stages = ["高度分档", "字号上限", "触控区域"]
-done = 0
-next = "先看旧工作区里的改动能否直接用，再补测试"
-branch = "worktree-agent-a39fe9339ffb138a9（做了大半，未提交）"
+done = 3
+branch = "本机工作区 worktree-agent-a0aa96c1b7aaaa422"
 
 [[task]]
 id = "A05.1"

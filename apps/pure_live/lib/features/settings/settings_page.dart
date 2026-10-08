@@ -24,7 +24,10 @@ const double settingsOverviewWidth = 360;
 /// Settings (3.x `lib/modules/settings/settings_page.dart`; U.6a): the
 /// overview of five groups, search, and the pages it opens. Below 840 the
 /// overview is a page of its own and a row opens its page; from 840 the
-/// page opens beside it, and pages it opens stay in that pane.
+/// page opens beside it, and pages it opens stay in that pane. A fold that
+/// splits the page into halves (a foldable half open like a book, a dual
+/// screen; A04.1) also puts them side by side, the overview on one half and
+/// the page on the other, nothing under the fold.
 ///
 /// Routes: `RoutePath.kSettings`; the arguments may name a page
 /// (`SettingsSection.name`, e.g. `'network'`) to open it directly.
@@ -165,22 +168,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final twoPane = constraints.maxWidth >= settingsTwoPaneBreakpoint;
+      // The row inside the safe area starts that far from the window's edge.
+      final padding = MediaQuery.paddingOf(context);
+      final fold = DisplayHinge.maybeOf(context)
+          ?.splitRow(left: padding.left, width: constraints.maxWidth - padding.horizontal);
+      final twoPane = constraints.maxWidth >= settingsTwoPaneBreakpoint || fold != null;
       final Widget page;
       if (twoPane) {
         final section = _open ?? SettingsSection.appearance;
-        final short = MediaQuery.sizeOf(context).height < 480;
+        final short = WindowClass.of(constraints.biggest).isShort;
         page = Scaffold(
           body: SafeArea(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
-                  width: settingsOverviewWidth,
+                  width: fold?.start ?? settingsOverviewWidth,
                   child: Column(
                     children: [
                       SizedBox(
-                        height: short ? 48 : kToolbarHeight,
+                        height: short ? compactToolbarHeight : kToolbarHeight,
                         child: Row(
                           children: [
                             if (Navigator.of(context).canPop()) const BackButton() else const SizedBox(width: 16),
@@ -200,7 +207,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                     ],
                   ),
                 ),
-                const VerticalDivider(width: 1),
+                if (fold == null) const VerticalDivider(width: 1) else SizedBox(width: fold.gap),
                 Expanded(child: SettingsPane(child: _contentNavigator(section, twoPane: true))),
               ],
             ),

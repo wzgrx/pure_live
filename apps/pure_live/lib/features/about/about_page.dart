@@ -72,10 +72,9 @@ class _AboutViewState extends State<AboutView> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final styles = context.textStyles;
-    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       // 3.x: only "back", no title.
-      appBar: AppBar(toolbarHeight: short ? 48 : null),
+      appBar: AppBar(toolbarHeight: WindowClassScope.toolbarHeightOf(context)),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final logoSize = constraints.maxWidth < 600 ? 80.0 : 96.0;

@@ -154,92 +154,113 @@ class _LogPageState extends ConsumerState<LogPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ReadableContent(
-              child: SettingsGroup(
-                first: true,
-                children: [
-                  SettingsSwitchRow(
-                    key: const ValueKey('log-write-file'),
-                    icon: AppIcons.logFile,
-                    title: i18n('enable_local_log'),
-                    subtitle: writing && _log.file != null ? _log.file!.path : i18n('settings_log_file_desc'),
-                    subtitleMaxLines: null,
-                    value: writing,
-                    onChanged: (value) => unawaited(settings.set(Settings.enableLocalLog, value)),
-                  ),
-                  SettingsRow(
-                    icon: AppIcons.logLevel,
-                    title: i18n('settings_log_level'),
-                    subtitle: i18n('settings_log_level_desc'),
-                    stackTrailing: false,
-                    trailing: DropdownButton<LogLevel>(
-                      key: const ValueKey('log-level'),
-                      value: level,
-                      underline: const SizedBox.shrink(),
-                      items: [
-                        for (final value in LogLevel.values)
-                          DropdownMenuItem(value: value, child: Text(_levelLabel(value))),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) unawaited(settings.set(Settings.logLevel, value.name));
-                      },
+      // One scroll for the settings, the levels and the entries (A04.1): a
+      // short window or large text left the entries no room, or less than
+      // none.
+      body: CustomScrollView(
+        physics: const PureLiveScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: ReadableContent(
+                child: SettingsGroup(
+                  first: true,
+                  children: [
+                    SettingsSwitchRow(
+                      key: const ValueKey('log-write-file'),
+                      icon: AppIcons.logFile,
+                      title: i18n('enable_local_log'),
+                      subtitle: writing && _log.file != null ? _log.file!.path : i18n('settings_log_file_desc'),
+                      subtitleMaxLines: null,
+                      value: writing,
+                      onChanged: (value) => unawaited(settings.set(Settings.enableLocalLog, value)),
                     ),
+                    SettingsRow(
+                      icon: AppIcons.logLevel,
+                      title: i18n('settings_log_level'),
+                      subtitle: i18n('settings_log_level_desc'),
+                      stackTrailing: false,
+                      trailing: DropdownButton<LogLevel>(
+                        key: const ValueKey('log-level'),
+                        value: level,
+                        underline: const SizedBox.shrink(),
+                        items: [
+                          for (final value in LogLevel.values)
+                            DropdownMenuItem(value: value, child: Text(_levelLabel(value))),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) unawaited(settings.set(Settings.logLevel, value.name));
+                        },
+                      ),
+                    ),
+                    SettingsLinkRow(
+                      key: const ValueKey('log-open-folder'),
+                      icon: AppIcons.openFolder,
+                      title: i18n('open_log_dir'),
+                      subtitle: i18n('open_log_dir_desc'),
+                      onTap: () => unawaited(_openFolder()),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+              // The count, the levels at the end of its line, or under it
+              // when they do not fit beside it; wider than the page they
+              // scroll sideways.
+              child: Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 8,
+                runSpacing: 4,
+                children: [
+                  Text(
+                    i18n('settings_log_entries', args: {'count': '${visible.length}'}),
+                    style: context.textStyles.t13SemiBold,
                   ),
-                  SettingsLinkRow(
-                    key: const ValueKey('log-open-folder'),
-                    icon: AppIcons.openFolder,
-                    title: i18n('open_log_dir'),
-                    subtitle: i18n('open_log_dir_desc'),
-                    onTap: () => unawaited(_openFolder()),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SegmentedButton<LogLevel>(
+                      key: const ValueKey('log-filter'),
+                      showSelectedIcon: false,
+                      // Compact: 40 high, kept until A05.1 X7 is decided.
+                      style: const ButtonStyle(visualDensity: VisualDensity.compact),
+                      segments: [
+                        for (final value in LogLevel.values)
+                          ButtonSegment(value: value, label: Text(_levelLabel(value))),
+                      ],
+                      selected: {_filter},
+                      onSelectionChanged: (value) => setState(() => _filter = value.first),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    i18n('settings_log_entries', args: {'count': '${visible.length}'}),
-                    style: context.textStyles.t13SemiBold,
-                  ),
+          if (visible.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Center(
+                child: Text(
+                  i18n('settings_log_empty'),
+                  key: const ValueKey('log-empty'),
+                  style: context.textStyles.t13.copyWith(color: theme.hintColor),
                 ),
-                SegmentedButton<LogLevel>(
-                  key: const ValueKey('log-filter'),
-                  showSelectedIcon: false,
-                  style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                  segments: [
-                    for (final value in LogLevel.values) ButtonSegment(value: value, label: Text(_levelLabel(value))),
-                  ],
-                  selected: {_filter},
-                  onSelectionChanged: (value) => setState(() => _filter = value.first),
-                ),
-              ],
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+              sliver: SliverList.separated(
+                itemCount: visible.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) => _EntryRow(entry: visible[index]),
+              ),
             ),
-          ),
-          Expanded(
-            child: visible.isEmpty
-                ? Center(
-                    child: Text(
-                      i18n('settings_log_empty'),
-                      key: const ValueKey('log-empty'),
-                      style: context.textStyles.t13.copyWith(color: theme.hintColor),
-                    ),
-                  )
-                : ListView.separated(
-                    physics: const PureLiveScrollPhysics(),
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                    itemCount: visible.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (context, index) => _EntryRow(entry: visible[index]),
-                  ),
-          ),
         ],
       ),
     );

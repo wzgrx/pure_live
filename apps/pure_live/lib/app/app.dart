@@ -255,7 +255,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
               config: uiConfig,
               child: MediaQuery(
                 // On top of the system's text size (3.x replaced it, U.6b
-                // C-5).
+                // C-5); both together at most 2× (A04.1, appTextScaleLimit).
                 data: MediaQuery.of(context)
                     .copyWith(textScaler: AppTextScaler(MediaQuery.textScalerOf(context), textScale)),
                 // See-through system bars, icons for the theme (A06.5).

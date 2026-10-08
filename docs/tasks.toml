@@ -867,8 +867,8 @@ size = "中"
 tier = 2
 old = ["P06", "T14g.1"]
 stages = ["高度分档", "字号上限", "触控区域"]
-done = 1
-next = "第 2 阶段字号上限"
+done = 2
+next = "第 3 阶段触控区域"
 branch = "本机工作区 worktree-agent-a0aa96c1b7aaaa422"
 
 [[task]]

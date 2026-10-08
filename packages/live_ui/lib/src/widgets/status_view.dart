@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/grid_columns.dart';
@@ -9,6 +11,7 @@ import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_dialog.dart';
 import 'package:live_ui/src/widgets/app_toast.dart';
 import 'package:live_ui/src/widgets/loading_styles.dart';
+import 'package:live_ui/src/widgets/scrolling.dart';
 import 'package:live_ui/src/widgets/window_layout.dart';
 
 // The one status component (docs/A-界面设计/A02-组件/A02.1-通用组件 c2–c7): six states
@@ -64,10 +67,12 @@ const double statusSideBySideHeight = windowCompactHeight;
 /// of a wider one; 3.x chose 24 or 32 by the screen only) and a line under
 /// it ([title], "加载中..." by default).
 ///
-/// No `LayoutBuilder`: the view also sits where its height is measured
-/// first (`SliverFillRemaining`), which a `LayoutBuilder` cannot answer. It
-/// reads the classes of the app's area instead ([WindowClassScope], kept on
-/// purpose by A02.1 and A04.1).
+/// Where its words do not fit (a short window, large text; A04.1) the
+/// state scrolls instead of overflowing. Inside a vertical list it uses no
+/// `LayoutBuilder`: there it sits where its height is measured first
+/// (`SliverFillRemaining`), which a `LayoutBuilder` cannot answer, and the
+/// list scrolls it. It reads the classes of the app's area instead
+/// ([WindowClassScope], kept on purpose by A02.1 and A04.1).
 class AppStatusView extends StatelessWidget {
   /// Creates the view.
   const new({
@@ -150,7 +155,27 @@ class AppStatusView extends StatelessWidget {
   };
 
   @override
-  Widget build(BuildContext context) => type == AppStatusType.loading ? _loading(context) : _state(context);
+  Widget build(BuildContext context) =>
+      type == AppStatusType.loading ? _loading(context) : _scrollWhenShort(context, _state(context));
+
+  /// [child] (centred) as it is where a list scrolls it or the height is
+  /// open; in a bounded area of its own, a scroll that fills the area and
+  /// centres it while it fits.
+  static Widget _scrollWhenShort(BuildContext context, Widget child) {
+    if (Scrollable.maybeOf(context, axis: Axis.vertical) != null) return child;
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.hasBoundedHeight
+          ? SingleChildScrollView(
+              primary: false,
+              physics: const PureLiveScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: child,
+              ),
+            )
+          : child,
+    );
+  }
 
   Widget _loading(BuildContext context) {
     final theme = Theme.of(context);
@@ -263,8 +288,8 @@ class AppStatusView extends StatelessWidget {
       if (finalSubtitle.isNotEmpty)
         Padding(
           padding: const EdgeInsets.only(top: 6),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: sideways ? 360 : 320),
+          child: _MaxWidth(
+            maxWidth: sideways ? 360 : 320,
             child: Text(
               finalSubtitle,
               textAlign: align,
@@ -539,4 +564,32 @@ class StatusSkeleton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A [ConstrainedBox] of at most [maxWidth] whose height measured ahead of
+/// layout (`SliverFillRemaining`) is its height at that width: a plain one
+/// measures its child at the full width, fewer lines than it then takes.
+class _MaxWidth extends SingleChildRenderObjectWidget {
+  const new({required this.maxWidth, super.child});
+
+  final double maxWidth;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderMaxWidth(maxWidth);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderMaxWidth renderObject) =>
+      renderObject.additionalConstraints = BoxConstraints(maxWidth: maxWidth);
+}
+
+class _RenderMaxWidth extends RenderConstrainedBox {
+  new(double maxWidth) : super(additionalConstraints: BoxConstraints(maxWidth: maxWidth));
+
+  double _within(double width) => math.min(width, additionalConstraints.maxWidth);
+
+  @override
+  double computeMinIntrinsicHeight(double width) => super.computeMinIntrinsicHeight(_within(width));
+
+  @override
+  double computeMaxIntrinsicHeight(double width) => super.computeMaxIntrinsicHeight(_within(width));
 }

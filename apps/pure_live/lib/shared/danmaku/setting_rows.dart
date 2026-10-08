@@ -32,12 +32,17 @@ class PanelGroupTitle extends StatelessWidget {
           : Row(
               children: [
                 Expanded(child: title),
-                Text(
-                  trailing!,
-                  key: const ValueKey('panel-group-note'),
-                  style: theme.textTheme.bodyMedium?.regular.copyWith(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurfaceVariant,
+                // At most half the line: large text wraps the note instead
+                // of pushing it off the panel (A04.1).
+                Flexible(
+                  child: Text(
+                    trailing!,
+                    key: const ValueKey('panel-group-note'),
+                    textAlign: TextAlign.end,
+                    style: theme.textTheme.bodyMedium?.regular.copyWith(
+                      fontSize: 13,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],

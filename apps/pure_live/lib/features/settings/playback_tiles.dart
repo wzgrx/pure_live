@@ -691,23 +691,34 @@ class PipDanmakuPage extends ConsumerWidget {
             key: const ValueKey('settings-pip-one-column'),
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Align(
-                alignment: embedded ? Alignment.topLeft : Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 720),
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(embedded ? 24 : 16, 4, embedded ? 24 : 16, 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        intro,
-                        // At most about a third of the height, so the rows
-                        // keep room (3.x: 31%).
-                        ConstrainedBox(
-                          constraints: BoxConstraints(maxHeight: (constraints.maxHeight * 0.34).clamp(120.0, 420.0)),
-                          child: const Center(child: PipDanmakuPreviewBinding()),
+              // At most half the height: a short window or large text
+              // scrolls the explanation and the preview instead of pushing
+              // the rows off the page (A04.1).
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight / 2),
+                child: SingleChildScrollView(
+                  physics: const PureLiveScrollPhysics(),
+                  child: Align(
+                    alignment: embedded ? Alignment.topLeft : Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 720),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(embedded ? 24 : 16, 4, embedded ? 24 : 16, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            intro,
+                            // At most about a third of the height, so the
+                            // rows keep room (3.x: 31%).
+                            ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: (constraints.maxHeight * 0.34).clamp(120.0, 420.0),
+                              ),
+                              child: const Center(child: PipDanmakuPreviewBinding()),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),

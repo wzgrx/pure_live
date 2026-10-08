@@ -518,9 +518,12 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
                 color: service.running ? colors.primary : colors.error,
               ),
               const SizedBox(width: 6),
-              Text(
-                i18n(service.running ? 'remote_sync_running' : 'remote_sync_not_running'),
-                style: styles.t14.copyWith(color: service.running ? colors.onSurface : colors.error),
+              // Wraps instead of running off the card (A04.1: large text).
+              Flexible(
+                child: Text(
+                  i18n(service.running ? 'remote_sync_running' : 'remote_sync_not_running'),
+                  style: styles.t14.copyWith(color: service.running ? colors.onSurface : colors.error),
+                ),
               ),
             ],
           ),

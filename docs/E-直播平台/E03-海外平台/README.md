@@ -54,7 +54,7 @@
 | PandaTV | `pandalive/`（1594） | 60 / 45 | 12 | 1078 | [E03.12](E03.12-PandaTV/README.md) |
 | FC2 | `fc2live/`（1817，含 `fc2live_control.dart`） | 30 / 47 | 8 | 1016 | [E03.13](E03.13-FC2LIVE/README.md) |
 | Steam | `steambroadcast/`（1791） | 39 / 27 | 19 | 799 | [E03.14](E03.14-Steam直播/README.md) |
-| 17LIVE | `seventeenlive/`（1179） | 47 / 38 | 10（`fixtures/17live/`） | 721 | [E03.15](E03.15-17LIVE/README.md) |
+| 17LIVE | `seventeenlive/`（1179） | 49 / 38 | 11（`fixtures/17live/`） | 721 | [E03.15](E03.15-17LIVE/README.md) |
 | Kick | `kick/`（935） | 20 / 17 | 18 | — | [E03.16](E03.16-Kick/README.md) |
 
 应用：`apps/pure_live/lib/app/platforms.dart`（构造、代理策略 `:13-48`、`PlatformDeps.twitchFallbacks` `:121`、`kickApi` `:126`）；`apps/pure_live/lib/app/bootstrap.dart:175-179`（Twitch 后备和 Kick 的原生通道在启动时给）；`packages/live_media/lib/src/inputs/recipes.dart`（配方打开器）。
@@ -102,7 +102,7 @@
 属于 [E 直播平台](../README.md)。
 
 - 代码：`packages/live_core/lib/src/sites/`
-- 进度：`███████████████████░` 97%
+- 进度：`████████████████████` 99%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -124,12 +124,6 @@
 | E03.15 | 17LIVE | 平台 | 完成 | 2026-09-28 | 0141660c6 | [设计或说明](E03.15-17LIVE/README.md)、[记录](E03.15-17LIVE/record.md) |
 | E03.16 | Kick（恢复，仅 Android） | 平台 | 完成 | 2026-10-01 | 6c68f0010 | [设计或说明](E03.16-Kick/README.md)、[记录](E03.16-Kick/record.md) |
 | E03.17 | 接 E07.1：Twitch 推荐的 GraphQL 语言参数类型变了 | 平台 | 待真机 | 2026-10-08 | — | [设计或说明](E03.17-Twitch推荐语言参数/README.md)、[记录](E03.17-Twitch推荐语言参数/record.md) |
-| E03.18 | 接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个 | 平台 | 未开始 | — | — | — |
-
-## 还没完成的
-
-- **E03.18 接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个**（未开始，第二档，规模 小）
-  - 说明：seventeenlive_api.dart:717（线路）、seventeenlive_site.dart:101-109（游标翻页）；先换代理出口地区复测，排除地区限制
-  - 来源：E07.1 第一轮巡检（2026-10-08，经代理）：P10 每个房间 tencent 线路 404、wansu 线路超时；P1、P3 第 2 页只有 1 个且和第 1 页重复
+| E03.18 | 接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个 | 平台 | 待真机 | 2026-10-08 | — | [设计或说明](E03.18-17LIVE线路和翻页/README.md)、[记录](E03.18-17LIVE线路和翻页/record.md) |
 
 <!-- docs:生成结束 -->

@@ -2397,11 +2397,12 @@ note = "twitch_api.dart:157 的 $languages 改成 [Language!]，巡检 P1 恢复
 id = "E03.18"
 title = "接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个"
 type = "平台"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 2
+date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08，经代理）：P10 每个房间 tencent 线路 404、wansu 线路超时；P1、P3 第 2 页只有 1 个且和第 1 页重复"
-note = "seventeenlive_api.dart:717（线路）、seventeenlive_site.dart:101-109（游标翻页）；先换代理出口地区复测，排除地区限制"
+note = "不是地区限制：平台把多数房间换到网宿，网宿不出 H.264 转码，默认的 H.264 档播不了；网宿排第一时不再给 H.264 档（seventeenlive_api.dart untranscodedCdns）。第 2 页重复是平台数据（应用已去重），改巡检判定。巡检 11 正常 0 失败；K90 经代理看默认档有画面"
 
 [[task]]
 id = "E04.1"

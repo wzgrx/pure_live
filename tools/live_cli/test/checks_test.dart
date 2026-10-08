@@ -85,6 +85,26 @@ void main() {
       expect(result.note, contains('没有房间号'));
     });
 
+    test('a small last page that only repeats page 1 passes and says so (17LIVE, E03.18)', () async {
+      final site = FakePagerSite()
+        ..pages = {
+          1: LiveDirectoryPage(rooms: [for (var i = 1; i <= 8; i++) room('$i')], page: 1, hasMore: true),
+          2: LiveDirectoryPage(rooms: [room('3')], page: 2, hasMore: false),
+        };
+      final result = resultOf(await patrolOf(site, _target).run(), CheckId.p1);
+      expect(result.outcome, Outcome.ok, reason: result.note);
+      expect(result.note, contains('最后一页'));
+    });
+
+    test('a last page as large as page 1 and repeating it still fails (a cursor that is ignored)', () async {
+      final site = FakePagerSite()
+        ..pages = {
+          1: LiveDirectoryPage(rooms: [room('1'), room('2')], page: 1, hasMore: true),
+          2: LiveDirectoryPage(rooms: [room('1'), room('2')], page: 2, hasMore: false),
+        };
+      expect(resultOf(await patrolOf(site, _target).run(), CheckId.p1).outcome, Outcome.failed);
+    });
+
     test('a directory pager without more pages passes and says so', () async {
       final site = FakePagerSite()
         ..pages = {

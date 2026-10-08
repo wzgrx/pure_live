@@ -1,6 +1,6 @@
 # 平台巡检：检查项和对象表
 
-- 更新：2026-10-08（E07.1 第 1 阶段定稿，E01.6 第一轮补全五大平台；E02.14 小红书的推荐改成“不支持”）
+- 更新：2026-10-08（E07.1 第 1 阶段定稿，E01.6 第一轮补全五大平台；E02.14 小红书的推荐改成“不支持”；E03.18 P1 的最后一页）
 - 代码里的同一份表：`tools/live_cli/lib/src/patrol/targets.dart`（改了这里就改那里，反过来也一样）；检查的做法：`tools/live_cli/lib/src/patrol/checks.dart`。
 - 跑法：`dart run tools/live_cli/bin/live_cli.dart patrol <平台…> | --domestic | --overseas | --all [--proxy host:port] [--danmaku 秒] [--out 报告.md] [--json 结果.json]`。退出码：全部正常或不支持 0，有失败 1，参数错 64。
 - 只在人手动运行时联网，永远不进门禁和自动测试（D-017）；只读、匿名（空的 Cookie）、不发言；每条线路只读开头 64 KB。
@@ -20,7 +20,7 @@
 
 | 编号 | 检查 | 做法 | 正常的标准 |
 |---|---|---|---|
-| P1 | 推荐 | `getRecommendRooms(page: 1)`、`page: 2`；有 `LiveSiteDirectoryPager` 的平台用 `getDirectoryPage`（游标分页用 `getDirectoryPageAtCursor`） | 第 1 页非空；每个房间有 `roomId`，标题或主播名至少一个非空；第 2 页和第 1 页重复的不超过一半。平台说没有更多（`hasMore: false`）或第 2 页为空时写“没有第 2 页”，仍算正常 |
+| P1 | 推荐 | `getRecommendRooms(page: 1)`、`page: 2`；有 `LiveSiteDirectoryPager` 的平台用 `getDirectoryPage`（游标分页用 `getDirectoryPageAtCursor`） | 第 1 页非空；每个房间有 `roomId`，标题或主播名至少一个非空；第 2 页和第 1 页重复的不超过一半（第 2 页是最后一页、又不到第 1 页的四分之一时，全是重复也算正常，写进说明：17LIVE 最后一页的群聊区把第 1 页的房间又列一次，应用按房间去重，E03.18）。平台说没有更多（`hasMore: false`）或第 2 页为空时写“没有第 2 页”，仍算正常 |
 | P2 | 分类 | `getCategories(1, 30)` | 至少 1 类、每类至少 1 个分区；写出类数和分区总数 |
 | P3 | 分区 | 对象表指定的热门分区（没指定时取分区最多的那一类的第一个分区），第 1、2 页；分区目录由 `LiveSiteCategoryDirectoryProvider` 提供的平台用它 | 同 P1：第 1 页非空、卡片完整，第 2 页不超过一半重复 |
 | P4 | 搜索房间 | `searchRooms(关键词)`；“推荐里筛选”的平台用推荐第一个主播名作关键词，“只能按房间号查”的平台用推荐第一个房间号（没有推荐的小红书用固定房间号），“只能精确查频道”的平台用对象表的频道名 | 非空；“只搜直播中”的平台每个结果都 `isLiveNow` |

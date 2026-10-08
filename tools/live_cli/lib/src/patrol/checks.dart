@@ -243,6 +243,12 @@ final class PlatformPatrol {
     final firstIds = {for (final room in first.rooms) room.roomId};
     final repeated = second.rooms.where((room) => firstIds.contains(room.roomId)).length;
     final note = '第 2 页 ${second.rooms.length} 个，和第 1 页重复 $repeated 个';
+    // A short last page that lists a few rooms of page 1 again is the
+    // platform's (17LIVE's group-call section, E03.18; the app drops rooms
+    // it already shows). A cursor that is ignored gives a full page again.
+    if (second.hasMore == false && second.rooms.length * 4 <= first.rooms.length) {
+      return '$note（最后一页，平台把第 1 页的房间又列了一次，应用按房间去重）';
+    }
     if (repeated * 2 > second.rooms.length) throw CheckFailure('$note（超过一半）');
     return note;
   }

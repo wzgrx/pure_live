@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/widgets/settings_row.dart';
 
 /// The − value + control (docs/A-界面设计/A02-组件/A02.1-通用组件 c10, the outlined style U.2f
@@ -135,13 +137,13 @@ class _CounterControlState extends State<CounterControl> {
           tapTargetSize: MaterialTapTargetSize.padded,
           foregroundColor: scheme.onSurfaceVariant,
           disabledForegroundColor: scheme.onSurfaceVariant.withValues(alpha: 0.38),
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadii.button),
         ),
         icon: Icon(glyph, size: 20),
       ),
     );
     final valueStyle = (theme.textTheme.bodyMedium ?? const TextStyle()).tabular.copyWith(
-      fontSize: tv ? 16 : 14,
+      fontSize: settingsValueFontSize(context, tv: tv),
       fontWeight: FontWeight.w600,
       color: enabled ? scheme.primary : scheme.onSurface.withValues(alpha: 0.38),
       decoration: widget.onValueTap == null ? null : TextDecoration.underline,
@@ -159,12 +161,7 @@ class _CounterControlState extends State<CounterControl> {
       ),
     );
     if (widget.onValueTap case final tap? when enabled) {
-      number = InkWell(
-        key: widget.valueKey,
-        onTap: tap,
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        child: number,
-      );
+      number = InkWell(key: widget.valueKey, onTap: tap, borderRadius: AppRadii.textButton, child: number);
     } else {
       number = KeyedSubtree(key: widget.valueKey, child: number);
     }
@@ -181,21 +178,21 @@ class _CounterControlState extends State<CounterControl> {
               key: const ValueKey('counter-frame'),
               decoration: BoxDecoration(
                 border: Border.all(color: scheme.outlineVariant),
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                borderRadius: AppRadii.button,
               ),
             ),
           ),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              half(Icons.remove_rounded, widget.decreaseTooltip, decrease, widget.decreaseKey, up: false),
+              half(AppIcons.decrease, widget.decreaseTooltip, decrease, widget.decreaseKey, up: false),
               Semantics(
                 label: widget.semanticLabel,
                 value: widget.value,
                 excludeSemantics: widget.semanticLabel != null,
                 child: number,
               ),
-              half(Icons.add_rounded, widget.increaseTooltip, increase, widget.increaseKey, up: true),
+              half(AppIcons.increase, widget.increaseTooltip, increase, widget.increaseKey, up: true),
             ],
           ),
         ],

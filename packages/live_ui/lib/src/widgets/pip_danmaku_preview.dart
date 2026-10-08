@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 
 /// The preview of the mini windows' danmaku on the settings page (3.x
 /// `PipDanmakuPreview`, U.6c): a dark 16:9 picture with up to 20 lines of
@@ -129,7 +130,7 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
       aspectRatio: 16 / 9,
       child: DecoratedBox(
         decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
+          borderRadius: AppRadii.card,
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -161,7 +162,7 @@ class _PipDanmakuPreviewState extends State<PipDanmakuPreview> with SingleTicker
               fit: StackFit.expand,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.all(Radius.circular(16)),
+                  borderRadius: AppRadii.card,
                   child: CustomPaint(
                     painter: _PreviewPainter(
                       clock: _clock,

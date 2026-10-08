@@ -3,6 +3,7 @@ import 'dart:ffi' show Abi;
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -81,6 +82,7 @@ Future<(AppServices, List<String>)> _pump(
   double width = 420,
   double height = 900,
   List<Override> overrides = const [],
+  LiveFontSizes fontSizes = const LiveFontSizes(),
 }) async {
   tester.view
     ..physicalSize = Size(width, height)
@@ -119,7 +121,7 @@ Future<(AppServices, List<String>)> _pump(
       child: LiveUiScope(
         config: LiveUiConfig(strings: strings.ui),
         child: MaterialApp.router(
-          theme: const LiveTheme(primaryColor: Colors.blue).light,
+          theme: LiveTheme(primaryColor: Colors.blue, fontSizes: fontSizes).light,
           routerConfig: router,
         ),
       ),
@@ -539,6 +541,29 @@ void main() {
     expect(nativePackageTitle(Abi.windowsX64), 'exe_installer');
     expect(nativePackageTitle(Abi.macosArm64), 'macos_package');
     expect(nativePackageTitle(Abi.linuxX64), isNull);
+  });
+
+  testWidgets('A01.2: the history and about follow the font settings, the same size by default', (tester) async {
+    double size(Finder finder) => tester.renderObject<RenderParagraph>(finder).text.style!.fontSize!;
+    final version = find.descendant(
+      of: find.byKey(const ValueKey('release-history-mobile-9.0.0')),
+      matching: find.text('v9.0.0'),
+    );
+    const page = VersionPage(route: RouteArgs(RoutePath.kVersionHistory));
+    await _pump(tester, page, _FakeFeed(history: _historyWith9()), width: 393, height: 852);
+    expect(size(find.text('版本历史')), 20);
+    expect(size(version), 17);
+    await _pump(tester, const AboutPage(route: RouteArgs(RoutePath.kAbout)), _FakeFeed());
+    expect(size(find.text('纯粹直播')), 20);
+
+    // Every size at its largest (Settings.fontSize*).
+    const largest = LiveFontSizes(bodySmall: 15, bodyMedium: 17, bodyLarge: 18, titleMedium: 20, titleLarge: 26);
+    await _pump(tester, page, _FakeFeed(history: _historyWith9()), width: 393, height: 852, fontSizes: largest);
+    expect(size(find.text('版本历史')), 26);
+    expect(size(version), closeTo(20 * 17 / 15, 1e-9));
+    expect(tester.takeException(), isNull);
+    await _pump(tester, const AboutPage(route: RouteArgs(RoutePath.kAbout)), _FakeFeed(), fontSizes: largest);
+    expect(size(find.text('纯粹直播')), 26);
   });
 
   testWidgets('the release history shows both panes on a wide window', (tester) async {

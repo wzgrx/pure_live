@@ -29,7 +29,8 @@ class TabLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     final count = this.count;
     final badge = this.badge;
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final content = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -40,7 +41,7 @@ class TabLabel extends StatelessWidget {
             '$count',
             key: countKey,
             maxLines: 1,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500).tabular,
+            style: TextStyle(fontSize: theme.textTheme.bodyMedium?.fontSize, fontWeight: FontWeight.w400).tabular,
           ),
         ],
         if (badge != null && badge.isNotEmpty) ...[
@@ -52,7 +53,12 @@ class TabLabel extends StatelessWidget {
             decoration: BoxDecoration(color: scheme.primary, borderRadius: BorderRadius.circular(9)),
             child: Text(
               badge,
-              style: TextStyle(fontSize: 12, height: 1.2, fontWeight: FontWeight.w600, color: scheme.onPrimary).tabular,
+              style: TextStyle(
+                fontSize: theme.textTheme.bodySmall?.fontSize,
+                height: 1.2,
+                fontWeight: FontWeight.w600,
+                color: scheme.onPrimary,
+              ).tabular,
             ),
           ),
         ],
@@ -104,8 +110,8 @@ class SecondaryTabBar extends StatelessWidget {
       dividerHeight: 1,
       labelColor: scheme.onSurface,
       unselectedLabelColor: scheme.onSurfaceVariant,
-      labelStyle: text.copyWith(fontSize: 14, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: text.copyWith(fontSize: 14, fontWeight: FontWeight.w400),
+      labelStyle: text.copyWith(fontWeight: FontWeight.w600),
+      unselectedLabelStyle: text.copyWith(fontWeight: FontWeight.w400),
       labelPadding: const EdgeInsets.symmetric(horizontal: 14),
       physics: physics,
       tabs: tabs,

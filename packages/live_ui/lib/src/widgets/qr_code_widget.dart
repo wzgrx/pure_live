@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:qr/qr.dart';
 
 /// The colours around a QR code: it is always dark on white, whatever the
@@ -134,8 +136,8 @@ class QrCodeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final ink = (theme.textTheme.bodyLarge ?? const TextStyle()).copyWith(fontSize: 14, color: QrColors.ink);
-    final heading = ink.copyWith(fontSize: 15, fontWeight: FontWeight.w600);
+    final ink = (theme.textTheme.bodyLarge ?? const TextStyle()).copyWith(color: QrColors.ink);
+    final heading = ink.copyWith(fontSize: theme.textTheme.titleMedium?.fontSize, fontWeight: FontWeight.w600);
     // The veil is white in every theme: the dark theme's light primary
     // would fade on it.
     final mark = scheme.brightness == Brightness.dark ? QrColors.ink : scheme.primary;
@@ -152,18 +154,18 @@ class QrCodeCard extends StatelessWidget {
               minimumSize: const Size(0, 36),
               padding: const EdgeInsets.symmetric(horizontal: 14),
             ),
-            icon: const Icon(Icons.refresh_rounded, size: 16),
+            icon: const Icon(AppIcons.qrCardRefresh, size: 16),
             label: Text(actionLabel!),
           );
     final children = switch (status) {
       QrCodeStatus.ready => null,
       QrCodeStatus.loading || QrCodeStatus.working => [spinner, ?_gap(12, text(ink))],
       QrCodeStatus.scanned || QrCodeStatus.done => [
-        Icon(Icons.check_circle_outline_rounded, size: 44, color: mark),
+        Icon(AppIcons.qrCardScanned, size: 44, color: mark),
         ?_gap(8, text(status == QrCodeStatus.scanned ? heading : ink)),
       ],
       QrCodeStatus.expired || QrCodeStatus.failed => [
-        Icon(Icons.error_outline_rounded, size: 32, color: status == QrCodeStatus.failed ? scheme.error : QrColors.ink),
+        Icon(AppIcons.qrCardFailed, size: 32, color: status == QrCodeStatus.failed ? scheme.error : QrColors.ink),
         ?_gap(8, text(ink)),
         ?_gap(8, button()),
       ],
@@ -173,10 +175,7 @@ class QrCodeCard extends StatelessWidget {
       child: Container(
         key: const ValueKey('qr-card'),
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
-          borderRadius: const BorderRadius.all(Radius.circular(16)),
-        ),
+        decoration: BoxDecoration(color: scheme.surfaceContainerLow, borderRadius: AppRadii.card),
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
           child: SizedBox.square(

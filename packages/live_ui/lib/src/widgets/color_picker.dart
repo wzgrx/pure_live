@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 
 /// The words of [LiveColorPicker] (the app passes the current language's).
 @immutable
@@ -320,7 +322,7 @@ class _Tabs extends StatelessWidget {
                   borderRadius: const BorderRadius.all(Radius.circular(10)),
                   onTap: () => onSelected(index),
                   child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 150),
+                    duration: AppDurations.fast,
                     height: 40,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -332,7 +334,7 @@ class _Tabs extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
                         fontWeight: index == selected ? FontWeight.w600 : FontWeight.w400,
                         color: index == selected ? colors.onSurface : colors.onSurfaceVariant,
                       ),
@@ -392,7 +394,7 @@ class _Swatches extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: on ? Border.all(color: scheme.onSurface, width: 3) : null,
                       ),
-                      child: on ? Icon(Icons.check_rounded, color: InkOnColor.on(color), size: size * 0.5) : null,
+                      child: on ? Icon(AppIcons.selected, color: InkOnColor.on(color), size: size * 0.5) : null,
                     ),
                   );
                   final name = names?[index];

@@ -14,6 +14,7 @@ export 'src/theme/dynamic_color.dart' show LiveDynamicColorBuilder, MaterialUiTh
 export 'src/theme/grid_columns.dart';
 export 'src/theme/live_colors.dart';
 export 'src/theme/live_theme.dart';
+export 'src/theme/metrics.dart';
 export 'src/theme/motion.dart';
 export 'src/theme/text_styles.dart';
 export 'src/theme/text_wrapping.dart';

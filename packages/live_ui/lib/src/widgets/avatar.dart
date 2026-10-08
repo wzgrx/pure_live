@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 import 'package:live_ui/src/widgets/network_image.dart';
 
@@ -56,7 +57,7 @@ class CommonAvatar extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(shape: BoxShape.circle, color: scheme.secondaryContainer),
         child: name.isEmpty
-            ? Icon(Icons.person_rounded, size: size * 0.6, color: scheme.onSecondaryContainer)
+            ? Icon(AppIcons.avatarPlaceholder, size: size * 0.6, color: scheme.onSecondaryContainer)
             : Text(
                 name.characters.first.toUpperCase(),
                 style: TextStyle(

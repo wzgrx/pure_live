@@ -148,7 +148,10 @@ class _JsonTreeSliverState extends State<JsonTreeSliver> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
-    final base = (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(fontSize: 14, height: 1.4);
+    final base = (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
+      fontSize: theme.textTheme.bodyLarge?.fontSize,
+      height: 1.4,
+    );
     Color valueColor(Object? value) => switch (value) {
       num() => dark ? LiveSemanticColors.successDark : LiveSemanticColors.successLight,
       String() => colors.tertiary,

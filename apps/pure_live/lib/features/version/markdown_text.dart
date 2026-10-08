@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 
 /// The Markdown of the update notes (3.x used markdown_widget): headings,
@@ -123,7 +124,7 @@ final class _Heading extends _Block {
     };
     return Padding(
       padding: EdgeInsets.only(top: level == 1 ? 12 : 10, bottom: 6),
-      child: _Inline(text, style: style?.copyWith(fontWeight: FontWeight.bold)),
+      child: _Inline(text, style: style?.emphasis),
     );
   }
 }
@@ -236,10 +237,7 @@ final class _Table extends _Block {
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 320),
-                        child: _Inline(
-                          c < rows[r].length ? rows[r][c] : '',
-                          style: r == 0 ? style?.copyWith(fontWeight: FontWeight.bold) : style,
-                        ),
+                        child: _Inline(c < rows[r].length ? rows[r][c] : '', style: r == 0 ? style?.emphasis : style),
                       ),
                     ),
                 ],
@@ -291,7 +289,7 @@ class _InlineState extends State<_Inline> {
         spans.add(
           TextSpan(
             text: bold,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         );
       } else if (match.group(2) case final code?) {

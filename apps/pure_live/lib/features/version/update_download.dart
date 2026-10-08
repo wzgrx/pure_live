@@ -478,7 +478,7 @@ class _UpdateDownloadDialogState extends ConsumerState<UpdateDownloadDialog> {
           key: const ValueKey('update-download-progress'),
           textAlign: stacked ? TextAlign.start : TextAlign.end,
           style: styles.t14.tabular.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w600,
             color: failed ? scheme.onSurfaceVariant : scheme.primary,
           ),
         );

@@ -24,7 +24,10 @@ void main() {
       expect(text.bodyLarge!.fontSize, 16);
       expect(text.titleSmall!.fontSize, 16);
       expect(text.titleMedium!.fontSize, 17);
-      expect(text.titleMedium!.fontWeight, FontWeight.w500);
+      // A01.2, UI.md §8.2: weights are 400 and 600 (3.x's 500 became 600).
+      expect(text.titleMedium!.fontWeight, FontWeight.w600);
+      expect(text.titleSmall!.fontWeight, FontWeight.w600);
+      expect(text.labelLarge!.fontWeight, FontWeight.w600);
       expect(text.titleLarge!.fontSize, 22);
       expect(text.titleLarge!.fontWeight, FontWeight.w600);
       expect(text.headlineSmall!.fontSize, closeTo(26.4, 1e-9));
@@ -95,10 +98,8 @@ void main() {
       expect(outerStyles.t13.fontSize, 13);
       expect(innerStyles.t13.fontSize, 19);
       expect(outerStyles.t11.fontSize, outerStyles.t12.fontSize);
-      expect(outerStyles.t15Bold.fontWeight, FontWeight.w700);
+      expect(outerStyles.t15SemiBold.fontWeight, FontWeight.w600);
       expect(outerStyles.t13Primary.color, outer.colorScheme.primary);
-      expect(outerStyles.t24Bold.fontSize, 24);
-      expect(outerStyles.t32Bold.fontWeight, FontWeight.w800);
     });
   });
 }

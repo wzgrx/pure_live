@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/live_theme.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 
 /// A page's name with a short line under it, for an app bar's title
@@ -34,8 +35,9 @@ class PageTitle extends StatelessWidget {
           key: const ValueKey('page-title'),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
+          // 17 by default: the app bar title size × 17 / 20 (A01.2).
           style: (theme.textTheme.titleLarge ?? const TextStyle()).emphasis.copyWith(
-            fontSize: 17,
+            fontSize: LiveFontSizes.of(theme.textTheme).titleLarge * 17 / 20,
             height: 1.3,
             color: theme.colorScheme.onSurface,
           ),

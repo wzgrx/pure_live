@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
 /// The chip's height (docs/A-界面设计/A02-组件/A02.1-通用组件 c13); 48 to tap.
@@ -25,9 +27,10 @@ class AppChip extends ChoiceChip {
          label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
          // The tick takes the picture's place (Material would paint it over
          // a darkened logo).
-         avatar: selected && showCheckmark ? const Icon(Icons.check_rounded, size: 18) : leading,
+         avatar: selected && showCheckmark ? const Icon(AppIcons.selected, size: 18) : leading,
          showCheckmark: false,
-         labelStyle: TextStyle(fontSize: 14, height: 20 / 14, fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
+         // The size is the chip theme's (the emphasised body size).
+         labelStyle: TextStyle(height: 20 / 14, fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
          onSelected: onSelected == null ? null : (_) => onSelected(),
        );
 }
@@ -36,7 +39,7 @@ class AppChip extends ChoiceChip {
 /// shape, the outline (none when chosen; the primary frame while the
 /// keyboard focus is on it), the colours and the size.
 ChipThemeData appChipTheme(ColorScheme scheme, TextTheme textTheme) => ChipThemeData(
-  shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+  shape: const RoundedRectangleBorder(borderRadius: AppRadii.chip),
   side: AppChipSide(
     outline: scheme.outlineVariant,
     focus: scheme.primary,
@@ -46,7 +49,7 @@ ChipThemeData appChipTheme(ColorScheme scheme, TextTheme textTheme) => ChipTheme
   checkmarkColor: scheme.onSecondaryContainer,
   iconTheme: IconThemeData(color: scheme.onSecondaryContainer, size: 18),
   // A 20-point line and 8 above and below: 36 high.
-  labelStyle: textTheme.bodyLarge?.copyWith(fontSize: 14, height: 20 / 14),
+  labelStyle: textTheme.bodyLarge?.copyWith(height: 20 / 14),
   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
 );
 

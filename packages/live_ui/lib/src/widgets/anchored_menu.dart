@@ -3,6 +3,7 @@ import 'dart:ui' show SemanticsRole, lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 
 // The route behind the small menu ([showSmallMenu], [showAppMenu];
 // docs/A-界面设计/A02-组件/A02.3-贴着按钮的小菜单/brief.md). Flutter's `showMenu` only takes the menu's top
@@ -19,10 +20,10 @@ const double anchoredMenuMargin = 8;
 
 /// How long the small menu takes to unfold (docs/specs/UI.md §8.6:
 /// instant feedback, 100–150 ms).
-const Duration anchoredMenuOpenDuration = Duration(milliseconds: 150);
+const Duration anchoredMenuOpenDuration = AppDurations.fast;
 
 /// How long it takes to fade out: a closing menu goes faster than it came.
-const Duration anchoredMenuCloseDuration = Duration(milliseconds: 100);
+const Duration anchoredMenuCloseDuration = AppDurations.instant;
 
 /// The smallest menu (one 48 row and the 8 above and below it): when neither
 /// side of the button has this much room, the menu may cover the button.
@@ -326,7 +327,7 @@ class _MenuSurfaceState extends State<_MenuSurface> {
     return Material(
       type: MaterialType.card,
       color: scheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadii.menu),
       elevation: 3,
       shadowColor: scheme.shadow,
       surfaceTintColor: Colors.transparent,

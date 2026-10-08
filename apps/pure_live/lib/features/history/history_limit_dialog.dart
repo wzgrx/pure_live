@@ -127,7 +127,7 @@ class _HistoryLimitDialogState extends State<HistoryLimitDialog> {
             ],
           ),
           const SizedBox(height: 24),
-          Text(i18n('history_limit_custom'), style: styles.t13Medium),
+          Text(i18n('history_limit_custom'), style: styles.t13),
           const SizedBox(height: 12),
           TextField(
             key: const ValueKey('history-limit-custom'),
@@ -157,7 +157,7 @@ class _HistoryLimitDialogState extends State<HistoryLimitDialog> {
             child: ElevatedButton(
               key: const ValueKey('history-limit-apply'),
               onPressed: _saving ? null : _applyCustom,
-              child: Text(i18n('apply'), style: styles.t13Medium.copyWith(color: theme.colorScheme.primary)),
+              child: Text(i18n('apply'), style: styles.t13.emphasis.copyWith(color: theme.colorScheme.primary)),
             ),
           ),
           const SizedBox(height: 16),

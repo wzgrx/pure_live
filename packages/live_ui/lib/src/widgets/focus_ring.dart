@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 
 /// Whether focus frames show: the user moves the focus with a keyboard
 /// (or a remote), not with touch (UI_PLAN §5.4: "焦点框只在用键盘时显示").
@@ -11,13 +12,7 @@ bool get focusFramesShown => FocusManager.instance.highlightMode == FocusHighlig
 /// tappable widgets (avatars, counters, the jump buttons).
 class FocusRing extends StatefulWidget {
   /// Frames [child].
-  const new({
-    required this.child,
-    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
-    this.gap = 2,
-    this.color,
-    super.key,
-  });
+  const new({required this.child, this.borderRadius = AppRadii.button, this.gap = 2, this.color, super.key});
 
   /// The framed widget; it holds the focusable widget.
   final Widget child;

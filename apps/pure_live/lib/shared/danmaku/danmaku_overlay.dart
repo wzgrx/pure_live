@@ -727,7 +727,7 @@ final class _Ink {
       fontFamily: look.fontFamily,
       color: color.withValues(alpha: color.a * opacity).toARGB32(),
       strokeColor: look.stroke && look.strokeWidth > 0
-          ? const Color(0xFF000000).withValues(alpha: math.sqrt(opacity)).toARGB32()
+          ? LivePalettes.danmakuStroke.withValues(alpha: math.sqrt(opacity)).toARGB32()
           : null,
       strokeWidth: look.stroke ? look.strokeWidth : 0,
       emoteAlpha: opacity,

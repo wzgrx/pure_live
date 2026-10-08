@@ -139,7 +139,7 @@ class SearchScopePanel extends StatelessWidget {
                         'total': '${members.length}',
                       },
                     ),
-                    style: styles.t12Medium.copyWith(color: scheme.onSurfaceVariant).tabular,
+                    style: styles.t12.copyWith(color: scheme.onSurfaceVariant).tabular,
                   ),
                 ],
               ),

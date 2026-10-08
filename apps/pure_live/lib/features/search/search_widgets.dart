@@ -566,7 +566,7 @@ class SearchHistoryPanel extends StatelessWidget {
             children: [
               Icon(AppIcons.searchHistory, size: 18, color: scheme.onSurfaceVariant),
               const SizedBox(width: 6),
-              Expanded(child: Text(i18n('search_history'), style: context.textStyles.t14Medium)),
+              Expanded(child: Text(i18n('search_history'), style: context.textStyles.t14.emphasis)),
               TextButton.icon(
                 key: const ValueKey('search-history-clear'),
                 onPressed: onClear,

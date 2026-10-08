@@ -327,7 +327,7 @@ class _StatusCard extends StatelessWidget {
                   newer
                       ? i18n('new_version_info', args: {'version': updateVersionLabel(info)})
                       : i18n('no_new_version_info'),
-                  style: styles.t16Bold,
+                  style: styles.t16.emphasis,
                 ),
                 const SizedBox(height: 4),
                 Wrap(

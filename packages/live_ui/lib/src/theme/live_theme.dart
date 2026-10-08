@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/widgets/app_chip.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
@@ -182,14 +183,10 @@ final class LiveTheme {
   /// Regular weight.
   static const FontWeight regular = FontWeight.w400;
 
-  /// Medium weight.
-  static const FontWeight medium = FontWeight.w500;
-
-  /// Semi-bold weight.
+  /// Semi-bold weight. The design uses only [regular] and this (UI.md §8.2:
+  /// Microsoft YaHei has no 500, so a medium weight renders as a blurred
+  /// faux bold on Windows); 3.x's 500 and 700 became 600 (A01.2).
   static const FontWeight semiBold = FontWeight.w600;
-
-  /// Bold weight.
-  static const FontWeight bold = FontWeight.w700;
 
   /// The error colour of a dark dynamic palette (3.x replaced the system's).
   static const Color darkDynamicError = Color(0xFFFF6347);
@@ -230,12 +227,13 @@ final class LiveTheme {
       headlineMedium: scale(localized.headlineMedium, sizes.titleLarge * 1.4),
       headlineSmall: scale(localized.headlineSmall, sizes.titleLarge * 1.2),
       titleLarge: scale(localized.titleLarge, sizes.titleLarge).copyWith(fontWeight: semiBold),
-      titleMedium: scale(localized.titleMedium, sizes.titleMedium).copyWith(fontWeight: medium),
-      titleSmall: scale(localized.titleSmall, sizes.bodyLarge).copyWith(fontWeight: medium),
+      // 3.x's 500 (theme.dart:76-77, :83) is 600 here (A01.2, UI.md §8.2).
+      titleMedium: scale(localized.titleMedium, sizes.titleMedium).copyWith(fontWeight: semiBold),
+      titleSmall: scale(localized.titleSmall, sizes.bodyLarge).copyWith(fontWeight: semiBold),
       bodyLarge: scale(localized.bodyLarge, sizes.bodyLarge),
       bodyMedium: scale(localized.bodyMedium, sizes.bodyMedium),
       bodySmall: scale(localized.bodySmall, sizes.bodySmall),
-      labelLarge: scale(localized.labelLarge, sizes.bodyMedium).copyWith(fontWeight: medium),
+      labelLarge: scale(localized.labelLarge, sizes.bodyMedium).copyWith(fontWeight: semiBold),
       labelMedium: scale(localized.labelMedium, sizes.bodySmall),
       // Nothing smaller than the small size (A01.4 c5: 12 by default;
       // Material makes labelSmall one smaller).
@@ -284,7 +282,7 @@ final class LiveTheme {
         unselectedLabelStyle: textTheme.titleMedium?.copyWith(fontWeight: regular),
         labelColor: colors.primary,
         unselectedLabelColor: colors.onSurfaceVariant.withValues(alpha: 0.8),
-        splashBorderRadius: BorderRadius.circular(8),
+        splashBorderRadius: AppRadii.menu,
         overlayColor: _TabOverlay(colors.onSurface),
       ),
       chipTheme: appChipTheme(colors, textTheme),
@@ -299,24 +297,24 @@ final class LiveTheme {
         ),
       ),
       iconButtonTheme: IconButtonThemeData(style: ButtonStyle(side: FocusFrame(colors.primary))),
-      cardTheme: CardThemeData(
+      cardTheme: const CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: AppRadii.card),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           textStyle: textTheme.labelLarge?.copyWith(fontWeight: semiBold),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadii.button),
         ).copyWith(side: FocusFrame(colors.primary)),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          textStyle: textTheme.labelLarge?.copyWith(fontWeight: medium),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          textStyle: textTheme.labelLarge?.copyWith(fontWeight: semiBold),
+          shape: const RoundedRectangleBorder(borderRadius: AppRadii.textButton),
         ).copyWith(side: FocusFrame(colors.primary)),
       ),
       // The list row (U.1c c16): one row for lists, panels and settings;
@@ -324,7 +322,7 @@ final class LiveTheme {
       // variant ink, at least 56 high; the chosen row on the secondary
       // container.
       listTileTheme: ListTileThemeData(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadii.listRow),
         titleTextStyle: textTheme.bodyLarge?.copyWith(
           fontSize: fontSizes.titleMedium,
           fontWeight: regular,
@@ -343,9 +341,9 @@ final class LiveTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         labelStyle: textTheme.bodyMedium,
         hintStyle: textTheme.bodyMedium?.copyWith(color: colors.onSurfaceVariant.withValues(alpha: 0.6)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: const OutlineInputBorder(borderRadius: AppRadii.input),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadii.input,
           borderSide: BorderSide(color: colors.primary, width: 1.5),
         ),
       ),
@@ -356,7 +354,7 @@ final class LiveTheme {
         showDragHandle: true,
         backgroundColor: colors.surface,
         surfaceTintColor: Colors.transparent,
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadii.panelTop),
       ),
       // The dialog (U.1d c1, c5): title 20/600, text 14 (3.x had 13).
       dialogTheme: DialogThemeData(
@@ -364,7 +362,7 @@ final class LiveTheme {
         backgroundColor: colors.surfaceContainerHigh,
         titleTextStyle: textTheme.titleLarge?.copyWith(fontWeight: semiBold, color: colors.onSurface),
         contentTextStyle: textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadii.dialog),
         insetPadding: const EdgeInsets.all(16),
       ),
       // The toast (U.1d c11–c13): floating, the inverse colours, 8-point
@@ -375,7 +373,7 @@ final class LiveTheme {
         contentTextStyle: textTheme.bodyLarge?.copyWith(color: colors.onInverseSurface),
         actionTextColor: colors.inversePrimary,
         closeIconColor: colors.onInverseSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        shape: const RoundedRectangleBorder(borderRadius: AppRadii.menu),
         insetPadding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       ),
     );

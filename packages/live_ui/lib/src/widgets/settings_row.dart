@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/live_theme.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_chip.dart';
 import 'package:live_ui/src/widgets/count_button.dart';
@@ -20,6 +23,14 @@ const double settingsRowNarrowWidth = 360;
 
 /// Text scale from which a row's value moves under its title.
 const double settingsRowLargeText = 1.5;
+
+/// The size of a row's value and a counter's number: the emphasised body
+/// size (14 by default), one step larger on the television (16, UI.md
+/// §5.5).
+double settingsValueFontSize(BuildContext context, {required bool tv}) {
+  final size = LiveFontSizes.of(Theme.of(context).textTheme).bodyLarge;
+  return tv ? size * 16 / 14 : size;
+}
 
 /// How settings rows look in a subtree: the phone and desktop style, or the
 /// television style (focus enlarges the row and draws a near-white frame,
@@ -189,7 +200,7 @@ class SettingsGroup extends StatelessWidget {
           // their ink.
           Material(
             color: colors.surfaceContainerLow,
-            borderRadius: const BorderRadius.all(Radius.circular(16)),
+            borderRadius: AppRadii.card,
             clipBehavior: Clip.antiAlias,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -230,7 +241,8 @@ class SettingsGroupTitle extends StatelessWidget {
         child: Text(
           text,
           style: (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-            fontSize: SettingsRowStyle.tvOf(context) ? 15 : 13,
+            // The body size; the TV's one step larger (15 by default).
+            fontSize: SettingsRowStyle.tvOf(context) ? LiveFontSizes.of(theme.textTheme).bodyMedium * 15 / 13 : null,
             fontWeight: FontWeight.w600,
             color: theme.colorScheme.primary,
           ),
@@ -259,7 +271,8 @@ class SettingsNote extends StatelessWidget {
       child: Text(
         withoutOrphan(text),
         style: (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-          fontSize: SettingsRowStyle.tvOf(context) ? 14 : 12,
+          // The small size; the TV's one step larger (14 by default).
+          fontSize: SettingsRowStyle.tvOf(context) ? LiveFontSizes.of(theme.textTheme).bodySmall * 14 / 12 : null,
           height: 1.5,
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -371,14 +384,17 @@ class _SettingsRowState extends State<SettingsRow> {
     final tv = SettingsRowStyle.tvOf(context);
     final usable = widget.enabled && !widget.busy;
     final body = theme.textTheme.bodyMedium ?? const TextStyle();
+    // The card title and small sizes; the TV's one step larger (UI.md §5.5:
+    // 17 and 14 by default).
+    final sizes = LiveFontSizes.of(theme.textTheme);
     final titleStyle = body.copyWith(
-      fontSize: tv ? 17 : 15,
+      fontSize: tv ? sizes.titleMedium * 17 / 15 : sizes.titleMedium,
       fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w400,
       height: 1.4,
       color: widget.titleColor ?? (widget.selected ? colors.onSecondaryContainer : colors.onSurface),
     );
     final subtitleStyle = body.copyWith(
-      fontSize: tv ? 14 : 12,
+      fontSize: tv ? sizes.bodySmall * 14 / 12 : sizes.bodySmall,
       fontWeight: FontWeight.w400,
       height: 1.45,
       color: widget.subtitleColor ?? colors.onSurfaceVariant,
@@ -493,12 +509,12 @@ class _SettingsRowState extends State<SettingsRow> {
     row = DecoratedBox(
       position: DecorationPosition.foreground,
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderRadius: AppRadii.listRow,
         border: showRing ? Border.all(color: tv ? LiveTvColors.focusFrame : colors.primary, width: tv ? 3 : 2) : null,
       ),
       child: row,
     );
-    if (tv) row = AnimatedScale(scale: _focused ? 1.05 : 1, duration: const Duration(milliseconds: 150), child: row);
+    if (tv) row = AnimatedScale(scale: _focused ? 1.05 : 1, duration: AppDurations.fast, child: row);
     if (widget.tooltip case final tooltip?) row = Tooltip(message: tooltip, child: row);
     if (!widget.enabled) {
       row = Opacity(
@@ -605,17 +621,13 @@ class SettingsLinkRow extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.end,
             style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
-              fontSize: tv ? 16 : 14,
+              fontSize: settingsValueFontSize(context, tv: tv),
               color: colors.onSurfaceVariant,
             ),
           ),
         ),
       if (chevron)
-        Icon(
-          choice ? Icons.expand_more_rounded : Icons.chevron_right_rounded,
-          size: choice ? 20 : 24,
-          color: colors.onSurfaceVariant,
-        ),
+        Icon(choice ? AppIcons.choiceRow : AppIcons.navigate, size: choice ? 20 : 24, color: colors.onSurfaceVariant),
     ];
     return SettingsRow(
       title: title,
@@ -636,7 +648,7 @@ class SettingsLinkRow extends StatelessWidget {
               child: Text(
                 value,
                 style: (Theme.of(context).textTheme.bodyMedium ?? const TextStyle()).copyWith(
-                  fontSize: tv ? 16 : 14,
+                  fontSize: settingsValueFontSize(context, tv: tv),
                   fontWeight: FontWeight.w600,
                   color: colors.primary,
                 ),
@@ -814,7 +826,7 @@ class SettingsSliderRow extends StatelessWidget {
         child: Text(
           label,
           style: (theme.textTheme.bodyMedium ?? const TextStyle()).tabular.copyWith(
-            fontSize: SettingsRowStyle.tvOf(context) ? 15 : 13,
+            fontSize: SettingsRowStyle.tvOf(context) ? LiveFontSizes.of(theme.textTheme).bodyMedium * 15 / 13 : null,
             fontWeight: FontWeight.w600,
             color: colors.primary,
           ),
@@ -1141,7 +1153,9 @@ class SettingsSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final size = theme.textTheme.titleMedium?.fontSize;
     return ValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) => SizedBox(
@@ -1151,20 +1165,20 @@ class SettingsSearchField extends StatelessWidget {
           controller: controller,
           focusNode: focusNode,
           textInputAction: TextInputAction.search,
-          style: TextStyle(fontSize: 15, color: colors.onSurface),
+          style: TextStyle(fontSize: size, color: colors.onSurface),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TextStyle(fontSize: 15, color: colors.onSurfaceVariant),
+            hintStyle: TextStyle(fontSize: size, color: colors.onSurfaceVariant),
             filled: true,
             fillColor: colors.surfaceContainerHigh,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            prefixIcon: Icon(Icons.search_rounded, size: 22, color: colors.onSurfaceVariant),
+            prefixIcon: Icon(AppIcons.searchField, size: 22, color: colors.onSurfaceVariant),
             suffixIcon: value.text.isEmpty
                 ? null
                 : IconButton(
                     key: clearKey,
                     tooltip: clearTooltip,
-                    icon: Icon(Icons.close_rounded, size: 20, color: colors.onSurfaceVariant),
+                    icon: Icon(AppIcons.clearQuery, size: 20, color: colors.onSurfaceVariant),
                     onPressed: controller.clear,
                   ),
             border: const OutlineInputBorder(

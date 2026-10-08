@@ -215,9 +215,6 @@ abstract final class AppIcons {
   /// A platform notice line.
   static const IconData chatNotice = Icons.campaign_outlined;
 
-  /// The chat list's look (compact lines or cards).
-  static const IconData chatListStyle = Icons.view_agenda_outlined;
-
   // ---- gestures over the video (3.x `BrightnessVolumnDargArea`) ----
 
   /// Low brightness.
@@ -252,10 +249,6 @@ abstract final class AppIcons {
   /// Play a finished replay again.
   static const IconData playAgain = Icons.replay_rounded;
 
-  /// The picture is paused: the play mark that resumes it (it shows what a
-  /// tap does, like the play key).
-  static const IconData pausedOverlay = Icons.play_circle_outline_rounded;
-
   // ---- the live room's popups (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗) ----
 
   /// Close a panel or a sheet (✕).
@@ -285,8 +278,10 @@ abstract final class AppIcons {
   /// Copy a stream address ("获取直链", 3.x's room menu).
   static const IconData streamLink = Remix.link_m;
 
-  /// The room in a new window (Windows, 3.x's room menu).
-  static const IconData newWindow = Icons.open_in_new_rounded;
+  /// The room in a new window (Windows, the room menu): the same stacked
+  /// pages as the home menu's [newPlayerWindow] (A16.1 c12), so it no
+  /// longer looks like [openExternal] next to it.
+  static const IconData newWindow = Icons.add_to_photos_outlined;
 
   /// The local interaction sheet (3.x's room menu).
   static const IconData localInteraction = Icons.auto_awesome_rounded;
@@ -297,17 +292,8 @@ abstract final class AppIcons {
   /// Apply the user's danmaku template (3.x's danmaku settings).
   static const IconData templateRestore = Icons.restore_rounded;
 
-  /// A recording waits for a free slot.
-  static const IconData recordQueued = Remix.hourglass_line;
-
-  /// A recording reconnects.
-  static const IconData recordReconnecting = Remix.loop_right_line;
-
   /// A recording is saved.
   static const IconData recordSaved = Icons.check_circle_rounded;
-
-  /// A recording failed.
-  static const IconData recordFailed = Icons.error_outline_rounded;
 
   // ---- the recording centre (3.x recorder_page.dart; docs/A-界面设计/A10-录制界面/A10.1-录制中心) ----
 
@@ -482,12 +468,6 @@ abstract final class AppIcons {
   /// Back to the room from a mini window (new in U.2j).
   static const IconData backToRoom = Icons.open_in_full_rounded;
 
-  /// Play in a mini window (3.x `Icons.play_circle_filled`).
-  static const IconData miniPlay = Icons.play_circle_filled;
-
-  /// Pause in a mini window (3.x `Icons.pause_circle_filled`).
-  static const IconData miniPause = Icons.pause_circle_filled;
-
   /// The desktop mini window stays on top (new in U.2j; Remix, as 3.x's
   /// "pinned" marks).
   static const IconData pinned = Remix.pushpin_fill;
@@ -533,9 +513,6 @@ abstract final class AppIcons {
   /// Loading failed for the network (3.x `AppStatusView` error).
   static const IconData networkError = Icons.wifi_off_rounded;
 
-  /// The platform wants a login.
-  static const IconData loginRequired = Icons.account_circle_outlined;
-
   /// No live rooms on the popular page (3.x `RemixIcons.fire_fill`).
   static const IconData emptyPopular = Remix.fire_fill;
 
@@ -560,9 +537,6 @@ abstract final class AppIcons {
   /// Show what was hidden (rooms that cannot play here).
   static const IconData showHidden = Icons.visibility_rounded;
 
-  /// Something is hidden.
-  static const IconData hiddenNote = Icons.visibility_off_outlined;
-
   /// Scroll to the top (3.x's mini button).
   static const IconData toTop = Icons.arrow_upward_rounded;
 
@@ -580,11 +554,17 @@ abstract final class AppIcons {
   /// The pull-to-refresh header after a failed refresh (U.1c c19).
   static const IconData refreshFailed = Icons.error_outline_rounded;
 
-  /// The previous page of the desktop pager.
-  static const IconData previousPage = Icons.chevron_left_rounded;
+  /// The previous page of the desktop pager (3.x `desktop_components.dart`
+  /// `Icons.arrow_back_ios_new_rounded`).
+  static const IconData previousPage = Icons.arrow_back_ios_new_rounded;
 
-  /// The next page of the desktop pager.
-  static const IconData nextPage = Icons.chevron_right_rounded;
+  /// The next page of the desktop pager (3.x
+  /// `Icons.arrow_forward_ios_rounded`).
+  static const IconData nextPage = Icons.arrow_forward_ios_rounded;
+
+  /// The desktop pager's rooms-per-page menu (3.x
+  /// `Icons.arrow_drop_down_rounded`).
+  static const IconData pageSize = Icons.arrow_drop_down_rounded;
 
   // ---- multi-view (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面; 3.x lib/modules/multiview) ----
 
@@ -1046,11 +1026,8 @@ abstract final class AppIcons {
   // ---- settings: playback (3.x video_settings_page.dart and the pages it
   // opens, player_kernel_settings_page.dart; U.6c) ----
 
-  /// Global mute while on.
+  /// Global mute.
   static const IconData settingsMuted = Remix.volume_mute_line;
-
-  /// Global mute while off.
-  static const IconData settingsUnmuted = Remix.volume_up_line;
 
   /// The phones' default volume (3.x's handset read as the call volume,
   /// A01.4 c4).
@@ -1340,8 +1317,7 @@ abstract final class AppIcons {
   /// The most recordings at once.
   static const IconData recordMaxTasks = Remix.task_line;
 
-  /// Reconnect when a recording breaks (the same as
-  /// [recordReconnecting], A01.4 c4).
+  /// Reconnect when a recording breaks (A01.4 c4).
   static const IconData recordReconnect = Remix.loop_right_line;
 
   /// The most retries.
@@ -1558,4 +1534,42 @@ abstract final class AppIcons {
 
   /// A group with no rooms.
   static const IconData switchRoomEmpty = Icons.live_tv_rounded;
+
+  // ---- live_ui's shared components (docs/A-界面设计/A02-组件; A01.3: the
+  // components name their icons here too) ----
+
+  /// A settings row that opens a list of choices (⌄; a row that opens a
+  /// page has [navigate]).
+  static const IconData choiceRow = Icons.expand_more_rounded;
+
+  /// The magnifier at the start of the settings' search field.
+  static const IconData searchField = Icons.search_rounded;
+
+  /// Empty the settings' search field (✕ at its end).
+  static const IconData clearQuery = Icons.close_rounded;
+
+  /// `QrCodeCard`: get a new QR code after it expired or failed.
+  static const IconData qrCardRefresh = Icons.refresh_rounded;
+
+  /// `QrCodeCard`: the code was scanned, confirm on the phone (the account
+  /// pages' status line has [qrScanned]).
+  static const IconData qrCardScanned = Icons.check_circle_outline_rounded;
+
+  /// `QrCodeCard`: the code expired or could not be loaded.
+  static const IconData qrCardFailed = Icons.error_outline_rounded;
+
+  /// An avatar without a picture.
+  static const IconData avatarPlaceholder = Icons.person_rounded;
+
+  /// An error banner (an information banner has [info], a warning
+  /// [warning]).
+  static const IconData bannerError = Icons.error_outline_rounded;
+
+  /// The status page while loading and when there is nothing (3.x
+  /// `AppStatusView`).
+  static const IconData statusEmpty = Icons.live_tv_rounded;
+
+  /// The status page after an error (offline has [networkError], a
+  /// restricted room [restricted]).
+  static const IconData statusError = Icons.error_outline_rounded;
 }

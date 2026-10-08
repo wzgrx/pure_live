@@ -279,7 +279,7 @@ class _Leading extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
               border: Border.all(color: scheme.surfaceContainerLow, width: 2),
             ),
-            child: Text(badge, style: context.textStyles.t11Bold.copyWith(color: background, height: 1.25)),
+            child: Text(badge, style: context.textStyles.t11.emphasis.copyWith(color: background, height: 1.25)),
           ),
         ),
       ],

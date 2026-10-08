@@ -641,10 +641,7 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final minimum = windowSizeMinimum();
-    final caption = (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(
-      fontSize: 13,
-      color: colors.onSurfaceVariant,
-    );
+    final caption = (theme.textTheme.bodyMedium ?? const TextStyle()).copyWith(color: colors.onSurfaceVariant);
     final defaultWidth = Settings.windowWidth.defaultValue.round();
     final defaultHeight = Settings.windowHeight.defaultValue.round();
     return SettingsDialogFrame(
@@ -699,7 +696,10 @@ class _WindowSizeDialogState extends State<_WindowSizeDialog> {
                       'max': '${Settings.windowWidth.max!.round()}',
                     },
                   ),
-              style: caption.copyWith(fontSize: 12, color: _error == null ? colors.onSurfaceVariant : colors.error),
+              style: caption.copyWith(
+                fontSize: theme.textTheme.bodySmall?.fontSize,
+                color: _error == null ? colors.onSurfaceVariant : colors.error,
+              ),
             ),
           ],
         ),
@@ -1002,7 +1002,8 @@ class _RefreshRateLimitedNote extends StatelessWidget {
       child: Text(
         i18n('settings_refresh_rate_limited', args: {'rate': '${rate.round()}'}),
         style: (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-          fontSize: tv ? 14 : 12,
+          // The small size; the TV's one step larger (14 by default).
+          fontSize: tv ? LiveFontSizes.of(theme.textTheme).bodySmall * 14 / 12 : null,
           height: 1.45,
           color: LiveSemanticColors.warning(theme.brightness),
         ),

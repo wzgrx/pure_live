@@ -341,8 +341,29 @@ abstract final class LivePureBlack {
 }
 
 /// The colour swatches of the colour picker (3.x `AppConsts.themeColors`
-/// and flex_color_picker's Material lists).
+/// and flex_color_picker's Material lists) and the danmaku colours (A01.2:
+/// the app writes no colour values of its own).
 abstract final class LivePalettes {
+  /// The colours offered for danmaku (the usual danmaku colours of the
+  /// platforms: white, black, red, orange, amber, yellow, green, sky blue,
+  /// blue, magenta; any other is typed as hex).
+  static const List<Color> danmaku = [
+    Color(0xFFFFFFFF),
+    Color(0xFF000000),
+    Color(0xFFFE0302),
+    Color(0xFFFF7204),
+    Color(0xFFFFAA02),
+    Color(0xFFFFD302),
+    Color(0xFF00CD00),
+    Color(0xFF00A2FF),
+    Color(0xFF4266BE),
+    Color(0xFFCC0273),
+  ];
+
+  /// The outline of a flying danmaku, drawn at the square root of the
+  /// danmaku's opacity (3.x `resolveBarrageStrokeOpacity`).
+  static const Color danmakuStroke = Color(0xFF000000);
+
   /// The app's colours, first in the picker (3.x's "自定义" tab, renamed
   /// "推荐" in U.6b): the brand blue, then 3.x's fourteen in its order.
   static const List<(String name, Color color)> recommended = [

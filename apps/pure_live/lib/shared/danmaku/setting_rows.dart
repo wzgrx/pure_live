@@ -23,7 +23,10 @@ class PanelGroupTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final title = Text(
       text,
-      style: theme.textTheme.labelLarge?.emphasis.copyWith(fontSize: 13, color: theme.colorScheme.primary),
+      style: theme.textTheme.labelLarge?.emphasis.copyWith(
+        fontSize: theme.textTheme.bodyMedium?.fontSize,
+        color: theme.colorScheme.primary,
+      ),
     );
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
@@ -35,10 +38,7 @@ class PanelGroupTitle extends StatelessWidget {
                 Text(
                   trailing!,
                   key: const ValueKey('panel-group-note'),
-                  style: theme.textTheme.bodyMedium?.regular.copyWith(
-                    fontSize: 13,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                  style: theme.textTheme.bodyMedium?.regular.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
               ],
             ),
@@ -68,7 +68,7 @@ class PanelCard extends StatelessWidget {
 }
 
 TextStyle? _titleStyle(ThemeData theme, {required bool enabled}) => theme.textTheme.bodyLarge?.regular.copyWith(
-  fontSize: 15,
+  fontSize: theme.textTheme.titleMedium?.fontSize,
   color: enabled ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.38),
 );
 

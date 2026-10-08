@@ -38,7 +38,8 @@ class LayoutSegments extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 14, fontWeight: FontWeight.w500).tabular;
+    final textTheme = Theme.of(context).textTheme;
+    final text = textTheme.bodyMedium?.copyWith(fontSize: textTheme.bodyLarge?.fontSize).emphasis.tabular;
     return ListenableSelector<MultiviewLayout>(
       listenable: controller,
       selector: () => controller.layout,

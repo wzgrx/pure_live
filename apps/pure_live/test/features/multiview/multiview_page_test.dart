@@ -4,6 +4,7 @@
 // cells).
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
@@ -36,6 +37,7 @@ Future<(AppServices, RoomsSite)> _pump(
   List<String> rooms = const ['1', '2', '3'],
   ThemeMode theme = ThemeMode.light,
   List<Override> overrides = const [],
+  LiveFontSizes fontSizes = const LiveFontSizes(),
 }) async {
   tester.view
     ..physicalSize = size
@@ -59,8 +61,8 @@ Future<(AppServices, RoomsSite)> _pump(
         ...overrides,
       ],
       child: MaterialApp(
-        theme: const LiveTheme().light,
-        darkTheme: const LiveTheme().dark,
+        theme: LiveTheme(fontSizes: fontSizes).light,
+        darkTheme: LiveTheme(fontSizes: fontSizes).dark,
         themeMode: theme,
         home: const MultiviewPage(route: RouteArgs(RoutePath.kMultiview)),
       ),
@@ -478,6 +480,32 @@ void main() {
     final icons = find.descendant(of: _key('multiview-cell-2'), matching: find.byIcon(AppIcons.addCell));
     expect(tester.getSize(icons).width, 20);
     await _close(tester, services);
+  });
+
+  testWidgets('A01.2: the picker and the cells follow the font settings, the same size by default', (tester) async {
+    double size(Finder finder) => tester.renderObject<RenderParagraph>(finder).text.style!.fontSize!;
+    final name = find.descendant(of: _key('multiview-pick-bilibili:1'), matching: find.text('主播1'));
+    var (services, _) = await _pump(tester, const Size(393, 852));
+    expect(size(_key('multiview-picker-title')), 15);
+    expect(size(name), 14);
+    expect(size(find.text('点击选台').first), 13);
+    await _close(tester, services);
+
+    // Every size at its largest (Settings.fontSize*).
+    const largest = LiveFontSizes(bodySmall: 15, bodyMedium: 17, bodyLarge: 18, titleMedium: 20, titleLarge: 26);
+    (services, _) = await _pump(tester, const Size(393, 852), fontSizes: largest);
+    expect(size(_key('multiview-picker-title')), 20);
+    expect(size(name), 18);
+    expect(size(find.text('点击选台').first), 17);
+    expect(tester.takeException(), isNull);
+    await _close(tester, services);
+    // A landscape phone and a wide window: nothing overflows either.
+    for (final window in const [Size(852, 393), Size(1280, 800)]) {
+      (services, _) = await _pump(tester, window, fontSizes: largest);
+      expect(size(_key('multiview-picker-title')), 20, reason: '$window');
+      expect(tester.takeException(), isNull, reason: '$window');
+      await _close(tester, services);
+    }
   });
 
   testWidgets('landscape phone: toolbar in the app bar, the column on the right, the picker in turn', (tester) async {

@@ -757,25 +757,29 @@ old = ["M11", "T01a.1"]
 id = "A01.2"
 title = "颜色、文字、间距、动效"
 type = "界面"
-status = "开发中"
+status = "待真机"
+date = "2026-10-08"
+commit = "52a429e8e"
 size = "小"
 tier = 2
 old = ["U.1a", "T01a.2"]
 stages = ["设计", "直播间要用的部分", "其余页面"]
-done = 2
-next = "直播间以外页面的颜色和文字角色收尾"
+done = 3
+next = "K90 上照任务书“真机验证”看"
 
 [[task]]
 id = "A01.3"
 title = "图标"
 type = "界面"
-status = "开发中"
+status = "待真机"
+date = "2026-10-08"
+commit = "cf5988255"
 size = "小"
 tier = 2
 old = ["U.1b", "T01b.1"]
 stages = ["设计", "直播间要用的部分", "其余页面"]
-done = 2
-next = "直播间以外页面的图标收尾"
+done = 3
+next = "K90 上照任务书“真机验证”看"
 
 
 [[task]]

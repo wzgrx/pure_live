@@ -92,7 +92,7 @@ class CardDialog extends StatelessWidget {
         foregroundColor: action.danger ? scheme.error : scheme.primary,
         side: BorderSide(color: scheme.outlineVariant),
         shape: const StadiumBorder(),
-        textStyle: styles.t14.copyWith(fontWeight: FontWeight.w500),
+        textStyle: styles.t14.emphasis,
       ),
       onPressed: action.onPressed,
       icon: Icon(action.icon, size: 18),
@@ -144,10 +144,7 @@ class CardDialog extends StatelessWidget {
               margin: const EdgeInsets.only(top: 14),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(color: scheme.surface, borderRadius: BorderRadius.circular(12)),
-              child: Text(
-                body,
-                style: styles.t14.copyWith(color: scheme.onSurface, fontWeight: FontWeight.w500, height: 1.45),
-              ),
+              child: Text(body, style: styles.t14.copyWith(color: scheme.onSurface, height: 1.45)),
             ),
           for (final (index, row) in actions.indexed)
             Padding(

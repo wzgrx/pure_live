@@ -391,7 +391,7 @@ class TextScaleTile extends StatelessWidget {
 class FontFamilyTile extends ConsumerWidget {
   /// Creates the row for [setting] (`fontFamilyName` or
   /// `danmakuFontFamilyName`).
-  const new({required this.entry, required this.setting, this.icon = AppIcons.appFont, super.key});
+  const new({required this.entry, required this.setting, required this.icon, super.key});
 
   /// The entry drawn.
   final SettingsEntry entry;
@@ -742,7 +742,6 @@ class _LoadingCell extends StatelessWidget {
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     style: context.textStyles.t12.copyWith(
-                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: selected ? colors.primary : colors.onSurface,
                     ),

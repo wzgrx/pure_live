@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
+import 'package:live_ui/src/theme/live_colors.dart';
+import 'package:live_ui/src/theme/metrics.dart';
 import 'package:live_ui/src/theme/motion.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/widgets/status_view.dart';
@@ -129,7 +131,7 @@ class AppRefreshViewState extends State<AppRefreshView> {
     final theme = Theme.of(context);
     final styles = AppTextStyles(theme);
     final words = LiveUiScope.of(context).strings;
-    final titleStyle = styles.t15Medium.copyWith(color: theme.colorScheme.onSurface);
+    final titleStyle = styles.t15.regular.copyWith(color: theme.colorScheme.onSurface);
     final messageStyle = styles.t12.copyWith(color: theme.colorScheme.onSurfaceVariant);
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -431,11 +433,7 @@ class _RefreshTracker extends ChangeNotifier {
     final over = trigger + 20;
     position.jumpTo(position.minScrollExtent);
     dragging = true;
-    await position.animateTo(
-      position.minScrollExtent - over,
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.linear,
-    );
+    await position.animateTo(position.minScrollExtent - over, duration: AppDurations.normal, curve: Curves.linear);
     // The animation's end let go already (createBallisticSimulation).
     dragging = false;
   }
@@ -636,13 +634,13 @@ class _RefreshHeader extends StatelessWidget {
         kind = AppRefreshMode.drag;
         icon = AnimatedRotation(
           turns: mode == AppRefreshMode.armed ? 0.5 : 0,
-          duration: const Duration(milliseconds: 200),
+          duration: AppDurations.normal,
           child: Icon(AppIcons.refreshPull, size: 24, color: colors.onSurfaceVariant),
         );
     }
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      reverseDuration: const Duration(milliseconds: 200),
+      duration: AppDurations.slow,
+      reverseDuration: AppDurations.normal,
       transitionBuilder: (child, animation) => FadeTransition(
         opacity: animation,
         child: ScaleTransition(scale: animation, child: child),

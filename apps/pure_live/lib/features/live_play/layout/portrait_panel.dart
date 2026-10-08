@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
@@ -90,35 +89,66 @@ class PortraitPanelLayout extends StatefulWidget {
 /// The three stops of [portraitPanelStops], lowest first.
 typedef _Stops = ({double minimum, double middle, double maximum, double initial});
 
-class _PortraitPanelLayoutState extends State<PortraitPanelLayout> {
+class _PortraitPanelLayoutState extends State<PortraitPanelLayout> with SingleTickerProviderStateMixin {
   /// The stop to start at ([PortraitPanelLayout.stop]) until the mode
   /// changes.
   late int? _first = widget.stop;
 
-  /// The chosen height (a stop, or where a drag is now); null: the initial
-  /// stop.
-  double? _height;
+  /// Where the panel's top is, above the area's bottom (A03.3): between the
+  /// stops its height; under the lowest it is pulled towards the portrait
+  /// fullscreen (it slides down at [_floor]'s height); over the highest the
+  /// rubber band. It moves the panel without building the layout or the
+  /// picture (research 2026-10-02 S4).
+  late final AnimationController _top = AnimationController.unbounded(vsync: this);
 
-  /// The height the picture's overlay leaves room for: changed when a drag
+  /// [_top] holds the place; until then the panel is at [_rest].
+  bool _moved = false;
+
+  /// Where the finger has taken the top, before the rubber band.
+  double _drag = 0;
+  bool _dragging = false;
+
+  /// The height the panel keeps while it slides down out of the way (the
+  /// one it had when the fullscreen was asked for); null: the lowest stop.
+  double? _floor;
+
+  /// The stop the picture's overlay leaves room for: changed when a drag
   /// ends, not while it moves.
   double? _settled;
 
-  /// How far the panel has been pulled down past its lowest stop.
-  double _dismiss = 0;
-
-  bool _animate = false;
   bool _entering = false;
+
+  /// Counts the springs started, so a caught one does not finish.
+  int _runs = 0;
+
+  /// The area's height, as last laid out.
+  double _area = 0;
+
+  /// The picture as last built and the covered height it was built for:
+  /// built again only when that changes or the page rebuilds this layout.
+  Widget? _picture;
+  double? _pictureCovered;
 
   @override
   void didUpdateWidget(PortraitPanelLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _picture = null;
     if (oldWidget.mode != widget.mode) {
+      _runs++;
+      _top.stop();
       _first = null;
-      _height = null;
+      _moved = false;
+      _dragging = false;
+      _floor = null;
       _settled = null;
-      _dismiss = 0;
       _entering = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _top.dispose();
+    super.dispose();
   }
 
   static List<double> _list(_Stops stops) => [stops.minimum, stops.middle, stops.maximum];
@@ -132,75 +162,170 @@ class _PortraitPanelLayoutState extends State<PortraitPanelLayout> {
     _ => stops.initial,
   };
 
-  void _drag(DragUpdateDetails details, _Stops stops) {
-    if (_entering) return;
-    final delta = details.delta.dy;
-    if (delta == 0) return;
-    setState(() {
-      _animate = false;
-      final height = (_height ?? _start(stops)).clamp(stops.minimum, stops.maximum);
-      if (delta > 0) {
-        final collapse = delta.clamp(0.0, height - stops.minimum);
-        _height = height - collapse;
-        final rest = delta - collapse;
-        if (widget.onPortraitFullscreen != null && rest > 0) {
-          _dismiss = (_dismiss + rest).clamp(0.0, height);
-        }
-        return;
-      }
-      var up = -delta;
-      final reveal = up.clamp(0.0, _dismiss);
-      _dismiss -= reveal;
-      up -= reveal;
-      if (up > 0) _height = (height + up).clamp(stops.minimum, stops.maximum);
-    });
+  /// The stop the panel rests at.
+  double _rest(_Stops stops) => (_settled ?? _start(stops)).clamp(stops.minimum, stops.maximum);
+
+  /// Where the top is now.
+  double _position(_Stops stops) => _moved ? _top.value : _rest(stops);
+
+  /// The panel's height and how far it is below the bottom.
+  ({double height, double bottom}) _place(_Stops stops) {
+    var top = _position(stops);
+    // At rest it keeps to the stops (the area may have changed).
+    if (!_dragging && !_entering && !_top.isAnimating) top = top.clamp(stops.minimum, stops.maximum);
+    final floor = _floor ?? stops.minimum;
+    return (height: math.max(top, floor), bottom: math.min(0, top - floor));
   }
 
-  void _release(DragEndDetails details, _Stops stops) {
+  /// The room over the highest stop, the rubber band's length there.
+  double _over(_Stops stops) => math.max(0, _area - stops.maximum);
+
+  /// Where a drag at [drag] shows the top: 1:1 between the stops and down
+  /// towards the fullscreen; with growing resistance over the highest stop,
+  /// and under the lowest where there is no fullscreen (research S6).
+  double _banded(double drag, _Stops stops) {
+    if (drag > stops.maximum) return stops.maximum + AppMotion.rubberBand(drag - stops.maximum, _over(stops));
+    if (drag < stops.minimum && widget.onPortraitFullscreen == null) {
+      return stops.minimum + AppMotion.rubberBand(drag - stops.minimum, stops.minimum);
+    }
+    return drag;
+  }
+
+  /// The drag that shows the top at [top] ([_banded] the other way).
+  double _unbanded(double top, _Stops stops) {
+    if (top > stops.maximum) return stops.maximum + rubberBandDrag(top - stops.maximum, _over(stops));
+    if (top < stops.minimum && widget.onPortraitFullscreen == null) {
+      return stops.minimum + rubberBandDrag(top - stops.minimum, stops.minimum);
+    }
+    return top;
+  }
+
+  /// How much the rubber band slows the finger where it is now (its
+  /// slope), 1 between the stops.
+  double _slope(_Stops stops) {
+    final (past, extent) = _drag > stops.maximum
+        ? (_drag - stops.maximum, _over(stops))
+        : _drag < stops.minimum && widget.onPortraitFullscreen == null
+        ? (stops.minimum - _drag, stops.minimum)
+        : (0.0, 0.0);
+    if (extent <= 0) return past > 0 ? 0 : 1;
+    final rest = 1 - math.min<double>(1, past / extent);
+    return rest * rest;
+  }
+
+  /// Takes the top from where it is, catching a spring.
+  void _hold(_Stops stops) {
+    _runs++;
+    final top = _position(stops);
+    _top.stop();
+    _moved = true;
+    _top.value = top;
+  }
+
+  void _started(DragStartDetails details, _Stops stops) {
     if (_entering) return;
-    final height = (_height ?? _start(stops)).clamp(stops.minimum, stops.maximum);
+    _hold(stops);
+    _dragging = true;
+    _drag = _unbanded(_top.value, stops);
+  }
+
+  void _dragged(DragUpdateDetails details, _Stops stops) {
+    if (_entering || !_dragging) return;
+    // Down towards the fullscreen at most until out of sight (3.x).
+    _drag = (_drag - details.delta.dy).clamp(0, stops.maximum + _over(stops));
+    _top.value = _banded(_drag, stops);
+  }
+
+  void _released(DragEndDetails details, _Stops stops) {
+    if (_entering || !_dragging) return;
+    _dragging = false;
+    final velocity = details.primaryVelocity ?? 0;
+    final top = _top.value;
+    final height = top.clamp(stops.minimum, stops.maximum);
     if (widget.onPortraitFullscreen != null &&
-        panelDragEntersFullscreen(dismissed: _dismiss, panelHeight: height, velocity: details.primaryVelocity ?? 0)) {
-      _enter(height);
+        panelDragEntersFullscreen(
+          dismissed: math.max(0, stops.minimum - top),
+          panelHeight: height,
+          velocity: velocity,
+        )) {
+      _enter(stops, velocity: velocity);
       return;
     }
-    _settle(nearestStop(height, _list(stops)), stops);
+    // The spring leaves at the finger's speed, as slowed by the band.
+    _settle(releaseStop(height, velocity, _list(stops)), stops, velocity: -velocity * _slope(stops));
   }
 
-  void _settle(double stop, _Stops stops) {
+  void _cancelled(_Stops stops) {
+    if (!_dragging) return;
+    _dragging = false;
+    _settle(nearestStop(_top.value.clamp(stops.minimum, stops.maximum), _list(stops)), stops);
+  }
+
+  /// A spring takes the panel to [stop] at [velocity] (upwards positive),
+  /// never past it (research S2); the overlay moves to it at once.
+  void _settle(double stop, _Stops stops, {double velocity = 0}) {
+    if (!_moved) _hold(stops);
     setState(() {
-      _animate = true;
-      _dismiss = 0;
-      _height = stop;
+      _floor = null;
       _settled = stop;
     });
     final index = _list(stops).indexOf(stop);
     if (index >= 0) widget.onStop?.call(index);
+    _run(stop, velocity: velocity);
   }
 
-  void _enter(double height) {
+  /// Runs [_top] to [target] with the panel spring, then [then]; at once
+  /// when the system asks for less motion.
+  void _run(double target, {required double velocity, double beyond = 0, VoidCallback? then}) {
+    final run = ++_runs;
+    if (MediaQuery.disableAnimationsOf(context) || _top.value == target) {
+      _top.value = target;
+      then?.call();
+      return;
+    }
+    _top
+        .animateRelease(
+          ReleaseSpringSimulation(
+            spring: AppMotion.panelSpring,
+            start: _top.value,
+            end: target,
+            velocity: velocity,
+            beyond: beyond,
+            tolerance: AppMotion.tolerance(MediaQuery.devicePixelRatioOf(context)),
+          ),
+          refreshRate: View.of(context).display.refreshRate,
+        )
+        .whenCompleteOrCancel(() {
+          if (mounted && run == _runs) then?.call();
+        });
+  }
+
+  /// The panel keeps its height and slides out of sight, 36 past the edge
+  /// (3.x), at the finger's [velocity] (downwards positive); the fullscreen
+  /// follows once it is out ([_slid]).
+  void _enter(_Stops stops, {double velocity = 0}) {
     if (_entering || widget.onPortraitFullscreen == null) return;
-    setState(() {
-      _entering = true;
-      _animate = true;
-      _dismiss = height + 36;
-    });
+    _hold(stops);
+    final floor = _top.value.clamp(stops.minimum, stops.maximum);
+    _entering = true;
+    _floor = floor;
+    // Out of sight is the end: no slow tail at the edge.
+    _run(-36, velocity: -velocity, beyond: (floor + 36) * 0.01, then: _slid);
   }
 
   /// The panel's slide has ended: a pending entry happens now (3.x: the
   /// animation, not a timer, owns the request), then the panel comes back
-  /// for when the room returns.
+  /// at its stop for when the room returns.
   void _slid() {
     if (!_entering || !mounted) return;
     _entering = false;
-    // Not inside the animation's own update (a zero-length one ends while
-    // the layout is built).
+    // Not inside the animation's own update.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       widget.onPortraitFullscreen?.call();
       setState(() {
-        _animate = false;
-        _dismiss = 0;
+        _moved = false;
+        _floor = null;
       });
     });
   }
@@ -208,46 +333,52 @@ class _PortraitPanelLayoutState extends State<PortraitPanelLayout> {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
+      _area = constraints.maxHeight.isFinite ? math.max(0, constraints.maxHeight) : 0;
       final stops = portraitPanelStops(constraints.maxHeight, widget.mode, least: widget.least);
-      final current = (_height ?? _start(stops)).clamp(stops.minimum, stops.maximum);
-      final covered = (_settled ?? _start(stops)).clamp(stops.minimum, stops.maximum);
-      final still = MediaQuery.disableAnimationsOf(context);
-      final duration = _animate && !still ? const Duration(milliseconds: 180) : Duration.zero;
+      final covered = _rest(stops);
+      if (_picture == null || _pictureCovered != covered) {
+        _picture = widget.player(covered);
+        _pictureCovered = covered;
+      }
+      final sheet = Material(
+        color: Theme.of(context).colorScheme.surface,
+        elevation: 3,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _handle(context, stops, covered),
+            Expanded(child: widget.content),
+          ],
+        ),
+      );
       return Stack(
         key: const ValueKey('live-play-portrait-panel-layout'),
         fit: StackFit.expand,
         children: [
-          Positioned.fill(child: widget.player(covered)),
-          AnimatedPositioned(
+          Positioned.fill(child: _picture!),
+          AnimatedBuilder(
             key: const ValueKey('live-play-portrait-sheet'),
-            duration: duration,
-            curve: Curves.easeOutCubic,
-            left: 0,
-            right: 0,
-            bottom: -_dismiss,
-            height: current,
-            onEnd: _slid,
-            child: Material(
-              color: Theme.of(context).colorScheme.surface,
-              elevation: 3,
-              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _handle(context, stops, current),
-                  Expanded(child: widget.content),
-                ],
-              ),
-            ),
+            animation: _top,
+            builder: (context, sheet) {
+              final place = _place(stops);
+              return Positioned(left: 0, right: 0, bottom: place.bottom, height: place.height, child: sheet!);
+            },
+            child: sheet,
           ),
-          AnimatedPositioned(
+          AnimatedBuilder(
             key: const ValueKey('live-play-portrait-panels'),
-            duration: duration,
-            curve: Curves.easeOutCubic,
-            left: 0,
-            right: 0,
-            bottom: -_dismiss,
-            height: math.min(math.max(0, constraints.maxHeight), current + widget.keyboard),
+            animation: _top,
+            builder: (context, panels) {
+              final place = _place(stops);
+              return Positioned(
+                left: 0,
+                right: 0,
+                bottom: place.bottom,
+                height: math.min(_area, place.height + widget.keyboard),
+                child: panels!,
+              );
+            },
             child: widget.panels,
           ),
         ],
@@ -274,21 +405,23 @@ class _PortraitPanelLayoutState extends State<PortraitPanelLayout> {
           : enter == null
           ? null
           : i18n('portrait_fullscreen_enter_hint'),
-      onTap: enter == null ? null : () => _enter(current),
+      onTap: enter == null ? null : () => _enter(stops),
       onIncrease: up == null ? null : () => _settle(up, stops),
       onDecrease: down != null
           ? () => _settle(down, stops)
           : enter == null
           ? null
-          : () => _enter(current),
+          : () => _enter(stops),
       child: GestureDetector(
         key: const ValueKey('live-play-portrait-handle'),
         behavior: HitTestBehavior.opaque,
-        dragStartBehavior: DragStartBehavior.down,
-        onTap: enter == null ? null : () => _enter(current),
-        onVerticalDragUpdate: (details) => _drag(details, stops),
-        onVerticalDragEnd: (details) => _release(details, stops),
-        onVerticalDragCancel: () => _settle(nearestStop(current, _list(stops)), stops),
+        // The default start: the panel moves from where the drag is taken,
+        // without the jump of the slop that `down` had (research S8).
+        onTap: enter == null ? null : () => _enter(stops),
+        onVerticalDragStart: (details) => _started(details, stops),
+        onVerticalDragUpdate: (details) => _dragged(details, stops),
+        onVerticalDragEnd: (details) => _released(details, stops),
+        onVerticalDragCancel: () => _cancelled(stops),
         child: SizedBox(
           height: kMinInteractiveDimension,
           child: Center(

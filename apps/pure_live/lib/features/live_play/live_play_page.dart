@@ -117,7 +117,7 @@ typedef _LayoutSettings = ({
   bool swipe,
 });
 
-class _LivePlayPageState extends ConsumerState<LivePlayPage> {
+class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerProviderStateMixin {
   RoomRuntime? _runtime;
   RoomMiniWindow? _mini;
 
@@ -176,8 +176,10 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   /// The switch panel's group, kept while the page stays (U.2m X1).
   final ValueNotifier<RoomSwitchGroup?> _switchGroup = ValueNotifier(null);
 
-  /// The portrait fullscreen's swipe between the rooms of [_playlist].
-  late final RoomSwipeController _swipe = RoomSwipeController(onSwitch: _swipeTo);
+  /// The portrait fullscreen's swipe between the rooms of [_playlist]; its
+  /// motion runs on the page's ticker, since the stage of a room swiped to
+  /// is built afresh while it lands (A03.3).
+  late final RoomSwipeController _swipe;
 
   /// A room swiped away still stopping the player, or null: the next room
   /// starts once it is done, and every stop waits for the one before (the
@@ -197,6 +199,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> {
   @override
   void initState() {
     super.initState();
+    _swipe = RoomSwipeController(onSwitch: _swipeTo, vsync: this);
     final (room, playlist) = switch (widget.route.arguments) {
       LiveRoomArgs(:final room, :final playlist) => (room, playlist),
       final LiveRoom room => (room, const <LiveRoom>[]),

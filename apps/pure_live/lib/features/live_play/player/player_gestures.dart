@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -94,10 +95,20 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   /// only after the finger has moved, by then out of the system's edge.
   double? _downY;
 
+  /// The frame callback that tells the system the level a drag set, or
+  /// null (research 2026-10-02 S9: a touch screen sampling at 240 or 480 Hz
+  /// moves several times a frame; the system hears the latest once).
+  int? _sending;
+
+  /// What the drag set and the system has not heard yet.
+  GestureLevel? _unsent;
+
   bool get _systemVolume => DeviceControls.available;
 
   @override
   void dispose() {
+    if (_sending case final id?) SchedulerBinding.instance.cancelFrameCallbackWithId(id);
+    if (_unsent case final kind?) unawaited(_send(kind, _level));
     _hide?.cancel();
     if (_save?.isActive ?? false) {
       _save!.cancel();
@@ -126,6 +137,23 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   Future<void> _apply(GestureLevel kind, double value) async {
     final level = value.clamp(0.0, 1.0);
     _show(kind, level);
+    await _send(kind, level);
+  }
+
+  /// Shows [kind]'s level at once and tells the system with the next frame.
+  void _applySoon(GestureLevel kind) {
+    _show(kind, _level);
+    _unsent = kind;
+    _sending ??= SchedulerBinding.instance.scheduleFrameCallback((_) {
+      _sending = null;
+      final unsent = _unsent;
+      _unsent = null;
+      if (unsent != null && mounted) unawaited(_send(unsent, _level));
+    });
+  }
+
+  /// Tells the system (or the player) [kind]'s [level].
+  Future<void> _send(GestureLevel kind, double level) async {
     switch (kind) {
       case GestureLevel.volume when _systemVolume:
         await DeviceControls.setVolume(level);
@@ -213,7 +241,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
     if (kind == null || height <= 0 || _reading) return;
     // A full-height drag moves the level by 1.2 (3.x).
     _level = (_level - details.delta.dy / height * 1.2).clamp(0.0, 1.0);
-    unawaited(_apply(kind, _level));
+    _applySoon(kind);
   }
 
   @override

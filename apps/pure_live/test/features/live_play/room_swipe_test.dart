@@ -359,11 +359,44 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       await drag.up();
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      // The spring back (A03.3, 1/400/1) takes about 0.35 s from there.
+      await tester.pump(const Duration(seconds: 1));
       await _settle(tester);
       expect(_shown(tester), '6');
       expect(preview, findsNothing);
       expect(room.site.asked, ['6']);
+      await _close(tester, room);
+    });
+
+    testWidgets('A03.3 c1: the room switches as the finger lifts; its cover lands, then its player is in place', (
+      tester,
+    ) async {
+      final room = await _pump(
+        tester,
+        arguments: LiveRoomArgs(room: _rooms['6']!, playlist: _rooms.values.toList()),
+      );
+      await _portraitFullscreen(tester);
+      final preview = _key('live-play-swipe-preview-${_rooms['7']!.identityKey}');
+      final gesture = await tester.startGesture(const Offset(196, 600));
+      var time = Duration.zero;
+      for (var i = 0; i < 8; i++) {
+        time += const Duration(microseconds: 8333);
+        await gesture.moveBy(const Offset(0, -25), timeStamp: time);
+        await tester.pump(const Duration(microseconds: 8333));
+      }
+      await gesture.up(timeStamp: time);
+      await tester.pump(const Duration(microseconds: 8333));
+      expect(_shown(tester), '7', reason: 'switched as it let go, not after the motion');
+      expect(preview, findsOneWidget, reason: 'still landing');
+      final top = tester.getTopLeft(preview).dy;
+      expect(top, inExclusiveRange(0, 852));
+      await tester.pump(const Duration(microseconds: 8333));
+      expect(tester.getTopLeft(preview).dy, lessThan(top), reason: 'the motion goes on over the rebuilt room');
+      await tester.pump(const Duration(seconds: 1));
+      await _settle(tester);
+      expect(preview, findsNothing);
+      expect(_shown(tester), '7');
+      expect(room.engine.opens.map((media) => media.uri.pathSegments.first), ['6', '7']);
       await _close(tester, room);
     });
 

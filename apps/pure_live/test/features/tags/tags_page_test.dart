@@ -271,6 +271,13 @@ void main() {
     expect(find.text('备注描述'), findsOneWidget);
     expect(find.text('0/15'), findsOneWidget);
     expect(find.text('0/40'), findsOneWidget);
+    // I03.2 c8: the limits are the store's, the same as the room tags dialog's.
+    TextField textField(String key) => tester.widget<TextField>(
+      find.descendant(of: find.byKey(ValueKey(key)), matching: find.byType(TextField), matchRoot: true),
+    );
+    expect(textField('tag-editor-name').maxLength, TagStore.maxNameLength);
+    expect(textField('tag-editor-description').maxLength, TagStore.maxDescriptionLength);
+    expect((TagStore.maxNameLength, TagStore.maxDescriptionLength), (15, 40));
     await tester.enterText(find.byKey(const ValueKey('tag-editor-name')), '音乐');
     await _tap(tester, find.byKey(const ValueKey('tag-editor-confirm')));
     final error = tester.getRect(find.text('已存在同名标签'));

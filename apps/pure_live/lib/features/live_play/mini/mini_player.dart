@@ -9,6 +9,7 @@ import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/features/live_play/logic/room_status.dart';
 import 'package:pure_live/features/live_play/mini/compact_danmaku.dart';
 import 'package:pure_live/features/live_play/player/recording_badge.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -216,10 +217,24 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
       fit: StackFit.expand,
       children: [
         RepaintBoundary(child: widget.video),
-        ListenableSelector<bool>(
-          listenable: room,
-          selector: () => room.audioOnly,
-          builder: (context, audioOnly, _) => audioOnly ? _MiniAudioCover(room: room.room) : const SizedBox.shrink(),
+        // A07.20 c2: a stream without a real picture gets the cover too.
+        StreamBuilder<PlaybackState>(
+          stream: room.session.states,
+          initialData: room.session.state,
+          builder: (context, snapshot) {
+            final playback = snapshot.data ?? room.session.state;
+            return ListenableSelector<bool>(
+              listenable: room,
+              selector: () => room.audioOnly,
+              builder: (context, audioOnly, _) {
+                final voice = !audioOnly && pictureIsPlaceholder(playback, voiceLive: room.site.isVoiceLive);
+                if (!audioOnly && !voice) return const SizedBox.shrink();
+                return IgnorePointer(
+                  child: _MiniAudioCover(room: room.room, voiceLive: voice),
+                );
+              },
+            );
+          },
         ),
         IgnorePointer(child: CompactDanmakuLayer(controller: room)),
         _MiniStatusLayer(controller: room, reconnect: widget.reconnect, centre: _buttons),
@@ -483,9 +498,12 @@ class _PinButton extends StatelessWidget {
 /// The audio-only room in a mini window (c8, M7): the streamer's picture and
 /// "纯音频模式", small enough for a 124 high window.
 class _MiniAudioCover extends StatelessWidget {
-  const new({required this.room});
+  const new({required this.room, required this.voiceLive});
 
   final LiveRoom room;
+
+  /// A07.20: a stream without a real picture, not the audio-only mode.
+  final bool voiceLive;
 
   @override
   Widget build(BuildContext context) {
@@ -521,7 +539,7 @@ class _MiniAudioCover extends StatelessWidget {
                         children: [
                           const Icon(AppIcons.audioOnly, size: 14, color: OnVideoColors.foreground),
                           const SizedBox(width: 4),
-                          Text(i18n('audio_only_mode'), style: text),
+                          Text(i18n(voiceLive ? 'live_play_voice_live' : 'audio_only_mode'), style: text),
                         ],
                       ),
                     ),

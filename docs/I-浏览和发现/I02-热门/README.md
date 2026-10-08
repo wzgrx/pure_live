@@ -82,8 +82,8 @@ popularSourceFor（:146）：
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 断网检查和移动网络提示只在**刷新**前做（`precheck`），第一次打开平台、加载更多、电脑翻页都不做；3.x 每次请求前都查 | `shared/rooms/room_feed.dart:427`（只在 `refresh` 里）；`open` `:348`、`ensure` `:355` 不调；3.x `server_fixed_page_controller.dart:111`、`server_remote_page_controller.dart:88`、`:184` | 第一次打开时没网显示的是请求失败的原因（多半“网络有问题”），不是“网络已断开”；用移动数据第一次打开热门时没有流量提示，下拉刷新后才有 | [I03.2](../I03-分区/I03.2-浏览列表的小问题合集/README.md) 第 1 阶段（2026-10-07 登记：`precheck` 挪进 `_fill`，分区房间也传） |
-| 加载更多失败后点“重试”只再取一块：`retry` 非刷新时用 `ensure(rooms.length + 1)`，忽略传进来的 `count` | `room_feed.dart:372-373`；调用 `room_grid.dart:729`（传 `rooms.length + 20`） | 重试后可能只多出几个房间（被隐藏的多时） | [I03.2](../I03-分区/I03.2-浏览列表的小问题合集/README.md) 第 2 阶段 |
+| 断网检查和移动网络提示只在**刷新**前做（`precheck`），第一次打开平台、加载更多、电脑翻页都不做；3.x 每次请求前都查 | `shared/rooms/room_feed.dart:427`（只在 `refresh` 里）；`open` `:348`、`ensure` `:355` 不调；3.x `server_fixed_page_controller.dart:111`、`server_remote_page_controller.dart:88`、`:184` | 第一次打开时没网显示的是请求失败的原因（多半“网络有问题”），不是“网络已断开”；用移动数据第一次打开热门时没有流量提示，下拉刷新后才有 | [I03.2](../I03-分区/I03.2-浏览列表的小问题合集/README.md) 第 1 阶段（2026-10-07 登记：`precheck` 挪进 `_fill`，分区房间也传）；2026-10-08 已改，待 K90 |
+| 加载更多失败后点“重试”只再取一块：`retry` 非刷新时用 `ensure(rooms.length + 1)`，忽略传进来的 `count` | `room_feed.dart:372-373`；调用 `room_grid.dart:729`（传 `rooms.length + 20`） | 重试后可能只多出几个房间（被隐藏的多时） | [I03.2](../I03-分区/I03.2-浏览列表的小问题合集/README.md) 第 2 阶段；2026-10-08 已改，待 K90 |
 | `isLoginError` 把风控（`RiskControl`）也当“要登录” | `room_texts.dart:153` | 风控时页面显示登录状态和“去登录”，登录了也可能还是风控 | 有意（3.x 风控多数登录后能过）；不做 |
 | I02.1 记录“留给后续”的分享面板、移动网络提示、开播时间都已做（`share_plus` + `SystemShare.sheet` `lib/platform/plugins.dart:38`、`MobileDataBanner`、`roomClockProvider`），记录里的 `popular_feed.dart`、`room_menu.dart`、`popular_rooms.dart` 已挪到 `shared/rooms/` | [I02.1 记录](I02.1-推荐首页/record.md) | 只是记录过时 | I02.1 README 已注明 |
 | I02.1 登记“完成”，记录里没有 K90 结果；S02.2、S02.3 冒烟看过热门的切平台、下拉刷新、卡片 | 记录；[S02.3 记录](../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md) | 移动网络提示、电脑翻页没有真机记录 | 移动网络提示没有归属的真机步骤，建议并入 [S02.6](../../S-质量和验证/S02-真机验证/S02.6-K90补验/README.md) 第 1 阶段（写进本单元报告）；电脑翻页归 X01 |

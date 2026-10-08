@@ -329,16 +329,20 @@ class PictureStateView extends StatelessWidget {
 /// headphone and "纯音频播放中" (3.x showed the streamer's picture with
 /// opacity, a colour filter, a blurred glow and a zoom; U.2g c14 drops them).
 /// [paused] (B-9): the status layer's play mark takes the middle and
-/// "纯音频已暂停" sits under it.
+/// "纯音频已暂停" sits under it. [voiceLive] (A07.20): the same cover over a
+/// stream without a real picture, which says "语音直播".
 class AudioOnlyCover extends StatelessWidget {
   /// Creates the cover of [room].
-  const new({required this.room, this.paused = false, super.key});
+  const new({required this.room, this.paused = false, this.voiceLive = false, super.key});
 
   /// The room.
   final LiveRoom room;
 
   /// The sound is paused.
   final bool paused;
+
+  /// The stream has no real picture (not the audio-only mode).
+  final bool voiceLive;
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +352,9 @@ class AudioOnlyCover extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         const ColoredBox(color: OnVideoColors.ground),
-        _DimmedCover(url: room.cover),
+        // A07.20: Missevan drops its placeholder covers; the streamer's
+        // picture stands in.
+        _DimmedCover(url: room.cover.trim().isNotEmpty ? room.cover : room.avatar),
         if (paused)
           // Under the mark, which is in the middle of the same area.
           Positioned.fill(
@@ -358,7 +364,7 @@ class AudioOnlyCover extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.topCenter,
                   child: Text(
-                    i18n('live_play_audio_only_paused'),
+                    i18n(voiceLive ? 'live_play_voice_live' : 'live_play_audio_only_paused'),
                     key: const ValueKey('live-play-audio-paused'),
                     style: style,
                   ),
@@ -373,7 +379,7 @@ class AudioOnlyCover extends StatelessWidget {
               children: [
                 const Icon(AppIcons.audioOnlyActive, color: OnVideoColors.secondary, size: 40),
                 const SizedBox(height: 8),
-                Text(i18n('live_play_audio_only_playing'), style: style),
+                Text(i18n(voiceLive ? 'live_play_voice_live' : 'live_play_audio_only_playing'), style: style),
               ],
             ),
           ),

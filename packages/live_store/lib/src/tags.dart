@@ -64,6 +64,13 @@ final class TagStore {
 
   static const Set<String> _tables = {StoreTables.tags, StoreTables.roomTags};
 
+  /// Longest tag name the dialogs take (3.x `maxLength: 15`; I03.2 c8: one
+  /// definition for the tag editor and the room tags dialog).
+  static const int maxNameLength = 15;
+
+  /// Longest tag description or note the dialogs take (3.x `maxLength: 40`).
+  static const int maxDescriptionLength = 40;
+
   /// The tags, in order.
   Future<List<StoreTag>> all() async => [
     for (final row in await _db.rows('SELECT id, name, description FROM tags ORDER BY position, rowid'))

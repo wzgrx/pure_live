@@ -9,11 +9,15 @@ import 'package:pure_live/features/areas/area_artwork.dart';
 /// category is kept by id across refreshes, so a reordered or shrunk
 /// catalogue never hides valid areas behind a stale index (3.x).
 final class AreaCatalog extends ChangeNotifier {
-  /// The catalogue of [site]; loaded pictures teach `pictures`.
-  new(this.site, {this._pictures});
+  /// The catalogue of [site]; loaded pictures teach `pictures`; [precheck]
+  /// runs before each request (I03.2 c1: offline).
+  new(this.site, {this._pictures, this.precheck});
 
   /// The platform.
   final LiveSite site;
+
+  /// Runs before the platform is asked; its error is the load's.
+  final Future<void> Function()? precheck;
 
   final AreaPictures? _pictures;
   List<LiveCategory> _categories = const [];
@@ -74,6 +78,7 @@ final class AreaCatalog extends ChangeNotifier {
   Future<void> _load() async {
     final selectedId = _categories.isEmpty ? null : _categories[selected].id;
     try {
+      await precheck?.call();
       // 3.x asked for page 1 of 1000 (one call gives the whole catalogue).
       final categories = await site.getCategories(1, 1000);
       if (_disposed) return;

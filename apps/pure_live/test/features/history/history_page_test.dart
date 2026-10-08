@@ -502,6 +502,20 @@ void main() {
     expect(normalizeImageUrl('"null"'), '');
   });
 
+  test('I03.2 c7: a platform without an adapter is kept as it is, not counted as failed', () async {
+    final stored = _room('1', platform: 'huajiao', status: LiveStatus.live);
+    final result = await refreshHistoryRooms(
+      [stored, _room('2')],
+      maxConcurrent: 2,
+      load: siteHistoryLoader(SiteRegistry({'douyu': _Site.new})),
+    );
+    expect(result.failed, 0);
+    expect(result.skipped, 1);
+    expect(result.succeeded, 1);
+    expect(result.rooms.first.effectiveLiveStatus, LiveStatus.live, reason: 'not marked pending');
+    expect(result.rooms.first.isLiveStatusPending, isFalse);
+  });
+
   test('refresh runs at most the given number of requests at once and stops when cancelled', () async {
     var running = 0;
     var peak = 0;
@@ -531,4 +545,17 @@ void main() {
     expect(cancelled.cancelled, isTrue);
     expect(cancelled.rooms, hasLength(2));
   });
+}
+
+/// A platform whose detail answers the room asked for.
+final class _Site extends LiveSite {
+  @override
+  String get id => 'douyu';
+
+  @override
+  String get name => '斗鱼';
+
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId}) async =>
+      LiveRoom(platform: 'douyu', roomId: roomId, liveStatus: LiveStatus.offline);
 }

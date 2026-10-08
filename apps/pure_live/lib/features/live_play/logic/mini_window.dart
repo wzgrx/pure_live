@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:live_player/live_player.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
+import 'package:pure_live/features/live_play/logic/room_status.dart';
 import 'package:pure_live/routes/route_path.dart';
 
 // The rules of the room's mini windows (docs/A-界面设计/A07-直播间界面/A07.8-小窗): the in-app
@@ -66,11 +67,14 @@ MiniStatus miniStatusOf({required RoomStage stage, required PlaybackStatus playb
 }
 
 /// The picture's size to lay a window out by: the video's, and before its
-/// first frame the size its line declares (F.1b); unknown otherwise.
+/// first frame the size its line declares (F.1b); unknown otherwise. A
+/// placeholder track's size (A07.20) is not a picture's.
 ({int? width, int? height}) expectedPictureSize(PlaybackState state) {
   final width = state.videoWidth;
   final height = state.videoHeight;
-  if (width != null && height != null && width > 0 && height > 0) return (width: width, height: height);
+  if (width != null && height != null && width > 0 && height > 0 && !pictureIsPlaceholder(state)) {
+    return (width: width, height: height);
+  }
   if (state.declaredAspectRatio != null) return (width: state.line?.width, height: state.line?.height);
   return (width: null, height: null);
 }

@@ -722,20 +722,32 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    ListenableSelector<bool>(
-                      listenable: _room,
-                      selector: () => _room.audioOnly,
-                      builder: (context, audioOnly, _) => audioOnly
-                          ? StreamBuilder<PlaybackState>(
-                              stream: _room.session.states,
-                              initialData: _room.session.state,
+                    // E5 audio only, and A07.20 a stream without a real
+                    // picture (a placeholder track, a voice platform): the
+                    // room's cover over the picture, which keeps decoding.
+                    StreamBuilder<PlaybackState>(
+                      stream: _room.session.states,
+                      initialData: _room.session.state,
+                      builder: (context, snapshot) {
+                        final playback = snapshot.data ?? _room.session.state;
+                        return ListenableSelector<bool>(
+                          listenable: _room,
+                          selector: () => _room.audioOnly,
+                          builder: (context, audioOnly, _) {
+                            final voice =
+                                !audioOnly && pictureIsPlaceholder(playback, voiceLive: _room.site.isVoiceLive);
+                            if (!audioOnly && !voice) return const SizedBox.shrink();
+                            return IgnorePointer(
                               // B-9: "纯音频已暂停" under the play mark.
-                              builder: (context, snapshot) => AudioOnlyCover(
+                              child: AudioOnlyCover(
                                 room: _room.room,
-                                paused: (snapshot.data ?? _room.session.state).status == PlaybackStatus.paused,
+                                paused: playback.status == PlaybackStatus.paused,
+                                voiceLive: voice,
                               ),
-                            )
-                          : const SizedBox.shrink(),
+                            );
+                          },
+                        );
+                      },
                     ),
                     _danmaku(
                       look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,

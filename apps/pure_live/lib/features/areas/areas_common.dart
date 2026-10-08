@@ -5,8 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/area_artwork.dart';
+import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
@@ -18,6 +20,55 @@ final Provider<AreaPictures> areaPicturesProvider = Provider((ref) {
   // Best effort: borrowed pictures appear once the saved ones are read.
   pictures.load().ignore();
   return pictures;
+});
+
+/// The areas page's catalogues, one per platform, kept while the app runs
+/// (I03.2 c2, like the popular page's): back on the tab, the catalogues
+/// already loaded show at once.
+final class AreaCatalogs {
+  /// Creates the catalogues; [_create] makes the one of a platform.
+  new(this._create);
+
+  final AreaCatalog Function(String platform) _create;
+  final Map<String, AreaCatalog> _catalogs = {};
+
+  /// The catalogue of [platform].
+  AreaCatalog of(String platform) => _catalogs[platform] ??= _create(platform);
+
+  /// Releases the catalogues of platforms not in [platforms].
+  void retain(Iterable<String> platforms) {
+    final kept = platforms.toSet();
+    for (final id in _catalogs.keys.where((id) => !kept.contains(id)).toList()) {
+      _catalogs.remove(id)!.dispose();
+    }
+  }
+
+  /// Releases every catalogue.
+  void dispose() {
+    for (final catalog in _catalogs.values) {
+      catalog.dispose();
+    }
+    _catalogs.clear();
+  }
+}
+
+/// The catalogues (I03.2 c2). Offline, a load fails with [Offline] without
+/// asking the platform (c1; the mobile-data notice is the rooms lists').
+final Provider<AreaCatalogs> areaCatalogsProvider = Provider((ref) {
+  final sites = ref.watch(sitesProvider);
+  final pictures = ref.watch(areaPicturesProvider);
+  final probe = ref.watch(networkProbeProvider);
+  final catalogs = AreaCatalogs(
+    (id) => AreaCatalog(
+      sites.of(id),
+      pictures: pictures,
+      precheck: () async {
+        if (await probe() == NetworkKind.none) throw const Offline();
+      },
+    ),
+  );
+  ref.onDispose(catalogs.dispose);
+  return catalogs;
 });
 
 /// The name of [area] to show: its name, else "unnamed area" (3.x).

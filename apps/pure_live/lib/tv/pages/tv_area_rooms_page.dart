@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -51,6 +52,7 @@ class _TvAreaRoomsPageState extends ConsumerState<TvAreaRoomsPage> {
       _area = area;
       final services = ref.read(appServicesProvider);
       final settings = services.store.settings;
+      final probe = ref.read(networkProbeProvider);
       final feed = _feed = RoomFeed(
         platform: site.id,
         source: AreaRoomSource(areaRoomLoader(site, area), areaName: area.areaName),
@@ -58,6 +60,8 @@ class _TvAreaRoomsPageState extends ConsumerState<TvAreaRoomsPage> {
             settings.get(Settings.showUnplayableInDiscover) ||
             !cannotPlayHere(room, signedIn: signedInOn(services.cookies, room.platform)),
         maxRooms: 5000,
+        // I03.2 c1: offline and mobile data, as on the phone.
+        precheck: () => MobileDataNotice.precheck(probe),
       )..addListener(_loaded);
       unawaited(feed.open(count: tvPageSize));
     }

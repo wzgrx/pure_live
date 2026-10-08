@@ -231,6 +231,12 @@ void main() {
       await tester.enterText(find.byKey(const ValueKey('room-tags-name')), '常看');
       await tester.pump();
       expect(find.text('2/15'), findsOneWidget);
+      // I03.2 c8: the store's limits, the same as the tag editor's.
+      expect(tester.widget<TextField>(find.byKey(const ValueKey('room-tags-name'))).maxLength, TagStore.maxNameLength);
+      expect(
+        tester.widget<TextField>(find.byKey(const ValueKey('room-tags-note'))).maxLength,
+        TagStore.maxDescriptionLength,
+      );
       await tester.tap(find.byKey(const ValueKey('room-tags-add')));
       await settle(tester);
       // Listed and selected; the form is cleared and stays for the next one.

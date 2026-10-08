@@ -519,6 +519,14 @@ void main() {
       await _settle(tester);
       expect(find.byKey(const ValueKey('mini-reconnecting')), findsNothing);
 
+      // A07.20 c2: a placeholder track (16 × 16) gets the cover and "语音直播".
+      engine.emit(const EngineVideoSize(16, 16));
+      await tester.pump();
+      expect(_inKey('mini-audio-only', find.text('语音直播')), findsOneWidget);
+      engine.emit(const EngineVideoSize(1920, 1080));
+      await tester.pump();
+      expect(find.byKey(const ValueKey('mini-audio-only')), findsNothing);
+
       // Audio only: the streamer's picture and "纯音频模式", inside 124.
       await tester.runAsync(() => FloatingRoom.instance.runtime!.controller.setAudioOnly(enabled: true));
       await tester.pump();

@@ -1,6 +1,6 @@
 # 功能清点（v3 → v4）
 
-- 更新：2026-10-08（F-NET-01“部分”→“没验证”：Q02.1 让图片走应用代理，等 K90；F-MINI-05“缺失”→“没验证”：G05.1 音频焦点，等 K90）；2026-10-07（docs v2 收尾：F-NET-01、F-NET-03 改“部分”，补 F-MINI-05 音频焦点，见“统计”一节）；2026-10-03（第 3 版：逐项对照当前代码和各任务的记录重新核对，改动和依据见 [V03.3](../V-需求和反馈/V03-审查和调研/V03.3-功能清点和已批准升级核对/README.md)）；2026-10-02（第 2 版：整理进新文档）
+- 更新：2026-10-08（F-NET-03“部分”→“没验证”：I03.2 让分区、第一次加载和加载更多也查，等 K90；F-NET-01“部分”→“没验证”：Q02.1 让图片走应用代理，等 K90；F-MINI-05“缺失”→“没验证”：G05.1 音频焦点，等 K90）；2026-10-07（docs v2 收尾：F-NET-01、F-NET-03 改“部分”，补 F-MINI-05 音频焦点，见“统计”一节）；2026-10-03（第 3 版：逐项对照当前代码和各任务的记录重新核对，改动和依据见 [V03.3](../V-需求和反馈/V03-审查和调研/V03.3-功能清点和已批准升级核对/README.md)）；2026-10-02（第 2 版：整理进新文档）
 - 计划：[PLAN.md](../PLAN.md)；任务：[TASKS.md](../TASKS.md)；做法：[PROCESS.md](../PROCESS.md)
 - 范围：v3（标签 `v3.2.11`，本机只读副本 `~/ref/v3ref`）里用户能用到的每一个功能点。界面怎么画不在这里（见 [specs/UI.md](../specs/UI.md) 和各界面任务），这里只管“能做什么、做了没有、对不对”。
 - **本阶段只判断 Android（手机和平板）**（用户 2026-10-02 决定）。Windows、Linux、电视、苹果平台的功能以后再清点；Windows 专属的功能点列在第 13 节，只写“以后”。
@@ -28,7 +28,7 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | 1 应用和全局 APP | 24 | 18 | 0 | 0 | 0 | 6 | 0 |
 | 2 Android 系统集成 AND | 9 | 4 | 0 | 0 | 0 | 5 | 0 |
-| 3 网络和代理 NET | 4 | 0 | 1 | 0 | 0 | 3 | 0 |
+| 3 网络和代理 NET | 4 | 0 | 0 | 0 | 0 | 4 | 0 |
 | 4 推荐和分区 BRW | 9 | 9 | 0 | 0 | 0 | 0 | 0 |
 | 5 房间卡片 CARD | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | 6 关注 FAV | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
@@ -38,7 +38,7 @@
 | 10 多画面 MV | 6 | 4 | 1 | 0 | 0 | 1 | 0 |
 | 11 录制 REC | 13 | 9 | 0 | 0 | 0 | 4 | 0 |
 | 12 网络电视、账号、备份、工具、标签 | 25 | 19 | 0 | 0 | 0 | 5 | 1 |
-| **合计** | **177** | **145** | **2** | **0** | **0** | **28** | **2** |
+| **合计** | **177** | **145** | **1** | **0** | **0** | **29** | **2** |
 
 2026-10-07 docs v2 收尾核对后改了 3 项：F-NET-01 应用代理“完成”→“部分”（封面和头像不走应用代理 → Q02.1）；F-NET-03 断网预检和移动数据提示“完成”→“部分”（只有热门做了 → I03.2）；新增 F-MINI-05 音频焦点（3.x 有、v4 缺失 → G05.1）。下面是第 3 版的说明。
 
@@ -104,7 +104,7 @@ v3 没有的、不在清点里的：开播提醒（v3 没有通知开播的功�
 |---|---|---|---|---|---|---|
 | F-NET-01 | 应用代理（平台请求、弹幕、图片、WebDAV） | `common/services/settings/proxy_settings_controller.dart:16`、`common/global/initialized.dart:81` | 是 | 没验证 | `app/platforms.dart` 的 `SettingsProxyPolicy`（Q01.1、I01.1）；图片 `app/image_cache.dart` 的 `AppImageCache`（Q02.1） | 平台请求、弹幕、WebDAV、录制走它；封面、头像、表情图 2026-10-08 起也走（Q02.1，照 3.x `plugins/cache_manager.dart:6`：每个新连接读应用代理，320 个、30 分钟），本机回环测试过，K90 上开着代理看 Twitch 封面由 Q02.1 验证 |
 | F-NET-02 | 播放代理（独立的一组设置，播放走它，关掉时直连；录制的中继走应用代理，`common/global/initialized.dart:94`） | `player/core/playback_proxy_policy.dart:6`、`modules/settings/pages/network_proxy_settings_page.dart:16` | 是 | 没验证 | O03.2 c5：`app/platforms.dart:35` 的 `PlaybackProxyPolicy`（`enableProxy`、`proxyHost`、`proxyPort` 照 3.x 管播放），`app/bootstrap.dart:233` 交给 `MediaOpener`（直播间、多画面、小窗共用）；录制仍走应用代理；测试 `test/platforms_test.dart` | 2026-10-02 O03.2 合并；媒体请求真的走代理要在真机上看 → S02.4（CHECKLIST 5 第 6 条；原 Q04.1 的验证并入） |
-| F-NET-03 | 断网预检、移动数据提示 | `common/base/base_controller.dart:19` | 是 | 部分 | `app/network.dart`（O03.1） | 只有热门在下拉刷新前检查（`features/popular/popular_catalog.dart:57`、`shared/rooms/room_feed.dart:427`）；分区、分区房间、第一次加载和加载更多不查，3.x 都查（`common/base/live_directory_controller.dart:167` 等）→ I03.2（2026-10-07 核对） |
+| F-NET-03 | 断网预检、移动数据提示 | `common/base/base_controller.dart:19` | 是 | 没验证 | `app/network.dart`（O03.1）、`shared/rooms/room_feed.dart` `_fill` 和 `refresh`（I03.2） | 热门、分区房间（手机和电视）第一次加载、加载更多、刷新前都查，分区目录加载前查断网（I03.2，2026-10-08）；断网和移动数据靠 connectivity_plus，等 K90（I03.2 真机验证）；搜索页归 I05 |
 | F-NET-04 | Twitch 网页完整性令牌（无界面浏览器） | `core/utils/twitch/twitch_web_integrity.dart:9` | 是 | 没验证 | `platform/twitch_webview_http.dart`（UPGRADES X-1） | → S02.4（CHECKLIST 5 第 7 条） |
 
 ## 4 推荐和分区（BRW）

@@ -6,6 +6,7 @@ import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
+import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/area_rooms/area_rooms_page.dart';
 import 'package:pure_live/features/areas/area_artwork.dart';
@@ -46,9 +47,13 @@ final class _FakeSite extends LiveSite {
   final List<LiveCategory> categories;
   final Map<int, List<LiveRoom>> pages;
   final List<(int, int)> asked = [];
+  int categoryCalls = 0;
 
   @override
-  Future<List<LiveCategory>> getCategories(int page, int pageSize) async => categories;
+  Future<List<LiveCategory>> getCategories(int page, int pageSize) async {
+    categoryCalls++;
+    return categories;
+  }
 
   @override
   Future<List<LiveRoom>> getCategoryRooms(LiveArea category, {int page = 1, int pageSize = 30}) async {
@@ -100,14 +105,20 @@ Future<AppServices> _services(Map<String, LiveSite> sites) async {
   );
 }
 
-Future<AppServices> _pumpApp(WidgetTester tester, Map<String, LiveSite> sites, {String preferred = 'huya'}) async {
+Future<AppServices> _pumpApp(
+  WidgetTester tester,
+  Map<String, LiveSite> sites, {
+  String preferred = 'huya',
+  List<String> menus = const ['areas'],
+  NetworkProbe? probe,
+}) async {
   tester.view
     ..physicalSize = const Size(400, 900)
     ..devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   final services = (await tester.runAsync(() async {
     final services = await _services(sites);
-    await services.store.settings.set(Settings.savedMenuIds, ['areas']);
+    await services.store.settings.set(Settings.savedMenuIds, menus);
     await services.store.settings.set(Settings.hotAreasList, ['douyu', 'huya']);
     await services.store.settings.set(Settings.preferPlatform, preferred);
     // The test device is English; the texts below are the Chinese ones.
@@ -118,7 +129,10 @@ Future<AppServices> _pumpApp(WidgetTester tester, Map<String, LiveSite> sites, {
   final strings = (await tester.runAsync(loadStrings))!;
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [appServicesProvider.overrideWithValue(services)],
+      overrides: [
+        appServicesProvider.overrideWithValue(services),
+        networkProbeProvider.overrideWithValue(probe ?? () async => NetworkKind.other),
+      ],
       child: PureLiveApp(strings: strings, bundle: FileAssetBundle()),
     ),
   );
@@ -135,6 +149,108 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
+  tearDown(() {
+    MobileDataNotice.onMobileData.value = false;
+    MobileDataNotice.dismissed.value = false;
+  });
+
+  group('I03.2 browsing lists', () {
+    _FakeSite huyaWithRooms() => _FakeSite(
+      'huya',
+      '虎牙直播',
+      [
+        LiveCategory(id: 'net', name: '网游', children: [_area('huya', '1', '英雄联盟')]),
+      ],
+      pages: {
+        1: [_room('huya', '11'), _room('huya', '12', restriction: LiveRestriction.password)],
+      },
+    );
+
+    Future<void> back(WidgetTester tester) async {
+      AppNavigator.back();
+      await _settle(tester);
+      await tester.pump(AppNavigator.openGuard);
+    }
+
+    testWidgets("c1: an area's rooms check the network: offline says so, mobile data shows the notice", (tester) async {
+      var kind = NetworkKind.mobile;
+      final services = await _pumpApp(tester, {'huya': huyaWithRooms()}, probe: () async => kind);
+      await tester.tap(find.text('英雄联盟'));
+      await _settle(tester);
+      expect(find.text('标题11'), findsOneWidget);
+      expect(find.byKey(const ValueKey('mobile-data-notice')), findsOneWidget);
+      await back(tester);
+
+      kind = NetworkKind.none;
+      await tester.tap(find.text('英雄联盟'));
+      await _settle(tester);
+      expect(find.byType(AreaRoomsView), findsOneWidget);
+      expect(find.text('没有网络连接'), findsOneWidget);
+      expect(find.text('标题11'), findsNothing);
+      await back(tester);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('c1: the areas say the network is down when offline', (tester) async {
+      final huya = huyaWithRooms();
+      final services = await _pumpApp(tester, {'huya': huya}, probe: () async => NetworkKind.none);
+      expect(find.text('没有网络连接'), findsOneWidget);
+      expect(huya.categoryCalls, 0, reason: 'nothing asked offline');
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('c2: back on the areas tab the catalogues show at once, without asking again', (tester) async {
+      final huya = huyaWithRooms();
+      final services = await _pumpApp(tester, {'huya': huya}, menus: ['popular', 'areas']);
+      await tester.tap(find.byKey(const ValueKey('home-nav-areas')));
+      await _settle(tester);
+      expect(find.text('英雄联盟'), findsOneWidget);
+      final calls = huya.categoryCalls;
+      expect(calls, greaterThan(0));
+      await tester.tap(find.byKey(const ValueKey('home-nav-popular')));
+      await _settle(tester);
+      expect(find.text('英雄联盟'), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('home-nav-areas')));
+      await tester.pump();
+      expect(find.text('英雄联盟'), findsOneWidget, reason: 'no skeleton on the way back');
+      await _settle(tester);
+      expect(huya.categoryCalls, calls);
+      await tester.runAsync(services.close);
+    });
+
+    test('c3: learning waits for the saved pictures, so both are kept', () async {
+      final store = await LiveStore.memory(cipher: FakeCipher());
+      addTearDown(store.close);
+      await store.meta.set(AreaPictures.metaKey, '{"原神":"https://a/ys.png"}');
+      final pictures = AreaPictures(store.meta);
+      await pictures.learn([
+        LiveCategory(
+          id: 'c',
+          name: 'c',
+          children: const [LiveArea(platform: 'douyu', areaId: '1', areaName: '英雄联盟', areaPic: 'https://a/lol.png')],
+        ),
+      ]);
+      final saved = (await store.meta.get(AreaPictures.metaKey))!;
+      expect(saved, allOf(contains('原神'), contains('英雄联盟')));
+      expect(pictures.borrow('原神'), 'https://a/ys.png');
+    });
+
+    testWidgets('c4: an open area page follows "显示不能播放的直播"', (tester) async {
+      final services = await _pumpApp(tester, {'huya': huyaWithRooms()});
+      await tester.tap(find.text('英雄联盟'));
+      await _settle(tester);
+      expect(find.text('标题12'), findsNothing);
+      await tester.runAsync(() => services.store.settings.set(Settings.showUnplayableInDiscover, true));
+      await _settle(tester);
+      expect(find.text('标题12'), findsOneWidget);
+      await tester.runAsync(() => services.store.settings.set(Settings.showUnplayableInDiscover, false));
+      await _settle(tester);
+      expect(find.text('标题12'), findsNothing);
+      await back(tester);
+      await tester.runAsync(services.close);
+    });
+  });
+
   group('areas', () {
     test('the filter matches every word in the name, short name or category', () {
       final areas = [_area('huya', '1', '英雄联盟', typeName: '网游'), _area('huya', '2', '原神', typeName: '单机')];

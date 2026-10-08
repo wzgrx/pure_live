@@ -26,7 +26,9 @@ final class FollowRefreshResult {
 ///
 /// A failed request keeps the stored room with its state pending
 /// (`LiveRoom.pendingAfterError`; 3.x reset it to offline-looking
-/// `status: false`). Rooms of retired platforms are not requested.
+/// `status: false`). Rooms of retired platforms, and of platforms without
+/// an adapter in this build (I03.2 c6), are not requested and stay as
+/// stored.
 final class FollowRefresher {
   /// Creates the refresher over [sites].
   new({
@@ -62,6 +64,7 @@ final class FollowRefresher {
     final queue = [
       for (final room in rooms)
         if (!SiteIds.isRetired(room.platform) &&
+            sites.maybeOf(room.platform) != null &&
             (bypassCooldown || !(now.difference(_failedAt[room.identityKey] ?? DateTime(0)) < cooldown)))
           room,
     ];

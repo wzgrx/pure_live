@@ -116,6 +116,26 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
     final name = message.userName.trim();
     final body = theme.textTheme.bodyLarge?.regular;
     final hint = theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant);
+    final level = message.userLevel.trim();
+    final text = Text.rich(
+      TextSpan(
+        children: [
+          if (name.isNotEmpty)
+            TextSpan(
+              text: '$name：',
+              style: body?.copyWith(
+                color: chatNameColor(message.color, scheme.surfaceContainerLowest) ?? scheme.onSurfaceVariant,
+              ),
+            ),
+          TextSpan(
+            text: message.message,
+            style: body?.copyWith(color: scheme.onSurface),
+          ),
+        ],
+      ),
+      maxLines: 6,
+      overflow: TextOverflow.ellipsis,
+    );
     return ListView(
       key: const ValueKey('live-play-message-sheet'),
       padding: const EdgeInsets.only(bottom: 8),
@@ -131,25 +151,29 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    if (name.isNotEmpty)
-                      TextSpan(
-                        text: '$name：',
-                        style: body?.copyWith(
-                          color: chatNameColor(message.color, scheme.surfaceContainerLowest) ?? scheme.onSurfaceVariant,
+              child: level.isEmpty
+                  ? text
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        text,
+                        // A08.8: 3.x's "Lv.N" as the platform gives it; read as
+                        // "等级 N".
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Semantics(
+                            label: i18n('danmaku_user_level', args: {'level': level}),
+                            excludeSemantics: true,
+                            child: Text(
+                              'Lv.$level',
+                              key: const ValueKey('live-play-message-level'),
+                              style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                            ),
+                          ),
                         ),
-                      ),
-                    TextSpan(
-                      text: message.message,
-                      style: body?.copyWith(color: scheme.onSurface),
+                      ],
                     ),
-                  ],
-                ),
-                maxLines: 6,
-                overflow: TextOverflow.ellipsis,
-              ),
             ),
           ),
         ),

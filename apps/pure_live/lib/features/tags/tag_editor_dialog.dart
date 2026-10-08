@@ -6,12 +6,6 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-/// Longest tag name (3.x `maxLength: 15`).
-const int tagNameMaxLength = 15;
-
-/// Longest tag description (3.x `maxLength: 40`).
-const int tagDescriptionMaxLength = 40;
-
 /// Shows the dialog that adds a tag, or edits [tag] when given (3.x
 /// `_TagEditorDialog`). Completes with the saved tag, or null when the
 /// dialog was closed without saving.
@@ -155,7 +149,7 @@ class _TagEditorDialogState extends State<TagEditorDialog> {
             controller: _name,
             focusNode: _nameFocus,
             autofocus: !_isEdit,
-            maxLength: tagNameMaxLength,
+            maxLength: TagStore.maxNameLength,
             label: i18n('tag_name_label'),
             hint: i18n('tag_input_hint'),
             error: _nameError,
@@ -166,7 +160,7 @@ class _TagEditorDialogState extends State<TagEditorDialog> {
           _field(
             key: const ValueKey('tag-editor-description'),
             controller: _description,
-            maxLength: tagDescriptionMaxLength,
+            maxLength: TagStore.maxDescriptionLength,
             label: i18n('tag_desc_label'),
             hint: i18n('tag_desc_hint'),
             clearLabel: i18n('clear_tag_description'),

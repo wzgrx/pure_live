@@ -370,6 +370,11 @@ void main() {
       await actions.save(SiteIds.bilibili, 'SESSDATA=a');
       await verifyBilibiliLogin(actions: actions, verify: valid);
       expect(store.settings.get(Settings.bilibiliUid), 42);
+      // K01.2: the checked login is remembered for switching back to it.
+      expect(
+        [for (final a in store.accounts.of(SiteIds.bilibili)) (a.uid, a.name, a.cookie)],
+        [(42, 'me', 'SESSDATA=a')],
+      );
 
       await verifyBilibiliLogin(actions: actions, verify: offline);
       expect(toasts.single, i18n('bilibili_user_info_failed'));
@@ -379,6 +384,7 @@ void main() {
       expect(toasts.last, i18n('bilibili_login_expired'));
       expect(actions.cookieOf(SiteIds.bilibili), isEmpty);
       expect(store.settings.get(Settings.bilibiliUid), 0);
+      expect(store.accounts.of(SiteIds.bilibili), isEmpty, reason: 'an expired login is forgotten with it');
     });
   });
 }

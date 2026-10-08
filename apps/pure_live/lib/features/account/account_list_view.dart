@@ -80,8 +80,8 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
       result = accountCheckFailure(error);
     }
     if (!mounted || _checkedCookies[site] != cookie || _actions.cookieOf(site) != cookie) return;
-    if (result case AccountVerified(:final uid?) when site == SiteIds.bilibili) {
-      await _actions.rememberBilibiliUid(uid);
+    if (result case AccountVerified(:final uid?, :final name) when site == SiteIds.bilibili) {
+      await _actions.rememberBilibili(uid, name: name);
     }
     if (result is AccountRejected && site == SiteIds.bilibili) {
       // 3.x `BiliBiliAccountService`: an expired login is signed out.
@@ -98,7 +98,9 @@ class _AccountListViewState extends ConsumerState<AccountListView> {
     final String path;
     Object? arguments;
     if (platform.id == SiteIds.bilibili) {
-      if (stored) {
+      // Signed out with remembered sign-ins: the page where they switch
+      // back (K01.2); with none, straight to the QR code as before.
+      if (stored || _actions.bilibiliAccounts.isNotEmpty) {
         path = RoutePath.kSettingsAccount;
         arguments = SiteIds.bilibili;
       } else {

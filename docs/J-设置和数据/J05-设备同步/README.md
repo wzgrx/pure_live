@@ -33,6 +33,7 @@ RemoteSyncService.start()（remote_sync_service.dart:175）
   GET|POST /api/remote-sync/settings → 先比配对码（常数时间，protocol :43），错 10 次换码（:317-325）
      → POST 先读正文、格式不对直接 400（不打扰用户）→ confirm(action, 对方地址) 问用户 → 允许才
         GET：BackupService.exportAll(includeSensitiveData: includeAccounts)；POST：BackupService.restoreAll
+        （账号一类 = 整个 cookie 分区，K01.2 起含记住的哔哩哔哩账号 bilibiliAccounts，收到的加进名册）
   不加 CORS 头（网页不能读设置）
 客户端：send（:379，POST 设置包）、fetch（:395，GET 设置，只取不应用，页面先预览）、apply（:407）；
   _busy（:427）同时只做一件、2 分钟超时；_request（:441）用 dart:io HttpClient 直连（不走应用代理），连接 5 秒超时

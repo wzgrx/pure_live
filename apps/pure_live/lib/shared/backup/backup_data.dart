@@ -228,7 +228,8 @@ final class RestorePreview {
   /// Settings whose value differs from the current one.
   final int settingsChanged;
 
-  /// Account entries (cookies, Douyu passport) the file writes.
+  /// Account entries the file writes (cookies, Douyu passport, remembered
+  /// sign-ins: [accountEntriesIn]).
   final int accounts;
 
   /// Entries that could not be read and are left out.
@@ -340,7 +341,7 @@ Future<RestorePreview> previewRestore(
     final now = store.settings.get(setting);
     if (jsonEncode(setting.encode(now)) != jsonEncode(setting.encode(value))) changed++;
   }
-  final accounts = snapshot.secrets?.values.where((value) => value.isNotEmpty).length ?? 0;
+  final accounts = accountEntriesIn(snapshot);
   return RestorePreview(
     scope: effective,
     version: version,
@@ -352,4 +353,17 @@ Future<RestorePreview> previewRestore(
     accounts: accounts,
     skipped: snapshot.skipped.length,
   );
+}
+
+/// The account entries [snapshot] writes: the cookies and Douyu passport
+/// values, and the remembered sign-ins (docs/K-账号和登录/K01-账号和登录方式/K01.2-哔哩哔哩多账号) other
+/// than the file's current ones, which the cookies count already.
+int accountEntriesIn(LegacySnapshot snapshot) {
+  final secrets = snapshot.secrets ?? const <String, String>{};
+  var count = secrets.values.where((value) => value.isNotEmpty).length;
+  for (final MapEntry(key: site, value: accounts) in (snapshot.savedAccounts ?? const {}).entries) {
+    final current = secrets[SecretRefs.cookie(site)];
+    count += accounts.where((account) => account.cookie != current).length;
+  }
+  return count;
 }

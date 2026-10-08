@@ -103,4 +103,30 @@ void main() {
     expect(withinSyncSections(data, const []), same(data));
     expect(withinSyncSections(data, const ['favorite']).keys, ['backupVersion', 'favorite']);
   });
+
+  test('K01.2: the remembered sign-ins travel with the account part only and are counted once', () async {
+    final source = await _filled();
+    await source.accounts.remember(SiteIds.bilibili, uid: 7, name: 'Fake Seven', cookie: 'SESSDATA=fake-7');
+    await source.accounts.remember(SiteIds.bilibili, uid: 8, name: 'Fake Eight', cookie: 'SESSDATA=fake-8');
+    await source.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=fake-7');
+
+    final plain = await BackupService(source).exportAll();
+    expect('$plain', isNot(contains('fake-8')));
+    final sensitive = await BackupService(source).exportAll(includeSensitiveData: true);
+    // The current cookie and the one other remembered sign-in.
+    expect(syncPartCounts(sensitive)[SyncPart.accounts], 2);
+    final withoutAccounts = pickSyncParts(sensitive, SyncPart.values.toSet()..remove(SyncPart.accounts));
+    expect('$withoutAccounts', isNot(contains('fake-')));
+
+    final target = await _filled();
+    await target.accounts.remember(SiteIds.bilibili, uid: 3, name: 'Fake Three', cookie: 'SESSDATA=fake-3');
+    await target.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=fake-3');
+    await BackupService(target).restoreAll(withoutAccounts);
+    expect([for (final account in target.accounts.of(SiteIds.bilibili)) account.uid], [3]);
+    expect(target.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=fake-3');
+
+    await BackupService(target).restoreAll(pickSyncParts(sensitive, {SyncPart.accounts}));
+    expect(target.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=fake-7');
+    expect({for (final account in target.accounts.of(SiteIds.bilibili)) account.uid}, {3, 7, 8});
+  });
 }

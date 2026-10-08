@@ -27,8 +27,10 @@ import '../../support.dart';
 final DateTime _now = DateTime(2026, 10, 1, 20);
 
 /// Answers like the platforms: `SESSDATA=ok` signs in Alice (uid 42),
-/// `SESSDATA=bad` signs in nobody, anything else cannot be checked.
+/// `SESSDATA=bob` Bob (uid 7), `SESSDATA=bad` signs in nobody, anything
+/// else cannot be checked.
 Future<AccountIdentity> _verifier(String site, String cookie) async {
+  if (cookie.contains('=bob')) return (name: 'Bob', uid: site == SiteIds.bilibili ? 7 : null);
   if (cookie.contains('=ok')) return (name: 'Alice', uid: site == SiteIds.bilibili ? 42 : null);
   if (cookie.contains('=bad')) throw NeedsLogin(site, 'test');
   throw NetworkFailure(site, 'test');
@@ -88,12 +90,14 @@ const List<String> _accountPaths = [
 
 const List<String> _authPaths = [RoutePath.kSignIn, RoutePath.kMine, RoutePath.kUserManage];
 
-/// Pumps [path] over an in-memory store holding [cookies], [secrets] and
-/// Douyu's save time; [unreadable] cookies cannot be opened on this device.
+/// Pumps [path] over an in-memory store holding [cookies], [secrets],
+/// the remembered Bilibili sign-ins [accounts] and Douyu's
+/// save time; [unreadable] cookies cannot be opened on this device.
 Future<_Harness> _pump(
   WidgetTester tester, {
   String path = RoutePath.kSettingsAccount,
   Map<String, String> cookies = const {},
+  List<({int uid, String name, String cookie})> accounts = const [],
   Map<String, String?> secrets = const {},
   Set<String> unreadable = const {},
   int douyuSavedAt = 0,
@@ -110,6 +114,19 @@ Future<_Harness> _pump(
       await services.store.secrets.setCookie(key, value);
     }
     if (secrets.isNotEmpty) await services.store.secrets.writeAll(secrets);
+    for (final account in accounts) {
+      await services.store.accounts.remember(
+        SiteIds.bilibili,
+        uid: account.uid,
+        name: account.name,
+        cookie: account.cookie,
+      );
+    }
+    if (cookies[SiteIds.bilibili] case final cookie?) {
+      for (final account in accounts) {
+        if (account.cookie == cookie) await services.store.settings.set(Settings.bilibiliUid, account.uid);
+      }
+    }
     if (douyuSavedAt > 0) await services.store.settings.set(Settings.douyuCookieSavedAt, douyuSavedAt);
     services.store.secrets.unreadable.addAll(unreadable.map(SecretRefs.cookie));
     return services;
@@ -809,6 +826,221 @@ void main() {
       expect(store.secrets.cookieFor(SiteIds.bilibili), isNull);
       expect(store.settings.get(Settings.bilibiliUid), 0);
     });
+  });
+
+  group('K01.2 remembered Bilibili accounts', () {
+    const alice = (uid: 42, name: 'Alice', cookie: 'SESSDATA=ok');
+    const bob = (uid: 7, name: 'Bob', cookie: 'SESSDATA=bob');
+
+    List<int> remembered(_Harness harness) => [
+      for (final account in harness.store.accounts.of(SiteIds.bilibili)) account.uid,
+    ];
+
+    String rowState(WidgetTester tester, int uid) =>
+        tester.widget<Text>(find.byKey(ValueKey('bilibili-account-$uid-state'))).data!;
+
+    Future<void> openBilibili(_Harness harness, WidgetTester tester) async {
+      harness.router.go(RoutePath.kSettingsAccount, extra: SiteIds.bilibili);
+      await _settle(tester);
+    }
+
+    testWidgets('one account works as before: remembered when checked, listed as current, signing out forgets it', (
+      tester,
+    ) async {
+      final harness = await _pump(tester, cookies: {SiteIds.bilibili: 'SESSDATA=ok'});
+      // The list's check remembers who the login is; the row reads as before.
+      expect(_status(tester, SiteIds.bilibili), '已登录：Alice');
+      expect(remembered(harness), [42]);
+      expect(harness.store.accounts.find(SiteIds.bilibili, 42)!.name, 'Alice');
+
+      await _tap(tester, find.byKey(const ValueKey('account-bilibili')));
+      expect(find.byKey(const ValueKey('bilibili-accounts')), findsOneWidget);
+      expect(find.text('已记住的账号'), findsOneWidget);
+      expect(rowState(tester, 42), 'UID 42 · 当前账号');
+      expect(find.byKey(const ValueKey('bilibili-account-42-switch')), findsNothing);
+      expect(find.byKey(const ValueKey('bilibili-account-42-forget')), findsNothing);
+      expect(find.text('扫码登录另一个账号，现在的账号会留在这里'), findsOneWidget);
+      // Under the status card, above the instructions.
+      expect(
+        _top(tester, find.byKey(const ValueKey('bilibili-accounts'))),
+        greaterThan(_top(tester, find.byKey(const ValueKey('account-status')))),
+      );
+      expect(
+        _top(tester, find.byKey(const ValueKey('bilibili-accounts'))),
+        lessThan(_top(tester, find.byKey(const ValueKey('account-cookie-input')))),
+      );
+
+      await _tap(tester, find.byKey(const ValueKey('account-cookie-sign-out')));
+      _expectSignOutQuestion('哔哩哔哩');
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), isNull);
+      expect(remembered(harness), isEmpty, reason: 'signing out forgets the login, as before');
+      expect(find.byKey(const ValueKey('bilibili-accounts')), findsNothing);
+      final sealed = await tester.runAsync(() => harness.store.database.rows('SELECT ref FROM secrets'));
+      expect(sealed, isEmpty);
+
+      harness.router.go(RoutePath.kSettingsAccount);
+      await _settle(tester);
+      await _tap(tester, find.byKey(const ValueKey('account-bilibili')));
+      expect(
+        find.byKey(const ValueKey('bilibili-qr-card')),
+        findsOneWidget,
+        reason: 'nothing remembered: QR as before',
+      );
+    });
+
+    testWidgets('switching asks, makes the other account current and checks it; the one left stays switchable', (
+      tester,
+    ) async {
+      final harness = await _pump(tester, cookies: {SiteIds.bilibili: 'SESSDATA=ok'}, accounts: [alice, bob]);
+      await openBilibili(harness, tester);
+      expect(rowState(tester, 42), 'UID 42 · 当前账号');
+      expect(rowState(tester, 7), 'UID 7');
+      final changes = <String>[];
+      final subscription = harness.store.secrets.cookieChanges.listen(changes.add);
+      addTearDown(subscription.cancel);
+
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-7-switch')));
+      expect(find.text('切换账号'), findsOneWidget);
+      expect(find.text('切换到“Bob”？正在看的直播间会用这个账号重新连接弹幕。'), findsOneWidget);
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-cancel')));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok');
+
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-7-switch')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=bob');
+      expect(harness.store.settings.get(Settings.bilibiliUid), 7);
+      // The open rooms and the adapters hear of it as of any new login.
+      expect(changes, contains(SiteIds.bilibili));
+      expect(harness.toasts, contains('已切换到“Bob”'));
+      expect(_cardStatus(tester), '已登录：Bob');
+      expect(find.text('SESSDATA=bob'), findsOneWidget);
+      expect(_enabled(tester, const ValueKey('account-cookie-save')), isFalse, reason: 'the box holds what is stored');
+      expect(rowState(tester, 7), 'UID 7 · 当前账号');
+      expect(find.byKey(const ValueKey('bilibili-account-42-switch')), findsOneWidget);
+      expect(remembered(harness), [7, 42]);
+
+      // A row's tap switches too.
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-42')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok');
+      expect(_cardStatus(tester), '已登录：Alice');
+    });
+
+    testWidgets('a remembered login that expired is signed out and forgotten after the switch', (tester) async {
+      final harness = await _pump(
+        tester,
+        cookies: {SiteIds.bilibili: 'SESSDATA=ok'},
+        accounts: [alice, (uid: 9, name: 'Carol', cookie: 'SESSDATA=bad')],
+      );
+      await openBilibili(harness, tester);
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-9-switch')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.toasts, contains('哔哩哔哩登录已失效，请重新登录'));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), isNull);
+      expect(harness.store.settings.get(Settings.bilibiliUid), 0);
+      expect(remembered(harness), [42]);
+      expect(find.byKey(const ValueKey('bilibili-account-42-switch')), findsOneWidget);
+      expect(find.byKey(const ValueKey('bilibili-account-9')), findsNothing);
+    });
+
+    testWidgets('signed out with remembered accounts the list opens the page; deleting one asks first', (tester) async {
+      final harness = await _pump(tester, accounts: [alice, bob]);
+      expect(_status(tester, SiteIds.bilibili), '未设置');
+      await _tap(tester, find.byKey(const ValueKey('account-bilibili')));
+      expect(find.byKey(const ValueKey('bilibili-qr-card')), findsNothing);
+      expect(find.byKey(const ValueKey('bilibili-account-7-switch')), findsOneWidget);
+      expect(find.byKey(const ValueKey('bilibili-account-42-switch')), findsOneWidget);
+
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-7-forget')));
+      expect(find.text('删除账号'), findsOneWidget);
+      expect(find.text('从本机删除“Bob”的登录信息？以后要用这个账号需要重新登录。'), findsOneWidget);
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-cancel')));
+      expect(remembered(harness), containsAll([7, 42]));
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-7-forget')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(remembered(harness), [42]);
+      expect(harness.toasts.last, '已删除“Bob”');
+      expect(find.byKey(const ValueKey('bilibili-account-7')), findsNothing);
+
+      // Back to the remembered one without a new scan.
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-42-switch')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok');
+      expect(_cardStatus(tester), '已登录：Alice');
+    });
+
+    testWidgets('adding an account: the QR page signs it in, back on the page both are listed', (tester) async {
+      final qr = _FakeQr();
+      final harness = await _pump(tester, cookies: {SiteIds.bilibili: 'SESSDATA=ok'}, qr: qr);
+      await openBilibili(harness, tester);
+      expect(remembered(harness), [42]);
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-add')));
+      expect(find.byKey(const ValueKey('bilibili-qr-card')), findsOneWidget);
+      qr.answers.add((state: BilibiliQrState.confirmed, cookie: 'SESSDATA=bob; DedeUserID=7'));
+      await tester.pump(const Duration(seconds: 3));
+      await _settle(tester);
+      expect(find.byKey(const ValueKey('bilibili-qr-card')), findsNothing);
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=bob; DedeUserID=7');
+      expect(remembered(harness), containsAll([7, 42]));
+      expect(rowState(tester, 7), 'UID 7 · 当前账号');
+      expect(find.byKey(const ValueKey('bilibili-account-42-switch')), findsOneWidget);
+      expect(_cardStatus(tester), '已登录：Bob');
+      expect(find.text('SESSDATA=bob; DedeUserID=7'), findsOneWidget);
+    });
+
+    testWidgets('with five remembered the add row says the oldest goes', (tester) async {
+      final harness = await _pump(
+        tester,
+        cookies: {SiteIds.bilibili: 'SESSDATA=ok'},
+        accounts: [alice, for (var uid = 1; uid <= 4; uid++) (uid: uid, name: 'Fake $uid', cookie: 'SESSDATA=f$uid')],
+      );
+      await openBilibili(harness, tester);
+      expect(remembered(harness), hasLength(5));
+      expect(find.text('已记住 5 个，再添加会删掉最久没用的那个'), findsOneWidget);
+    });
+
+    testWidgets('a failing secure storage on a switch changes nothing and says so', (tester) async {
+      final harness = await _pump(tester, cookies: {SiteIds.bilibili: 'SESSDATA=ok'}, accounts: [alice, bob]);
+      await openBilibili(harness, tester);
+      harness.cipher.sealFailure = StateError('Keystore returned nothing');
+      await _tap(tester, find.byKey(const ValueKey('bilibili-account-7-switch')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.toasts.last, _secretSaveFailed);
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok');
+      expect(harness.store.settings.get(Settings.bilibiliUid), 42);
+      expect(remembered(harness), containsAll([7, 42]));
+      expect(_cardStatus(tester), '已登录：Alice');
+      expect(find.byKey(const ValueKey('bilibili-account-7-switch')), findsOneWidget);
+    });
+
+    for (final (label, size, scale) in [
+      ('landscape at 1.3x text', const Size(852, 393), 1.3),
+      ('wide', const Size(1280, 800), 1.0),
+    ]) {
+      testWidgets('$label: the group fits and its buttons can be reached', (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final harness = await _pump(
+          tester,
+          size: size,
+          cookies: {SiteIds.bilibili: 'SESSDATA=ok'},
+          accounts: [alice, bob],
+        );
+        await openBilibili(harness, tester);
+        expect(tester.takeException(), isNull);
+        final group = tester.getRect(find.byKey(const ValueKey('bilibili-accounts')));
+        expect(group.width, lessThanOrEqualTo(720));
+        await tester.ensureVisible(find.byKey(const ValueKey('bilibili-account-7-switch')));
+        await tester.pump();
+        final button = tester.getRect(find.byKey(const ValueKey('bilibili-account-7-switch')));
+        expect(button.right, lessThanOrEqualTo(size.width));
+        expect(button.height, greaterThanOrEqualTo(40));
+        await _tap(tester, find.byKey(const ValueKey('bilibili-account-7-switch')));
+        expect(find.text('切换账号'), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 
   group('U.10c cloud account', () {

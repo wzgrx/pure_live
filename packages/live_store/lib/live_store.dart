@@ -4,6 +4,7 @@
 /// 3.x's data. Pure Dart.
 library;
 
+export 'src/accounts.dart' show AccountRoster, SavedAccount;
 export 'src/backup/backup_service.dart' show BackupService;
 export 'src/block_lists.dart' show BlockKind, BlockListStore;
 export 'src/database.dart' show StoreDatabase, StoreTables;

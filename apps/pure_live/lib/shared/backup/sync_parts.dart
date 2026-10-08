@@ -173,6 +173,6 @@ Map<SyncPart, int> syncPartCounts(Map<String, Object?> data) {
     if (snapshot.blockedKeywords case final words?) SyncPart.keywords: words.length,
     if (snapshot.blockedUsers case final users?) SyncPart.users: users.length,
     if (snapshot.webdav case final servers?) SyncPart.webdav: servers.length,
-    if (snapshot.secrets case final secrets?) SyncPart.accounts: secrets.values.where((v) => v.isNotEmpty).length,
+    if (snapshot.secrets != null || snapshot.savedAccounts != null) SyncPart.accounts: accountEntriesIn(snapshot),
   };
 }

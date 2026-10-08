@@ -28,6 +28,16 @@ abstract final class SecretRefs {
   /// Douyu's passport device id (3.x `douyuDid`).
   static const douyuDid = 'cookie/douyu.did';
 
+  /// The remembered sign-in [uid] of platform [site] (V01.2,
+  /// `AccountRoster`).
+  static String account(String site, int uid) => '${accountsOf(site)}$uid';
+
+  /// The prefix of the remembered sign-ins of [site].
+  static String accountsOf(String site) => '$accountPrefix${site.trim().toLowerCase()}/';
+
+  /// The prefix of every remembered sign-in.
+  static const accountPrefix = 'account/';
+
   /// The password of WebDAV server [name].
   static String webdav(String name) => 'webdav/$name';
 
@@ -131,6 +141,9 @@ final class SecretStore {
 
   /// Names whose sealed value could not be opened.
   final Set<String> unreadable;
+
+  /// The names of the secrets this device could open.
+  Set<String> get refs => {..._values.keys};
 
   /// The secret [ref], or null.
   String? read(String ref) => _values[ref];

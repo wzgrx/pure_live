@@ -297,6 +297,36 @@ void _partTests() {
     }),
   );
 
+  test(
+    'remembered Bilibili sign-ins (K01.2) leave only with "同步账号 Cookie" and its part; the receiver adds them',
+    () => _withRealHttp(() async {
+      final target = await _service();
+      final source = await _service();
+      await target.start();
+      await source.store.accounts.remember(SiteIds.bilibili, uid: 7, name: 'Fake Seven', cookie: 'SESSDATA=fake-7');
+      await source.store.accounts.remember(SiteIds.bilibili, uid: 8, name: 'Fake Eight', cookie: 'SESSDATA=fake-8');
+      await source.store.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=fake-7');
+      await target.store.accounts.remember(SiteIds.bilibili, uid: 3, name: 'Fake Three', cookie: 'SESSDATA=fake-3');
+      await target.store.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=fake-3');
+      List<int> remembered() => [for (final account in target.store.accounts.of(SiteIds.bilibili)) account.uid];
+
+      // Off by default: nothing of the sign-ins leaves the device.
+      expect(jsonEncode(await source.outgoing()), isNot(contains('fake-')));
+      expect(await source.send('127.0.0.1', target.port, target.pairingCode), isTrue);
+      expect(remembered(), [3]);
+      expect(target.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=fake-3');
+
+      source.includeAccounts = true;
+      final withoutAccounts = SyncPart.values.toSet()..remove(SyncPart.accounts);
+      expect(await source.send('127.0.0.1', target.port, target.pairingCode, parts: withoutAccounts), isTrue);
+      expect(remembered(), [3], reason: '"账号 Cookie" not ticked');
+
+      expect(await source.send('127.0.0.1', target.port, target.pairingCode, parts: {SyncPart.accounts}), isTrue);
+      expect(target.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=fake-7');
+      expect(remembered().toSet(), {3, 7, 8});
+    }),
+  );
+
   test('a received backup applies only the ticked parts', () async {
     final target = await _service();
     final source = await _service();

@@ -38,7 +38,7 @@ AppBootstrap.start（bootstrap.dart:98）
 ```
 
 - 表（`database.dart:45-55`）：`follows`（身份主键、位置、房间 JSON）、`history`（身份、序号、房间）、`follow_areas`、`tags`、`room_tags`、`block_rules`（种类、折叠后的值、原值、位置）、`settings`（键、JSON 值）、`secrets`（名字、密文 BLOB）、`webdav_profiles`（名字、位置、地址、用户名；**没有密码列**）、`meta`（内部记录：迁移账本、`webdav.current`、搜索记录、多画面上次的画面、礼物开关等）、`legacy_values`（3.x 其他模块的原值，等主人接走）。网络电视另有 6 张 `iptv_` 表（L01.2，版本记在 `meta` 的 `iptv.schemaVersion`）。
-- 密钥的名字（`secrets.dart:21-35`）：`cookie/<平台>`、`cookie/douyu.ltp0`、`cookie/douyu.did`、`webdav/<服务器名>`。
+- 密钥的名字（`secrets.dart:21-44`）：`cookie/<平台>`、`cookie/douyu.ltp0`、`cookie/douyu.did`、`webdav/<服务器名>`；K01.2 加了 `account/<平台>/<uid>`（记住的哔哩哔哩账号，值是加密的名字、Cookie 和最后使用时间，`packages/live_store/lib/src/accounts.dart` 的 `AccountRoster`；不以 `cookie/` 开头，所以不算进 `cookieSites`、`cookieChanges`）。
 - 完成度：J02.1（2026-10-01，`d2fbe3072`）一次做完，之后 A16.1 加了多窗口共用（`shared`、`syncExternal`）、A11.2 加了主题色迁移。保留了 3.x 的行为（关注和历史的有效性、历史顺序和上限、清空只删当时显示的、屏蔽词去重保留第一次写法、分组名不分大小写唯一、平台列表版本表 1～38、Cookie 规范化）；确认过的改动见 J02.1 README。**真机上从没验证过 Keystore 加解密和“重装后解不开”的提示**（K02.1）。
 
 ## 代码地图

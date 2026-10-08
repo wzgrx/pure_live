@@ -200,6 +200,7 @@ path = [
   { glob = "packages/live_record/lib/src/settings.dart", sub = "H03" },
   { glob = "packages/live_record/lib/src/storage.dart", sub = "H03" },
   { glob = "packages/live_record/", sub = "H01" },
+  { glob = "packages/live_store/lib/src/accounts.dart", sub = "K01", note = "哔哩哔哩多账号的名册（K01.2）" },
   { glob = "packages/live_store/lib/src/backup/", sub = "J03" },
   { glob = "packages/live_store/lib/src/legacy/", sub = "J06" },
   { glob = "packages/live_store/lib/src/settings/", sub = "J01" },

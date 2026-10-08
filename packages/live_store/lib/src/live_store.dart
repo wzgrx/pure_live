@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:live_store/src/accounts.dart';
 import 'package:live_store/src/block_lists.dart';
 import 'package:live_store/src/database.dart';
 import 'package:live_store/src/legacy/legacy_rules.dart';
@@ -88,6 +89,7 @@ final class LiveStore {
       tags = TagStore(database, now: now),
       blockLists = BlockListStore(database),
       webdav = WebDavStore(database, secrets),
+      accounts = AccountRoster(secrets, now: now),
       meta = MetaStore(database);
 
   /// Opens (or creates) the store in [directory] (`<directory>/pure_live.db`)
@@ -187,6 +189,9 @@ final class LiveStore {
 
   /// Cookies and passwords.
   final SecretStore secrets;
+
+  /// The remembered sign-ins (V01.2), sealed in [secrets].
+  final AccountRoster accounts;
 
   /// Followed rooms.
   final FollowStore follows;

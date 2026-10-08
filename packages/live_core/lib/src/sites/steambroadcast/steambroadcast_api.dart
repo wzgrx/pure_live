@@ -46,7 +46,7 @@ enum SteamBroadcastState {
 /// the variant is a selector that holds across fresh copies of the master
 /// (the CDN host and paths change between answers): see [selectIn].
 @immutable
-final class SteamBroadcastVariant {
+final class SteamBroadcastVariant implements HlsVariantSelector {
   /// Creates the variant.
   const new({
     required this.id,
@@ -79,6 +79,7 @@ final class SteamBroadcastVariant {
   /// [source]: the variant of the same [id] whose bandwidth is closest to
   /// [bandwidth]. Throws [FormatException] when the master cannot be read
   /// or has no such variant.
+  @override
   HlsMasterSelection selectIn(String text, {required Uri source}) {
     final playlist = HlsMasterPlaylist.parse(source, text);
     HlsMasterVariant? best;
@@ -1025,7 +1026,8 @@ abstract final class SteamBroadcastApi {
   /// (3.x's player and recorder sent none; the CDN answers without them,
   /// 2026-09-28) and no lease (no expiry in the address; Steam needs no
   /// heartbeat, archive spec §6). A variant's quality plays the same line
-  /// restricted to its variant ([SteamBroadcastVariant.selectIn], M7).
+  /// restricted to its variant: the resolution names the variant as the
+  /// line's selector ([SteamBroadcastVariant.selectIn], G01.4).
   static LivePlayLine line(Uri master, {String? codec}) =>
       LivePlayLine('$master', format: StreamFormat.hls, codec: codec, lineId: lineId);
 }

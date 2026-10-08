@@ -686,6 +686,7 @@ final class PlaybackSession {
               site: request.site,
               renew: refresh == null ? null : _renewer(session, refresh),
               queryPolicy: plan.queryPolicyFor(source),
+              variantSelector: plan.variantSelectorFor(source),
               onRenewed: (line) {
                 if (_current(session)) _emit(_state.copyWith(line: line));
               },

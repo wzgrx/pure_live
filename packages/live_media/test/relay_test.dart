@@ -26,6 +26,10 @@ final class _Cdn {
 
   static final segment = Uint8List.fromList(List.generate(400, (i) => (i * 7) & 0xff));
 
+  /// The recorded Steam master: an audio group and four video variants
+  /// (fixtures/steambroadcast/S09-master-live).
+  static final String steamMaster = File('../../fixtures/steambroadcast/S09-master-live/body.m3u8').readAsStringSync();
+
   static Uint8List legacyHevcFlv() {
     final header = FlvTag.fileHeader();
     final config = FlvTag.build(type: FlvTag.video, timestamp: 0, data: [0x1c, 0, 0, 0, 0, 9, 9, 9]);
@@ -53,6 +57,12 @@ final class _Cdn {
         response.write('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000\nv/media.m3u8\n');
       case '/token/v/media.m3u8' || '/renew/1/v/media.m3u8' || '/renew/2/v/media.m3u8':
         response.write('#EXTM3U\n#EXT-X-TARGETDURATION:2\n#EXTINF:2,\n1.ts\n');
+      case '/steam/master.m3u8':
+        response.write(steamMaster);
+      case '/steam/other-host/master.m3u8':
+        response.write(steamMaster.replaceAll('cache3-lax2.steamcontent.com', 'cache8-lax1.steamcontent.com'));
+      case '/steam/no-720p/master.m3u8':
+        response.write(steamMaster.replaceAll('RESOLUTION=1280x720,', 'RESOLUTION=1024x576,'));
       case '/live.flv':
         response
           ..headers.contentType = ContentType('video', 'x-flv')
@@ -164,6 +174,53 @@ void main() {
     await input.close();
     expect(input.isClosed, isTrue);
     expect((await _get(input.uri)).status, HttpStatus.notFound);
+  });
+
+  group("a Steam variant's line (G01.4)", () {
+    const hd = SteamBroadcastVariant(id: '720p', width: 1280, height: 720, bandwidth: 3660000, codec: 'avc');
+    late MediaOpener opener;
+
+    setUp(() => opener = MediaOpener(relay: () async => relay));
+
+    Future<MediaInput> open(String path) => opener.open(
+      LineSource(LivePlayLine(cdn.base(path), format: StreamFormat.hls)),
+      site: 'steambroadcast',
+      variantSelector: hd,
+    );
+
+    List<String> streams(String master) =>
+        const LineSplitter().convert(master).where((line) => line.startsWith('#EXT-X-STREAM-INF')).toList();
+
+    test('serves the master with that variant only, and its audio', () async {
+      final input = await open('/steam/master.m3u8');
+      expect(input.route, MediaRoute.hlsRelay);
+      final master = await _text(input.uri);
+      expect(streams(master), [contains('RESOLUTION=1280x720')]);
+      expect(
+        const LineSplitter().convert(master).where((line) => line.startsWith('#EXT-X-MEDIA:TYPE=AUDIO')),
+        hasLength(1),
+      );
+      expect(master, isNot(contains('steamcontent.com')), reason: 'the children go through the relay');
+    });
+
+    test('a fresh master on another CDN host still plays the same variant', () async {
+      final master = await _text((await open('/steam/other-host/master.m3u8')).uri);
+      expect(streams(master), [contains('RESOLUTION=1280x720')]);
+    });
+
+    test('a master without the variant fails the open instead of playing another', () async {
+      final input = await open('/steam/no-720p/master.m3u8');
+      expect((await _get(input.uri)).status, HttpStatus.badGateway);
+    });
+
+    test('without a selector the master goes to the engine as it is', () async {
+      final input = await opener.open(
+        LineSource(LivePlayLine(cdn.base('/steam/master.m3u8'), format: StreamFormat.hls)),
+        site: 'steambroadcast',
+      );
+      expect(input.route, MediaRoute.direct);
+      expect(input.uri.toString(), cdn.base('/steam/master.m3u8'));
+    });
   });
 
   test('niconico keeps exactly the selected variant of the master', () {

@@ -305,12 +305,25 @@ abstract final class BigoApi {
   /// The website.
   static const String webOrigin = 'https://www.bigo.tv';
 
-  /// 3.x's headers of every request (`BigoApi.headers`); its
-  /// `PlaybackHeaderResolver` and its HLS input sent the same to the media.
+  /// The desktop browser user agent of [headers] and the chat handshake.
+  static const String userAgent =
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
+
+  /// The headers of every request and of the media (3.x's
+  /// `PlaybackHeaderResolver` and HLS input sent the requests' headers to
+  /// the media too): a full desktop browser fingerprint (E03.19, upstream
+  /// pure_live 2e84d68d3). 3.x sent a bare `Mozilla/5.0`, which the site's
+  /// firewall answered on 2026-10-06 (upstream's egress) with a 418 on the
+  /// `www.bigo.tv` API and a `needLogin` shell from `getInternalStudioInfo`.
+  /// The patrol of 2026-10-08 (through the proxy) got full answers and
+  /// segments with both, so this is a precaution, not a repair.
   static const Map<String, String> headers = {
     'origin': webOrigin,
     'referer': '$webOrigin/',
-    'user-agent': 'Mozilla/5.0',
+    'user-agent': userAgent,
+    'accept': 'application/json, text/javascript, */*; q=0.01',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'x-requested-with': 'XMLHttpRequest',
   };
 
   /// The largest answer 3.x accepted, in UTF-8 bytes.

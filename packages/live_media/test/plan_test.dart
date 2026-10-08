@@ -123,6 +123,47 @@ void main() {
       );
       expect(MediaRoute.of(_hls('https://tc.test/m.m3u8'), engine: engine, canRenew: true), MediaRoute.direct);
     });
+
+    test('G01.4: HLS with a variant selector is relayed (its master is rewritten), FLV is not', () {
+      final selector = _Selector();
+      expect(
+        MediaRoute.of(
+          _hls('https://steam.test/master.m3u8'),
+          engine: engine,
+          canRenew: false,
+          variantSelector: selector,
+        ),
+        MediaRoute.hlsRelay,
+      );
+      expect(MediaRoute.of(_hls('https://steam.test/master.m3u8'), engine: engine, canRenew: false), MediaRoute.direct);
+      expect(
+        MediaRoute.of(_flv('https://x.test/live.flv'), engine: engine, canRenew: false, variantSelector: selector),
+        MediaRoute.direct,
+      );
+    });
+  });
+
+  group('PlaybackPlan variant selectors (G01.4)', () {
+    test("a line's selector comes from the resolution; other lines and recipes have none", () {
+      final selector = _Selector();
+      const master = 'https://steam.test/master.m3u8';
+      final plan = PlaybackPlan.of(
+        LivePlayUrlResolution.lines(
+          const [
+            LivePlayLine(master, format: StreamFormat.hls),
+            LivePlayLine('https://other.test/live.m3u8', format: StreamFormat.hls),
+          ],
+          sourceVariantSelectors: {master: selector},
+        ),
+      );
+      expect(plan.variantSelectorFor(plan.sources.first), same(selector));
+      expect(plan.variantSelectorFor(plan.sources.last), isNull);
+      expect(
+        PlaybackPlan.of(LivePlayUrlResolution.owned(input: BigoInputRecipe('12345678')))
+            .variantSelectorFor(RecipeSource(BigoInputRecipe('12345678'))),
+        isNull,
+      );
+    });
   });
 
   group('MediaOpener', () {
@@ -153,4 +194,10 @@ void main() {
       );
     });
   });
+}
+
+/// A variant selector that selects nothing (G01.4).
+final class _Selector implements HlsVariantSelector {
+  @override
+  HlsMasterSelection selectIn(String text, {required Uri source}) => throw const FormatException('unused');
 }

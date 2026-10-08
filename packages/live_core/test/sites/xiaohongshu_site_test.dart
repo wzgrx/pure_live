@@ -692,7 +692,7 @@ void main() {
       'https://www.xiaohongshu.com/livestream/%35$id',
       'https://www.xiaohongshu.com:8787/livestream/$id',
       'https://user@www.xiaohongshu.com/livestream/$id',
-      'https://xhslink.com/a/fixture',
+      'https://xhslink.com/abcde/fixture',
     ]) {
       test('unverified or malformed links stay unrecognised: $url', () async {
         expect(parser.containsSupportedLink(url), isFalse);
@@ -724,6 +724,27 @@ void main() {
       expect(parser.containsSupportedLink(text), isTrue);
       expect(await parser.parse(text), const RoomLink('xiaohongshu', id));
       expect(http.requests.single.url.path, '/m/abc123');
+    });
+
+    test("E04.2: the app's whole share text with an /o/ short link opens the room", () async {
+      serve((request) async => _redirect(302, '$dynamicRoom?share_source=share_link&xsec_token=fixture', request));
+      const text =
+          '小红书，你的生活指南#测试主播正在直播，来和我一起支持ta吧。 https://xhslink.com/o/AbC123 '
+          '复制本条信息，打开【小红书】，直接观看直播！';
+      expect(parser.containsSupportedLink(text), isTrue);
+      expect(await parser.parse(text), const RoomLink('xiaohongshu', id));
+      expect(http.requests.single.url.toString(), 'https://xhslink.com/o/AbC123');
+      expect(http.requests.single.followRedirects, isFalse);
+    });
+
+    test('E04.2: an /o/ short link pasted into the search finds its room', () async {
+      final room = _Room(id);
+      final page = room.http.handler;
+      room.http.handler = (request) async =>
+          request.url.host == 'xhslink.com' ? _redirect(302, dynamicRoom, request) : await page(request);
+      final found = await room.site.searchRooms('https://xhslink.com/o/AbC123');
+      expect(found.single.roomId, id);
+      expect(room.http.requests.first.url.toString(), 'https://xhslink.com/o/AbC123');
     });
 
     test('a hop to an app deep link names its room', () async {

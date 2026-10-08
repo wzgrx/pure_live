@@ -783,12 +783,32 @@ void main() {
       expect(XiaohongshuApi.shortLink('https://xhslink.com/m/18ox3lAz'), Uri.parse('https://xhslink.com/m/18ox3lAz'));
       expect(XiaohongshuApi.shortLink('http://xhslink.com/zfknEQ/'), isNotNull);
       for (final url in [
-        'https://xhslink.com/a/fixture',
         'https://www.xhslink.com/m/abc',
         'https://xhslink.com.evil.test/m/abc',
         'https://xhslink.com/m/abc/../def',
         'https://xhslink.com:8443/m/abc',
         'ftp://xhslink.com/m/abc',
+      ]) {
+        expect(XiaohongshuApi.shortLink(url), isNull, reason: url);
+      }
+    });
+
+    test('E04.2: a code behind a prefix of one to four letters (/o/ of the app shares) is a short link', () {
+      expect(XiaohongshuApi.shortLink('https://xhslink.com/o/AbC123'), Uri.parse('https://xhslink.com/o/AbC123'));
+      for (final url in [
+        'https://xhslink.com/a/fixture',
+        'https://xhslink.com/abcd/AbC123/',
+        'http://xhslink.com/O/AbC123',
+      ]) {
+        expect(XiaohongshuApi.shortLink(url), isNotNull, reason: url);
+      }
+      for (final url in [
+        'https://xhslink.com/abcde/xyz',
+        'https://xhslink.com/o1/AbC123',
+        'https://xhslink.com/o/AbC123/extra',
+        'https://xhslink.com/o/m/AbC123',
+        'https://example.com/o/AbC123',
+        'https://xhslink.com.evil.test/o/AbC123',
       ]) {
         expect(XiaohongshuApi.shortLink(url), isNull, reason: url);
       }

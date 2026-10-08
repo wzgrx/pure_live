@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:live_core/src/hls_master.dart';
 import 'package:live_core/src/hls_source_query_policy.dart';
 import 'package:live_core/src/input_recipe.dart';
 import 'package:live_core/src/live_area.dart';
@@ -90,17 +91,23 @@ final class LivePlayUrlResolution {
     this.start,
   }) : lines = List.unmodifiable([for (final url in urls) LivePlayLine(url)]),
        sourceQueryPolicies = const {},
+       sourceVariantSelectors = const {},
        inputRecipe = null;
 
-  /// Lines that describe themselves (headers, format, lease).
+  /// Lines that describe themselves (headers, format, lease), with the
+  /// variant selectors of HLS lines whose quality is one variant of their
+  /// master (G01.4); each key must be one of [lines]' URLs, else
+  /// [FormatException].
   new lines(
     List<LivePlayLine> lines, {
     this.appliedQualityData,
     this.qualityUnconfirmed = false,
     this.appliedQuality,
     this.start,
+    Map<String, HlsVariantSelector> sourceVariantSelectors = const {},
   }) : lines = List.unmodifiable(lines),
        sourceQueryPolicies = const {},
+       sourceVariantSelectors = _checkedSelectors(lines, sourceVariantSelectors),
        inputRecipe = null;
 
   /// A source without an exportable URL (see [LiveInputRecipe]).
@@ -112,11 +119,13 @@ final class LivePlayUrlResolution {
     this.start,
   }) : inputRecipe = input,
        lines = const [],
-       sourceQueryPolicies = const {};
+       sourceQueryPolicies = const {},
+       sourceVariantSelectors = const {};
 
   const new _({
     required this.lines,
     required this.sourceQueryPolicies,
+    required this.sourceVariantSelectors,
     this.appliedQualityData,
     this.qualityUnconfirmed = false,
     this.appliedQuality,
@@ -144,6 +153,7 @@ final class LivePlayUrlResolution {
   factory _validated(
     List<LivePlayLine> lines,
     Map<String, HlsSourceQueryPolicy> sourceQueryPolicies, {
+    Map<String, HlsVariantSelector> sourceVariantSelectors = const {},
     Object? appliedQualityData,
     bool qualityUnconfirmed = false,
     LivePlayQuality? appliedQuality,
@@ -162,6 +172,7 @@ final class LivePlayUrlResolution {
     return LivePlayUrlResolution._(
       lines: normalized,
       sourceQueryPolicies: Map<String, HlsSourceQueryPolicy>.unmodifiable(policies),
+      sourceVariantSelectors: _checkedSelectors(normalized, sourceVariantSelectors),
       appliedQualityData: appliedQualityData,
       qualityUnconfirmed: qualityUnconfirmed,
       appliedQuality: appliedQuality,
@@ -180,6 +191,25 @@ final class LivePlayUrlResolution {
 
   /// HLS query policies by exact URL.
   final Map<String, HlsSourceQueryPolicy> sourceQueryPolicies;
+
+  /// The variant each HLS line's master is restricted to, by exact URL
+  /// (G01.4: a Steam quality named after one variant); a line without one
+  /// plays its whole master. Copying the URL (copy, cast) ignores them.
+  final Map<String, HlsVariantSelector> sourceVariantSelectors;
+
+  /// [selectors] when every key is one of [lines]' URLs, else
+  /// [FormatException].
+  static Map<String, HlsVariantSelector> _checkedSelectors(
+    List<LivePlayLine> lines,
+    Map<String, HlsVariantSelector> selectors,
+  ) {
+    if (selectors.isEmpty) return const {};
+    final urls = {for (final line in lines) line.url};
+    if (!selectors.keys.every(urls.contains)) {
+      throw const FormatException('Variant selector does not match resolved URLs');
+    }
+    return Map<String, HlsVariantSelector>.unmodifiable(selectors);
+  }
 
   /// The adapter expected a confirmation but the answer had none.
   final bool qualityUnconfirmed;
@@ -211,6 +241,7 @@ final class LivePlayUrlResolution {
       : LivePlayUrlResolution._validated(
           lines,
           sourceQueryPolicies,
+          sourceVariantSelectors: sourceVariantSelectors,
           appliedQualityData: appliedQualityData,
           qualityUnconfirmed: qualityUnconfirmed,
           appliedQuality: appliedQuality,

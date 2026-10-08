@@ -108,12 +108,16 @@ final class MediaOpener {
   ///
   /// With [renew], a line whose lease cuts the connection is relayed and
   /// renewed in place; [onRenewed] receives each renewed line. [queryPolicy]
-  /// is the resolution's policy for the line ([PlaybackPlan.queryPolicyFor]).
+  /// is the resolution's policy for the line ([PlaybackPlan.queryPolicyFor]);
+  /// [variantSelector] its selector ([PlaybackPlan.variantSelectorFor]): the
+  /// relay serves every copy of the line's master restricted to that variant
+  /// and its audio, and a copy without it fails (G01.4).
   Future<MediaInput> open(
     PlaybackSource source, {
     required String site,
     LineRenewer? renew,
     HlsSourceQueryPolicy? queryPolicy,
+    HlsVariantSelector? variantSelector,
     void Function(LivePlayLine line)? onRenewed,
     void Function(SpliceEvent event)? onEvent,
     bool onDemand = false,
@@ -123,7 +127,13 @@ final class MediaOpener {
     if (cancel?.isCancelled ?? false) throw TransportFailure(site, TransportReason.cancelled);
     switch (source) {
       case LineSource(:final line):
-        final route = MediaRoute.of(line, engine: engine, canRenew: renew != null, queryPolicy: queryPolicy);
+        final route = MediaRoute.of(
+          line,
+          engine: engine,
+          canRenew: renew != null,
+          queryPolicy: queryPolicy,
+          variantSelector: variantSelector,
+        );
         switch (route) {
           case MediaRoute.direct || MediaRoute.owned:
             final url = Uri.parse(line.url);
@@ -147,7 +157,12 @@ final class MediaOpener {
             final input = relay.openHls(
               line,
               site: site,
-              recipe: HlsRelayRecipe(queryPolicy: queryPolicy),
+              recipe: HlsRelayRecipe(
+                queryPolicy: queryPolicy,
+                master: variantSelector == null
+                    ? null
+                    : (source, text) => variantSelector.selectIn(text, source: source).rewrite(source, text),
+              ),
               renew: (line.lease?.cutsConnection ?? false) && renew != null
                   ? (current) async {
                       final next = await renew(current);

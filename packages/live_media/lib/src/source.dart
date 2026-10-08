@@ -95,8 +95,9 @@ enum MediaRoute {
   flvRewrite,
 
   /// HLS the engine cannot fetch by itself: token propagation (a query
-  /// policy) or a lease that cuts the connection with a renewer (CHZZK,
-  /// PandaTV).
+  /// policy), a lease that cuts the connection with a renewer (CHZZK,
+  /// PandaTV), or a master to restrict to one variant (a variant selector,
+  /// Steam, G01.4).
   hlsRelay,
 
   /// A recipe: the relay serves the consumer's own grant (Bigo, FC2,
@@ -107,12 +108,14 @@ enum MediaRoute {
   direct;
 
   /// The route of [line] on [engine]. Splicing and HLS renewal need
-  /// [canRenew]; [queryPolicy] is the resolution's policy for the line.
+  /// [canRenew]; [queryPolicy] and [variantSelector] are the resolution's
+  /// policy and selector for the line.
   static MediaRoute of(
     LivePlayLine line, {
     required EngineProfile engine,
     required bool canRenew,
     HlsSourceQueryPolicy? queryPolicy,
+    HlsVariantSelector? variantSelector,
   }) {
     final cuts = line.lease?.cutsConnection ?? false;
     final format = line.format ?? _formatOf(line.url);
@@ -121,7 +124,9 @@ enum MediaRoute {
       if (engine.rewriteLegacyHevcFlv && engine.mayCarryLegacyHevc(line)) return flvRewrite;
       return direct;
     }
-    if (format == StreamFormat.hls && (queryPolicy != null || (canRenew && cuts))) return hlsRelay;
+    if (format == StreamFormat.hls && (queryPolicy != null || variantSelector != null || (canRenew && cuts))) {
+      return hlsRelay;
+    }
     return direct;
   }
 
@@ -141,6 +146,7 @@ final class PlaybackPlan {
   new({
     required List<PlaybackSource> sources,
     this.queryPolicies = const {},
+    this.variantSelectors = const {},
     this.appliedQualityData,
     this.onDemand = false,
     this.start,
@@ -170,6 +176,7 @@ final class PlaybackPlan {
     return PlaybackPlan(
       sources: [for (final line in ordered) LineSource(line)],
       queryPolicies: resolution.sourceQueryPolicies,
+      variantSelectors: resolution.sourceVariantSelectors,
       appliedQualityData: resolution.appliedQualityData,
       onDemand: onDemand,
       start: start,
@@ -181,6 +188,9 @@ final class PlaybackPlan {
 
   /// HLS query policies by exact URL.
   final Map<String, HlsSourceQueryPolicy> queryPolicies;
+
+  /// HLS variant selectors by exact URL (G01.4).
+  final Map<String, HlsVariantSelector> variantSelectors;
 
   /// The quality the platform applied, when it said.
   final Object? appliedQualityData;
@@ -203,6 +213,13 @@ final class PlaybackPlan {
   /// The query policy of [source], if any.
   HlsSourceQueryPolicy? queryPolicyFor(PlaybackSource source) => switch (source) {
     LineSource(:final line) => queryPolicies[line.url],
+    RecipeSource() => null,
+  };
+
+  /// The variant selector of [source], if any: its master plays restricted
+  /// to that variant (G01.4).
+  HlsVariantSelector? variantSelectorFor(PlaybackSource source) => switch (source) {
+    LineSource(:final line) => variantSelectors[line.url],
     RecipeSource() => null,
   };
 }

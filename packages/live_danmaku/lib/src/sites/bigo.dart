@@ -101,10 +101,10 @@ abstract final class BigoDanmakuProtocol {
   /// Where the page gets its visitor account.
   static final Uri linkUrl = Uri.https('ta.bigo.tv', '/official_website/studio/getWebSocketLink');
 
-  /// Handshake headers: the website's origin and the adapter's user agent
-  /// (`BigoApi.headers`). The server also accepts a handshake without an
+  /// Handshake headers: the website's origin and the adapter's browser user
+  /// agent (`BigoApi.userAgent`, E03.19). The server also accepts a handshake without an
   /// origin (checked 2026-09-30).
-  static const Map<String, String> socketHeaders = {'origin': BigoApi.webOrigin, 'user-agent': 'Mozilla/5.0'};
+  static const Map<String, String> socketHeaders = {'origin': BigoApi.webOrigin, 'user-agent': BigoApi.userAgent};
 
   /// Ping period (the page's `setInterval(doPing, 1e4)`).
   static const Duration heartbeatInterval = Duration(seconds: 10);

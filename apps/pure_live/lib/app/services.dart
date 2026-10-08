@@ -92,10 +92,14 @@ final class AppServices {
   /// The recorder (M8); null where this build has no FFmpeg.
   Recorder? get recorder => recording?.recorder;
 
-  /// Releases recording, the store and the HTTP client.
+  /// Releases recording, the store and the HTTP client, and the FC2
+  /// controls still waiting for playback (E06.2 c6).
   Future<void> close() async {
     await recording?.dispose();
     await mediaOpener.close();
+    if (sites.maybeOf(SiteIds.fc2Live) case final Fc2LiveSite fc2) {
+      await Fc2ControlPool.of(fc2).close();
+    }
     http.close();
     await store.close();
   }

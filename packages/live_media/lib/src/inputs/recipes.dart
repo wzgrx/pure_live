@@ -86,27 +86,98 @@ final class BigoRecipeOpener implements RecipeOpener {
   }
 }
 
-/// FC2 (3.x's `Fc2PlaybackInput`): a control of its own, held while the
-/// playlist is played ([Fc2LiveSite.openControl]); the input stops being
-/// usable when the control ends. A control already opened (the quality
-/// probe's, notes "FC2 control sharing") can be handed over with [adopt].
+/// The FC2 controls a platform's quality probes handed over
+/// ([Fc2LiveSite.probeControl]; UPGRADES 26-2, E06.2 c6), one per channel: an
+/// open of that channel takes it ([take]) instead of taking a second grant
+/// and socket. A control nobody takes is closed after [unclaimedLifetime]
+/// (a room left or switched before it played, a toolbox lookup), so a
+/// probe never leaves a control seat behind for long; a newer control of
+/// the same channel replaces it at once.
+final class Fc2ControlPool {
+  /// Creates an empty pool; [timer] is injectable for tests.
+  new({this.unclaimedLifetime = const Duration(seconds: 20), Timer Function(Duration, void Function())? timer})
+    : _timer = timer ?? Timer.new;
+
+  /// The pool of [site]'s probes, made on first use: what the app's
+  /// `probeControl` of [site] fills and every [Fc2RecipeOpener] of [site]
+  /// (playback, recording) takes from.
+  factory of(Fc2LiveSite site) => _pools[site] ??= Fc2ControlPool();
+
+  static final Expando<Fc2ControlPool> _pools = Expando('FC2 control pools');
+
+  /// How long a control waits for an open of its channel.
+  final Duration unclaimedLifetime;
+
+  final Timer Function(Duration, void Function()) _timer;
+  final Map<String, ({Fc2LiveControl control, Timer expiry})> _held = {};
+
+  /// Controls waiting (tests).
+  int get length => _held.length;
+
+  /// Keeps [control] for the next open of its channel; the pool owns it
+  /// until then. Any quality plays from it: the probe opened it for `auto`,
+  /// and its playlists hold every tier ([Fc2LiveApi.playlistFor]).
+  void adopt(Fc2LiveControl control) {
+    final channel = control.channelId;
+    final previous = _held.remove(channel);
+    previous?.expiry.cancel();
+    if (previous != null && !identical(previous.control, control)) unawaited(previous.control.close());
+    if (control.isClosed) return;
+    late final Timer expiry;
+    expiry = _timer(unclaimedLifetime, () {
+      if (!identical(_held[channel]?.expiry, expiry)) return;
+      _held.remove(channel);
+      unawaited(control.close());
+    });
+    _held[channel] = (control: control, expiry: expiry);
+    // A control that ends while it waits (the grant expired, the socket
+    // dropped) leaves at once.
+    unawaited(
+      control.done.then((_) {
+        if (!identical(_held[channel]?.control, control)) return;
+        _held.remove(channel)?.expiry.cancel();
+      }),
+    );
+  }
+
+  /// The control kept for [channelId], now the caller's; null when there
+  /// is none or it has ended meanwhile.
+  Fc2LiveControl? take(String channelId) {
+    final held = _held.remove(channelId);
+    if (held == null) return null;
+    held.expiry.cancel();
+    return held.control.isClosed ? null : held.control;
+  }
+
+  /// Closes every control kept.
+  Future<void> close() async {
+    final held = _held.values.toList();
+    _held.clear();
+    for (final entry in held) {
+      entry.expiry.cancel();
+    }
+    await Future.wait([for (final entry in held) entry.control.close()]);
+  }
+}
+
+/// FC2 (3.x's `Fc2PlaybackInput`): a control held while the playlist is
+/// played; the input stops being usable when the control ends. The
+/// control is the one the quality probe handed to [pool] for the channel
+/// when there is one (notes "FC2 control sharing"), else a control of its
+/// own ([Fc2LiveSite.openControl]).
 final class Fc2RecipeOpener implements RecipeOpener {
-  /// Creates the opener.
-  new(this.site);
+  /// Creates the opener; [pool] defaults to [site]'s ([Fc2ControlPool.of]).
+  new(this.site, {Fc2ControlPool? pool}) : pool = pool ?? Fc2ControlPool.of(site);
 
   /// The platform adapter.
   final Fc2LiveSite site;
 
-  final Map<String, Fc2LiveControl> _adopted = {};
+  /// Where the probes' controls wait for an open of their channel.
+  final Fc2ControlPool pool;
 
-  /// Lets the next open of [control]'s channel and quality use it instead of
-  /// opening another; the opener then owns it.
-  void adopt(Fc2LiveControl control) {
-    final key = '${control.channelId}:${control.requestedQuality}';
-    final previous = _adopted[key];
-    _adopted[key] = control;
-    if (previous != null && !identical(previous, control)) unawaited(previous.close());
-  }
+  /// Lets the next open of [control]'s channel use it, whatever the quality
+  /// ([Fc2ControlPool.adopt]).
+  void adopt(Fc2LiveControl control) => pool.adopt(control);
 
   @override
   bool handles(LiveInputRecipe recipe) => recipe is Fc2LiveInputRecipe;
@@ -114,17 +185,18 @@ final class Fc2RecipeOpener implements RecipeOpener {
   @override
   Future<OwnedInput> open(LiveInputRecipe recipe, LoopbackRelay relay, {CancelToken? cancel}) async {
     final fc2 = recipe as Fc2LiveInputRecipe;
-    final adopted = _adopted.remove('${fc2.channelId}:${fc2.quality}');
-    final control = adopted != null && !adopted.isClosed
-        ? adopted
-        : await site.openControl(fc2.channelId, cancel: cancel, quality: fc2.quality);
+    final control =
+        pool.take(fc2.channelId) ?? await site.openControl(fc2.channelId, cancel: cancel, quality: fc2.quality);
     try {
       _checkCancelled(site.id, cancel);
+      // A probe's control is `auto`: the recipe's tier is read from its
+      // playlists (the same answer as a control opened for that tier).
+      final playlist = Fc2LiveApi.playlistFor(control.playlists, fc2.quality)?.url ?? control.playlist;
       final line = LivePlayLine(
-        control.playlist.toString(),
+        playlist.toString(),
         headers: control.mediaHeaders,
         format: StreamFormat.hls,
-        lineId: control.playlist.host,
+        lineId: playlist.host,
       );
       return _Owned(
         relay.openHls(line, site: site.id),

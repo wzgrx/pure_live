@@ -287,6 +287,23 @@ void main() {
   });
 
   group('P9 qualities', () {
+    test('a live room the platform says has no stream is skipped, not failed (Douyu streamStatus 0, E01.7)', () async {
+      final site = _healthy()..qualityErrors['2'] = const StreamUnavailable('bilibili', 'no stream pushed');
+      final run = await patrolOf(site, _target).run();
+      final p9 = resultOf(run, CheckId.p9);
+      expect(p9.outcome, Outcome.ok, reason: p9.note);
+      expect(p9.note, contains('2 没有流'));
+      expect(resultOf(run, CheckId.p10).outcome, Outcome.ok);
+    });
+
+    test('when no live room has a stream, P9 is not run rather than failed', () async {
+      final site = _healthy()
+        ..qualityErrors.addAll({
+          for (final id in ['1', '2', '3']) id: const StreamUnavailable('bilibili', 'none'),
+        });
+      expect(resultOf(await patrolOf(site, _target).run(), CheckId.p9).outcome, Outcome.notRun);
+    });
+
     test('repeated names fail', () async {
       final site = _healthy()..qualities['1'] = [_quality, const LivePlayQuality(quality: '原画', id: 1)];
       expect(resultOf(await patrolOf(site, _target).run(), CheckId.p9).note, contains('名字重复'));

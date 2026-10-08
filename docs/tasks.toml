@@ -2101,6 +2101,17 @@ next = "第 2 轮 2026-10-22：patrol bilibili douyu huya douyin kuaishou --danm
 note = "持续任务：第 1 轮 2026-10-08 做完，本轮无失效（斗鱼一个房间断流是平台状态，候选见 record.md）"
 
 [[task]]
+id = "E01.7"
+title = "斗鱼在播但没有流：streamStatus 为 0 时报“没有画面”，不再交给播放器 404 地址"
+type = "平台"
+status = "待真机"
+size = "小"
+tier = 2
+date = "2026-10-08"
+from = "E01.6 第 1 轮巡检（2026-10-08）"
+note = "getH5PlayV1 元数据 streamStatus 0 是 StreamUnavailable（douyu_api.dart qualities）；当天 14 个 0 全 404、约 60 个 1 全 200；只看元数据，单档回答不判（S09-24422-r2）。巡检 P9 把没有流的房间记跳过。K90 进一个这样的房间看提示"
+
+[[task]]
 id = "E02.1"
 title = "YY 直播"
 type = "平台"

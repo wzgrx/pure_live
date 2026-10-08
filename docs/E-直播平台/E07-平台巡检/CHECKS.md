@@ -1,6 +1,6 @@
 # 平台巡检：检查项和对象表
 
-- 更新：2026-10-08（E07.1 第 1 阶段定稿，E01.6 第一轮补全五大平台；E02.14 小红书的推荐改成“不支持”；E03.18 P1 的最后一页）
+- 更新：2026-10-08（E07.1 第 1 阶段定稿，E01.6 第一轮补全五大平台；E02.14 小红书的推荐改成“不支持”；E03.18 P1 的最后一页；E01.7 P9 没有流的房间）
 - 代码里的同一份表：`tools/live_cli/lib/src/patrol/targets.dart`（改了这里就改那里，反过来也一样）；检查的做法：`tools/live_cli/lib/src/patrol/checks.dart`。
 - 跑法：`dart run tools/live_cli/bin/live_cli.dart patrol <平台…> | --domestic | --overseas | --all [--proxy host:port] [--danmaku 秒] [--out 报告.md] [--json 结果.json]`。退出码：全部正常或不支持 0，有失败 1，参数错 64。
 - 只在人手动运行时联网，永远不进门禁和自动测试（D-017）；只读、匿名（空的 Cookie）、不发言；每条线路只读开头 64 KB。
@@ -28,7 +28,7 @@
 | P6 | 在播详情 | 从 P1、P3、P4 的结果里按顺序挑在播的，最多试 6 个，拿到 3 个在播为止，`getRoomDetail` | 至少 1 个在播；在播的标题、主播名非空（和直播间一样，详情缺的先用进房前的卡片补：`LiveRoom.fillFromDetail`，快手房间页本来没有标题，A-3）；有开播时间的不晚于现在（容差 2 分钟）；对象表要求分区的平台（抖音）先挑 P3 分区里的房间，详情本身的分区要非空（非游戏房间本来没有分区）。挑中时已经下播的、受限的（`restriction` 不是 none：要登录、付费、会员）写“跳过”，不算失败 |
 | P7 | 未开播详情 | 对象表的固定房间 | 状态是 offline、replay、carousel 之一，不抛错（标了“任意状态”的只要求不抛错）；这次正好在播的写“没测到” |
 | P8 | 不存在的房间 | 对象表的房间号 | 抛 `NotFound`；抛别的错写“失败：错误类型不对”，不抛错也失败 |
-| P9 | 清晰度 | P6 的在播房间 `discoverPlayQualities` | 非空；名字非空、不重复 |
+| P9 | 清晰度 | P6 的在播房间 `discoverPlayQualities` | 非空；名字非空、不重复。平台说在播房间没有流（`StreamUnavailable`，例如斗鱼的 `streamStatus: 0`，E01.7）的写“没有流，跳过”，不算失败；都没有流时写“没测到” |
 | P10 | 线路 | 每个房间第一档 `resolvePlayUrls`；每条线路带它的 `headers` 读前 64 KB | 有线路；HTTP 2xx；开头字节和 `format` 对得上（`flv` → `FLV`，`hls` → `#EXTM3U`，`other` 或没写时按路径，任何媒体容器都行：TS 0x47、fMP4 `ftyp`/`styp`、DASH `<MPD`）。一个房间不通的线路超过一半或全部不通算失败，少数不通写进说明。会话型（`inputRecipe` 不为空：niconico、FC2、BIGO）记“配方，未打开”算正常。平台把请求的档降下来时写“实际给 X” |
 | P11 | 租期 | P10 线路的 `lease` | 有租期的：`refreshAt` 在现在之后、`expiresAt`（有的话）不早于 `refreshAt`；写出最短剩余分钟。都没有租期写“线路没有租期”，算正常 |
 | P12 | 链接 | P6 第一个房间的 `link`、对象表的房间页地址（按房间号拼）、对象表的固定链接，经 `LinkParser`（只登记本平台，要请求的链接照样请求） | 认出同一个房间号（`SiteIds.ignoresRoomIdCase` 的平台不分大小写）；链接用另一种写法指向房间时（SHOWROOM 的 url key、YouTube 频道的直播视频），再查一次详情，是同一个房间也算正常；固定链接认出写明的房间 |

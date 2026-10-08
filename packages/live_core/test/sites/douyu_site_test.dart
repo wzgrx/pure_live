@@ -340,6 +340,25 @@ void main() {
       expect(play.headers['content-type'], startsWith('application/x-www-form-urlencoded'));
     });
 
+    test('E01.7: metadata with streamStatus 0 (a live room without a pushed stream) is StreamUnavailable '
+        'when listing qualities and when recovering; no CDN is asked', () async {
+      final noStream = Fixture.load('douyu', 'S08-meta-9263298-nostream').body;
+      final answer = _synthetic('https://www.douyu.com$_play', noStream, method: 'POST');
+      final setup = _setup(
+        ['S06-encryption'],
+        script: {
+          _play: [answer, answer],
+        },
+      );
+      await expectLater(setup.site.getPlayQualities(detail: _room('24422')), throwsA(isA<StreamUnavailable>()));
+      final quality = LivePlayQuality(quality: '原画', id: 0, data: DouyuPlayData(0, const ['hw-h5']));
+      await expectLater(
+        setup.site.resolvePlayUrlsForRecovery(detail: _room('24422'), quality: quality),
+        throwsA(isA<StreamUnavailable>()),
+      );
+      expect(_paths(setup.http).where((path) => path == _play), hasLength(2), reason: 'one metadata request each');
+    });
+
     test('the account cookie device id signs every request; LTP0 is never sent to them (REG-DOUYU-004)', () async {
       final vault = MemoryCookieVault()..set('douyu', 'dy_did=abc123; acf_auth=t; LTP0=secret');
       addTearDown(vault.dispose);

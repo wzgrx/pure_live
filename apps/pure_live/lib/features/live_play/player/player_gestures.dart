@@ -89,6 +89,10 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
   /// A drag in the middle third moves between rooms (U.2b2).
   bool _switching = false;
 
+  /// Where the finger went down, down the screen (A07.15): the drag starts
+  /// only after the finger has moved, by then out of the system's edge.
+  double? _downY;
+
   bool get _systemVolume => DeviceControls.available;
 
   @override
@@ -149,6 +153,17 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
       _restoring = 0;
       return;
     }
+    // A07.15: going home (or pulling down the status bar) from the screen's
+    // edge changes nothing. Global, since the picture need not fill the
+    // screen; the portrait fullscreen's restore above goes first.
+    final edges = MediaQuery.systemGestureInsetsOf(context);
+    if (inSystemGestureArea(
+      globalY: _downY ?? details.globalPosition.dy,
+      screenHeight: MediaQuery.sizeOf(context).height,
+      insets: (top: edges.top, bottom: edges.bottom),
+    )) {
+      return;
+    }
     final swipe = widget.swipe;
     final drag = pictureDragAt(x: details.localPosition.dx, width: size.width, switchRooms: swipe != null);
     if (drag == PictureDrag.switchRoom) {
@@ -206,6 +221,7 @@ class PlayerGestureLayerState extends State<PlayerGestureLayer> {
     if (widget.enabled && (mobile || widget.onSwipeUp != null || widget.swipe != null)) {
       content = GestureDetector(
         behavior: HitTestBehavior.translucent,
+        onVerticalDragDown: (details) => _downY = details.globalPosition.dy,
         onVerticalDragStart: _onDragStart,
         onVerticalDragUpdate: _onDragUpdate,
         onVerticalDragEnd: _onDragEnd,

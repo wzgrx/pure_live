@@ -697,6 +697,22 @@ void main() {
       await _close(tester, room);
     });
 
+    testWidgets("A07.15 c2: an upward swipe from the system's gesture area still restores the panel", (tester) async {
+      final room = await _pump(tester, portrait: true);
+      await _tap(tester, 'live-play-fullscreen');
+      tester.view.systemGestureInsets = const FakeViewPadding(bottom: 32);
+      addTearDown(tester.view.resetSystemGestureInsets);
+      // The controls hide after 4 s: the swipe lands on the picture.
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump();
+      expect(_key('live-play-portrait-panel'), findsNothing);
+      await tester.dragFrom(const Offset(196, 852 - 10), const Offset(0, -120));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(_key('live-play-portrait-panel'), findsOneWidget);
+      await _close(tester, room);
+    });
+
     testWidgets('B09 c3: 360 wide, a split screen, the largest display size: no overflow; the rows scroll', (
       tester,
     ) async {

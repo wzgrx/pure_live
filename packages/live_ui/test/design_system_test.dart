@@ -154,7 +154,7 @@ void main() {
       (AppIcons.cellPlay, Remix.play_line),
       (AppIcons.cellPause, Remix.pause_line),
       (AppIcons.cellRefresh, Remix.refresh_line),
-      (AppIcons.changeRoom, Remix.tv_2_line),
+      (AppIcons.changeRoom, Icons.swap_horiz_outlined),
       (AppIcons.closeCell, Remix.close_circle_line),
       (AppIcons.cellVolume, Remix.volume_down_line),
       (AppIcons.audioFocus, Remix.volume_up_line),
@@ -168,7 +168,7 @@ void main() {
       (AppIcons.importGuide, Remix.file_add_line),
       (AppIcons.playlist, Remix.play_list_2_line),
       (AppIcons.playlistAdd, Remix.play_list_add_line),
-      (AppIcons.guide, Remix.tv_2_line),
+      (AppIcons.guide, Icons.assignment_outlined),
       (AppIcons.networkSource, Remix.global_line),
       (AppIcons.localSource, Remix.folder_2_line),
       (AppIcons.localPlaylistFile, Remix.folder_open_line),
@@ -186,7 +186,7 @@ void main() {
       (AppIcons.qrCode, Remix.qr_code_line),
       (AppIcons.qrScanned, Remix.checkbox_circle_line),
       (AppIcons.failed, Remix.error_warning_line),
-      (AppIcons.webDav, Remix.cloud_line),
+      (AppIcons.webDav, Remix.upload_cloud_2_line),
       (AppIcons.deviceSync, Remix.qr_scan_2_line),
       (AppIcons.platformAccounts, Remix.account_box_line), // A01.4 c4
       // U.13: the title bar keeps 3.x's glyphs; a maximized window shows

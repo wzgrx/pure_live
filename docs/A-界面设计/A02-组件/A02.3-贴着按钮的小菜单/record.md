@@ -91,3 +91,8 @@
 
 - `packages/live_ui/lib/src/widgets/app_menu.dart`、`stream_menu_button.dart`、新文件 `anchored_menu.dart`：A02.2（弹窗组件，依赖 A02.3）、A02.1、A07.12（直播间子弹窗，依赖 A02.3）会改到小菜单，应在本任务合并后再开。
 - `apps/pure_live/test/features/live_play/live_play_popups_test.dart`：只加了几行断言，A07.12 等改直播间弹窗的任务可能同时改这个测试文件。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 第 4 条：竖屏信息行点清晰度“FLV ⌄”（映客），菜单在按钮下方、从上往下展开、贴着按钮 ✓（映客复查时的截图）。
+- 横屏全屏的第 1～3 条还没看成：横屏时不能读控件树（会锁旋转），按坐标点按钮要等控制层自动隐藏后再点，这次被红薯助手会话打断。

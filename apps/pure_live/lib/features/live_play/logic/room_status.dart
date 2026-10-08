@@ -3,6 +3,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// What the picture shows when it is not simply playing (docs/A-界面设计/A07-直播间界面/A07.7-直播间的状态:
@@ -90,6 +91,10 @@ enum PictureAction {
 
   /// Plays the replay from the start (7).
   playAgain,
+
+  /// Plays the platform's carousel video from where the loop is (E06.2
+  /// c1, UPGRADES 1-1).
+  playCarousel,
 }
 
 /// What lies under a picture state.
@@ -302,7 +307,11 @@ PictureState _offline(LiveRoom room) => switch (room.effectiveLiveStatus) {
     kind: PictureStateKind.carousel,
     title: i18n('live_play_carousel'),
     reason: i18n('live_play_offline_hint'),
-    actions: const [PictureAction.switchRoom, PictureAction.refresh],
+    // E06.2 G1 A: a carousel the app can play offers it first; the periodic
+    // refresh still starts the broadcast when the streamer comes on air.
+    actions: carouselPlayable(room)
+        ? const [PictureAction.playCarousel, PictureAction.switchRoom]
+        : const [PictureAction.switchRoom, PictureAction.refresh],
     dim: PictureDim.cover,
   ),
   LiveStatus.unknown => PictureState(

@@ -276,6 +276,80 @@ void main() {
     controller.dispose();
   });
 
+  test('a carousel room plays its video from play_time (1-1)', () async {
+    final carousel = liveRoom(status: LiveStatus.carousel);
+    await store.follows.add(carousel);
+    final site = CarouselFakeSite(carousel);
+    final controller = controllerFor(site);
+    await controller.start();
+    await settle();
+    expect(controller.stage, RoomStage.offline, reason: 'G1 A: the user starts it');
+    expect(engine.opens, isEmpty);
+
+    await controller.playCarousel();
+    await settle();
+    expect(controller.stage, RoomStage.playing, reason: '${controller.failure}');
+    expect(controller.playingCarousel, isTrue);
+    expect(controller.qualities.map((q) => q.quality), ['轮播']);
+    final first = engine.opens.single;
+    expect(first.uri.path, '/video-0.mp4');
+    expect(first.start, const Duration(seconds: 37), reason: "the loop's play_time, not the video's start");
+    expect(first.onDemand, isFalse, reason: "the video's end is no replay's end: recovery takes the next");
+    // The room is still not on air: follows keep it under 未开播.
+    expect(controller.room.isPlayableNow, isFalse);
+    expect((await store.follows.find(SiteIds.bilibili, '6'))!.isPlayableNow, isFalse);
+
+    // The video ends: the recovery asks again and plays the next from its
+    // play_time.
+    engine.emit(const EngineCompleted());
+    await settle();
+    expect(engine.opens.last.uri.path, '/video-1.mp4');
+    expect(engine.opens.last.start, const Duration(seconds: 5));
+    expect(controller.playingCarousel, isTrue);
+
+    // The streamer comes on air: the refresh plays the broadcast instead.
+    site.room = liveRoom();
+    await controller.refreshDetail();
+    await settle();
+    expect(controller.playingCarousel, isFalse);
+    expect(engine.opens.last.uri.path, endsWith('.flv'));
+    expect(engine.opens.last.start, isNull);
+    controller.dispose();
+  });
+
+  test('only a carousel the app can play has the button; a reload is offline again (1-1)', () async {
+    final site = CarouselFakeSite(liveRoom(status: LiveStatus.carousel));
+    final controller = controllerFor(site);
+    await controller.start();
+    await settle();
+    await controller.playCarousel();
+    await settle();
+    expect(controller.playingCarousel, isTrue);
+    // "刷新" (the room again) shows the carousel state, not its video.
+    await controller.load();
+    await settle();
+    expect((controller.stage, controller.playingCarousel), (RoomStage.offline, false));
+    expect(carouselPlayable(controller.room), isTrue);
+    controller.dispose();
+
+    // Another platform's carousel (none plays one yet) and a plain offline
+    // room do nothing.
+    for (final room in [
+      LiveRoom(platform: SiteIds.youtube, roomId: '6', liveStatus: LiveStatus.carousel),
+      liveRoom(status: LiveStatus.offline),
+    ]) {
+      expect(carouselPlayable(room), isFalse);
+      final other = controllerFor(CarouselFakeSite(room), room: room);
+      await other.start();
+      await settle();
+      await other.playCarousel();
+      await settle();
+      expect(other.stage, RoomStage.offline);
+      other.dispose();
+    }
+    expect(engine.opens.where((media) => media.uri.path.endsWith('.mp4')), hasLength(1));
+  });
+
   group('C01.6 danmaku of a new broadcast', () {
     /// The light refresh's answer: no danmaku arguments (SHOWROOM, Kilakila,
     /// TwitCasting, Baidu).

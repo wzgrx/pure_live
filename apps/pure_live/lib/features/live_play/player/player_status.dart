@@ -239,6 +239,12 @@ class PictureStateView extends StatelessWidget {
         icon: AppIcons.playAgain,
         onPressed: () => controller.session.seek(Duration.zero),
       ),
+      PictureAction.playCarousel => VideoStateAction(
+        key: const ValueKey('live-play-state-play-carousel'),
+        label: i18n('live_play_play_carousel'),
+        icon: AppIcons.play,
+        onPressed: controller.playCarousel,
+      ),
     };
   }
 

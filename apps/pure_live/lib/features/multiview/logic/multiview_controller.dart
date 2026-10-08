@@ -506,7 +506,29 @@ class MultiviewController extends ChangeNotifier {
       unawaited(_save());
       return;
     }
+    await _play(cell, epoch, site, room);
+  }
 
+  /// A carousel cell's "播放轮播" (E06.2 c1, as the live room's): the video
+  /// in rotation from the platform's `play_time`; the room stays offline in
+  /// the model, so follows and recording are untouched.
+  Future<void> playCarousel(int index) async {
+    if (_disposed || index < 0 || index >= _cells.length) return;
+    final cell = _cells[index];
+    final site = cell._site;
+    final room = cell._room;
+    if (cell._stage != CellStage.offline || site == null || room == null || !carouselPlayable(room)) return;
+    final epoch = ++cell._epoch;
+    cell
+      .._stage = CellStage.resolving
+      .._failure = null;
+    _notify();
+    await _play(cell, epoch, site, room);
+  }
+
+  /// The qualities of [room] and its stream in [cell], then the sound and
+  /// the danmaku.
+  Future<void> _play(MultiviewCell cell, int epoch, LiveSite site, LiveRoom room) async {
     final scope = cell._scope = LiveQualityDiscoveryScope();
     final List<LivePlayQuality> found;
     try {
@@ -644,8 +666,14 @@ class MultiviewController extends ChangeNotifier {
     }
   }
 
-  PlaybackPlan _plan(LiveRoom room, LivePlayUrlResolution resolution) =>
-      PlaybackPlan.of(resolution, preferH264: store.settings.get(Settings.preferH264), onDemand: room.isRecord);
+  /// The plan of [resolution]; a carousel video starts where the loop is
+  /// (1-1: `play_time`), also after a recovery took the next one.
+  PlaybackPlan _plan(LiveRoom room, LivePlayUrlResolution resolution) => PlaybackPlan.of(
+    resolution,
+    preferH264: store.settings.get(Settings.preferH264),
+    onDemand: room.isRecord,
+    start: resolution.start,
+  );
 
   /// Plays quality [qualityIndex] in cell [index]; the old stream plays
   /// until the new one resolves.

@@ -172,6 +172,7 @@ List<String> _buttons(WidgetTester tester) {
     'live-play-state-login',
     'live-play-state-open',
     'live-play-state-play-again',
+    'live-play-state-play-carousel',
   ];
   final found =
       [
@@ -246,6 +247,14 @@ void main() {
         room: liveRoom(status: LiveStatus.carousel),
       );
       expect((carousel.title, carousel.reason), ('主播未开播，正在轮播往期视频', '开播后会自动开始播放'));
+      // E06.2 G1 A: Bilibili's carousel plays from a button (UPGRADES 1-1);
+      // a platform whose carousel the app cannot play keeps refresh.
+      expect(carousel.actions, [PictureAction.playCarousel, PictureAction.switchRoom]);
+      final elsewhere = _state(
+        stage: RoomStage.offline,
+        room: LiveRoom(platform: SiteIds.youtube, roomId: '6', liveStatus: LiveStatus.carousel),
+      );
+      expect(elsewhere.actions, [PictureAction.switchRoom, PictureAction.refresh]);
       final unknown = _state(
         stage: RoomStage.offline,
         room: liveRoom(status: LiveStatus.unknown),
@@ -466,6 +475,34 @@ void main() {
       expect(find.byKey(const ValueKey('live-play-audience')), findsNothing);
       expect(find.text('每晚八点开播'), findsWidgets);
       expect(find.text('开播后这里显示弹幕'), findsOneWidget);
+      await _close(tester, room);
+    });
+
+    testWidgets('carousel: "播放轮播" first, then switch room; a tap plays the video (E06.2 c1)', (tester) async {
+      final site = CarouselFakeSite(liveRoom(status: LiveStatus.carousel));
+      final room = await _pump(tester, site: site);
+      expect(find.text('主播未开播，正在轮播往期视频'), findsOneWidget);
+      expect(find.text('播放轮播'), findsOneWidget);
+      expect(_buttons(tester), ['play-carousel', 'switch-room']);
+      await tester.tap(find.byKey(const ValueKey('live-play-state-play-carousel')));
+      await _settle(tester);
+      expect(site.videos, 1);
+      expect(find.text('主播未开播，正在轮播往期视频'), findsNothing);
+      expect(find.byKey(const ValueKey('live-play-pause')), findsOneWidget, reason: 'the bars of a stream that plays');
+      await _close(tester, room);
+    });
+
+    testWidgets('carousel in fullscreen: the same two buttons, the tap plays (E06.2 c1)', (tester) async {
+      final site = CarouselFakeSite(liveRoom(status: LiveStatus.carousel));
+      final room = await _pump(tester, site: site, width: 852, height: 393);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.pump();
+      expect(find.byKey(const ValueKey('live-play-back')), findsOneWidget, reason: 'fullscreen');
+      expect(_buttons(tester), ['play-carousel', 'switch-room']);
+      await tester.tap(find.byKey(const ValueKey('live-play-state-play-carousel')));
+      await _settle(tester);
+      expect(site.videos, 1);
+      expect(find.text('主播未开播，正在轮播往期视频'), findsNothing);
       await _close(tester, room);
     });
 

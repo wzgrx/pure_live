@@ -35,3 +35,14 @@ int _relativePosition(int length, String preferred) {
   final ratio = level / (names.length - 1);
   return (ratio * (length - 1)).round().clamp(0, length - 1);
 }
+
+/// The platforms whose carousel the app can play (UPGRADES 1-1: Bilibili's
+/// loop of old videos, which a guest plays from the video itself).
+const Set<String> carouselPlatforms = {SiteIds.bilibili};
+
+/// Whether [room] is a carousel the user may start (E06.2 G1 A: a
+/// "播放轮播" button, not at once). The room itself stays not playable
+/// ([LiveRoom.isPlayableNow]): follows keep it under "未开播" and recording
+/// does not record it.
+bool carouselPlayable(LiveRoom room) =>
+    room.effectiveLiveStatus == LiveStatus.carousel && carouselPlatforms.contains(room.platform);

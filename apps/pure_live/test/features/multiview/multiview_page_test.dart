@@ -15,6 +15,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 import 'package:pure_live/features/multiview/multiview_page.dart';
 import 'package:pure_live/features/multiview/widgets/cell_view.dart';
 import 'package:pure_live/features/multiview/widgets/toolbar.dart';
@@ -747,6 +748,19 @@ void main() {
     await tester.tap(_key('multiview-control-refresh'));
     await _wait(tester);
     expect(_inCell(2, find.text('播放失败')), findsNothing);
+    await _close(tester, services);
+  });
+
+  testWidgets('E06.2 c1: a carousel cell offers "播放轮播", which plays it', (tester) async {
+    final (services, site) = await _pump(tester, const Size(393, 852));
+    site.carousel.add('2');
+    await _pick(tester, '2');
+    expect(_inCell(1, find.text('主播未开播，正在轮播往期视频')), findsOneWidget);
+    expect(_inCell(1, find.text('播放轮播')), findsOneWidget);
+    await tester.tap(_inCell(1, find.text('播放轮播')));
+    await _wait(tester);
+    expect(_inCell(1, find.text('主播未开播，正在轮播往期视频')), findsNothing);
+    expect(_cellView(tester, 1).cell.stage, CellStage.playing);
     await _close(tester, services);
   });
 

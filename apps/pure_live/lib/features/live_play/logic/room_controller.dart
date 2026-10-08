@@ -185,6 +185,10 @@ class LiveRoomController extends ChangeNotifier {
   /// A refresh while playing found the room off air (C01.6): on air again
   /// is a new broadcast.
   bool _sawOffline = false;
+
+  /// The stream open is the platform's carousel video ([playCarousel]), not
+  /// a broadcast; a load forgets it.
+  bool _carousel = false;
   bool _disposed = false;
   int _maskedChats = 0;
   int _namedChats = 0;
@@ -462,6 +466,7 @@ class LiveRoomController extends ChangeNotifier {
     }
     _startWhenBack = false;
     _sawOffline = false;
+    _carousel = false;
     _stage = RoomStage.loading;
     _failure = null;
     _catchup = null;
@@ -499,6 +504,30 @@ class LiveRoomController extends ChangeNotifier {
   }
 
   bool _current(int epoch) => !_disposed && epoch == _epoch;
+
+  /// The carousel video plays ([playCarousel]): the room is still not on
+  /// air.
+  bool get playingCarousel => _carousel && _stage == RoomStage.playing;
+
+  /// The picture's "播放轮播" (E06.2 c1, UPGRADES 1-1; 3.x could not play a
+  /// carousel): a room the platform loops old videos in plays the one in
+  /// rotation from the platform's `play_time` ([LivePlayUrlResolution.start]).
+  /// The room stays offline in the model ([LiveRoom.isPlayableNow]), so
+  /// follows and recording are untouched; the video's end is no replay's
+  /// end (`onDemand` stays false): recovery asks again and gets the next
+  /// video. A refresh that finds the broadcast on air loads it instead.
+  Future<void> playCarousel() async {
+    if (_disposed || _stage != RoomStage.offline || !carouselPlayable(_room)) return;
+    final epoch = ++_epoch;
+    _startup = null;
+    _carousel = true;
+    // As a room entry: "正在进入直播间…" while the qualities and the video
+    // are fetched.
+    _stage = RoomStage.loading;
+    _failure = null;
+    _notify();
+    await _startStream(epoch);
+  }
 
   Future<void> _stopStream() async {
     _qualityScope.cancel();
@@ -634,10 +663,13 @@ class LiveRoomController extends ChangeNotifier {
     return _current(epoch);
   }
 
+  /// The plan of [resolution]; a carousel video starts where the platform's
+  /// loop is (1-1: `play_time`), also after a recovery took the next one.
   PlaybackPlan _plan(LivePlayUrlResolution resolution) => PlaybackPlan.of(
     site.id == SiteIds.iptv ? _withIptvHeaders(resolution) : resolution,
     preferH264: store.settings.get(Settings.preferH264),
     onDemand: _room.isRecord,
+    start: resolution.start,
   );
 
   /// IPTV lines with the user's agent (`customIptvUserAgent`) under the
@@ -899,10 +931,12 @@ class LiveRoomController extends ChangeNotifier {
     final playing = _stage == RoomStage.playing;
     // A room that came on air starts playing (U.2g c8); a failed stream of a
     // broadcast that ended is reloaded. A room on air whose stream is
-    // withheld keeps its danmaku; it is tried again by "重试".
+    // withheld keeps its danmaku; it is tried again by "重试". A carousel
+    // video gives way to the broadcast when the streamer comes on air.
     final reload =
         (!playing && _stage != RoomStage.unplayable && fetched.isPlayableNow) ||
-        (playing && !fetched.isPlayableNow && session.state.status == PlaybackStatus.error);
+        (playing && !fetched.isPlayableNow && session.state.status == PlaybackStatus.error) ||
+        (playing && _carousel && fetched.isPlayableNow);
     if (reload && (mayAutoStart?.call() ?? true)) {
       await load();
       return;

@@ -5,6 +5,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// One cell on screen (3.x `_MultiviewCellView`, docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c6–c8):
@@ -22,6 +23,7 @@ class MultiviewCellView extends StatelessWidget {
     required this.onTap,
     required this.onLongPress,
     required this.onRetry,
+    this.onPlayCarousel,
     this.saver = false,
     this.showVideo = true,
     this.keepScreenOn = true,
@@ -55,6 +57,9 @@ class MultiviewCellView extends StatelessWidget {
 
   /// Plays the cell again after a failure.
   final VoidCallback onRetry;
+
+  /// Plays a carousel cell's video (E06.2 c1); null offers no button.
+  final VoidCallback? onPlayCarousel;
 
   /// False while the page closes (the video leaves the tree first).
   final bool showVideo;
@@ -110,7 +115,14 @@ class MultiviewCellView extends StatelessWidget {
                       ),
                     ),
                   ] else
-                    _Placeholder(cell: cell, pickTarget: pickTarget, small: small, accent: accent, onRetry: onRetry),
+                    _Placeholder(
+                      cell: cell,
+                      pickTarget: pickTarget,
+                      small: small,
+                      accent: accent,
+                      onRetry: onRetry,
+                      onPlayCarousel: onPlayCarousel,
+                    ),
                   Positioned(
                     top: 6,
                     left: 6 + nameInset,
@@ -266,6 +278,7 @@ class _Placeholder extends StatelessWidget {
     required this.small,
     required this.accent,
     required this.onRetry,
+    this.onPlayCarousel,
   });
 
   final MultiviewCell cell;
@@ -273,6 +286,7 @@ class _Placeholder extends StatelessWidget {
   final bool small;
   final Color accent;
   final VoidCallback onRetry;
+  final VoidCallback? onPlayCarousel;
 
   @override
   Widget build(BuildContext context) {
@@ -349,6 +363,13 @@ class _Placeholder extends StatelessWidget {
           style: title,
         ),
         if (!small) Text(i18n('multiview_room_offline_hint'), textAlign: TextAlign.center, style: muted),
+        if (!small && onPlayCarousel != null && room != null && carouselPlayable(room))
+          _RetryButton(
+            key: ValueKey('multiview-play-carousel-${cell.id}'),
+            label: 'live_play_play_carousel',
+            icon: AppIcons.play,
+            onPressed: onPlayCarousel!,
+          ),
       ],
       CellStage.failed => [
         const Icon(AppIcons.cellFailed, size: 26, color: OnVideoColors.error),
@@ -380,11 +401,16 @@ class _Placeholder extends StatelessWidget {
   }
 }
 
-/// "重试" on a failed cell.
+/// "重试" on a failed cell; "播放轮播" on a carousel (E06.2 c1).
 class _RetryButton extends StatelessWidget {
-  const new({required this.onPressed, super.key});
+  const new({required this.onPressed, this.label = 'retry', this.icon = AppIcons.cellRefresh, super.key});
 
   final VoidCallback onPressed;
+
+  /// The text key of the words.
+  final String label;
+
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -397,8 +423,8 @@ class _RetryButton extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.padded,
       ),
       onPressed: onPressed,
-      icon: const Icon(AppIcons.cellRefresh, size: 16),
-      label: Text(i18n('retry')),
+      icon: Icon(icon, size: 16),
+      label: Text(i18n(label)),
     ),
   );
 }

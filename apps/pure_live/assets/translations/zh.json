@@ -871,6 +871,7 @@
     "live_play_picture": "直播画面",
     "live_play_picture_tap_hint": "显示或隐藏控制按钮",
     "live_play_play": "播放",
+    "live_play_play_carousel": "播放轮播",
     "live_play_reconnecting": "正在重连（第 {count} 次）",
     "live_play_record_failed": "录制操作失败，请重试",
     "live_play_refresh_room": "刷新直播间",

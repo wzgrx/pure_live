@@ -872,6 +872,7 @@
     "live_play_picture": "Stream picture",
     "live_play_picture_tap_hint": "show or hide the controls",
     "live_play_play": "Play",
+    "live_play_play_carousel": "Play the rerun",
     "live_play_reconnecting": "Reconnecting (attempt {count})",
     "live_play_record_failed": "The recording action failed, please try again",
     "live_play_refresh_room": "Refresh room",

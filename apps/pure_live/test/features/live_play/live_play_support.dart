@@ -93,6 +93,41 @@ class DowngradingSite extends FakeSite implements LivePlayUrlResolver {
   }) async => LivePlayUrlResolution(urls: ['https://a.example/$applied.flv'], appliedQualityData: applied);
 }
 
+/// Bilibili's carousel for a guest (UPGRADES 1-1, E06.1 c6 and c11): while
+/// the room is a carousel its one quality is 轮播, and each request gives
+/// the video in rotation, an MP4 to start at its `play_time` ([starts] in
+/// turn, the last one repeated); on air it answers as a [FakeSite].
+class CarouselFakeSite extends FakeSite implements LivePlayUrlResolver {
+  /// Creates the platform.
+  new(super.room);
+
+  /// Where each video in turn starts.
+  List<Duration?> starts = const [Duration(seconds: 37), Duration(seconds: 5)];
+
+  /// Carousel videos given so far.
+  int videos = 0;
+
+  @override
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
+      detail.effectiveLiveStatus == LiveStatus.carousel ? const [BilibiliApi.carouselQuality] : qualities;
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({required LiveRoom detail, required LivePlayQuality quality}) async {
+    if (quality.data != BilibiliApi.carouselQualityId) {
+      return LivePlayUrlResolution(
+        urls: await getPlayUrls(detail: detail, quality: quality),
+        appliedQualityData: quality.selectionId,
+      );
+    }
+    final video = videos++;
+    return LivePlayUrlResolution.lines(
+      [LivePlayLine('https://upos.example/video-$video.mp4', format: StreamFormat.other)],
+      appliedQualityData: BilibiliApi.carouselQualityId,
+      start: starts[video.clamp(0, starts.length - 1)],
+    );
+  }
+}
+
 /// A danmaku connection driven by the test.
 final class FakeDanmaku implements DanmakuConnection {
   final StreamController<DanmakuEvent> _events = StreamController.broadcast(sync: true);

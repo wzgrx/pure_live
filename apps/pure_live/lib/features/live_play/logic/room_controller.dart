@@ -181,6 +181,10 @@ class LiveRoomController extends ChangeNotifier {
   Timer? _superChatTimer;
   int _epoch = 0;
   int _danmakuEpoch = 0;
+
+  /// A refresh while playing found the room off air (C01.6): on air again
+  /// is a new broadcast.
+  bool _sawOffline = false;
   bool _disposed = false;
   int _maskedChats = 0;
   int _namedChats = 0;
@@ -304,16 +308,26 @@ class LiveRoomController extends ChangeNotifier {
   Future<void> _onLoginChanged(String platform) async {
     if (_disposed || platform != SiteIds.bilibili || _room.platform != SiteIds.bilibili) return;
     _notify();
+    await _renewDanmaku('a login change');
+  }
+
+  /// Fresh danmaku arguments from the room entry (`getRoomDetail`; most
+  /// platforms' light refresh has none), then the danmaku again: after a
+  /// login change (B06 c1), a new broadcast, or a connection that ended
+  /// (C01.6). A failed fetch reconnects with the arguments the room has.
+  Future<void> _renewDanmaku(String why) async {
     if (!_danmakuStage || !_wantsDanmaku) return;
     final epoch = _epoch;
-    try {
-      final fetched = await site.getRoomDetail(roomId: _room.roomId);
-      if (!_current(epoch)) return;
-      if (fetched.danmakuData case final Object data) _room = _room.copyWith(danmakuData: data);
-    } on Object catch (error) {
-      // The connection still renews a missing token itself.
-      developer.log('Danmaku credentials after a login change failed', name: 'LivePlay', error: error);
-      if (!_current(epoch)) return;
+    if (danmakuSupported && site.id != SiteIds.iptv) {
+      try {
+        final fetched = await site.getRoomDetail(roomId: _room.roomId);
+        if (!_current(epoch)) return;
+        if (fetched.danmakuData case final Object data) _room = _room.copyWith(danmakuData: data);
+      } on Object catch (error) {
+        // The connection still renews a missing token itself.
+        developer.log('Danmaku arguments after $why failed', name: 'LivePlay', error: error);
+        if (!_current(epoch)) return;
+      }
     }
     await _syncDanmaku(force: true);
   }
@@ -349,6 +363,12 @@ class LiveRoomController extends ChangeNotifier {
     }
     for (final setting in [Settings.enableDanmakuDisplay, Settings.enablePipDanmaku]) {
       _subscriptions.add(store.settings.watch(setting).skip(1).listen((_) => unawaited(_syncDanmaku())));
+    }
+    // YouTube's connection reads "show all chat" when it starts (C01.6).
+    if (site.id == SiteIds.youtube) {
+      _subscriptions.add(
+        store.settings.watch(Settings.youtubeShowAllChat).skip(1).listen((_) => unawaited(_syncDanmaku(force: true))),
+      );
     }
     await _reloadFilter();
     await _guard(() async {
@@ -398,6 +418,7 @@ class LiveRoomController extends ChangeNotifier {
     if (_disposed) return;
     final epoch = ++_epoch;
     _startWhenBack = false;
+    _sawOffline = false;
     _stage = RoomStage.loading;
     _failure = null;
     _catchup = null;
@@ -831,9 +852,34 @@ class LiveRoomController extends ChangeNotifier {
     }
     // Away from the app: only the state is updated; the start waits.
     if (reload) _startWhenBack = true;
+    // A new broadcast while the session went on (C01.6): its danmaku
+    // arguments may have changed, and the old connection may not end
+    // (SHOWROOM, Kilakila, TwitCasting keep it open).
+    final newBroadcast = playing && !reload && _isNewBroadcast(fetched);
+    if (playing && !reload) _sawOffline = !fetched.isPlayableNow;
     _room = _room.mergeFrom(fetched).withAudienceFallbackFrom(_room);
     _notify();
-    if (playing && !reload && danmaku.status == DanmakuStatus.closed) unawaited(_syncDanmaku(force: true));
+    if (!playing || reload) return;
+    if (newBroadcast) {
+      unawaited(_renewDanmaku('a new broadcast'));
+    } else if (danmaku.status == DanmakuStatus.closed) {
+      // A refresh with arguments was merged in; one without asks the entry.
+      unawaited(fetched.danmakuData == null ? _renewDanmaku('a closed connection') : _syncDanmaku(force: true));
+    }
+  }
+
+  /// How far apart two starts of the same broadcast may be: some platforms
+  /// count back from the time on air (SOOP's `BTIME`, Kugou's list).
+  static const Duration _startJitter = Duration(minutes: 2);
+
+  /// Whether [fetched] is another broadcast than the one playing: its start
+  /// moved, or the room is on air again after a refresh found it off.
+  bool _isNewBroadcast(LiveRoom fetched) {
+    if (!fetched.isPlayableNow) return false;
+    if (_sawOffline) return true;
+    final before = _room.startedAt;
+    final after = fetched.startedAt;
+    return before != null && after != null && after.difference(before).abs() > _startJitter;
   }
 
   /// A followed room's card gets the fresh detail (3.x

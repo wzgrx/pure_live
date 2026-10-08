@@ -1666,11 +1666,12 @@ from = "C01 说明“已知问题”第 1、2 条（原归 C01.3 第 3 阶段，
 id = "C01.6"
 title = "主播换场后弹幕参数变了要重连；改“YouTube 显示全部聊天”立即生效"
 type = "功能"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
 size = "小"
 tier = 2
 stages = ["换场和弹幕结束后按进房详情取新参数重连", "YouTube 显示全部聊天改了就重连"]
-done = 0
+done = 2
 from = "docs v2 D 组核对（D06 余项、D01.14、D01.16、D01.27）和 C、O 组核对"
 note = "和 E05.4 的“百度刷新带弹幕参数”、C01.5 改同一个文件（room_controller.dart），先后做"
 

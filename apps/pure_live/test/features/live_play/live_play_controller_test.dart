@@ -276,6 +276,161 @@ void main() {
     controller.dispose();
   });
 
+  group('C01.6 danmaku of a new broadcast', () {
+    /// The light refresh's answer: no danmaku arguments (SHOWROOM, Kilakila,
+    /// TwitCasting, Baidu).
+    LiveRoom refreshAnswer({LiveStatus status = LiveStatus.live, DateTime? startedAt, Object? danmakuData}) => LiveRoom(
+      platform: SiteIds.bilibili,
+      roomId: '6',
+      liveStatus: status,
+      startedAt: startedAt,
+      danmakuData: danmakuData,
+    );
+
+    List<String> systemLines(LiveRoomController controller) => [
+      for (final line in controller.chat.lines)
+        if (line.kind == ChatLineKind.system) line.text,
+    ];
+
+    test('a new broadcast found by the refresh reconnects the danmaku with fresh arguments (C01.6)', () async {
+      final first = DateTime.utc(2026, 10, 1, 10);
+      final site = RefreshingFakeSite(
+        liveRoom(startedAt: first),
+        refreshRoom: refreshAnswer(startedAt: first),
+      );
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      expect(danmaku.connects, ['args-6']);
+      final entries = site.detailCalls;
+
+      // The same broadcast, its start a little off (platforms that count
+      // back from the time on air): no extra request, no reconnect.
+      site.refreshRoom = refreshAnswer(startedAt: first.add(const Duration(seconds: 40)));
+      for (var i = 0; i < 3; i++) {
+        await controller.refreshDetail();
+        await settle();
+      }
+      expect(site.refreshCalls, 3);
+      expect(site.detailCalls, entries);
+      expect(danmaku.connects, ['args-6']);
+
+      final second = first.add(const Duration(hours: 3));
+      site
+        ..room = liveRoom(startedAt: second).copyWith(danmakuData: 'args-7')
+        ..refreshRoom = refreshAnswer(startedAt: second);
+      final before = systemLines(controller).length;
+      await controller.refreshDetail();
+      await settle();
+      expect(site.detailCalls, entries + 1);
+      expect(danmaku.connects, ['args-6', 'args-7']);
+      expect(systemLines(controller).sublist(before), ['开始连接弹幕服务器', '弹幕服务器连接正常']);
+
+      // Once per broadcast.
+      await controller.refreshDetail();
+      await settle();
+      expect(site.detailCalls, entries + 1);
+      expect(danmaku.connects, hasLength(2));
+      controller.dispose();
+    });
+
+    test('a broadcast that went off air and came back reconnects with fresh arguments (C01.6)', () async {
+      final site = RefreshingFakeSite(liveRoom(), refreshRoom: refreshAnswer());
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      // Off air while the session still plays (it recovers by itself).
+      site.refreshRoom = refreshAnswer(status: LiveStatus.offline);
+      await controller.refreshDetail();
+      await settle();
+      expect(controller.stage, RoomStage.playing);
+      expect(danmaku.connects, ['args-6']);
+
+      site
+        ..room = liveRoom().copyWith(danmakuData: 'args-7')
+        ..refreshRoom = refreshAnswer();
+      await controller.refreshDetail();
+      await settle();
+      expect(danmaku.connects, ['args-6', 'args-7']);
+      await controller.refreshDetail();
+      await settle();
+      expect(danmaku.connects, ['args-6', 'args-7']);
+      controller.dispose();
+    });
+
+    test('a closed connection asks the room entry for arguments when the refresh has none (C01.6)', () async {
+      final site = RefreshingFakeSite(liveRoom(), refreshRoom: refreshAnswer());
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      final entries = site.detailCalls;
+
+      // Baidu's signatures ran out: the room entry has new ones.
+      site.room = liveRoom().copyWith(danmakuData: 'args-7');
+      danmaku.emit(const DanmakuClosed(DanmakuCloseReason.credentialsUnavailable));
+      await controller.refreshDetail();
+      await settle();
+      expect(danmaku.connects, ['args-6', 'args-7']);
+      expect(site.detailCalls, entries + 1);
+
+      // A refresh that brings arguments is used as it is.
+      site.refreshRoom = refreshAnswer(danmakuData: 'args-8');
+      danmaku.emit(const DanmakuClosed(DanmakuCloseReason.credentialsUnavailable));
+      await controller.refreshDetail();
+      await settle();
+      expect(danmaku.connects, ['args-6', 'args-7', 'args-8']);
+      expect(site.detailCalls, entries + 1);
+      controller.dispose();
+    });
+
+    test('a failed room entry reconnects with the arguments the room has, quietly (C01.6)', () async {
+      final site = RefreshingFakeSite(liveRoom(), refreshRoom: refreshAnswer());
+      final controller = controllerFor(site);
+      await controller.start();
+      await settle();
+      site.detailError = const NetworkFailure(SiteIds.bilibili, 'test');
+      danmaku.emit(const DanmakuClosed(DanmakuCloseReason.connectionFailed));
+      await controller.refreshDetail();
+      await settle();
+      expect(danmaku.connects, ['args-6', 'args-6']);
+      expect(toasts, isEmpty);
+      expect(controller.stage, RoomStage.playing);
+      controller.dispose();
+    });
+
+    test("changing YouTube's all-chat setting reconnects a YouTube room (C01.6)", () async {
+      final room = LiveRoom(
+        platform: SiteIds.youtube,
+        roomId: 'UC_test',
+        nick: '主播',
+        liveStatus: LiveStatus.live,
+        danmakuData: 'yt-args',
+      );
+      final site = FakeSite(room)..siteId = SiteIds.youtube;
+      final controller = controllerFor(site, room: room);
+      await controller.start();
+      await settle();
+      expect(danmaku.connects, ['yt-args']);
+      await store.settings.set(Settings.youtubeShowAllChat, true);
+      await settle();
+      expect(danmaku.connects, ['yt-args', 'yt-args']);
+      await store.settings.set(Settings.youtubeShowAllChat, false);
+      await settle();
+      expect(danmaku.connects, hasLength(3));
+      controller.dispose();
+    });
+
+    test("YouTube's all-chat setting leaves other rooms alone (C01.6)", () async {
+      final controller = controllerFor(FakeSite(liveRoom()));
+      await controller.start();
+      await settle();
+      await store.settings.set(Settings.youtubeShowAllChat, true);
+      await settle();
+      expect(danmaku.connects, ['args-6']);
+      controller.dispose();
+    });
+  });
+
   test('a failed detail keeps the card and says why; retry loads again', () async {
     final site = FakeSite(liveRoom())..detailError = const NeedsLogin(SiteIds.bilibili);
     final controller = controllerFor(site);

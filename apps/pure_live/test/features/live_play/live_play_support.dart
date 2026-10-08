@@ -29,8 +29,11 @@ class FakeSite extends LiveSite {
   /// Detail requests so far.
   int detailCalls = 0;
 
+  /// The platform's id (Bilibili unless a test says otherwise).
+  String siteId = SiteIds.bilibili;
+
   @override
-  String get id => SiteIds.bilibili;
+  String get id => siteId;
 
   @override
   String get name => '哔哩哔哩';
@@ -53,6 +56,26 @@ class FakeSite extends LiveSite {
 
   @override
   Future<List<LiveSuperChatMessage>> getSuperChatMessage({required String roomId}) async => superChats;
+}
+
+/// A platform whose periodic refresh asks a lighter endpoint than the room
+/// entry (SHOWROOM, Kilakila, TwitCasting, Baidu): [refreshRoom] answers it,
+/// without danmaku arguments unless the test gives some.
+class RefreshingFakeSite extends FakeSite implements LiveSiteRoomRefresher {
+  /// Creates the platform.
+  new(super.room, {required this.refreshRoom});
+
+  /// The refresh's answer.
+  LiveRoom refreshRoom;
+
+  /// Refresh requests so far.
+  int refreshCalls = 0;
+
+  @override
+  Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async {
+    refreshCalls++;
+    return refreshRoom;
+  }
 }
 
 /// A platform that downgrades every request to [applied] (Bilibili guests).

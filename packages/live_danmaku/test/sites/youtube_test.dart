@@ -2021,6 +2021,22 @@ void main() {
       expect(_body(requests[1])['continuation'], s10Next);
     });
 
+    test('allChatOf is read at every start (C01.6)', () async {
+      var allChat = false;
+      final http = _ScriptedHttp([_step(s10[0]), _step(s10[1]), _step(s10[0]), _step(s10[1])]);
+      final connection = YouTubeDanmakuConnection(http: http, allChatOf: () => allChat);
+      const args = YouTubeDanmakuArgs(roomId: 'UChAnqc_AY5_I3Px5dig3X1Q', videoId: 'lNPh7CdwkWk');
+      await connection.connect(args);
+      await connection.close();
+      allChat = true;
+      await connection.connect(args);
+      await connection.close();
+      final requests = http.requests;
+      expect(requests, hasLength(4));
+      expect(_body(requests[1])['continuation'], s10Next);
+      expect(_body(requests[3])['continuation'], YouTubeDanmakuProtocol.allChatContinuation(s10Next));
+    });
+
     final top = s06Next;
     final live = YouTubeDanmakuProtocol.allChatContinuation(s06Next)!;
     Map<String, Object?> poll(String token) => {'request': 'live_chat/get_live_chat', 'continuation': token};

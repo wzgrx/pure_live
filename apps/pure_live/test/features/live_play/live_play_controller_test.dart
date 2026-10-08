@@ -75,6 +75,30 @@ void main() {
     controller.dispose();
   });
 
+  test('a detail without a cover keeps the card cover in the room and the history', () async {
+    final card = LiveRoom(platform: SiteIds.bilibili, roomId: '6', nick: '卡片上的名字', cover: 'https://img/c.jpg');
+    final controller = controllerFor(FakeSite(liveRoom()), room: card);
+    await controller.start();
+    await settle();
+
+    expect(controller.stage, RoomStage.playing);
+    expect(controller.room.cover, 'https://img/c.jpg');
+    expect((await store.history.all()).single.cover, 'https://img/c.jpg');
+    controller.dispose();
+  });
+
+  test('a detail with a new cover replaces the card cover', () async {
+    final card = LiveRoom(platform: SiteIds.bilibili, roomId: '6', cover: 'https://img/old.jpg');
+    final detail = liveRoom().copyWith(cover: 'https://img/new.jpg');
+    final controller = controllerFor(FakeSite(detail), room: card);
+    await controller.start();
+    await settle();
+
+    expect(controller.room.cover, 'https://img/new.jpg');
+    expect((await store.history.all()).single.cover, 'https://img/new.jpg');
+    controller.dispose();
+  });
+
   test('on mobile data the first quality follows the mobile-data preference (M12.3)', () async {
     await store.settings.setAll({Settings.preferResolution: '原画', Settings.preferResolutionCellular: '流畅'});
     final mobile = controllerFor(FakeSite(liveRoom()), network: NetworkKind.mobile);

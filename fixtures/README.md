@@ -13,6 +13,8 @@ fixtures/<平台>/<样本编号>-<情况>/
 
 ## 录制
 
+master 上的 `tools/live_cli` 现在只有 `probe` 和 `patrol`（E07.1）；录样本的 `fixture capture` 命令还没取回，在归档标签 `v4-archive` 的 `tools/live_cli/lib/src/fixture/`。在它取回之前，样本按下面“手工补录”一条手工写 `body.*` 和 `meta.json`。归档工具的用法是：
+
 ```bash
 dart run tools/live_cli/bin/live_cli.dart fixture capture douyu S05-live \
   --url https://www.douyu.com/betard/5526219 \
@@ -21,7 +23,7 @@ dart run tools/live_cli/bin/live_cli.dart fixture capture douyu S05-live \
 
 - 登录态放在文件里用 `--cookie-file` 传入，不要写在命令行上。
 - 错误响应加 `--allow-error`；海外站点加 `--proxy env`（走 `HTTPS_PROXY`）。
-- 脱敏规则在 `tools/live_cli/lib/src/fixture/rules/<平台>.dart`。只要还能在输出里找到任何被替换的原值，工具就拒绝写入。
+- 每个平台的脱敏规则在归档标签 `v4-archive` 的 `tools/live_cli/lib/src/fixture/rules/<平台>.dart`，手工补录时照着做。归档工具在还能从输出里找到任何被替换的原值时拒绝写入；手工补录时自己检查一遍。
 - 有些平台会在响应头里回显调用方的地址（`x-real-ip`、`x-ksclient-ip`、`xhs-real-ip`，百度的 `x-bfe-svbbrers` 是 Base64）。归档的规则漏过几处，录制时的真实出口地址进了 git，已在 2026-09-28 换成 `203.0.113.7`。现在门禁的 `fixture privacy`（`tools/gate/check_fixtures.py`）检查所有 JSON 样本：名字表示客户端地址的字段，只要含有保留段和文档段以外的 IPv4（明文或 Base64），就不通过。服务端地址（负载均衡、CDN 节点）不算。
 - 手工补录或改动样本后，同样要换掉访客编号、设备编号、令牌和 Cookie 值，改成同形的合成值，并记进 `meta.json` 的脱敏记录。
 - 2026-09-30 起门禁也检查弹幕帧（`*.jsonl`，逐行）：帧文字里、字符串里套着的 JSON 里、Base64 载荷里（gzip、zlib 会先解开）的客户端地址字段；地址写成 32 位整数也算（BIGO 登录回答的 `clientIp` 是小端整数的十进制，M5.20 发现，已换成 `3362010054`，即 198.51.100.200）。整数的两种字节序只要有一种落在保留段或文档段就放过，所以合成值要用文档段。

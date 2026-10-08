@@ -1,0 +1,23 @@
+name: live_cli
+description: Command-line platform probe and patrol for Pure Live (real network, run by hand; never in the gate).
+publish_to: none
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.0
+
+resolution: workspace
+
+dependencies:
+  args: ^2.7.0
+  live_core: any
+  live_danmaku: any
+  live_net: any
+  meta: ^1.19.0
+
+dev_dependencies:
+  test: ^1.32.0
+  very_good_analysis: ^11.0.0
+
+executables:
+  live_cli: live_cli

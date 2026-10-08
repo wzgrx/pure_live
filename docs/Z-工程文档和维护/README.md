@@ -45,14 +45,14 @@
 
 1. **第二档**：Z03.3（小，清点脚本输出新编号，之后 `docs/inventory/UI.md` 才能重新生成）→ Z03.2（中，三个阶段，全项目归属清点；Z03.3 的编号表可以复用）；Z07.1、Z07.2（小，各做一次，把步骤固定下来）。Z07.1 先做：本机有 25 个工作区、26 个本地分支，只有 7 个已合并，三个暂停任务的半成品工作区要确认还要不要。
 2. **第三档**：Z01.2（每月 `check_latest`，2026-09-28 之后没跑过）、Z05.1（D-024 定了“这次不清理”，等 D-016 的清单）、Z04.1、Z05.2（大，英文界面）、Z07.3（第一次季度复查定在 2026-12 底）。
-3. 不在登记表里但要尽快处理的（见“风险和注意”）：代码注释里 16 处被改坏的文档路径；`tools/live_cli` 的悬空引用；docs v2 本身的登记（Z06.3）。
+3. 不在登记表里但要尽快处理的（见“风险和注意”）：代码注释里 16 处被改坏的文档路径；docs v2 本身的登记（Z06.3）。
 
 ## 风险和注意
 
 - **门禁只减不增**：`tools/gate/ui_baseline.json` 的跨功能引用（现在 17 条）和直接写的颜色图标（现在 0）只能变少（PROCESS 第 12 节）；脚本发现“基线里有、代码里没了”也报错，逼着同时改基线。
 - **门禁运行时不要在同一份代码里构建正式包**（PROCESS 第 8 节第 5 条）：两边都会改 `.dart_tool/` 和生成的插件注册文件。门禁有全局锁 `${TMPDIR:-/tmp}/pure_live-gate.lock`，同一时间只跑一个，第二个最多等 1 小时。
 - **代码里的文档路径检查有漏洞**：`docs.py` 按行用正则找 `docs/...`，路径在注释里换行时只匹配到行尾，16 处 `docs/README.md/`、`docs/TASKS.md/` 开头的坏路径因此没被拦住（Z06 已知问题）。
-- **悬空的工具引用**：`tools/live_cli` 在 master 上不存在（D-002 清空 master 时没取回，只在标签 `v4-archive`），但 `docs/specs/ENGINEERING.md:52`、`tools/gate/check_deps.py:34`、`:41`、`fixtures/README.md:17`、`:24` 都当它存在；E07.1 的任务书写了取回和重写的方案。
+- **悬空的工具引用**（已解决，2026-10-08）：`tools/live_cli` 由 E07.1 取回并按现在的接口重写（`probe`、`patrol`）；`docs/specs/ENGINEERING.md`、`tools/gate/check_deps.py`、`fixtures/README.md` 已改成和它一致（录样本的 `fixture capture` 仍在 `v4-archive`）。
 - **翻译键不要随手删**：4.0.0 清理时误删了刷新率说明的键，界面显示成键名（D-016）；D-024 定了这次不清理，以后先列运行时拼出来的键再删。
 - **登记表是唯一来源**：改状态只改 `docs/tasks.toml`，再运行 `python3 tools/docs/docs.py`；生成的文件（STATUS、TASKS、MAPPING、各 README 的生成区）不手改（PROCESS 第 13 节）。
 - 签名文件、密钥、`key.properties` 不进 git（D-006）；`.gitignore` 里已有这些规则，加新工具时不要输出到仓库里。

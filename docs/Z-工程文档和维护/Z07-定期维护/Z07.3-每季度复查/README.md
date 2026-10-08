@@ -14,7 +14,7 @@
 | 方面 | 3.x | 现在（2026-10-07） | 要做到 |
 |---|---|---|---|
 | 决定 | 3.x 用 ADR（归档 v4 里有 `docs/adr/`，`fixtures/README.md:3` 还引用 `ADR 0009`） | `docs/DECISIONS.md` 29 条（D-001～D-029）；D-014 的编号部分被 D-025 取代，D-007 有 D-008 一个例外；没复查过 | 每条看依据还成立吗 |
-| 规则和事实不一致（已知的） | — | `docs/specs/ENGINEERING.md:68` 说上游对照写进 Z（实际在 W01）；`ENGINEERING.md:52` 写着不存在的 `tools/live_cli`；`docs/README.md:3`、`tasks.toml:1` 还写 docs v1；AGENTS.md 说 `apps/pure_live` 有 Linux（没有 `linux/` 运行器）；PROCESS 第 10 节和 S 组提到的 `~/tools/pl-adb.sh` 默认包名是旧的 `.next` | 逐条改正或开任务 |
+| 规则和事实不一致（已知的） | — | `docs/specs/ENGINEERING.md:68` 说上游对照写进 Z（实际在 W01）；`docs/README.md:3`、`tasks.toml:1` 还写 docs v1；AGENTS.md 说 `apps/pure_live` 有 Linux（没有 `linux/` 运行器）；PROCESS 第 10 节和 S 组提到的 `~/tools/pl-adb.sh` 默认包名是旧的 `.next` | 逐条改正或开任务 |
 | 长期没动的任务 | — | 没完成的 79 个：第一档 8、第二档 32、第三档 37、受阻 2（D01.18 要登录才能连弹幕、D01.19 要签名，不写档位） | 第一档超过两周、第二档超过两个月没动的，决定降档、拆小或不做 |
 | 空的子分类 | — | 9 个子分类一个任务都没有：G05、H03、H04、J05、K03、L02、O01、Q02、X05 | 每个写明“范围保留，现在没有任务”的原因（v2 的子分类说明已写），或合并、删除 |
 

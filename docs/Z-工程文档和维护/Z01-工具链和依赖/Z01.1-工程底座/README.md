@@ -17,7 +17,7 @@
 | CI 和门禁 | 11 个 GitHub Actions 工作流（`.github/workflows/`），没有 push、PR 触发；发布工作流引用了不存在的 Secret | 不用 Actions；本机 `tools/gate/gate.sh`（128 行）：依赖方向、格式、`dart analyze --fatal-infos`、测试，全局锁 | 同一个脚本，后来加了样本隐私（`check_fixtures.py`）、界面结构（Z02.1）、文档（Z02.2）、FFmpeg 包，`--all` 再跑门禁自己的测试 |
 | 工具链版本 | 散在 `.fvmrc`、`pubspec.yaml`、各工作流 | `toolchain.env`（19 行）唯一来源 | 不变 |
 | 结构 | 单个包，`lib/` 下按模块分目录 | 根 `pubspec.yaml` 定义 pub workspace（一开始只有 `tools/check_latest` 一个成员），共用一个 `pubspec.lock`，依赖覆盖只能写在根 | 13 个成员（2026-10-01 各模块合并时逐个加） |
-| 依赖方向 | 靠约定（平台层、播放层、界面层互相引用） | `tools/gate/check_deps.py` 按分层表强制；新成员不在表里就报错 | 表里 14 项，其中 `tools/live_cli` 还不存在（见“留下的问题”） |
+| 依赖方向 | 靠约定（平台层、播放层、界面层互相引用） | `tools/gate/check_deps.py` 按分层表强制；新成员不在表里就报错 | 表里 14 项（`tools/live_cli` 2026-10-08 由 E07.1 取回） |
 | 脚本 | `tool/` 下 174 个，约 2.56 万行，多数一次性 | 只保留门禁和版本检查 | 另加了 `tools/docs`、`tools/ui`、`tools/ffmpeg_kit`、`tools/timeshift`、`tools/brotli` |
 | 版本检查 | 无（靠 dependabot） | `tools/check_latest`：对照官方渠道查工具链、media_kit 上游和 pub 依赖 | 不变；之后没再跑过（Z01.2） |
 | Claude Code 钩子 | 无 | `.claude/settings.json`：改完 Dart 文件自动 `dart format`（`tools/gate/hooks/format_dart.sh`），结束时跑 `gate.sh --hook` | 不变 |

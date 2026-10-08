@@ -102,7 +102,7 @@
 属于 [E 直播平台](../README.md)。
 
 - 代码：`packages/live_core/lib/src/sites/`
-- 进度：`████████████████████` 100%
+- 进度：`███████████████████░` 94%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -123,5 +123,16 @@
 | E03.14 | Steam 直播 | 平台 | 完成 | 2026-09-28 | 9965e3c7f | [设计或说明](E03.14-Steam直播/README.md)、[记录](E03.14-Steam直播/record.md) |
 | E03.15 | 17LIVE | 平台 | 完成 | 2026-09-28 | 0141660c6 | [设计或说明](E03.15-17LIVE/README.md)、[记录](E03.15-17LIVE/record.md) |
 | E03.16 | Kick（恢复，仅 Android） | 平台 | 完成 | 2026-10-01 | 6c68f0010 | [设计或说明](E03.16-Kick/README.md)、[记录](E03.16-Kick/record.md) |
+| E03.17 | 接 E07.1：Twitch 推荐的 GraphQL 语言参数类型变了 | 平台 | 未开始 | — | — | — |
+| E03.18 | 接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个 | 平台 | 未开始 | — | — | — |
+
+## 还没完成的
+
+- **E03.17 接 E07.1：Twitch 推荐的 GraphQL 语言参数类型变了**（未开始，第一档，规模 小）
+  - 说明：twitch_api.dart:156 的查询把 $languages 声明成 [String!]，平台改成了 [Language!] 枚举；推荐页（和用它的分区）打不开。修完在 K90 上看热门里的 Twitch
+  - 来源：E07.1 第一轮巡检（2026-10-08，经代理）：P1 推荐 ApiChanged：Variable "$languages" of type "[String!]" used in position expecting type "[Language!]"
+- **E03.18 接 E07.1：17LIVE 线路全部不通、第 2 页只给重复的一个**（未开始，第二档，规模 小）
+  - 说明：seventeenlive_api.dart:717（线路）、seventeenlive_site.dart:101-109（游标翻页）；先换代理出口地区复测，排除地区限制
+  - 来源：E07.1 第一轮巡检（2026-10-08，经代理）：P10 每个房间 tencent 线路 404、wansu 线路超时；P1、P3 第 2 页只有 1 个且和第 1 页重复
 
 <!-- docs:生成结束 -->

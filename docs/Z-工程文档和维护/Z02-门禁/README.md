@@ -30,7 +30,7 @@
 | 文件 | 职责 |
 |---|---|
 | `tools/gate/gate.sh`（139 行） | 模式、锁、依赖刷新、FFmpeg 包、四个仓库级检查、逐成员格式/分析/测试、门禁测试 |
-| `tools/gate/check_deps.py`（138 行） | `ALLOWED`（`:18`，14 项，含不存在的 `tools/live_cli`）、`PURE_DART`（`:39`）、`workspace_members`（`:50`）、`pubspec_dependencies`（`:65`）、`check`（`:95`） |
+| `tools/gate/check_deps.py`（138 行） | `ALLOWED`（`:18`，14 项，含 `tools/live_cli`）、`PURE_DART`（`:39`）、`workspace_members`（`:50`）、`pubspec_dependencies`（`:65`）、`check`（`:95`） |
 | `tools/gate/check_fixtures.py`（225 行） | `CLIENT_HEADER`、`SERVER_HEADERS`、`KEYED`、`ALLOWED` 地址段；`leaks`（`:130`）、`_walk`（`:139`）、`_documents`（`:164`，`.jsonl` 逐行）、`check`（`:181`）、`main`（`:210`） |
 | `tools/gate/check_ui_structure.py`（86 行） | `FEATURE_IMPORT`、`RAW_STYLE`、`MATERIAL`（`:26-28`）、`scan`（`:36`）、`check`（`:55`，棘轮两个方向）、`--write-baseline`（`:81-84`） |
 | `tools/gate/ui_baseline.json` | `cross_feature_imports`（17 条）、`raw_styles`（空） |
@@ -58,7 +58,7 @@
 |---|---|---|---|
 | 默认模式和 `--hook` 在“没有成员改动”时直接退出（`gate: no workspace member changed`），连依赖方向、样本隐私、界面结构、文档四个仓库级检查也不跑 | `tools/gate/gate.sh:58-62`（在 `:113-116` 之前） | 只改文档或样本的提交，Stop 钩子和默认模式都发现不了文档、样本的问题；只有 `--all` 会查 | 推送前必须 `--all`（D-007），所以不会漏进 master；登记为 Z02.3（第二档）：只改文档、样本、脚本时默认模式和钩子也跑四项仓库级检查 |
 | `docs.py` 没有测试；代码里的文档路径检查按行匹配，注释里换行的路径会被截短（16 处坏路径没被拦） | `tools/docs/docs.py:502`、`:523` | 文档检查有漏洞 | Z06 已知问题；修脚本时加 `tools/gate/tests/test_docs.py` |
-| `check_deps.py` 的分层表有不存在的 `tools/live_cli` | `check_deps.py:34`、`:41` | 规则表和仓库不一致 | E07.1（取回工具）；不取回就删掉 |
+| `check_deps.py` 的分层表有不存在的 `tools/live_cli` | `check_deps.py:34`、`:41` | 规则表和仓库不一致 | 已解决（2026-10-08，E07.1 取回工具，规则收窄到 `live_core`、`live_net`、`live_danmaku`） |
 | `gate.sh` 的锁文件放在 `${TMPDIR:-/tmp}`；Claude Code 会话的 `TMPDIR` 和普通终端不同时，两边的门禁拿的是不同的锁 | `gate.sh:66` | 两个门禁可能同时跑、互相改 `.dart_tool/` | 没有任务；同一时间只开一个门禁（PROCESS 第 8 节） |
 | 没有密钥扫描（3.x 有 `.gitleaks.toml`） | — | 密钥误提交只靠 `.gitignore` 和人工审查 | 需要维护者决定是否加（Y04 相关） |
 

@@ -7,6 +7,7 @@ import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/version/app_version.dart';
+import 'package:pure_live/i18n/i18n.dart';
 
 /// The repository the update files are read from (3.x `AppConfig`).
 const GitHubMirror updateRepository = GitHubMirror(owner: 'wzgrx', repo: 'pure_live');
@@ -18,6 +19,12 @@ final Uri projectUrl = Uri.parse('https://github.com/${updateRepository.owner}/$
 /// null when there is none or nothing was checked. The about page shows it
 /// as "新版本 v…" (docs/A-界面设计/A15-小页面/A15.2-关于和版本 c3).
 final ValueNotifier<UpdateInfo?> foundUpdate = ValueNotifier<UpdateInfo?>(null);
+
+/// The version of [info] as shown: with its build when the version is the
+/// installed one (`4.0.0（构建号 5002）`, Y02.1).
+String updateVersionLabel(UpdateInfo info) => info.sameVersion(appVersion)
+    ? i18n('version_with_build', args: {'version': info.version, 'build': '${info.buildNumber}'})
+    : info.version;
 
 /// Keeps [info] in [foundUpdate] when it is newer, clears it otherwise.
 void noteCheckedUpdate(UpdateInfo info) => foundUpdate.value = info.isNewer ? info : null;
@@ -85,7 +92,33 @@ final class UpdateInfo {
   final bool windowsMsixAvailable;
 
   /// Whether it is newer than the installed version.
-  bool get isNewer => isNewerVersion(version, appVersion);
+  bool get isNewer => newerThan(appVersion, appBuild);
+
+  /// Whether it is newer than [installed] built as [build]: a newer version,
+  /// or the same version with a newer build (Y02.1: 4.0.0 was re-released as
+  /// build 5001, which the version alone never offered).
+  bool newerThan(String installed, int build) =>
+      isNewerVersion(version, installed) || (sameVersion(installed) && buildNumber > build);
+
+  /// Whether [other] names the same version (a `v` and a `+build` aside).
+  bool sameVersion(String other) =>
+      versionParts(version) != null &&
+      versionParts(other) != null &&
+      !isNewerVersion(version, other) &&
+      !isNewerVersion(other, version);
+
+  /// What "不再提醒这个版本" keeps: the version and its build (`4.0.0+5002`).
+  String get skipToken => '${version.replaceFirst(RegExp('^[vV]'), '')}+$buildNumber';
+
+  /// Whether [skipped] (`skippedUpdateVersion`) is this release: its version
+  /// and build, or, as kept before builds counted, its version alone.
+  bool skippedAs(String skipped) {
+    final value = skipped.trim();
+    if (value.isEmpty) return false;
+    if (!value.contains('+')) return sameVersion(value);
+    final build = int.tryParse(value.split('+').last.trim());
+    return sameVersion(value) && build == buildNumber;
+  }
 }
 
 /// One downloadable file of a release.

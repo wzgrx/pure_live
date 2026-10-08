@@ -143,7 +143,9 @@ class _AboutViewState extends State<AboutView> {
                         subtitle: i18n('about_update_subtitle'),
                         // c3: the newer version the start-up check found;
                         // nothing otherwise (the version is shown above).
-                        valueWidget: update == null || !update.isNewer ? null : _NewVersionBadge(update.version),
+                        valueWidget: update == null || !update.isNewer
+                            ? null
+                            : _NewVersionBadge(updateVersionLabel(update)),
                         onTap: () => unawaited(AppNavigator.toNamed<void>(RoutePath.kVersionPage)),
                       ),
                     ),

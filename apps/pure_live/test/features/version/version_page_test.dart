@@ -169,6 +169,12 @@ void main() {
     expect(isNewerVersion('v3.10.0', '3.9.9+1'), isTrue);
     expect(isNewerVersion('3.2.11', '3.2.11'), isFalse);
     expect(isNewerVersion('x', '3.2.11'), isFalse);
+    // The same version with a newer build (Y02.1: 4.0.0 was re-released as build 5001).
+    const rebuilt = UpdateInfo(version: '4.0.0', buildNumber: 5001);
+    expect(rebuilt.newerThan('4.0.0', 5000), isTrue);
+    expect(rebuilt.newerThan('v4.0.0', 5001), isFalse);
+    expect(rebuilt.newerThan('4.0.1', 1), isFalse);
+    expect(const UpdateInfo(version: '3.9.9', buildNumber: 9999).newerThan('4.0.0', 5001), isFalse);
     expect(compareVersions('3.2.10', '3.2.9'), greaterThan(0));
     expect(downloadSources('https://github.com/a/b.apk', githubOrigin: true), ['https://github.com/a/b.apk']);
     final mirrors = downloadSources('https://github.com/a/b.apk', githubOrigin: false);

@@ -2389,6 +2389,7 @@
     "version_update": "版本更新",
     "version_update_failed_subtitle": "请检查网络和更新源后重试。",
     "version_update_failed_title": "更新信息获取失败",
+    "version_with_build": "{version}（构建号 {build}）",
     "video": "视频",
     "video_fit_crop_center": "居中裁剪",
     "video_fit_default": "默认比例",

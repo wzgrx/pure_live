@@ -89,8 +89,7 @@ Future<void> checkForUpdateOnStartup(
 }
 
 bool _wanted(SettingsStore settings, UpdateInfo info) =>
-    settings.get(Settings.enableAutoCheckUpdate) &&
-    compareVersions(settings.get(Settings.skippedUpdateVersion), info.version) != 0;
+    settings.get(Settings.enableAutoCheckUpdate) && !info.skippedAs(settings.get(Settings.skippedUpdateVersion));
 
 /// From this width the "skip" box sits at the left of the button row (U.3d
 /// c5), so a landscape phone shows the whole log.
@@ -126,14 +125,14 @@ class NewVersionDialog extends StatefulWidget {
 }
 
 class _NewVersionDialogState extends State<NewVersionDialog> {
-  late bool _skip = widget.settings?.get(Settings.skippedUpdateVersion) == widget.info.version;
+  late bool _skip = widget.info.skippedAs(widget.settings?.get(Settings.skippedUpdateVersion) ?? '');
 
   bool get _inApp => widget.package != null && widget.sources.isNotEmpty;
 
   void _toggleSkip(bool? value) {
     final skip = value ?? false;
     setState(() => _skip = skip);
-    unawaited(widget.settings?.set(Settings.skippedUpdateVersion, skip ? widget.info.version : ''));
+    unawaited(widget.settings?.set(Settings.skippedUpdateVersion, skip ? widget.info.skipToken : ''));
   }
 
   void _otherWays() {
@@ -217,7 +216,7 @@ class _NewVersionDialogState extends State<NewVersionDialog> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            i18n('update_new_version_title', args: {'version': widget.info.version}),
+                            i18n('update_new_version_title', args: {'version': updateVersionLabel(widget.info)}),
                             style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 6),

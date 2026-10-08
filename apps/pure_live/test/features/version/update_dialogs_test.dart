@@ -41,9 +41,10 @@ final class _FakeFeed extends UpdateFeed {
   Future<List<ReleaseInfo>?> releases({Duration timeout = const Duration(seconds: 15)}) async => history;
 }
 
-UpdateInfo _info(String version) => UpdateInfo.fromJson({
+UpdateInfo _info(String version, {int? build}) => UpdateInfo.fromJson({
   ..._versionJson(),
   'version': version,
+  'build_number': ?build,
   'version_desc': '- 斗鱼原画不再每 5 分钟断流\n- **更快**的播放',
   'platforms': const <String, Object?>{},
 }, platform: 'android');
@@ -296,7 +297,11 @@ void main() {
       expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
       await tester.tap(find.text('取消'));
       await tester.pumpAndSettle();
-      expect(settings.get(Settings.skippedUpdateVersion), '9.0.0');
+      expect(
+        settings.get(Settings.skippedUpdateVersion),
+        '9.0.0+${_info('9.0.0').buildNumber}',
+        reason: 'with its build (Y02.1)',
+      );
 
       await checkForUpdateOnStartup(context, settings: settings, feed: feed, prompts: AppPrompts());
       await tester.pumpAndSettle();
@@ -308,6 +313,42 @@ void main() {
       expect(find.text('发现新版本 v9.0.1'), findsOneWidget);
       expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
     });
+
+    testWidgets(
+      'the same version with a newer build is offered, its build named; skipping it skips that build (Y02.1)',
+      (tester) async {
+        final h = await _pump(tester);
+        final context = tester.element(find.text('home'));
+        final settings = h.services.store.settings;
+        final feed = _FakeFeed(info: _info(appVersion, build: appBuild + 1));
+        unawaited(checkForUpdateOnStartup(context, settings: settings, feed: feed, prompts: AppPrompts()));
+        await tester.pumpAndSettle();
+        expect(find.text('发现新版本 v$appVersion（构建号 ${appBuild + 1}）'), findsOneWidget);
+        await tester.tap(find.text('不再提醒这个版本'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('取消'));
+        await tester.pumpAndSettle();
+        expect(settings.get(Settings.skippedUpdateVersion), '$appVersion+${appBuild + 1}');
+
+        await checkForUpdateOnStartup(context, settings: settings, feed: feed, prompts: AppPrompts());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('new-version-dialog')), findsNothing);
+
+        feed.info = _info(appVersion, build: appBuild + 2);
+        unawaited(checkForUpdateOnStartup(context, settings: settings, feed: feed, prompts: AppPrompts()));
+        await tester.pumpAndSettle();
+        expect(find.text('发现新版本 v$appVersion（构建号 ${appBuild + 2}）'), findsOneWidget);
+        expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
+        await tester.tap(find.text('取消'));
+        await tester.pumpAndSettle();
+
+        // A version skipped before builds counted (only the version) skips every build of it.
+        await settings.set(Settings.skippedUpdateVersion, appVersion);
+        await checkForUpdateOnStartup(context, settings: settings, feed: feed, prompts: AppPrompts());
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('new-version-dialog')), findsNothing);
+      },
+    );
 
     testWidgets('waits while another page is on top and opens when home is back (U.3c c7, K2)', (tester) async {
       final observer = LiveRouteObserver();

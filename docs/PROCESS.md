@@ -232,7 +232,7 @@ to = ["A07.13"]                # 去向：实现这个提议或反馈的任务�
 
 ## 11. 发布
 
-1. **版本号**：换安装包就必须改版本号（3.x 和 4.x 的应用内更新只比较版本号）；构建号同时加一。Android 的 versionCode = ABI 编号 × 1000 + 构建号（v7a 6、arm64 7、x86_64 9）。
+1. **版本号**：换安装包就必须改版本号（3.x 只比较版本号；4.x 从 Y02.1 起版本号相同时再比构建号，但 3.x 用户仍然只认版本号）；构建号同时加一。打标签前跑 `python3 tools/release/check_version.py`，和 master 上的 `assets/version.json` 比，版本号没变或构建号没变大就不通过。Android 的 versionCode = ABI 编号 × 1000 + 构建号（v7a 6、arm64 7、x86_64 9）。
 2. 改 `apps/pure_live/pubspec.yaml` 和 `features/version/app_version.dart`，写发布说明（[Y03](Y-发布和运营/Y03-发布说明和README/README.md) 的 `releases/`）。
 3. 构建：`flutter build apk --release --split-per-abi`（门禁不在跑的时候）；签名用维护者调试密钥（和 3.x 同一证书，见 D-006）。
 4. 检查：包名、versionCode、签名证书、通知图标资源、16 KB 对齐（命令见 [Y01](Y-发布和运营/Y01-版本签名和发布/README.md) 的记录）。

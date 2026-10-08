@@ -2390,6 +2390,7 @@
     "version_update": "Version Update",
     "version_update_failed_subtitle": "Check the network and update source, then try again.",
     "version_update_failed_title": "Update information is unavailable",
+    "version_with_build": "{version} (build {build})",
     "video": "Video",
     "video_fit_crop_center": "Center Crop",
     "video_fit_default": "Default Ratio",

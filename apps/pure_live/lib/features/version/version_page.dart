@@ -324,7 +324,9 @@ class _StatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  newer ? i18n('new_version_info', args: {'version': info.version}) : i18n('no_new_version_info'),
+                  newer
+                      ? i18n('new_version_info', args: {'version': updateVersionLabel(info)})
+                      : i18n('no_new_version_info'),
                   style: styles.t16Bold,
                 ),
                 const SizedBox(height: 4),

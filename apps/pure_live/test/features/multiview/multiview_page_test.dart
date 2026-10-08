@@ -6,19 +6,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/multiview/multiview_page.dart';
 import 'package:pure_live/features/multiview/widgets/cell_view.dart';
 import 'package:pure_live/features/multiview/widgets/toolbar.dart';
+import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 
 import '../../support.dart';
 import '../live_play/live_play_support.dart';
@@ -31,6 +35,7 @@ Future<(AppServices, RoomsSite)> _pump(
   Size size, {
   List<String> rooms = const ['1', '2', '3'],
   ThemeMode theme = ThemeMode.light,
+  List<Override> overrides = const [],
 }) async {
   tester.view
     ..physicalSize = size
@@ -51,6 +56,7 @@ Future<(AppServices, RoomsSite)> _pump(
         sitesProvider.overrideWithValue(SiteRegistry({SiteIds.bilibili: () => site})),
         danmakuProvider.overrideWithValue(DanmakuRegistry({SiteIds.bilibili: FakeDanmaku.new})),
         playbackSessionFactoryProvider.overrideWithValue(({config}) => fakeSession(FakeEngine())),
+        ...overrides,
       ],
       child: MaterialApp(
         theme: const LiveTheme().light,
@@ -686,5 +692,77 @@ void main() {
     await _wait(tester);
     expect(_inCell(2, find.text('播放失败')), findsNothing);
     await _close(tester, services);
+  });
+
+  group("N01.2: the cells' flying danmaku follow the danmaku settings, as in the room", () {
+    tearDown(() => DisplayMode.info.value = null);
+
+    testWidgets('the danmaku frame rate: manual, changed without leaving, and following the refresh rate', (
+      tester,
+    ) async {
+      final (services, _) = await _pump(tester, const Size(393, 852));
+      await tester.runAsync(
+        () => services.store.settings.setAll({Settings.danmakuAutoFps: false, Settings.danmakuFps: 30}),
+      );
+      await _pick(tester, '1');
+      await tester.tap(_key('multiview-danmaku'));
+      await _wait(tester);
+      DanmakuOverlay overlay() => tester.widget<DanmakuOverlay>(_inCell(1, find.byType(DanmakuOverlay)));
+      expect(overlay().fps, 30);
+
+      // c1: a change applies at once, without leaving the multi-view.
+      await tester.runAsync(() => services.store.settings.set(Settings.danmakuFps, 45));
+      await _wait(tester);
+      expect(overlay().fps, 45);
+
+      // Following the refresh rate: "省电" is 60 on a 120 Hz display,
+      // "性能" the display's highest; the display's rate is passed on.
+      DisplayMode.info.value = const DisplayModeInfo(
+        currentRefreshRate: 120,
+        maxRefreshRate: 120,
+        supportedRefreshRates: [60, 120],
+      );
+      await tester.runAsync(
+        () => services.store.settings.setAll({Settings.danmakuAutoFps: true, Settings.refreshRateMode: 'powerSaving'}),
+      );
+      await _wait(tester);
+      expect(overlay().fps, 60);
+      expect(overlay().refreshRate, 120);
+      await tester.runAsync(() => services.store.settings.set(Settings.refreshRateMode, 'performance'));
+      await _wait(tester);
+      expect(overlay().fps, 120);
+      await _close(tester, services);
+    });
+
+    testWidgets("c3 (D-035): the selected cell's bundled emoticons fly as pictures", (tester) async {
+      // The app's lists, read from the files (the room's library reads the
+      // same assets).
+      final library = EmoteLibrary(bundle: FileAssetBundle());
+      final bilibili = (await tester.runAsync(() => library.load(SiteIds.bilibili)))!;
+      expect(bilibili.codes, isNotEmpty);
+      final (services, _) = await _pump(
+        tester,
+        const Size(393, 852),
+        overrides: [emoteLibraryProvider.overrideWithValue(library)],
+      );
+      await _pick(tester, '1');
+      await tester.tap(_key('multiview-danmaku'));
+      await _wait(tester);
+      final overlay = tester.widget<DanmakuOverlay>(_inCell(1, find.byType(DanmakuOverlay)));
+      // The Bilibili table, the same one the room uses.
+      expect(overlay.emotes, same(bilibili));
+      await _close(tester, services);
+    });
+
+    testWidgets('c4 (D-035): the cells follow "屏幕常亮"', (tester) async {
+      final (services, _) = await _pump(tester, const Size(393, 852));
+      await _pick(tester, '1');
+      LiveVideoView video() => tester.widget<LiveVideoView>(_inCell(1, find.byType(LiveVideoView)));
+      expect(video().keepScreenOn, isTrue);
+      await tester.runAsync(() => services.store.settings.set(Settings.enableScreenKeepOn, false));
+      await _wait(tester);
+      expect(video().keepScreenOn, isFalse);
+      await _close(tester, services);
+    });
   });
 }

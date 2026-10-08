@@ -15,6 +15,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/setting_rows.dart';
 
@@ -23,9 +24,9 @@ import 'package:pure_live/shared/danmaku/setting_rows.dart';
 /// the first group's title as in the room's tab (U.2e c8); then "更多": what
 /// the room keeps elsewhere and only the settings hold for every room (the
 /// global "显示弹幕", the player's "在画面上显示飞行弹幕", YouTube's chat, the
-/// danmaku font and the block list). The room's own "弹幕列表" group (its
-/// chat list) and "小窗弹幕" (its own row on the overview, U.6a c7) are not
-/// repeated here.
+/// danmaku font and the block list). The room's "弹幕列表" and "小窗弹幕"
+/// groups come before "更多", as in the room (A08.6 c2, G2 A: the whole
+/// group; the overview keeps its "小窗弹幕" row, U.6a c7).
 ///
 /// The overview's "弹幕" row shows it (in the right pane from 840 wide);
 /// `RoutePath.kDanmakuSettings` opens it on its own.
@@ -59,7 +60,7 @@ class DanmakuSettingsPage extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: start ? 12 : 4),
             child: DanmakuSettingsContent(
               hint: i18n('danmaku_settings_live_hint'),
-              extra: [PanelGroupTitle(i18n('more')), const _More()],
+              extra: [...danmakuListAndPipGroups(), PanelGroupTitle(i18n('more')), const _More()],
             ),
           ),
         ),

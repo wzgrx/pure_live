@@ -123,7 +123,9 @@ class SettingsSectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (section == SettingsSection.configPreview) return ConfigPreviewPage(onBack: onBack);
-    if (section == SettingsSection.pipDanmaku) return PipDanmakuPage(highlight: highlight, onBack: onBack);
+    // The room's mini window group (A08.6 c4); the catalogue's rows are
+    // only for search.
+    if (section == SettingsSection.pipDanmaku) return PipDanmakuPage(onBack: onBack);
     // The live room's danmaku settings (F02 c1); the catalogue's danmaku
     // rows are only for search.
     if (section == SettingsSection.danmaku) return DanmakuSettingsPage(onBack: onBack);

@@ -16,22 +16,9 @@ import 'package:pure_live/features/live_play/local_interaction/local_chat_line.d
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
-
-/// The look of the chat list (the `danmakuListStyle` setting, U.2a choice
-/// A): compact lines by default, 3.x's cards on request.
-enum ChatListStyle {
-  /// One line per message: "用户名：" in a secondary colour (or the message's
-  /// own colour), then the message.
-  compact,
-
-  /// 3.x `DanmakuItem`: a card per message with a coloured dot.
-  card;
-
-  /// The style stored as [name], compact for anything else.
-  static ChatListStyle of(String name) => name == card.name ? card : compact;
-}
 
 /// The contrast a name in a viewer's colour keeps on its background (WCAG
 /// AA for body text).

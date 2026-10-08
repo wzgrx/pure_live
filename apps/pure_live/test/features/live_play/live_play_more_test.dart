@@ -98,13 +98,42 @@ void main() {
     expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.gift), isEmpty);
     danmaku.emit(DanmakuReceived(gift('观众', '小电视 ×1')));
     expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.gift), isEmpty);
-    expect(await store.meta.get(LiveRoomController.showGiftsKey), '0');
+    // A08.6 c3: the switch is the `showChatGifts` setting now (it was a
+    // record in `meta`), so every room and the settings page share it.
+    expect(store.settings.get(Settings.showChatGifts), isFalse);
     controller.dispose();
 
     final next = controllerFor(FakeSite(liveRoom()));
     await next.start();
     expect(next.showGifts, isFalse);
     next.dispose();
+  });
+
+  test('A08.6 c3: the gift setting changed elsewhere applies to an open room at once', () async {
+    final controller = controllerFor(FakeSite(liveRoom()));
+    await controller.start();
+    await settle();
+    var notified = 0;
+    controller.addListener(() => notified++);
+    danmaku.emit(DanmakuReceived(gift('观众', '辣条 ×10')));
+    expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.gift), hasLength(1));
+
+    // The settings page turns it off: the open room drops its gift lines.
+    await store.settings.set(Settings.showChatGifts, false);
+    await settle();
+    expect(controller.showGifts, isFalse);
+    expect(notified, greaterThan(0));
+    expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.gift), isEmpty);
+    danmaku.emit(DanmakuReceived(gift('观众', '小电视 ×1')));
+    expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.gift), isEmpty);
+
+    // And on again: new gifts show.
+    await store.settings.set(Settings.showChatGifts, true);
+    await settle();
+    expect(controller.showGifts, isTrue);
+    danmaku.emit(DanmakuReceived(gift('观众', '小电视 ×2')));
+    expect(controller.chat.lines.where((line) => line.kind == ChatLineKind.gift), hasLength(1));
+    controller.dispose();
   });
 
   test('audio only keeps the stream; a sleep session starts audio only and its timer pauses the room', () async {

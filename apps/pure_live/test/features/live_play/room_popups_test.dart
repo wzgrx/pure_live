@@ -246,6 +246,65 @@ void main() {
     });
   });
 
+  group('A08.7: the mini window danmaku colour unfolds in the danmaku panel', () {
+    /// Opens the danmaku panel, turns "保留平台弹幕颜色" off and taps
+    /// "统一弹幕颜色".
+    Future<Finder> openColour(WidgetTester tester) async {
+      final scope = tester.widget<RoomPanelScope>(find.byType(RoomPanelScope).first);
+      scope.notifier!.open(RoomPanelKind.danmaku);
+      await tester.pumpAndSettle();
+      final panel = _key('live-play-danmaku-panel');
+      final list = find.descendant(of: panel, matching: find.byType(Scrollable)).first;
+      await tester.scrollUntilVisible(_key('danmaku-switch-pipOriginalColor'), 200, scrollable: list);
+      await tester.pumpAndSettle();
+      await tester.tap(_key('danmaku-switch-pipOriginalColor'));
+      await _settle(tester);
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(_key('danmaku-setting-pipColor'), 100, scrollable: list);
+      await tester.pumpAndSettle();
+      await tester.tap(_key('danmaku-setting-pipColor'));
+      await tester.pumpAndSettle();
+      return panel;
+    }
+
+    for (final (name, width, height, fullscreen) in [
+      ('landscape fullscreen 852×393', 852.0, 393.0, true),
+      ('portrait 393×852', 393.0, 852.0, false),
+      ('wide 1280×800', 1280.0, 800.0, false),
+    ]) {
+      testWidgets('$name: no dialog; the palette shows whole inside the panel; a swatch applies', (tester) async {
+        final room = await _pump(tester, width: width, height: height);
+        if (fullscreen) {
+          await tester.tap(_key('live-play-fullscreen'));
+          await _settle(tester);
+          expect(_key('live-play-back'), findsOneWidget, reason: 'fullscreen');
+        }
+        final panel = await openColour(tester);
+        _noDialog(tester);
+        final palette = _in('live-play-danmaku-panel', _key('danmaku-color-palette'));
+        expect(palette, findsOneWidget);
+        expect(_in('live-play-danmaku-panel', _key('danmaku-color-fffe0302')), findsOneWidget);
+        // c2: scrolled so the whole palette is in view, inside the panel.
+        final box = tester.getRect(panel);
+        final rect = tester.getRect(palette);
+        expect(rect.left, greaterThanOrEqualTo(box.left));
+        expect(rect.right, lessThanOrEqualTo(box.right));
+        expect(rect.bottom, lessThanOrEqualTo(box.bottom + 0.5));
+        if (fullscreen) expect(box, const Rect.fromLTRB(852.0 - 360, 0, 852, 393));
+        await tester.tap(_key('danmaku-color-fffe0302'));
+        await _settle(tester);
+        await tester.pumpAndSettle();
+        expect(room.services.store.settings.get(Settings.pipDanmakuColor), 0xFFFE0302);
+        expect(
+          find.descendant(of: _key('danmaku-color-fffe0302'), matching: _key('danmaku-color-selected')),
+          findsOneWidget,
+        );
+        _noDialog(tester);
+        await _close(tester, room);
+      });
+    }
+  });
+
   group("A07.15: drags from the system's gesture area", () {
     testWidgets('landscape fullscreen: from the bottom or top edge nothing changes; from the middle as before', (
       tester,

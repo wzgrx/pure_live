@@ -145,7 +145,22 @@ final class LiveStore {
     final settings = await SettingsStore.load(db);
     final secrets = await SecretStore.load(db, cipher);
     await _upgradeThemeColor(settings);
+    await _adoptGiftSwitch(settings, MetaStore(db));
     return LiveStore._(db, settings, secrets, now: now).._dataVersion = version;
+  }
+
+  /// The meta key the room kept "在聊天列表显示礼物" under before it became
+  /// [Settings.showChatGifts] (B-21; A08.6 c3).
+  static const legacyShowGiftsKey = 'live_play.showGifts';
+
+  /// Takes the room's old gift switch over once (A08.6 c3): "off" (`0`)
+  /// becomes the setting unless one is stored already; the meta record is
+  /// removed either way, so it is never read again.
+  static Future<void> _adoptGiftSwitch(SettingsStore settings, MetaStore meta) async {
+    final stored = await meta.get(legacyShowGiftsKey);
+    if (stored == null) return;
+    if (stored == '0' && !settings.isSet(Settings.showChatGifts)) await settings.set(Settings.showChatGifts, false);
+    await meta.set(legacyShowGiftsKey, null);
   }
 
   /// Moves a stored 3.x default blue to the brand blue once (U.6b C-3):

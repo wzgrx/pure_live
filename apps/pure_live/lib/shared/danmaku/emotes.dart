@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
@@ -106,6 +106,60 @@ final class EmoteLibrary {
 
 /// The app's [EmoteLibrary].
 final Provider<EmoteLibrary> emoteLibraryProvider = Provider((ref) => EmoteLibrary());
+
+/// Builds with [platform]'s bundled emoticons for a flying layer: the table
+/// at once when it is loaded, else empty until it is (then again). The
+/// multi-view cells (N01.2 c3) and the mini windows (D03.3 c2) read it the
+/// way the room's picture does; a new [platform] reads its own.
+class EmoteTableBuilder extends ConsumerStatefulWidget {
+  /// Creates the builder.
+  const new({required this.platform, required this.builder, super.key});
+
+  /// The platform whose table is read; null for none.
+  final String? platform;
+
+  /// Builds with the table.
+  final Widget Function(BuildContext context, EmoteTable emotes) builder;
+
+  @override
+  ConsumerState<EmoteTableBuilder> createState() => _EmoteTableBuilderState();
+}
+
+class _EmoteTableBuilderState extends ConsumerState<EmoteTableBuilder> {
+  EmoteTable _emotes = EmoteTable.empty;
+
+  @override
+  void initState() {
+    super.initState();
+    _read();
+  }
+
+  @override
+  void didUpdateWidget(EmoteTableBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.platform != widget.platform) _read();
+  }
+
+  void _read() {
+    final platform = widget.platform;
+    if (platform == null) {
+      _emotes = EmoteTable.empty;
+      return;
+    }
+    final library = ref.read(emoteLibraryProvider);
+    _emotes = library.tableOf(platform);
+    if (_emotes.codes.isNotEmpty) return;
+    unawaited(
+      library.load(platform).then((table) {
+        // Not after the page closed or the cell changed platform.
+        if (mounted && widget.platform == platform && table.codes.isNotEmpty) setState(() => _emotes = table);
+      }),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.builder(context, _emotes);
+}
 
 /// Each message's pieces with the table they were made with: the chat list
 /// and the flying layer get the same message and share one parse (B09 c7).

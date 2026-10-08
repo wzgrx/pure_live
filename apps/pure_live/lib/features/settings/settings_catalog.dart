@@ -13,6 +13,7 @@ import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 
@@ -1706,6 +1707,28 @@ List<SettingsEntry> _build() {
       format: (value) => '${value.round()} FPS',
       requires: () => [needsOff(Settings.danmakuAutoFps, 'settings_danmaku_auto_fps')],
       keywords: ['帧率', 'fps', '弹幕'],
+    )
+    // A08.6 c2: the room's chat list group, on the page before "更多".
+    ..group = 'danmaku_list'
+    ..choice(
+      'danmaku_list_style',
+      'danmaku_list_style',
+      Settings.danmakuListStyle,
+      null,
+      () => _keyed({
+        ChatListStyle.compact.name: 'danmaku_list_style_compact',
+        ChatListStyle.card.name: 'danmaku_list_style_card',
+      }),
+      desc: 'danmaku_list_style_desc',
+      keywords: ['聊天', '列表', '卡片', '紧凑'],
+    )
+    ..toggle(
+      'danmaku_show_gifts',
+      'live_play_show_gifts',
+      Settings.showChatGifts,
+      null,
+      desc: 'live_play_show_gifts_desc',
+      keywords: ['礼物', '聊天', 'gift'],
     )
     ..group = 'more'
     ..toggle(

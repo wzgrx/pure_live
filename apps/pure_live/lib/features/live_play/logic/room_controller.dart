@@ -199,7 +199,6 @@ class LiveRoomController extends ChangeNotifier {
   bool _switching = false;
   bool _switchingLine = false;
   List<LiveSuperChatMessage> _superChats = const [];
-  bool _showGifts = true;
   bool _audioOnly = false;
   Timer? _sleepTimer;
   DateTime? _sleepDeadline;
@@ -207,9 +206,6 @@ class LiveRoomController extends ChangeNotifier {
   bool _sleepSession = false;
   EpgProgramme? _catchup;
   ChatConnection _chatConnection = ChatConnection.idle;
-
-  /// The meta key of the "show gifts" switch (B-21).
-  static const String showGiftsKey = 'live_play.showGifts';
 
   /// The room as known now (the card's data until the detail arrives).
   LiveRoom get room => _room;
@@ -245,8 +241,9 @@ class LiveRoomController extends ChangeNotifier {
   /// What "now" is (tests fix it).
   DateTime now() => _now();
 
-  /// Gifts appear in the chat list (B-21); the switch is kept in `meta`.
-  bool get showGifts => _showGifts;
+  /// Gifts appear in the chat list (B-21): the `showChatGifts` setting
+  /// (A08.6 c3; the room kept it in `meta` before).
+  bool get showGifts => store.settings.get(Settings.showChatGifts);
 
   /// Video is off: only the sound plays (3.x's headphone button).
   bool get audioOnly => _audioOnly;
@@ -350,10 +347,9 @@ class LiveRoomController extends ChangeNotifier {
     for (final setting in [Settings.enableDanmakuDisplay, Settings.enablePipDanmaku]) {
       _subscriptions.add(store.settings.watch(setting).skip(1).listen((_) => unawaited(_syncDanmaku())));
     }
+    // A08.6 c3: the settings page changes it for the rooms already open.
+    _subscriptions.add(store.settings.watch(Settings.showChatGifts).skip(1).listen(_onShowGifts));
     await _reloadFilter();
-    await _guard(() async {
-      _showGifts = await store.meta.get(showGiftsKey) != '0';
-    }, 'gift switch');
     if (sleepSessionOnStart) {
       _audioOnly = true;
       _sleepSession = true;
@@ -649,13 +645,18 @@ class LiveRoomController extends ChangeNotifier {
     await session.setAudioOnly(enabled: enabled);
   }
 
-  /// Shows or hides gifts in the chat list and remembers the choice.
+  /// Shows or hides gifts in the chat list of every room (the setting).
   Future<void> setShowGifts({required bool show}) async {
-    if (_showGifts == show) return;
-    _showGifts = show;
+    if (showGifts == show) return;
+    await _guard(() => store.settings.set(Settings.showChatGifts, show), 'gift switch');
+    // At once for this room; the others hear it from the setting.
+    _onShowGifts(show);
+  }
+
+  void _onShowGifts(bool show) {
+    if (_disposed) return;
     if (!show) chat.removeWhere((line) => line.kind == ChatLineKind.gift);
     _notify();
-    await _guard(() => store.meta.set(showGiftsKey, show ? '1' : '0'), 'gift switch');
   }
 
   /// Starts (or restarts) the sleep timer for [minutes], or stops it (3.x
@@ -957,7 +958,7 @@ class LiveRoomController extends ChangeNotifier {
         chat.add(ChatLine.notice(message));
       case LiveMessageType.gift:
         // B-21: a line in the chat list, not on the video; the switch hides them.
-        if (!_showGifts || message.message.trim().isEmpty) return;
+        if (!showGifts || message.message.trim().isEmpty) return;
         chat.add(ChatLine.gift(message));
     }
   }

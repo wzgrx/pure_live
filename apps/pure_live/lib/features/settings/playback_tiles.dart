@@ -8,6 +8,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
@@ -16,8 +17,10 @@ import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/danmaku_color_palette.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
+import 'package:pure_live/shared/danmaku/pip_danmaku_settings.dart';
 import 'package:pure_live/shared/permission_prompts.dart';
 
 // The rows of the playback pages that draw more than a plain switch, slider
@@ -503,9 +506,11 @@ class DanmakuStylePage extends StatelessWidget {
   }
 }
 
-/// "统一弹幕颜色" of the mini windows: the colour dialog of U.6b; greyed out
-/// while the platform's colours are kept (U.6c c5).
-class PipColorTile extends ConsumerWidget {
+/// "统一弹幕颜色" of the mini windows as a search result: the same palette as
+/// the page's row (A08.7 c3, H1 A; [DanmakuColorPalette], no opacity as in
+/// 3.x) unfolds under it instead of a colour dialog; greyed out while the
+/// platform's colours are kept (U.6c c5).
+class PipColorTile extends ConsumerStatefulWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
 
@@ -513,7 +518,15 @@ class PipColorTile extends ConsumerWidget {
   final SettingsEntry entry;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PipColorTile> createState() => _PipColorTileState();
+}
+
+class _PipColorTileState extends ConsumerState<PipColorTile> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final entry = widget.entry;
     final color = Color(watchSetting(ref, Settings.pipDanmakuColor));
     final unmet = watchUnmet(ref, [
       needsOn(Settings.enablePipDanmaku, 'pip_danmaku_enable'),
@@ -523,17 +536,40 @@ class PipColorTile extends ConsumerWidget {
         reason: i18n('settings_needs_off', args: {'name': i18n('pip_danmaku_original_color')}),
       ),
     ]);
-    return SettingsLinkRow(
-      key: entry.rowKey,
-      title: entry.titleText,
-      value: '#${colorHex(color)}',
-      valueWidget: SettingsSwatch(color, size: 24),
-      enabled: unmet == null,
-      disabledReason: unmetReason(unmet),
-      onTap: () async {
-        final picked = await showColorDialog(context: context, title: entry.titleText, current: color);
-        if (picked != null && context.mounted) writeSetting(ref, Settings.pipDanmakuColor, picked.toARGB32());
-      },
+    final open = _open && unmet == null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsLinkRow(
+          key: entry.rowKey,
+          title: entry.titleText,
+          value: '#${colorHex(color)}',
+          valueWidget: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SettingsSwatch(color, size: 24),
+              const SizedBox(width: 4),
+              Icon(
+                open ? AppIcons.foldUp : AppIcons.dropDown,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          chevron: false,
+          enabled: unmet == null,
+          disabledReason: unmetReason(unmet),
+          onTap: () => setState(() => _open = !_open),
+        ),
+        if (open)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: DanmakuColorPalette(
+              current: color,
+              onChanged: (picked) => writeSetting(ref, Settings.pipDanmakuColor, picked.toARGB32()),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -596,15 +632,15 @@ class PipFpsTile extends ConsumerWidget {
 }
 
 /// The floating-window danmaku page (3.x `PipDanmakuSettingsPage`, U.6c
-/// c13, c14): the explanation and the live preview above the rows on
-/// phones; from 840 wide, or below 480 high (a phone held sideways), the
-/// preview stays on the left and the rows scroll on the right.
+/// c13): the explanation and the live preview above the rows on phones;
+/// from 840 wide, or below 480 high (a phone held sideways), the preview
+/// stays on the left and the rows scroll on the right. The rows are the
+/// room's "小窗弹幕" group ([PipDanmakuSettings], 3.x's one
+/// `PipDanmakuSettingsSection`; A08.6 c4, G3 A), then the page's "恢复默认";
+/// the catalogue's rows are only for search.
 class PipDanmakuPage extends ConsumerWidget {
   /// Creates the page.
-  const new({this.highlight, this.onBack, super.key});
-
-  /// The row to highlight (search).
-  final String? highlight;
+  const new({this.onBack, super.key});
 
   /// The back button of the one-column layout's first page.
   final VoidCallback? onBack;
@@ -627,7 +663,7 @@ class PipDanmakuPage extends ConsumerWidget {
             i18n('settings_pip_danmaku_intro'),
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
           );
-          final rows = SettingsSectionView(section: SettingsSection.pipDanmaku, highlight: highlight);
+          final rows = _PipDanmakuRows(start: embedded || side);
           if (side) {
             final previewWidth = (constraints.maxWidth * 0.43).clamp(240.0, 520.0);
             return Row(
@@ -680,6 +716,42 @@ class PipDanmakuPage extends ConsumerWidget {
           );
         },
       ),
+    );
+  }
+}
+
+/// The rows of [PipDanmakuPage]: the shared group, then "恢复默认".
+class _PipDanmakuRows extends StatelessWidget {
+  const new({required this.start});
+
+  /// Kept at the start (the right pane, or right of the preview).
+  final bool start;
+
+  @override
+  Widget build(BuildContext context) {
+    final reset = settingsCatalog.firstWhere((entry) => entry.id == 'pip_reset');
+    return ListView(
+      key: const ValueKey('settings-pip-rows'),
+      physics: const PureLiveScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(start ? 12 : 4, 8, start ? 12 : 4, 32),
+      children: [
+        Align(
+          alignment: start ? Alignment.topLeft : Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const PipDanmakuSettings(),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
+                  child: SettingsGroup(children: [reset.build(context, reset)]),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

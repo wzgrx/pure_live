@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:live_cast/live_cast.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
@@ -276,7 +277,8 @@ void main() {
     await tester.tap(find.text('在聊天列表显示礼物'));
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pumpAndSettle();
-    expect(await tester.runAsync(() => services.store.meta.get('live_play.showGifts')), '0');
+    // A08.6 c3: the switch is the `showChatGifts` setting (was in meta).
+    expect(services.store.settings.get(Settings.showChatGifts), isFalse);
 
     await tester.tap(find.byKey(const ValueKey('live-play-audio-only')));
     await tester.pump();

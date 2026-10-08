@@ -1,11 +1,20 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 
 // The danmaku look, shared by the live room and the multi-view page (M12.2);
 // the settings themselves are in danmaku_settings_content.dart (U.2f, U.8).
+
+/// The family of the danmaku font setting [name]: null for the system's
+/// (empty, or the stored default "Default"). The room's picture, the
+/// multi-view and the mini windows (D03.3 c1) use this one rule.
+String? danmakuFontFamilyOf(String name) =>
+    name.isEmpty || name == Settings.danmakuFontFamilyName.defaultValue ? null : name;
 
 /// The danmaku look from the settings.
 DanmakuLook danmakuLookOf(WidgetRef ref) {
@@ -22,9 +31,35 @@ DanmakuLook danmakuLookOf(WidgetRef ref) {
     stroke: watchSetting(ref, Settings.enableDanmakuStroke),
     strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
     // F.2a: the danmaku font ("Default" is the system's) and text-only mode.
-    fontFamily: font.isEmpty || font == Settings.danmakuFontFamilyName.defaultValue ? null : font,
+    fontFamily: danmakuFontFamilyOf(font),
     textOnly: watchSetting(ref, Settings.noEmojiMode),
   );
+}
+
+/// Builds with the flying danmaku's frame rate and the display's rate
+/// ([danmakuFrameRate]) from "弹幕帧率", "弹幕帧率跟随界面刷新率", the
+/// refresh-rate policy and the display; again when any of them changes
+/// (N01.2: the multi-view cells, as the room's picture).
+class DanmakuFrameRateBuilder extends ConsumerWidget {
+  /// Creates the builder.
+  const new({required this.builder, super.key});
+
+  /// Builds with the rates.
+  final Widget Function(BuildContext context, int fps, double? refreshRate) builder;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final automatic = watchSetting(ref, Settings.danmakuAutoFps);
+    final configured = watchSetting(ref, Settings.danmakuFps);
+    final mode = watchSetting(ref, Settings.refreshRateMode);
+    return ValueListenableBuilder<DisplayModeInfo?>(
+      valueListenable: DisplayMode.info,
+      builder: (context, display, _) {
+        final rate = danmakuFrameRate(automatic: automatic, configured: configured, mode: mode, display: display);
+        return builder(context, rate.fps, rate.refreshRate);
+      },
+    );
+  }
 }
 
 /// The choices of "暂停时的弹幕" ([Settings.danmakuPausedBehavior], B02 c3).

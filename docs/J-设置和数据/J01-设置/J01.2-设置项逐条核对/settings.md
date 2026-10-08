@@ -37,7 +37,7 @@ v4 的 224 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `matchVideoFrameRate` | Bool | `true` | —（新加） |  |  |  | `features/live_play/logic/room_refresh_rate.dart:37`、`features/live_play/logic/room_refresh_rate.dart:57` | 立即 | `match_video_frame_rate` | 一样：v4 新加（R02.1，U.2i），默认值照来源任务 |
 | `preferRealOnlineCounts` | Bool | `false` | `false`（`app_settings_controller.dart:54`） |  |  |  | `features/favorite/favorite_controller.dart:136`、`features/favorite/favorite_controller.dart:291`、`features/multiview/widgets/room_picker.dart:173` 等 10 处 | 立即 | `audience_heat` | 一样 |
 | `realOnlinePlatforms` | StringList | `[douyin, kuaishou, cc, twitch, soop, acfun, picarto, twitcasting]` | `[douyin, kuaishou, cc, twitch, soop, acfun, picarto, twitcasting]`（`app_settings_controller.dart:11-20、:55`） |  |  |  | `features/favorite/favorite_controller.dart:137`、`features/favorite/favorite_controller.dart:292`、`features/multiview/widgets/room_picker.dart:174` 等 13 处 | 立即 | `audience_platforms` | 一样：`defaultRealOnlinePlatforms` 展开后一样；3.x 的 `audienceMetricMigration` 补的平台都已在列表里 |
-| `savedMenuIds` | StringList | `[favorites, popular, areas, record]` | `[favorites, popular, areas, record]`（`app_settings_controller.dart:69`，`HomeMenu` 在 `common/consts/app_consts.dart:6-10`） |  |  |  | `app/app.dart:142`、`features/home/home_page.dart:136`、`live_store/src/legacy/legacy_snapshot.dart:201` 等 4 处 | 立即 | `home_menus` | 一样 |
+| `savedMenuIds` | StringList | `[favorites, popular, areas, record]` | `[favorites, popular, areas, record]`（`app_settings_controller.dart:69`，`HomeMenu` 在 `common/consts/app_consts.dart:6-10`） |  |  |  | `app/app.dart:142`、`features/home/home_page.dart:136`、`live_store/src/legacy/legacy_snapshot.dart:209` 等 4 处 | 立即 | `home_menus` | 一样 |
 | `enableMultiView` | Bool | `true` | `true`（`app_settings_controller.dart:60`） |  |  |  | `features/home/home_views.dart:98`、`features/home/menu_button.dart:137` | 立即 | `multiview` | 一样 |
 | `enableNewWindowPlay` | Bool | `true` | `true`（`app_settings_controller.dart:61`） |  |  |  | `app/desktop/desktop_window.dart:84`、`app/desktop/desktop_window.dart:89`、`features/home/menu_button.dart:56` | 立即 | `new_window` | 一样 |
 | `showUnplayableInDiscover` | Bool | `false` | —（新加） |  |  |  | `features/area_rooms/area_rooms_page.dart:77`、`features/area_rooms/area_rooms_page.dart:80`、`features/area_rooms/area_rooms_page.dart:81` 等 7 处 | 立即 | `show_unplayable` | 一样：v4 新加（UPGRADES 统一原则“受限”，J02.1），默认值照来源任务 |
@@ -78,7 +78,7 @@ v4 的 224 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 
 | 键 | 类型 | v4 默认 | 3.x 默认 | v4 范围 | 3.x 范围 | 设置页 | 读取 | 生效 | 目录 | 结论 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `themeColorMigration` | Int，本机 | `0` | —（新加） | 不限 |  |  | `live_store/src/live_store.dart:170`、`live_store/src/live_store.dart:175` | 读取时 |  | 一样：v4 新加（A11.2，本机记录），默认值照来源任务 |
+| `themeColorMigration` | Int，本机 | `0` | —（新加） | 不限 |  |  | `live_store/src/live_store.dart:172`、`live_store/src/live_store.dart:177` | 读取时 |  | 一样：v4 新加（A11.2，本机记录），默认值照来源任务 |
 | `remote_sync_device_id` | String，本机 | `''` | `''`（`modules/remote_receiver/remote_sync_service.dart:134-143（第一次用时生成）`） |  |  |  | `features/remote_receiver/remote_sync_service.dart:164`、`features/remote_receiver/remote_sync_service.dart:167` | 读取时 |  | 一样 |
 
 ## 字体（font）
@@ -154,9 +154,9 @@ v4 的 224 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `danmakuFps` | Int | `60` | `60`（`danmaku_settings_controller.dart:70`） | 30～240 | 30～240（`danmaku_settings_controller.dart:123`） | 滑块 30～240，步长 1 | `features/live_play/player/player_view.dart:652`、`shared/danmaku/danmaku_settings.dart:53`、`shared/danmaku/danmaku_templates.dart:38` 等 4 处 | 立即 | `danmaku_fps` | 一样 |
 | `danmakuAutoFps` | Bool | `true` | `true`（`danmaku_settings_controller.dart:71`） |  |  |  | `features/live_play/player/player_view.dart:651`、`shared/danmaku/danmaku_settings.dart:52`、`shared/danmaku/danmaku_templates.dart:39` 等 5 处 | 立即 | `danmaku_auto_fps` | 一样 |
 | `danmakuMaxVisibleCount` | Int | `48` | —（新加） | 10～120 | 3.x 没有这个设置，直播间和多画面写死 48 | 滑块 10～120，步长 2 | `features/live_play/player/player_view.dart:658`、`features/multiview/multiview_page.dart:896`、`tv/room/tv_live_play_page.dart:470` | 立即 | `danmaku_max_visible` | 一样：v4 新加（D05.2，V01.4，D-036）：默认 48 和 3.x 一样；10～120，超出范围（上游电视版存 0 表示按设备）读成 48 |
-| `enableDanmakuTapInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:72`） |  |  |  | `features/live_play/player/player_view.dart:469`、`live_store/src/legacy/legacy_snapshot.dart:407` | 读取时 | `danmaku_tap` | 一样 |
-| `enableDanmakuLongPressInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:73`） |  |  |  | `features/live_play/player/player_view.dart:469`、`features/live_play/player/player_view.dart:655`、`live_store/src/legacy/legacy_snapshot.dart:408` | 立即 | `danmaku_long_press` | 一样 |
-| `holdDanmakuOnPress` | Bool | `false` | —（新加） |  |  |  | `features/live_play/player/player_view.dart:482` | 读取时 | `danmaku_hold_on_press` | 一样：v4 新加（D03.4，V01.3，D-036）：默认关，画面弹幕和以前一样；开了以后按住一条飞行弹幕时它停住 |
+| `enableDanmakuTapInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:72`） |  |  |  | `features/live_play/player/player_view.dart:469`、`live_store/src/legacy/legacy_snapshot.dart:426` | 读取时 | `danmaku_tap` | 一样 |
+| `enableDanmakuLongPressInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:73`） |  |  |  | `features/live_play/player/player_view.dart:469`、`features/live_play/player/player_view.dart:655`、`live_store/src/legacy/legacy_snapshot.dart:427` | 立即 | `danmaku_long_press` | 一样 |
+| `holdDanmakuOnPress` | Bool | `true` | —（新加） |  |  |  | `features/live_play/player/player_view.dart:482` | 读取时 | `danmaku_hold_on_press` | 一样：v4 新加（D03.4，V01.3，D-036）：默认开（D-039，用户 2026-10-09）；按住一条飞行弹幕时它停住，松手继续；关掉和 3.x 一样 |
 | `collapseRepeatedDanmaku` | Bool | `false` | `false`（`danmaku_settings_controller.dart:74`） |  |  |  | `features/live_play/logic/room_controller.dart:445`、`features/live_play/logic/room_controller.dart:459`、`features/multiview/logic/multiview_controller.dart:290` 等 4 处 | 立即（直播间和多画面监听它，重建过滤器） | `collapse_repeated` | 一样 |
 | `repeatedDanmakuWindowSeconds` | Int | `5` | `5`（`danmaku_settings_controller.dart:75`） | 1～30 | 1～30（`danmaku_settings_controller.dart:259-261`，导入备份时） | 滑块 1～30，步长 1 | `features/live_play/logic/room_controller.dart:446`、`features/live_play/logic/room_controller.dart:460`、`features/multiview/logic/multiview_controller.dart:291` 等 4 处 | 立即（直播间和多画面监听它，重建过滤器） | `repeat_window` | 不一样，已改：注册表原来只有下限 1，3.x 导入时夹到 1～30、设置页滑块也是 1～30；补上 `max: 30` |
 | `savedDanmakuTemplate` | String | `''` | `''`（`danmaku_settings_controller.dart:77`） |  |  |  | 弹幕设置的“模板”本身（`shared/danmaku/danmaku_settings_content.dart`、`danmaku_templates.dart`） | 立即 |  | 一样 |
@@ -353,8 +353,8 @@ v4 的 224 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 
 | 键 | 类型 | v4 默认 | 3.x 默认 | v4 范围 | 3.x 范围 | 设置页 | 读取 | 生效 | 目录 | 结论 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `bilibiliUid` | Int，本机 | `0` | `0`（`cookie_settings_controller.dart:11`） | 不限 | 不限 |  | `app/platforms.dart:164`、`features/account/account_services.dart:122`、`features/account/account_services.dart:128` 等 6 处 | 读取时 |  | 一样 |
-| `douyuCookieSavedAt` | Int，本机 | `0` | `0`（`cookie_settings_controller.dart:22`） | 不限 | 不限 |  | `app/platforms.dart:84`、`app/platforms.dart:91`、`features/account/account_services.dart:148` 等 7 处 | 读取时 |  | 一样 |
+| `bilibiliUid` | Int，本机 | `0` | `0`（`cookie_settings_controller.dart:11`） | 不限 | 不限 |  | `app/platforms.dart:164`、`features/account/account_services.dart:122`、`features/account/account_services.dart:131` 等 11 处 | 读取时 |  | 一样 |
+| `douyuCookieSavedAt` | Int，本机 | `0` | `0`（`cookie_settings_controller.dart:22`） | 不限 | 不限 |  | `app/platforms.dart:84`、`app/platforms.dart:91`、`features/account/account_services.dart:211` 等 7 处 | 读取时 |  | 一样 |
 
 ## 3.x 有、v4 不作为设置的键
 

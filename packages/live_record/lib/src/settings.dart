@@ -31,6 +31,7 @@ final class RecordSettings {
     int threadQueueSize = 2048,
     this.usePinyinForFolder = false,
     this.recordDanmaku = false,
+    this.preferH264 = true,
   }) : segmentTime = segmentTime.clamp(60, 3600),
        maxTaskCount = maxTaskCount.clamp(1, 10),
        maxCacheMB = maxCacheMB < 1 ? 1 : maxCacheMB,
@@ -106,4 +107,9 @@ final class RecordSettings {
 
   /// Save the chat beside each attempt (left to the app, see the M8 record).
   final bool recordDanmaku;
+
+  /// The player's "优先 H.264" (live_store `Settings.preferH264`, on by
+  /// default): a task that does not name its quality is not started on an
+  /// HEVC quality while the room offers another (H01.7).
+  final bool preferH264;
 }

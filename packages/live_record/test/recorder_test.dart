@@ -22,6 +22,45 @@ void main() {
       expect(RecordStreamResolver.orderQualities(qualities, '流畅').map((q) => q.id), [1, 4, 2]);
     });
 
+    test('优先 H.264 passes over an HEVC quality picked by name or position (H01.7, Inke)', () {
+      // Inke: 原画 is Zego's HEVC only and ranks first; FLV is Wangsu's H.264.
+      const inke = [
+        LivePlayQuality(quality: 'FLV', id: 'flv', codec: 'avc'),
+        LivePlayQuality(quality: '原画', id: 'original', sort: 1, codec: 'hevc'),
+      ];
+      expect(RecordStreamResolver.orderQualities(inke, '原画').map((q) => q.id), ['original', 'flv']);
+      expect(RecordStreamResolver.orderQualities(inke, '原画', preferH264: true).map((q) => q.id), ['flv', 'original']);
+      const ranked = [
+        LivePlayQuality(quality: '蓝光', id: 3, sort: 3, codec: 'hevc'),
+        LivePlayQuality(quality: '高清', id: 2, sort: 2, codec: 'hevc'),
+        LivePlayQuality(quality: '标清', id: 1, sort: 1),
+      ];
+      expect(RecordStreamResolver.orderQualities(ranked, '蓝光4M', preferH264: true).first.id, 1);
+      const hevcOnly = [
+        LivePlayQuality(quality: '原画', id: 'original', codec: 'hevc'),
+        LivePlayQuality(quality: '高清', id: 'hd', codec: 'hevc'),
+      ];
+      expect(RecordStreamResolver.orderQualities(hevcOnly, '原画', preferH264: true).first.id, 'original');
+    });
+
+    test('the recorder honours 优先 H.264 unless the task names its quality (H01.7)', () async {
+      final site = FakeSite(
+        qualities: const [
+          LivePlayQuality(quality: 'FLV', id: 'flv', codec: 'avc'),
+          LivePlayQuality(quality: '原画', id: 'original', sort: 1, codec: 'hevc'),
+        ],
+        lines: {
+          'flv': const [LivePlayLine('https://wangsu.example/live.flv?sign=1')],
+          'original': const [LivePlayLine('https://zego.example/live.flv?sign=1')],
+        },
+      );
+      final resolver = RecordStreamResolver((_) => site);
+      final chosen = await resolver.resolve(roomId: '1', platform: 'fake', preferredQuality: '原画', preferH264: true);
+      expect(chosen.line!.url, startsWith('https://wangsu.'));
+      final plain = await resolver.resolve(roomId: '1', platform: 'fake', preferredQuality: '原画');
+      expect(plain.line!.url, startsWith('https://zego.'));
+    });
+
     test('a retry moves to the next line, a renewal keeps the line', () async {
       final site = FakeSite(
         lines: {

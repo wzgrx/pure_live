@@ -102,7 +102,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 属于 [H 录制](../README.md)。
 
 - 代码：`packages/live_record`
-- 进度：`████████████████░░░░` 79%
+- 进度：`████████████████░░░░` 80%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -113,6 +113,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 | H01.4 | 录制的 4 项真机验证：划掉应用后继续录、所有文件访问权限、同时录弹幕 XML、HLS 预取 | 验证 | 未开始 | — | — | [设计或说明](H01.4-录制余项/README.md)、[任务书](H01.4-录制余项/brief.md) |
 | H01.5 | 主播下播后不再无限快速重试；正常下播后合并已录分段（开播自动录拿不到 MP4）；合并时跳过 0 字节分段，有一段有效就能合并 | 功能 | 待真机 | 2026-10-08 | b2b62a1f7 | [设计或说明](H01.5-主播下播后不再无限快速重试/README.md)、[任务书](H01.5-主播下播后不再无限快速重试/brief.md)、[记录](H01.5-主播下播后不再无限快速重试/record.md) |
 | H01.6 | YY 等 HLS 直播每两秒报一次音频“Packet corrupt”，录制被当成损坏、一直拿不到 MP4 | 功能 | 待真机 | 2026-10-08 | — | [设计或说明](H01.6-HLS音频丢包被当成录制损坏/README.md)、[任务书](H01.6-HLS音频丢包被当成录制损坏/brief.md)、[记录](H01.6-HLS音频丢包被当成录制损坏/record.md) |
+| H01.7 | 录映客默认录的是 HEVC 的“原画”，不看“优先 H.264” | 功能 | 待真机 | 2026-10-08 | — | [设计或说明](H01.7-映客录制默认录HEVC/README.md)、[任务书](H01.7-映客录制默认录HEVC/brief.md)、[记录](H01.7-映客录制默认录HEVC/record.md) |
 
 ## 还没完成的
 

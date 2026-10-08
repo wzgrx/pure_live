@@ -46,7 +46,7 @@
 
 ## 风险和注意
 
-- **手机规则**（D-019、AGENTS.md）：只点测试包 `com.mystyle.purelive.v4dev`，每次输入前确认前台；不碰用户的 3.x 正式包 `com.mystyle.purelive` 和它的数据。`~/tools/pl-adb.sh` 第 7 行默认的 `PL_APP` 还是旧的 `com.mystyle.purelive.next`，用之前先 `export PL_APP=com.mystyle.purelive.v4dev`。上机前用 `adb logcat -d | grep "adbd service requested"` 看有没有别的自动化程序在操作手机（2026-09-28 出过一次）。
+- **手机规则**（D-019、AGENTS.md）：只点测试包 `com.mystyle.purelive.v4dev`，每次输入前确认前台；不碰用户的 3.x 正式包 `com.mystyle.purelive` 和它的数据。点按、截图用仓库里的 [`tools/device/`](../../tools/device/README.md)（`PL_DEVICE` 指定手机，默认包名 `com.mystyle.purelive.v4dev`，每次输入和读屏前查前台；横屏读控件树会锁住旋转，用完把 `user_rotation` 改回 0）。手机还可能被别的会话借用（红果、红薯助手），用之前先打招呼。上机前用 `adb logcat -d | grep "adbd service requested"` 看有没有别的自动化程序在操作手机（2026-09-28 出过一次）。
 - **断网只断测试包**：K90 的 adb 走 Wi-Fi，关 Wi-Fi 就连不回来；用 `iptables -m owner --uid-owner` 只拦测试包（S02 子分类说明第 5 步），用完删规则。
 - **K90 看不到平板分栏**：K90 横屏是 869×400 dp，高度不到 480，按 `features/live_play/logic/room_layout.dart:66` 走“横屏手机”布局；宽屏分栏要宽 ≥840。宽屏条目用 `adb shell wm size`、`wm density` 临时模拟（测完必须 `reset`），或者留给平板。
 - **基准会覆盖测试包**：`flutter drive --profile` 会把 profile 版装成 `.v4dev`，跑完要重新装平时的测试包。

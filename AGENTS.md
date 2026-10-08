@@ -16,7 +16,7 @@
 
 - `apps/pure_live`：应用（Android、Windows、Linux、电视模式）。
 - `packages/`：`live_core`（平台）、`live_net`（网络）、`live_danmaku`（弹幕）、`live_media`、`live_player`（播放）、`live_record`（录制）、`live_store`（存储和迁移）、`live_ui`（设计系统）、`live_iptv`、`live_cast`、`live_vod`。分层和依赖方向见 [docs/specs/ENGINEERING.md](docs/specs/ENGINEERING.md) 第 4 节。
-- `tools/gate/`：门禁；`tools/docs/`：文档生成和检查；`tools/ui/`：清点和效果图工具；`tools/check_latest/`：工具链检查；`tools/ffmpeg_kit/`：录制用的 FFmpeg 包；`tools/timeshift/`：时间炸弹检查；`tools/brotli/`：Brotli 测试向量生成。
+- `tools/gate/`：门禁；`tools/docs/`：文档生成和检查；`tools/ui/`：清点和效果图工具；`tools/check_latest/`：工具链检查；`tools/ffmpeg_kit/`：录制用的 FFmpeg 包；`tools/timeshift/`：时间炸弹检查；`tools/brotli/`：Brotli 测试向量生成；`tools/live_cli/`：平台巡检；`tools/device/`：真机点按和截图（带前台检查）；`tools/coverage/`：测试覆盖率。
 - `assets/version.json`、`assets/releases.json`：已安装的 3.x 从 master 读取检查更新，只在发布时修改，不能删。
 
 ## 必须遵守

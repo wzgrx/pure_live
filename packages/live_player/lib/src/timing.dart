@@ -2,13 +2,30 @@ import 'package:clock/clock.dart';
 import 'package:live_media/live_media.dart';
 import 'package:meta/meta.dart';
 
+/// The time the start-up marks read (G03.1): a monotonic stopwatch from
+/// the first read, not the wall clock. The wall clock may be set while a
+/// room opens; a K90 line read `detail=869 … firstFrame=475 total=13`, its
+/// steps adding up to 1.37 s. Inside a test's clock (`withClock`,
+/// fake_async) it follows that clock. Replaceable in tests.
+@visibleForTesting
+DateTime Function() timingNow = _monotonicNow;
+
+final Stopwatch _sinceFirstRead = Stopwatch()..start();
+final DateTime _firstRead = DateTime.now();
+
+DateTime _monotonicNow() {
+  final zone = clock;
+  if (!identical(zone, const Clock())) return zone.now();
+  return _firstRead.add(_sinceFirstRead.elapsed);
+}
+
 /// G03.1: the room's half of the start-up timing. The room makes it when it
 /// is entered (T0, or the release of a swipe) and marks, once each, when its
 /// detail (T1), qualities (T2) and play URLs (T3) came back; the session
 /// times the rest of the open from there ([PlaybackTiming]).
 final class StartupMarks {
   /// Marks T0 now.
-  new() : started = clock.now();
+  new() : started = timingNow();
 
   /// T0: the room was entered.
   final DateTime started;
@@ -27,13 +44,13 @@ final class StartupMarks {
   DateTime? get urls => _urls;
 
   /// Marks T1 (only the first call counts).
-  void markDetail() => _detail ??= clock.now();
+  void markDetail() => _detail ??= timingNow();
 
   /// Marks T2 (only the first call counts).
-  void markQualities() => _qualities ??= clock.now();
+  void markQualities() => _qualities ??= timingNow();
 
   /// Marks T3 (only the first call counts).
-  void markUrls() => _urls ??= clock.now();
+  void markUrls() => _urls ??= timingNow();
 }
 
 /// Receives the timing of an open that ended (`PlaybackRequest.onTiming`).
@@ -107,11 +124,11 @@ final class PlaybackTiming {
 
 /// The session's half of one open's timing: T4 engine ready, T5 input
 /// opened, T6 `engine.open` returned, T7 first video size, T8 first playing.
-/// Only clock reads while the open runs; nothing once it ended.
+/// Only [timingNow] reads while the open runs; nothing once it ended.
 @internal
 final class OpenTiming {
   /// Starts timing an open of [site] that continues [startup].
-  new({required this.site, required this.startup, required this.sink}) : opened = clock.now();
+  new({required this.site, required this.startup, required this.sink}) : opened = timingNow();
 
   /// T4: the engine is ready.
   static const engineReady = 0;
@@ -153,7 +170,7 @@ final class OpenTiming {
     for (var later = index; later < _marks.length; later++) {
       if (_marks[later] != null) return;
     }
-    _marks[index] = clock.now();
+    _marks[index] = timingNow();
   }
 
   /// T4, and whether the engine was there already.
@@ -170,7 +187,7 @@ final class OpenTiming {
 
   /// Ends the open now: [error] is the failure's code, null when it plays.
   PlaybackTiming finish({String? error}) {
-    final end = clock.now();
+    final end = timingNow();
     final room = startup;
     final start = room?.started ?? opened;
     var previous = start;

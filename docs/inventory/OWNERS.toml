@@ -348,6 +348,7 @@ setting = [
   { key = "showChatGifts", sub = "A08" },
   { key = "enableDanmakuTapInteraction", sub = "A08" },
   { key = "enableDanmakuLongPressInteraction", sub = "A08" },
+  { key = "holdDanmakuOnPress", sub = "A08" },
   { key = "collapseRepeatedDanmaku", sub = "D02" },
   { key = "repeatedDanmakuWindowSeconds", sub = "D02" },
   { key = "filterDouyuSuspectedAutomatedMessages", sub = "D02" },

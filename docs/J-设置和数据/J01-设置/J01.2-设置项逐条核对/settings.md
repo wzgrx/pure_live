@@ -2,13 +2,13 @@
 
 <!-- 由 tools/docs/settings_audit.py 生成（手写的部分在 tools/docs/settings_audit_notes.py），不要手改 -->
 
-v4 的 220 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）比默认值、取值范围、设置页的范围、读取位置和生效时机。返回 [README](README.md)。
+v4 的 221 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）比默认值、取值范围、设置页的范围、读取位置和生效时机。返回 [README](README.md)。
 
 ## 结论
 
 | 结论 | 个数 |
 |---|---:|
-| 一样 | 199 |
+| 一样 | 200 |
 | 确认改动 | 3 |
 | 不一样，已改 | 18 |
 | 不一样，待处理 | 0 |
@@ -27,7 +27,7 @@ v4 的 220 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `enableAsmrSleepMode` | Bool | `false` | `false`（`app_settings_controller.dart:45`） |  |  |  | `features/live_play/live_play_page.dart:289` | 读取时 | `asmr_sleep` | 一样 |
 | `asmrSleepMinutes` | Int | `60` | `60`（`app_settings_controller.dart:46`） | 1～525600 | 1～525600（`app_settings_controller.dart:227`） | 数字框，预设 `[15, 30, 45, 60, 90, 120, 240, 480, 720, 1440]` | `features/live_play/logic/room_controller.dart:417` | 读取时 | `asmr_minutes` | 一样 |
 | `enableRotateScreen` | Bool | `false` | `false`（`app_settings_controller.dart:47`） |  |  |  | 没有读取 |  |  | 一样：3.x 也没有读取它的代码，只存、只进备份 |
-| `enableScreenKeepOn` | Bool | `true` | `true`（`app_settings_controller.dart:48`） |  |  |  | `features/live_play/mini/floating_window.dart:187`、`features/live_play/player/player_view.dart:552`、`features/multiview/multiview_page.dart:870` | 立即 | `screen_keep_on` | 一样 |
+| `enableScreenKeepOn` | Bool | `true` | `true`（`app_settings_controller.dart:48`） |  |  |  | `features/live_play/mini/floating_window.dart:187`、`features/live_play/player/player_view.dart:595`、`features/multiview/multiview_page.dart:870` | 立即 | `screen_keep_on` | 一样 |
 | `enableAutoCheckUpdate` | Bool | `true` | `true`（`app_settings_controller.dart:49`） |  |  |  | `features/version/update_prompt.dart:40`、`features/version/update_prompt.dart:92` | 读取时 | `auto_update` | 一样 |
 | `useGitHubOriginForUpdates` | Bool | `false` | `false`（`app_settings_controller.dart:50`） |  |  |  | `features/version/release_history_view.dart:480`、`features/version/update_feed.dart:404`、`features/version/update_prompt.dart:81` 等 4 处 | 立即 | `github_updates` | 一样 |
 | `skippedUpdateVersion` | String，本机 | `''` | —（新加） |  |  |  | `features/version/update_prompt.dart:23`、`features/version/update_prompt.dart:92`、`features/version/update_prompt.dart:128` 等 4 处 | 读取时 |  | 一样：v4 新加（A06.3 c4，本机记录），默认值照来源任务 |
@@ -119,12 +119,12 @@ v4 的 220 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `portraitAdaptiveHeight` | Bool | `true` | `true`（`player_settings_controller.dart:57`） |  |  |  | `features/live_play/live_play_page.dart:533`、`features/live_play/live_play_page.dart:709` | 立即 | `portrait_height` | 一样 |
 | `portraitLayoutMode` | String | `'balanced'` | `'balanced'`（`player_settings_controller.dart:58`，`player/core/portrait_stream_support.dart:9`） |  |  |  | `features/live_play/live_play_page.dart:534`、`features/live_play/live_play_page.dart:710` | 立即 | `portrait_layout` | 一样 |
 | `portraitFullscreenPolicy` | String | `'followSource'` | `'followSource'`（`player_settings_controller.dart:59-62`） |  |  |  | `features/live_play/live_play_page.dart:535`、`features/live_play/live_play_page.dart:711` | 立即 | `portrait_fullscreen` | 一样 |
-| `portraitFullscreenDisplayMode` | String | `'ambient'` | `'ambient'`（`player_settings_controller.dart:63-66`） |  |  |  | `features/live_play/player/bar_parts.dart:276`、`features/live_play/player/bar_parts.dart:301`、`features/live_play/player/player_view.dart:564` | 立即 | `portrait_display` | 一样 |
+| `portraitFullscreenDisplayMode` | String | `'ambient'` | `'ambient'`（`player_settings_controller.dart:63-66`） |  |  |  | `features/live_play/player/bar_parts.dart:276`、`features/live_play/player/bar_parts.dart:301`、`features/live_play/player/player_view.dart:607` | 立即 | `portrait_display` | 一样 |
 | `portraitPipFollowSource` | Bool | `true` | `true`（`player_settings_controller.dart:67`） |  |  |  | `features/live_play/mini/floating_window.dart:125`、`features/live_play/mini/room_mini_window.dart:113`、`features/live_play/mini/room_mini_window.dart:270` | 立即 | `portrait_pip` | 一样 |
-| `portraitDanmakuMode` | String | `'followGlobal'` | `'followGlobal'`（`player_settings_controller.dart:68`） |  |  |  | `features/live_play/player/player_view.dart:605` | 立即 | `portrait_danmaku` | 一样 |
+| `portraitDanmakuMode` | String | `'followGlobal'` | `'followGlobal'`（`player_settings_controller.dart:68`） |  |  |  | `features/live_play/player/player_view.dart:648` | 立即 | `portrait_danmaku` | 一样 |
 | `rememberPortraitRoomOverride` | Bool | `true` | `true`（`player_settings_controller.dart:69`） |  |  |  | `features/live_play/logic/room_orientation.dart:58`、`features/live_play/logic/room_orientation.dart:81` | 读取时 | `portrait_remember` | 一样 |
 | `portraitFullscreenSwipeSwitch` | Bool | `false` | —（新加） |  |  |  | `features/live_play/live_play_page.dart:537`、`features/live_play/live_play_page.dart:713` | 立即 | `portrait_swipe` | 一样：v4 新加（A07.2 c14、A07.3），默认值照来源任务 |
-| `showPortraitDiagnostics` | Bool | `false` | `false`（`player_settings_controller.dart:70`） |  |  |  | `features/live_play/player/player_view.dart:613` | 立即 | `portrait_diagnostics` | 一样 |
+| `showPortraitDiagnostics` | Bool | `false` | `false`（`player_settings_controller.dart:70`） |  |  |  | `features/live_play/player/player_view.dart:656` | 立即 | `portrait_diagnostics` | 一样 |
 | `portraitRoomOverrides` | Json | `{}` | `'{}'`（`player_settings_controller.dart:71`） |  |  |  | `features/live_play/logic/room_orientation.dart:53`、`features/live_play/logic/room_orientation.dart:70`、`features/live_play/logic/room_orientation.dart:82` | 读取时 | `portrait_reset` | 一样：3.x 在 Hive 里存 JSON 字符串 `'{}'`，v4 存映射；读 3.x 的字符串时解码（`JsonSetting`） |
 | `livePlayChatCollapsed` | Bool | `false` | —（新加） |  |  |  | `features/live_play/live_play_page.dart:536`、`features/live_play/live_play_page.dart:630`、`features/live_play/live_play_page.dart:712` | 立即 |  | 一样：v4 新加（A07.5 第 7 条，直播间里记住），默认值照来源任务 |
 | `roomSwitcherLayout` | String | `'grid'` | —（新加） | `grid` / `list` |  |  | `features/live_play/switch_room/room_switch_panel.dart:223`、`features/live_play/switch_room/room_switch_panel.dart:233` | 立即 |  | 一样：v4 新加（A07.13 c4，D-022），默认值照来源任务 |
@@ -147,12 +147,13 @@ v4 的 220 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `enableDanmakuStroke` | Bool | `true` | `true`（`danmaku_settings_controller.dart:69`） |  |  |  | `features/live_play/mini/compact_danmaku.dart:156`、`shared/danmaku/danmaku_settings.dart:31`、`shared/danmaku/danmaku_templates.dart:36` 等 5 处 | 立即 | `danmaku_stroke` | 一样 |
 | `danmakuListStyle` | String | `'compact'` | —（新加） | `compact` / `card` |  |  | `features/live_play/danmaku/chat_list.dart:386` | 立即 | `danmaku_list_style` | 一样：v4 新加（A07.1，U.2a），默认值照来源任务 |
 | `showChatGifts` | Bool | `true` | —（新加） |  |  |  | `features/live_play/logic/room_controller.dart:260`、`features/live_play/logic/room_controller.dart:406`、`features/live_play/logic/room_controller.dart:728` 等 6 处 | 立即 | `danmaku_show_gifts` | 一样：v4 新加（A08.6 c3，B-21），默认值照来源任务 |
-| `danmakuPausedBehavior` | String | `'pause'` | —（新加） | `pause` / `continue` |  |  | `features/live_play/mini/compact_danmaku.dart:165`、`features/live_play/player/player_view.dart:614`、`features/multiview/multiview_page.dart:881` 等 4 处 | 立即 | `danmaku_paused` | 一样：v4 新加（A07.10 c3），默认值照来源任务 |
-| `danmakuFps` | Int | `60` | `60`（`danmaku_settings_controller.dart:70`） | 30～240 | 30～240（`danmaku_settings_controller.dart:123`） | 滑块 30～240，步长 1 | `features/live_play/player/player_view.dart:609`、`shared/danmaku/danmaku_settings.dart:53`、`shared/danmaku/danmaku_templates.dart:38` 等 4 处 | 立即 | `danmaku_fps` | 一样 |
-| `danmakuAutoFps` | Bool | `true` | `true`（`danmaku_settings_controller.dart:71`） |  |  |  | `features/live_play/player/player_view.dart:608`、`shared/danmaku/danmaku_settings.dart:52`、`shared/danmaku/danmaku_templates.dart:39` 等 5 处 | 立即 | `danmaku_auto_fps` | 一样 |
-| `danmakuMaxVisibleCount` | Int | `48` | —（新加） | 10～120 | 3.x 没有这个设置，直播间和多画面写死 48 | 滑块 10～120，步长 2 | `features/live_play/player/player_view.dart:615`、`features/multiview/multiview_page.dart:895`、`tv/room/tv_live_play_page.dart:470` | 立即 | `danmaku_max_visible` | 一样：v4 新加（D05.2，V01.4，D-036）：默认 48 和 3.x 一样；10～120，超出范围（上游电视版存 0 表示按设备）读成 48 |
-| `enableDanmakuTapInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:72`） |  |  |  | `features/live_play/player/player_view.dart:464`、`live_store/src/legacy/legacy_snapshot.dart:407` | 读取时 | `danmaku_tap` | 一样 |
-| `enableDanmakuLongPressInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:73`） |  |  |  | `features/live_play/player/player_view.dart:464`、`features/live_play/player/player_view.dart:612`、`live_store/src/legacy/legacy_snapshot.dart:408` | 立即 | `danmaku_long_press` | 一样 |
+| `danmakuPausedBehavior` | String | `'pause'` | —（新加） | `pause` / `continue` |  |  | `features/live_play/mini/compact_danmaku.dart:165`、`features/live_play/player/player_view.dart:657`、`features/multiview/multiview_page.dart:881` 等 4 处 | 立即 | `danmaku_paused` | 一样：v4 新加（A07.10 c3），默认值照来源任务 |
+| `danmakuFps` | Int | `60` | `60`（`danmaku_settings_controller.dart:70`） | 30～240 | 30～240（`danmaku_settings_controller.dart:123`） | 滑块 30～240，步长 1 | `features/live_play/player/player_view.dart:652`、`shared/danmaku/danmaku_settings.dart:53`、`shared/danmaku/danmaku_templates.dart:38` 等 4 处 | 立即 | `danmaku_fps` | 一样 |
+| `danmakuAutoFps` | Bool | `true` | `true`（`danmaku_settings_controller.dart:71`） |  |  |  | `features/live_play/player/player_view.dart:651`、`shared/danmaku/danmaku_settings.dart:52`、`shared/danmaku/danmaku_templates.dart:39` 等 5 处 | 立即 | `danmaku_auto_fps` | 一样 |
+| `danmakuMaxVisibleCount` | Int | `48` | —（新加） | 10～120 | 3.x 没有这个设置，直播间和多画面写死 48 | 滑块 10～120，步长 2 | `features/live_play/player/player_view.dart:658`、`features/multiview/multiview_page.dart:895`、`tv/room/tv_live_play_page.dart:470` | 立即 | `danmaku_max_visible` | 一样：v4 新加（D05.2，V01.4，D-036）：默认 48 和 3.x 一样；10～120，超出范围（上游电视版存 0 表示按设备）读成 48 |
+| `enableDanmakuTapInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:72`） |  |  |  | `features/live_play/player/player_view.dart:469`、`live_store/src/legacy/legacy_snapshot.dart:407` | 读取时 | `danmaku_tap` | 一样 |
+| `enableDanmakuLongPressInteraction` | Bool | `true` | `true`（`danmaku_settings_controller.dart:73`） |  |  |  | `features/live_play/player/player_view.dart:469`、`features/live_play/player/player_view.dart:655`、`live_store/src/legacy/legacy_snapshot.dart:408` | 立即 | `danmaku_long_press` | 一样 |
+| `holdDanmakuOnPress` | Bool | `false` | —（新加） |  |  |  | `features/live_play/player/player_view.dart:482` | 读取时 | `danmaku_hold_on_press` | 一样：v4 新加（D03.4，V01.3，D-036）：默认关，画面弹幕和以前一样；开了以后按住一条飞行弹幕时它停住 |
 | `collapseRepeatedDanmaku` | Bool | `false` | `false`（`danmaku_settings_controller.dart:74`） |  |  |  | `features/live_play/logic/room_controller.dart:426`、`features/live_play/logic/room_controller.dart:440`、`features/multiview/logic/multiview_controller.dart:283` 等 4 处 | 立即（直播间和多画面监听它，重建过滤器） | `collapse_repeated` | 一样 |
 | `repeatedDanmakuWindowSeconds` | Int | `5` | `5`（`danmaku_settings_controller.dart:75`） | 1～30 | 1～30（`danmaku_settings_controller.dart:259-261`，导入备份时） | 滑块 1～30，步长 1 | `features/live_play/logic/room_controller.dart:427`、`features/live_play/logic/room_controller.dart:441`、`features/multiview/logic/multiview_controller.dart:284` 等 4 处 | 立即（直播间和多画面监听它，重建过滤器） | `repeat_window` | 不一样，已改：注册表原来只有下限 1，3.x 导入时夹到 1～30、设置页滑块也是 1～30；补上 `max: 30` |
 | `savedDanmakuTemplate` | String | `''` | `''`（`danmaku_settings_controller.dart:77`） |  |  |  | 弹幕设置的“模板”本身（`shared/danmaku/danmaku_settings_content.dart`、`danmaku_templates.dart`） | 立即 |  | 一样 |

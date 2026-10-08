@@ -543,6 +543,13 @@ abstract final class Settings {
     defaultValue: true,
   );
 
+  /// New (docs/D-弹幕/D03-飞行弹幕引擎/D03.4-按住飞行弹幕让它停住; V01.3, D-036): a finger pressing a
+  /// flying danmaku on the room's picture pins that one where it is, the
+  /// others fly on; it flies on when the finger lifts or moves away
+  /// ("按住飞行弹幕让它停住"). Off by default, so the picture behaves as
+  /// before; the tap and long-press actions are unchanged either way.
+  static const holdDanmakuOnPress = BoolSetting('holdDanmakuOnPress', section: 'danmaku', defaultValue: false);
+
   /// Collapse repeats.
   static const collapseRepeatedDanmaku = BoolSetting(
     'collapseRepeatedDanmaku',
@@ -1611,6 +1618,7 @@ abstract final class Settings {
     danmakuMaxVisibleCount,
     enableDanmakuTapInteraction,
     enableDanmakuLongPressInteraction,
+    holdDanmakuOnPress,
     collapseRepeatedDanmaku,
     repeatedDanmakuWindowSeconds,
     savedDanmakuTemplate,

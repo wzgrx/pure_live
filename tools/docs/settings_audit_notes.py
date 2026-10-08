@@ -158,6 +158,10 @@ NOTES: dict[str, dict] = {
     'showChatGifts': _new('A08.6 c3，B-21'),
     'danmakuPausedBehavior': _new('A07.10 c3'),
     'danmakuFps': _danmaku('123', '30', '240'),
+    'holdDanmakuOnPress': {
+        **_new('D03.4，V01.3'),
+        'verdict': 'v4 新加（D03.4，V01.3，D-036）：默认关，画面弹幕和以前一样；开了以后按住一条飞行弹幕时它停住',
+    },
     'danmakuMaxVisibleCount': {
         **_new('D05.2，V01.4'),
         'v3range': '3.x 没有这个设置，直播间和多画面写死 48',

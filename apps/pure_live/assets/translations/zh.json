@@ -336,6 +336,8 @@
     "danmaku_group_repeat": "重复弹幕",
     "danmaku_group_smoothness": "流畅度",
     "danmaku_group_templates": "观看模板",
+    "danmaku_hold_on_press": "按住飞行弹幕让它停住",
+    "danmaku_hold_on_press_desc": "手指按住画面上的一条弹幕时只停住这一条，其他照飞，松手继续",
     "danmaku_keyword_block": "弹幕关键词屏蔽",
     "danmaku_keyword_blocked": "关键词已加入弹幕屏蔽列表",
     "danmaku_list": "弹幕列表",

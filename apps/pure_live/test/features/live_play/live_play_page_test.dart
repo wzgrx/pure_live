@@ -1,4 +1,4 @@
-import 'package:flutter/gestures.dart' show kDoubleTapTimeout;
+import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kLongPressTimeout;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -407,6 +407,102 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byKey(const ValueKey('live-play-message-sheet')), findsNothing);
       expect(shown(tester), 1);
+      await _close(tester, services);
+    });
+
+    testWidgets('D03.4 (V01.3): off by default, a finger on a flying danmaku does not stop it (as before)', (
+      tester,
+    ) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      expect(services.store.settings.get(Settings.holdDanmakuOnPress), isFalse);
+      final (state, at) = await fly(tester, danmaku);
+      final gesture = await tester.startGesture(at);
+      for (var i = 0; i < 18; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(state.pinnedMessage, isNull);
+      expect(now(tester, state).dx, lessThan(at.dx - 20), reason: 'it flew on under the finger');
+      await gesture.cancel();
+      await tester.pump(const Duration(seconds: 1));
+      await _close(tester, services);
+    });
+
+    testWidgets('D03.4 (V01.3): on, a pressed danmaku stands while the others fly; let go, it flies on', (
+      tester,
+    ) async {
+      final danmaku = FakeDanmaku();
+      final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+      AppNavigator.toast = (_) {};
+      await tester.runAsync(() => services.store.settings.set(Settings.holdDanmakuOnPress, true));
+      await _settle(tester);
+      final sheet = find.byKey(const ValueKey('live-play-message-sheet'));
+      Rect rectOf(DanmakuOverlayState state, String text) =>
+          state.debugFlying.firstWhere((item) => item.$1.message == text).$2;
+
+      // Pressed: that one stands, the first one flies on.
+      var (state, at) = await fly(tester, danmaku, user: '按住1');
+      final first = rectOf(state, '第一条');
+      final gesture = await tester.startGesture(at);
+      await tester.pump();
+      expect(state.pinnedMessage?.message, '点这一条弹幕');
+      for (var i = 0; i < 18; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(now(tester, state), at, reason: 'it stands under the finger');
+      expect(rectOf(state, '第一条').left, lessThan(first.left - 20), reason: 'the others fly on');
+      expect(overlay(tester).held, isFalse);
+      // Let go: it flies on from there; the tap still opens its actions
+      // once a double tap is ruled out (A07.14, D-038: the controls show).
+      await gesture.up();
+      await tester.pump();
+      expect(state.pinnedMessage, isNull);
+      await tester.pump(kDoubleTapTimeout);
+      await tester.pump(const Duration(seconds: 1));
+      expect(sheet, findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(now(tester, state).dx, lessThan(at.dx - 20), reason: 'flying again');
+
+      // A long press opens the pinned one's actions; everything stands.
+      (state, at) = await fly(tester, danmaku, user: '按住2');
+      final press = await tester.startGesture(at);
+      await tester.pump(kLongPressTimeout + const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(sheet, findsOneWidget);
+      expect(overlay(tester).held, isTrue);
+      await press.up();
+      await tester.pump();
+      expect(state.pinnedMessage, isNull);
+      await tester.tap(find.byKey(const ValueKey('room-panel-close')));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(overlay(tester).held, isFalse);
+
+      // A drag from it (volume, brightness) lets it go.
+      (state, at) = await fly(tester, danmaku, user: '按住3');
+      final drag = await tester.startGesture(at);
+      await tester.pump();
+      expect(state.pinnedMessage, isNotNull);
+      await drag.moveBy(const Offset(0, 40));
+      await tester.pump();
+      expect(state.pinnedMessage, isNull);
+      await drag.up();
+      await tester.pump(const Duration(seconds: 2));
+
+      // A double tap on it still only toggles the fullscreen.
+      (state, at) = await fly(tester, danmaku, user: '按住4');
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(at);
+      await tester.pump();
+      expect(state.pinnedMessage, isNull);
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(sheet, findsNothing);
+      }
+      expect(find.byType(AppBar), findsNothing, reason: 'fullscreen');
       await _close(tester, services);
     });
 

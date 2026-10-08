@@ -44,10 +44,10 @@
   - `apps/pure_live/test/tv/tv_test.dart` 的电视直播间用例加了“默认 48，改成 30 跟着变”。
   - `apps/pure_live/test/features/live_play/live_play_popups_test.dart` 的弹幕设置面板用例：逐项标题表加了这一行；在“弹幕帧率”下面；滑条 10～120、55 段、值 48，显示“48 条”；改成 20 存进设置、显示“20 条”。
   - `apps/pure_live/test/features/settings/settings_danmaku_test.dart` 新增“设置 → 弹幕有这一行、改了是设置；搜索‘同屏’在‘弹幕 › 流畅度’下”。
-  - `packages/live_store/test/danmaku_on_screen_test.dart`（新文件，2 个）：默认 48、10 和 120 能存、0/9/121/-1 读成 48、`danmaku` 一节、跟备份；备份往返、3.x 的备份没有它时保持 48 且没存值、电视版备份的 0 读成 48。
+  - `packages/live_store/test/danmaku_new_settings_test.dart`（新文件，2 个；D03.4 时从 `danmaku_on_screen_test.dart` 改名）：默认 48、10 和 120 能存、0/9/121/-1 读成 48、`danmaku` 一节、跟备份；备份往返、3.x 的备份没有它时保持 48 且没存值、电视版备份的 0 读成 48。
   - `packages/live_store/test/settings_defaults_test.dart`：`newInV4`、`ranges` 各加一行。
 - 默认值下行为不变的证据：弹幕层的 48 条用例（D03.3 c4）没改照样通过；直播间、多画面、电视在没设过时都是 48。
-- 全部通过的范围：`packages/live_store` 全部；`apps/pure_live` 改到的 7 个测试文件和 `settings_page_test.dart`（说明不超过 40 个字）；最后跑 `tools/gate/gate.sh --all`（结果写在 V01.3 的实现任务 D03.4 的记录里，两个任务同一次门禁）。
+- 全部通过的范围：`packages/live_store` 全部；`apps/pure_live` 改到的 7 个测试文件和 `settings_page_test.dart`（说明不超过 40 个字）；`bash tools/gate/gate.sh --all` 和 D03.4 一起跑，`gate: passed`（见 [D03.4 的记录](../../D03-飞行弹幕引擎/D03.4-按住飞行弹幕让它停住/record.md)“门禁”）。
 
 ## 真机上要看的
 

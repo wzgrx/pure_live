@@ -1695,6 +1695,14 @@ List<SettingsEntry> _build() {
       desc: 'settings_danmaku_long_press_desc',
       keywords: ['长按', '弹幕'],
     )
+    ..toggle(
+      'danmaku_hold_on_press',
+      'danmaku_hold_on_press',
+      Settings.holdDanmakuOnPress,
+      null,
+      desc: 'danmaku_hold_on_press_desc',
+      keywords: ['按住', '停住', '定住', '弹幕'],
+    )
     ..group = 'danmaku_group_smoothness'
     ..toggle(
       'danmaku_auto_fps',

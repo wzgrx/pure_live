@@ -434,6 +434,75 @@ void main() {
     await layer.close();
   });
 
+  testWidgets('D03.4 (V01.3): a pinned danmaku stands, the others fly on; let go, it flies on from there', (
+    tester,
+  ) async {
+    final layer = _Layer(tester);
+    // Two lanes of 26.
+    await layer.pump(height: 60);
+    final pinned = _chat('按住我');
+    final other = _chat('照飞');
+    layer.messages
+      ..add(pinned)
+      ..add(other);
+    await tester.pump();
+    await layer.run(60, 1);
+    final at = layer.rect(pinned);
+    final before = layer.rect(other);
+    expect(layer.state.pinAt(at.center.translate(0, 100)), isNull, reason: 'nothing there');
+    expect(layer.state.pinAt(at.center), same(pinned));
+    expect(layer.state.pinnedMessage, same(pinned));
+
+    await layer.run(60, 2);
+    expect(layer.rect(pinned), at, reason: 'it stands');
+    expect(layer.rect(other).left, closeTo(before.left - 240, 2), reason: 'the other flies on, 120 px/s');
+    expect(layer.state.messageAt(at.center), same(pinned), reason: 'a long press there finds it');
+
+    layer.state.unpin();
+    expect(layer.state.pinnedMessage, isNull);
+    await layer.run(60, 0.5);
+    expect(layer.rect(pinned).left, closeTo(at.left - 60, 2), reason: 'on from where it stood, at its speed');
+
+    // Everything held (the actions open) while it is pinned: let go after,
+    // it does not jump.
+    final again = layer.rect(pinned);
+    layer.state.pinAt(again.center);
+    await layer.pump(height: 60, held: true);
+    await layer.run(60, 1);
+    layer.state.unpin();
+    await layer.pump(height: 60);
+    expect(layer.rect(pinned), again);
+
+    // A pinned one taken back is gone, and nothing stays pinned.
+    layer.state.pinAt(layer.rect(pinned).center);
+    layer.retractions.add(const LiveRetraction.all());
+    await tester.pump();
+    expect(layer.state.pinnedMessage, isNull);
+    expect(layer.state.flyingCount, 0);
+    await layer.close();
+  });
+
+  testWidgets("D03.4: no new danmaku enters a pinned one's lane; let go, the lane takes them again", (tester) async {
+    final layer = _Layer(tester);
+    // One lane.
+    await layer.pump(height: 30);
+    final pinned = _chat('按住我');
+    layer.messages.add(pinned);
+    await tester.pump();
+    await layer.run(60, 1);
+    layer.state.pinAt(layer.rect(pinned).center);
+    final next = _chat('后来的');
+    layer.messages.add(next);
+    await layer.run(60, 2);
+    expect(layer.state.rectOf(next), isNull, reason: 'well in, but it stands: the lane waits');
+    expect(layer.state.pendingCount, 1);
+    layer.state.unpin();
+    await layer.run(60, 0.1);
+    expect(layer.state.rectOf(next), isNotNull);
+    expect(layer.state.pendingCount, 0);
+    await layer.close();
+  });
+
   test('B02 c3: danmakuRunning: playing; paused only with "继续飘过"; never while it opens, buffers or failed', () {
     for (final behavior in [DanmakuPausedBehavior.pause, DanmakuPausedBehavior.fly]) {
       expect(danmakuRunning(PlaybackStatus.playing, behavior), isTrue, reason: behavior);

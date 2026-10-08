@@ -212,6 +212,12 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// Where the last tap went down.
   Offset? _tapAt;
 
+  /// V01.3 (D03.4, "按住飞行弹幕让它停住"): the pointer pressing a pinned
+  /// danmaku and where it went down; the danmaku flies on when it lifts,
+  /// is cancelled or moves into a drag.
+  int? _pinPointer;
+  Offset? _pinFrom;
+
   /// B09 c1 (audit B-8): a tap acts at once instead of waiting out the
   /// double tap's timeout; a second tap within [kDoubleTapTimeout] and
   /// [kDoubleTapSlop] of it takes the first one back ([_undoTap]) and
@@ -459,11 +465,48 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
   /// `handleDanmakuPointer`): only with the gesture's switch on, not on the
   /// bars while the controls show, not while locked.
   LiveMessage? _danmakuAt(Offset global, {required bool longPress}) {
-    if (_locked) return null;
     final settings = ref.read(storeProvider).settings;
     if (!settings.get(longPress ? Settings.enableDanmakuLongPressInteraction : Settings.enableDanmakuTapInteraction)) {
       return null;
     }
+    if (_flyingPoint(global) case (final flying, final local)) return flying.messageAt(local);
+    return null;
+  }
+
+  /// V01.3 (D03.4): a finger going down on a flying danmaku pins it there
+  /// (with "按住飞行弹幕让它停住" on; where a tap could hit one); the others fly
+  /// on. The tap, the long press and the double tap act as before: a long
+  /// press opens the pinned one's actions, which stand everything (the
+  /// finger is still on it, so it is the one hit).
+  void _onPointerDown(PointerDownEvent event) {
+    if (_pinPointer != null || !ref.read(storeProvider).settings.get(Settings.holdDanmakuOnPress)) return;
+    if (_flyingPoint(event.position) case (final flying, final local) when flying.pinAt(local) != null) {
+      _pinPointer = event.pointer;
+      _pinFrom = event.position;
+    }
+  }
+
+  /// A finger that moves past the touch slop is a drag (volume, brightness,
+  /// a swipe), not a press: the danmaku flies on.
+  void _onPointerMove(PointerMoveEvent event) {
+    final from = _pinFrom;
+    if (event.pointer == _pinPointer && from != null && (event.position - from).distance > kTouchSlop) _unpin();
+  }
+
+  void _onPointerEnd(PointerEvent event) {
+    if (event.pointer == _pinPointer) _unpin();
+  }
+
+  void _unpin() {
+    _pinPointer = null;
+    _pinFrom = null;
+    _flying.currentState?.unpin();
+  }
+
+  /// The flying layer and [global] in its coordinates where a tap may hit a
+  /// danmaku: not on the bars while the controls show, not while locked.
+  (DanmakuOverlayState, Offset)? _flyingPoint(Offset global) {
+    if (_locked) return null;
     final flying = _flying.currentState;
     final box = flying?.context.findRenderObject();
     if (flying == null || box is! RenderBox || !box.hasSize) return null;
@@ -480,7 +523,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     if (!danmakuTapAllowed(local: local, size: box.size, controlsVisible: _controls, top: top, bottom: bottom)) {
       return null;
     }
-    return flying.messageAt(local);
+    return (flying, local);
   }
 
   /// The message's actions (U.2f 长按弹幕); the danmaku stand meanwhile
@@ -713,59 +756,67 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                 container: true,
                 label: i18n('live_play_picture'),
                 onTapHint: i18n('live_play_picture_tap_hint'),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTapDown: (details) {
-                    _tapAt = details.globalPosition;
-                    _tapHit = _danmakuAt(details.globalPosition, longPress: false);
-                  },
-                  onTap: _onTap,
-                  // F.2b: only with its switch on, so it never holds a drag back.
-                  onLongPressStart: longPress
-                      ? (details) {
-                          if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
-                            unawaited(_openMessage(hit));
+                // V01.3 (D03.4): raw pointers, outside the gesture arena, so
+                // pinning a danmaku never takes a tap, a long press or a drag.
+                child: Listener(
+                  onPointerDown: _onPointerDown,
+                  onPointerMove: _onPointerMove,
+                  onPointerUp: _onPointerEnd,
+                  onPointerCancel: _onPointerEnd,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTapDown: (details) {
+                      _tapAt = details.globalPosition;
+                      _tapHit = _danmakuAt(details.globalPosition, longPress: false);
+                    },
+                    onTap: _onTap,
+                    // F.2b: only with its switch on, so it never holds a drag back.
+                    onLongPressStart: longPress
+                        ? (details) {
+                            if (_danmakuAt(details.globalPosition, longPress: true) case final hit?) {
+                              unawaited(_openMessage(hit));
+                            }
                           }
-                        }
-                      : null,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // E5 audio only, and A07.20 a stream without a real
-                      // picture (a placeholder track, a voice platform): the
-                      // room's cover over the picture, which keeps decoding.
-                      StreamBuilder<PlaybackState>(
-                        stream: _room.session.states,
-                        initialData: _room.session.state,
-                        builder: (context, snapshot) {
-                          final playback = snapshot.data ?? _room.session.state;
-                          return ListenableSelector<bool>(
-                            listenable: _room,
-                            selector: () => _room.audioOnly,
-                            builder: (context, audioOnly, _) {
-                              final voice =
-                                  !audioOnly && pictureIsPlaceholder(playback, voiceLive: _room.site.isVoiceLive);
-                              if (!audioOnly && !voice) return const SizedBox.shrink();
-                              return IgnorePointer(
-                                // B-9: "纯音频已暂停" under the play mark.
-                                child: AudioOnlyCover(
-                                  room: _room.room,
-                                  paused: playback.status == PlaybackStatus.paused,
-                                  voiceLive: voice,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      _danmaku(
-                        look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
-                        visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
-                        fps: fps,
-                        pausedBehavior: pausedBehavior,
-                        maxVisible: maxVisible,
-                      ),
-                    ],
+                        : null,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // E5 audio only, and A07.20 a stream without a real
+                        // picture (a placeholder track, a voice platform): the
+                        // room's cover over the picture, which keeps decoding.
+                        StreamBuilder<PlaybackState>(
+                          stream: _room.session.states,
+                          initialData: _room.session.state,
+                          builder: (context, snapshot) {
+                            final playback = snapshot.data ?? _room.session.state;
+                            return ListenableSelector<bool>(
+                              listenable: _room,
+                              selector: () => _room.audioOnly,
+                              builder: (context, audioOnly, _) {
+                                final voice =
+                                    !audioOnly && pictureIsPlaceholder(playback, voiceLive: _room.site.isVoiceLive);
+                                if (!audioOnly && !voice) return const SizedBox.shrink();
+                                return IgnorePointer(
+                                  // B-9: "纯音频已暂停" under the play mark.
+                                  child: AudioOnlyCover(
+                                    room: _room.room,
+                                    paused: playback.status == PlaybackStatus.paused,
+                                    voiceLive: voice,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        _danmaku(
+                          look: widget.portraitStream ? _portraitLook(look, portraitDanmaku) : look,
+                          visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
+                          fps: fps,
+                          pausedBehavior: pausedBehavior,
+                          maxVisible: maxVisible,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

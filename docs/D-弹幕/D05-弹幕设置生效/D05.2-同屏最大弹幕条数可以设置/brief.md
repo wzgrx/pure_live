@@ -48,7 +48,7 @@
 - `apps/pure_live/test/features/multiview/multiview_page_test.dart`、`apps/pure_live/test/tv/tv_test.dart`：多画面、电视跟设置。
 - `apps/pure_live/test/features/live_play/live_play_popups_test.dart`：面板里的行、位置、范围、默认“48 条”、改了是设置。
 - `apps/pure_live/test/features/settings/settings_danmaku_test.dart`：设置 → 弹幕有这一行；搜索“同屏”在“弹幕 › 流畅度”下。
-- `packages/live_store/test/danmaku_on_screen_test.dart`：默认、范围、超出读成 48、备份往返、3.x 备份不带它、电视版的 0。
+- `packages/live_store/test/danmaku_new_settings_test.dart`：默认、范围、超出读成 48、备份往返、3.x 备份不带它、电视版的 0。
 
 ## 真机验证（维护者在 K90 上做）
 

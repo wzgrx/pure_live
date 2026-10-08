@@ -336,6 +336,8 @@
     "danmaku_group_repeat": "Repeated danmaku",
     "danmaku_group_smoothness": "Smoothness",
     "danmaku_group_templates": "Viewing templates",
+    "danmaku_hold_on_press": "Hold a flying danmaku to stop it",
+    "danmaku_hold_on_press_desc": "Pressing one on the picture stops just that one while the others fly on; it moves again when you let go",
     "danmaku_keyword_block": "Danmaku Keyword Block",
     "danmaku_keyword_blocked": "Keyword added to the danmaku block list",
     "danmaku_list": "Danmaku List",

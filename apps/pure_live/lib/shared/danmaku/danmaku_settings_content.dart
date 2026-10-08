@@ -233,6 +233,14 @@ class DanmakuSettingsContent extends ConsumerWidget {
               value: watchSetting(ref, Settings.enableDanmakuLongPressInteraction),
               onChanged: (value) => set(Settings.enableDanmakuLongPressInteraction, value),
             ),
+            // D03.4 (V01.3): new in v4, off by default.
+            SettingSwitchRow(
+              settingKey: 'holdOnPress',
+              title: i18n('danmaku_hold_on_press'),
+              subtitle: i18n('danmaku_hold_on_press_desc'),
+              value: watchSetting(ref, Settings.holdDanmakuOnPress),
+              onChanged: (value) => set(Settings.holdDanmakuOnPress, value),
+            ),
           ],
         ),
         PanelGroupTitle(i18n('danmaku_group_smoothness')),

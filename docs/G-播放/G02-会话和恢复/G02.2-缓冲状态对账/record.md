@@ -87,3 +87,7 @@ K90，profile 包（`com.mystyle.purelive.v4dev`），`adb -s 192.168.1.2:5555 l
 
 - G03.1、G01.2 也改 `session.dart`；本任务改了 `_onEvent`、`_onFrame`、`_openSource`、缓冲看门狗和几处 `_emit`。
 - 应用日志里的恢复原因可以直接给 G03.1 的测量用。
+
+## K90 复查（2026-10-08）
+
+- 哔哩哔哩、虎牙、斗鱼各连续播 15 分钟：日志里 0 次 `playback: recovering`，没有“画面在动却一直转圈”；暂停 10 秒再继续、进出全屏、换线路都没误报重连（A07.10、G02.3 复查）✓。抖音、快手的 15 分钟和 `mpv: buffering for 3 s` 行没看到（没出现）。

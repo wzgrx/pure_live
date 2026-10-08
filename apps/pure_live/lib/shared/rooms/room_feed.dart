@@ -369,9 +369,10 @@ final class RoomFeed extends ChangeNotifier {
   /// a phone list).
   Future<void> loadMore() => _loaded ? ensure(rooms.length + 1) : Future.value();
 
-  /// Retries what failed: the refresh, or the next rooms.
+  /// Retries what failed: the refresh, or the next rooms up to [count] (at
+  /// least one more; I03.2 c5).
   Future<void> retry({required int count}) =>
-      _errorOnRefresh || _rooms.isEmpty ? refresh(count: count) : ensure(rooms.length + 1);
+      _errorOnRefresh || _rooms.isEmpty ? refresh(count: count) : ensure(math.max(count, rooms.length + 1));
 
   Future<void> _fill(int count, int generation) async {
     _busy = true;

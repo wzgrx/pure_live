@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/features/tags/tag_editor_dialog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
@@ -279,7 +278,7 @@ class _TvRoomTagsDialogState extends State<TvRoomTagsDialog> {
       context,
       title: i18n('room_tags_new'),
       hint: i18n('tv_tag_name_hint'),
-      maxLength: tagNameMaxLength,
+      maxLength: TagStore.maxNameLength,
     );
     if (name == null || !mounted) return;
     final text = name.trim();
@@ -292,7 +291,9 @@ class _TvRoomTagsDialogState extends State<TvRoomTagsDialog> {
         );
         return;
       }
-      final tag = await tags.add(text.length > tagNameMaxLength ? text.substring(0, tagNameMaxLength) : text);
+      final tag = await tags.add(
+        text.length > TagStore.maxNameLength ? text.substring(0, TagStore.maxNameLength) : text,
+      );
       if (tag == null) {
         AppNavigator.toast(i18n('tag_invalid_or_duplicate'));
         return;

@@ -159,6 +159,21 @@ void main() {
       expect((await store.follows.find('huajiao', '3'))!.effectiveLiveStatus, LiveStatus.live);
     });
 
+    test('I03.2 c6: a platform without an adapter is skipped like a retired one, not failed', () async {
+      final douyu = FakeSite('douyu', {'1': room('douyu', '1', status: LiveStatus.live)});
+      final refresher = FollowRefresher(sites: SiteRegistry({'douyu': () => douyu}));
+      final stored = room('huya', '2', status: LiveStatus.live);
+      final progress = <int>[];
+      final result = await refresher.refresh(
+        [room('douyu', '1'), stored],
+        concurrency: 2,
+        onProgress: (_, total) => progress.add(total),
+      );
+      expect(result.failed, 0);
+      expect(result.rooms.map((r) => r.roomId), ['1'], reason: 'the other room is kept as stored');
+      expect(progress, [1]);
+    });
+
     test('at most the concurrency setting at a time; a failed room waits out the cooldown', () async {
       var now = DateTime(2026, 10);
       final site = FakeSite('huya', {

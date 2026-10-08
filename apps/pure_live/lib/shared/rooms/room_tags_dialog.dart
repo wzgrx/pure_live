@@ -9,12 +9,6 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
-/// Longest tag name (3.x `maxLength: 15`).
-const int roomTagNameMaxLength = 15;
-
-/// Longest tag note (3.x `maxLength: 40`).
-const int roomTagNoteMaxLength = 40;
-
 /// The width from which the tags sit in two columns (U.4a c14: the
 /// dialog's own content width, not the screen's).
 const double roomTagTwoColumnWidth = 400;
@@ -327,7 +321,7 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
                 controller: _name,
                 focusNode: _nameFocus,
                 autofocus: _tags.isNotEmpty,
-                maxLength: roomTagNameMaxLength,
+                maxLength: TagStore.maxNameLength,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => unawaited(_add()),
                 decoration: field(i18n('room_tags_name_hint')).copyWith(
@@ -339,7 +333,7 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '${_name.text.characters.length}/$roomTagNameMaxLength',
+                              '${_name.text.characters.length}/${TagStore.maxNameLength}',
                               style: styles.t12.copyWith(color: scheme.onSurfaceVariant).tabular,
                             ),
                             IconButton(
@@ -359,7 +353,7 @@ class _RoomTagPickerState extends State<RoomTagPicker> {
             child: TextField(
               key: const ValueKey('room-tags-note'),
               controller: _note,
-              maxLength: roomTagNoteMaxLength,
+              maxLength: TagStore.maxDescriptionLength,
               decoration: field(i18n('room_tags_note_hint')).copyWith(counterText: ''),
               onSubmitted: (_) => unawaited(_add()),
             ),

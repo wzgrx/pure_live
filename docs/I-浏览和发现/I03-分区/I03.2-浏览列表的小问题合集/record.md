@@ -2,7 +2,7 @@
 
 - 日期：2026-10-08
 - 执行者：Claude
-- 分支和提交：本机工作区（从 master `d24c6757b` 开始），两个阶段各一个提交
+- 分支和提交：本机工作区（从 master `d24c6757b` 开始），两个阶段各一个提交（阶段 1 `9cc37bab2`）
 - 设计或说明：[README.md](README.md)；任务书 [brief.md](brief.md)
 
 ## 阶段 1：分区（c1～c4）
@@ -32,3 +32,39 @@
 - 内存：每个平台一份目录（分类和分区列表，几十 KB），应用运行期间留着，和热门一样。
 - 电视的分区目录（`tv/pages/tv_areas_pane.dart`）有自己的一份目录表，不在本任务范围（任务书只要电视分区房间页传 `precheck`），没改。
 - 搜索页的断网预检照 README“留下的问题”，归 I05。
+
+## 阶段 2：列表通用和其他页（c5～c8）
+
+### 根因
+
+5. `apps/pure_live/lib/shared/rooms/room_feed.dart:372-373`（改前）`retry` 不是刷新时用 `ensure(rooms.length + 1)`，丢了调用方传的 `count`（`room_grid.dart` 传 `rooms.length + 20`）。
+6. `features/favorite/follow_refresher.dart:91-93`（改前）`_load` 对没有适配器的平台返回 null → `failed++`，也不写 `_failedAt`，每轮都算失败；已下线平台在 `:64` 单独跳过。
+7. `features/history/history_refresh.dart:15`（改前）`siteHistoryLoader` 对没有适配器的平台抛 `StateError`，`refreshHistoryRooms` 算失败并标成状态待定。
+8. 标签名 15、说明 40 在 `features/tags/tag_editor_dialog.dart:10`、`:13` 和 `shared/rooms/room_tags_dialog.dart:13`、`:16` 各定义一份（电视的设标签框用前一份）。
+
+### 做了什么
+
+- c5：`retry` 改成 `ensure(math.max(count, rooms.length + 1))`。
+- c6：`FollowRefresher.refresh` 的队列和已下线平台一样跳过 `sites.maybeOf(...) == null` 的房间：不请求、不算失败、不进结果（`FollowStore.update` 不动它，原样保留）。
+- c7：`siteHistoryLoader` 对没有适配器的抛 `HistoryRoomSkipped`；`refreshHistoryRooms` 收到它就原样保留、计入新的 `skipped`，不算 `failed`；`succeeded = rooms.length - failed - skipped`（“已刷新 N 个”不含跳过的）。
+- c8：`packages/live_store/lib/src/tags.dart` `TagStore.maxNameLength = 15`、`maxDescriptionLength = 40`；标签编辑框、设标签框、电视设标签框都引用它，删掉两组重复常量（数值不变，不是设置）。
+- 文档：`docs/inventory/FEATURES.md` F-NET-03“部分”→“没验证”（代码都改了；断网和移动数据靠 connectivity_plus，照该文件的规矩等 K90 看过再改“完成”）；I02、I03、I04、I06、I07 的“已知问题”里并进本任务的 8 行标“2026-10-08 已改，待 K90”。
+
+### 测试（改之前 5 个都失败：2 个断言失败，3 个编译不过）
+
+- `popular_test.dart`：`I03.2 c5: a retry after a failed load more fetches the count asked for`（每块 5 个，重试要 25 个就取到 25 个；改前 10 个）。
+- `favorite_test.dart`：`I03.2 c6: a platform without an adapter is skipped like a retired one, not failed`（`failed == 0`，结果里只有有适配器的房间；改前 `failed == 1`）。
+- `history_page_test.dart`：`I03.2 c7: a platform without an adapter is kept as it is, not counted as failed`（`failed 0`、`skipped 1`、状态不变成待定）。
+- `tags_page_test.dart`、`test/shared/shared_test.dart`：两个对话框的 `maxLength` 等于 `TagStore.maxNameLength`、`maxDescriptionLength`（15、40）。
+- 改后 `packages/live_store`、`apps/pure_live` 全部通过。
+
+## 真机
+
+待 K90（任务书“真机验证”）：
+
+1. 只断测试包的网（或开飞行模式），首页 → 分区：显示“没有网络连接”和重试；连上网后自动重新加载。有目录时进一个分区再断网下拉刷新：分区房间也显示离线（或刷新失败提示，已有房间留着）。
+2. 维护者手持手机关掉 Wi-Fi 只用移动数据（不用 adb），进分区房间：列表上方有流量提示和“不再显示”；回到 Wi-Fi 后重新 `adb connect`。
+3. 首页：分区（等目录出来）→ 热门 → 分区：第二次进分区直接显示，没有骨架。
+4. 分区房间页开着，去设置改“显示不能播放的直播”，返回：列表马上变。
+5. 观看记录里有已下线平台的记录时下拉刷新：提示里没有把它算成失败。
+6. 热门某平台滑到底，加载更多失败（断网）后连网点“重试”：一次多出约 20 个房间。

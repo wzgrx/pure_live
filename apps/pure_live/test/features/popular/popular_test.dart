@@ -268,6 +268,23 @@ void main() {
       expect(fresh.rooms, isEmpty);
     });
 
+    test('I03.2 c5: a retry after a failed load more fetches the count asked for', () async {
+      final site = _FakeSite(SiteIds.bilibili, [
+        for (var page = 0; page < 8; page++) [for (var i = 0; i < 5; i++) _room('bilibili', page * 10 + i)],
+      ]);
+      final rooms = feed(popularSourceFor(site));
+      await rooms.ensure(5);
+      expect(rooms.rooms, hasLength(5));
+      site.error = const NetworkFailure('bilibili');
+      await rooms.loadMore();
+      expect(rooms.error, isNotNull);
+      expect(rooms.errorOnRefresh, isFalse);
+      site.error = null;
+      await rooms.retry(count: rooms.rooms.length + 20);
+      expect(rooms.error, isNull);
+      expect(rooms.rooms, hasLength(25));
+    });
+
     test('a failed refresh keeps the rooms; a failed first load has none', () async {
       final site = _FakeSite(SiteIds.bilibili, [
         [_room('bilibili', 1)],

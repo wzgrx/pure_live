@@ -142,3 +142,7 @@ v3 的热门、分区房间、历史放在 `EasyRefresh(child:)` 里，列表自
 - `packages/live_ui/lib/src/widgets/scrolling.dart`：没有改。
 - A03.2 要新建 `packages/live_ui/lib/src/theme/motion.dart`：这次没有建这个文件，弹簧常量 `appRefreshSpring` 先放在 `refresh_view.dart`；A03.2 可以把它挪进 `motion.dart`（面板也是 1/500/1）。
 - `apps/pure_live/assets/translations/*.json`、`packages/live_ui/lib/src/scope.dart`、`app_icons.dart`：各任务都会往里加，按键名排序合并即可。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 热门哔哩哔哩列表下拉：头部是 3.x 的经典样式，“↑ 松开刷新 / 上次刷新时间 15:15”，松手后“刷新成功 / 上次刷新时间 15:31” ✓。滑行距离和回弹按测试里对过 3.x 的数字，手感没逐项量。

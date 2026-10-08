@@ -831,8 +831,8 @@ from = "S02.5 清单 1A-14（2026-10-08 K90）"
 id = "A03.1"
 title = "主列表手感：照 3.x 两端回弹，经典下拉刷新头"
 type = "性能"
-status = "待真机"
-date = "2026-10-02"
+status = "完成"
+date = "2026-10-08"
 commit = "6e9e0da7e"
 old = ["P02", "T14c.1"]
 
@@ -840,8 +840,8 @@ old = ["P02", "T14c.1"]
 id = "A03.2"
 title = "翻页和面板：弹簧带上松手速度，翻页阈值照 ViewPager"
 type = "性能"
-status = "待真机"
-date = "2026-10-02"
+status = "完成"
+date = "2026-10-08"
 commit = "7e1124e01"
 old = ["P03", "T14c.2"]
 

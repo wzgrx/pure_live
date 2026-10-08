@@ -136,3 +136,7 @@
 - `packages/live_ui/lib/live_ui.dart`：各任务都会加导出，按字母顺序合并即可。
 - 5 个页面文件各只改了 physics 一行（`popular_page.dart`、`favorite_page.dart`、`favorite_areas_view.dart`、`platform_areas_view.dart`、`chat_panel.dart`），A02.1、A04.1 改这些页面时一般不会撞到。
 - `room_switcher.dart`：没有碰；A07.13 已删掉它，新面板没有 `TabBarView`。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 热门标签页：慢慢横拖约 60 dp 松手，停在原页 ✓；快速一甩翻到下一页（哔哩哔哩 → 斗鱼）✓，反向一甩回来 ✓。

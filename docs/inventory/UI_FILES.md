@@ -2,6 +2,8 @@
 
 由 `tools/ui/inventory.py --files` 生成，不要手改。`v3:` 是 `v3.2.11` 的 `lib/`，`tv:` 是 pure_live_TV 的 `lib/`。
 
+扫描的提交：v3 `f0d64772`（`v3.2.11`），pure_live_TV `b9d2f739`。
+
 ## A01.2
 
 - `v3:main.dart`
@@ -22,6 +24,29 @@
 ## A02.2
 
 - `v3:plugins/utils.dart`
+
+## A06.1
+
+- `v3:common/widgets/common_appbar_actions.dart`
+- `v3:common/widgets/menu_button.dart`
+- `v3:common/widgets/search_button.dart`
+- `v3:modules/home/home_page.dart`
+- `v3:modules/home/mobile_view.dart`
+
+## A06.2
+
+- `v3:modules/home/tablet_view.dart`
+
+## A06.3
+
+- `v3:common/widgets/download_apk_dialog.dart`
+- `v3:common/widgets/download_directory_dialog.dart`
+- `v3:common/widgets/share_command_import_dialog.dart`
+- `v3:plugins/update.dart`
+
+## A06.4
+
+- `v3:modules/splash/splash_screen.dart`
 
 ## A07.1
 
@@ -53,15 +78,6 @@
 
 - `v3:modules/live_play/widgets/layout/control_hover_region.dart`
 
-## A08.1
-
-- `v3:modules/live_play/pages/danmaku_settings_page.dart`
-- `v3:modules/live_play/pages/keyword_block_page.dart`
-- `v3:modules/live_play/pages/super_chat_page.dart`
-- `v3:modules/live_play/widgets/danmaku/danmaku_list_view.dart`
-- `v3:modules/live_play/widgets/danmaku/danmaku_tab.dart`
-- `v3:modules/live_play/widgets/layout/super_chat_card.dart`
-
 ## A07.6
 
 - `v3:modules/live_play/dialogs/known_room_link_dialog.dart`
@@ -83,42 +99,28 @@
 - `v3:modules/live_play/widgets/video_player/playback_failure_overlay.dart`
 - `v3:modules/live_play/widgets/video_player/video_loading.dart`
 
-## R02.1
-
-- `v3:common/widgets/adaptive_refresh_rate_scope.dart`
-
 ## A07.8
 
 - `v3:modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart`
 - `v3:player/utils/pip_window_widget.dart`
+
+## A08.1
+
+- `v3:modules/live_play/pages/danmaku_settings_page.dart`
+- `v3:modules/live_play/pages/keyword_block_page.dart`
+- `v3:modules/live_play/pages/super_chat_page.dart`
+- `v3:modules/live_play/widgets/danmaku/danmaku_list_view.dart`
+- `v3:modules/live_play/widgets/danmaku/danmaku_tab.dart`
+- `v3:modules/live_play/widgets/layout/super_chat_card.dart`
 
 ## A08.2
 
 - `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart`
 - `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart`
 
-## A06.1
+## A08.3
 
-- `v3:common/widgets/common_appbar_actions.dart`
-- `v3:common/widgets/menu_button.dart`
-- `v3:common/widgets/search_button.dart`
-- `v3:modules/home/home_page.dart`
-- `v3:modules/home/mobile_view.dart`
-
-## A06.2
-
-- `v3:modules/home/tablet_view.dart`
-
-## A06.4
-
-- `v3:modules/splash/splash_screen.dart`
-
-## A06.3
-
-- `v3:common/widgets/download_apk_dialog.dart`
-- `v3:common/widgets/download_directory_dialog.dart`
-- `v3:common/widgets/share_command_import_dialog.dart`
-- `v3:plugins/update.dart`
+- `v3:modules/shield/danmu_shield_page.dart`
 
 ## A09.1
 
@@ -163,6 +165,19 @@
 
 - `v3:modules/history/history_page.dart`
 
+## A09.10
+
+- `v3:modules/tags/tag_management_page.dart`
+
+## A10.1
+
+- `v3:recorder/pages/recorder/recorder_page.dart`
+- `v3:recorder/widgets/recorder_bounded_scroll.dart`
+
+## A10.2
+
+- `v3:recorder/pages/record_settings/record_settings_page.dart`
+
 ## A11.1
 
 - `v3:modules/settings/settings_page.dart`
@@ -199,28 +214,6 @@
 
 - `v3:modules/settings/pages/cache_data_settings_page.dart`
 - `v3:modules/settings/pages/local_config_preveiw.dart`
-
-## A10.1
-
-- `v3:recorder/pages/recorder/recorder_page.dart`
-- `v3:recorder/widgets/recorder_bounded_scroll.dart`
-
-## A10.2
-
-- `v3:recorder/pages/record_settings/record_settings_page.dart`
-
-## A13.2
-
-- `v3:modules/multiview/multiview_page.dart`
-- `v3:modules/multiview/widgets/multiview_fullscreen_surface.dart`
-- `v3:modules/multiview/widgets/multiview_room_picker.dart`
-
-## A13.1
-
-- `v3:modules/iptv/iptv_manage.dart`
-- `v3:modules/iptv/iptv_page.dart`
-- `v3:core/iptv/services/epg_import_manager.dart`
-- `v3:core/iptv/services/iptv_import_manager.dart`
 
 ## A12.1
 
@@ -262,6 +255,19 @@
 
 - `v3:modules/remote_receiver/remote_sync_page.dart`
 
+## A13.1
+
+- `v3:modules/iptv/iptv_manage.dart`
+- `v3:modules/iptv/iptv_page.dart`
+- `v3:core/iptv/services/epg_import_manager.dart`
+- `v3:core/iptv/services/iptv_import_manager.dart`
+
+## A13.2
+
+- `v3:modules/multiview/multiview_page.dart`
+- `v3:modules/multiview/widgets/multiview_fullscreen_surface.dart`
+- `v3:modules/multiview/widgets/multiview_room_picker.dart`
+
 ## A15.1
 
 - `v3:modules/toolbox/toolbox_page.dart`
@@ -272,14 +278,6 @@
 - `v3:modules/about/version_history.dart`
 - `v3:modules/about/widgets/version_dialog.dart`
 - `v3:modules/version/version_page.dart`
-
-## A09.10
-
-- `v3:modules/tags/tag_management_page.dart`
-
-## A08.3
-
-- `v3:modules/shield/danmu_shield_page.dart`
 
 ## A16.1
 
@@ -515,4 +513,8 @@
 - `tv:features/settings/pages/widgets/video_interface_settings_group.dart`
 - `tv:features/settings/pages/widgets/video_playback_settings_group.dart`
 - `tv:features/settings/widgets/download_apk_dialog.dart`
+
+## R02.1
+
+- `v3:common/widgets/adaptive_refresh_rate_scope.dart`
 

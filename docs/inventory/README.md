@@ -11,6 +11,6 @@
 
 说明：
 
-- UI.md 和 UI_FILES.md 是 2026-10-01 用 `tools/ui/inventory.py` 生成后换成新编号的；脚本本身还输出旧编号，改脚本是 [Z03.3](../Z-工程文档和维护/Z03-清点和归属/README.md)。在脚本改好之前不要重新生成，否则会变回旧编号。
+- UI.md 和 UI_FILES.md 由 `tools/ui/inventory.py --items` / `--files` 生成，直接输出新编号（从 `docs/tasks.toml` 的 `old` 字段对照，[Z03.3](../Z-工程文档和维护/Z03-清点和归属/README.md)），开头写着扫描的两个提交。现在的两份扫的是 pure_live_TV `b9d2f739`（X03.1 对照的版本）：`python3 tools/ui/inventory.py --items --tv-ref b9d2f739 > docs/inventory/UI.md`。条目编号（如 A11.3-11）按文件在磁盘上的顺序排，文档里大量引用；要在同一台机器的同一个盘上重新生成，换了机器先对比一遍编号。
 - 功能点编号（`F-ROOM-01`）是功能点自己的编号，不是任务编号，保持不变。
 - 全项目的归属清点（代码文件、功能点、设置项、平台、原生插件都归到子分类）是 [Z03.2](../Z-工程文档和维护/Z03-清点和归属/README.md)。

@@ -1,17 +1,22 @@
 """Counts the screens of v3 (v3.2.11) and pure_live_TV and assigns every UI
 file to a task of docs/TASKS.md, so no screen is left out.
 
+The rules below keep the old U ids of the first inventory (2026-10-01); the
+output names the tasks by their docs v2 ids, looked up in the `old` field of
+docs/tasks.toml (Z03.3).
+
 A UI file is a Dart file that declares a widget class or opens a dialog,
 sheet or menu. RULES maps path prefixes to task ids, first match wins; a UI
 file no rule matches is printed as unassigned and the script exits 1.
 
-usage: python3 tools/ui/inventory.py [--v3 ~/ref/v3ref] [--tv ~/ref/pure_live_TV] [--files | --items]
+usage: python3 tools/ui/inventory.py [--v3 ~/ref/v3ref] [--tv ~/ref/pure_live_TV] [--tv-ref COMMIT] [--files | --items]
+  --tv-ref: scan that commit of the TV repository (git archive, the work tree is left alone)
   default output: per-task counts as a Markdown table
   --files: Markdown list of files per task (docs/inventory/UI_FILES.md)
   --items: every page, dialog, sheet, menu and overlay per task, with the
            Chinese title found next to it (docs/inventory/UI.md)
 """
-import argparse, os, re, sys
+import argparse, os, re, subprocess, sys, tarfile, tempfile, tomllib
 from collections import Counter, defaultdict
 
 WIDGET = re.compile(r'^class\s+(\w+)\s+extends\s+(?:StatelessWidget|StatefulWidget|GetView<|GetWidget<|ConsumerWidget|ConsumerStatefulWidget|HookWidget)', re.M)
@@ -147,6 +152,8 @@ def scan(lib, rules, label, zh=None):
     """Returns ({task: Counter}, {task: [files]}, [unassigned], {task: [items]})."""
     counts, files, missing = defaultdict(Counter), defaultdict(list), []
     items = defaultdict(list)
+    # Directories in the file system's order, as when the inventory was first
+    # made: the docs cite its item numbers (A11.3-11 ...), which follow it.
     for root, _, names in os.walk(lib):
         for name in sorted(names):
             if not name.endswith('.dart') or name.endswith(('.g.dart', '.freezed.dart')):
@@ -180,20 +187,74 @@ def scan(lib, rules, label, zh=None):
     return counts, files, missing, items
 
 
+REGISTRY = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'docs', 'tasks.toml')
+
+
+def new_ids(registry=REGISTRY):
+    """{old U id: task id} from the `old` field of the task registry."""
+    with open(registry, 'rb') as f:
+        data = tomllib.load(f)
+    ids = {}
+    for task in data.get('task', []):
+        for old in task.get('old', []):
+            if old.startswith('U.'):
+                if old in ids:
+                    raise ValueError(f'{old} is the old id of both {ids[old]} and {task["id"]}')
+                ids[old] = task['id']
+    return ids
+
+
+def renamed(table, ids, empty):
+    """[table] ({old id: value}) under the new ids; an old id without one is an error."""
+    unknown = sorted(k for k in table if k not in ids)
+    if unknown:
+        raise KeyError('no task has the old id ' + ', '.join(unknown))
+    out = defaultdict(empty)
+    for old, value in table.items():
+        out[ids[old]] = value
+    return out
+
+
 def order(task):
-    m = re.match(r'U\.(\d+)([a-z]?)', task)
-    return (int(m.group(1)), m.group(2))
+    """Group letter, sub-category, number: A07.6 before A08.1, R02.1 after the A group."""
+    m = re.fullmatch(r'([A-Z])(\d\d)\.(\d+)', task)
+    return (m.group(1), int(m.group(2)), int(m.group(3)))
+
+
+def commit(repo, ref='HEAD'):
+    try:
+        return subprocess.run(['git', '-C', repo, 'rev-parse', '--short=8', ref], capture_output=True, text=True,
+                              check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return '?'
+
+
+def checkout(repo, ref, into):
+    """The `lib/` and translations of [ref] in [repo], unpacked under [into]."""
+    archive = subprocess.run(['git', '-C', repo, 'archive', ref, 'lib', 'assets/translations'], capture_output=True,
+                             check=True).stdout
+    path = os.path.join(into, 'tv.tar')
+    with open(path, 'wb') as f:
+        f.write(archive)
+    with tarfile.open(path) as tar:
+        tar.extractall(into, filter='data')
+    return into
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--v3', default=os.path.expanduser('~/ref/v3ref'))
     ap.add_argument('--tv', default=os.path.expanduser('~/ref/pure_live_TV'))
+    ap.add_argument('--tv-ref')
     ap.add_argument('--files', action='store_true')
     ap.add_argument('--items', action='store_true')
     args = ap.parse_args()
     counts, files, missing, items = defaultdict(Counter), defaultdict(list), [], defaultdict(list)
-    for root, rules, label in ((args.v3, V3, 'v3'), (args.tv, TV, 'tv')):
+    # Next to the TV repository: the same file system lists directories in the same order.
+    tmp = tempfile.TemporaryDirectory(dir=os.path.dirname(os.path.abspath(args.tv)))
+    tv = checkout(args.tv, args.tv_ref, tmp.name) if args.tv_ref else args.tv
+    versions = f'v3 `{commit(args.v3)}`（`v3.2.11`），pure_live_TV `{commit(args.tv, args.tv_ref or "HEAD")}`'
+    for root, rules, label in ((args.v3, V3, 'v3'), (tv, TV, 'tv')):
         c, f, m, it = scan(os.path.join(root, 'lib'), rules, label, load_zh(root))
         for k, v in c.items():
             counts[k].update(v)
@@ -202,8 +263,11 @@ def main():
         for k, v in it.items():
             items[k] += v
         missing += m
+    ids = new_ids()
+    counts, files, items = renamed(counts, ids, Counter), renamed(files, ids, list), renamed(items, ids, list)
     if args.items:
         print('# 界面清单（逐项，生成）\n\n由 `tools/ui/inventory.py --items` 生成，不要手改。每个任务列出 v3（`v3.2.11`）和 pure_live_TV 代码里的页面、对话框、底部面板、菜单和覆盖层，名称取代码旁边的中文文案（取不到时用方法名或类名），位置是“文件:行”。同一个弹窗可能在两处出现（组件类和调用处），设计时按实际界面合并。\n')
+        print(f'扫描的提交：{versions}。\n')
         kinds = ('页面', '对话框', '底部面板', '菜单', '覆盖层')
         print('| 任务 | ' + ' | '.join(kinds) + ' | 提示条 |')
         print('|---|' + '---:|' * (len(kinds) + 1))
@@ -220,6 +284,7 @@ def main():
             print()
     elif args.files:
         print('# 界面文件对照（生成）\n\n由 `tools/ui/inventory.py --files` 生成，不要手改。`v3:` 是 `v3.2.11` 的 `lib/`，`tv:` 是 pure_live_TV 的 `lib/`。\n')
+        print(f'扫描的提交：{versions}。\n')
         for task in sorted(files, key=order):
             print(f'## {task}\n')
             print('\n'.join(f'- `{p}`' for p in files[task]) + '\n')

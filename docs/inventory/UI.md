@@ -2,22 +2,25 @@
 
 由 `tools/ui/inventory.py --items` 生成，不要手改。每个任务列出 v3（`v3.2.11`）和 pure_live_TV 代码里的页面、对话框、底部面板、菜单和覆盖层，名称取代码旁边的中文文案（取不到时用方法名或类名），位置是“文件:行”。同一个弹窗可能在两处出现（组件类和调用处），设计时按实际界面合并。
 
+扫描的提交：v3 `f0d64772`（`v3.2.11`），pure_live_TV `b9d2f739`。
+
 | 任务 | 页面 | 对话框 | 底部面板 | 菜单 | 覆盖层 | 提示条 |
 |---|---:|---:|---:|---:|---:|---:|
 | [A02.1](#a021) | 2 | 1 | 0 | 0 | 0 | 0 |
 | [A02.2](#a022) | 0 | 6 | 0 | 0 | 0 | 1 |
+| [A06.1](#a061) | 2 | 1 | 0 | 2 | 0 | 1 |
+| [A06.2](#a062) | 1 | 0 | 0 | 0 | 0 | 0 |
+| [A06.3](#a063) | 0 | 5 | 0 | 0 | 0 | 7 |
+| [A06.4](#a064) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [A07.1](#a071) | 1 | 1 | 0 | 0 | 0 | 1 |
 | [A07.2](#a072) | 0 | 2 | 0 | 0 | 0 | 0 |
 | [A07.4](#a074) | 0 | 6 | 0 | 0 | 2 | 3 |
-| [A08.1](#a081) | 5 | 0 | 0 | 0 | 0 | 9 |
 | [A07.6](#a076) | 1 | 7 | 2 | 3 | 0 | 6 |
 | [A07.7](#a077) | 0 | 1 | 0 | 0 | 1 | 0 |
 | [A07.8](#a078) | 0 | 0 | 0 | 0 | 1 | 0 |
+| [A08.1](#a081) | 5 | 0 | 0 | 0 | 0 | 9 |
 | [A08.2](#a082) | 0 | 1 | 2 | 0 | 0 | 1 |
-| [A06.1](#a061) | 2 | 1 | 0 | 2 | 0 | 1 |
-| [A06.2](#a062) | 1 | 0 | 0 | 0 | 0 | 0 |
-| [A06.4](#a064) | 1 | 0 | 0 | 0 | 0 | 0 |
-| [A06.3](#a063) | 0 | 5 | 0 | 0 | 0 | 7 |
+| [A08.3](#a083) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [A09.1](#a091) | 0 | 4 | 0 | 0 | 0 | 5 |
 | [A09.2](#a092) | 2 | 0 | 0 | 0 | 0 | 0 |
 | [A09.3](#a093) | 2 | 0 | 0 | 0 | 0 | 0 |
@@ -27,25 +30,24 @@
 | [A09.7](#a097) | 1 | 1 | 0 | 1 | 0 | 7 |
 | [A09.8](#a098) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [A09.9](#a099) | 1 | 3 | 0 | 0 | 0 | 4 |
+| [A09.10](#a0910) | 1 | 4 | 0 | 0 | 0 | 2 |
+| [A10.1](#a101) | 1 | 1 | 0 | 0 | 0 | 0 |
+| [A10.2](#a102) | 1 | 5 | 0 | 0 | 0 | 4 |
 | [A11.1](#a111) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [A11.2](#a112) | 7 | 10 | 0 | 0 | 0 | 13 |
 | [A11.3](#a113) | 6 | 9 | 0 | 0 | 0 | 2 |
 | [A11.4](#a114) | 5 | 11 | 0 | 0 | 0 | 2 |
 | [A11.5](#a115) | 2 | 1 | 0 | 0 | 0 | 1 |
-| [A10.1](#a101) | 1 | 1 | 0 | 0 | 0 | 0 |
-| [A10.2](#a102) | 1 | 5 | 0 | 0 | 0 | 4 |
-| [A13.2](#a132) | 1 | 0 | 6 | 1 | 0 | 0 |
-| [A13.1](#a131) | 2 | 11 | 0 | 0 | 0 | 43 |
 | [A12.1](#a121) | 1 | 1 | 0 | 0 | 0 | 0 |
 | [A12.2](#a122) | 10 | 1 | 0 | 0 | 0 | 1 |
 | [A12.3](#a123) | 3 | 3 | 0 | 0 | 0 | 21 |
 | [A12.4](#a124) | 2 | 0 | 0 | 0 | 0 | 9 |
 | [A12.5](#a125) | 2 | 3 | 0 | 2 | 0 | 2 |
 | [A12.6](#a126) | 1 | 4 | 0 | 0 | 0 | 7 |
+| [A13.1](#a131) | 2 | 11 | 0 | 0 | 0 | 43 |
+| [A13.2](#a132) | 1 | 0 | 6 | 1 | 0 | 0 |
 | [A15.1](#a151) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [A15.2](#a152) | 3 | 5 | 0 | 0 | 1 | 4 |
-| [A09.10](#a0910) | 1 | 4 | 0 | 0 | 0 | 2 |
-| [A08.3](#a083) | 1 | 0 | 0 | 0 | 0 | 0 |
 | [A16.1](#a161) | 0 | 2 | 0 | 1 | 0 | 2 |
 | [A17.1](#a171) | 3 | 3 | 0 | 0 | 1 | 2 |
 | [A17.2](#a172) | 2 | 5 | 0 | 0 | 0 | 3 |
@@ -76,6 +78,38 @@
 | A02.2-05 | 对话框 | _SharedAlertDialog | `v3:plugins/utils.dart:395` |
 | A02.2-06 | 对话框 | _EditTextDialog | `v3:plugins/utils.dart:507` |
 
+## A06.1
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A06.1-01 | 菜单 | 更多 | `v3:common/widgets/common_appbar_actions.dart:13` |
+| A06.1-02 | 菜单 | 菜单 | `v3:common/widgets/menu_button.dart:15` |
+| A06.1-03 | 页面 | HomePage | `v3:modules/home/home_page.dart:20` |
+| A06.1-04 | 对话框 | _checkForStartupUpdate | `v3:modules/home/home_page.dart:208` |
+| A06.1-05 | 页面 | HomeMobileView（关注） | `v3:modules/home/mobile_view.dart:5` |
+
+## A06.2
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A06.2-01 | 页面 | HomeTabletView（关注） | `v3:modules/home/tablet_view.dart:6` |
+
+## A06.3
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A06.3-01 | 对话框 | DownloadApkDialog（准备中...） | `v3:common/widgets/download_apk_dialog.dart:127` |
+| A06.3-02 | 对话框 | 选择下载目录 · `showDownloadDirectoryChoiceDialog` | `v3:common/widgets/download_directory_dialog.dart:20` |
+| A06.3-03 | 对话框 | ShareCommandImportDialog（分享） | `v3:common/widgets/share_command_import_dialog.dart:6` |
+| A06.3-04 | 对话框 | 分享 · `show` | `v3:common/widgets/share_command_import_dialog.dart:12` |
+| A06.3-05 | 对话框 | 未选择下载目录，已取消下载 · `_showDownloadDialog` | `v3:plugins/update.dart:100` |
+
+## A06.4
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A06.4-01 | 页面 | SplashScreen | `v3:modules/splash/splash_screen.dart:6` |
+
 ## A07.1
 
 | 编号 | 类型 | 名称 | 位置 |
@@ -102,16 +136,6 @@
 | A07.4-06 | 对话框 | 选择清晰度 · `_showSelector` | `v3:modules/live_play/widgets/video_player/video_controller_panel.dart:1059` |
 | A07.4-07 | 对话框 | _liveProgramme | `v3:modules/live_play/widgets/video_player/video_controller_panel.dart:1859` |
 | A07.4-08 | 覆盖层 | SettingsPanel | `v3:modules/live_play/widgets/video_player/video_controller_panel.dart:2120` |
-
-## A08.1
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A08.1-01 | 页面 | DanmakuSettingsPage | `v3:modules/live_play/pages/danmaku_settings_page.dart:9` |
-| A08.1-02 | 页面 | KeywordBlockPage（请输入关键词） | `v3:modules/live_play/pages/keyword_block_page.dart:6` |
-| A08.1-03 | 页面 | SuperChatPage（暂无醒目留言） | `v3:modules/live_play/pages/super_chat_page.dart:5` |
-| A08.1-04 | 页面 | DanmakuListView | `v3:modules/live_play/widgets/danmaku/danmaku_list_view.dart:51` |
-| A08.1-05 | 页面 | DanmakuTabView（全局弹幕显示已关闭；仍可切换到“弹幕设置”调整主播放器和小窗弹幕。） | `v3:modules/live_play/widgets/danmaku/danmaku_tab.dart:8` |
 
 ## A07.6
 
@@ -144,6 +168,16 @@
 |---|---|---|---|
 | A07.8-01 | 覆盖层 | CompactDanmakuOverlay | `v3:modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart:6` |
 
+## A08.1
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A08.1-01 | 页面 | DanmakuSettingsPage | `v3:modules/live_play/pages/danmaku_settings_page.dart:9` |
+| A08.1-02 | 页面 | KeywordBlockPage（请输入关键词） | `v3:modules/live_play/pages/keyword_block_page.dart:6` |
+| A08.1-03 | 页面 | SuperChatPage（暂无醒目留言） | `v3:modules/live_play/pages/super_chat_page.dart:5` |
+| A08.1-04 | 页面 | DanmakuListView | `v3:modules/live_play/widgets/danmaku/danmaku_list_view.dart:51` |
+| A08.1-05 | 页面 | DanmakuTabView（全局弹幕显示已关闭；仍可切换到“弹幕设置”调整主播放器和小窗弹幕。） | `v3:modules/live_play/widgets/danmaku/danmaku_tab.dart:8` |
+
 ## A08.2
 
 | 编号 | 类型 | 名称 | 位置 |
@@ -152,37 +186,11 @@
 | A08.2-02 | 底部面板 | 本地弹幕样式 · `showLocalDanmakuStyleEditor` | `v3:modules/live_play/widgets/local_interaction/local_danmaku_style_editor.dart:33` |
 | A08.2-03 | 底部面板 | LocalInteractionSheet（本地互动体验） | `v3:modules/live_play/widgets/local_interaction/local_interaction_sheet.dart:5` |
 
-## A06.1
+## A08.3
 
 | 编号 | 类型 | 名称 | 位置 |
 |---|---|---|---|
-| A06.1-01 | 菜单 | 更多 | `v3:common/widgets/common_appbar_actions.dart:13` |
-| A06.1-02 | 菜单 | 菜单 | `v3:common/widgets/menu_button.dart:15` |
-| A06.1-03 | 页面 | HomePage | `v3:modules/home/home_page.dart:20` |
-| A06.1-04 | 对话框 | _checkForStartupUpdate | `v3:modules/home/home_page.dart:208` |
-| A06.1-05 | 页面 | HomeMobileView（关注） | `v3:modules/home/mobile_view.dart:5` |
-
-## A06.2
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A06.2-01 | 页面 | HomeTabletView（关注） | `v3:modules/home/tablet_view.dart:6` |
-
-## A06.4
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A06.4-01 | 页面 | SplashScreen | `v3:modules/splash/splash_screen.dart:6` |
-
-## A06.3
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A06.3-01 | 对话框 | DownloadApkDialog（准备中...） | `v3:common/widgets/download_apk_dialog.dart:127` |
-| A06.3-02 | 对话框 | 选择下载目录 · `showDownloadDirectoryChoiceDialog` | `v3:common/widgets/download_directory_dialog.dart:20` |
-| A06.3-03 | 对话框 | ShareCommandImportDialog（分享） | `v3:common/widgets/share_command_import_dialog.dart:6` |
-| A06.3-04 | 对话框 | 分享 · `show` | `v3:common/widgets/share_command_import_dialog.dart:12` |
-| A06.3-05 | 对话框 | 未选择下载目录，已取消下载 · `_showDownloadDialog` | `v3:plugins/update.dart:100` |
+| A08.3-01 | 页面 | DanmuShieldPage（弹幕关键词屏蔽） | `v3:modules/shield/danmu_shield_page.dart:6` |
 
 ## A09.1
 
@@ -250,6 +258,34 @@
 | A09.9-02 | 对话框 | 清空历史 · `_showHistoryLimitDialog` | `v3:modules/history/history_page.dart:75` |
 | A09.9-03 | 对话框 | 历史记录 · `_showDestructiveConfirmation` | `v3:modules/history/history_page.dart:131` |
 | A09.9-04 | 对话框 | _HistoryLimitDialog（历史记录更改未保存，请重试。） | `v3:modules/history/history_page.dart:248` |
+
+## A09.10
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A09.10-01 | 页面 | TagManagementPage（标签管理） | `v3:modules/tags/tag_management_page.dart:9` |
+| A09.10-02 | 对话框 | 标签详情 · `_showTagDetails` | `v3:modules/tags/tag_management_page.dart:280` |
+| A09.10-03 | 对话框 | 删除标签 · `_showTagDialog` | `v3:modules/tags/tag_management_page.dart:378` |
+| A09.10-04 | 对话框 | 删除标签 · `_confirmDelete` | `v3:modules/tags/tag_management_page.dart:389` |
+| A09.10-05 | 对话框 | _TagEditorDialog（标签名称不能为空） | `v3:modules/tags/tag_management_page.dart:462` |
+
+## A10.1
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A10.1-01 | 页面 | RecorderPage（录制中心） | `v3:recorder/pages/recorder/recorder_page.dart:12` |
+| A10.1-02 | 对话框 | 取消监控 · `_remove` | `v3:recorder/pages/recorder/recorder_page.dart:769` |
+
+## A10.2
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A10.2-01 | 页面 | RecordSettingsPage（录制设置） | `v3:recorder/pages/record_settings/record_settings_page.dart:10` |
+| A10.2-02 | 对话框 | 确认清空录制文件目录？ · `_clearCache` | `v3:recorder/pages/record_settings/record_settings_page.dart:241` |
+| A10.2-03 | 对话框 | 最大同时录制任务数 · `_showMaxTaskDialog` | `v3:recorder/pages/record_settings/record_settings_page.dart:371` |
+| A10.2-04 | 对话框 | 设置最大缓存 (MB) · `_showCacheDialog` | `v3:recorder/pages/record_settings/record_settings_page.dart:403` |
+| A10.2-05 | 对话框 | 录制设置未保存，请重试 · `_showCacheDialog` | `v3:recorder/pages/record_settings/record_settings_page.dart:425` |
+| A10.2-06 | 对话框 | _RecordIntegerDialog | `v3:recorder/pages/record_settings/record_settings_page.dart:482` |
 
 ## A11.1
 
@@ -328,55 +364,6 @@
 | A11.5-02 | 对话框 | 确认清空本地缓存？ · `_confirmClearCache` | `v3:modules/settings/pages/cache_data_settings_page.dart:56` |
 | A11.5-03 | 页面 | LocalConfigPreviewPage（本地配置预览） | `v3:modules/settings/pages/local_config_preveiw.dart:8` |
 
-## A10.1
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A10.1-01 | 页面 | RecorderPage（录制中心） | `v3:recorder/pages/recorder/recorder_page.dart:12` |
-| A10.1-02 | 对话框 | 取消监控 · `_remove` | `v3:recorder/pages/recorder/recorder_page.dart:769` |
-
-## A10.2
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A10.2-01 | 页面 | RecordSettingsPage（录制设置） | `v3:recorder/pages/record_settings/record_settings_page.dart:10` |
-| A10.2-02 | 对话框 | 确认清空录制文件目录？ · `_clearCache` | `v3:recorder/pages/record_settings/record_settings_page.dart:241` |
-| A10.2-03 | 对话框 | 最大同时录制任务数 · `_showMaxTaskDialog` | `v3:recorder/pages/record_settings/record_settings_page.dart:371` |
-| A10.2-04 | 对话框 | 设置最大缓存 (MB) · `_showCacheDialog` | `v3:recorder/pages/record_settings/record_settings_page.dart:403` |
-| A10.2-05 | 对话框 | 录制设置未保存，请重试 · `_showCacheDialog` | `v3:recorder/pages/record_settings/record_settings_page.dart:425` |
-| A10.2-06 | 对话框 | _RecordIntegerDialog | `v3:recorder/pages/record_settings/record_settings_page.dart:482` |
-
-## A13.2
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A13.2-01 | 页面 | MultiviewPage | `v3:modules/multiview/multiview_page.dart:36` |
-| A13.2-02 | 底部面板 | 换台 · `_openPickerFor` | `v3:modules/multiview/multiview_page.dart:253` |
-| A13.2-03 | 底部面板 | 换台 · `_showCellActions` | `v3:modules/multiview/multiview_page.dart:278` |
-| A13.2-04 | 底部面板 | 多画面 · `_showQualitySheet` | `v3:modules/multiview/multiview_page.dart:320` |
-| A13.2-05 | 底部面板 | 线路 {index} · `_showLineSheet` | `v3:modules/multiview/multiview_page.dart:795` |
-| A13.2-06 | 底部面板 | 音量 · `_showVolumeSheet` | `v3:modules/multiview/multiview_page.dart:820` |
-| A13.2-07 | 底部面板 | _showDanmakuSettings | `v3:modules/multiview/multiview_page.dart:875` |
-| A13.2-08 | 菜单 | 选择清晰度 · `_buildQualityEntry` | `v3:modules/multiview/multiview_page.dart:1073` |
-
-## A13.1
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A13.1-01 | 页面 | IptvManagePage | `v3:modules/iptv/iptv_manage.dart:44` |
-| A13.1-02 | 页面 | IptvPage | `v3:modules/iptv/iptv_page.dart:13` |
-| A13.1-03 | 对话框 | 电子节目单源切换成功 · `_showSourceSelectionDialog` | `v3:modules/iptv/iptv_page.dart:103` |
-| A13.1-04 | 对话框 | 同步配置已保存 · `_showEditUserAgentDialog` | `v3:modules/iptv/iptv_page.dart:231` |
-| A13.1-05 | 对话框 | 选择自动同步时间间隔 · `_showIntervalSelectionMenu` | `v3:modules/iptv/iptv_page.dart:241` |
-| A13.1-06 | 对话框 | 导入播放列表 (M3U / TXT) · `showIptvImportDialog` | `v3:modules/iptv/iptv_page.dart:310` |
-| A13.1-07 | 对话框 | 导入电视节目单 (XML / GZ / JSON) · `showEpgImportDialog` | `v3:modules/iptv/iptv_page.dart:375` |
-| A13.1-08 | 对话框 | 导入已完成，但列表刷新失败。请重新打开此页面查看，勿重复导入。 · `showEditTextDialog` | `v3:modules/iptv/iptv_page.dart:467` |
-| A13.1-09 | 对话框 | _UserAgentDialog（修改请求头 (User-Agent)） | `v3:modules/iptv/iptv_page.dart:501` |
-| A13.1-10 | 对话框 | _NetworkImportDialog（请输入下载地址） | `v3:modules/iptv/iptv_page.dart:693` |
-| A13.1-11 | 对话框 | _EpgSourceDialog | `v3:modules/iptv/iptv_page.dart:808` |
-| A13.1-12 | 对话框 | 该订阅名称已存在 · `importEpgFile` | `v3:core/iptv/services/epg_import_manager.dart:215` |
-| A13.1-13 | 对话框 | 该订阅名称已存在 · `importIptvFile` | `v3:core/iptv/services/iptv_import_manager.dart:261` |
-
 ## A12.1
 
 | 编号 | 类型 | 名称 | 位置 |
@@ -440,6 +427,37 @@
 | A12.6-04 | 对话框 | 接收配置 · `_receiveFromDevice` | `v3:modules/remote_receiver/remote_sync_page.dart:105` |
 | A12.6-05 | 对话框 | 选择同步操作 · `_scanQr` | `v3:modules/remote_receiver/remote_sync_page.dart:162` |
 
+## A13.1
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A13.1-01 | 页面 | IptvManagePage | `v3:modules/iptv/iptv_manage.dart:44` |
+| A13.1-02 | 页面 | IptvPage | `v3:modules/iptv/iptv_page.dart:13` |
+| A13.1-03 | 对话框 | 电子节目单源切换成功 · `_showSourceSelectionDialog` | `v3:modules/iptv/iptv_page.dart:103` |
+| A13.1-04 | 对话框 | 同步配置已保存 · `_showEditUserAgentDialog` | `v3:modules/iptv/iptv_page.dart:231` |
+| A13.1-05 | 对话框 | 选择自动同步时间间隔 · `_showIntervalSelectionMenu` | `v3:modules/iptv/iptv_page.dart:241` |
+| A13.1-06 | 对话框 | 导入播放列表 (M3U / TXT) · `showIptvImportDialog` | `v3:modules/iptv/iptv_page.dart:310` |
+| A13.1-07 | 对话框 | 导入电视节目单 (XML / GZ / JSON) · `showEpgImportDialog` | `v3:modules/iptv/iptv_page.dart:375` |
+| A13.1-08 | 对话框 | 导入已完成，但列表刷新失败。请重新打开此页面查看，勿重复导入。 · `showEditTextDialog` | `v3:modules/iptv/iptv_page.dart:467` |
+| A13.1-09 | 对话框 | _UserAgentDialog（修改请求头 (User-Agent)） | `v3:modules/iptv/iptv_page.dart:501` |
+| A13.1-10 | 对话框 | _NetworkImportDialog（请输入下载地址） | `v3:modules/iptv/iptv_page.dart:693` |
+| A13.1-11 | 对话框 | _EpgSourceDialog | `v3:modules/iptv/iptv_page.dart:808` |
+| A13.1-12 | 对话框 | 该订阅名称已存在 · `importEpgFile` | `v3:core/iptv/services/epg_import_manager.dart:215` |
+| A13.1-13 | 对话框 | 该订阅名称已存在 · `importIptvFile` | `v3:core/iptv/services/iptv_import_manager.dart:261` |
+
+## A13.2
+
+| 编号 | 类型 | 名称 | 位置 |
+|---|---|---|---|
+| A13.2-01 | 页面 | MultiviewPage | `v3:modules/multiview/multiview_page.dart:36` |
+| A13.2-02 | 底部面板 | 换台 · `_openPickerFor` | `v3:modules/multiview/multiview_page.dart:253` |
+| A13.2-03 | 底部面板 | 换台 · `_showCellActions` | `v3:modules/multiview/multiview_page.dart:278` |
+| A13.2-04 | 底部面板 | 多画面 · `_showQualitySheet` | `v3:modules/multiview/multiview_page.dart:320` |
+| A13.2-05 | 底部面板 | 线路 {index} · `_showLineSheet` | `v3:modules/multiview/multiview_page.dart:795` |
+| A13.2-06 | 底部面板 | 音量 · `_showVolumeSheet` | `v3:modules/multiview/multiview_page.dart:820` |
+| A13.2-07 | 底部面板 | _showDanmakuSettings | `v3:modules/multiview/multiview_page.dart:875` |
+| A13.2-08 | 菜单 | 选择清晰度 · `_buildQualityEntry` | `v3:modules/multiview/multiview_page.dart:1073` |
+
 ## A15.1
 
 | 编号 | 类型 | 名称 | 位置 |
@@ -459,22 +477,6 @@
 | A15.2-07 | 对话框 | NewVersionDialog（检查更新） | `v3:modules/about/widgets/version_dialog.dart:26` |
 | A15.2-08 | 页面 | VersionPage（版本更新） | `v3:modules/version/version_page.dart:16` |
 | A15.2-09 | 对话框 | 下载源 {num} · `_showActionDialog` | `v3:modules/version/version_page.dart:360` |
-
-## A09.10
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A09.10-01 | 页面 | TagManagementPage（标签管理） | `v3:modules/tags/tag_management_page.dart:9` |
-| A09.10-02 | 对话框 | 标签详情 · `_showTagDetails` | `v3:modules/tags/tag_management_page.dart:280` |
-| A09.10-03 | 对话框 | 删除标签 · `_showTagDialog` | `v3:modules/tags/tag_management_page.dart:378` |
-| A09.10-04 | 对话框 | 删除标签 · `_confirmDelete` | `v3:modules/tags/tag_management_page.dart:389` |
-| A09.10-05 | 对话框 | _TagEditorDialog（标签名称不能为空） | `v3:modules/tags/tag_management_page.dart:462` |
-
-## A08.3
-
-| 编号 | 类型 | 名称 | 位置 |
-|---|---|---|---|
-| A08.3-01 | 页面 | DanmuShieldPage（弹幕关键词屏蔽） | `v3:modules/shield/danmu_shield_page.dart:6` |
 
 ## A16.1
 

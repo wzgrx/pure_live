@@ -426,6 +426,52 @@ void main() {
     });
   });
 
+  test("E06.3: a YY room plays stream-manager's FLV, two lines, at the quality 3.x's 原画 picks", () async {
+    final site = YySite(
+      ReplayHttp(
+        [
+          for (final name in ['S05-detail-live', 'S06-streams-g1', 'S06-streams-g2', 'S06-streams-g2-l10'])
+            ReplaySample.load('../../fixtures/yy/$name'),
+        ],
+        ignoredQuery: const {'seq', 'send_time', 'sequence', 'osversion', 'width', 'height'},
+      ),
+      flvFirst: true,
+      now: () => DateTime.utc(2026, 9, 27, 16, 56, 56),
+    );
+    final controller = controllerFor(
+      site,
+      room: LiveRoom(platform: SiteIds.yy, roomId: '22490906'),
+    );
+    await controller.start();
+    await settle();
+
+    expect(controller.stage, RoomStage.playing, reason: '${controller.failure}');
+    expect(controller.qualities.map((q) => q.quality), ['高清', '流畅']);
+    expect(controller.qualityIndex, 0);
+    expect(session.state.lineCount, 2);
+    expect(engine.opens.single.uri.path, endsWith('.flv'));
+    expect(toasts, isEmpty);
+    controller.dispose();
+  });
+
+  test("E06.3: YY's FLV names under 3.x's five preferences", () {
+    const two = [LivePlayQuality(quality: '高清', id: '2'), LivePlayQuality(quality: '流畅', id: '1')];
+    const three = [
+      LivePlayQuality(quality: '蓝光', id: '3'),
+      LivePlayQuality(quality: '高清', id: '2'),
+      LivePlayQuality(quality: '流畅', id: '1'),
+    ];
+    const preferences = ['原画', '蓝光8M', '蓝光4M', '超清', '流畅'];
+    expect(
+      [for (final name in preferences) two[defaultQualityIndex(two, name)].quality],
+      ['高清', '高清', '流畅', '流畅', '流畅'],
+    );
+    expect(
+      [for (final name in preferences) three[defaultQualityIndex(three, name)].quality],
+      ['蓝光', '高清', '高清', '流畅', '流畅'],
+    );
+  });
+
   test("the starting quality follows 3.x's preference rules", () {
     const qualities = [LivePlayQuality(quality: '原画'), LivePlayQuality(quality: '蓝光'), LivePlayQuality(quality: '高清')];
     expect(defaultQualityIndex(qualities, '原画'), 0);

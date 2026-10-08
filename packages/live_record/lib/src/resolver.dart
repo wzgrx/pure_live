@@ -235,9 +235,7 @@ final class RecordStreamResolver {
     }
     final ordered = orderQualities(qualities, preferredQuality, preferH264: preferH264);
     final cursor = site is LivePlayUrlCursorResolver;
-    final previousIndex = previousQualityId == null
-        ? -1
-        : ordered.indexWhere((quality) => quality.selectionId.toString() == previousQualityId);
+    final previousIndex = _previousIndex(site.id, qualities, ordered, previousQualityId);
     Object? lastError;
     _Resolved? previous;
 
@@ -362,6 +360,26 @@ final class RecordStreamResolver {
     required LivePlayUrlResolution resolution,
   }) =>
       resolveServedPlayQuality(platform: platform, qualities: qualities, requested: requested, resolution: resolution);
+
+  /// The position in [ordered] of the quality [id] remembered by a task
+  /// (-1: none). A YY task saved while mobile HLS listed the qualities
+  /// (`mobile-hls:4000`, `mobile-hls:1200`) finds the stream-manager quality
+  /// that stands for it once FLV comes first ([YyApi.flvQualityId] over the
+  /// platform's [qualities], best first; E06.3). Other platforms and ids
+  /// are matched as they are.
+  static int _previousIndex(
+    String platform,
+    List<LivePlayQuality> qualities,
+    List<LivePlayQuality> ordered,
+    String? id,
+  ) {
+    if (id == null) return -1;
+    int find(String id) => ordered.indexWhere((quality) => quality.selectionId.toString() == id);
+    final index = find(id);
+    if (index >= 0 || platform != SiteIds.yy || !id.startsWith(YyApi.mobileHlsPrefix)) return index;
+    final moved = YyApi.flvQualityId(id, qualities);
+    return moved == null || moved == id ? -1 : find(moved);
+  }
 
   static List<LivePlayQuality> _moveToFront(List<LivePlayQuality> qualities, int index) =>
       List.unmodifiable([qualities[index], ...qualities.take(index), ...qualities.skip(index + 1)]);

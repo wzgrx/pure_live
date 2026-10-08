@@ -2439,11 +2439,12 @@ note = "UPGRADES 1-1、8-8、11-1、B-7、B-14、B-16 和 26-2 的界面余项�
 id = "E06.3"
 title = "YY 优先用 FLV：应用打开 YySite.flvFirst，换算存下的画质 id（UPGRADES 6-1）"
 type = "平台"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 2
 stages = ["打开 flvFirst，核对默认档", "录制任务旧画质 id 换算"]
-done = 0
+done = 2
+date = "2026-10-08"
 from = "UPGRADES 6-1（V03.3 核对）"
 
 [[task]]

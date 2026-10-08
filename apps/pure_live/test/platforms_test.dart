@@ -24,6 +24,12 @@ void main() {
     expect(identical(services.sites.of('BiliBili '), services.sites.of(SiteIds.bilibili)), isTrue);
   });
 
+  test('E06.3: YY lists the FLV qualities first, mobile HLS standing in (UPGRADES 6-1)', () async {
+    final services = await testServices();
+    addTearDown(services.close);
+    expect((services.sites.of(SiteIds.yy) as YySite).flvFirst, isTrue);
+  });
+
   test('Kick is registered with its API transport, after CHZZK', () async {
     final services = await testServices();
     addTearDown(services.close);

@@ -56,6 +56,11 @@ final class MpvEngine implements PlayerEngine {
     MediaKit.ensureInitialized();
     final player = Player(configuration: const PlayerConfiguration(title: 'Pure Live'));
     final native = player.platform;
+    // An A/B build (G03.1) says so in logcat, next to its timing lines.
+    final probe = mpvProbeValues();
+    if (probe != (probeSize: '2097152', analyzeDuration: '2')) {
+      debugPrint('mpv probe override: probesize=${probe.probeSize} analyzeduration=${probe.analyzeDuration}');
+    }
     if (native is NativePlayer) {
       for (final MapEntry(:key, :value) in resolved.liveProperties.entries) {
         await native.setProperty(key, value);

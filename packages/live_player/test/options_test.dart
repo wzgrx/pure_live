@@ -25,6 +25,28 @@ void main() {
     );
   });
 
+  test('G03.1: the probe keeps 3.x values unless the build overrides them', () {
+    // No --dart-define in the test run: 3.x's 2 MiB / 2 s.
+    expect(mpvProbeValues(), (probeSize: '2097152', analyzeDuration: '2'));
+    expect(mpvProbeValues(probeSize: '1048576', analyzeDuration: '1'), (probeSize: '1048576', analyzeDuration: '1'));
+    expect(mpvProbeValues(probeSize: ' 524288 ', analyzeDuration: '0.5'), (
+      probeSize: '524288',
+      analyzeDuration: '0.5',
+    ));
+    // Each value falls back on its own; mpv refuses a probe under 32 bytes.
+    expect(mpvProbeValues(probeSize: '31', analyzeDuration: '1'), (probeSize: '2097152', analyzeDuration: '1'));
+    for (final bad in ['', 'abc', '-1', '0', '1e400', 'NaN', '99999999999']) {
+      expect(mpvProbeValues(probeSize: bad, analyzeDuration: bad), (
+        probeSize: '2097152',
+        analyzeDuration: '2',
+      ), reason: bad);
+    }
+    expect(mpvProbeValues(analyzeDuration: '3601'), (probeSize: '2097152', analyzeDuration: '2'));
+    final overridden = const MpvEngineConfig().liveProperties;
+    expect(overridden['demuxer-lavf-probesize'], mpvProbeValues().probeSize);
+    expect(overridden['demuxer-lavf-analyzeduration'], mpvProbeValues().analyzeDuration);
+  });
+
   test('decoder and output choices follow 3.x settings', () {
     expect(const MpvEngineConfig().hwdecFor(software: false), 'auto-safe');
     expect(const MpvEngineConfig().hwdecFor(software: true), 'no');

@@ -347,6 +347,7 @@
     "danmaku_masked_blocks_cleaned": "已清理 {count} 个打码昵称的屏蔽（它们会误伤其他观众）",
     "danmaku_new_messages": "{count} 条新弹幕，点击回到底部",
     "danmaku_no_emoji": "纯文字模式（隐藏表情）",
+    "danmaku_other_room": "对方",
     "danmaku_paused_behavior": "暂停时的弹幕",
     "danmaku_paused_behavior_desc": "视频暂停后，弹幕跟着停住还是照常飘过",
     "danmaku_paused_fly": "继续飘过",

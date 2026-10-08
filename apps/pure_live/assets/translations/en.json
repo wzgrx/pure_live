@@ -347,6 +347,7 @@
     "danmaku_masked_blocks_cleaned": "Removed {count} blocked masked names (they also hid other viewers)",
     "danmaku_new_messages": "{count} new messages - tap to resume",
     "danmaku_no_emoji": "Pure text mode (hide emoji)",
+    "danmaku_other_room": "Opponent",
     "danmaku_paused_behavior": "Danmaku while paused",
     "danmaku_paused_behavior_desc": "Whether danmaku stop with a paused video or keep flying",
     "danmaku_paused_fly": "Keep flying",

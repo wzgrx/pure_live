@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
@@ -18,6 +20,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/images.dart';
 import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -709,11 +712,32 @@ class ChatLineView extends StatelessWidget {
     }
   }
 
-  List<InlineSpan> _tag() => [
+  List<InlineSpan> _tag(ThemeData theme, LiveMessage message) => [
     if (tag case final mark?) ...[
       WidgetSpan(alignment: PlaceholderAlignment.middle, child: mark),
       const TextSpan(text: ' '),
     ],
+    // B-16 (E06.2 c3): a PK partner room's viewer, in the block of "本地".
+    if (message.isFromOtherRoom)
+      WidgetSpan(
+        alignment: PlaceholderAlignment.middle,
+        child: ChatChip(
+          key: const ValueKey('live-play-chat-other-room'),
+          text: i18n('danmaku_other_room'),
+          background: theme.colorScheme.tertiaryContainer,
+          style: ChatChip.styleOf(theme)?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+        ),
+      ),
+  ];
+
+  /// B-14 (E06.2 c2): the platform's badges before the name, in its order.
+  List<InlineSpan> _badges(LiveMessage message) => [
+    for (final (index, badge) in message.badges.indexed)
+      if (badge.url.trim().isNotEmpty)
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: ChatBadge(key: ValueKey('live-play-chat-badge-$index'), url: badge.url.trim()),
+        ),
   ];
 
   List<InlineSpan> _fans(ThemeData theme, LiveMessage message) {
@@ -728,20 +752,23 @@ class ChatLineView extends StatelessWidget {
     ];
   }
 
-  /// U.2a change 11: "用户名：" in the secondary colour (or the message's own
-  /// colour, B08: readable on the panel's surface), the message in the
-  /// normal colour.
+  /// U.2a change 11: "用户名：" in the secondary colour (or the platform's
+  /// name colour, B-14, else the message's own colour, B08: readable on the
+  /// panel's surface), the message in the normal colour.
   Widget _compact(BuildContext context, LiveMessage message, TextStyle? body) {
     final theme = Theme.of(context);
     final name = message.userName.trim();
-    final nameColor = chatNameColor(message.color, theme.colorScheme.surface) ?? theme.colorScheme.onSurfaceVariant;
+    final nameColor =
+        chatNameColor(message.nameColor ?? message.color, theme.colorScheme.surface) ??
+        theme.colorScheme.onSurfaceVariant;
     return Padding(
       key: const ValueKey('live-play-chat-line'),
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Text.rich(
         TextSpan(
           children: [
-            ..._tag(),
+            ..._tag(theme, message),
+            ..._badges(message),
             ..._fans(theme, message),
             if (name.isNotEmpty)
               TextSpan(
@@ -767,6 +794,11 @@ class ChatLineView extends StatelessWidget {
     final scheme = theme.colorScheme;
     final colour = chatNameColor(message.color, scheme.surfaceContainerLowest);
     final dot = colour ?? scheme.onSurface;
+    // B-14: the platform's name colour, when it gives one, colours the name.
+    final named = switch (message.nameColor) {
+      final given? => chatNameColor(given, scheme.surfaceContainerLowest),
+      null => null,
+    };
     final name = message.userName.trim();
     final avatar = switch (message.data) {
       DanmakuSender(:final avatar) when avatar.isNotEmpty => avatar,
@@ -803,13 +835,14 @@ class ChatLineView extends StatelessWidget {
                 child: Text.rich(
                   TextSpan(
                     children: [
-                      ..._tag(),
+                      ..._tag(theme, message),
+                      ..._badges(message),
                       ..._fans(theme, message),
                       if (name.isNotEmpty)
                         TextSpan(
                           text: '$name: ',
                           style: body?.emphasis.copyWith(
-                            color: avatar.isEmpty ? scheme.onSurface : colour ?? scheme.onSurface,
+                            color: named ?? (avatar.isEmpty ? scheme.onSurface : colour ?? scheme.onSurface),
                           ),
                         ),
                       WidgetSpan(
@@ -828,6 +861,50 @@ class ChatLineView extends StatelessWidget {
     );
   }
 }
+
+/// A badge the platform shows before a sender's name (B-14: 17LIVE's
+/// prefix, attendance and level pictures; E06.2 c2): [height] high at its
+/// own width, through the app's image cache. Nothing, and no gap, while it
+/// loads or when it fails.
+class ChatBadge extends StatelessWidget {
+  /// Creates the badge of [url].
+  const new({required this.url, super.key});
+
+  /// The picture's address.
+  final String url;
+
+  /// The badge's height.
+  static const double height = 16;
+
+  /// The gap after a badge that loaded.
+  static const double gap = 4;
+
+  @override
+  Widget build(BuildContext context) {
+    final decoded = (height * MediaQuery.devicePixelRatioOf(context)).round();
+    return Image(
+      image: ResizeImage(chatBadgeImage(url), height: decoded),
+      height: height,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
+      gaplessPlayback: true,
+      frameBuilder: (context, child, frame, _) => frame == null
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: const EdgeInsets.only(right: gap),
+              child: child,
+            ),
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+    );
+  }
+}
+
+/// The picture of a chat badge at [url]: the app's image cache (its proxy
+/// and headers) when it is installed, else a plain request.
+ImageProvider chatBadgeImage(String url) => switch (AppImageCache.manager) {
+  final manager? => CachedNetworkImageProvider(url, cacheManager: manager, headers: networkImageHeaders(url)),
+  null => NetworkImage(url, headers: networkImageHeaders(url)),
+};
 
 /// A colour the platform sent as `#RRGGBB` or `AARRGGBB`, or null.
 Color? parsePlatformColor(String text) {

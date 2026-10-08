@@ -235,9 +235,7 @@ final class RecordStreamResolver {
     }
     final ordered = orderQualities(qualities, preferredQuality, preferH264: preferH264);
     final cursor = site is LivePlayUrlCursorResolver;
-    final previousIndex = previousQualityId == null
-        ? -1
-        : ordered.indexWhere((quality) => quality.selectionId.toString() == previousQualityId);
+    final previousIndex = _previousIndex(site.id, qualities, ordered, previousQualityId);
     Object? lastError;
     _Resolved? previous;
 
@@ -349,29 +347,38 @@ final class RecordStreamResolver {
     return index;
   }
 
-  /// The quality the platform served for [requested]: the option of
-  /// [qualities] whose id it confirmed (`resolveAppliedPlayQuality`, as the
-  /// player); a confirmed id outside [qualities] — a room listed as 原画
-  /// only, where a Bilibili guest asking for 10000 is served 250 — named by
-  /// the platform's codes ([LiveQualityLabel]) instead of falling back to
-  /// the request; else [requested], unconfirmed when the platform did not
-  /// say what it was expected to.
+  /// The quality the platform served for [requested]
+  /// ([resolveServedPlayQuality], the live room's rule): the option of
+  /// [qualities] whose id it confirmed; a confirmed id outside [qualities] —
+  /// a room listed as 原画 only, where a Bilibili guest asking for 10000 is
+  /// served 250 — named by the platform's codes; else [requested],
+  /// unconfirmed when the platform did not say what it was expected to.
   static LivePlayQuality servedQuality({
     required String platform,
     required List<LivePlayQuality> qualities,
     required LivePlayQuality requested,
     required LivePlayUrlResolution resolution,
-  }) {
-    final applied = resolveAppliedPlayQuality(qualities: qualities, requested: requested, resolution: resolution);
-    final id = resolution.appliedQualityData;
-    if (!applied.isPlaybackUnconfirmed || resolution.qualityUnconfirmed || id == null || '$id'.trim().isEmpty) {
-      return applied;
-    }
-    return LivePlayQuality(
-      quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id),
-      data: id,
-      id: id,
-    );
+  }) =>
+      resolveServedPlayQuality(platform: platform, qualities: qualities, requested: requested, resolution: resolution);
+
+  /// The position in [ordered] of the quality [id] remembered by a task
+  /// (-1: none). A YY task saved while mobile HLS listed the qualities
+  /// (`mobile-hls:4000`, `mobile-hls:1200`) finds the stream-manager quality
+  /// that stands for it once FLV comes first ([YyApi.flvQualityId] over the
+  /// platform's [qualities], best first; E06.3). Other platforms and ids
+  /// are matched as they are.
+  static int _previousIndex(
+    String platform,
+    List<LivePlayQuality> qualities,
+    List<LivePlayQuality> ordered,
+    String? id,
+  ) {
+    if (id == null) return -1;
+    int find(String id) => ordered.indexWhere((quality) => quality.selectionId.toString() == id);
+    final index = find(id);
+    if (index >= 0 || platform != SiteIds.yy || !id.startsWith(YyApi.mobileHlsPrefix)) return index;
+    final moved = YyApi.flvQualityId(id, qualities);
+    return moved == null || moved == id ? -1 : find(moved);
   }
 
   static List<LivePlayQuality> _moveToFront(List<LivePlayQuality> qualities, int index) =>

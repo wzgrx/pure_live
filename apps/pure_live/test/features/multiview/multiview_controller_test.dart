@@ -54,6 +54,22 @@ void main() {
     await store.close();
   });
 
+  test('C01.4: a cell names a served quality outside the list by the platform and says nothing on entry', () async {
+    final store = await memoryStore();
+    final toasts = <String>[];
+    final site = _ServedSite()..qualities = const [LivePlayQuality(quality: '原画', id: 10000)];
+    final controller = multiviewController(store, site, toasts: toasts);
+    await controller.start();
+    await controller.assign(0, pickRoom('1'));
+    final cell = controller.cells[0];
+    expect(cell.stage, CellStage.playing);
+    final shown = cell.qualities[cell.qualityIndex];
+    expect((shown.quality, shown.id, shown.isPlaybackUnconfirmed), ('超清', 250, false));
+    expect(toasts, isEmpty, reason: 'four cells entering would say it four times');
+    controller.dispose();
+    await store.close();
+  });
+
   test('G01.3: with 优先 H.264 a cell skips the HEVC quality named like the preference', () async {
     final store = await memoryStore();
     final site = RoomsSite()
@@ -243,4 +259,13 @@ void main() {
     controller.dispose();
     await store.close();
   });
+}
+
+/// Rooms whose every request is served at 250 (a Bilibili guest).
+class _ServedSite extends RoomsSite implements LivePlayUrlResolver {
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution(urls: const ['https://a.example/250.flv'], appliedQualityData: 250);
 }

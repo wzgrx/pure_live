@@ -181,7 +181,23 @@ void main() {
       expect(filled.nick, 'kept');
       expect(filled.avatar, 'a');
       expect(filled.area, 'x');
+      expect(filled.cover, '');
+      expect(card.fillFromDetail(LiveRoom(platform: 'douyu', roomId: '1', cover: 'c')).cover, 'c');
       expect(card.fillFromDetail(null), same(card));
+    });
+
+    test('fillFromDetail takes the card cover when the detail has none', () {
+      final card = LiveRoom(platform: 'douyin', roomId: '1', cover: 'c');
+      expect(LiveRoom(platform: 'douyin', roomId: '1').fillFromDetail(card).cover, 'c');
+      expect(LiveRoom(platform: 'douyin', roomId: '1', cover: ' ').fillFromDetail(card).cover, 'c');
+      expect(LiveRoom(platform: 'douyin', roomId: '1', cover: 'd').fillFromDetail(card).cover, 'd');
+    });
+
+    test('fillFromDetail treats a blank name or avatar as missing', () {
+      final card = LiveRoom(platform: 'douyin', roomId: '1', nick: 'n', avatar: 'a');
+      final filled = LiveRoom(platform: 'douyin', roomId: '1', nick: ' ', avatar: ' ').fillFromDetail(card);
+      expect(filled.nick, 'n');
+      expect(filled.avatar, 'a');
     });
 
     test('fillFromDetail takes the card title only when the detail has none (A-3)', () {

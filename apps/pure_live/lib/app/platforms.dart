@@ -91,6 +91,13 @@ final class StoreDouyuLogin implements DouyuLoginStore {
   }
 }
 
+/// Whether YY plays stream-manager's FLV first, mobile HLS standing in
+/// (UPGRADES 6-1, E06.3): lower latency, the platform's names (蓝光, 高清,
+/// 流畅), two CDN lines per quality, URLs renewed by their lease. Not a
+/// setting (E02.1); `--dart-define=YY_FLV_FIRST=false` builds the mobile
+/// HLS order for a side-by-side check on the phone.
+const bool yyFlvFirst = bool.fromEnvironment('YY_FLV_FIRST', defaultValue: true);
+
 /// What the platform adapters share.
 final class PlatformDeps {
   /// Creates the dependencies.
@@ -157,7 +164,7 @@ SiteRegistry buildSiteRegistry(PlatformDeps deps) {
       preferH264: preferH264,
     ),
     SiteIds.soop: () => SoopSite(http, cookies: cookies),
-    SiteIds.yy: () => YySite(http, cookies: cookies),
+    SiteIds.yy: () => YySite(http, cookies: cookies, flvFirst: yyFlvFirst),
     SiteIds.acfun: () => AcfunSite(http),
     SiteIds.picarto: () => PicartoSite(http),
     SiteIds.twitcasting: () => TwitcastingSite(http),

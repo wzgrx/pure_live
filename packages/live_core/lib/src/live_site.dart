@@ -7,6 +7,7 @@ import 'package:live_core/src/live_danmaku.dart';
 import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
+import 'package:live_core/src/quality_label.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
@@ -236,6 +237,32 @@ LivePlayQuality resolveAppliedPlayQuality({
             };
   return (matched ?? requested).withPlaybackUnconfirmed(
     unconfirmed: resolution.qualityUnconfirmed || (appliedId != null && matched == null),
+  );
+}
+
+/// The quality the platform served for [requested], as the live room, the
+/// multi-view and the recorder show it (H01.3, C01.4): the
+/// [resolveAppliedPlayQuality] answer, except that a confirmed id outside
+/// [qualities] — a room listed as 原画 only, where a Bilibili guest asking
+/// for 10000 is served 250 — is named by [platform]'s codes
+/// ([LiveQualityLabel]) and counts as confirmed, instead of falling back to
+/// the request marked unconfirmed. A platform that did not say what it was
+/// expected to still gets the request, unconfirmed.
+LivePlayQuality resolveServedPlayQuality({
+  required String platform,
+  required List<LivePlayQuality> qualities,
+  required LivePlayQuality requested,
+  required LivePlayUrlResolution resolution,
+}) {
+  final applied = resolveAppliedPlayQuality(qualities: qualities, requested: requested, resolution: resolution);
+  final id = resolution.appliedQualityData;
+  if (!applied.isPlaybackUnconfirmed || resolution.qualityUnconfirmed || id == null || '$id'.trim().isEmpty) {
+    return applied;
+  }
+  return LivePlayQuality(
+    quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id),
+    data: id,
+    id: id,
   );
 }
 

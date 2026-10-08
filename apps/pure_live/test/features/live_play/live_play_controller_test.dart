@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_net/testing.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/network.dart';
@@ -11,6 +14,55 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
+
+const _bilibili = '../../fixtures/bilibili';
+
+/// `getRoomPlayInfo` at qn=0 as a room offering 原画 only answers it (the
+/// H01.3 rewrite of `S07-guest-qn0`): every codec lists 10000 alone.
+ReplaySample _onlyOriginalListed() {
+  final sample = ReplaySample.load('$_bilibili/S07-guest-qn0');
+  final body = jsonDecode(utf8.decode(sample.bytes)) as Map<String, dynamic>;
+  final playurl = ((body['data'] as Map)['playurl_info'] as Map)['playurl'] as Map;
+  for (final stream in playurl['stream'] as List) {
+    for (final format in (stream as Map)['format'] as List) {
+      for (final codec in (format as Map)['codec'] as List) {
+        (codec as Map)
+          ..['accept_qn'] = [10000]
+          ..['current_qn'] = 10000;
+      }
+    }
+  }
+  return ReplaySample(
+    method: sample.method,
+    url: sample.url,
+    status: sample.status,
+    headers: sample.headers,
+    bytes: utf8.encode(jsonEncode(body)),
+  );
+}
+
+/// Bilibili over the recorded guest answers of room 42062, listing 原画
+/// only; a request at 10000 is served 250 (`S07-guest-qn10000`).
+BilibiliSite _bilibiliGuestOriginalOnly() => BilibiliSite(
+  ReplayHttp(
+    [
+      _onlyOriginalListed(),
+      for (final name in [
+        'S06-live',
+        'S07-guest-qn0',
+        'S07-guest-qn10000',
+        'S09-guest',
+        'S10-guest',
+        'S11-guest',
+        'S12-guest',
+      ])
+        ReplaySample.load('$_bilibili/$name'),
+    ],
+    ignoredQuery: const {'wts', 'w_rid', 'w_webid'},
+  ),
+  now: () => DateTime.utc(2026, 9, 27, 10, 16, 23),
+  sleep: (_) async {},
+);
 
 void main() {
   late LiveStore store;
@@ -36,7 +88,7 @@ void main() {
   });
 
   LiveRoomController controllerFor(
-    FakeSite site, {
+    LiveSite site, {
     LiveRoom? room,
     bool danmakuSupported = true,
     NetworkKind? network,
@@ -72,6 +124,30 @@ void main() {
     expect((await store.history.all()).single.roomId, '6');
     expect(danmaku.connects, ['args-6']);
     expect(controller.chat.lines.map((line) => line.text), contains('弹幕服务器连接正常'));
+    controller.dispose();
+  });
+
+  test('a detail without a cover keeps the card cover in the room and the history', () async {
+    final card = LiveRoom(platform: SiteIds.bilibili, roomId: '6', nick: '卡片上的名字', cover: 'https://img/c.jpg');
+    final controller = controllerFor(FakeSite(liveRoom()), room: card);
+    await controller.start();
+    await settle();
+
+    expect(controller.stage, RoomStage.playing);
+    expect(controller.room.cover, 'https://img/c.jpg');
+    expect((await store.history.all()).single.cover, 'https://img/c.jpg');
+    controller.dispose();
+  });
+
+  test('a detail with a new cover replaces the card cover', () async {
+    final card = LiveRoom(platform: SiteIds.bilibili, roomId: '6', cover: 'https://img/old.jpg');
+    final detail = liveRoom().copyWith(cover: 'https://img/new.jpg');
+    final controller = controllerFor(FakeSite(detail), room: card);
+    await controller.start();
+    await settle();
+
+    expect(controller.room.cover, 'https://img/new.jpg');
+    expect((await store.history.all()).single.cover, 'https://img/new.jpg');
     controller.dispose();
   });
 
@@ -229,12 +305,48 @@ void main() {
     await controller.start();
     await settle();
     expect(controller.qualityIndex, 1);
-    expect(toasts, isEmpty);
+    expect(toasts, ['平台实际返回 超清，已按真实画质播放'], reason: 'C01.4: entering the room says it once');
 
     await controller.selectQuality(0);
     expect(controller.qualityIndex, 1);
-    expect(toasts.single, contains('超清'));
+    expect(toasts, hasLength(2), reason: 'a quality picked by hand is answered every time');
+    expect(toasts.last, contains('超清'));
     controller.dispose();
+  });
+
+  group('C01.4: the quality shown is the one the platform served', () {
+    test('a Bilibili guest in a room listing 原画 only sees the 超清 it is served, told once', () async {
+      final controller = controllerFor(
+        _bilibiliGuestOriginalOnly(),
+        room: LiveRoom(platform: SiteIds.bilibili, roomId: '42062'),
+      );
+      await controller.start();
+      await settle();
+
+      expect(controller.stage, RoomStage.playing, reason: '${controller.failure}');
+      final shown = controller.qualities[controller.qualityIndex];
+      expect((shown.quality, shown.id, shown.isPlaybackUnconfirmed), ('超清', 250, false));
+      expect(controller.qualities.map((q) => q.quality), ['超清']);
+      expect(toasts, ['平台实际返回 超清，已按真实画质播放']);
+
+      // Refreshing the room (also the reload after a failed stream) plays the
+      // same tier again without saying it again.
+      await controller.load();
+      await settle();
+      expect(controller.qualities[controller.qualityIndex].quality, '超清');
+      expect(toasts, hasLength(1));
+      controller.dispose();
+    });
+
+    test('a quality the platform did not confirm keeps the request, unconfirmed, without a toast', () async {
+      final controller = controllerFor(_UnconfirmedSite(liveRoom()));
+      await controller.start();
+      await settle();
+      final shown = controller.qualities[controller.qualityIndex];
+      expect((shown.quality, shown.isPlaybackUnconfirmed), ('原画', true));
+      expect(toasts, isEmpty);
+      controller.dispose();
+    });
   });
 
   test('a platform without danmaku says so once', () async {
@@ -312,6 +424,52 @@ void main() {
       expect(danmaku.connects, ['args-6']);
       controller.dispose();
     });
+  });
+
+  test("E06.3: a YY room plays stream-manager's FLV, two lines, at the quality 3.x's 原画 picks", () async {
+    final site = YySite(
+      ReplayHttp(
+        [
+          for (final name in ['S05-detail-live', 'S06-streams-g1', 'S06-streams-g2', 'S06-streams-g2-l10'])
+            ReplaySample.load('../../fixtures/yy/$name'),
+        ],
+        ignoredQuery: const {'seq', 'send_time', 'sequence', 'osversion', 'width', 'height'},
+      ),
+      flvFirst: true,
+      now: () => DateTime.utc(2026, 9, 27, 16, 56, 56),
+    );
+    final controller = controllerFor(
+      site,
+      room: LiveRoom(platform: SiteIds.yy, roomId: '22490906'),
+    );
+    await controller.start();
+    await settle();
+
+    expect(controller.stage, RoomStage.playing, reason: '${controller.failure}');
+    expect(controller.qualities.map((q) => q.quality), ['高清', '流畅']);
+    expect(controller.qualityIndex, 0);
+    expect(session.state.lineCount, 2);
+    expect(engine.opens.single.uri.path, endsWith('.flv'));
+    expect(toasts, isEmpty);
+    controller.dispose();
+  });
+
+  test("E06.3: YY's FLV names under 3.x's five preferences", () {
+    const two = [LivePlayQuality(quality: '高清', id: '2'), LivePlayQuality(quality: '流畅', id: '1')];
+    const three = [
+      LivePlayQuality(quality: '蓝光', id: '3'),
+      LivePlayQuality(quality: '高清', id: '2'),
+      LivePlayQuality(quality: '流畅', id: '1'),
+    ];
+    const preferences = ['原画', '蓝光8M', '蓝光4M', '超清', '流畅'];
+    expect(
+      [for (final name in preferences) two[defaultQualityIndex(two, name)].quality],
+      ['高清', '高清', '流畅', '流畅', '流畅'],
+    );
+    expect(
+      [for (final name in preferences) three[defaultQualityIndex(three, name)].quality],
+      ['蓝光', '高清', '高清', '流畅', '流畅'],
+    );
   });
 
   test("the starting quality follows 3.x's preference rules", () {
@@ -414,4 +572,15 @@ void main() {
     expect(readableAudience('123456'), '12.3万');
     expect(readableAudience('999'), '999');
   });
+}
+
+/// A platform expected to confirm the quality that did not.
+class _UnconfirmedSite extends FakeSite implements LivePlayUrlResolver {
+  new(super.room);
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution(urls: ['https://a.example/${quality.id}.flv'], qualityUnconfirmed: true);
 }

@@ -63,7 +63,10 @@ final class KuaishouSite extends LiveSite
   final Random _random;
   late BrowserUserAgent _browser = BrowserUserAgent.random(_random);
   _Session? _session;
-  Future<void>? _bootstrap;
+  Future<_Visit>? _bootstrap;
+
+  /// The device report of the latest session, while or after it is sent.
+  Future<void> _reported = Future.value();
 
   /// What each area page after the first needs, by `areaId#page`: the
   /// previous page's `cursor` ('' for none) and the identities of the rooms
@@ -100,22 +103,29 @@ final class KuaishouSite extends LiveSite
   /// Makes sure an anonymous session exists (3.x's `_ensureSession`): a bare
   /// GET of the room page [url] as a new browser, whose `Set-Cookie` (`did`,
   /// `clientid`, `client_key`, `kpn`, `kuaishou.live.bfb1s`) becomes the
-  /// session, then the best-effort report of its `did`. Concurrent callers
-  /// share one bootstrap.
-  Future<void> _ensureSession(Uri url) {
-    if (_sessionCookie() != null) return Future.value();
-    return _bootstrap ??= () async {
+  /// session, then the best-effort report of its `did` ([_reported]).
+  /// Concurrent callers share one bootstrap.
+  ///
+  /// Returns that visit when it was of [url] (G03.1: it is the room page
+  /// itself, which [_roomPage] reads before asking again), else null. The
+  /// visit does not wait for the report.
+  Future<LiveResponse?> _ensureSession(Uri url) async {
+    if (_sessionCookie() != null) return null;
+    final visit = await (_bootstrap ??= () async {
       try {
         _browser = BrowserUserAgent.random(_random);
         final response = await _get(url, _pageHeaders(null));
         final cookies = KuaishouApi.setCookies(response.headers['set-cookie'] ?? const []);
-        if (cookies.isEmpty) return;
-        _session = _Session(cookies, _now());
-        if (cookies['did'] case final did?) await _reportDevice(did);
+        if (cookies.isNotEmpty) {
+          _session = _Session(cookies, _now());
+          if (cookies['did'] case final did?) _reported = _reportDevice(did).then((_) {}, onError: (Object _) {});
+        }
+        return _Visit(url, response);
       } finally {
         _bootstrap = null;
       }
-    }();
+    }());
+    return visit.url == url ? visit.page : null;
   }
 
   /// POSTs the `misc2` report of [did]; failures are ignored (3.x did the
@@ -178,6 +188,13 @@ final class KuaishouSite extends LiveSite
   /// refresh). A refused or unreadable page (`RiskControl`, `ApiChanged`)
   /// drops the session, makes a new one and is retried once (3.x retried
   /// the refresh the same way).
+  ///
+  /// A new session's visit is this page already (G03.1: on the K90 the
+  /// second request made a first room entry take 1.0-1.35 s instead of
+  /// 0.3-0.5 s): when it reads as one it is the answer, with the session
+  /// for the danmaku feed, and the device report goes on alone. A visit
+  /// that does not read leaves it to the page with the session, sent
+  /// after the report as before.
   Future<T> _roomPage<T>(
     String id,
     T Function(LiveResponse response, {required String cookie, required bool userCookie}) parse, {
@@ -186,8 +203,16 @@ final class KuaishouSite extends LiveSite
     final url = Uri.parse(KuaishouApi.roomPageUrl(id));
     final login = _login();
     if (login.isNotEmpty) return parse(await _get(url, _pageHeaders(login)), cookie: login, userCookie: true);
-    if (ensureSession) await _ensureSession(url);
+    var visit = ensureSession ? await _ensureSession(url) : null;
     for (var attempt = 0; ; attempt++) {
+      if (visit != null) {
+        try {
+          return parse(visit, cookie: _sessionCookie() ?? '', userCookie: false);
+        } on SiteError {
+          // The page with the session decides, as before.
+        }
+      }
+      await _reported;
       final cookie = _sessionCookie();
       final response = await _get(url, _pageHeaders(cookie));
       try {
@@ -196,7 +221,7 @@ final class KuaishouSite extends LiveSite
         if (attempt > 0 || (error is! RiskControl && error is! ApiChanged)) rethrow;
       }
       _session = null;
-      await _ensureSession(url);
+      visit = await _ensureSession(url);
     }
   }
 
@@ -440,6 +465,14 @@ final class KuaishouSite extends LiveSite
     final id = segments[1].trim();
     return RoomPaths.isRoomIdentifier(id, _roomIdPattern) ? id : null;
   }
+}
+
+/// A session's first visit: the room page it was made on.
+final class _Visit {
+  new(this.url, this.page);
+
+  final Uri url;
+  final LiveResponse page;
 }
 
 /// The anonymous session: the room page's cookies and when they came.

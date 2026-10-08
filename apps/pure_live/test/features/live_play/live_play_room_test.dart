@@ -18,6 +18,7 @@ import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/area_lookup.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
+import 'package:pure_live/features/live_play/logic/room_status.dart';
 import 'package:pure_live/features/live_play/player/player_controls.dart';
 import 'package:pure_live/features/live_play/player/player_view.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -591,8 +592,49 @@ void main() {
     await _close(tester, room);
   });
 
+  testWidgets('A07.20: a placeholder picture gets the room cover and "语音直播"; a real one does not', (tester) async {
+    final room = await _pump(tester);
+    room.engine.emit(const EngineVideoSize(16, 16));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('live-play-audio-cover')), findsOneWidget);
+    expect(find.text('语音直播'), findsOneWidget);
+    expect(find.text('纯音频播放中'), findsNothing);
+    room.engine.emit(const EngineVideoSize(1280, 720));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('live-play-audio-cover')), findsNothing);
+    await _close(tester, room);
+  });
+
+  testWidgets('A07.20: a voice platform gets the room cover over a full-size picture', (tester) async {
+    final site = FakeSite(liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30))))
+      ..siteId = SiteIds.kilakila;
+    final room = await _pump(tester, site: site);
+    room.engine.emit(const EngineVideoSize(1280, 720));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('live-play-audio-cover')), findsOneWidget);
+    expect(find.text('语音直播'), findsOneWidget);
+    await _close(tester, room);
+  });
+
   group('room logic of U.2a', () {
     setUpAll(loadStrings);
+
+    test('A07.20 c1: a short side of 32 or less is a placeholder; an unknown size is not', () {
+      PlaybackState sized(int? width, int? height, [PlaybackStatus status = PlaybackStatus.playing]) =>
+          PlaybackState(status: status, videoWidth: width, videoHeight: height);
+      expect(pictureIsPlaceholder(sized(16, 16)), isTrue);
+      expect(pictureIsPlaceholder(sized(32, 32)), isTrue);
+      expect(pictureIsPlaceholder(sized(1920, 32)), isTrue);
+      expect(pictureIsPlaceholder(sized(144, 256)), isFalse);
+      expect(pictureIsPlaceholder(sized(33, 33)), isFalse);
+      expect(pictureIsPlaceholder(sized(null, null)), isFalse, reason: 'still loading');
+      // A voice platform has no real picture whatever its size, once one
+      // shows or the sound plays; while it opens it is loading.
+      expect(pictureIsPlaceholder(sized(1280, 720), voiceLive: true), isTrue);
+      expect(pictureIsPlaceholder(sized(null, null), voiceLive: true), isTrue);
+      expect(pictureIsPlaceholder(sized(null, null, PlaybackStatus.opening), voiceLive: true), isFalse);
+      expect(SiteIds.voiceLive, {SiteIds.missevan, SiteIds.kilakila});
+    });
 
     test('B02 c4: ReconnectWatch says what the session says: its recovery, not a buffering or a resume', () {
       final states = StreamController<PlaybackState>(sync: true);

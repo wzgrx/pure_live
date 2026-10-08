@@ -853,6 +853,7 @@
     "live_play_unmute": "取消静音",
     "live_play_unread_count": "{count} 条新弹幕",
     "live_play_user_blocked": "已屏蔽 {name}",
+    "live_play_voice_live": "语音直播",
     "live_play_volume_room_hint": "只对这个直播间生效，下次进来还是这个音量",
     "live_play_volume_system_hint": "调的是手机的媒体音量：和画面右侧上下滑、音量键是同一个音量",
     "live_play_weekday_1": "周一",

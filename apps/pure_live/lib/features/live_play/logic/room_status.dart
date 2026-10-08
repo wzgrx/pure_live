@@ -179,6 +179,25 @@ const Duration slowAfter = Duration(seconds: 8);
 bool pictureBuffering(PlaybackState playback) =>
     playback.status == PlaybackStatus.buffering && playback.videoWidth != null;
 
+/// The short side, in pixels, at or under which a decoded picture is a
+/// placeholder track rather than a picture (A07.20 c1: Missevan's is
+/// 16 × 16; the lowest real quality, 144p, is far above).
+const int placeholderPictureSide = 32;
+
+/// Whether [playback] has no real picture (A07.20 c1): its short side is at
+/// most [placeholderPictureSide], or the platform is a voice one
+/// ([voiceLive], `LiveSite.isVoiceLive`) and the stream is under way. A size
+/// not reported yet is not a placeholder: that moment shows the loading
+/// state.
+bool pictureIsPlaceholder(PlaybackState playback, {bool voiceLive = false}) {
+  final width = playback.videoWidth;
+  final height = playback.videoHeight;
+  final known = width != null && height != null && width > 0 && height > 0;
+  if (known && (width < height ? width : height) <= placeholderPictureSide) return true;
+  if (!voiceLive) return false;
+  return known || playback.status == PlaybackStatus.playing || playback.status == PlaybackStatus.paused;
+}
+
 /// Whether the picture's control bars belong on screen: only once a stream
 /// is open (c5: no bars over loading, offline, failed or restricted rooms;
 /// fullscreen keeps a reduced top bar, c6).

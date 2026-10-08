@@ -7,6 +7,7 @@ import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
 import 'package:live_core/src/quality_label.dart';
+import 'package:live_core/src/sites.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
@@ -59,6 +60,10 @@ abstract class LiveSite {
   /// an empty list can say the platform has none instead of "they will show
   /// up here".
   bool get hasSuperChats => superChatPlatforms.contains(id);
+
+  /// Whether the platform is voice only ([SiteIds.voiceLive]): its picture
+  /// is never a real one (A07.20).
+  bool get isVoiceLive => SiteIds.voiceLive.contains(id);
 }
 
 /// The platforms with super chats (3.x: Bilibili and Huya poll them and

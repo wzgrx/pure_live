@@ -149,6 +149,11 @@ abstract final class SiteIds {
     iptv,
   ];
 
+  /// Voice platforms (A07.20): the stream's video track is a placeholder
+  /// (Missevan's 16 × 16 picture) or a plain background (Kilakila's colour
+  /// or picture), so the room shows its cover instead.
+  static const Set<String> voiceLive = {missevan, kilakila};
+
   /// Platforms retired in 3.2.8 (hard to maintain, niche or unusable).
   /// Stored follows, history and links for them stay readable and are shown
   /// as retired instead of failing as unknown. Kick, retired in 3.2.11

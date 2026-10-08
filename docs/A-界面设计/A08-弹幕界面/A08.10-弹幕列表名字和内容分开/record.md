@@ -56,7 +56,7 @@
   - “弹幕列表”一组里开关在样式和礼物之间、默认开、点了改设置。
 - 改了：`chat_line_marks_test.dart`（卡片的名字以“：”结尾）、`chat_names_test.dart`（粉丝牌是 `live-play-chat-fans` 小块）、`settings_danmaku_test.dart`（设置页的开关、搜索“用户名”在“弹幕 › 弹幕列表”）、`packages/live_store/test/danmaku_new_settings_test.dart`（默认开、`danmaku` 一节、备份带上）。
 - `apps/pure_live` 的 `test/features/live_play`、`test/features/settings`、`test/shared` 542 个通过；`chat_benchmark_test.dart`（每秒 200 条 60 秒）单独跑：`ChatLineView` 602 次构建、每帧 45.2 个组件构建，和改之前一样（粉丝牌小块只在有粉丝牌的行上多一个组件）。
-- 门禁：见文末。
+- 门禁：`bash tools/gate/gate.sh --all` 在提交 `9ed1fe332` 上通过（`gate: passed (all, 14 members)`）；第一次在 `a56ec99bd` 上跑时 `apps/pure_live analyze` 报了一个 `prefer_const_constructors`（新测试里礼物消息没写 `const`），改了再跑通过。
 
 ## 真机上要看的
 
@@ -69,4 +69,6 @@
 
 ## 提交
 
-- 见报告；合并后在登记表补 `commit`。
+- `a56ec99bd` [A08.10] Tell names from words in the chat list; add "显示用户名"
+- `9ed1fe332` [A08.10] Make the gift message of the roles test const
+- 本记录的更新是第三个提交。没有推送、没有合并；合并后在登记表补 `commit`。

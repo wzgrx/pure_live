@@ -705,7 +705,7 @@ HTTP 和 WebSocket、请求头、压缩、代理和镜像、原生 HTTP 通道�
 
 | 编号 | 任务 | 类型 | 档位 | 状态 | 阶段 | 资料 |
 |---|---|---|---|---|---|---|
-| Q03.1 | 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 功能 | 第三档 | 未开始 | 0/2：下一阶段“K90 上逐平台测两种构建” | [设计或说明](Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md)、[任务书](Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/brief.md) |
+| Q03.1 | 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 功能 | 第三档 | 开发中 | 0/2：下一阶段“K90 上逐平台测两种构建” | [设计或说明](Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md)、[任务书](Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/brief.md)、[记录](Q-网络和代理/Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/record.md) |
 
 ### [Q04 网络状态和权限](Q-网络和代理/Q04-网络状态和权限/README.md)
 

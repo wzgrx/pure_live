@@ -88,7 +88,7 @@
 | 任务 | 状态 | 档位 | 阶段 |
 |---|---|---|---|
 | [Q02.1](Q02-代理和镜像/Q02.1-封面和头像走应用代理/README.md) 封面和头像走应用代理（3.x 的 CustomImageCacheManager） | 待真机 | 第二档 | 1/1 |
-| [Q03.1](Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md) 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 未开始 | 第三档 | 0/2：下一阶段“K90 上逐平台测两种构建” |
+| [Q03.1](Q03-原生HTTP和WebSocket/Q03.1-弹幕握手的UA去掉Dart前缀/README.md) 弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2） | 开发中 | 第三档 | 0/2：下一阶段“K90 上逐平台测两种构建” |
 
 决定见 [DECISIONS.md](../DECISIONS.md)，做法见 [PROCESS.md](../PROCESS.md)。
 

@@ -204,45 +204,53 @@ DanmakuRegistry buildDanmakuRegistry(PlatformDeps deps, SiteRegistry sites) {
   final http = deps.http;
   final proxy = deps.proxy;
   final settings = deps.store.settings;
-  final connector = danmakuHandshake();
+  final generic = danmakuHandshake();
+  // Only the platforms on dart:io's handshake take the plain one (Q03.1).
+  SocketConnector? connector(String site) => genericDanmakuHandshakeSites.contains(site) ? generic : null;
   return DanmakuRegistry({
-    SiteIds.bilibili: () => BilibiliDanmakuConnection(proxy: proxy, connector: connector),
+    SiteIds.bilibili: () => BilibiliDanmakuConnection(proxy: proxy, connector: connector(SiteIds.bilibili)),
     SiteIds.douyu: () => DouyuDanmakuConnection(
       proxy: proxy,
-      connector: connector,
+      connector: connector(SiteIds.douyu),
       filterSuspectedAutomatedMessages: () => settings.get(Settings.filterDouyuSuspectedAutomatedMessages),
     ),
-    SiteIds.huya: () => HuyaDanmakuConnection(proxy: proxy, connector: connector),
+    SiteIds.huya: () => HuyaDanmakuConnection(proxy: proxy, connector: connector(SiteIds.huya)),
     // The room's DouyinDanmakuArgs carry `refresh` (B-5), set by DouyinSite.
-    SiteIds.douyin: () => DouyinDanmakuConnection(proxy: proxy, connector: connector),
+    SiteIds.douyin: () => DouyinDanmakuConnection(proxy: proxy, connector: connector(SiteIds.douyin)),
     SiteIds.kuaishou: () => KuaishouDanmakuConnection(http: http),
-    SiteIds.twitch: () => TwitchDanmakuConnection(proxy: proxy, connector: connector),
-    // B-6: SOOP's chat follows the app proxy (CONNECT tunnel).
-    SiteIds.soop: () => SoopDanmakuConnection(proxy: proxy, connector: connector),
+    SiteIds.twitch: () => TwitchDanmakuConnection(proxy: proxy, connector: connector(SiteIds.twitch)),
+    // B-6: SOOP's chat follows the app proxy (CONNECT tunnel). Its own
+    // case-preserving handshake: its edge does not answer dart:io's
+    // lower-case headers (Q03.1), so never the generic connector.
+    SiteIds.soop: () => SoopDanmakuConnection(proxy: proxy),
     SiteIds.yy: YyDanmakuConnection.new,
-    SiteIds.acfun: () => AcfunDanmakuConnection(proxy: proxy, connector: connector),
-    SiteIds.picarto: () => PicartoDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.twitcasting: () => TwitcastingDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.missevan: () => MissevanDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.kilakila: () => KilakilaDanmakuConnection(proxy: proxy, connector: connector),
+    SiteIds.acfun: () => AcfunDanmakuConnection(proxy: proxy, connector: connector(SiteIds.acfun)),
+    SiteIds.picarto: () => PicartoDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.picarto)),
+    SiteIds.twitcasting: () =>
+        TwitcastingDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.twitcasting)),
+    SiteIds.missevan: () => MissevanDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.missevan)),
+    SiteIds.kilakila: () => KilakilaDanmakuConnection(proxy: proxy, connector: connector(SiteIds.kilakila)),
     SiteIds.niconico: () => NiconicoDanmakuConnection(site: sites.of(SiteIds.niconico) as NiconicoSite),
-    SiteIds.showroom: () => ShowroomDanmakuConnection(proxy: proxy, connector: connector),
-    SiteIds.chzzk: () => ChzzkDanmakuConnection(http: http, proxy: proxy, connector: connector),
+    SiteIds.showroom: () => ShowroomDanmakuConnection(proxy: proxy, connector: connector(SiteIds.showroom)),
+    SiteIds.chzzk: () => ChzzkDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.chzzk)),
     // M5.34: Kick's Pusher socket is not behind Kick's Cloudflare; dart:io works.
-    SiteIds.kick: () => KickDanmakuConnection(proxy: proxy, connector: connector),
+    SiteIds.kick: () => KickDanmakuConnection(proxy: proxy, connector: connector(SiteIds.kick)),
     // B-13: "显示全部聊天" is read at every connect (C01.6: a change reconnects).
     SiteIds.youtube: () =>
         YouTubeDanmakuConnection(http: http, allChatOf: () => settings.get(Settings.youtubeShowAllChat)),
-    SiteIds.bigo: () => BigoDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.pandaLive: () => PandaLiveDanmakuConnection(http: http, proxy: proxy, connector: connector),
+    SiteIds.bigo: () => BigoDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.bigo)),
+    SiteIds.pandaLive: () =>
+        PandaLiveDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.pandaLive)),
     SiteIds.fc2Live: () => Fc2LiveDanmakuConnection(http: http, proxy: proxy),
     SiteIds.steamBroadcast: () => SteamBroadcastDanmakuConnection(http: http),
-    SiteIds.jdLive: () => JdLiveDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.kugouLive: () => KugouLiveDanmakuConnection(http: http, proxy: proxy, connector: connector),
+    SiteIds.jdLive: () => JdLiveDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.jdLive)),
+    SiteIds.kugouLive: () =>
+        KugouLiveDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.kugouLive)),
     SiteIds.baiduLive: () => BaiduLiveDanmakuConnection(http: http),
-    SiteIds.sixRoom: () => SixRoomDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.lookLive: () => LookLiveDanmakuConnection(http: http, proxy: proxy, connector: connector),
-    SiteIds.seventeenLive: () => SeventeenLiveDanmakuConnection(http: http, proxy: proxy, connector: connector),
+    SiteIds.sixRoom: () => SixRoomDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.sixRoom)),
+    SiteIds.lookLive: () => LookLiveDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.lookLive)),
+    SiteIds.seventeenLive: () =>
+        SeventeenLiveDanmakuConnection(http: http, proxy: proxy, connector: connector(SiteIds.seventeenLive)),
   });
 }
 
@@ -252,8 +260,36 @@ DanmakuRegistry buildDanmakuRegistry(PlatformDeps deps, SiteRegistry sites) {
 /// with `--dart-define=PURE_LIVE_PLAIN_WS_UA=true` to try it.
 const bool plainDanmakuUserAgent = bool.fromEnvironment('PURE_LIVE_PLAIN_WS_UA');
 
+/// The platforms whose danmaku sockets shake hands through dart:io and so
+/// take [danmakuHandshake]. Not here: SOOP and YY (their own case-preserving
+/// handshake, `exact_websocket.dart`), FC2 (its own socket), and Kuaishou,
+/// niconico, YouTube, Steam and Baidu (no WebSocket of ours to shake).
+const Set<String> genericDanmakuHandshakeSites = {
+  SiteIds.bilibili,
+  SiteIds.douyu,
+  SiteIds.huya,
+  SiteIds.douyin,
+  SiteIds.twitch,
+  SiteIds.acfun,
+  SiteIds.picarto,
+  SiteIds.twitcasting,
+  SiteIds.missevan,
+  SiteIds.kilakila,
+  SiteIds.showroom,
+  SiteIds.chzzk,
+  SiteIds.kick,
+  SiteIds.bigo,
+  SiteIds.pandaLive,
+  SiteIds.jdLive,
+  SiteIds.kugouLive,
+  SiteIds.sixRoom,
+  SiteIds.lookLive,
+  SiteIds.seventeenLive,
+};
+
 /// The handshake of the danmaku sockets that use dart:io: null (the
-/// default) unless [plainDanmakuUserAgent] is on. YY and FC2 keep their own.
+/// default) unless [plainDanmakuUserAgent] is on; only for
+/// [genericDanmakuHandshakeSites].
 SocketConnector? danmakuHandshake({bool plain = plainDanmakuUserAgent}) => plain
     ? (endpoint, {required headers, required protocols, required route, required connectTimeout}) => connectIoSocket(
         endpoint,

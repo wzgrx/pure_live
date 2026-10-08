@@ -105,3 +105,10 @@
 - `apps/pure_live/lib/shared/danmaku/emotes.dart`（弹幕相关任务）。
 - `apps/pure_live/assets/translations/zh.json`、`en.json`（按键名排序插入；删了两个键）。
 - 测试：`live_play_layouts_test.dart`、`live_play_page_test.dart`、`live_play_room_test.dart`、`live_play_popups_test.dart`、`room_popups_test.dart`、`live_play_mini_window_test.dart`、`chat_list_follow_test.dart`、`recorder_centre_test.dart`。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 第 1 条：哔哩哔哩直播间，控制层隐藏后双击画面进横屏全屏，全屏里再双击退出、回到竖屏 ✓。单击的响应速度、底栏位置双击没单独看。
+- 第 12 条：录制面板的状态卡、“停止录制”都在面板里，没有居中对话框 ✓（A10.3 复查）。
+- 第 13 条：录制中心已保存的卡片有“播放”，滑动不卡 ✓（S02.6 阶段 5）。
+- 其他条没看。

@@ -49,25 +49,25 @@ void main() {
     expect(fresh.settings.get(Settings.danmakuMaxVisibleCount), 48);
   });
 
-  test('D03.4: "按住飞行弹幕让它停住" is off by default; a danmaku setting carried by backups', () async {
-    expect(store.settings.get(Settings.holdDanmakuOnPress), isFalse);
+  test('D03.4: "按住飞行弹幕让它停住" is on by default (D-039); a danmaku setting carried by backups', () async {
+    expect(store.settings.get(Settings.holdDanmakuOnPress), isTrue);
     expect(Settings.holdDanmakuOnPress.section, 'danmaku');
     expect(Settings.holdDanmakuOnPress.scope, SettingScope.synced);
     expect(Settings.byKey('holdDanmakuOnPress'), Settings.holdDanmakuOnPress);
-    await store.settings.set(Settings.holdDanmakuOnPress, true);
+    await store.settings.set(Settings.holdDanmakuOnPress, false);
     final file = await BackupService(store).exportAll();
-    expect((file['danmaku']! as Map)['holdDanmakuOnPress'], isTrue);
+    expect((file['danmaku']! as Map)['holdDanmakuOnPress'], isFalse);
     final other = await memoryStore();
     addTearDown(other.close);
     await BackupService(other).restoreAll(file);
-    expect(other.settings.get(Settings.holdDanmakuOnPress), isTrue);
-    // 3.x's files do not have it: it stays off.
+    expect(other.settings.get(Settings.holdDanmakuOnPress), isFalse);
+    // 3.x's files do not have it: the default, on.
     final fresh = await memoryStore();
     addTearDown(fresh.close);
     await BackupService(fresh).restoreAll({
       'backupVersion': 3,
       'danmaku': {'danmakuSpeed': 130.0},
     });
-    expect(fresh.settings.get(Settings.holdDanmakuOnPress), isFalse);
+    expect(fresh.settings.get(Settings.holdDanmakuOnPress), isTrue);
   });
 }

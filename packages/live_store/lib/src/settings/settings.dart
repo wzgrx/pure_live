@@ -548,7 +548,7 @@ abstract final class Settings {
   /// others fly on; it flies on when the finger lifts or moves away
   /// ("按住飞行弹幕让它停住"). Off by default, so the picture behaves as
   /// before; the tap and long-press actions are unchanged either way.
-  static const holdDanmakuOnPress = BoolSetting('holdDanmakuOnPress', section: 'danmaku', defaultValue: false);
+  static const holdDanmakuOnPress = BoolSetting('holdDanmakuOnPress', section: 'danmaku', defaultValue: true);
 
   /// Collapse repeats.
   static const collapseRepeatedDanmaku = BoolSetting(

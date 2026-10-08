@@ -410,12 +410,14 @@ void main() {
       await _close(tester, services);
     });
 
-    testWidgets('D03.4 (V01.3): off by default, a finger on a flying danmaku does not stop it (as before)', (
+    testWidgets('D03.4 (V01.3): turned off, a finger on a flying danmaku does not stop it (3.x)', (
       tester,
     ) async {
       final danmaku = FakeDanmaku();
       final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
-      expect(services.store.settings.get(Settings.holdDanmakuOnPress), isFalse);
+      expect(services.store.settings.get(Settings.holdDanmakuOnPress), isTrue, reason: 'on by default (D-039)');
+      await tester.runAsync(() => services.store.settings.set(Settings.holdDanmakuOnPress, false));
+      await _settle(tester);
       final (state, at) = await fly(tester, danmaku);
       final gesture = await tester.startGesture(at);
       for (var i = 0; i < 18; i++) {

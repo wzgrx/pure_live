@@ -64,3 +64,9 @@ K90（`com.mystyle.purelive.v4dev`，每次点按前确认前台是测试包）�
 7. 横屏全屏里重复第 3、4 步；在一条弹幕上按住后上下拖（调亮度或音量）：拖动照常，那条弹幕一拖就接着飞。
 8. 控制层显示时按住上栏或下栏里的弹幕位置：不钉（按的是栏）；锁定画面后按住弹幕：不钉。
 9. 设置 → 弹幕 →“画面弹幕交互”：同一个开关是开的；设置页搜索“按住”能搜到。把开关关掉，回到第 1 步的行为。
+
+## 2026-10-09 默认打开（D-039）
+
+- 用户决定默认打开：`Settings.holdDanmakuOnPress` 默认值改为 `true`；3.x 的备份里没有这个键，导入后也是开。
+- 改了的测试：`danmaku_new_settings_test.dart`（默认开、备份里的“关”能带回去）、`settings_defaults_test.dart`、`live_play_page_test.dart`（“关掉后手指按住不会停住”先把设置关掉）、`settings_danmaku_test.dart` 和 `live_play_popups_test.dart`（开关一开始是开的）。
+- 真机第 1 步改成：默认按住一条飞行弹幕就停住；在弹幕设置里关掉后，按住不停（和 3.x 一样）。

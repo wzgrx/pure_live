@@ -832,10 +832,10 @@ void main() {
       greaterThan(tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-longPress'))).dy),
     );
     expect(_in('danmaku-setting-holdOnPress', find.text('手指按住画面上的一条弹幕时只停住这一条，其他照飞，松手继续')), findsOneWidget);
-    expect(tester.widget<Switch>(find.byKey(const ValueKey('danmaku-switch-holdOnPress'))).value, isFalse);
+    expect(tester.widget<Switch>(find.byKey(const ValueKey('danmaku-switch-holdOnPress'))).value, isTrue);
     await tester.tap(find.byKey(const ValueKey('danmaku-switch-holdOnPress')));
     await _settle(tester);
-    expect(room.services.store.settings.get(Settings.holdDanmakuOnPress), isTrue);
+    expect(room.services.store.settings.get(Settings.holdDanmakuOnPress), isFalse);
     // D05.2 (V01.4): "同屏最大弹幕条数" after the frame rate, 3.x's 48 by
     // default, 10..120 in steps of 2; a change is the room's setting.
     expect(

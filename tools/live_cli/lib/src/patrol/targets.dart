@@ -169,8 +169,9 @@ final class PatrolTarget {
   /// Extra links for P12 (aliases, short ids, case).
   final List<LinkCase> links;
 
-  /// The room page for a room id, when the detail has no link.
-  final String Function(String roomId)? roomLink;
+  /// A room page for a room id (P12, beside the detail's link); null when
+  /// the id has none.
+  final String? Function(String roomId)? roomLink;
 
   /// Pause between checks of this platform (and between its requests).
   final Duration interval;
@@ -198,7 +199,7 @@ String _douyuRoom(String id) => 'https://www.douyu.com/$id';
 String _huyaRoom(String id) => 'https://www.huya.com/$id';
 String _douyinRoom(String id) => 'https://live.douyin.com/$id';
 String _kuaishouRoom(String id) => 'https://live.kuaishou.com/u/$id';
-String _nicoShort(String id) => 'https://nico.ms/$id';
+String? _nicoShort(String id) => id.startsWith('lv') ? 'https://nico.ms/$id' : null;
 
 const String _noDanmaku = '平台不提供弹幕（platforms.dart 没登记）';
 const String _noAnchors = '平台不提供搜索主播（search_capability.dart）';
@@ -319,7 +320,8 @@ final List<PatrolTarget> patrolTargets = List.unmodifiable(<PatrolTarget>[
   const PatrolTarget(
     site: SiteIds.yy,
     name: 'YY',
-    keyword: '英雄联盟',
+    // 英雄联盟 finds nothing on YY (entertainment rooms), 2026-10-08.
+    keyword: '王者荣耀',
     search: SearchKind.liveOnly,
     anchors: true,
     fixedRooms: [
@@ -499,14 +501,16 @@ final List<PatrolTarget> patrolTargets = List.unmodifiable(<PatrolTarget>[
     site: SiteIds.steamBroadcast,
     name: 'Steam 直播',
     overseas: true,
-    keyword: 'dota',
+    // Broadcaster names: dota finds nothing (2026-10-08).
+    keyword: 'game',
     fixedRooms: [FixedRoom('76561197960287930', note: '未开播')],
     unsupported: {CheckId.p5: _noAnchors},
   ),
   const PatrolTarget(
     site: SiteIds.jdLive,
     name: '京东直播',
-    keyword: '手机',
+    // Shop names: 手机 finds nothing, 京东 the 京东自营 shops (2026-10-08).
+    keyword: '京东',
     fixedRooms: [FixedRoom('48378944', note: '已结束', anyState: true)],
     unsupported: {CheckId.p5: _noAnchors},
   ),
@@ -544,7 +548,8 @@ final List<PatrolTarget> patrolTargets = List.unmodifiable(<PatrolTarget>[
     site: SiteIds.seventeenLive,
     name: '17LIVE',
     overseas: true,
-    keyword: 'music',
+    // Streamer names: music finds nothing (2026-10-08).
+    keyword: 'a',
     search: SearchKind.liveOnly,
     fixedRooms: [FixedRoom('28371376', note: '未开播', anyState: true)],
     missingRoom: '999999999',

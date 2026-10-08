@@ -4,10 +4,14 @@ import 'dart:io';
 import 'package:live_cli/src/patrol/result.dart';
 
 /// [url] as the report may show it: host and the first two path segments,
-/// without query, fragment or user info (signed parameters, tokens).
+/// without query, fragment or user info (signed parameters, tokens); a
+/// segment longer than 24 characters (a stream key) keeps its first 12.
 String redact(Uri url) {
   final segments = url.pathSegments.where((segment) => segment.isNotEmpty).toList();
-  final kept = segments.take(2).join('/');
+  final kept = segments
+      .take(2)
+      .map((segment) => segment.length > 24 ? '${segment.substring(0, 12)}…' : segment)
+      .join('/');
   final more = segments.length > 2 ? '/…' : '';
   return '${url.host}${kept.isEmpty ? '' : '/$kept'}$more';
 }

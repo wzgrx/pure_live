@@ -32,6 +32,10 @@ void main() {
       'cdn.example/live-bvc/123/…',
     );
     expect(redact(Uri.parse('https://cdn.example/a/b')), 'cdn.example/a/b');
+    expect(
+      redact(Uri.parse('https://cdn.example/live/20007330_sr_a53fbe7f2baa573b4e3b.m3u8')),
+      'cdn.example/live/20007330_sr_…',
+    );
     expect(redact(Uri.parse('https://cdn.example/?token=1')), 'cdn.example');
   });
 

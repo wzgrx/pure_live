@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:live_cli/src/patrol/media.dart';
+import 'package:live_cli/src/patrol/report.dart';
 import 'package:live_cli/src/patrol/result.dart';
 import 'package:live_cli/src/patrol/targets.dart';
 import 'package:live_core/live_core.dart';
@@ -134,6 +135,7 @@ final class PlatformPatrol {
   final List<LiveRoom> _searched = [];
   List<LiveCategory>? _categories;
   final List<LiveRoom> _live = [];
+  final Map<String, String> _cardIds = {};
   final Map<String, List<LivePlayQuality>> _qualities = {};
   final List<LivePlayLine> _lines = [];
   bool _resolved = false;
@@ -364,6 +366,10 @@ final class PlatformPatrol {
         notes.add('${candidate.roomId} 已经${fetched.effectiveLiveStatus.name}（跳过）');
         continue;
       }
+      if (fetched.isRestricted) {
+        notes.add('${candidate.roomId} 受限（${fetched.effectiveRestriction.name}，跳过）');
+        continue;
+      }
       // As the room page does (`room_controller.dart`): what the detail
       // lacks comes from the card it was entered from (Kuaishou's page has
       // no broadcast title, A-3). The area rule reads the detail itself.
@@ -378,6 +384,7 @@ final class PlatformPatrol {
       if (started != null && started.isAfter(_now().add(const Duration(minutes: 2)))) missing.add('开播时间（晚于现在）');
       if (missing.isNotEmpty) problems.add('${detail.roomId} 缺${missing.join('、')}');
       _live.add(detail);
+      _cardIds[detail.roomId] = candidate.roomId;
       notes.add(
         '${detail.roomId}${detail.area == null || detail.area!.isEmpty ? '' : '（${detail.area}）'}'
         '${fromCard ? ' 标题取自卡片' : ''}'
@@ -507,7 +514,7 @@ final class PlatformPatrol {
           kinds.update(found.label, (count) => count + 1, ifAbsent: () => 1);
         } else {
           final why = answer.error ?? (answer.ok ? '开头是${found.label}' : 'HTTP ${answer.status}');
-          bad.add('${url.host}/${url.pathSegments.take(2).join('/')}（${line.format?.name ?? '?'}，$why）');
+          bad.add('${redact(url)}（${line.format?.name ?? '?'}，$why）');
         }
       }
       final good = resolution.lines.length - bad.length;
@@ -555,9 +562,12 @@ final class PlatformPatrol {
       if (room.link case final link? when link.trim().isNotEmpty) {
         cases.add(LinkCase(link, expected: room.roomId, note: '详情的链接'));
       }
-      if (target.roomLink case final build?) {
-        final url = build(room.roomId);
-        if (!cases.any((item) => item.url == url)) cases.add(LinkCase(url, expected: room.roomId, note: '房间页'));
+      // The room page by the detail's id and by the card's (niconico's
+      // card is the programme `lv…`, its detail the streamer).
+      for (final id in {room.roomId, ?_cardIds[room.roomId]}) {
+        if (target.roomLink?.call(id) case final url? when !cases.any((item) => item.url == url)) {
+          cases.add(LinkCase(url, expected: room.roomId, note: '房间页'));
+        }
       }
     }
     cases.addAll(target.links);
@@ -573,8 +583,17 @@ final class PlatformPatrol {
         failed = true;
         notes.add('${item.note}（$label）认不出');
       } else if (expected != null && !sameRoom(target.site, found, expected)) {
-        failed = true;
-        notes.add('${item.note}（$label）→ $found，应为 $expected');
+        // A link may name the room another way (a SHOWROOM url key, a
+        // YouTube video of the channel): it is right when its detail is the
+        // same room.
+        _step = '解析 ${item.note} 后的详情 $found';
+        final same = await _detailId(found);
+        if (same != null && sameRoom(target.site, same, expected)) {
+          notes.add('${item.note}（$label）→ $found（详情是同一房间 $expected）');
+        } else {
+          failed = true;
+          notes.add('${item.note}（$label）→ $found，应为 $expected${same == null ? '' : '（详情是 $same）'}');
+        }
       } else {
         notes.add('${item.note}（$label）→ $found');
       }
@@ -582,6 +601,16 @@ final class PlatformPatrol {
     final note = notes.join('；');
     if (failed) throw CheckFailure(note);
     return note;
+  }
+
+  Future<String?> _detailId(String roomId) async {
+    try {
+      return (await site.getRoomDetail(roomId: roomId)).roomId;
+    } on RiskControl {
+      rethrow;
+    } on Object {
+      return null;
+    }
   }
 
   // P13 ---------------------------------------------------------------------

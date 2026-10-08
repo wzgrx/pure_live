@@ -170,6 +170,21 @@ void main() {
     expect(result.note, contains('超过 1 秒'));
   });
 
+  test('P6 skips restricted rooms, whose streams need an account', () async {
+    final site = _healthy()
+      ..details['1'] = LiveRoom(
+        roomId: '1',
+        platform: 'bilibili',
+        title: 't',
+        nick: 'n',
+        liveStatus: LiveStatus.live,
+        restriction: LiveRestriction.needsLogin,
+      );
+    final run = await patrolOf(site, _target).run();
+    expect(resultOf(run, CheckId.p6).note, contains('1 受限（needsLogin，跳过）'));
+    expect(resultOf(run, CheckId.p9).note, startsWith('2 '));
+  });
+
   test('P6 fails a start time in the future', () async {
     final site = _healthy()..details['1'] = room('1', startedAt: DateTime.utc(2026, 10, 9));
     expect(resultOf(await patrolOf(site, _target).run(), CheckId.p6).note, contains('开播时间'));
@@ -309,6 +324,31 @@ void main() {
       final result = resultOf(run, CheckId.p12);
       expect(result.outcome, Outcome.failed);
       expect(result.note, contains('应为 1'));
+    });
+
+    test('a link naming the room another way passes when its detail is the same room', () async {
+      final site = _healthy()..details['key-1'] = room('1');
+      final run = await patrolOf(site, _target, links: {'https://live.bilibili.com/1': 'key-1'}).run();
+      final result = resultOf(run, CheckId.p12);
+      expect(result.outcome, Outcome.ok);
+      expect(result.note, contains('详情是同一房间 1'));
+    });
+
+    test('the room page is also built from the card id, and ids without one are left out', () async {
+      final target = PatrolTarget(
+        site: 'niconico',
+        name: 'niconico',
+        roomLink: (id) => id.startsWith('lv') ? 'https://nico.ms/$id' : null,
+      );
+      final site = _healthy()
+        ..recommend[1] = [room('lv1'), room('lv2'), room('lv3')]
+        ..details.addAll({
+          for (final n in [1, 2, 3]) 'lv$n': room('user/$n'),
+        });
+      final run = await patrolOf(site, target, links: {'https://nico.ms/lv1': 'user/1'}).run();
+      final result = resultOf(run, CheckId.p12);
+      expect(result.outcome, Outcome.ok);
+      expect(result.note, contains('房间页（nico.ms）→ user/1'));
     });
 
     test('case is ignored on platforms whose ids ignore it', () async {

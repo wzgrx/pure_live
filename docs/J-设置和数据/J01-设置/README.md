@@ -9,7 +9,7 @@
 - 包括：
   - 设置注册表 `packages/live_store/lib/src/settings/settings.dart`（`Settings`，218 个 `static const`，`Settings.all` 在 `:1413`）和设置类型 `setting.dart`、读写 `settings_store.dart`。
   - 应用里读设置的方式：`watchSetting`（`apps/pure_live/lib/app/services.dart:143`，界面只重建用到的行）、`store.settings.get/watch`（逻辑代码）、`writeSetting`（`features/settings/settings_tiles.dart:16`）。
-  - 设置页的**目录和设置的对应**：`features/settings/settings_catalog.dart` 的每一行 `SettingsEntry.settings`（这一行改哪些设置，“已修改”计数和“恢复默认”都按它算）、各页“恢复默认”的设置清单（`portraitSettings`、`kernelSettings` 等，文件末尾）、搜索（`settings_model.dart` 的 `searchSettings`）的匹配规则。
+  - 设置页的**目录和设置的对应**：`features/settings/settings_catalog.dart` 的每一行 `SettingsEntry.settings`（这一行改哪些设置；现在只是记录，界面还没有用它，“恢复默认”用各页自己的清单）、各页“恢复默认”的设置清单（`portraitSettings`、`kernelSettings` 等，文件末尾）、搜索（`settings_model.dart` 的 `searchSettings`）的匹配规则。
   - 设置项逐条核对（J01.2）：默认值、范围、生效位置对照 3.x。
   - 启动时就要跟着设置跑的后台计时：定时退出 `AutoExitTimer`（`settings_editors.dart:767`）、定时刷新封面 `CoverRefreshTimer`（`data_tools.dart:87`），由 `app/startup.dart:74-75` 接上。
 - 不包括（归哪里）：
@@ -74,11 +74,11 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
-| 64 个默认值是 3.x 的常量或表达式，没展开比；另 46 个（20 个新加、19 个录制、7 个常量键）没单独查；范围（`min`/`max`、可选值）和生效位置没逐条对 | `settings.dart` 全文；3.x `lib/common/services/settings/` | 某个默认值和 3.x 不同时，新用户（和没改过这个设置的老用户）的行为悄悄变了 | [J01.2](J01.2-设置项逐条核对/README.md) |
-| `refreshRateMode` 的默认值：3.x 没存时由旧开关 `enableHighRefreshRate` 推出（`_initialRefreshRateMode`），v4 注册表写 `'powerSaving'`，旧开关的换算放在迁移里（`legacy_snapshot.dart:409-411`） | `settings.dart:64` | 只有从 3.x 迁过来的才走换算；从没装过 3.x 的新用户默认“省电”是否等于 3.x 新装的默认，要在 J01.2 核对 | J01.2 |
-| `page_default_size` 3.x 默认随屏幕宽度（宽于 960 为 20，否则 12），v4 默认 0 表示“由界面按宽度决定” | `settings.dart:718`；`appearance_pages.dart:1009` `recommendedPageSizes` | 纯 Dart 包拿不到屏幕宽度（J02.1 有意差异）；导出备份时写 0，3.x 读回会按 0 处理 | J01.2 确认 3.x 读到 0 的行为；不对就开小任务 |
+| 已逐条核对（J01.2，[对照表](J01.2-设置项逐条核对/settings.md)）：219 个里 198 个一样、3 个确认改动；14 个数值设置的范围比 3.x 宽，已改；4 个越界值的修法和 3.x 不同 | `settings.dart` 全文；3.x `lib/common/services/settings/` | 越界的历史条数、画面比例、代理端口 3.x 回到默认值、v4 夹紧；只在数据坏了时才遇到 | [J01.3](J01.3-越界设置值回到默认值/README.md) |
+| `refreshRateMode` 的默认值：3.x 没存时由旧开关 `enableHighRefreshRate` 推出（`_initialRefreshRateMode`），v4 注册表写 `'powerSaving'`，旧开关的换算放在迁移里（`legacy_snapshot.dart:409-411`） | `settings.dart:64` | 只有从 3.x 迁过来的才走换算 | J01.2 已核对：3.x 新装没有旧开关，同样是“省电” |
+| `page_default_size` 3.x 默认随屏幕宽度（宽于 960 为 20，否则 12），v4 默认 0 表示“由界面按宽度决定” | `settings.dart:718`；`appearance_pages.dart:1009` `recommendedPageSizes` | 纯 Dart 包拿不到屏幕宽度（J02.1 有意差异）；导出备份时写 0 | J01.2 已核对：3.x 读到 0 时取可选条数的第一个（12 或 20），结果一样 |
 | 4 个设置没人读：`videoPlayerKey`、`autoRefreshTime`、`enableRotateScreen`、`m3uDirectory` | `settings.dart` | 后三个 3.x 也不读；`videoPlayerKey` 只为备份往返 | 不做（清点第 15 节） |
-| `SettingsStore.resetAll` 没有调用方；`changed` 计数和“恢复本页默认”只看目录里登记了的设置 | `settings_store.dart:120`；`settings_catalog.dart` | 没登记进 `SettingsEntry.settings` 的设置（例如某些子页里改的）不计“已修改”、不随本页恢复 | J01.2 核对“生效位置”时顺带核对每个设置在目录里有没有登记 |
+| `SettingsStore.resetAll` 没有调用方；`SettingsEntry.settings` 也没有使用方（没有“已修改”计数，“恢复本页默认”用各页自己的清单） | `settings_store.dart:120`；`settings_catalog.dart` | 没有 | J01.2 核对了登记：屏蔽页入口补登记 5 个过滤设置；其余没登记的是本机记录、没有界面的，或在自己的页面上设置（网络电视、录制、本地互动、日志、电视界面） |
 | 3.x 说明文字里还有偏技术的旧键（`audience_*_detail` 等）没删 | 翻译文件 | 不显示就没影响 | 不清理（D-024） |
 
 ## 相关决定和规范
@@ -89,13 +89,13 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 
 ## 测试和验证
 
-- 自动测试：`cd packages/live_store && dart test`（设置、迁移、备份）；`cd apps/pure_live && flutter test test/features/settings/`。缺的：没有“每个设置的默认值等于 3.x”的表驱动测试（J01.2 要加）。
+- 自动测试：`cd packages/live_store && dart test`（设置、迁移、备份）；`cd apps/pure_live && flutter test test/features/settings/`。每个设置的默认值和范围对照 3.x 的表驱动测试：`packages/live_store/test/settings_defaults_test.dart`（J01.2），新加设置要在里面登记。
 - 真机：设置本身不靠原生；各设置的生效在对应组的真机清单里看（[S02 的 CHECKLIST](../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1、2、5 节）。覆盖安装后 3.x 改过的设置还在，归 J06.1。
 
 ## 路线
 
-1. **J01.2**（第二档）：脚本列出 218 个设置的 v4 默认值、范围和 3.x 对应值，展开 64 个常量，逐条标“一样 / 确认过的改动 / 不一样”；不一样的开修复任务或写进决定；加表驱动测试守住。
-2. 以后新加设置：在注册表里加（写清默认值和范围、3.x 没有这个键）、在目录里登记（`SettingsEntry.settings`）、在清点第 15 节的“新加”名单里补一行。
+1. **J01.2**（做完）：`tools/docs/settings_audit.py` 生成逐条对照表；表驱动测试守住默认值和范围。**J01.3**（第三档）：越界值按 3.x 回到默认值。
+2. 以后新加设置：在注册表里加（写清默认值和范围、3.x 没有这个键）、在目录里登记（`SettingsEntry.settings`）、在 `settings_defaults_test.dart` 的 `newInV4` 和清点第 15 节的“新加”名单里补一行，再跑一次 `python3 tools/docs/settings_audit.py`。
 3. 新想法（例如设置导入导出单页、按房间的设置）写进 V01 提议，不直接加任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
@@ -105,17 +105,18 @@ Settings.xxx（settings.dart，类型化常量：键 = 3.x 的 Hive 键，sectio
 属于 [J 设置和数据](../README.md)。
 
 - 代码：`features/settings/`、`packages/live_store/lib/src/settings/`
-- 进度：`██████████░░░░░░░░░░` 50%
+- 进度：`████████████████░░░░` 80%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | J01.1 | 设置 | 功能 | 完成 | 2026-10-01 | 9a90cbf6c | [设计或说明](J01.1-设置/README.md)、[记录](J01.1-设置/record.md) |
-| J01.2 | 设置项逐条核对：218 个设置的默认值、取值范围和生效位置对照 3.x | 功能 | 未开始 | — | — | [设计或说明](J01.2-设置项逐条核对/README.md)、[任务书](J01.2-设置项逐条核对/brief.md) |
+| J01.2 | 设置项逐条核对：218 个设置的默认值、取值范围和生效位置对照 3.x | 功能 | 完成 | 2026-10-08 | — | [设计或说明](J01.2-设置项逐条核对/README.md)、[任务书](J01.2-设置项逐条核对/brief.md)、[记录](J01.2-设置项逐条核对/record.md) |
+| J01.3 | 越界的设置值按 3.x 回到默认值：历史条数、画面比例、代理端口，弹幕粗细取整 | 功能 | 未开始 | — | — | [设计或说明](J01.3-越界设置值回到默认值/README.md)、[任务书](J01.3-越界设置值回到默认值/brief.md) |
 
 ## 还没完成的
 
-- **J01.2 设置项逐条核对：218 个设置的默认值、取值范围和生效位置对照 3.x**（未开始，第二档，规模 中）
-  - 说明：读取检查（功能清点第 15 节）2026-10-03 重做过，没人读的只剩 3.x 也不读的 3 个和不做的播放内核；剩下默认值：3.x 用 hive* 存的 172 个里 106 个字面值一样、2 个写法不同意思一样、64 个要展开 3.x 的常量或表达式，另 46 个（20 个 v4 新加、19 个录制、7 个常量键）要单独查（V03.3）
+- **J01.3 越界的设置值按 3.x 回到默认值：历史条数、画面比例、代理端口，弹幕粗细取整**（未开始，第三档，规模 小）
+  - 来源：J01.2 逐条核对
 
 <!-- docs:生成结束 -->

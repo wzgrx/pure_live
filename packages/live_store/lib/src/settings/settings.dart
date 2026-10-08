@@ -424,14 +424,27 @@ abstract final class Settings {
     max: 300,
   );
 
-  /// Scroll speed.
-  static const danmakuSpeed = DoubleSetting('danmakuSpeed', section: 'danmaku', defaultValue: 120);
+  /// Scroll speed, pixels per second (20..400: 3.x clamped a stored or
+  /// imported value, danmaku_settings_controller.dart:118, J01.2).
+  static const danmakuSpeed = DoubleSetting('danmakuSpeed', section: 'danmaku', defaultValue: 120, min: 20, max: 400);
 
-  /// Font size.
-  static const danmakuFontSize = DoubleSetting('danmakuFontSize', section: 'danmaku', defaultValue: 16);
+  /// Font size (10..30, danmaku_settings_controller.dart:119).
+  static const danmakuFontSize = DoubleSetting(
+    'danmakuFontSize',
+    section: 'danmaku',
+    defaultValue: 16,
+    min: 10,
+    max: 30,
+  );
 
-  /// Font weight.
-  static const danmakuFontWeight = IntSetting('danmakuFontWeight', section: 'danmaku', defaultValue: 500);
+  /// Font weight (100..900, danmaku_settings_controller.dart:41-44).
+  static const danmakuFontWeight = IntSetting(
+    'danmakuFontWeight',
+    section: 'danmaku',
+    defaultValue: 500,
+    min: 100,
+    max: 900,
+  );
 
   /// Stroke width.
   static const danmakuFontBorder = DoubleSetting(
@@ -506,12 +519,13 @@ abstract final class Settings {
     defaultValue: false,
   );
 
-  /// Repeat window, seconds.
+  /// Repeat window, seconds (1..30, danmaku_settings_controller.dart:260).
   static const repeatedDanmakuWindowSeconds = IntSetting(
     'repeatedDanmakuWindowSeconds',
     section: 'danmaku',
     defaultValue: 5,
     min: 1,
+    max: 30,
   );
 
   /// Saved danmaku template.
@@ -548,40 +562,74 @@ abstract final class Settings {
   /// PiP colour, ARGB.
   static const pipDanmakuColor = IntSetting('pipDanmakuColor', section: 'danmaku', defaultValue: 0xFFFFFFFF);
 
-  /// PiP font size.
-  static const pipDanmakuFontSize = DoubleSetting('pipDanmakuFontSize', section: 'danmaku', defaultValue: 12);
+  // The PiP ranges are 3.x's on a backup import, which its PiP page's
+  // sliders also kept to (danmaku_settings_controller.dart:272-291, J01.2).
 
-  /// PiP font weight.
-  static const pipDanmakuFontWeight = IntSetting('pipDanmakuFontWeight', section: 'danmaku', defaultValue: 500);
+  /// PiP font size (8..24).
+  static const pipDanmakuFontSize = DoubleSetting(
+    'pipDanmakuFontSize',
+    section: 'danmaku',
+    defaultValue: 12,
+    min: 8,
+    max: 24,
+  );
 
-  /// PiP speed.
-  static const pipDanmakuSpeed = DoubleSetting('pipDanmakuSpeed', section: 'danmaku', defaultValue: 90);
+  /// PiP font weight (100..900).
+  static const pipDanmakuFontWeight = IntSetting(
+    'pipDanmakuFontWeight',
+    section: 'danmaku',
+    defaultValue: 500,
+    min: 100,
+    max: 900,
+  );
 
-  /// PiP opacity.
+  /// PiP speed (20..400).
+  static const pipDanmakuSpeed = DoubleSetting(
+    'pipDanmakuSpeed',
+    section: 'danmaku',
+    defaultValue: 90,
+    min: 20,
+    max: 400,
+  );
+
+  /// PiP opacity (0.1..1).
   static const pipDanmakuOpacity = DoubleSetting(
     'pipDanmakuOpacity',
     section: 'danmaku',
     defaultValue: 0.9,
-    min: 0,
+    min: 0.1,
     max: 1,
   );
 
-  /// PiP area.
-  static const pipDanmakuArea = DoubleSetting('pipDanmakuArea', section: 'danmaku', defaultValue: 0.5, min: 0, max: 1);
+  /// PiP area (0.1..1).
+  static const pipDanmakuArea = DoubleSetting(
+    'pipDanmakuArea',
+    section: 'danmaku',
+    defaultValue: 0.5,
+    min: 0.1,
+    max: 1,
+  );
 
-  /// PiP visible count.
+  /// PiP visible count (1..20).
   static const pipDanmakuMaxVisibleCount = IntSetting(
     'pipDanmakuMaxVisibleCount',
     section: 'danmaku',
     defaultValue: 6,
     min: 1,
+    max: 20,
   );
 
-  /// PiP emit interval, seconds.
-  static const pipDanmakuEmitInterval = DoubleSetting('pipDanmakuEmitInterval', section: 'danmaku', defaultValue: 0.35);
+  /// PiP emit interval, seconds (0.05..2).
+  static const pipDanmakuEmitInterval = DoubleSetting(
+    'pipDanmakuEmitInterval',
+    section: 'danmaku',
+    defaultValue: 0.35,
+    min: 0.05,
+    max: 2,
+  );
 
-  /// PiP frame rate.
-  static const pipDanmakuFps = IntSetting('pipDanmakuFps', section: 'danmaku', defaultValue: 30);
+  /// PiP frame rate (15..240).
+  static const pipDanmakuFps = IntSetting('pipDanmakuFps', section: 'danmaku', defaultValue: 30, min: 15, max: 240);
 
   /// PiP automatic frame rate.
   static const pipDanmakuAutoFps = BoolSetting('pipDanmakuAutoFps', section: 'danmaku', defaultValue: true);
@@ -853,19 +901,24 @@ abstract final class Settings {
     backupKey: 'displayId',
   );
 
-  /// PiP geometry.
+  /// PiP geometry (0..16384, window_size_controller.dart:308, J01.2; 0 =
+  /// nothing remembered).
   static const windowsPipWidth = DoubleSetting(
     'windows_pip_width',
     section: 'windowSize',
     defaultValue: 0,
+    min: 0,
+    max: 16384,
     backupKey: 'windowsPipWidth',
   );
 
-  /// PiP geometry.
+  /// PiP geometry (as [windowsPipWidth]).
   static const windowsPipHeight = DoubleSetting(
     'windows_pip_height',
     section: 'windowSize',
     defaultValue: 0,
+    min: 0,
+    max: 16384,
     backupKey: 'windowsPipHeight',
   );
 

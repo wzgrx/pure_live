@@ -156,6 +156,32 @@ void main() {
       expect(reopened.get(Settings.autoRefreshInterval), 5);
     });
 
+    test("J01.2: danmaku and PiP window values out of 3.x's ranges are clamped as 3.x did", () async {
+      final out = <Setting<Object>, (Object, Object)>{
+        Settings.danmakuSpeed: (0.0, 20.0),
+        Settings.danmakuFontSize: (64.0, 30.0),
+        Settings.danmakuFontWeight: (1000, 900),
+        Settings.repeatedDanmakuWindowSeconds: (99, 30),
+        Settings.pipDanmakuFontSize: (2.0, 8.0),
+        Settings.pipDanmakuFontWeight: (50, 100),
+        Settings.pipDanmakuSpeed: (1000.0, 400.0),
+        Settings.pipDanmakuOpacity: (0.0, 0.1),
+        Settings.pipDanmakuArea: (0.0, 0.1),
+        Settings.pipDanmakuMaxVisibleCount: (50, 20),
+        Settings.pipDanmakuEmitInterval: (10.0, 2.0),
+        Settings.pipDanmakuFps: (5, 15),
+        Settings.windowsPipWidth: (99999.0, 16384.0),
+        Settings.windowsPipHeight: (-5.0, 0.0),
+      };
+      await store.settings.setAll({for (final MapEntry(:key, value: (raw, _)) in out.entries) key: raw});
+      final reopened = await SettingsStore.load(store.database);
+      for (final MapEntry(:key, value: (raw, clamped)) in out.entries) {
+        expect(store.settings.get(key), clamped, reason: key.key);
+        expect(reopened.get(key), clamped, reason: key.key);
+        expect(LegacySnapshot.fromHive({key.key: raw}).settings[key], clamped, reason: '3.x data: ${key.key}');
+      }
+    });
+
     test('interface mode: auto by default, three choices, kept on this device (M14.1)', () async {
       expect(store.settings.get(Settings.uiMode), 'auto');
       await store.settings.set(Settings.uiMode, 'tv');

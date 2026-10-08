@@ -100,3 +100,9 @@ flutter test test/features/live_play/chat_benchmark_test.dart --dart-define=CHAT
 - `danmaku/chat_list.dart`：A07.12 改屏蔽关键词输入和长按弹幕表单两处弹窗；本任务在 `showChatMessageActions` 里只改了名字颜色那一行（`chatNameColor(message.color, scheme.surfaceContainerLowest)`），其余改动都在列表、`chatNameColor` 和 `ChatLineView` 里。冲突时两边都保留，名字颜色那行用新签名。
 - `logic/room_controller.dart`：`_onMessage`、`addLocal`、`_system`、`dispose` 几处。
 - `danmaku/chat_panel.dart`：未读数那一行（A03.2 改了同文件的翻页手感，已合并，无冲突）。
+
+## K90 复查（2026-10-08，提交 `9e84b6f7b`）
+
+- 第 3 条：斗鱼 71415（弹幕很密）往上翻一下后放着不动，10 秒前后两次读界面，各行位置完全一样，右下角“N 条新弹幕，点击回到底部”从 578 涨到 716 ✓。
+- 第 4 条（部分）：定住时长按一条弹幕，面板有“屏蔽此用户” ✓；没真的屏蔽。
+- 还剩：第 1 条（DevTools 看 UI 线程和重建，要电脑连 profile）、2、5、6、7。

@@ -553,6 +553,16 @@ void main() {
       await _close(tester, app);
     });
 
+    testWidgets('A07.10 on K90: the mini danmaku are clipped to the window', (tester) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      final overlay = _inWindow(find.byType(DanmakuOverlay));
+      final clip = find.ancestor(of: overlay, matching: find.byType(ClipRect)).first;
+      expect(tester.getRect(clip), tester.getRect(overlay));
+      await _close(tester, app);
+    });
+
     testWidgets('D03.3 c1: the mini danmaku use the danmaku font; the default is the system one', (tester) async {
       final app = await _app(tester);
       await _openRoom(tester);

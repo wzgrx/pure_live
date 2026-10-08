@@ -179,34 +179,39 @@ class _CompactDanmakuLayerState extends ConsumerState<CompactDanmakuLayer> {
               fontSize: fontSize,
               speed: speed,
             );
-            return RepaintBoundary(
-              key: const ValueKey('mini-danmaku'),
-              child: DanmakuOverlay(
-                messages: _out.stream,
-                retractions: widget.controller.retractions,
-                visible: shown,
-                running: _running,
-                maxVisible: maxVisible,
-                color: original ? null : Color(color),
-                emotes: emotes,
-                fps: compactDanmakuFps(
-                  automatic: autoFps,
-                  configured: fps,
-                  mode: refreshMode,
-                  maxRefreshRate: display?.maxRefreshRate,
-                  currentRefreshRate: display?.currentRefreshRate,
-                ),
-                look: DanmakuLook(
-                  fontSize: metrics.fontSize,
-                  fontWeight: weight.clamp(100, 900),
-                  speed: metrics.speed,
-                  opacity: opacity,
-                  area: area,
-                  stroke: stroke && strokeWidth > 0,
-                  strokeWidth: strokeWidth.clamp(0, 4).toDouble(),
-                  laneHeight: metrics.laneHeight,
-                  fontFamily: fontFamily,
-                  textOnly: textOnly,
+            // Kept inside the window like the room's ([PlayerView]): danmaku
+            // enter from beyond the right edge (A07.10 on K90, an emoticon
+            // was drawn outside the mini window).
+            return ClipRect(
+              child: RepaintBoundary(
+                key: const ValueKey('mini-danmaku'),
+                child: DanmakuOverlay(
+                  messages: _out.stream,
+                  retractions: widget.controller.retractions,
+                  visible: shown,
+                  running: _running,
+                  maxVisible: maxVisible,
+                  color: original ? null : Color(color),
+                  emotes: emotes,
+                  fps: compactDanmakuFps(
+                    automatic: autoFps,
+                    configured: fps,
+                    mode: refreshMode,
+                    maxRefreshRate: display?.maxRefreshRate,
+                    currentRefreshRate: display?.currentRefreshRate,
+                  ),
+                  look: DanmakuLook(
+                    fontSize: metrics.fontSize,
+                    fontWeight: weight.clamp(100, 900),
+                    speed: metrics.speed,
+                    opacity: opacity,
+                    area: area,
+                    stroke: stroke && strokeWidth > 0,
+                    strokeWidth: strokeWidth.clamp(0, 4).toDouble(),
+                    laneHeight: metrics.laneHeight,
+                    fontFamily: fontFamily,
+                    textOnly: textOnly,
+                  ),
                 ),
               ),
             );

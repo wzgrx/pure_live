@@ -282,7 +282,7 @@ const Map<String, Object> newInV4 = {
   'showChatGifts': true, // A08.6
   'danmakuPausedBehavior': 'pause', // A07.10
   'danmakuMaxVisibleCount': 48, // D05.2 (V01.4; 3.x's fixed 48)
-  'holdDanmakuOnPress': false, // D03.4 (V01.3; off: the picture as before)
+  'holdDanmakuOnPress': true, // D03.4 (V01.3), on by default (D-039)
   'youtubeShowAllChat': false, // UPGRADES B-13
   'enableLocalLog': false, // I01.3
   'logLevel': 'info', // I01.3

@@ -160,7 +160,7 @@ NOTES: dict[str, dict] = {
     'danmakuFps': _danmaku('123', '30', '240'),
     'holdDanmakuOnPress': {
         **_new('D03.4，V01.3'),
-        'verdict': 'v4 新加（D03.4，V01.3，D-036）：默认关，画面弹幕和以前一样；开了以后按住一条飞行弹幕时它停住',
+        'verdict': 'v4 新加（D03.4，V01.3，D-036）：默认开（D-039，用户 2026-10-09）；按住一条飞行弹幕时它停住，松手继续；关掉和 3.x 一样',
     },
     'danmakuMaxVisibleCount': {
         **_new('D05.2，V01.4'),

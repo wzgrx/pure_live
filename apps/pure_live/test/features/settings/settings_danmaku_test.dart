@@ -172,9 +172,9 @@ void main() {
 
   testWidgets('D03.4 (V01.3): "按住飞行弹幕让它停住" is on the page and found under "弹幕 › 画面弹幕交互"', (tester) async {
     final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
-    expect(tester.widget<Switch>(_switch('holdOnPress')).value, isFalse);
+    expect(tester.widget<Switch>(_switch('holdOnPress')).value, isTrue, reason: 'on by default (D-039)');
     await tapSettings(tester, _switch('holdOnPress'));
-    expect(h.settings.get(Settings.holdDanmakuOnPress), isTrue);
+    expect(h.settings.get(Settings.holdDanmakuOnPress), isFalse);
 
     await pumpSettings(tester);
     await searchSettingsFor(tester, '按住');

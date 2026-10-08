@@ -235,6 +235,25 @@ NOTES: dict[str, dict] = {
     'danmakuSimilarityThreshold': {'v3range': f'50～100（`{_D}:125`）', 'ui': f'滑块 50～100（{_BLOCK}）', 'when': _FILTER_WHEN},
     'danmakuSimilarityCacheDuration': {'v3range': f'1～60（`{_D}:126`）', 'ui': f'滑块 1～60（{_BLOCK}）', 'when': _FILTER_WHEN},
     'danmakuSimilarityMaxCacheSize': {'v3range': f'20～1000（`{_D}:127`）', 'ui': f'滑块 20～1000（{_BLOCK}）', 'when': _FILTER_WHEN},
+    'blockEmoteOnlyDanmaku': {
+        **_new('D02.2，V03.6 E11'),
+        'verdict': 'v4 新加（D02.2，V03.6 E11，D-040）：默认关，和 3.x 一样（3.x 没有这个屏蔽）；只有表情的平台弹幕不显示',
+        'ui': f'开关（{_BLOCK}“按内容屏蔽”）',
+        'when': _FILTER_WHEN,
+    },
+    'blockLongDanmaku': {
+        **_new('D02.2，V03.6 E11'),
+        'verdict': 'v4 新加（D02.2，D-040）：默认关，和 3.x 一样；超过“最多字数”的平台弹幕不显示',
+        'ui': f'开关（{_BLOCK}“按内容屏蔽”）',
+        'when': _FILTER_WHEN,
+    },
+    'blockLongDanmakuLength': {
+        **_new('D02.2，V03.6 E11'),
+        'v3range': '3.x 没有这个设置',
+        'verdict': 'v4 新加（D02.2）：默认 30，10～100（超出范围夹到两端），一个表情算一个字',
+        'ui': f'滑块 10～100（{_BLOCK}，“屏蔽超长弹幕”关着时变灰）',
+        'when': _FILTER_WHEN,
+    },
     'youtubeShowAllChat': _new('UPGRADES B-13'),
     # ---- volume ----
     'defaultMobileVolume': {

@@ -366,6 +366,9 @@ setting = [
   { key = "danmakuSimilarityThreshold", sub = "D02" },
   { key = "danmakuSimilarityCacheDuration", sub = "D02" },
   { key = "danmakuSimilarityMaxCacheSize", sub = "D02" },
+  { key = "blockEmoteOnlyDanmaku", sub = "D02" },
+  { key = "blockLongDanmaku", sub = "D02" },
+  { key = "blockLongDanmakuLength", sub = "D02" },
   { key = "youtubeShowAllChat", sub = "D01" },
   # refresh 分节（默认 I04）
   { key = "liveAlertEnabled", sub = "O01" },

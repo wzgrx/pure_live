@@ -336,7 +336,7 @@ void main() {
       expect(menuEntriesOnBars(landscape: true, cast: false), {RoomMenuEntry.switchRoom, RoomMenuEntry.videoFit});
       final landscape = roomMenuGroups(
         iptv: false,
-        windows: false,
+        newWindow: false,
         cast: true,
         onBars: menuEntriesOnBars(landscape: true, cast: true),
       );
@@ -345,7 +345,7 @@ void main() {
         [RoomMenuEntry.streamLink, RoomMenuEntry.share, RoomMenuEntry.external],
         <RoomMenuEntry>[],
       ]);
-      expect(roomMenuGroups(iptv: false, windows: false, cast: true).first.first, RoomMenuEntry.switchRoom);
+      expect(roomMenuGroups(iptv: false, newWindow: false, cast: true).first.first, RoomMenuEntry.switchRoom);
     });
   });
 

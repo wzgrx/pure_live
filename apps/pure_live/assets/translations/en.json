@@ -1214,6 +1214,7 @@
     "open_app_failed_fallback_browser": "Cannot open app, fallback to browser",
     "open_folder": "Open Folder",
     "open_font_dir_failed": "Could not open the font folder. Check folder access permissions",
+    "open_in_new_window": "Open in new window",
     "open_in_system_browser": "Open in system browser",
     "open_log_dir": "Open Log Directory",
     "open_log_dir_desc": "View and manage log files",

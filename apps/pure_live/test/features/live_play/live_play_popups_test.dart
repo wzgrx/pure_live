@@ -14,6 +14,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
@@ -911,11 +912,38 @@ void main() {
     expect(find.text('打开直播间'), findsNothing);
     // Windows adds "在新窗口打开" at the end of the second group; the local
     // interaction is the third group only while it is on (U.2k).
-    expect(roomMenuGroups(iptv: false, windows: true, cast: false)[1].last, RoomMenuEntry.newWindow);
-    expect(roomMenuGroups(iptv: false, windows: false, cast: true)[2], isEmpty);
-    expect(roomMenuGroups(iptv: false, windows: false, cast: true, local: true)[2], [RoomMenuEntry.localInteraction]);
-    expect(roomMenuGroups(iptv: true, windows: false, cast: true)[1], [RoomMenuEntry.cast, RoomMenuEntry.streamLink]);
-    expect(roomMenuGroups(iptv: true, windows: false, cast: false)[1], [RoomMenuEntry.streamLink]);
+    expect(roomMenuGroups(iptv: false, newWindow: true, cast: false)[1].last, RoomMenuEntry.newWindow);
+    expect(roomMenuGroups(iptv: false, newWindow: false, cast: true)[2], isEmpty);
+    expect(roomMenuGroups(iptv: false, newWindow: false, cast: true, local: true)[2], [RoomMenuEntry.localInteraction]);
+    expect(roomMenuGroups(iptv: true, newWindow: false, cast: true)[1], [RoomMenuEntry.cast, RoomMenuEntry.streamLink]);
+    expect(roomMenuGroups(iptv: true, newWindow: false, cast: false)[1], [RoomMenuEntry.streamLink]);
+    await _close(tester, room);
+  });
+
+  testWidgets('room menu: the new window follows the desktop shell and the setting (A16.1 c12, A16.2)', (tester) async {
+    final opened = <LiveRoom?>[];
+    DesktopWindow.newWindowLauncher = ({room}) async => opened.add(room);
+    addTearDown(() => DesktopWindow.newWindowLauncher = null);
+    final room = await _pump(tester);
+    await tester.tap(find.byKey(const ValueKey('live-play-menu')));
+    await tester.pumpAndSettle();
+    final entry = find.byKey(const ValueKey('room-menu-newWindow'));
+    expect(_in('room-menu-newWindow', find.text('在新窗口打开')), findsOneWidget);
+    expect(_in('room-menu-newWindow', find.byIcon(AppIcons.newPlayerWindow)), findsOneWidget);
+    // At the end of the second group, after "在<平台>打开".
+    expect(
+      tester.getRect(entry).top,
+      greaterThan(tester.getRect(find.byKey(const ValueKey('room-menu-external'))).top),
+    );
+    await tester.tap(entry);
+    await tester.pumpAndSettle();
+    expect(opened.single?.roomId, isNotNull, reason: 'opens this room');
+    // The setting off: gone the next time the menu opens.
+    await tester.runAsync(() => room.services.store.settings.set(Settings.enableNewWindowPlay, false));
+    await tester.tap(find.byKey(const ValueKey('live-play-menu')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('room-menu-newWindow')), findsNothing);
+    expect(find.byKey(const ValueKey('room-menu-external')), findsOneWidget);
     await _close(tester, room);
   });
 

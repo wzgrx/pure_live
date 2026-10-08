@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -8,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
-import 'package:pure_live/app/launch_args.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
 import 'package:pure_live/features/live_play/dialogs/room_dialogs.dart';
@@ -152,12 +151,13 @@ bool castSupported(TargetPlatform platform) => platform == TargetPlatform.androi
 /// (the `localInteraction.enabled` setting) is on; an empty group is left
 /// out.
 ///
-/// Cast only where [cast] ([castSupported]); the new window only on
-/// [windows]. The menu on the picture leaves out what its bars already show
+/// Cast only where [cast] ([castSupported]); the new window only with
+/// [newWindow] (`DesktopWindow.offersNewWindow`: a desktop shell that opens
+/// windows and the setting "新建独立播放窗口" on, A16.1 c12). The menu on the picture leaves out what its bars already show
 /// ([onBars], docs/A-界面设计/A07-直播间界面/A07.13-切换直播间面板 c12).
 List<List<RoomMenuEntry>> roomMenuGroups({
   required bool iptv,
-  required bool windows,
+  required bool newWindow,
   required bool cast,
   bool local = false,
   Set<RoomMenuEntry> onBars = const {},
@@ -170,7 +170,7 @@ List<List<RoomMenuEntry>> roomMenuGroups({
       // An IPTV channel has no page to share or open (as before).
       if (!iptv) RoomMenuEntry.share,
       if (!iptv) RoomMenuEntry.external,
-      if (windows) RoomMenuEntry.newWindow,
+      if (newWindow) RoomMenuEntry.newWindow,
     ],
     [if (local) RoomMenuEntry.localInteraction],
   ])
@@ -198,20 +198,10 @@ Set<RoomMenuEntry> menuEntriesOnBars({required bool landscape, required bool cas
 /// second line.
 class RoomMenuButton extends ConsumerWidget {
   /// Creates the menu.
-  const new({
-    required this.controller,
-    this.windows = false,
-    this.onVideo = false,
-    this.onBars = const {},
-    this.onMenu,
-    super.key,
-  });
+  const new({required this.controller, this.onVideo = false, this.onBars = const {}, this.onMenu, super.key});
 
   /// The room.
   final LiveRoomController controller;
-
-  /// Windows entries (new window).
-  final bool windows;
 
   /// On the picture (the fullscreen bars, U.2c change 2): a white icon.
   final bool onVideo;
@@ -252,13 +242,8 @@ class RoomMenuButton extends ConsumerWidget {
       case RoomMenuEntry.localInteraction:
         RoomPanelScope.maybeOf(context)?.open(RoomPanelKind.localInteraction);
       case RoomMenuEntry.newWindow:
-        final services = ref.read(appServicesProvider);
-        try {
-          await launchNewWindow(services.store, services.cipher, room: room);
-        } on Object catch (error, stackTrace) {
-          developer.log('New window failed', name: 'LivePlay', error: error, stackTrace: stackTrace);
-          AppNavigator.toast(i18n('open_new_window_failed'));
-        }
+        // It says "新窗口启动失败，请重试" itself when the window does not start.
+        await DesktopWindow.openNewWindow(room: room);
     }
   }
 
@@ -297,7 +282,7 @@ class RoomMenuButton extends ConsumerWidget {
           i18n('live_play_open_in', args: {'platform': platformName(controller.room.platform)}),
           null,
         ),
-        RoomMenuEntry.newWindow => (AppIcons.newWindow, i18n('open_room_in_new_window'), null),
+        RoomMenuEntry.newWindow => (AppIcons.newWindow, i18n('open_in_new_window'), null),
         RoomMenuEntry.localInteraction => (AppIcons.localInteraction, i18n('local_interaction_title'), null),
       };
       return AppMenuEntry(
@@ -327,7 +312,7 @@ class RoomMenuButton extends ConsumerWidget {
           final local = ref.read(storeProvider).settings.get(Settings.localInteractionEnabled);
           final groups = roomMenuGroups(
             iptv: iptv,
-            windows: windows,
+            newWindow: DesktopWindow.offersNewWindow(ref.read(storeProvider).settings),
             local: local,
             cast: castSupported(defaultTargetPlatform),
             onBars: onBars,

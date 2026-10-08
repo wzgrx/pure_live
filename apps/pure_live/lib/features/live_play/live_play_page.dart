@@ -1162,7 +1162,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
             onPressed: () => Navigator.of(context).maybePop(),
             icon: const Icon(AppIcons.back),
           ),
-          title: RoomHeader(controller: controller, onDetails: _openDetails, windows: _platform.windows),
+          title: RoomHeader(controller: controller, onDetails: _openDetails),
         ),
         body: SafeArea(
           child: LayoutBuilder(

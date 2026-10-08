@@ -186,20 +186,35 @@ final Matcher _cancelled = throwsA(
 
 /// Asserts [room] equals 3.x's [legacy] projection on every key 3.x wrote,
 /// except [changed]. Every room differs in its notice, said for viewers (the
-/// unified rule on notices; M5.20 drops "chat pending" from it).
+/// unified rule on notices; M5.20 drops "chat pending" from it) and in its
+/// headers, the browser ones instead of 3.x's bare `Mozilla/5.0` (E03.19).
 void _expectParity(LiveRoom room, Object? legacy, {Set<String> changed = const {'notice'}, String reason = ''}) {
   final actual = {...room.toJson(), 'link': room.link};
+  expect(room.httpHeaders, _browserHeaders, reason: '$reason httpHeaders');
   for (final MapEntry(:key, :value) in (legacy! as Map<String, dynamic>).entries) {
-    if (changed.contains(key)) continue;
+    if (changed.contains(key) || key == 'httpHeaders') continue;
     expect(actual[key] ?? '', value ?? '', reason: '$reason $key');
   }
 }
 
 List<Object?> _ids(Object? legacy) => [for (final room in legacy! as List) (room as Map)['roomId']];
 
+/// The full desktop browser headers of every request and the media
+/// (E03.19, upstream 2e84d68d3): the site's firewall answers a bare
+/// `Mozilla/5.0` with a 418 or a `needLogin` shell.
+const _browserHeaders = {
+  'origin': 'https://www.bigo.tv',
+  'referer': 'https://www.bigo.tv/',
+  'user-agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+  'accept': 'application/json, text/javascript, */*; q=0.01',
+  'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+  'x-requested-with': 'XMLHttpRequest',
+};
+
 void main() {
   group('requests', () {
-    test("3.x's headers everywhere, no redirects, as bigo; the token first, then the studio with it", () async {
+    test('browser headers everywhere, no redirects, as bigo; the token first, then the studio with it', () async {
       final setup = _setup([..._list, ..._live], random: Random(7));
       await setup.site.getRecommendRooms();
       await setup.site.getRoomDetail(roomId: _room);
@@ -210,11 +225,7 @@ void main() {
         'POST https://ta.bigo.tv$_studioPath?siteId=$_room&verify=',
       ]);
       for (final request in setup.http.requests) {
-        expect(request.headers, {
-          'origin': 'https://www.bigo.tv',
-          'referer': 'https://www.bigo.tv/',
-          'user-agent': 'Mozilla/5.0',
-        });
+        expect(request.headers, _browserHeaders, reason: 'a full browser fingerprint (E03.19)');
         expect(request.followRedirects, isFalse);
         expect(request.site, 'bigo');
       }
@@ -673,7 +684,11 @@ void main() {
       final merged = stored.mergeFrom(refreshed);
       expect(merged.hasSameIdentity(stored), isTrue);
       expect(merged.isLiveNow, isTrue);
-      expect(merged.httpHeaders, BigoApi.headers);
+      expect(
+        merged.httpHeaders,
+        stored.httpHeaders,
+        reason: "only IPTV takes a refresh's headers; a Bigo room's media take the input's line headers (E03.19)",
+      );
       final card = BigoApi.directory(Fixture.load('bigo', 'S01-list').body).firstWhere((card) => card.roomId == _room);
       expect(card.hasSameIdentity(refreshed), isFalse, reason: '3.x bound a refresh to the follow it was asked for');
     });

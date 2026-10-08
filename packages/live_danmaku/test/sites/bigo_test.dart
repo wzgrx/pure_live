@@ -383,7 +383,12 @@ void main() {
       expect(BigoDanmakuProtocol.chatTags, {1, 2});
       final handshake = (_live.meta['handshakes']! as List).single as Map<String, Object?>;
       expect(handshake['url'], '${BigoDanmakuProtocol.endpoint}');
-      expect(handshake['headers'], BigoDanmakuProtocol.socketHeaders);
+      // Recorded with 3.x's bare `Mozilla/5.0`; the user agent is now the
+      // adapter's browser one (E03.19).
+      expect(BigoDanmakuProtocol.socketHeaders, {
+        ...(handshake['headers']! as Map).cast<String, Object?>(),
+        'user-agent': BigoApi.userAgent,
+      });
     });
 
     test('the visitor request is the recorded one; device ids have the page shape', () {
@@ -394,7 +399,11 @@ void main() {
       expect(request.site, SiteIds.bigo);
       expect(request.method, link['method']);
       expect('${request.url}', link['url']);
-      expect(request.headers, link['headers']);
+      // Recorded with 3.x's headers; the adapter's are now a full browser
+      // fingerprint (E03.19), the content type stays.
+      final recorded = (link['headers']! as Map).cast<String, Object?>();
+      expect(request.headers, {...BigoApi.headers, 'content-type': recorded['content-type']});
+      expect(recorded.keys.toSet().difference(request.headers.keys.toSet()), isEmpty);
       expect(request.followRedirects, link['followRedirects']);
       expect(utf8.decode(request.body!), _live.lines.first.text);
       expect(request.timeout, const Duration(seconds: 7));
@@ -1180,7 +1189,7 @@ void main() {
       await _until(() => received.length == 5);
       expect(handshake['path'], '/live/official/web');
       expect(handshake['origin'], 'https://www.bigo.tv');
-      expect(handshake['user-agent'], endsWith('Mozilla/5.0'));
+      expect(handshake['user-agent'], endsWith(BigoApi.userAgent), reason: 'the browser user agent (E03.19)');
       expect(received, [79108, 512279, 1304, 10776, 791]);
       expect(events.first, const DanmakuReady());
       expect([for (final m in _messages(events)) _project(m)['text'] ?? _project(m)['value']], [481, 'dari server']);

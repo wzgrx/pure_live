@@ -44,8 +44,10 @@ List<Map<String, dynamic>> _maps(Object? value) => (value! as List).cast<Map<Str
 Object? _result(Object? traced) => (traced! as Map<String, dynamic>)['result'];
 
 /// Keys every card differs in from 3.x: the notice, said for viewers (the
-/// unified rule on notices; M5.20 drops "chat pending" from it).
-const Set<String> _cardChanges = {'notice'};
+/// unified rule on notices; M5.20 drops "chat pending" from it), and the
+/// headers, a full browser fingerprint instead of 3.x's bare `Mozilla/5.0`
+/// (E03.19).
+const Set<String> _cardChanges = {'notice', 'httpHeaders'};
 
 void _expectRooms(List<LiveRoom> rooms, Object? legacy, {String reason = '', Set<String> changed = _cardChanges}) {
   final expected = _maps(legacy);
@@ -448,12 +450,17 @@ void main() {
         final legacy = _result(calls[depth])! as Map<String, dynamic>;
         final https = BigoApi.room(BigoApi.studio(_avatarHttps(), requestedSiteId: '414439909'));
         // cover: the snapshot (24-1); notice: said for viewers (unified rule; M5.20 drops "chat pending").
-        _expectParity(_projection(https), legacy, changed: {'cover', 'notice'}, reason: depth);
+        _expectParity(_projection(https), legacy, changed: {'cover', 'notice', 'httpHeaders'}, reason: depth);
         expect(https.avatar, legacy['avatar'], reason: 'the avatar stays the avatar');
         expect(legacy['cover'], legacy['avatar'], reason: '3.x used the avatar as cover');
         // avatar: the recorded http avatar, which 3.x rejected.
         final recorded = BigoApi.room(BigoApi.studio(_studioBody(), requestedSiteId: '414439909'));
-        _expectParity(_projection(recorded), legacy, changed: {'avatar', 'cover', 'notice'}, reason: depth);
+        _expectParity(
+          _projection(recorded),
+          legacy,
+          changed: {'avatar', 'cover', 'notice', 'httpHeaders'},
+          reason: depth,
+        );
       }
       final room = BigoApi.room(BigoApi.studio(_studioBody(), requestedSiteId: '414439909'));
       expect(room.roomId, 'qashia305', reason: '3.x: clientBigoId, whatever id was asked');
@@ -601,7 +608,7 @@ void main() {
         _expectParity(
           _projection(room),
           _result(calls[depth])! as Map<String, dynamic>,
-          changed: {'cover', 'notice'},
+          changed: {'cover', 'notice', 'httpHeaders'},
           reason: depth,
         );
         expect((_result(calls[depth])! as Map)['cover'] ?? '', isEmpty);
@@ -802,15 +809,18 @@ void main() {
   });
 
   group('streams', () {
-    test('the playlist line: 3.x headers, HLS, the CDN host as line id, no lease', () {
+    test('the playlist line: browser headers, HLS, the CDN host as line id, no lease', () {
       final studio = BigoApi.studio(_studioBody(), requestedSiteId: '414439909');
       final line = BigoApi.line(studio.hls!);
       expect(line.url, 'https://47a788a9.cubetecn.com:1451/list_3453520891_2472221860_0.m3u8');
       expect(line.headers, {
         'origin': 'https://www.bigo.tv',
         'referer': 'https://www.bigo.tv/',
-        'user-agent': 'Mozilla/5.0',
-      });
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+        'accept': 'application/json, text/javascript, */*; q=0.01',
+        'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'x-requested-with': 'XMLHttpRequest',
+      }, reason: 'the browser headers of the requests, also on the media (E03.19)');
       expect(line.format, StreamFormat.hls);
       expect(line.lineId, '47a788a9.cubetecn.com');
       expect(line.lease, isNull);

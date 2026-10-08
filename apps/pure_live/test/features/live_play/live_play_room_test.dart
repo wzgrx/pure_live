@@ -630,6 +630,72 @@ void main() {
       expect(notified, 5);
     });
 
+    testWidgets('G02.3: the network gone: reconnecting within seconds, counting on, the network as the reason, '
+        'back by itself', (tester) async {
+      var online = true;
+      final engine = FakeEngine();
+      final session = fakeSession(engine);
+      final watch = ReconnectWatch(session.states);
+      PlaybackPlan plan() => PlaybackPlan.of(
+        LivePlayUrlResolution.lines(const [
+          LivePlayLine('https://a.example/live.flv', lineId: 'a'),
+          LivePlayLine('https://b.example/live.flv', lineId: 'b'),
+        ]),
+      );
+      unawaited(
+        session.open(
+          PlaybackRequest(
+            site: SiteIds.bilibili,
+            plan: plan(),
+            refresh: () async {
+              if (!online) throw const NetworkFailure(SiteIds.bilibili, 'connect');
+              return plan();
+            },
+          ),
+        ),
+      );
+      await tester.pump();
+      // The connection the cut broke stays dead; one opened online plays.
+      var dead = false;
+      engine.onOpen = (_) async {
+        dead = !online;
+        engine
+          ..emit(const EngineBuffering(buffering: false))
+          ..emit(const EnginePlaying(playing: true));
+      };
+      final ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (online && !dead) engine.advance();
+      });
+      Future<void> elapse(int seconds) async {
+        for (var second = 0; second < seconds; second++) {
+          await tester.pump(const Duration(seconds: 1));
+        }
+      }
+
+      await elapse(3);
+      expect(watch.reconnecting, isFalse);
+
+      online = false;
+      dead = true;
+      engine.emit(const EngineBuffering(buffering: true));
+      await elapse(7);
+      expect((watch.reconnecting, watch.attempts), (true, 1));
+      await elapse(15);
+      expect(watch.reconnecting, isTrue);
+      expect(watch.attempts, greaterThan(2));
+      await elapse(25);
+      expect(watch.reconnecting, isFalse);
+      expect(session.state.status, PlaybackStatus.error);
+      expect(failureText(session.state.error), '网络已断开，恢复后会自动重连');
+
+      online = true;
+      await elapse(8);
+      expect((session.state.status, watch.reconnecting), (PlaybackStatus.playing, false));
+      ticker.cancel();
+      watch.dispose();
+      await session.dispose();
+    });
+
     test('orientation choice: remembered under the room, or for this run only', () async {
       final services = await testServices();
       addTearDown(services.close);

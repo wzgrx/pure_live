@@ -1195,6 +1195,7 @@
     "play_video_failed": "无法播放直播",
     "playback_behavior_settings": "播放行为设置",
     "playback_failure_title": "播放已中断",
+    "playback_network_lost": "网络已断开，恢复后会自动重连",
     "player_kernel": "播放器内核",
     "player_mpv": "Mpv播放器",
     "player_proxy_group_title": "播放器内核代理 (解决直播流拉取)",

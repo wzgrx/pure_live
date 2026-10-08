@@ -145,6 +145,15 @@ final class FakeEngine implements PlayerEngine {
   /// Reports [event] as the engine.
   void emit(EngineEvent event) => _events.add(event);
 
+  /// The position [advance] reports next.
+  Duration position = Duration.zero;
+
+  /// Reports playback moving on by a second (mpv's `time-pos`).
+  void advance() {
+    position += const Duration(seconds: 1);
+    _events.add(EnginePosition(position));
+  }
+
   /// What the next opens do instead of playing (B02: an open that hangs
   /// keeps a recovery on screen); null plays.
   Future<void> Function(EngineMedia media)? onOpen;

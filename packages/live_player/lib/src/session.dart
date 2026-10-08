@@ -46,11 +46,15 @@ final class SessionTimings {
     this.unexpectedPauseGrace = const Duration(milliseconds: 350),
     this.unexpectedPauseFailure = const Duration(seconds: 5),
     this.bufferingStall = const Duration(seconds: 12),
+    this.stallNotice = const Duration(seconds: 4),
     this.frameStall = const Duration(seconds: 10),
     this.recoveryBudgetReset = const Duration(seconds: 30),
     this.liveRetryDelays = const [Duration(milliseconds: 750), Duration(seconds: 2)],
     this.idleRelease = const Duration(seconds: 45),
     this.refreshRetry = const Duration(seconds: 10),
+    this.offlineGrace = const Duration(seconds: 20),
+    this.networkProbe = const Duration(seconds: 2),
+    this.networkProbeTimeout = const Duration(seconds: 5),
   });
 
   /// Longest wait for an input plus the engine's open.
@@ -66,8 +70,16 @@ final class SessionTimings {
   /// How long after that the pause counts as a failure.
   final Duration unexpectedPauseFailure;
 
-  /// How long buffering may last before it counts as a failure.
+  /// How long buffering may last before it counts as a failure; for a live
+  /// source whose position moves (mpv's `time-pos`), also how long it may
+  /// go without moving, whatever the engine's flags say (G02.3).
   final Duration bufferingStall;
+
+  /// How long a live source that was moving may stand still before the
+  /// session says it reconnects ([PlaybackState.recovery]), ahead of
+  /// [bufferingStall] (G02.3: "正在重连" within ten seconds of a cut; a
+  /// shorter stall is a buffering, B02).
+  final Duration stallNotice;
 
   /// How long without a presented frame counts as a failure (engines that
   /// report frames, video shown).
@@ -85,6 +97,17 @@ final class SessionTimings {
 
   /// Delay before trying a failed lease prefetch again.
   final Duration refreshRetry;
+
+  /// How long the session keeps saying it reconnects after it found the
+  /// network gone, before it publishes [networkLostCode] (and keeps
+  /// looking).
+  final Duration offlineGrace;
+
+  /// The pause between two looks at the network while it is gone.
+  final Duration networkProbe;
+
+  /// Longest wait for one look at the network.
+  final Duration networkProbeTimeout;
 }
 
 /// The playback session of one player (the session and recovery half of
@@ -106,6 +129,19 @@ final class SessionTimings {
 /// The platform saying the stream cannot be played (offline, login, region)
 /// is published at once without walking the lines. An on-demand source
 /// (replay) ends as [PlaybackStatus.completed] and seeks.
+///
+/// G02.3, a live source and the network:
+/// - a source is judged by its position moving, where the engine reports
+///   one, not by the engine's flags (mpv's `playing` only means "not
+///   paused", and its buffering flag flips while nothing arrives): standing
+///   still for [SessionTimings.stallNotice] after it moved is the first
+///   attempt of a recovery, for [SessionTimings.bufferingStall] a failure;
+///   a reopened source ends its recovery once it moves;
+/// - a refresh that fails because nothing answered means the network is
+///   gone: no line or decoder is tried; the session looks at the network
+///   every [SessionTimings.networkProbe] (each look another attempt), after
+///   [SessionTimings.offlineGrace] publishes [networkLostCode] and keeps
+///   looking, and reopens the stream once the platform answers.
 final class PlaybackSession {
   /// Creates a session. The opener is the caller's (it may share a relay
   /// with other players); [engine] creates the engine on first open.
@@ -159,7 +195,35 @@ final class PlaybackSession {
   /// by sustained playback ([_armBudgetReset]).
   int _recoveries = 0;
 
+  /// The engine's positions moved on a live source at least once: from
+  /// then on a source is judged by moving, not by the engine's flags.
+  bool _engineMoves = false;
+
+  /// The last position of the current source (null: none since it opened).
+  Duration? _lastPosition;
+
+  /// When the current source last moved, or started waiting to.
+  DateTime? _lastMove;
+
+  /// The current source moved since it opened or resumed.
+  bool _moved = false;
+
+  /// A reopened source of a recovery: the engine's flags do not end the
+  /// recovery, moving does.
+  bool _awaitingMove = false;
+
+  /// The source stood still for [SessionTimings.stallNotice]: the
+  /// recovery's attempt is shown before the recovery acts.
+  bool _stallNoticed = false;
+
+  /// The network is gone: [_probe] owns the recovery.
+  bool _offline = false;
+  DateTime? _offlineSince;
+  Object? _offlineError;
+
   Timer? _bufferingTimer;
+  Timer? _moveTimer;
+  Timer? _probeTimer;
   Timer? _pauseTimer;
   Timer? _frameTimer;
   DateTime? _lastFrame;
@@ -268,6 +332,11 @@ final class PlaybackSession {
     _wantPlaying = false;
     _cancelWatchdogs();
     _retryTimer?.cancel();
+    // A pause while the network is gone stops looking for it; resume
+    // reopens a failed stream.
+    _leaveOffline();
+    _stallNoticed = false;
+    _awaitingMove = false;
     final engine = _engine;
     if (engine != null && _transport.active != null) await engine.pause();
     if (_state.status != PlaybackStatus.error && _state.status != PlaybackStatus.stopped) {
@@ -285,6 +354,9 @@ final class PlaybackSession {
       return;
     }
     _wantPlaying = true;
+    // A resume that waits is no drop (B02) until the source moved again.
+    _moved = false;
+    _lastMove = null;
     _emit(_state.copyWith(status: PlaybackStatus.buffering));
     await engine.play();
     _settle(_session);
@@ -399,6 +471,7 @@ final class PlaybackSession {
     _retryTimer?.cancel();
     _prefetchTimer?.cancel();
     _idleTimer?.cancel();
+    _leaveOffline();
     _pendingError = null;
     return _session;
   }
@@ -433,6 +506,7 @@ final class PlaybackSession {
   Future<void> _releaseEngine() async {
     final engine = _engine;
     _engine = null;
+    _engineMoves = false;
     // Not awaited: a broadcast cancel completes in the root zone.
     unawaited(_events?.cancel());
     _events = null;
@@ -452,6 +526,13 @@ final class PlaybackSession {
     _openingError = null;
     _playing = false;
     _buffering = true;
+    _lastPosition = null;
+    _lastMove = null;
+    _moved = false;
+    _stallNoticed = false;
+    // mpv says it plays as soon as a load starts: a recovery's source has
+    // to move before the recovery ends.
+    _awaitingMove = recovering && _engineMoves && !plan.onDemand;
     final opened = _state.status == PlaybackStatus.playing || _state.status == PlaybackStatus.buffering;
     _emit(
       _state.copyWith(
@@ -571,6 +652,7 @@ final class PlaybackSession {
         if (_accepting && fps > 0) _emit(_state.copyWith(frameRate: fps));
       case EnginePosition(:final position):
         if (_accepting && _state.onDemand) _emit(_state.copyWith(position: position));
+        if (_accepting) _onPosition(position, session);
       case EngineDuration(:final duration):
         if (_accepting && _state.onDemand) _emit(_state.copyWith(duration: duration));
       case EngineFrame():
@@ -610,12 +692,23 @@ final class PlaybackSession {
     if (playing) {
       _pauseTimer?.cancel();
       _pauseTimer = null;
+      if (_awaitingMove || _stallNoticed || _offline) {
+        // The flag is no proof anything arrived (G02.3): the recovery goes
+        // on until the source moves.
+        if (_wantPlaying) {
+          _emit(_state.copyWith(status: PlaybackStatus.buffering));
+          if (_buffering) _armBufferingWatchdog(session);
+          _armMoveWatchdog(session);
+        }
+        return;
+      }
       if (_source case LineSource(:final line)) _lines.markSuccess(line);
       _decoders.reset(_decoder);
       if (!_wantPlaying) return;
       if (_buffering) {
         _emit(_state.copyWith(status: PlaybackStatus.buffering));
         _armBufferingWatchdog(session);
+        _armMoveWatchdog(session);
       } else {
         _bufferingTimer?.cancel();
         _bufferingTimer = null;
@@ -623,6 +716,7 @@ final class PlaybackSession {
         // [_armBudgetReset]).
         _emit(_state.copyWith(status: PlaybackStatus.playing, recovery: 0));
         _armFrameWatchdog(session);
+        _armMoveWatchdog(session);
         _armBudgetReset(session);
       }
       return;
@@ -630,7 +724,10 @@ final class PlaybackSession {
     _cancelFrameWatchdog();
     _budgetTimer?.cancel();
     if (!_wantPlaying) {
-      if (_state.status != PlaybackStatus.completed) _emit(_state.copyWith(status: PlaybackStatus.paused, recovery: 0));
+      // A published failure stays: the engine stopping is no user pause.
+      if (_state.status != PlaybackStatus.completed && _state.status != PlaybackStatus.error) {
+        _emit(_state.copyWith(status: PlaybackStatus.paused, recovery: 0));
+      }
     } else if (_buffering) {
       _armBufferingWatchdog(session);
     } else {
@@ -679,6 +776,27 @@ final class PlaybackSession {
   void _onFrame(int session) {
     _lastFrame = clock.now();
     _armFrameWatchdog(session);
+  }
+
+  /// A live source's position: moving on is the proof that it plays.
+  void _onPosition(Duration position, int session) {
+    if (_plan?.onDemand ?? true) return;
+    final last = _lastPosition;
+    _lastPosition = position;
+    if (last == null || position <= last) return;
+    _engineMoves = true;
+    _lastMove = clock.now();
+    _moved = true;
+    final waited = _awaitingMove || _stallNoticed || _offline;
+    _awaitingMove = false;
+    _stallNoticed = false;
+    if (_offline) {
+      // The stream came back by itself (an HLS demuxer that kept asking).
+      _leaveOffline();
+      _wantPlaying = true;
+    }
+    _armMoveWatchdog(session);
+    if (waited && _playing && !_buffering) _onPlaying(true, session);
   }
 
   // Watchdogs.
@@ -759,6 +877,58 @@ final class PlaybackSession {
     _frameTimer = Timer(timings.frameStall, check);
   }
 
+  /// G02.3: a live source that moved, or a recovery's source that has to,
+  /// is judged by its position: the engine's flags neither postpone nor end
+  /// the wait (one timer, re-armed for the time left, like the frame
+  /// watchdog). Standing still for [SessionTimings.stallNotice] after
+  /// moving shows the recovery's attempt; for [SessionTimings.bufferingStall]
+  /// it is a failure.
+  void _armMoveWatchdog(int session) {
+    if (_moveTimer != null || !_wantPlaying || _offline || (_plan?.onDemand ?? true)) return;
+    if (!_moved && !_awaitingMove) return;
+    _lastMove ??= clock.now();
+    Duration next(Duration still) {
+      final notice = _moved && !_stallNoticed && !_state.recovering && still < timings.stallNotice;
+      return (notice ? timings.stallNotice : timings.bufferingStall) - still;
+    }
+
+    void check() {
+      _moveTimer = null;
+      if (!_current(session) || !_wantPlaying || _offline) return;
+      final still = clock.now().difference(_lastMove ?? clock.now());
+      if (still >= timings.bufferingStall) {
+        _handleError(
+          const PlayerException(
+            message: 'The live source did not move before the deadline',
+            type: PlayerErrorType.source,
+            code: 'playback_stall_timeout',
+          ),
+          session,
+        );
+        return;
+      }
+      if (_moved && !_stallNoticed && !_state.recovering && still >= timings.stallNotice) _noticeStall();
+      _moveTimer = Timer(next(still), check);
+    }
+
+    _moveTimer = Timer(next(clock.now().difference(_lastMove!)), check);
+  }
+
+  /// The source stands still: the first attempt of the recovery shows now
+  /// ([_recover] does not count it again).
+  void _noticeStall() {
+    _stallNoticed = true;
+    _recoveries++;
+    _cancelFrameWatchdog();
+    _budgetTimer?.cancel();
+    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
+  }
+
+  void _cancelMoveWatchdog() {
+    _moveTimer?.cancel();
+    _moveTimer = null;
+  }
+
   void _cancelFrameWatchdog() {
     _frameTimer?.cancel();
     _frameTimer = null;
@@ -784,6 +954,7 @@ final class PlaybackSession {
     _pauseTimer = null;
     _budgetTimer?.cancel();
     _cancelFrameWatchdog();
+    _cancelMoveWatchdog();
   }
 
   // Lease prefetch.
@@ -848,7 +1019,8 @@ final class PlaybackSession {
   // Recovery.
 
   void _handleError(PlayerException error, int session, {bool fenced = true}) {
-    if (!_current(session)) return;
+    // While the network is gone, the dead source's failures say nothing new.
+    if (!_current(session) || _offline) return;
     // The engine may repeat a failure after its recovery was queued.
     if (fenced && !_errorSignatures.add('${error.type.name}:${error.code ?? '-'}:${error.message}')) return;
     _cancelWatchdogs();
@@ -879,12 +1051,17 @@ final class PlaybackSession {
   }
 
   Future<void> _recover(PlayerException error, int session) async {
-    if (!_current(session) || !_wantPlaying) return;
+    if (!_current(session) || !_wantPlaying || _offline) return;
     final plan = _plan!;
     final source = _source;
     // The stream failed on its own: say so, with the attempt (the "正在重连
-    // （第 N 次）" of the room; a plain buffering is no recovery).
-    _recoveries++;
+    // （第 N 次）" of the room; a plain buffering is no recovery). A stall
+    // already showed this attempt.
+    if (_stallNoticed) {
+      _stallNoticed = false;
+    } else {
+      _recoveries++;
+    }
     _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
     final transport = error.type == PlayerErrorType.network || error.type == PlayerErrorType.source;
 
@@ -948,6 +1125,12 @@ final class PlaybackSession {
         _publishError(error, SourceFailureKind.terminal);
         return true;
       }
+      if (isNetworkFailure(error) && !(_plan?.onDemand ?? false)) {
+        // Neither the stream nor the platform answers: the network is gone.
+        // Other lines and decoders go through the same network.
+        _enterOffline(error, session);
+        return true;
+      }
       return false;
     }
     if (!_current(session) || !_wantPlaying) return true;
@@ -1007,5 +1190,109 @@ final class PlaybackSession {
     _prefetchTimer?.cancel();
     _wantPlaying = false;
     _emit(_state.copyWith(status: PlaybackStatus.error, error: error, failure: kind, recovery: 0));
+  }
+
+  // The network is gone (G02.3).
+
+  /// [error] said nothing answers: keep the attempt on screen and look at
+  /// the network until it answers.
+  void _enterOffline(Object error, int session) {
+    _offline = true;
+    _offlineSince = clock.now();
+    _offlineError = error;
+    _cancelWatchdogs();
+    _retryTimer?.cancel();
+    _scheduleProbe(session);
+  }
+
+  void _leaveOffline() {
+    _offline = false;
+    _offlineSince = null;
+    _offlineError = null;
+    _probeTimer?.cancel();
+    _probeTimer = null;
+  }
+
+  void _scheduleProbe(int session) {
+    _probeTimer?.cancel();
+    _probeTimer = Timer(timings.networkProbe, () {
+      _probeTimer = null;
+      unawaited(_probe(session));
+    });
+  }
+
+  /// One look at the network: the plan refresh, which asks the platform.
+  /// Nothing answering again is another attempt (after
+  /// [SessionTimings.offlineGrace], the published [networkLostCode]); an
+  /// answer reopens the stream as the next attempt.
+  Future<void> _probe(int session) async {
+    final refresh = _request?.refresh;
+    if (!_current(session) || !_offline || refresh == null) return;
+    final published = _state.status == PlaybackStatus.error;
+    if (!published) {
+      _recoveries++;
+      _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
+    }
+    PlaybackPlan? plan;
+    try {
+      plan = await refresh().timeout(timings.networkProbeTimeout);
+    } on Object catch (error) {
+      if (!_current(session) || !_offline) return;
+      if (classifySourceFailure(error) == SourceFailureKind.terminal) {
+        _leaveOffline();
+        _publishError(error, SourceFailureKind.terminal);
+        return;
+      }
+      if (isNetworkFailure(error)) {
+        _offlineError = error;
+        final since = _offlineSince ?? clock.now();
+        if (!published && clock.now().difference(since) >= timings.offlineGrace) _publishOffline();
+        _scheduleProbe(session);
+        return;
+      }
+      // Something answered (a refusal for now): the network is back, the
+      // plan at hand is played.
+    }
+    if (!_current(session) || !_offline) return;
+    _leaveOffline();
+    if (plan != null && !plan.isEmpty) _plan = plan;
+    final current = _plan!;
+    // Back online: the next attempt, with fresh budgets.
+    _refreshAttempts = 0;
+    _retryRounds = 0;
+    _prefetched = null;
+    _lines.reset();
+    _decoders.resetAll();
+    _decoder = _decoders.preferred;
+    _engineRecreated = false;
+    _wantPlaying = true;
+    if (published) _recoveries++;
+    final previous = _source;
+    final next =
+        _matching(current, previous) ??
+        (previous != null && current.sources.contains(previous) ? previous : current.sources.first);
+    await _openSource(next, session, recovering: true);
+  }
+
+  /// Publishes that the network is gone; [_probe] keeps looking and plays
+  /// again once it answers.
+  void _publishOffline() {
+    _cancelWatchdogs();
+    _retryTimer?.cancel();
+    _prefetchTimer?.cancel();
+    _wantPlaying = false;
+    _emit(
+      _state.copyWith(
+        status: PlaybackStatus.error,
+        error: PlayerException(
+          message: 'The network is gone',
+          type: PlayerErrorType.network,
+          code: networkLostCode,
+          error: _offlineError,
+        ),
+        failure: SourceFailureKind.transient,
+        recovery: 0,
+      ),
+    );
   }
 }

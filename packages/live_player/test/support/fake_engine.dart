@@ -28,6 +28,15 @@ final class FakeEngine implements PlayerEngine {
   /// Reports [event].
   void emit(EngineEvent event) => _events.add(event);
 
+  /// The position [advance] reports next.
+  Duration position = Duration.zero;
+
+  /// Reports playback moving on by [step] (mpv's `time-pos`).
+  void advance([Duration step = const Duration(seconds: 1)]) {
+    position += step;
+    emit(EnginePosition(position));
+  }
+
   /// Reports a started picture.
   void playing() {
     emit(const EngineBuffering(buffering: false));

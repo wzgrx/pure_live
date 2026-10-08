@@ -174,6 +174,8 @@ String failureText(Object? error) => switch (error) {
   StreamUnavailable() => i18n('live_play_error_no_stream'),
   ApiChanged() => i18n('live_play_error_api_changed'),
   NetworkFailure() || TransportFailure() => i18n('live_play_error_network'),
+  // G02.3: the session plays again by itself once the network answers.
+  PlayerException(code: networkLostCode) => i18n('playback_network_lost'),
   PlayerException(:final error) when error is SiteError => failureText(error),
   PlayerException(:final type) => i18nOr('error_${type.name}', i18n('error_unknown')),
   _ => i18n('get_room_info_failed_retry'),

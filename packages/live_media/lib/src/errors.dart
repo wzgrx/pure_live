@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
@@ -88,9 +91,12 @@ final class NativeDiagnostic {
   /// Classifies [message]; [nativePrefix] is mpv's log prefix (`vd`, `ad`,
   /// `ffmpeg/video`...). The order of checks is 3.x's: lifecycle, video
   /// output, decoder init, transport, source open, decoder runtime, source
-  /// runtime, else an unclassified native diagnostic.
+  /// runtime, else an unclassified native diagnostic. URLs in [message] are
+  /// ignored: their hosts, paths and queries carry arbitrary words (Huya's
+  /// `codec=264`), and a line naming the stream it failed to open was taken
+  /// for a decoder failure (G02.3).
   factory classify(String message, {String? nativePrefix}) {
-    final value = message.trim().toLowerCase();
+    final value = message.trim().toLowerCase().replaceAll(_url, ' ');
     final prefix = nativePrefix?.trim().toLowerCase();
     final component = switch (prefix) {
       'ad' || 'ffmpeg/audio' => NativeDiagnosticComponent.audio,
@@ -144,6 +150,8 @@ final class NativeDiagnostic {
 
   static bool _any(String value, List<String> markers) => markers.any(value.contains);
 
+  static final RegExp _url = RegExp(r'[a-z][a-z0-9+.-]*://\S*');
+
   static final RegExp _httpServerFailure = RegExp(r'(?:server returned|http error)\s+5\d\d(?:\D|$)');
 
   static const _lifecycle = [
@@ -173,6 +181,12 @@ final class NativeDiagnostic {
     'host is unreachable',
     'connection refused',
     'connection reset',
+    // The system tore the connection down (Android destroys the sockets of
+    // an app whose network was taken away).
+    'connection aborted',
+    'software caused connection abort',
+    'broken pipe',
+    'no route to host',
     'failed to resolve',
     'could not resolve host',
     'unable to resolve host',
@@ -262,4 +276,20 @@ SourceFailureKind classifySourceFailure(Object error) => switch (error) {
   NotFound() ||
   UnsupportedLink() => SourceFailureKind.terminal,
   _ => SourceFailureKind.transient,
+};
+
+/// The [PlayerException.code] of the failure a session publishes when the
+/// network is gone (G02.3): the interface says so and that playback comes
+/// back by itself, which the session does once the network answers again.
+const String networkLostCode = 'network_lost';
+
+/// Whether [error] says nothing answered at all (G02.3): no connection,
+/// TLS, a timeout, or a player failure of the network kind. A cancelled
+/// request, a malformed answer and every refusal of the platform are
+/// answers, not a missing network.
+bool isNetworkFailure(Object error) => switch (error) {
+  TransportFailure(reason: TransportReason.cancelled || TransportReason.protocol) => false,
+  TransportFailure() || NetworkFailure() || TimeoutException() || SocketException() || TlsException() => true,
+  PlayerException(type: PlayerErrorType.network) => true,
+  _ => false,
 };

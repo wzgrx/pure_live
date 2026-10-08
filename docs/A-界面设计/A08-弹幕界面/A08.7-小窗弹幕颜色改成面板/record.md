@@ -49,3 +49,8 @@
 ## 可能和别的任务冲突的文件
 
 - `shared/danmaku/pip_danmaku_settings.dart`（A08.6 新建）；`features/settings/playback_tiles.dart`（A04.1）。
+
+## K90 复查（2026-10-08，master 660b488b7）
+
+- 横屏全屏 → 弹幕设置 → 小窗弹幕 → 关掉“保留平台弹幕颜色”后点“统一弹幕颜色”：面板里就地展开 10 个色圈和“颜色代码”输入框，当前色描边加勾，没有对话框 ✓。
+- 小毛病：行尾写 `#FFFFFFFF`（带透明度的 8 位），输入框提示是 `RRGGBB`（6 位），写法不一致，没改。

@@ -23,7 +23,7 @@
 ```text
 创建：exportBackup(service, store, scope)（backup_data.dart:40）
    = BackupService.exportAll()（3.x 分区：app、theme、roomCard、font、player、danmaku、volume、favorite、history、
-     webdav、iptv、cookie〔只在 includeSensitiveData 时〕、proxy、windowSize、exit、startup、refresh、page、tags；backupVersion 4）
+     webdav、iptv、cookie〔只在 includeSensitiveData 时；K01.2 起还有 bilibiliAccounts，恢复时加进名册〕、proxy、windowSize、exit、startup、refresh、page、tags；backupVersion 4）
    + search{history}（搜索记录）+ iptvLibrary（网络电视列表，内置热门除外）+ multiview{session}（有才写）
    → BackupService.writeFile（先写 .part，旧文件改名 .previous，就位后删；上次中断留下的 .previous 先恢复）
 恢复：readFile → previewRestore（backup_data.dart:248，用 LegacySnapshot.fromBackup 解析，格式错在这里就报）

@@ -122,19 +122,82 @@ final class AccountActions {
     if (changed && site == SiteIds.bilibili) await store.settings.set(Settings.bilibiliUid, 0);
   }
 
-  /// Remembers the verified Bilibili uid (the danmaku uid when the cookie
-  /// has no `DedeUserID`).
-  Future<void> rememberBilibiliUid(int uid) async {
+  /// Remembers who the stored Bilibili cookie signs in as, just checked:
+  /// the uid (the danmaku uid when the cookie has no `DedeUserID`) and, in
+  /// the remembered sign-ins, the account with its cookie and [name]
+  /// (docs/K-账号和登录/K01-账号和登录方式/K01.2-哔哩哔哩多账号). A failing secure storage only
+  /// leaves it out of the remembered ones; the login itself is stored.
+  Future<void> rememberBilibili(int uid, {String name = ''}) async {
     if (store.settings.get(Settings.bilibiliUid) != uid) await store.settings.set(Settings.bilibiliUid, uid);
+    final cookie = cookieOf(SiteIds.bilibili);
+    if (uid <= 0 || cookie.isEmpty) return;
+    try {
+      await store.accounts.remember(SiteIds.bilibili, uid: uid, name: name, cookie: cookie);
+    } on Object catch (error, stack) {
+      // The error is the cipher's, never the cookie.
+      log('Remembering the Bilibili account failed', name: 'AccountPage', error: error, stackTrace: stack);
+    }
   }
 
+  /// The remembered Bilibili sign-ins, most recently used first (K01.2).
+  List<SavedAccount> get bilibiliAccounts => store.accounts.of(SiteIds.bilibili);
+
+  /// Whether [account] is the current Bilibili sign-in: its cookie is the
+  /// stored one, or its uid the one the stored cookie was checked as.
+  bool isCurrentBilibili(SavedAccount account) {
+    final cookie = cookieOf(SiteIds.bilibili);
+    if (cookie.isEmpty && !unreadable(SiteIds.bilibili)) return false;
+    if (cookie.isNotEmpty && account.cookie == cookie) return true;
+    final uid = store.settings.get(Settings.bilibiliUid);
+    return uid > 0 && account.uid == uid;
+  }
+
+  /// Whether switching away from the current Bilibili login would lose it:
+  /// one is stored but it is not among the remembered sign-ins and its uid
+  /// is not known (never checked).
+  bool get bilibiliCurrentUnremembered {
+    if (cookieOf(SiteIds.bilibili).isEmpty) return false;
+    if (bilibiliAccounts.any(isCurrentBilibili)) return false;
+    return store.settings.get(Settings.bilibiliUid) <= 0;
+  }
+
+  /// Makes the remembered sign-in [uid] the current Bilibili login (K01.2):
+  /// its cookie and uid become the stored ones, so the adapters and the
+  /// open rooms use it at once (`cookieChanges`). The login being left
+  /// stays remembered. Null when [uid] is not remembered; throws when the
+  /// secure storage failed (nothing changed then).
+  Future<SavedAccount?> switchBilibili(int uid) async {
+    if (store.accounts.find(SiteIds.bilibili, uid) == null) return null;
+    final cookie = cookieOf(SiteIds.bilibili);
+    final previousUid = store.settings.get(Settings.bilibiliUid);
+    final known = previousUid > 0 ? store.accounts.find(SiteIds.bilibili, previousUid) : null;
+    final previous = cookie.isNotEmpty && previousUid > 0 && known?.cookie != cookie
+        ? SavedAccount(uid: previousUid, name: known?.name ?? '', cookie: cookie, usedAt: DateTime(0))
+        : null;
+    // The uid first, as 3.x's roster did: the room that reconnects on the
+    // cookie change reads both.
+    await store.settings.set(Settings.bilibiliUid, uid);
+    try {
+      return await store.accounts.switchTo(SiteIds.bilibili, uid, previous: previous);
+    } on Object {
+      await store.settings.set(Settings.bilibiliUid, previousUid);
+      rethrow;
+    }
+  }
+
+  /// Forgets the remembered Bilibili sign-in [uid] (not the current one:
+  /// that is [signOut]).
+  Future<void> forgetBilibili(int uid) => store.accounts.forget(SiteIds.bilibili, [uid]);
+
   /// Signs out of [site]: the cookie and what belongs to it (the Bilibili
-  /// uid and the in-app browser's Bilibili cookies, 3.x `logout`; Douyu's
-  /// save time and renewal pair).
+  /// uid, the remembered sign-in it is (K01.2: signing out forgets it, as
+  /// before there was a roster) and the in-app browser's Bilibili cookies,
+  /// 3.x `logout`; Douyu's save time and renewal pair).
   Future<void> signOut(String site) async {
     await store.secrets.writeAll({
       SecretRefs.cookie(site): null,
       if (site == SiteIds.douyu) ...{SecretRefs.douyuLtp0: null, SecretRefs.douyuDid: null},
+      if (site == SiteIds.bilibili) ...store.accounts.forgetting(site, isCurrentBilibili),
     });
     if (site == SiteIds.bilibili) {
       await store.settings.set(Settings.bilibiliUid, 0);
@@ -209,7 +272,7 @@ Future<({AccountCheck check, String? refused})> storeBilibiliLogin(
     log('Storing the Bilibili login failed', name: 'AccountPage', error: error, stackTrace: stack);
     return (check: result, refused: secretSaveFailedKey);
   }
-  if (result case AccountVerified(:final uid?)) await actions.rememberBilibiliUid(uid);
+  if (result case AccountVerified(:final uid?, :final name)) await actions.rememberBilibili(uid, name: name);
   return (check: result, refused: null);
 }
 

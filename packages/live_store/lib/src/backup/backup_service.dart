@@ -18,7 +18,8 @@ import 'package:live_store/src/webdav.dart';
 /// - Read: the flat format without a version, versions 2..4, and the
 ///   follows-only file (`backupScope: favorites`).
 /// - Accounts (`cookie`, `webdav` with passwords) only when asked, as in
-///   3.x.
+///   3.x; the remembered sign-ins (V01.2) travel in `cookie` as
+///   `<site>Accounts`.
 final class BackupService {
   /// Creates the service for `store`.
   new(this._store);
@@ -67,6 +68,10 @@ final class BackupService {
         'douyuDid': secrets.read(SecretRefs.douyuDid) ?? '',
         'bilibiliUid': _store.settings.get(Settings.bilibiliUid),
         'douyuCookieSavedAt': _store.settings.get(Settings.douyuCookieSavedAt),
+        // The remembered sign-ins (V01.2) go where the cookies go; 3.x
+        // ignores the key.
+        for (final site in _store.accounts.sites)
+          '$site${LegacySnapshot.accountsSuffix}': [for (final account in _store.accounts.of(site)) account.toJson()],
       };
     }
     return {'backupVersion': version, 'sensitiveDataIncluded': includeSensitiveData, ...sections};
@@ -110,6 +115,11 @@ final class BackupService {
       );
     }
     if (snapshot.secrets case final secrets?) await store.secrets.writeAll(secrets);
+    // Added to the remembered sign-ins, never replacing them: the file's
+    // current cookie is the current one, the others stay switchable.
+    for (final MapEntry(key: site, value: accounts) in (snapshot.savedAccounts ?? const {}).entries) {
+      await store.accounts.merge(site, accounts);
+    }
   });
 
   /// Restores only the followed rooms and areas the file has; everything

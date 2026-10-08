@@ -13,6 +13,7 @@
   - 扫码 `bilibili_qr_login.dart` 的 `BilibiliQrLogin`（`ChangeNotifier`）：取码、3 秒轮询、已扫码、过期、确认后先核验再存、连续失败退避和停止。
   - 网页登录 `bilibili_web_login.dart`：打开前清 WebView 里哔哩哔哩的 Cookie、跳到主站时读出 Cookie、核验后保存。
   - 斗鱼 `douyu_cookie_view.dart` 的逻辑：粘贴 passport Cookie 自动取 LTP0 和 dy_did、立即续期、“登录后强制续期”开关（设置 `douyuForceRenew`）。
+  - 哔哩哔哩多账号（K01.2）：记住核验过的登录（`packages/live_store/lib/src/accounts.dart` 的 `AccountRoster`，每个账号一条加密秘密 `account/bilibili/<uid>`，最多 5 个）、切换、删除、退出时忘掉；`AccountActions` 的 `rememberBilibili`、`switchBilibili`、`forgetBilibili`。
 - 不包括（归哪里）：
   - 页面、卡片、按钮、提示的样子 → [A12.1](../../A-界面设计/A12-账号和数据界面/A12.1-账号总览/README.md)、[A12.2](../../A-界面设计/A12-账号和数据界面/A12.2-登录和Cookie/README.md)。
   - 存 Cookie 的密钥库和加密 → J02；登录以后的有效性、失效提示、弹幕重连 → K02。
@@ -39,10 +40,16 @@
   → 读三个域的 Cookie 拼成请求头（cookieHeader :32）→ 没有 SESSDATA 报错；核验规则同扫码 → 存 → 返回
 斗鱼（douyu_cookie_view.dart）：粘贴 passport Cookie 自动填 LTP0 / dy_did，不覆盖已存的登录；saveDouyu 只在 Cookie 变了时更新保存时间（account_services.dart:138）；
   立即续期（:121）→ douyuRenewerProvider → DouyuSite.renewSession；“登录后强制续期”写设置 douyuForceRenew，取流时 DouyuSite 读（douyu_site.dart:459）
-退出（account_services.dart:116）：删 Cookie；斗鱼一并删 LTP0、DID、保存时间；哔哩哔哩 uid 清 0
+退出（account_services.dart:196）：删 Cookie；斗鱼一并删 LTP0、DID、保存时间；哔哩哔哩 uid 清 0，名册里的当前账号同一次写入删掉
+哔哩哔哩多账号（K01.2）
+  核验拿到 uid（扫码、网页、粘贴、页面核验、账号总览、启动核验）→ rememberBilibili（account_services.dart:130）
+     → 记 bilibiliUid → AccountRoster.remember：account/bilibili/<uid> = 加密的 {名字, Cookie, 最后使用}；满 5 个忘掉最久没用的
+  哔哩哔哩账号页“已记住的账号”（bilibili_accounts.dart）→ 切换 switchBilibili（:169）：先写 bilibiliUid，再一次写入 cookie/bilibili 和名册
+     → cookieChanges → 适配器、打开着的直播间（K02）；页面重新核验，失效的退出并忘掉
+  备份：只有 exportAll(includeSensitiveData: true) 在 cookie 分区写 bilibiliAccounts；restoreAll 写完当前 Cookie 后 merge（同 uid 替换，其余不动）
 ```
 
-- 完成度：K01.1（2026-10-01，`e5ae55fbf`）做完账号列表、各 Cookie 页、扫码、斗鱼；O03.1 加了 WebView 后网页登录做出来（3.x 有）；A12.1～A12.2 按确认的设计重做了页面（例如“扫不了？”的入口、宽屏）。清点：F-ACC-01、02、04、05“完成”，F-ACC-03（网页登录）“没验证”→ S02.6。**账号页整体没在 K90 上看过**（S02.3 记录）。
+- 完成度：K01.1（2026-10-01，`e5ae55fbf`）做完账号列表、各 Cookie 页、扫码、斗鱼；K01.2（2026-10-09，待真机）加了哔哩哔哩多账号；O03.1 加了 WebView 后网页登录做出来（3.x 有）；A12.1～A12.2 按确认的设计重做了页面（例如“扫不了？”的入口、宽屏）。清点：F-ACC-01、02、04、05“完成”，F-ACC-03（网页登录）“没验证”→ S02.6。**账号页整体没在 K90 上看过**（S02.3 记录）。
 
 ## 代码地图
 
@@ -56,12 +63,15 @@
 | `.../bilibili_web_login.dart`（230 行） | `bilibiliPassportLogin`（`:16`）、`bilibiliLoginUserAgent`（`:20`，iPhone UA）、`isBilibiliHome`（`:25`）、`cookieHeader`（`:32`）、`BilibiliWebLoginView`（`:46`：清 Cookie `:67`、`_page` `:79`、`_complete` `:105`） |
 | `.../cookie_editor.dart`（427 行）、`platform_cookie_view.dart`（167 行）、`douyu_cookie_view.dart`（305 行）、`account_list_view.dart`（224 行）、`account_widgets.dart`（205 行） | 界面为主（A12.1、A12.2）；逻辑相关：`PlatformCookieView._save`（`platform_cookie_view.dart:94`，先核验再存）、`CookieEditor._save`（`cookie_editor.dart:220`，空 = 退出、不像 Cookie 报错）、`DouyuCookieView._renewNow`（`douyu_cookie_view.dart:121`）、`AccountListView._check`（`account_list_view.dart:62`，打开列表时核验，失效时退出并提示） |
 | `apps/pure_live/lib/app/platforms.dart` | `StoreCookieVault`（`:52`）、`StoreDouyuLogin`（`:68`）：把这里写的东西交给平台适配器 |
+| `packages/live_store/lib/src/accounts.dart`（K01.2） | `SavedAccount`（`:7`）、`AccountRoster`（`:78`：`limit` = 5、`of`、`find`、`remember` `:137`、`switchTo` `:156`、`forget` `:172`、`forgetting` `:181`、`merge` `:190`）；`LiveStore.accounts` |
+| `.../bilibili_accounts.dart`（K01.2） | 界面（A12.2）：`BilibiliAccountsGroup`（“已记住的账号”一组）、`savedAccountName`；页面里的逻辑在 `platform_cookie_view.dart` 的 `_switchTo`、`_forget`、`_addAccount` |
 
 测试：
 
 | 测试文件 | 覆盖什么 |
 |---|---|
-| `apps/pure_live/test/features/account/account_page_test.dart`（22） | 列表两组和每个平台的状态（`:209`）；点平台进页、哔哩哔哩没登录直接扫码（`:279`）；退出确认（`:294`）；哔哩哔哩失效时退出并提示（`:310`）；解不开的 Cookie（`:317`）；Cookie 页顺序、退出、清空保存 = 退出（`:335`、`:391`）；粘贴和 Ctrl+S（`:411`）；先核验再存（`:435`）；CC（`:464`）；斗鱼续期组、passport Cookie、立即续期、强制续期（`:474`）；扫码的状态、被拒不存、“扫不了？”、手机先网页登录（`:535`～`:600`）；没有 WebView 时网页登录路由的说明（`:624`）；斗鱼说明（`:631`）；云账号三个路由（`:651`）；平台名字（`:703`） |
+| `packages/live_store/test/accounts_test.dart`（9，K01.2） | 名册加密、顺序、同 uid 更新、上限、切换、删除、Keystore 出错、本机打不开的条目、备份带不带和恢复 |
+| `apps/pure_live/test/features/account/account_page_test.dart`（22，K01.2 又加 9） | 列表两组和每个平台的状态（`:209`）；点平台进页、哔哩哔哩没登录直接扫码（`:279`）；退出确认（`:294`）；哔哩哔哩失效时退出并提示（`:310`）；解不开的 Cookie（`:317`）；Cookie 页顺序、退出、清空保存 = 退出（`:335`、`:391`）；粘贴和 Ctrl+S（`:411`）；先核验再存（`:435`）；CC（`:464`）；斗鱼续期组、passport Cookie、立即续期、强制续期（`:474`）；扫码的状态、被拒不存、“扫不了？”、手机先网页登录（`:535`～`:600`）；没有 WebView 时网页登录路由的说明（`:624`）；斗鱼说明（`:631`）；云账号三个路由（`:651`）；平台名字（`:703`） |
 
 ## 3.x 基线
 
@@ -96,7 +106,7 @@
 1. K02.1 + S02.6 第 3 阶段：真机走一遍扫码、网页登录、Cookie 页、斗鱼续期。
 2. 根据结果开小任务：退出时清 WebView 的哔哩哔哩 Cookie、保存失败的提示。
 3. C-17、C-22：维护者决定是否提供登录 Cookie 来做（做的话开到 E 组）。
-4. V01.2 哔哩哔哩多账号（提议，参考 pure_live_TV `6ba16c55`）：用户确认后在本组登记实现任务。
+4. V01.2 哔哩哔哩多账号：D-036 同意，实现是 [K01.2](K01.2-哔哩哔哩多账号/README.md)（待真机，要两个真实账号）。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -105,11 +115,12 @@
 属于 [K 账号和登录](../README.md)。
 
 - 代码：`features/account/`
-- 进度：`████████████████████` 100%
+- 进度：`███████████████████░` 95%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | K01.1 | 账号与登录 | 功能 | 完成 | 2026-10-01 | e5ae55fbf | [设计或说明](K01.1-账号与登录/README.md)、[记录](K01.1-账号与登录/record.md) |
+| K01.2 | 哔哩哔哩多账号：记住登录过的账号，在哔哩哔哩账号页一键切换（接 V01.2） | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](K01.2-哔哩哔哩多账号/README.md)、[任务书](K01.2-哔哩哔哩多账号/brief.md)、[记录](K01.2-哔哩哔哩多账号/record.md)、[真机验证](K01.2-哔哩哔哩多账号/verify.md) |
 
 <!-- docs:生成结束 -->

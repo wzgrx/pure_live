@@ -123,6 +123,8 @@ class CookieEditorScaffold extends StatefulWidget {
     this.extraInputs = const [],
     this.extra = const [],
     this.banner,
+    this.accounts,
+    this.storedRevision = 0,
     this.verifiesOnSave = false,
     super.key,
   });
@@ -162,6 +164,13 @@ class CookieEditorScaffold extends StatefulWidget {
   /// A notice above the status card.
   final Widget? banner;
 
+  /// The remembered sign-ins under the status card (Bilibili, K01.2).
+  final Widget? accounts;
+
+  /// Changed by the page when it put a newly stored login into the inputs
+  /// (a switch of account): the inputs then count as saved.
+  final int storedRevision;
+
   /// Groups between the cookie and "退出登录" (Douyu's renewal).
   final List<Widget> extra;
 
@@ -186,6 +195,16 @@ class _CookieEditorScaffoldState extends State<CookieEditorScaffold> {
     _saved = _texts();
     for (final controller in _controllers) {
       controller.addListener(_changed);
+    }
+  }
+
+  @override
+  void didUpdateWidget(CookieEditorScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.storedRevision != widget.storedRevision) {
+      _saved = _texts();
+      _dirty = false;
+      _error = null;
     }
   }
 
@@ -320,6 +339,7 @@ class _CookieEditorScaffoldState extends State<CookieEditorScaffold> {
         status: widget.status,
         action: widget.statusAction,
       ),
+      if (widget.accounts case final accounts?) ...[const SizedBox(height: 4), accounts],
       const SizedBox(height: 12),
       widget.tip,
       const SizedBox(height: 12),

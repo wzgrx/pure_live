@@ -124,7 +124,7 @@ Future<void> verifyBilibiliLogin({required AccountActions actions, required Acco
   try {
     final identity = await verify(SiteIds.bilibili, cookie);
     if (actions.cookieOf(SiteIds.bilibili) != cookie) return;
-    if (identity.uid case final uid?) await actions.rememberBilibiliUid(uid);
+    if (identity.uid case final uid?) await actions.rememberBilibili(uid, name: identity.name);
   } on NeedsLogin {
     if (actions.cookieOf(SiteIds.bilibili) != cookie) return;
     AppNavigator.toast(i18n('bilibili_login_expired'));

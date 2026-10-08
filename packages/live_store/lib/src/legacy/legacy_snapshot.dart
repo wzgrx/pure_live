@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
+import 'package:live_store/src/accounts.dart';
 import 'package:live_store/src/legacy/legacy_rules.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets.dart';
@@ -170,6 +171,13 @@ final class LegacySnapshot {
 
   /// Cookies and Douyu passport values by [SecretRefs] name.
   Map<String, String>? secrets;
+
+  /// The remembered sign-ins by platform (V01.2: `cookie` section,
+  /// `<site>Accounts`); null when the file has none.
+  Map<String, List<SavedAccount>>? savedAccounts;
+
+  /// The suffix of the remembered sign-ins' key in the `cookie` section.
+  static const String accountsSuffix = 'Accounts';
 
   /// 3.x values other modules own (recorder settings and tasks with quality
   /// ids converted, local interaction), kept verbatim (Hive only).
@@ -355,8 +363,13 @@ final class LegacySnapshot {
   /// Douyu's passport `douyuLtp0` and `douyuDid`.
   void _readSecrets(Map<String, Object?> source) {
     final found = <String, String>{};
+    final accounts = <String, List<SavedAccount>>{};
     for (final entry in source.entries) {
       final value = entry.value;
+      if (_accountsKey.firstMatch(entry.key) case final match? when value is List) {
+        accounts[match.group(1)!] = [for (final item in value) ?SavedAccount.fromJson(item)];
+        continue;
+      }
       if (value is! String) continue;
       final match = RegExp(r'^([a-z0-9]+)Cookie$').firstMatch(entry.key);
       if (match != null && match.group(1) != 'taobao') {
@@ -367,10 +380,16 @@ final class LegacySnapshot {
         found[SecretRefs.douyuDid] = normalizeCookie(value);
       }
     }
+    if (accounts.isNotEmpty) {
+      _recognized = true;
+      savedAccounts = accounts;
+    }
     if (found.isEmpty) return;
     _recognized = true;
     secrets = found;
   }
+
+  static final RegExp _accountsKey = RegExp('^([a-z0-9]+)$accountsSuffix\$');
 
   void _upgradeThemeColor() {
     if (settings[Settings.themeColorSwitch] case final String hex) {

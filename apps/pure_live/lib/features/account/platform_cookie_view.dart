@@ -4,14 +4,17 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/account/account_platforms.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
 import 'package:pure_live/features/account/account_widgets.dart';
+import 'package:pure_live/features/account/bilibili_accounts.dart';
 import 'package:pure_live/features/account/cookie_editor.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/routes/route_path.dart';
 
 /// The cookie page of one platform (3.x `HuyaCookiePage`, `DouyinCookiePage`,
 /// `KuaishouCookiePage`, `TwitchCookiePage`, `YyCookiePage`,
@@ -40,8 +43,11 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
   late final AccountActions _actions = ref.read(accountActionsProvider);
   late final TextEditingController _cookie = TextEditingController(text: _actions.cookieOf(_id));
   StreamSubscription<String>? _changes;
+  StreamSubscription<String>? _rosterChanges;
   AccountCheck? _check;
   int _checkRun = 0;
+  int _storedRevision = 0;
+  bool _accountBusy = false;
 
   String get _id => widget.platform.id;
 
@@ -53,6 +59,11 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
     _changes = _actions.store.secrets.cookieChanges.where((site) => site == _id).listen((_) {
       if (mounted) setState(() {});
     });
+    if (_id == SiteIds.bilibili) {
+      _rosterChanges = _actions.store.accounts.changes.where((site) => site == _id).listen((_) {
+        if (mounted) setState(() {});
+      });
+    }
     if (_online && _actions.cookieOf(_id).isNotEmpty) {
       _check = const AccountChecking();
       unawaited(_runVerify(++_checkRun));
@@ -62,6 +73,7 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
   @override
   void dispose() {
     unawaited(_changes?.cancel());
+    unawaited(_rosterChanges?.cancel());
     _cookie.dispose();
     super.dispose();
   }
@@ -83,7 +95,7 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
     try {
       final identity = await ref.read(accountVerifierProvider)(_id, cookie);
       if (identity.uid case final uid? when _id == SiteIds.bilibili && cookie == _actions.cookieOf(_id)) {
-        await _actions.rememberBilibiliUid(uid);
+        await _actions.rememberBilibili(uid, name: identity.name);
       }
       return AccountVerified(identity.name, uid: identity.uid);
     } on Object catch (error, stack) {
@@ -117,8 +129,8 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
       if (mounted && run == _checkRun) setState(() => _check = previous);
       rethrow;
     }
-    if (result case AccountVerified(:final uid?) when _id == SiteIds.bilibili) {
-      await _actions.rememberBilibiliUid(uid);
+    if (result case AccountVerified(:final uid?, :final name) when _id == SiteIds.bilibili) {
+      await _actions.rememberBilibili(uid, name: name);
     }
     _cookie.text = cookie;
     if (mounted && run == _checkRun) setState(() => _check = result);
@@ -136,6 +148,101 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
     AppNavigator.toast(i18n('account_signed_out', args: {'name': widget.platform.name}));
   }
 
+  /// Puts the stored login into the box (it changed: a switch, a login on
+  /// the QR page) and checks it again.
+  Future<void> _reloadStored() async {
+    _cookie.text = _actions.cookieOf(_id);
+    setState(() {
+      _storedRevision++;
+      _check = null;
+    });
+    await _verifyStored();
+  }
+
+  /// Switches to a remembered Bilibili sign-in after asking (K01.2), then
+  /// checks it: one the platform says signs in nobody is signed out (and
+  /// forgotten) as the accounts list does with an expired login.
+  Future<void> _switchTo(SavedAccount account) async {
+    if (_accountBusy) return;
+    final name = savedAccountName(account);
+    final confirmed = await confirmAccountAction(
+      context,
+      title: i18n('account_switch_title'),
+      message: i18n(
+        _actions.bilibiliCurrentUnremembered ? 'account_switch_confirm_unremembered' : 'account_switch_confirm',
+        args: {'name': name},
+      ),
+      action: i18n('account_switch'),
+      destructive: false,
+    );
+    if (!confirmed || !mounted) return;
+    setState(() => _accountBusy = true);
+    _checkRun++;
+    SavedAccount? switched;
+    try {
+      switched = await _actions.switchBilibili(account.uid);
+    } on Object catch (error, stack) {
+      // The error is the cipher's, never the cookie.
+      log('Switching the Bilibili account failed', name: 'AccountPage', error: error, stackTrace: stack);
+      AppNavigator.toast(i18n(secretSaveFailedKey));
+    } finally {
+      if (mounted) setState(() => _accountBusy = false);
+    }
+    if (switched == null || !mounted) return;
+    AppNavigator.toast(i18n('account_switched', args: {'name': name}));
+    await _reloadStored();
+    if (!mounted || _check is! AccountRejected || _actions.cookieOf(_id) != switched.cookie) return;
+    AppNavigator.toast(i18n('bilibili_login_expired'));
+    await _actions.signOut(_id);
+    if (mounted) await _reloadStored();
+  }
+
+  /// Forgets a remembered Bilibili sign-in after asking (K01.2).
+  Future<void> _forget(SavedAccount account) async {
+    if (_accountBusy) return;
+    final name = savedAccountName(account);
+    final confirmed = await confirmAccountAction(
+      context,
+      title: i18n('account_forget_title'),
+      message: i18n('account_forget_confirm', args: {'name': name}),
+      action: i18n('delete'),
+    );
+    if (!confirmed || !mounted) return;
+    setState(() => _accountBusy = true);
+    try {
+      await _actions.forgetBilibili(account.uid);
+      AppNavigator.toast(i18n('account_forgotten', args: {'name': name}));
+    } on Object catch (error, stack) {
+      log('Forgetting the Bilibili account failed', name: 'AccountPage', error: error, stackTrace: stack);
+      AppNavigator.toast(i18n('account_save_failed'));
+    } finally {
+      if (mounted) setState(() => _accountBusy = false);
+    }
+  }
+
+  /// Signs another account in on the QR page; back here, the box and the
+  /// card show the login stored then.
+  Future<void> _addAccount() async {
+    final before = _actions.cookieOf(_id);
+    await AppNavigator.toNamed<Object?>(RoutePath.kBiliBiliQRLogin);
+    if (mounted && _actions.cookieOf(_id) != before) await _reloadStored();
+  }
+
+  /// The remembered sign-ins (Bilibili with a login or a remembered one).
+  Widget? _accounts(AccountSnapshot stored) {
+    if (_id != SiteIds.bilibili) return null;
+    final accounts = _actions.bilibiliAccounts;
+    if (accounts.isEmpty && !accountStored(stored)) return null;
+    return BilibiliAccountsGroup(
+      accounts: accounts,
+      isCurrent: _actions.isCurrentBilibili,
+      busy: _accountBusy,
+      onSwitch: (account) => unawaited(_switchTo(account)),
+      onForget: (account) => unawaited(_forget(account)),
+      onAdd: () => unawaited(_addAccount()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final platform = widget.platform;
@@ -150,6 +257,8 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
         websiteLabel: i18n('account_open_website', args: {'name': platform.name}),
       ),
       status: accountPageStatus(status, stored),
+      accounts: _accounts(stored),
+      storedRevision: _storedRevision,
       statusAction: _online && stored.cookie.isNotEmpty && _check is! AccountChecking
           ? TextButton.icon(
               key: const ValueKey('account-recheck'),

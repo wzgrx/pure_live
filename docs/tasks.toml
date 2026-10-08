@@ -2070,12 +2070,14 @@ old = ["M4.05", "M4.U.5", "T02a.5"]
 id = "E01.6"
 title = "国内五大平台巡检和修复（持续）"
 type = "平台"
-status = "未开始"
+status = "开发中"
 size = "中"
 tier = 1
 old = ["T02a.6"]
 stages = ["写巡检清单", "逐个平台跑一遍", "修复失效的"]
 done = 0
+next = "第 2 轮 2026-10-22：patrol bilibili douyu huya douyin kuaishou --danmaku 60"
+note = "持续任务：第 1 轮 2026-10-08 做完，本轮无失效（斗鱼一个房间断流是平台状态，候选见 record.md）"
 
 [[task]]
 id = "E02.1"

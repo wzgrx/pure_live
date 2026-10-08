@@ -920,12 +920,14 @@ old = ["U.3c", "T07i.2"]
 id = "A06.5"
 title = "状态栏和导航栏样式和 3.x 核对：3.x 启动时全局设透明，v4 启动页留下黑色导航栏和浅色导航栏图标"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
+commit = "937f3eb65"
 size = "小"
 tier = 2
 stages = ["K90 截图核对", "启动时按主题设系统栏，启动页不再带黑色导航栏"]
-done = 0
-note = "读代码（V03.3）：3.x 的 MobileManager.initialize 启动时设透明、分隔线透明、导航栏图标固定深色；v4 没有对应代码，启动页的 AnnotatedRegion 用 Flutter 的 SystemUiOverlayStyle.light/dark（带黑色导航栏、浅色图标），首页不改回。先在 K90 截图确认（上一次没留下来的核对记过“首页导航栏是主题色、3.x 是透明”），没有差别就只改清点"
+done = 1
+note = "读代码（V03.3）：3.x 的 MobileManager.initialize 启动时设透明、分隔线透明、导航栏图标固定深色；v4 没有对应代码，启动页的 AnnotatedRegion 用 Flutter 的 SystemUiOverlayStyle.light/dark（带黑色导航栏、浅色图标），首页不改回。先在 K90 截图确认（上一次没留下来的核对记过“首页导航栏是主题色、3.x 是透明”），没有差别就只改清点。2026-10-08 维护者定 X1、X2 为 A，先改代码（阶段 2），K90 截图和改后核对一起做"
 from = "V03.3 功能清点 F-APP-23"
 
 [[task]]

@@ -921,7 +921,9 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
 }
 
 /// The handle on the column's edge that folds it away and back (22, as
-/// U.2d's chat column).
+/// U.2d's chat column). It answers taps 48 wide (A04.1, docs/specs/UI.md
+/// §5.4): the clear part reaches over the wall's edge, the tab and its
+/// ripple stay 22.
 class _FoldHandle extends StatelessWidget {
   const new({required this.folded, required this.onTap});
 
@@ -933,17 +935,39 @@ class _FoldHandle extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Tooltip(
       message: i18n(folded ? 'multiview_unfold_column' : 'multiview_fold_column'),
-      child: Material(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: const BorderRadiusDirectional.horizontal(start: Radius.circular(8))
-            .resolve(Directionality.of(context)),
-        child: InkWell(
-          key: const ValueKey('multiview-fold'),
+      child: Semantics(
+        button: true,
+        onTap: onTap,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
           onTap: onTap,
           child: SizedBox(
-            width: 22,
+            width: kMinInteractiveDimension,
             height: 56,
-            child: Icon(folded ? AppIcons.unfoldLeft : AppIcons.foldRight, size: 20, color: scheme.onSurfaceVariant),
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: ExcludeSemantics(
+                child: Material(
+                  color: scheme.surfaceContainerHighest,
+                  borderRadius: const BorderRadiusDirectional.horizontal(start: Radius.circular(8))
+                      .resolve(Directionality.of(context)),
+                  child: InkWell(
+                    key: const ValueKey('multiview-fold'),
+                    onTap: onTap,
+                    child: SizedBox(
+                      width: 22,
+                      height: 56,
+                      child: Icon(
+                        folded ? AppIcons.unfoldLeft : AppIcons.foldRight,
+                        size: 20,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),

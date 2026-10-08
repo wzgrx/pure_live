@@ -544,6 +544,16 @@ void main() {
     await _wait(tester);
     expect(_key('multiview-column'), findsNothing);
     expect(find.descendant(of: _key('multiview-fold'), matching: find.byIcon(AppIcons.unfoldLeft)), findsOneWidget);
+    // A04.1: the tab looks 22 wide and answers 48; a tap on its clear
+    // part, over the wall's edge, unfolds it too.
+    final tab = tester.getRect(_key('multiview-fold'));
+    expect(tab.width, 22);
+    await tester.tapAt(tab.centerLeft - const Offset(12, 0));
+    await _wait(tester);
+    expect(_key('multiview-column'), findsOneWidget);
+    await tester.tap(_key('multiview-fold'));
+    await _wait(tester);
+    expect(_key('multiview-column'), findsNothing);
     await tester.tap(_key('multiview-fold'));
     await _wait(tester);
     expect(_key('multiview-column'), findsOneWidget);

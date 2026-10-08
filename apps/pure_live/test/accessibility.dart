@@ -20,8 +20,46 @@ const List<AccessibilityGuideline> appGuidelines = [
 /// and why.
 typedef KnownAccessibilityFailure = ({Type guideline, String place, String why});
 
-/// The failures of [appGuidelines] on the current frame, one line each with
-/// the places in `lib/` that built the node; empty when all pass.
+/// What still fails, each waiting for the maintainer's choice in the README's
+/// "待选和决定" (A05.1 X5–X9): the fix makes something visibly larger. The
+/// size checks of A04.1 (window_sizes_test.dart) leave them out too.
+const List<KnownAccessibilityFailure> knownAccessibilityFailures = [
+  (
+    guideline: MinimumTapTargetGuideline,
+    place: 'live_play/layout/room_info_bar.dart',
+    why: 'X5: the title line with "详情" is 40 high',
+  ),
+  (
+    guideline: MinimumTapTargetGuideline,
+    place: 'live_play/local_interaction/local_composer.dart',
+    why: 'X6: the field on the picture is 40 high (its star, words and send)',
+  ),
+  (
+    guideline: MinimumTapTargetGuideline,
+    place: 'search/search_widgets.dart',
+    why: 'X7: the compact rooms / streamers switch (40) and the two-line scope line (44)',
+  ),
+  (guideline: MinimumTapTargetGuideline, place: 'backup/log_page.dart', why: 'X7: the compact level filter (40)'),
+  (
+    guideline: MinimumTapTargetGuideline,
+    place: 'switch_room/room_switch_panel.dart',
+    why: 'X7: the compact group pills in their 40 bar',
+  ),
+  (
+    guideline: MinimumTapTargetGuideline,
+    place: 'live_ui/lib/src/widgets/json_tree.dart',
+    why: 'X8: the configuration preview tree rows are 36–40',
+  ),
+  (
+    guideline: MinimumTapTargetGuideline,
+    place: 'multiview/widgets/toolbar.dart',
+    why: 'X9: the layout buttons of the multi-view toolbar are 44 high',
+  ),
+];
+
+/// The failures of [guidelines] ([appGuidelines] unless given) on the
+/// current frame, one line each with the places in `lib/` that built the
+/// node; empty when all pass.
 ///
 /// [known] failures are left out (matched on the place that built the node
 /// itself), and so is selectable text, a read-only field the tap-target rule
@@ -29,12 +67,13 @@ typedef KnownAccessibilityFailure = ({Type guideline, String place, String why})
 Future<List<String>> accessibilityFailures(
   WidgetTester tester, {
   List<KnownAccessibilityFailure> known = const [],
+  List<AccessibilityGuideline> guidelines = appGuidelines,
 }) async {
   final handle = tester.ensureSemantics();
   try {
     await tester.pump();
     final failures = <String>[];
-    for (final guideline in appGuidelines) {
+    for (final guideline in guidelines) {
       final evaluation = await guideline.evaluate(tester);
       if (evaluation.passed) continue;
       for (final reason in _split(evaluation.reason ?? '')) {
@@ -58,8 +97,9 @@ Future<void> expectAccessible(
   WidgetTester tester,
   String screen, {
   List<KnownAccessibilityFailure> known = const [],
+  List<AccessibilityGuideline> guidelines = appGuidelines,
 }) async {
-  final failures = await accessibilityFailures(tester, known: known);
+  final failures = await accessibilityFailures(tester, known: known, guidelines: guidelines);
   if (failures.isNotEmpty) fail('$screen:\n${failures.join('\n')}');
 }
 

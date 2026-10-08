@@ -28,37 +28,6 @@ import 'accessibility.dart';
 import 'features/live_play/live_play_support.dart';
 import 'support.dart';
 
-/// What still fails, each waiting for the maintainer's choice in the README's
-/// "待选和决定" (A05.1 X5–X9): the fix makes something visibly larger.
-const List<KnownAccessibilityFailure> _known = [
-  (
-    guideline: MinimumTapTargetGuideline,
-    place: 'live_play/layout/room_info_bar.dart',
-    why: 'X5: the title line with "详情" is 40 high',
-  ),
-  (
-    guideline: MinimumTapTargetGuideline,
-    place: 'live_play/local_interaction/local_composer.dart',
-    why: 'X6: the field on the picture is 40 high (its star, words and send)',
-  ),
-  (
-    guideline: MinimumTapTargetGuideline,
-    place: 'search/search_widgets.dart',
-    why: 'X7: the compact rooms / streamers switch (40) and the two-line scope line (44)',
-  ),
-  (guideline: MinimumTapTargetGuideline, place: 'backup/log_page.dart', why: 'X7: the compact level filter (40)'),
-  (
-    guideline: MinimumTapTargetGuideline,
-    place: 'switch_room/room_switch_panel.dart',
-    why: 'X7: the compact group pills in their 40 bar',
-  ),
-  (
-    guideline: MinimumTapTargetGuideline,
-    place: 'live_ui/lib/src/widgets/json_tree.dart',
-    why: 'X8: the configuration preview tree rows are 36–40',
-  ),
-];
-
 LiveRoom _room(int n, {LiveStatus status = LiveStatus.live}) => LiveRoom(
   platform: SiteIds.bilibili,
   roomId: '$n',
@@ -240,7 +209,8 @@ Future<void> _press(WidgetTester tester, String key, Offset at) async {
   await _settle(tester);
 }
 
-Future<void> _check(WidgetTester tester, String screen) => expectAccessible(tester, screen, known: _known);
+Future<void> _check(WidgetTester tester, String screen) =>
+    expectAccessible(tester, screen, known: knownAccessibilityFailures);
 
 void main() {
   for (final mode in ['Light', 'Dark']) {

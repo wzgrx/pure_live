@@ -13,6 +13,7 @@ import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 
+import 'accessibility.dart';
 import 'support.dart';
 
 // A04.1 (docs/A-界面设计/A04-尺寸和适配/A04.1-尺寸和字号适配; research V03.2
@@ -235,5 +236,34 @@ void main() {
       expect(MediaQuery.textScalerOf(tester.element(find.byType(Scaffold).first)).scale(10), closeTo(19.5, 1e-9));
       await _close(tester, again);
     });
+  });
+  group('tap targets (stage 3)', () {
+    // D4: what A05.1 checks on an upright phone, at the other sizes: a
+    // phone's split screen, a phone held sideways, a foldable's inner screen
+    // and a tablet. A05.1's known failures (X5–X9) stay out, kept by design.
+    for (final size in const [Size(400, 420), Size(821, 400), Size(673, 841), Size(1280, 800)]) {
+      final name = '${size.width.toInt()}×${size.height.toInt()}';
+      testWidgets('$name: the main pages’ tap targets are at least 48', (tester) async {
+        final services = await _pumpApp(tester, size);
+        Future<void> check(String screen) => expectAccessible(
+          tester,
+          '$name $screen',
+          known: knownAccessibilityFailures,
+          guidelines: const [androidTapTargetGuideline],
+        );
+        await check('home');
+        for (final page in _pages) {
+          await _open(tester, page);
+          await check(page);
+          await _back(tester);
+        }
+        for (final section in SettingsSection.values.where((section) => section.route == null)) {
+          await _open(tester, RoutePath.kSettings, arguments: section.name);
+          await check('settings ${section.name}');
+          await _back(tester);
+        }
+        await _close(tester, services);
+      });
+    }
   });
 }

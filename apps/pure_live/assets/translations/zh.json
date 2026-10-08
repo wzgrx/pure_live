@@ -30,6 +30,7 @@
     "account_saved_signed_in": "已保存，已登录：{name}",
     "account_saved_unverified": "已保存，暂时无法核验账号",
     "account_saving_verifying": "正在核验并保存…",
+    "account_secret_save_failed": "登录信息没能保存：这台设备的加密存储出错，请重试",
     "account_signed_out": "已退出{name}",
     "account_site_cc": "网易CC",
     "account_site_soop": "SOOP",

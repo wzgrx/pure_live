@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/account/account_platforms.dart';
+import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
 import 'package:pure_live/features/account/account_widgets.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -151,7 +153,7 @@ class CookieEditorScaffold extends StatefulWidget {
 
   /// Stores the inputs; returns false when nothing was stored (the page
   /// then keeps them marked unsaved). It may rewrite the inputs (the cookie
-  /// as stored).
+  /// as stored). It throws when the store failed; the editor says so.
   final Future<bool> Function() onSave;
 
   /// Signs out of the platform; the page empties the inputs after it.
@@ -234,6 +236,11 @@ class _CookieEditorScaffoldState extends State<CookieEditorScaffold> {
     setState(() => _busy = true);
     try {
       if (await widget.onSave()) _markSaved();
+    } on Object catch (error, stack) {
+      // The device's secure storage failed (K02.2): said once, here; the
+      // input stays unsaved. The error is the cipher's, never the cookie.
+      log('Storing the cookie failed', name: 'AccountPage', error: error, stackTrace: stack);
+      AppNavigator.toast(i18n(secretSaveFailedKey));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

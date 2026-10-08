@@ -1,12 +1,13 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
+import 'package:pure_live/features/account/bilibili_web_cookies.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -52,29 +53,11 @@ class BilibiliWebLoginView extends ConsumerStatefulWidget {
 }
 
 class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
-  late final Future<void> _cleared = _clearCookies();
+  late final Future<void> _cleared = clearBilibiliWebCookies();
   bool _saving = false;
 
   /// Why the last sign-in did not finish (the red bar, 3.x).
   String? _error;
-
-  static final List<WebUri> _domains = [
-    WebUri('https://www.bilibili.com'),
-    WebUri('https://passport.bilibili.com'),
-    WebUri('https://m.bilibili.com'),
-  ];
-
-  Future<void> _clearCookies() async {
-    final cookies = CookieManager.instance();
-    for (final url in _domains) {
-      try {
-        await cookies.deleteCookies(url: url, domain: '.bilibili.com');
-        await cookies.deleteCookies(url: url);
-      } on Object {
-        // Nothing stored yet.
-      }
-    }
-  }
 
   Future<void> _page(Uri uri) async {
     if (_saving || !isBilibiliHome(uri)) return;
@@ -83,7 +66,7 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
       _error = null;
     });
     final found = <({String name, String value})>[];
-    for (final url in _domains) {
+    for (final url in bilibiliWebDomains) {
       try {
         for (final cookie in await CookieManager.instance().getCookies(url: url)) {
           found.add((name: cookie.name, value: '${cookie.value}'));
@@ -92,7 +75,14 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
         // Read what the other domains have.
       }
     }
-    final error = await _complete(cookieHeader(found));
+    String? error;
+    try {
+      error = await _complete(cookieHeader(found));
+    } on Object catch (failure, stack) {
+      // Never left at verifying (K02.2).
+      log('Bilibili web login failed', name: 'AccountPage', error: failure, stackTrace: stack);
+      error = secretSaveFailedKey;
+    }
     if (!mounted) return;
     setState(() {
       _saving = false;
@@ -102,21 +92,14 @@ class _BilibiliWebLoginViewState extends ConsumerState<BilibiliWebLoginView> {
 
   /// Checks and stores the cookie (the QR login's rules): one the platform
   /// says signs in nobody is not stored; one that cannot be checked now is.
+  /// A failed store comes back as the red bar's reason (K02.2), so the page
+  /// never stays at verifying.
   Future<String?> _complete(String cookie) async {
     final value = cleanPastedCookie(cookie);
     if (!value.contains('SESSDATA=')) return 'qr_cookie_missing';
-    final actions = ref.read(accountActionsProvider);
-    AccountCheck result;
-    try {
-      final identity = await ref.read(accountVerifierProvider)(SiteIds.bilibili, value);
-      result = AccountVerified(identity.name, uid: identity.uid);
-    } on Object catch (error) {
-      result = accountCheckFailure(error);
-    }
-    if (result is AccountRejected) return 'bilibili_login_verification_failed';
-    await actions.save(SiteIds.bilibili, value);
-    if (result case AccountVerified(:final uid?)) await actions.rememberBilibiliUid(uid);
-    AppNavigator.toast(switch (result) {
+    final stored = await storeBilibiliLogin(ref.read(accountActionsProvider), ref.read(accountVerifierProvider), value);
+    if (stored.refused case final refused?) return refused;
+    AppNavigator.toast(switch (stored.check) {
       AccountVerified(:final name) => i18n('account_saved_signed_in', args: {'name': name}),
       _ => i18n('account_saved_unverified'),
     });

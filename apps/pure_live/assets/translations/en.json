@@ -30,6 +30,7 @@
     "account_saved_signed_in": "Saved, signed in: {name}",
     "account_saved_unverified": "Saved; the account could not be checked right now",
     "account_saving_verifying": "Checking and saving…",
+    "account_secret_save_failed": "The sign-in could not be saved: this device's secure storage failed. Try again.",
     "account_signed_out": "Signed out of {name}",
     "account_site_cc": "NetEase CC",
     "account_site_soop": "SOOP",

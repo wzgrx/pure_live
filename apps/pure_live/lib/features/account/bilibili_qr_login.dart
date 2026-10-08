@@ -135,7 +135,15 @@ final class BilibiliQrLogin extends ChangeNotifier {
         case BilibiliQrState.confirmed:
           _key = null;
           _set(BilibiliQrPhase.verifying);
-          final refused = await _complete(answer.cookie ?? '');
+          String? refused;
+          try {
+            refused = await _complete(answer.cookie ?? '');
+          } on Object catch (error, stack) {
+            // Not a failed poll: the code is used up, so a retry would
+            // never come and the page would stay at verifying (K02.2).
+            log('QR login completion failed', name: 'AccountPage', error: error, stackTrace: stack);
+            refused = secretSaveFailedKey;
+          }
           if (_closed || generation != _generation) return;
           if (refused == null) {
             _set(BilibiliQrPhase.done);
@@ -214,17 +222,9 @@ class _BilibiliQrLoginViewState extends ConsumerState<BilibiliQrLoginView> {
   Future<String?> _complete(String cookie) async {
     final value = cleanPastedCookie(cookie);
     if (value.isEmpty) return 'qr_cookie_missing';
-    AccountCheck result;
-    try {
-      final identity = await ref.read(accountVerifierProvider)(SiteIds.bilibili, value);
-      result = AccountVerified(identity.name, uid: identity.uid);
-    } on Object catch (error) {
-      result = accountCheckFailure(error);
-    }
-    if (result is AccountRejected) return 'bilibili_login_verification_failed';
-    await _actions.save(SiteIds.bilibili, value);
-    if (result case AccountVerified(:final uid?)) await _actions.rememberBilibiliUid(uid);
-    AppNavigator.toast(switch (result) {
+    final stored = await storeBilibiliLogin(_actions, ref.read(accountVerifierProvider), value);
+    if (stored.refused case final refused?) return refused;
+    AppNavigator.toast(switch (stored.check) {
       AccountVerified(:final name) => i18n('account_saved_signed_in', args: {'name': name}),
       // The passport just issued it: stored, marked unchecked (c13).
       _ => i18n('account_saved_unverified'),

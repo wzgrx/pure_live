@@ -281,6 +281,8 @@ const Map<String, Object> newInV4 = {
   'danmakuListStyle': 'compact', // A07.1
   'showChatGifts': true, // A08.6
   'danmakuPausedBehavior': 'pause', // A07.10
+  'danmakuMaxVisibleCount': 48, // D05.2 (V01.4; 3.x's fixed 48)
+  'holdDanmakuOnPress': false, // D03.4 (V01.3; off: the picture as before)
   'youtubeShowAllChat': false, // UPGRADES B-13
   'enableLocalLog': false, // I01.3
   'logLevel': 'info', // I01.3
@@ -313,6 +315,7 @@ const Map<String, (num?, num?)> ranges = {
   'danmakuFontBorder': (0, 4),
   'danmakuOpacity': (0, 1),
   'danmakuFps': (30, 240),
+  'danmakuMaxVisibleCount': (10, 120), // D05.2: out of range reads as 48
   'repeatedDanmakuWindowSeconds': (1, 30),
   'pipDanmakuColor': (null, null),
   'pipDanmakuFontSize': (8, 24),

@@ -1695,6 +1695,14 @@ List<SettingsEntry> _build() {
       desc: 'settings_danmaku_long_press_desc',
       keywords: ['长按', '弹幕'],
     )
+    ..toggle(
+      'danmaku_hold_on_press',
+      'danmaku_hold_on_press',
+      Settings.holdDanmakuOnPress,
+      null,
+      desc: 'danmaku_hold_on_press_desc',
+      keywords: ['按住', '停住', '定住', '弹幕'],
+    )
     ..group = 'danmaku_group_smoothness'
     ..toggle(
       'danmaku_auto_fps',
@@ -1715,6 +1723,18 @@ List<SettingsEntry> _build() {
       format: (value) => '${value.round()} FPS',
       requires: () => [needsOff(Settings.danmakuAutoFps, 'settings_danmaku_auto_fps')],
       keywords: ['帧率', 'fps', '弹幕'],
+    )
+    ..slider(
+      'danmaku_max_visible',
+      'danmaku_max_visible',
+      Settings.danmakuMaxVisibleCount,
+      null,
+      min: 10,
+      max: 120,
+      step: 2,
+      format: (value) => i18n('danmaku_max_visible_value', args: {'count': '${value.round()}'}),
+      desc: 'danmaku_max_visible_desc',
+      keywords: ['同屏', '条数', '数量', '密度', '弹幕'],
     )
     // A08.6 c2: the room's chat list group, on the page before "更多".
     ..group = 'danmaku_list'

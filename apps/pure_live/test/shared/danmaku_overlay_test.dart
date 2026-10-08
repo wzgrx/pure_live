@@ -77,6 +77,7 @@ final class _Layer {
     double refreshRate = 60,
     bool running = true,
     bool held = false,
+    int? maxVisible = 48,
     EmoteTable emotes = EmoteTable.empty,
   }) => tester.pumpWidget(
     Directionality(
@@ -94,6 +95,7 @@ final class _Layer {
             refreshRate: refreshRate,
             running: running,
             held: held,
+            maxVisible: maxVisible,
             emotes: emotes,
           ),
         ),
@@ -356,6 +358,36 @@ void main() {
     await layer.close();
   });
 
+  testWidgets('D05.2: "同屏最大弹幕条数": a lower limit lets the next ones wait; a higher one lets them in', (tester) async {
+    tester.view
+      ..physicalSize = const Size(400, 4000)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final layer = _Layer(tester);
+    await layer.pump(height: 4000, maxVisible: 10);
+    for (var i = 0; i < 30; i++) {
+      layer.messages.add(_chat('$i'));
+    }
+    await layer.run(60, 1);
+    expect(layer.state.flyingCount, 10);
+    expect(layer.state.pendingCount, 20);
+
+    // Raised while they wait: the waiting ones enter at once (four a frame).
+    await layer.pump(height: 4000, maxVisible: 24);
+    await layer.run(60, 0.5);
+    expect(layer.state.flyingCount, 24);
+    expect(layer.state.pendingCount, 6);
+
+    // Lowered: the ones on screen fly on, nothing new enters until fewer
+    // than the limit are left.
+    await layer.pump(height: 4000, maxVisible: 12);
+    layer.messages.add(_chat('等着'));
+    await layer.run(60, 0.5);
+    expect(layer.state.flyingCount, 24, reason: 'none is taken off the screen');
+    expect(layer.state.pendingCount, 7);
+    await layer.close();
+  });
+
   testWidgets("Q02.1: a network emoticon loads through the app's image cache (the app proxy)", (tester) async {
     final previous = AppImageCache.manager;
     addTearDown(() => AppImageCache.manager = previous);
@@ -399,6 +431,75 @@ void main() {
     await layer.pump();
     await layer.run(60, 0.5);
     expect(layer.rect(message).left, closeTo(rect.left - 60, 1));
+    await layer.close();
+  });
+
+  testWidgets('D03.4 (V01.3): a pinned danmaku stands, the others fly on; let go, it flies on from there', (
+    tester,
+  ) async {
+    final layer = _Layer(tester);
+    // Two lanes of 26.
+    await layer.pump(height: 60);
+    final pinned = _chat('按住我');
+    final other = _chat('照飞');
+    layer.messages
+      ..add(pinned)
+      ..add(other);
+    await tester.pump();
+    await layer.run(60, 1);
+    final at = layer.rect(pinned);
+    final before = layer.rect(other);
+    expect(layer.state.pinAt(at.center.translate(0, 100)), isNull, reason: 'nothing there');
+    expect(layer.state.pinAt(at.center), same(pinned));
+    expect(layer.state.pinnedMessage, same(pinned));
+
+    await layer.run(60, 2);
+    expect(layer.rect(pinned), at, reason: 'it stands');
+    expect(layer.rect(other).left, closeTo(before.left - 240, 2), reason: 'the other flies on, 120 px/s');
+    expect(layer.state.messageAt(at.center), same(pinned), reason: 'a long press there finds it');
+
+    layer.state.unpin();
+    expect(layer.state.pinnedMessage, isNull);
+    await layer.run(60, 0.5);
+    expect(layer.rect(pinned).left, closeTo(at.left - 60, 2), reason: 'on from where it stood, at its speed');
+
+    // Everything held (the actions open) while it is pinned: let go after,
+    // it does not jump.
+    final again = layer.rect(pinned);
+    layer.state.pinAt(again.center);
+    await layer.pump(height: 60, held: true);
+    await layer.run(60, 1);
+    layer.state.unpin();
+    await layer.pump(height: 60);
+    expect(layer.rect(pinned), again);
+
+    // A pinned one taken back is gone, and nothing stays pinned.
+    layer.state.pinAt(layer.rect(pinned).center);
+    layer.retractions.add(const LiveRetraction.all());
+    await tester.pump();
+    expect(layer.state.pinnedMessage, isNull);
+    expect(layer.state.flyingCount, 0);
+    await layer.close();
+  });
+
+  testWidgets("D03.4: no new danmaku enters a pinned one's lane; let go, the lane takes them again", (tester) async {
+    final layer = _Layer(tester);
+    // One lane.
+    await layer.pump(height: 30);
+    final pinned = _chat('按住我');
+    layer.messages.add(pinned);
+    await tester.pump();
+    await layer.run(60, 1);
+    layer.state.pinAt(layer.rect(pinned).center);
+    final next = _chat('后来的');
+    layer.messages.add(next);
+    await layer.run(60, 2);
+    expect(layer.state.rectOf(next), isNull, reason: 'well in, but it stands: the lane waits');
+    expect(layer.state.pendingCount, 1);
+    layer.state.unpin();
+    await layer.run(60, 0.1);
+    expect(layer.state.rectOf(next), isNotNull);
+    expect(layer.state.pendingCount, 0);
     await layer.close();
   });
 

@@ -148,9 +148,12 @@ int danmakuFrameDivisor({required double refreshRate, int? cap}) {
 /// message is laid out once and recorded as a picture, cached by content and
 /// look (c6); a frame only moves the pictures. The opacity goes into the
 /// colours (c5). A message that finds no lane waits (at most 120, 5 s), four
-/// enter a frame at most, 48 are on screen at most (c7). Messages arrive
+/// enter a frame at most, [maxVisible] are on screen at most (c7; 3.x's 48,
+/// the room's "同屏最大弹幕条数", D05.2). Messages arrive
 /// only while [running]; a danmaku composed on this device (U.2k) always
-/// enters and flies on while the video is paused (c10).
+/// enters and flies on while the video is paused (c10). One danmaku can be
+/// pinned under a finger ([DanmakuOverlayState.pinAt], V01.3): it stands,
+/// drawn over the others, while they fly on.
 class DanmakuOverlay extends StatefulWidget {
   /// Creates the overlay.
   const new({
@@ -180,8 +183,10 @@ class DanmakuOverlay extends StatefulWidget {
   /// Hidden: nothing flies and nothing waits.
   final bool visible;
 
-  /// At most this many messages on screen at once (3.x 48; the mini
-  /// windows' "最大同时显示数量", U.2j); null for no limit.
+  /// At most this many of the platform's messages on screen at once (3.x
+  /// 48; the room's "同屏最大弹幕条数", D05.2; the mini windows' "最大同时显示数量",
+  /// U.2j); null for no limit. A lower one lets the ones on screen fly out
+  /// and the next ones wait; a higher one lets the waiting ones in.
   final int? maxVisible;
 
   /// The frame-rate cap ([danmakuFrameDivisor]); null paints every refresh.
@@ -257,8 +262,14 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
   int _records = 0;
   TextStyle? _lastStyle;
 
+  /// The danmaku pinned under a finger (D03.4), if any.
+  _Flying? _pinned;
+
   /// Messages on screen now.
   int get flyingCount => _items.length;
+
+  /// The danmaku pinned under a finger ([pinAt]); null for none.
+  LiveMessage? get pinnedMessage => _pinned?.message;
 
   /// Messages waiting for a lane.
   int get pendingCount => _pending.length;
@@ -297,6 +308,40 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       if (item.rect(_clockOf(item), _size.width).inflate(4).contains(position)) return item.message;
     }
     return null;
+  }
+
+  /// Pins the danmaku drawn at [position] (as [messageAt] finds it) where it
+  /// is (docs/D-弹幕/D03-飞行弹幕引擎/D03.4-按住飞行弹幕让它停住; V01.3, upstream flame_barrage
+  /// `pauseItemAt`): it neither moves nor goes until [unpin], and is drawn
+  /// over the others, which fly on and may pass under it; no new danmaku
+  /// enters its lane meanwhile. A danmaku pinned before is let go first.
+  /// Returns the pinned message; null when none is there.
+  LiveMessage? pinAt(Offset position) {
+    unpin();
+    for (final item in _items.reversed) {
+      final now = _clockOf(item);
+      if (item.rect(now, _size.width).inflate(4).contains(position)) {
+        item.pin(now);
+        _pinned = item;
+        _frame.value++;
+        return item.message;
+      }
+    }
+    return null;
+  }
+
+  /// Lets the pinned danmaku go: it flies on from where it stood, at its
+  /// speed, and its lane takes new ones again. It moves to the end of the
+  /// list: the ones that passed under it are ahead of it now, and a lane's
+  /// last one is the one a new danmaku must keep clear of ([_place]).
+  void unpin() {
+    final item = _pinned;
+    if (item == null) return;
+    _pinned = null;
+    item.unpin(_clockOf(item));
+    if (_items.remove(item)) _items.add(item);
+    _frame.value++;
+    _wake();
   }
 
   Duration _clockOf(_Flying item) => item.local ? _free : _media;
@@ -341,7 +386,10 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
       final before = _items.length;
       _items.removeWhere((item) {
         final gone = retracts(retraction, item.message);
-        if (gone) item.picture.release();
+        if (gone) {
+          item.picture.release();
+          if (identical(item, _pinned)) _pinned = null;
+        }
         return gone;
       });
       if (_items.length != before) _frame.value++;
@@ -352,6 +400,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     for (final item in _items) {
       item.picture.release();
     }
+    _pinned = null;
     _items.clear();
     _pending.clear();
     _frame.value++;
@@ -480,7 +529,10 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     int? chosen;
     _Flying? ahead;
     var room = double.infinity;
+    final pinned = _pinned;
     for (var i = 0; i < lanes; i++) {
+      // D03.4: a pinned danmaku's lane waits until it flies on.
+      if (pinned != null && !pinned.local && pinned.fixed == null && pinned.lane == i) continue;
       final last = _items.lastWhereOrNull((item) => item.lane == i && !item.local && item.fixed == null);
       if (last == null) {
         chosen = i;
@@ -975,12 +1027,27 @@ final class _Flying {
   final Duration stay;
 
   /// When it entered (this frame's time on its clock): it starts at the
-  /// right edge.
-  final Duration start;
+  /// right edge. Moved on by the time it stood pinned ([unpin]).
+  Duration start;
+
+  /// The time on its clock when a finger pinned it (D03.4); null while it
+  /// flies.
+  Duration? _pinnedAt;
+
+  /// Stands where it is from [now] on its clock.
+  void pin(Duration now) => _pinnedAt ??= now;
+
+  /// Flies on at [now] from where it stood: the time it stood does not count.
+  void unpin(Duration now) {
+    final at = _pinnedAt;
+    if (at == null) return;
+    _pinnedAt = null;
+    if (now > at) start += now - at;
+  }
 
   double left(Duration now, double width) {
     if (fixed != null) return (width - picture.width) / 2;
-    return width - (now - start).inMicroseconds * speed / Duration.microsecondsPerSecond;
+    return width - ((_pinnedAt ?? now) - start).inMicroseconds * speed / Duration.microsecondsPerSecond;
   }
 
   double right(Duration now, double width) => left(now, width) + picture.width;
@@ -988,7 +1055,7 @@ final class _Flying {
   Rect rect(Duration now, double width) => Rect.fromLTWH(left(now, width), y, picture.width, picture.height);
 
   bool gone(Duration now, double width) {
-    return fixed != null ? now - start > stay : right(now, width) < 0;
+    return fixed != null ? (_pinnedAt ?? now) - start > stay : right(now, width) < 0;
   }
 }
 
@@ -1000,15 +1067,22 @@ class _DanmakuPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     state._paints++;
+    final pinned = state._pinned;
     for (final item in state._items) {
-      final left = item.left(state._clockOf(item), size.width);
-      if (left >= size.width || left + item.picture.width <= 0) continue;
-      canvas
-        ..save()
-        ..translate(left, item.y)
-        ..drawPicture(item.picture.picture)
-        ..restore();
+      if (!identical(item, pinned)) _draw(canvas, size, item);
     }
+    // D03.4: the pinned one over the ones passing under it.
+    if (pinned != null) _draw(canvas, size, pinned);
+  }
+
+  void _draw(Canvas canvas, Size size, _Flying item) {
+    final left = item.left(state._clockOf(item), size.width);
+    if (left >= size.width || left + item.picture.width <= 0) return;
+    canvas
+      ..save()
+      ..translate(left, item.y)
+      ..drawPicture(item.picture.picture)
+      ..restore();
   }
 
   @override

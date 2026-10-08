@@ -2080,6 +2080,17 @@ done = 2
 from = "docs v2 D 组核对（compact_danmaku.dart 不传字体和表情表，3.x 有）；V01.5 评估：上游 pure_live b2cca41c7（缩放上限 1.0 → 2.0）"
 
 [[task]]
+id = "D03.4"
+title = "按住飞行弹幕让它停住，松手继续（接 V01.3）"
+type = "功能"
+status = "待真机"
+date = "2026-10-08"
+size = "小"
+tier = 3
+from = "V01.3 提议（D-036）；上游 flame_barrage 3eddae8、pure_live 2d2ad2039"
+note = "做法 A：新开关 holdDanmakuOnPress 默认关；开了以后手指按下的那一条钉住、其他照飞，松手或拖动时继续；单击、双击、长按的结果不变（Listener 不参加手势竞技场）"
+
+[[task]]
 id = "D04.1"
 title = "弹幕性能和可读性：每帧最多刷新一次、聊天列表反转、昵称对比度"
 type = "性能"
@@ -2097,6 +2108,17 @@ status = "完成"
 date = "2026-10-02"
 commit = "b8462638a"
 old = ["F.2a", "T06e.1"]
+
+[[task]]
+id = "D05.2"
+title = "同屏最大弹幕条数可以设置（接 V01.4）"
+type = "功能"
+status = "待真机"
+date = "2026-10-08"
+size = "小"
+tier = 3
+from = "V01.4 提议（D-036）；上游 pure_live_TV 9a7bb104"
+note = "新设置 danmakuMaxVisibleCount，默认 48（和 3.x 一样），10～120；直播间、多画面、电视直播间跟它；小窗另有自己的条数"
 
 [[task]]
 id = "D06.1"
@@ -3499,21 +3521,23 @@ note = "同意做（D-036）；参考 pure_live_TV 6ba16c55"
 id = "V01.3"
 title = "按住弹幕让它停住，松手继续"
 type = "功能"
-status = "未开始"
+status = "已确认"
 size = "小"
 tier = 3
 old = ["T06c.5"]
-note = "同意做（D-036）；参考 flame_barrage 3eddae8"
+note = "同意做（D-036）；评估、手势冲突分析和设计写在 README（维护者按 D-003 选做法 A，开关默认关），实现任务 D03.4"
+to = ["D03.4"]
 
 [[task]]
 id = "V01.4"
 title = "同屏最大弹幕条数可以设置"
 type = "功能"
-status = "未开始"
+status = "已确认"
 size = "小"
 tier = 3
 old = ["T06e.5"]
-note = "同意做（D-036）；参考 pure_live_TV 9a7bb104"
+note = "同意做（D-036）；评估和设计写在 README（维护者按 D-003 选），实现任务 D05.2"
+to = ["D05.2"]
 
 [[task]]
 id = "V01.5"

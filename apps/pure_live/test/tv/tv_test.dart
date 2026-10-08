@@ -12,6 +12,7 @@ import 'package:pure_live/features/home/home_page.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/tv/home/tv_home_page.dart';
 import 'package:pure_live/tv/room/tv_live_play_page.dart';
 import 'package:pure_live/tv/tv_theme.dart';
@@ -241,6 +242,11 @@ void main() {
     expect(room.index, 1);
     expect(room.playlist, hasLength(10));
     expect(room.controller!.room.roomId, '1');
+    // D05.2: the picture's danmaku follow "同屏最大弹幕条数" (48 by default).
+    expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).maxVisible, 48);
+    await tester.runAsync(() => services.store.settings.set(Settings.danmakuMaxVisibleCount, 30));
+    await _settle(tester);
+    expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).maxVisible, 30);
 
     // Two presses inside the window: one switch of two rooms.
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);

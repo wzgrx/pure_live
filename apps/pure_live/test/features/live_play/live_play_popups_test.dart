@@ -788,8 +788,10 @@ void main() {
       'repeatWindow': '相同内容合并时间（秒）',
       'tap': '点击画面弹幕查看操作',
       'longPress': '长按画面弹幕打开屏蔽操作',
+      'holdOnPress': '按住飞行弹幕让它停住',
       'autoFps': '弹幕帧率跟随界面刷新率',
       'fps': '弹幕帧率',
+      'maxVisible': '同屏最大弹幕条数',
     };
     for (final MapEntry(:key, :value) in items.entries) {
       expect(_in('danmaku-setting-$key', find.text(value)), findsOneWidget, reason: key);
@@ -823,6 +825,30 @@ void main() {
       reason: 'follows the display: greyed, with the rate in use',
     );
     expect(_in('danmaku-setting-fps', find.text('60 FPS')), findsOneWidget);
+    // D03.4 (V01.3): "按住飞行弹幕让它停住" after the long press, off by
+    // default, with what it does; a change is the room's setting.
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-holdOnPress'))).dy,
+      greaterThan(tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-longPress'))).dy),
+    );
+    expect(_in('danmaku-setting-holdOnPress', find.text('手指按住画面上的一条弹幕时只停住这一条，其他照飞，松手继续')), findsOneWidget);
+    expect(tester.widget<Switch>(find.byKey(const ValueKey('danmaku-switch-holdOnPress'))).value, isFalse);
+    await tester.tap(find.byKey(const ValueKey('danmaku-switch-holdOnPress')));
+    await _settle(tester);
+    expect(room.services.store.settings.get(Settings.holdDanmakuOnPress), isTrue);
+    // D05.2 (V01.4): "同屏最大弹幕条数" after the frame rate, 3.x's 48 by
+    // default, 10..120 in steps of 2; a change is the room's setting.
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-maxVisible'))).dy,
+      greaterThan(tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-fps'))).dy),
+    );
+    final maxVisible = tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-maxVisible')));
+    expect((maxVisible.min, maxVisible.max, maxVisible.divisions, maxVisible.value), (10, 120, 55, 48));
+    expect(_in('danmaku-setting-maxVisible', find.text('48 条')), findsOneWidget);
+    maxVisible.onChanged!(20);
+    await _settle(tester);
+    expect(room.services.store.settings.get(Settings.danmakuMaxVisibleCount), 20);
+    expect(_in('danmaku-setting-maxVisible', find.text('20 条')), findsOneWidget);
 
     // D4: the stroke width greys out (stays) while the stroke is off.
     expect(tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-strokeWidth'))).onChanged, isNotNull);

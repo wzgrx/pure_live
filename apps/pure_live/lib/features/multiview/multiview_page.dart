@@ -892,6 +892,8 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
                         messages: _controller.flying,
                         retractions: _controller.retractions,
                         look: look,
+                        // D05.2: the room's "同屏最大弹幕条数" (3.x's cells 48 too).
+                        maxVisible: watchSetting(ref, Settings.danmakuMaxVisibleCount),
                         fps: fps,
                         refreshRate: refreshRate,
                         emotes: emotes,

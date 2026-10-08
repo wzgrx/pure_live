@@ -156,6 +156,32 @@ void main() {
     );
   });
 
+  testWidgets('D05.2 (V01.4): "同屏最大弹幕条数" is on the page and found under "弹幕 › 流畅度"', (tester) async {
+    final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+    expect(find.byKey(const ValueKey('danmaku-setting-maxVisible')), findsOneWidget);
+    expect(find.text('48 条'), findsOneWidget);
+    tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-maxVisible'))).onChanged!(30);
+    await settleSettings(tester);
+    expect(h.settings.get(Settings.danmakuMaxVisibleCount), 30);
+
+    await pumpSettings(tester);
+    await searchSettingsFor(tester, '同屏');
+    expect(settingsRow('danmaku_max_visible'), findsOneWidget);
+    expect(find.text('弹幕 › 流畅度'), findsOneWidget);
+  });
+
+  testWidgets('D03.4 (V01.3): "按住飞行弹幕让它停住" is on the page and found under "弹幕 › 画面弹幕交互"', (tester) async {
+    final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+    expect(tester.widget<Switch>(_switch('holdOnPress')).value, isFalse);
+    await tapSettings(tester, _switch('holdOnPress'));
+    expect(h.settings.get(Settings.holdDanmakuOnPress), isTrue);
+
+    await pumpSettings(tester);
+    await searchSettingsFor(tester, '按住');
+    expect(settingsRow('danmaku_hold_on_press'), findsOneWidget);
+    expect(find.text('弹幕 › 画面弹幕交互'), findsOneWidget);
+  });
+
   test('its route opens the page', () {
     final page = pageRoutes[RoutePath.kDanmakuSettings]!(const RouteArgs(RoutePath.kDanmakuSettings));
     expect(page, isA<DanmakuSettingsPage>());

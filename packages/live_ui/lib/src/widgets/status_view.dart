@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/theme/text_wrapping.dart';
@@ -137,10 +138,10 @@ class AppStatusView extends StatelessWidget {
 
   /// The default icon of [type].
   static IconData defaultIcon(AppStatusType type) => switch (type) {
-    AppStatusType.loading || AppStatusType.empty => Icons.live_tv_rounded,
-    AppStatusType.error => Icons.error_outline_rounded,
-    AppStatusType.restricted => Icons.lock_outline_rounded,
-    AppStatusType.offline => Icons.wifi_off_rounded,
+    AppStatusType.loading || AppStatusType.empty => AppIcons.statusEmpty,
+    AppStatusType.error => AppIcons.statusError,
+    AppStatusType.restricted => AppIcons.restricted,
+    AppStatusType.offline => AppIcons.networkError,
   };
 
   @override
@@ -324,7 +325,7 @@ class AppStatusView extends StatelessWidget {
                   dimension: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : Icon(buttonIcon ?? (restricted ? Icons.login_rounded : Icons.refresh_rounded), size: 18),
+              : Icon(buttonIcon ?? (restricted ? AppIcons.login : AppIcons.retry), size: 18),
           label: Text(buttonText ?? (restricted ? words.login : words.retry)),
         ),
       if (onSecondaryButtonPressed case final pressed?)

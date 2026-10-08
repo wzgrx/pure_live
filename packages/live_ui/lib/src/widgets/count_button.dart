@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/widgets/settings_row.dart';
 
@@ -188,14 +189,14 @@ class _CounterControlState extends State<CounterControl> {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              half(Icons.remove_rounded, widget.decreaseTooltip, decrease, widget.decreaseKey, up: false),
+              half(AppIcons.decrease, widget.decreaseTooltip, decrease, widget.decreaseKey, up: false),
               Semantics(
                 label: widget.semanticLabel,
                 value: widget.value,
                 excludeSemantics: widget.semanticLabel != null,
                 child: number,
               ),
-              half(Icons.add_rounded, widget.increaseTooltip, increase, widget.increaseKey, up: true),
+              half(AppIcons.increase, widget.increaseTooltip, increase, widget.increaseKey, up: true),
             ],
           ),
         ],

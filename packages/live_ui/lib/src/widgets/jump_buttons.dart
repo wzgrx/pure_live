@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
 /// How far a list scrolls before "to top" shows (3.x `BasePageView`: 400).
@@ -131,7 +132,7 @@ class _ScrollJumpButtonsState extends State<ScrollJumpButtons> {
             materialTapTargetSize: MaterialTapTargetSize.padded,
             tooltip: up ? widget.topTooltip : widget.bottomTooltip,
             onPressed: shown ? () => _jump(up: up) : null,
-            child: Icon(up ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded),
+            child: Icon(up ? AppIcons.toTop : AppIcons.toBottom),
           ),
         ),
       ),

@@ -47,7 +47,9 @@ void main() {
       (AppIcons.sleepTimer, Remix.time_line),
       (AppIcons.roomVolume, Remix.volume_up_line),
       (AppIcons.streamLink, Remix.link_m),
-      (AppIcons.newWindow, Icons.open_in_new_rounded),
+      // A16.1 c12: the room menu's new window is the home menu's stacked
+      // pages, not the ↗ of opening the platform next to it.
+      (AppIcons.newWindow, Icons.add_to_photos_outlined),
       (AppIcons.localInteraction, Icons.auto_awesome_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
@@ -103,8 +105,6 @@ void main() {
       // U.2j: the mini windows' buttons (3.x's play and pause; the new back
       // and pin).
       (AppIcons.backToRoom, Icons.open_in_full_rounded),
-      (AppIcons.miniPlay, Icons.play_circle_filled),
-      (AppIcons.miniPause, Icons.pause_circle_filled),
       (AppIcons.pinned, Remix.pushpin_fill),
       (AppIcons.unpinned, Remix.pushpin_line),
       // U.3a, U.3b: the home shell keeps 3.x's glyphs, except the areas tab
@@ -233,6 +233,35 @@ void main() {
       (AppIcons.refreshPull, Icons.arrow_downward_rounded),
       (AppIcons.refreshSucceeded, Icons.done_rounded),
       (AppIcons.refreshFailed, Icons.error_outline_rounded),
+      // A01.3: live_ui's components and the desktop pager name their
+      // icons here too; the glyphs are the ones they wrote before
+      // (the pager's are 3.x desktop_components.dart's).
+      (AppIcons.toTop, Icons.arrow_upward_rounded),
+      (AppIcons.toBottom, Icons.arrow_downward_rounded),
+      (AppIcons.previousPage, Icons.arrow_back_ios_new_rounded),
+      (AppIcons.nextPage, Icons.arrow_forward_ios_rounded),
+      (AppIcons.pageSize, Icons.arrow_drop_down_rounded),
+      (AppIcons.decrease, Icons.remove_rounded),
+      (AppIcons.increase, Icons.add_rounded),
+      (AppIcons.selected, Icons.check_rounded),
+      (AppIcons.choiceRow, Icons.expand_more_rounded),
+      (AppIcons.navigate, Icons.chevron_right_rounded),
+      (AppIcons.searchField, Icons.search_rounded),
+      (AppIcons.clearQuery, Icons.close_rounded),
+      (AppIcons.close, Icons.close_rounded),
+      (AppIcons.qrCardRefresh, Icons.refresh_rounded),
+      (AppIcons.qrCardScanned, Icons.check_circle_outline_rounded),
+      (AppIcons.qrCardFailed, Icons.error_outline_rounded),
+      (AppIcons.avatarPlaceholder, Icons.person_rounded),
+      (AppIcons.info, Icons.info_outline_rounded),
+      (AppIcons.warning, Icons.warning_amber_rounded),
+      (AppIcons.bannerError, Icons.error_outline_rounded),
+      (AppIcons.statusEmpty, Icons.live_tv_rounded),
+      (AppIcons.statusError, Icons.error_outline_rounded),
+      (AppIcons.restricted, Icons.lock_outline_rounded),
+      (AppIcons.networkError, Icons.wifi_off_rounded),
+      (AppIcons.login, Icons.login_rounded),
+      (AppIcons.retry, Icons.refresh_rounded),
     ];
     for (final (actual, glyph) in expected) {
       expect(actual, glyph);
@@ -532,7 +561,6 @@ void main() {
     // Same meaning, same icon.
     expect(AppIcons.settingsDesktopVolume, AppIcons.settingsPhoneVolume);
     expect(AppIcons.settingsDanmakuFont, AppIcons.appFont);
-    expect(AppIcons.recordReconnect, AppIcons.recordReconnecting);
     expect(AppIcons.settingsExitMinutes, AppIcons.settingsExitTimer);
     // Different meanings, different icons.
     final apart = <(IconData, IconData)>[

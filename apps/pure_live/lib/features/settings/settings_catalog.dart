@@ -443,7 +443,7 @@ List<SettingsEntry> _build() {
     ..add(
       'app_font',
       'settings_font',
-      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.fontFamilyName),
+      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.fontFamilyName, icon: AppIcons.appFont),
       desc: 'settings_font_desc',
       settings: [Settings.fontFamilyName, Settings.fontFamilyFileName],
       keywords: ['font', '字体'],
@@ -892,7 +892,8 @@ List<SettingsEntry> _build() {
       'video_danmaku_font',
       'change_danmaku_font_family',
       // The app font's icon (A01.4 c4: a font, whichever text it sets).
-      (context, entry) => FontFamilyTile(entry: entry, setting: Settings.danmakuFontFamilyName),
+      (context, entry) =>
+          FontFamilyTile(entry: entry, setting: Settings.danmakuFontFamilyName, icon: AppIcons.settingsDanmakuFont),
       settings: [Settings.danmakuFontFamilyName, Settings.danmakuFontFamilyFileName],
       keywords: ['字体', 'font', '弹幕'],
       opens: true,

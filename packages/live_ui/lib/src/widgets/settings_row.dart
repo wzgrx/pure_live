@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_chip.dart';
@@ -611,11 +612,7 @@ class SettingsLinkRow extends StatelessWidget {
           ),
         ),
       if (chevron)
-        Icon(
-          choice ? Icons.expand_more_rounded : Icons.chevron_right_rounded,
-          size: choice ? 20 : 24,
-          color: colors.onSurfaceVariant,
-        ),
+        Icon(choice ? AppIcons.choiceRow : AppIcons.navigate, size: choice ? 20 : 24, color: colors.onSurfaceVariant),
     ];
     return SettingsRow(
       title: title,
@@ -1158,13 +1155,13 @@ class SettingsSearchField extends StatelessWidget {
             filled: true,
             fillColor: colors.surfaceContainerHigh,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            prefixIcon: Icon(Icons.search_rounded, size: 22, color: colors.onSurfaceVariant),
+            prefixIcon: Icon(AppIcons.searchField, size: 22, color: colors.onSurfaceVariant),
             suffixIcon: value.text.isEmpty
                 ? null
                 : IconButton(
                     key: clearKey,
                     tooltip: clearTooltip,
-                    icon: Icon(Icons.close_rounded, size: 20, color: colors.onSurfaceVariant),
+                    icon: Icon(AppIcons.clearQuery, size: 20, color: colors.onSurfaceVariant),
                     onPressed: controller.clear,
                   ),
             border: const OutlineInputBorder(

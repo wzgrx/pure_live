@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/scope.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
@@ -76,23 +77,18 @@ class _StatusBannerState extends State<StatusBanner> {
     final scheme = theme.colorScheme;
     final brightness = theme.brightness;
     final (Color background, Color ink, Color iconColor, IconData glyph) = switch (widget.kind) {
-      StatusBannerKind.info => (
-        scheme.surfaceContainerLow,
-        scheme.onSurfaceVariant,
-        scheme.primary,
-        Icons.info_outline_rounded,
-      ),
+      StatusBannerKind.info => (scheme.surfaceContainerLow, scheme.onSurfaceVariant, scheme.primary, AppIcons.info),
       StatusBannerKind.warning => (
         LiveSemanticColors.warningContainer(brightness),
         scheme.onSurface,
         LiveSemanticColors.warning(brightness),
-        Icons.warning_amber_rounded,
+        AppIcons.warning,
       ),
       StatusBannerKind.error => (
         scheme.errorContainer,
         scheme.onErrorContainer,
         scheme.onErrorContainer,
-        Icons.error_outline_rounded,
+        AppIcons.bannerError,
       ),
     };
     final folds = widget.kind == StatusBannerKind.info && widget.onTap == null;
@@ -169,13 +165,13 @@ class _StatusBannerState extends State<StatusBanner> {
                         tooltip: LiveUiScope.of(context).strings.close,
                         onPressed: close,
                         color: widget.kind == StatusBannerKind.error ? ink : scheme.onSurfaceVariant,
-                        icon: const Icon(Icons.close_rounded, size: 20),
+                        icon: const Icon(AppIcons.close, size: 20),
                       ),
                     )
                   else if (widget.onTap != null)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Icon(Icons.chevron_right_rounded, size: 20, color: scheme.onSurfaceVariant),
+                      child: Icon(AppIcons.navigate, size: 20, color: scheme.onSurfaceVariant),
                     ),
                 ],
               ),

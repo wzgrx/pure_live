@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/widgets/focus_ring.dart';
 
 /// The chip's height (docs/A-界面设计/A02-组件/A02.1-通用组件 c13); 48 to tap.
@@ -25,7 +26,7 @@ class AppChip extends ChoiceChip {
          label: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
          // The tick takes the picture's place (Material would paint it over
          // a darkened logo).
-         avatar: selected && showCheckmark ? const Icon(Icons.check_rounded, size: 18) : leading,
+         avatar: selected && showCheckmark ? const Icon(AppIcons.selected, size: 18) : leading,
          showCheckmark: false,
          labelStyle: TextStyle(fontSize: 14, height: 20 / 14, fontWeight: selected ? FontWeight.w600 : FontWeight.w400),
          onSelected: onSelected == null ? null : (_) => onSelected(),

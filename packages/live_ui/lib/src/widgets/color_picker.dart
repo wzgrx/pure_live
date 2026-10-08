@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:live_ui/src/theme/live_colors.dart';
 
 /// The words of [LiveColorPicker] (the app passes the current language's).
@@ -392,7 +393,7 @@ class _Swatches extends StatelessWidget {
                         shape: BoxShape.circle,
                         border: on ? Border.all(color: scheme.onSurface, width: 3) : null,
                       ),
-                      child: on ? Icon(Icons.check_rounded, color: InkOnColor.on(color), size: size * 0.5) : null,
+                      child: on ? Icon(AppIcons.selected, color: InkOnColor.on(color), size: size * 0.5) : null,
                     ),
                   );
                   final name = names?[index];

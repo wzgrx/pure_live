@@ -185,7 +185,7 @@ class _PaginationBarState extends State<PaginationBar> {
                 const SizedBox(width: 8),
                 TextButton.icon(
                   onPressed: current > 1 && !busy ? () => widget.onPage(current - 1) : null,
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 12),
+                  icon: const Icon(AppIcons.previousPage, size: 12),
                   label: Text(i18n('prev_page')),
                 ),
                 const SizedBox(width: 8),
@@ -201,7 +201,7 @@ class _PaginationBarState extends State<PaginationBar> {
                       if (busy)
                         const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2))
                       else
-                        const Icon(Icons.arrow_forward_ios_rounded, size: 12),
+                        const Icon(AppIcons.nextPage, size: 12),
                     ],
                   ),
                 ),
@@ -234,7 +234,7 @@ class _PaginationBarState extends State<PaginationBar> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('${widget.pageSize}', style: styles.t13),
-                              Icon(Icons.arrow_drop_down_rounded, size: 18, color: theme.hintColor),
+                              Icon(AppIcons.pageSize, size: 18, color: theme.hintColor),
                             ],
                           ),
                         ),

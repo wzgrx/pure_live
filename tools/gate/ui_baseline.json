@@ -18,5 +18,7 @@
     "search -> settings/settings_model.dart",
     "settings -> home/home_menu.dart"
   ],
-  "raw_styles": {}
+  "raw_styles": {
+    "shared": 11
+  }
 }

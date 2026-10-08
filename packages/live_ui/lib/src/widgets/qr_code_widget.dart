@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/app_icons.dart';
 import 'package:qr/qr.dart';
 
 /// The colours around a QR code: it is always dark on white, whatever the
@@ -152,18 +153,18 @@ class QrCodeCard extends StatelessWidget {
               minimumSize: const Size(0, 36),
               padding: const EdgeInsets.symmetric(horizontal: 14),
             ),
-            icon: const Icon(Icons.refresh_rounded, size: 16),
+            icon: const Icon(AppIcons.qrCardRefresh, size: 16),
             label: Text(actionLabel!),
           );
     final children = switch (status) {
       QrCodeStatus.ready => null,
       QrCodeStatus.loading || QrCodeStatus.working => [spinner, ?_gap(12, text(ink))],
       QrCodeStatus.scanned || QrCodeStatus.done => [
-        Icon(Icons.check_circle_outline_rounded, size: 44, color: mark),
+        Icon(AppIcons.qrCardScanned, size: 44, color: mark),
         ?_gap(8, text(status == QrCodeStatus.scanned ? heading : ink)),
       ],
       QrCodeStatus.expired || QrCodeStatus.failed => [
-        Icon(Icons.error_outline_rounded, size: 32, color: status == QrCodeStatus.failed ? scheme.error : QrColors.ink),
+        Icon(AppIcons.qrCardFailed, size: 32, color: status == QrCodeStatus.failed ? scheme.error : QrColors.ink),
         ?_gap(8, text(ink)),
         ?_gap(8, button()),
       ],

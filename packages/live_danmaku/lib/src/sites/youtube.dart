@@ -851,17 +851,21 @@ abstract final class YouTubeDanmakuProtocol {
 ///   by video id again) and does not touch the chat.
 ///
 /// The app registers it as `SiteIds.youtube: () =>
-/// YouTubeDanmakuConnection(http: …, allChat: …)`, with the `LiveHttp` it
+/// YouTubeDanmakuConnection(http: …, allChatOf: …)`, with the `LiveHttp` it
 /// gives `YouTubeSite` (the `youtube` proxy route and throttle) and the
 /// "show all chat" setting (default off, as the page).
 final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmakuArgs> {
   /// Creates the connection; `http` sends the chat requests, `allChat` reads
-  /// the "Live chat" view instead of "Top chat" (default off, as the page),
-  /// [now] is the clock a Super Chat without a platform time starts at.
-  new({required this._http, this._allChat = false, DateTime Function()? now}) : _now = now ?? DateTime.now;
+  /// the "Live chat" view instead of "Top chat" (default off, as the page);
+  /// `allChatOf`, when given, is asked instead at every start, so a changed
+  /// setting applies to the next connect (C01.6); [now] is the clock a
+  /// Super Chat without a platform time starts at.
+  new({required this._http, this._allChat = false, this._allChatOf, DateTime Function()? now})
+    : _now = now ?? DateTime.now;
 
   final LiveHttp _http;
   final bool _allChat;
+  final bool Function()? _allChatOf;
   final DateTime Function() _now;
 
   @override
@@ -871,7 +875,7 @@ final class YouTubeDanmakuConnection extends DanmakuConnectionBase<YouTubeDanmak
     if (!YouTubeApi.isVideoId(videoId)) {
       throw const DanmakuStartFailure(DanmakuCloseReason.connectionFailed, detail: 'No broadcast');
     }
-    final chat = _YouTubeChat(_http, run, allChat: _allChat, now: _now);
+    final chat = _YouTubeChat(_http, run, allChat: _allChatOf?.call() ?? _allChat, now: _now);
     YouTubeChatEntry? entry;
     YouTubeChatPoll? history;
     for (var failures = 0; history == null;) {

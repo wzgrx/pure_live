@@ -17,8 +17,13 @@ final class FakeCipher implements SecretCipher {
   /// Values sealed so far.
   int sealed = 0;
 
+  /// Thrown by [seal] while set: the device's secure storage failing (a
+  /// Keystore error).
+  Object? sealFailure;
+
   @override
   Future<Uint8List> seal(String ref, String plain) async {
+    if (sealFailure case final failure?) Error.throwWithStackTrace(failure, StackTrace.current);
     sealed++;
     return Uint8List.fromList(utf8.encode('$ref|${plain.split('').reversed.join()}'));
   }

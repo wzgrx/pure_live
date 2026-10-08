@@ -11,6 +11,7 @@ import 'package:pure_live/features/account/account_page.dart';
 import 'package:pure_live/features/account/account_platforms.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/account/account_state.dart';
+import 'package:pure_live/features/account/bilibili_qr_login.dart';
 import 'package:pure_live/features/auth/auth_page.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -52,15 +53,24 @@ final class _FakeQr implements BilibiliQrApi {
 }
 
 final class _Harness {
-  new(this.services, this.toasts, this.router, this.renewals);
+  new(this.services, this.toasts, this.router, this.renewals, this.webClears);
 
   final AppServices services;
   final List<String> toasts;
   final GoRouter router;
   final List<String> renewals;
 
+  /// Calls of the in-app browser's Bilibili cookie removal (K02.2 c3).
+  final List<void> webClears;
+
   LiveStore get store => services.store;
+
+  /// The store's cipher; set its `sealFailure` to fail every save.
+  FakeCipher get cipher => services.cipher as FakeCipher;
 }
+
+/// What the app says when the secure storage could not store a login (K02.2).
+const String _secretSaveFailed = '登录信息没能保存：这台设备的加密存储出错，请重试';
 
 const List<String> _accountPaths = [
   RoutePath.kSettingsAccount,
@@ -111,6 +121,7 @@ Future<_Harness> _pump(
   AppNavigator.toast = toasts.add;
   addTearDown(() => AppNavigator.toast = previousToast);
   final renewals = <String>[];
+  final webClears = <void>[];
   final router = GoRouter(
     initialLocation: path,
     routes: [
@@ -143,6 +154,7 @@ Future<_Harness> _pump(
           renewals.add('$ltp0/$did');
           return 'dy_auth=renewed; LTP0=$ltp0';
         }),
+        bilibiliWebCookieClearerProvider.overrideWithValue(() async => webClears.add(null)),
       ],
       child: LiveUiScope(
         config: LiveUiConfig(strings: strings.ui),
@@ -154,7 +166,7 @@ Future<_Harness> _pump(
     ),
   );
   await _settle(tester);
-  return _Harness(services, toasts, router, renewals);
+  return _Harness(services, toasts, router, renewals, webClears);
 }
 
 /// Lets the store (real async work) and the checks finish, then the frames.
@@ -644,6 +656,158 @@ void main() {
       expect(cleanPastedCookie(' Cookie: a=b; c=d \n'), 'a=b; c=d');
       expect(looksLikeCookie('a=b'), isTrue);
       expect(looksLikeCookie('hello'), isFalse);
+    });
+  });
+
+  group('K02.2 save failures and sign-out', () {
+    testWidgets('a failed save says so and keeps the input (K02.2)', (tester) async {
+      final harness = await _pump(tester, path: RoutePath.kHuyaCookie);
+      harness.cipher.sealFailure = PlatformException(code: 'KeyStoreException', message: 'test');
+      await _enter(tester, 'udb_uid=1; yyuid=99');
+      await _tap(tester, find.byKey(const ValueKey('account-cookie-save')));
+      expect(harness.toasts, [_secretSaveFailed]);
+      expect(harness.store.secrets.cookieFor(SiteIds.huya), isNull);
+      // The input stays, still unsaved: saving again is a tap away.
+      expect(find.text('udb_uid=1; yyuid=99'), findsOneWidget);
+      expect(_enabled(tester, const ValueKey('account-cookie-save')), isTrue);
+      expect(_cardStatus(tester), '未设置：粘贴登录后的 Cookie');
+      expect(tester.takeException(), isNull);
+
+      harness.cipher.sealFailure = null;
+      await _tap(tester, find.byKey(const ValueKey('account-cookie-save')));
+      expect(harness.store.secrets.cookieFor(SiteIds.huya), 'udb_uid=1; yyuid=99');
+      expect(harness.toasts.last, 'Cookie 已保存在本机');
+      expect(_enabled(tester, const ValueKey('account-cookie-save')), isFalse);
+    });
+
+    testWidgets('a checked cookie whose save fails puts the check back (K02.2)', (tester) async {
+      final harness = await _pump(tester, cookies: {SiteIds.bilibili: 'SESSDATA=ok'});
+      harness.router.go(RoutePath.kSettingsAccount, extra: SiteIds.bilibili);
+      await _settle(tester);
+      expect(_cardStatus(tester), '已登录：Alice');
+      harness.cipher.sealFailure = StateError('Keystore returned nothing');
+      await _enter(tester, 'SESSDATA=ok; bili_jct=2');
+      await _tap(tester, find.byKey(const ValueKey('account-cookie-save')));
+      expect(harness.toasts.where((toast) => toast == _secretSaveFailed), hasLength(1));
+      expect(harness.toasts.last, _secretSaveFailed);
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok');
+      expect(harness.store.settings.get(Settings.bilibiliUid), 42);
+      // Not left at "核验中".
+      expect(_cardStatus(tester), '已登录：Alice');
+      expect(find.byKey(const ValueKey('account-recheck')), findsOneWidget);
+      expect(find.text('SESSDATA=ok; bili_jct=2'), findsOneWidget);
+      expect(_enabled(tester, const ValueKey('account-cookie-save')), isTrue);
+    });
+
+    testWidgets('a failed Douyu save says so once and keeps the input (K02.2)', (tester) async {
+      final harness = await _pump(tester, path: RoutePath.kDouyuAccountCookie);
+      harness.cipher.sealFailure = PlatformException(code: 'KeyStoreException');
+      await _enter(tester, 'dy_auth=login; dy_did=d1');
+      await _tap(tester, find.byKey(const ValueKey('account-cookie-save')));
+      expect(harness.toasts, [_secretSaveFailed]);
+      expect(harness.store.secrets.cookieFor(SiteIds.douyu), isNull);
+      expect(harness.store.settings.get(Settings.douyuCookieSavedAt), 0);
+      expect(find.text('dy_auth=login; dy_did=d1'), findsOneWidget);
+    });
+
+    testWidgets('a QR login whose save fails stops with the reason and can start over (K02.2)', (tester) async {
+      final qr = _FakeQr();
+      final harness = await _pump(tester, path: RoutePath.kBiliBiliQRLogin, qr: qr);
+      harness.cipher.sealFailure = PlatformException(code: 'KeyStoreException');
+      qr.answers.add((state: BilibiliQrState.confirmed, cookie: 'SESSDATA=ok; DedeUserID=42'));
+      await tester.pump(const Duration(seconds: 3));
+      await _settle(tester);
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), isNull);
+      expect(find.byKey(const ValueKey('qr-failed')), findsOneWidget);
+      expect(find.text('核验中'), findsNothing);
+      expect(find.text(_secretSaveFailed), findsOneWidget);
+      // The page shows it; no passing message on top.
+      expect(harness.toasts, isNot(contains(_secretSaveFailed)));
+
+      harness.cipher.sealFailure = null;
+      await _tap(tester, find.byKey(const ValueKey('bilibili-qr-retry')));
+      expect(qr.codes, 2);
+      expect(find.byKey(const ValueKey('qr-code')), findsOneWidget);
+      expect(find.text('请使用哔哩哔哩手机客户端扫码登录'), findsOneWidget);
+      qr.answers.add((state: BilibiliQrState.confirmed, cookie: 'SESSDATA=ok; DedeUserID=42'));
+      await tester.pump(const Duration(seconds: 3));
+      await _settle(tester);
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok; DedeUserID=42');
+    });
+
+    testWidgets('the QR flow never stays at verifying when the completion throws', (tester) async {
+      final qr = _FakeQr()..answers.add((state: BilibiliQrState.confirmed, cookie: 'SESSDATA=ok'));
+      final notices = <String>[];
+      final login = BilibiliQrLogin(
+        api: qr,
+        complete: (_) async => throw StateError('test'),
+        notice: notices.add,
+        interval: const Duration(seconds: 1),
+      );
+      await login.load();
+      expect(login.phase, BilibiliQrPhase.waiting);
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      expect(login.phase, BilibiliQrPhase.failed);
+      expect(login.errorKey, 'account_secret_save_failed');
+      expect(notices, isEmpty);
+
+      final phases = <BilibiliQrPhase>[];
+      login.addListener(() => phases.add(login.phase));
+      await login.load();
+      expect(phases, [BilibiliQrPhase.loading, BilibiliQrPhase.waiting]);
+      expect(qr.codes, 2);
+      login.dispose();
+    });
+
+    test('a web or QR login whose save fails stores nothing and says why (K02.2)', () async {
+      await loadStrings();
+      final cipher = FakeCipher();
+      final store = await LiveStore.memory(cipher: cipher);
+      addTearDown(store.close);
+      final actions = AccountActions(store, clearBilibiliWeb: () async {});
+      cipher.sealFailure = PlatformException(code: 'KeyStoreException');
+      var stored = await storeBilibiliLogin(actions, _verifier, 'SESSDATA=ok; DedeUserID=42');
+      expect(stored.refused, 'account_secret_save_failed');
+      expect(store.secrets.cookieFor(SiteIds.bilibili), isNull);
+      expect(store.settings.get(Settings.bilibiliUid), 0);
+      expect(i18n('account_secret_save_failed'), _secretSaveFailed);
+
+      stored = await storeBilibiliLogin(actions, _verifier, 'SESSDATA=bad');
+      expect(stored.refused, 'bilibili_login_verification_failed');
+
+      cipher.sealFailure = null;
+      stored = await storeBilibiliLogin(actions, _verifier, 'SESSDATA=ok; DedeUserID=42');
+      expect(stored.refused, isNull);
+      expect(stored.check, isA<AccountVerified>());
+      expect(store.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=ok; DedeUserID=42');
+      expect(store.settings.get(Settings.bilibiliUid), 42);
+    });
+
+    testWidgets('signing out of Bilibili clears its web cookies; other platforms do not (K02.2)', (tester) async {
+      final harness = await _pump(tester, cookies: {SiteIds.bilibili: 'SESSDATA=ok', SiteIds.soop: 'x=y'});
+      await _tap(tester, find.byKey(const ValueKey('account-soop-sign-out')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.store.secrets.cookieFor(SiteIds.soop), isNull);
+      expect(harness.webClears, isEmpty);
+
+      await _tap(tester, find.byKey(const ValueKey('account-bilibili-sign-out')));
+      await _tap(tester, find.byKey(const ValueKey('account-confirm-ok')));
+      expect(harness.store.secrets.cookieFor(SiteIds.bilibili), isNull);
+      expect(harness.store.settings.get(Settings.bilibiliUid), 0);
+      expect(harness.webClears, hasLength(1));
+      expect(harness.toasts.last, '已退出哔哩哔哩');
+    });
+
+    test('a web cookie removal that fails does not stop the sign-out', () async {
+      final store = await LiveStore.memory(cipher: FakeCipher());
+      addTearDown(store.close);
+      await store.secrets.setCookie(SiteIds.bilibili, 'SESSDATA=ok');
+      await store.settings.set(Settings.bilibiliUid, 42);
+      final actions = AccountActions(store, clearBilibiliWeb: () async => throw StateError('no WebView'));
+      await actions.signOut(SiteIds.bilibili);
+      expect(store.secrets.cookieFor(SiteIds.bilibili), isNull);
+      expect(store.settings.get(Settings.bilibiliUid), 0);
     });
   });
 

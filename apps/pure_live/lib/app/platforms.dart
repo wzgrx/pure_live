@@ -230,8 +230,9 @@ DanmakuRegistry buildDanmakuRegistry(PlatformDeps deps, SiteRegistry sites) {
     SiteIds.chzzk: () => ChzzkDanmakuConnection(http: http, proxy: proxy, connector: connector),
     // M5.34: Kick's Pusher socket is not behind Kick's Cloudflare; dart:io works.
     SiteIds.kick: () => KickDanmakuConnection(proxy: proxy, connector: connector),
-    // B-13: "显示全部聊天" is read when the room connects.
-    SiteIds.youtube: () => YouTubeDanmakuConnection(http: http, allChat: settings.get(Settings.youtubeShowAllChat)),
+    // B-13: "显示全部聊天" is read at every connect (C01.6: a change reconnects).
+    SiteIds.youtube: () =>
+        YouTubeDanmakuConnection(http: http, allChatOf: () => settings.get(Settings.youtubeShowAllChat)),
     SiteIds.bigo: () => BigoDanmakuConnection(http: http, proxy: proxy, connector: connector),
     SiteIds.pandaLive: () => PandaLiveDanmakuConnection(http: http, proxy: proxy, connector: connector),
     SiteIds.fc2Live: () => Fc2LiveDanmakuConnection(http: http, proxy: proxy),

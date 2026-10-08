@@ -292,6 +292,106 @@ void main() {
     await store.close();
   });
 
+  test('3.x stand-in names are cleared on import (JD Live, Kugou Live, Baidu Live)', () async {
+    const cover = 'https://img.example/blur.jpg';
+    final file = await writeV3Box(Directory(p.join(temp.path, 'stand_ins'))..createSync(), {
+      'favoriteRooms': jsonEncode({
+        'list': [
+          {
+            ...v3Room('jdlive', '501', nick: 'JD Live', title: 'JD Live'),
+            'userId': '501',
+            'avatar': cover,
+            'cover': cover,
+          },
+          {
+            ...v3Room('jdlive', '502', nick: 'Shop', title: 'Sale'),
+            'userId': 'shop-9',
+            'avatar': 'https://img.example/a.jpg',
+          },
+          v3Room('kugoulive', '601', nick: 'Kugou Live', title: 'Kugou Live'),
+          {
+            ...v3Room('kugoulive', '602', nick: 'Singer', title: 'Kugou Live'),
+            'userId': '602',
+            'avatar': cover,
+            'cover': cover,
+          },
+          v3Room('baidulive', '701', nick: 'Baidu Live', title: 'Baidu Live'),
+          // Another platform's streamer may really be called that.
+          {
+            ...v3Room('bilibili', '801', nick: 'JD Live', title: 'Baidu Live'),
+            'userId': '801',
+            'avatar': cover,
+            'cover': cover,
+          },
+        ],
+      }),
+      'historyRooms': [jsonEncode(v3Room('kugoulive', '603', nick: 'Kugou Live', lastWatchedAt: 5))],
+    });
+    final store = await memoryStore();
+    await LegacyMigration.importHiveFiles(store, [file]);
+    final follows = {for (final room in await store.follows.all()) room.identityKey: room};
+    final jd = follows['jdlive:501']!;
+    expect((jd.nick, jd.title, jd.userId, jd.avatar, jd.cover), ('', '', '', '', cover));
+    final shop = follows['jdlive:502']!;
+    expect((shop.nick, shop.title, shop.userId, shop.avatar), ('Shop', 'Sale', 'shop-9', 'https://img.example/a.jpg'));
+    final kugou = follows['kugoulive:601']!;
+    expect((kugou.nick, kugou.title), ('', ''));
+    // Only JD's id and avatar rules: Kugou keeps them.
+    final singer = follows['kugoulive:602']!;
+    expect((singer.nick, singer.title, singer.userId, singer.avatar), ('Singer', '', '602', cover));
+    final baidu = follows['baidulive:701']!;
+    expect((baidu.nick, baidu.title), ('', ''));
+    final bili = follows['bilibili:801']!;
+    expect((bili.nick, bili.title, bili.userId, bili.avatar), ('JD Live', 'Baidu Live', '801', cover));
+    expect((await store.history.all()).single.nick, '');
+    await store.close();
+  });
+
+  test('rooms imported before are cleared once', () async {
+    final store = await memoryStore();
+    final standIns = [
+      LiveRoom(platform: 'jdlive', roomId: '501', userId: '501', nick: 'JD Live', title: 'JD Live'),
+      LiveRoom(platform: 'bilibili', roomId: '1', nick: 'Kugou Live'),
+      LiveRoom(platform: 'baidulive', roomId: '701', nick: 'Real', title: 'Baidu Live'),
+    ];
+    await store.follows.replaceAll(standIns);
+    await store.history.replaceAll([LiveRoom(platform: 'kugoulive', roomId: '601', nick: 'Kugou Live')]);
+    expect(await LegacyMigration.clearPlaceholdersOnce(store), 3);
+    final follows = await store.follows.all();
+    expect([for (final room in follows) room.identityKey], ['jdlive:501', 'bilibili:1', 'baidulive:701']);
+    expect([for (final room in follows) room.nick], ['', 'Kugou Live', 'Real']);
+    expect([for (final room in follows) room.title], ['', '', '']);
+    expect(follows.first.userId, '');
+    expect((await store.history.all()).single.nick, '');
+    expect(await store.meta.get(LegacyMigration.placeholdersClearedKey), isNotNull);
+
+    // Once: stand-ins that come back later are left to the refresh.
+    await store.follows.replaceAll(standIns);
+    expect(await LegacyMigration.clearPlaceholdersOnce(store), isNull);
+    expect((await store.follows.all()).first.nick, 'JD Live');
+    await store.close();
+  });
+
+  test('the import report sums up without values', () {
+    final report = LegacyImportReport()
+      ..importedSources = 1
+      ..follows = 12
+      ..history = 30
+      ..failedSources.add('/data/old/app_settings.hive')
+      ..skipped.addAll(['currentWebDavConfig', 'favoriteRooms[3]'])
+      ..skippedSecrets.add(SecretRefs.cookie('bilibili'));
+    expect(report.read, isTrue);
+    expect(report.hasProblems, isTrue);
+    expect(
+      report.summary(),
+      'sources 1, before 0, failed 1 (/data/old/app_settings.hive), follows 12, history 30, '
+      'unreadable 2 (currentWebDavConfig, favoriteRooms[3]), sign-ins not stored 1 (cookie/bilibili)',
+    );
+    final quiet = LegacyImportReport()..alreadyImported = 1;
+    expect(quiet.read, isFalse);
+    expect(quiet.hasProblems, isFalse);
+  });
+
   test('quality ids map once per platform (CC, Missevan, others unchanged)', () {
     expect(LegacyRules.qualityId('missevan', 'hls'), MissevanApi.qualityIdFromLegacy('hls'));
     expect(LegacyRules.qualityId('cc', 'high'), CcApi.qualityIdFromLegacy('high'));

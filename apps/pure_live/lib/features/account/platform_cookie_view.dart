@@ -110,7 +110,13 @@ class _PlatformCookieViewState extends ConsumerState<PlatformCookieView> {
       AppNavigator.toast(i18n('account_cookie_rejected'));
       return false;
     }
-    await _actions.save(_id, cookie);
+    try {
+      await _actions.save(_id, cookie);
+    } on Object {
+      // The editor says so (K02.2); the card goes back to before.
+      if (mounted && run == _checkRun) setState(() => _check = previous);
+      rethrow;
+    }
     if (result case AccountVerified(:final uid?) when _id == SiteIds.bilibili) {
       await _actions.rememberBilibiliUid(uid);
     }

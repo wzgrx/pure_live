@@ -1,0 +1,10 @@
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=226 qualities=68 urls=75 engineReady=39 input=0 load=7 firstFrame=2452 playing=0 total=2868
+site=bilibili room=7a1cd9 route=direct engine=new result=playing detail=262 qualities=76 urls=82 engineReady=50 input=0 load=10 firstFrame=2875 playing=0 total=3358
+site=douyu room=9f1c10 route=flvSplice engine=new result=playing detail=130 qualities=239 urls=170 engineReady=24 input=0 load=9 firstFrame=394 playing=0 total=968
+site=douyu room=9f1c10 route=flvSplice engine=new result=playing detail=351 qualities=267 urls=332 engineReady=50 input=0 load=5 firstFrame=432 playing=0 total=1440
+site=huya room=e12d61 route=direct engine=new result=playing detail=299 qualities=0 urls=239 engineReady=47 input=0 load=4 firstFrame=748 playing=0 total=1339
+site=huya room=e12d61 route=direct engine=new result=playing detail=271 qualities=0 urls=223 engineReady=52 input=0 load=4 firstFrame=818 playing=0 total=1371
+site=douyin room=165c50 route=direct engine=new result=playing detail=425 qualities=0 urls=2 engineReady=37 input=0 load=4 firstFrame=612 playing=0 total=1082
+site=douyin room=ba6b9f route=direct engine=new result=playing detail=554 qualities=1 urls=2 engineReady=42 input=0 load=5 firstFrame=645 playing=0 total=1252
+site=kuaishou room=0e2242 route=direct engine=new result=playing detail=1040 qualities=0 urls=2 engineReady=45 input=0 load=5 firstFrame=624 playing=0 total=1719
+site=kuaishou room=eb37ae route=direct engine=new result=playing detail=1317 qualities=0 urls=4 engineReady=33 input=0 load=4 firstFrame=576 playing=0 total=1937

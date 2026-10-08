@@ -286,6 +286,8 @@ const Map<String, Object> newInV4 = {
   'danmakuPausedBehavior': 'pause', // A07.10
   'danmakuMaxVisibleCount': 48, // D05.2 (V01.4; 3.x's fixed 48)
   'holdDanmakuOnPress': true, // D03.4 (V01.3), on by default (D-039)
+  'liveAlertEnabled': false, // O01.1 (V01.1; off: no notification as before)
+  'liveAlertTagIds': <String>[], // O01.1 (every follow)
   'youtubeShowAllChat': false, // UPGRADES B-13
   'enableLocalLog': false, // I01.3
   'logLevel': 'info', // I01.3

@@ -1227,6 +1227,9 @@ abstract final class AppIcons {
   /// Refresh follows on returning to the app (a refresh, A01.4 c4).
   static const IconData settingsRefreshOnResume = Remix.refresh_line;
 
+  /// "开播提醒": a notification when a followed streamer goes live (O01.1).
+  static const IconData settingsLiveAlert = Remix.notification_3_line;
+
   /// A refresh interval.
   static const IconData settingsInterval = Remix.time_line;
 

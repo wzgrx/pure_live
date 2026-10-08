@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/features/settings/playback_tiles.dart';
+import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/features/settings/settings_model.dart';
 import 'package:pure_live/routes/route_path.dart';
@@ -176,6 +178,79 @@ void main() {
       await tapSettings(tester, find.byKey(const ValueKey('settings-entry-refresh_concurrency-decrease')));
       await tapSettings(tester, find.byKey(const ValueKey('settings-entry-refresh_concurrency-decrease')));
       expect(h.settings.get(Settings.maxConcurrentRefresh), before - 1);
+    });
+
+    testWidgets('O01.1 "开播提醒": its own group after the follow list, off; the tag rows wait for it', (tester) async {
+      final h = await pumpSettings(
+        tester,
+        arguments: 'refresh',
+        height: 2400,
+        overrides: [switchGateProvider.overrideWithValue((_) async => SwitchGateResult.granted)],
+      );
+      expectInOrder(tester, [
+        settingsRow('refresh_concurrency'),
+        settingsRow('live_alert'),
+        settingsRow('live_alert_tags'),
+        settingsRow('refresh_covers'),
+      ]);
+      expect(_text('开播提醒'), findsNWidgets(2), reason: 'the group and the switch');
+      expect(_inRow('live_alert', find.byType(Switch)), findsOneWidget);
+      expect(h.settings.get(Settings.liveAlertEnabled), isFalse);
+      expect(_inRow('live_alert_tags', _text(withoutOrphan('打开“开播提醒”后生效'))), findsOneWidget);
+
+      await tapSettings(tester, settingsRow('live_alert'));
+      expect(h.settings.get(Settings.liveAlertEnabled), isTrue);
+      expect(_inRow('live_alert_tags', findWords('还没有标签，提醒全部关注')), findsOneWidget);
+
+      final tags = (await tester.runAsync(() async {
+        final store = h.services.store;
+        return [(await store.tags.add('常看'))!, (await store.tags.add('游戏'))!];
+      }))!;
+      await settleSettings(tester);
+      expect(_inRow('live_alert_tags', findWords('都不选时提醒全部关注')), findsOneWidget);
+      final second = find.byKey(ValueKey('settings-live-alert-tag-${tags[1].id}'));
+      expect(tester.widget<SettingsSwitchRow>(second).value, isFalse);
+      await tapSettings(tester, second);
+      expect(h.settings.get(Settings.liveAlertTagIds), [tags[1].id]);
+      await tapSettings(tester, find.byKey(ValueKey('settings-live-alert-tag-${tags[0].id}')));
+      expect(h.settings.get(Settings.liveAlertTagIds), [tags[0].id, tags[1].id], reason: "in the tags' order");
+      await tapSettings(tester, second);
+      expect(h.settings.get(Settings.liveAlertTagIds), [tags[0].id]);
+    });
+
+    testWidgets('O01.1: search finds "开播提醒" and its tags', (tester) async {
+      await pumpSettings(tester);
+      await searchSettingsFor(tester, '开播');
+      expect(settingsRow('live_alert'), findsOneWidget);
+      expect(settingsRow('live_alert_tags'), findsOneWidget);
+    });
+
+    testWidgets('O01.1: refused notifications keep "开播提醒" off with the red explanation', (tester) async {
+      final h = await pumpSettings(
+        tester,
+        arguments: 'refresh',
+        height: 2400,
+        overrides: [switchGateProvider.overrideWithValue((_) async => SwitchGateResult.denied)],
+      );
+      await tapSettings(tester, settingsRow('live_alert'));
+      expect(h.settings.get(Settings.liveAlertEnabled), isFalse);
+      expect(_inRow('live_alert', _text(withoutOrphan('通知权限已关闭：在系统设置里允许通知后再打开'))), findsOneWidget);
+    });
+
+    test('O01.1: "开播提醒" is Android only (a system notification)', () {
+      for (final (platform, shown) in [
+        (TargetPlatform.android, true),
+        (TargetPlatform.windows, false),
+        (TargetPlatform.linux, false),
+        (TargetPlatform.iOS, false),
+      ]) {
+        final env = SettingsEnv(platform: platform);
+        final ids = [
+          for (final entry in settingsCatalog)
+            if (entry.when(env)) entry.id,
+        ];
+        expect(ids.contains('live_alert') && ids.contains('live_alert_tags'), shown, reason: '$platform');
+      }
     });
 
     testWidgets('a held + repeats', (tester) async {

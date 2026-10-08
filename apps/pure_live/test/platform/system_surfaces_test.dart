@@ -4,9 +4,11 @@ import 'dart:io';
 import 'package:audio_service/audio_service.dart' as audio;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:live_core/live_core.dart';
 import 'package:live_record/live_record.dart';
 import 'package:pure_live/app/recording_notice.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
+import 'package:pure_live/platform/live_alert_channel.dart';
 import 'package:pure_live/platform/recording_platform.dart';
 
 import '../support.dart';
@@ -313,6 +315,64 @@ void main() {
     await pumpEventQueue();
     expect(commands, ['pause', 'play']);
     expect(sent, [true, false, null], reason: 'the action goes away with the room');
+  });
+
+  group('"开播提醒" (O01.1, V01.1 L7)', () {
+    test('"晚风 开播了" over the title; the platform for a streamer without a name; a tap hint without a title', () {
+      final start = DateTime.utc(2026, 10, 8, 19, 30);
+      final room = LiveRoom(
+        platform: 'douyu',
+        roomId: '9',
+        nick: '晚风',
+        title: '深夜电台',
+        liveStatus: LiveStatus.live,
+        startedAt: start,
+      );
+      expect(liveAlertContent(room), (title: '晚风 开播了', text: '深夜电台'));
+      expect(liveAlertContent(LiveRoom(platform: 'douyu', roomId: '9')), (title: '斗鱼 开播了', text: '点按进入直播间'));
+      expect(liveAlertArguments(room), {
+        'platform': 'douyu',
+        'roomId': '9',
+        'nick': '晚风',
+        'roomTitle': '深夜电台',
+        'title': '晚风 开播了',
+        'text': '深夜电台',
+        'since': start.millisecondsSinceEpoch,
+        'channel': '开播提醒',
+        'channelDescription': '关注的主播开播时提醒',
+      });
+      expect(liveAlertArguments(LiveRoom(platform: 'douyu', roomId: '9'))['since'], isNull);
+    });
+
+    test('posts on pure_live/live_alerts; a build without the native side is fine', () async {
+      const channel = MethodChannel('pure_live/live_alerts');
+      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final calls = <MethodCall>[];
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        calls.add(call);
+        return true;
+      });
+      await const LiveAlertChannel().post(LiveRoom(platform: 'huya', roomId: '1', nick: 'A'));
+      expect(calls.single.method, 'post');
+      expect((calls.single.arguments as Map)['title'], 'A 开播了');
+      messenger.setMockMethodCallHandler(channel, null);
+      await const LiveAlertChannel().post(LiveRoom(platform: 'huya', roomId: '1'));
+    });
+
+    test('the native side opens the room like a shortcut, one notification per room, on its own channel', () {
+      // LiveAlerts.kt is not compiled by the tests; these pin what O01.1 relies on.
+      final kotlin = File('android/app/src/main/kotlin/com/mystyle/purelive/LiveAlerts.kt').readAsStringSync();
+      expect(kotlin, contains('.setAction(ShareIntakePlugin.ACTION_OPEN)'));
+      for (final extra in ['"platform"', '"roomId"', '"title"', '"nick"']) {
+        expect(kotlin, contains('.putExtra($extra'), reason: extra);
+      }
+      expect(kotlin, contains(r'"live_alert:$key"'));
+      expect(kotlin, contains('NotificationManager.IMPORTANCE_DEFAULT'));
+      expect(kotlin, contains('0x20000000 + (key.hashCode() and 0x0FFFFFFF)'));
+      final plugins = File('android/app/src/main/kotlin/com/mystyle/purelive/AppChannelsPlugin.kt').readAsStringSync();
+      expect(plugins, contains('channel(messenger, "pure_live/live_alerts")'));
+      expect(plugins, contains('LiveAlerts.post(context, call.arguments)'));
+    });
   });
 
   group('Android resources (c2, c8, c9, c15)', () {

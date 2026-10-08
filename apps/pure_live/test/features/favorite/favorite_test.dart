@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
@@ -261,6 +262,151 @@ void main() {
       HomeSignals.resumedAfterBackground.value = (HomeMenu.popular, 3);
       await pumpEventQueue();
       expect(douyu.requested, hasLength(2));
+    });
+  });
+
+  group('live alerts (O01.1, V01.1)', () {
+    var resumes = 100;
+    Future<void> resume() async {
+      HomeSignals.resumedAfterBackground.value = (HomeMenu.popular, ++resumes);
+      await pumpEventQueue();
+    }
+
+    test('the start check and a pull only record; a resume posts a room that began, once; off posts nothing', () async {
+      final store = await memoryStore();
+      addTearDown(store.close);
+      await store.settings.set(Settings.liveAlertEnabled, true);
+      await store.follows.add(room('douyu', '1', nick: 'A', status: LiveStatus.offline));
+      await store.follows.add(room('douyu', '2', nick: 'B', status: LiveStatus.offline));
+      await store.follows.add(room('douyu', '3', nick: 'C', status: LiveStatus.offline));
+      final details = {
+        '1': room('douyu', '1', status: LiveStatus.offline),
+        '2': room('douyu', '2', status: LiveStatus.live),
+        '3': room('douyu', '3', status: LiveStatus.offline),
+      };
+      final site = FakeSite('douyu', details);
+      var now = DateTime(2026, 10, 8, 20);
+      final posted = <LiveRoom>[];
+      final controller = FavoriteController(
+        store: store,
+        refresher: FollowRefresher(sites: SiteRegistry({'douyu': () => site})),
+        now: () => now,
+        postLiveAlert: (room) async => posted.add(room),
+      )..start();
+      addTearDown(controller.dispose);
+      await pumpEventQueue();
+      expect(posted, isEmpty, reason: 'what is live at the start check is not news');
+
+      details['3'] = room('douyu', '3', status: LiveStatus.live);
+      await controller.refreshVisible();
+      expect(posted, isEmpty, reason: 'a pull: the user sees it');
+      details['3'] = room('douyu', '3', status: LiveStatus.offline);
+
+      details['1'] = room('douyu', '1', nick: 'A', title: 'T', status: LiveStatus.live);
+      now = now.add(const Duration(minutes: 20));
+      await resume();
+      expect([for (final room in posted) (room.roomId, room.nick, room.title)], [('1', 'A', 'T')]);
+      now = now.add(const Duration(minutes: 20));
+      await resume();
+      expect(posted, hasLength(1), reason: 'the same broadcast');
+
+      // The room switcher's refresh button is the user's too.
+      details['3'] = room('douyu', '3', status: LiveStatus.live);
+      await controller.refreshAll(visible: false, alert: false);
+      expect(posted, hasLength(1));
+
+      await store.settings.set(Settings.liveAlertEnabled, false);
+      details['2'] = room('douyu', '2', status: LiveStatus.offline);
+      now = now.add(const Duration(minutes: 20));
+      await resume();
+      details['2'] = room('douyu', '2', status: LiveStatus.live);
+      now = now.add(const Duration(minutes: 20));
+      await resume();
+      expect(posted, hasLength(1), reason: 'switched off');
+    });
+
+    test("the recorder's check posts first; the follows' pass of the same broadcast does not repeat it", () async {
+      final store = await memoryStore();
+      addTearDown(store.close);
+      await store.settings.set(Settings.liveAlertEnabled, true);
+      await store.follows.add(room('douyu', '1', nick: 'A', status: LiveStatus.offline));
+      final details = {'1': room('douyu', '1', status: LiveStatus.offline)};
+      var now = DateTime(2026, 10, 8, 20);
+      final posted = <String>[];
+      final controller = FavoriteController(
+        store: store,
+        refresher: FollowRefresher(sites: SiteRegistry({'douyu': () => FakeSite('douyu', details)})),
+        now: () => now,
+        postLiveAlert: (room) async => posted.add(room.roomId),
+      )..start();
+      addTearDown(controller.dispose);
+      await pumpEventQueue();
+
+      final followed = RecordTask.fromRoom(room('douyu', '1', nick: 'A'), now: now);
+      final other = RecordTask.fromRoom(room('douyu', '8', nick: 'X'), now: now);
+      controller.recorderChanged([followed, other]);
+      for (final task in [followed, other]) {
+        task
+          ..lastLiveCheckAt = now
+          ..liveStatus = LiveStatus.offline;
+      }
+      controller.recorderChanged([followed, other]);
+      for (final task in [followed, other]) {
+        task
+          ..lastLiveCheckAt = now.add(const Duration(minutes: 1))
+          ..liveStatus = LiveStatus.live;
+      }
+      controller.recorderChanged([followed, other]);
+      await pumpEventQueue();
+      expect(posted, ['1'], reason: 'not followed: no alert');
+
+      details['1'] = room('douyu', '1', status: LiveStatus.live);
+      now = now.add(const Duration(minutes: 20));
+      await resume();
+      expect(posted, ['1']);
+    });
+
+    test('without "关注自动刷新" a timer checks only the covered follows (tags chosen)', () async {
+      final store = await memoryStore();
+      addTearDown(store.close);
+      await store.follows.add(room('douyu', '1', nick: 'A', status: LiveStatus.offline));
+      await store.follows.add(room('douyu', '2', nick: 'B', status: LiveStatus.offline));
+      final tag = (await store.tags.add('提醒'))!;
+      await store.tags.setTagsOf(room('douyu', '1'), [tag.id]);
+      await store.settings.set(Settings.liveAlertTagIds, [tag.id]);
+      final details = {
+        '1': room('douyu', '1', status: LiveStatus.offline),
+        '2': room('douyu', '2', status: LiveStatus.offline),
+      };
+      final site = FakeSite('douyu', details);
+      final posted = <String>[];
+      final controller = FavoriteController(
+        store: store,
+        refresher: FollowRefresher(sites: SiteRegistry({'douyu': () => site})),
+        postLiveAlert: (room) async => posted.add(room.roomId),
+        liveAlertCheckInterval: const Duration(seconds: 1),
+      )..start();
+      addTearDown(controller.dispose);
+      await pumpEventQueue();
+      expect(site.requested, ['1', '2']);
+
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      expect(site.requested, ['1', '2'], reason: 'off: no timer');
+
+      await store.settings.set(Settings.liveAlertEnabled, true);
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      expect(site.requested, ['1', '2', '1'], reason: 'only the tagged follow');
+      details['1'] = room('douyu', '1', status: LiveStatus.live);
+      details['2'] = room('douyu', '2', status: LiveStatus.live);
+      await Future<void>.delayed(const Duration(seconds: 1));
+      expect(site.requested, ['1', '2', '1', '1']);
+      expect(posted, ['1']);
+      expect([for (final room in controller.liveAlertTargets) room.roomId], ['1']);
+
+      // "关注自动刷新" takes over with its own interval (30 minutes).
+      await store.settings.set(Settings.autoRefreshFavorite, true);
+      await Future<void>.delayed(const Duration(milliseconds: 1500));
+      expect(site.requested, hasLength(4));
     });
   });
 

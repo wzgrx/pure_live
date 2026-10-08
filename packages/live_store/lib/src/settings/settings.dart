@@ -886,6 +886,14 @@ abstract final class Settings {
     max: 20,
   );
 
+  /// "开播提醒": a system notification when a followed streamer goes live,
+  /// while the app runs (O01.1, V01.1; new in v4, off as D-036 asks).
+  static const liveAlertEnabled = BoolSetting('liveAlertEnabled', section: 'refresh', defaultValue: false);
+
+  /// The tags whose follows [liveAlertEnabled] covers; empty covers every
+  /// follow (O01.1).
+  static const liveAlertTagIds = StringListSetting('liveAlertTagIds', section: 'refresh', defaultValue: []);
+
   /// Refresh covers on a timer.
   static const autoRefreshThumbnails = BoolSetting('autoRefreshThumbnails', section: 'refresh', defaultValue: false);
 
@@ -1698,6 +1706,8 @@ abstract final class Settings {
     refreshFavoriteOnResume,
     autoRefreshInterval,
     maxConcurrentRefresh,
+    liveAlertEnabled,
+    liveAlertTagIds,
     autoRefreshThumbnails,
     thumbnailRefreshInterval,
     selectedSourceName,

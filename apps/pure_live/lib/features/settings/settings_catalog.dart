@@ -5,6 +5,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/appearance_pages.dart';
 import 'package:pure_live/features/settings/audience_pages.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
+import 'package:pure_live/features/settings/live_alert_tiles.dart';
 import 'package:pure_live/features/settings/playback_tiles.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
@@ -638,6 +639,31 @@ List<SettingsEntry> _build() {
       desc: 'settings_refresh_concurrency_desc',
       settings: [Settings.maxConcurrentRefresh],
       keywords: ['刷新', 'refresh', '并发'],
+    )
+    // O01.1 (V01.1): "开播提醒", a system notification, so Android only.
+    ..group = 'settings_group_live_alert'
+    ..add(
+      'live_alert',
+      'live_alert',
+      (context, entry) => GatedToggleTile(
+        entry: entry,
+        setting: Settings.liveAlertEnabled,
+        icon: AppIcons.settingsLiveAlert,
+        failedKey: 'live_alert_apply_failed',
+      ),
+      desc: 'live_alert_desc',
+      settings: [Settings.liveAlertEnabled],
+      keywords: ['开播', '提醒', '通知', 'notification'],
+      when: _android,
+    )
+    ..add(
+      'live_alert_tags',
+      'live_alert_tags',
+      (context, entry) => LiveAlertTagsTile(entry: entry),
+      desc: 'live_alert_tags_desc',
+      settings: [Settings.liveAlertTagIds],
+      keywords: ['开播', '提醒', '标签', 'tag'],
+      when: _android,
     )
     ..group = 'settings_group_covers'
     ..toggle(

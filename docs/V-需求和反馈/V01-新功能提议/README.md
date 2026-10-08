@@ -36,6 +36,7 @@
 - 2026-10-07（docs v2）：6 个提议各写了评估初稿（README，状态仍是“未开始”，等执行者照任务书补完、出图、发评审页）和任务书。
 - 2026-10-08：按 D-036 的路线做了头两个：V01.4 和 V01.3 的评估、设计定稿（维护者按 D-003 选，写在各自 README“评估结论和设计”），状态改“已确认”，实现任务 [D05.2](../../D-弹幕/D05-弹幕设置生效/D05.2-同屏最大弹幕条数可以设置/README.md)（同屏条数，默认 48）、[D03.4](../../D-弹幕/D03-飞行弹幕引擎/D03.4-按住飞行弹幕让它停住/README.md)（按住停住，开关默认关）代码做完、待真机；两个提议在实现任务完成后改“完成”。下一个是 V01.6。
 - 2026-10-09：V01.5 的评估和设计定稿（README“评估结论和设计”S1～S13，按 D-003）：一个朝屏幕中间的拖角把手加两指缩放，横竖画面各记一份，设置“小窗大小”三档（默认“中”= 原来的大小）；实现任务 [A07.22](../../A-界面设计/A07-直播间界面/A07.22-小窗改大小和尺寸设置/README.md)（待真机），弹幕随窗口变大已由 D03.3 做完。
+- 2026-10-09：V01.1 开播提醒的评估、设计定稿（README“评估结论和设计（定稿）”L1～L16，按 D-003），状态改“已确认”；拆成 [O01.1](../../O-Android系统集成/O01-通知和前台服务/O01.1-开播提醒/README.md)（应用开着时提醒，默认关，代码做完、待真机）、O01.2（被冻结或清理后也查）、A09.13（卡片和菜单里单独开关），后两个第三档、未开始。
 
 ## 代码地图
 
@@ -43,8 +44,8 @@
 
 | 文件 | 和哪个提议有关 |
 |---|---|
-| `apps/pure_live/lib/features/favorite/follow_refresher.dart`、`favorite_controller.dart:298-307`（`_scheduleAutoRefresh`，定时刷新）；`packages/live_core/lib/src/live_room.dart:383-395`（`effectiveLiveStatus`、`isLiveNow`） | V01.1：开播状态从哪来、什么时候刷新 |
-| `packages/live_record/lib/src/recorder.dart`（等开播的轮询 `_schedulePoll` `:1071`，普通 `Timer`，没有前台服务） | V01.1：已有的“等开播”检测 |
+| `apps/pure_live/lib/features/favorite/follow_refresher.dart`、`favorite_controller.dart:356`（`_scheduleAutoRefresh`，定时刷新）；开播提醒的判断 `features/favorite/live_alerts.dart`（O01.1）；`packages/live_core/lib/src/live_room.dart:383-395`（`effectiveLiveStatus`、`isLiveNow`） | V01.1：开播状态从哪来、什么时候刷新 |
+| `packages/live_record/lib/src/recorder.dart`（等开播的轮询 `_schedulePoll` `:1145`、`_doPoll` `:1191`，普通 `Timer`，没有前台服务） | V01.1：已有的“等开播”检测 |
 | `apps/pure_live/lib/app/recording_notice.dart`、`android/.../RecorderForegroundService.kt`（通知类别和提醒） | V01.1：发通知的现成做法 |
 | `packages/live_store/lib/src/secrets.dart`（`SecretRefs.cookie`，一个平台一份 Cookie）；`apps/pure_live/lib/features/account/account_platforms.dart:88-95` | V01.2 |
 | `apps/pure_live/lib/shared/danmaku/danmaku_overlay.dart`（`held` `:200`、`messageAt` `:292`、`maxVisible = 48` `:158`）；`features/live_play/player/player_view.dart:416-449`（点按、长按、`_danmakuHeld`） | V01.3、V01.4 |
@@ -93,12 +94,12 @@
 属于 [V 需求和反馈](../README.md)。
 
 - 代码：—
-- 进度：`████░░░░░░░░░░░░░░░░` 18%
+- 进度：`████░░░░░░░░░░░░░░░░` 22%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| V01.1 | 开播提醒（v3 没有的新功能，先出方案再定做不做） | 功能 | 未开始 | — | — | [设计或说明](V01.1-开播提醒/README.md)、[任务书](V01.1-开播提醒/brief.md) |
+| V01.1 | 开播提醒（v3 没有的新功能，先出方案再定做不做）（去向：[O01.1](../../O-Android系统集成/O01-通知和前台服务/O01.1-开播提醒/README.md)、[O01.2](../../O-Android系统集成/O01-通知和前台服务/README.md)、[A09.13](../../A-界面设计/A09-浏览界面/README.md)） | 功能 | 已确认 | — | — | [设计或说明](V01.1-开播提醒/README.md)、[任务书](V01.1-开播提醒/brief.md) |
 | V01.2 | 哔哩哔哩多账号：账号名册和切换（先出方案）（去向：[K01.2](../../K-账号和登录/K01-账号和登录方式/K01.2-哔哩哔哩多账号/README.md)） | 功能 | 已确认 | — | — | [设计或说明](V01.2-哔哩哔哩多账号/README.md)、[任务书](V01.2-哔哩哔哩多账号/brief.md) |
 | V01.3 | 按住弹幕让它停住，松手继续（去向：[D03.4](../../D-弹幕/D03-飞行弹幕引擎/D03.4-按住飞行弹幕让它停住/README.md)） | 功能 | 已确认 | — | — | [设计或说明](V01.3-按住弹幕让它停住/README.md)、[任务书](V01.3-按住弹幕让它停住/brief.md) |
 | V01.4 | 同屏最大弹幕条数可以设置（去向：[D05.2](../../D-弹幕/D05-弹幕设置生效/D05.2-同屏最大弹幕条数可以设置/README.md)） | 功能 | 已确认 | — | — | [设计或说明](V01.4-同屏最大弹幕条数可以设置/README.md)、[任务书](V01.4-同屏最大弹幕条数可以设置/brief.md) |
@@ -109,9 +110,8 @@
 
 ## 还没完成的
 
-- **V01.1 开播提醒（v3 没有的新功能，先出方案再定做不做）**（未开始，第三档，规模 中）
-  - 阶段：方案和对比页 → 用户确认 → 开发
-  - 说明：同意做（D-036），按 V01 路线的顺序评估
+- **V01.1 开播提醒（v3 没有的新功能，先出方案再定做不做）**（已确认，第三档，规模 中）
+  - 说明：同意做（D-036）；2026-10-09 评估和设计定稿（README“评估结论和设计（定稿）”L1～L16，按 D-003）：拆成三个任务，先做 O01.1（应用开着时提醒，复用关注刷新和录制的等开播检测，默认关）；O01.2（应用被冻结或清理后也查）、A09.13（卡片和直播间菜单里单独开关）以后再看。O01.1 真机看过后提议改“完成”（另两个做或不做由用户定）
 - **V01.2 哔哩哔哩多账号：账号名册和切换（先出方案）**（已确认，第三档，规模 中）
   - 说明：同意做（D-036）；2026-10-09 评估和设计定稿（README“评估结论和设计（定稿）”S1～S17，按 D-003），实现是 K01.2；K01.2 真机看过后改完成
   - 来源：上游 pure_live_TV 6ba16c55（W01.1 对照）；旧任务清单 T10a.4

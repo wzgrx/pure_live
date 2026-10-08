@@ -34,7 +34,8 @@ import javax.crypto.spec.GCMParameterSpec
  * - `pure_live/native_http`: HTTPS through the platform TLS stack for hosts
  *   that refuse dart:io (Twitch GraphQL through a proxy; Kick later);
  * - `pure_live/text_codec`: GBK playlists (IPTV);
- * - `pure_live/multicast_lock`: the Wi-Fi multicast lock of DLNA discovery.
+ * - `pure_live/multicast_lock`: the Wi-Fi multicast lock of DLNA discovery;
+ * - `pure_live/live_alerts`: `post` "开播提醒" ([LiveAlerts], O01.1).
  */
 internal class AppChannelsPlugin : FlutterPlugin {
     private val channels = mutableListOf<MethodChannel>()
@@ -54,6 +55,12 @@ internal class AppChannelsPlugin : FlutterPlugin {
         }
         channel(messenger, "pure_live/text_codec") { call, result ->
             background(pool, result) { TextCodecChannel.handle(call) }
+        }
+        channel(messenger, "pure_live/live_alerts") { call, result ->
+            when (call.method) {
+                "post" -> result.success(LiveAlerts.post(context, call.arguments))
+                else -> result.notImplemented()
+            }
         }
         channel(messenger, "pure_live/multicast_lock") { call, result ->
             when (call.method) {

@@ -362,6 +362,7 @@
     "danmaku_template_save_mine": "Save these settings as my template",
     "danmaku_template_saved": "Current danmaku style saved",
     "danmaku_template_use_mine": "Use my template",
+    "danmaku_user_level": "Level {level}",
     "day": "d",
     "days": "days",
     "decrease_value": "Decrease {label}",

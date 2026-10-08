@@ -362,6 +362,7 @@
     "danmaku_template_save_mine": "把当前设置存为我的模板",
     "danmaku_template_saved": "当前弹幕样式已保存",
     "danmaku_template_use_mine": "用我的模板",
+    "danmaku_user_level": "等级 {level}",
     "day": "天",
     "days": "天",
     "decrease_value": "减少{label}",

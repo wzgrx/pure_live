@@ -246,6 +246,59 @@ void main() {
     });
   });
 
+  group("A08.8: the message panel shows the sender's level", () {
+    const card = 'live-play-message-card';
+    Future<void> open(WidgetTester tester, LiveMessage message) async {
+      RoomPanelScope.maybeOf(tester.element(_menuButton()))!.openMessage(message);
+      await tester.pumpAndSettle();
+    }
+
+    for (final (name, fullscreen) in [('portrait', false), ('landscape fullscreen', true)]) {
+      testWidgets('$name: message panel shows the sender level', (tester) async {
+        final room = fullscreen ? await _pump(tester, width: 852, height: 393) : await _pump(tester);
+        if (fullscreen) {
+          await tester.tap(_key('live-play-fullscreen'));
+          await _settle(tester);
+        }
+        await open(
+          tester,
+          const LiveMessage(
+            type: LiveMessageType.chat,
+            userName: '路人',
+            message: '前排',
+            color: LiveMessageColor.white,
+            userLevel: '12',
+          ),
+        );
+        expect(_in(card, find.text('Lv.12')), findsOneWidget);
+        final level = tester.widget<Text>(_in(card, find.text('Lv.12')));
+        final context = tester.element(_key(card));
+        expect(level.style?.fontSize, Theme.of(context).textTheme.bodySmall?.fontSize);
+        expect(level.style?.color, Theme.of(context).colorScheme.onSurfaceVariant);
+        final semantics = tester.widget<Semantics>(
+          find.ancestor(of: find.text('Lv.12'), matching: find.byType(Semantics)).first,
+        );
+        expect(semantics.properties.label, '等级 12');
+        await _close(tester, room);
+      });
+
+      testWidgets('$name: message panel without a level has no level line', (tester) async {
+        final room = fullscreen ? await _pump(tester, width: 852, height: 393) : await _pump(tester);
+        if (fullscreen) {
+          await tester.tap(_key('live-play-fullscreen'));
+          await _settle(tester);
+        }
+        await open(
+          tester,
+          const LiveMessage(type: LiveMessageType.chat, userName: '路人', message: '前排', color: LiveMessageColor.white),
+        );
+        expect(_in(card, find.textContaining('Lv.')), findsNothing);
+        expect(_in(card, find.textContaining('路人：前排', findRichText: true)), findsOneWidget);
+        await _close(tester, room);
+      });
+    }
+  });
+
   group('A08.7: the mini window danmaku colour unfolds in the danmaku panel', () {
     /// Opens the danmaku panel, turns "保留平台弹幕颜色" off and taps
     /// "统一弹幕颜色".

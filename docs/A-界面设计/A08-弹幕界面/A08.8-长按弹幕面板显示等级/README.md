@@ -26,5 +26,5 @@
 
 ## 实现和验证
 
-- 未开始。测试：`apps/pure_live/test/features/live_play/room_popups_test.dart` 加两个用例（有等级显示“Lv.12”、没有等级不显示）。
+- 已实现（2026-10-08，见 [record.md](record.md)），待 K90。测试：`apps/pure_live/test/features/live_play/room_popups_test.dart` 加两个用例（有等级显示“Lv.12”、没有等级不显示）。
 - 真机：在 SHOWROOM 或克拉克拉的直播间长按一条带等级的弹幕，看到“Lv.N”；哔哩哔哩（不解等级）没有这一行。

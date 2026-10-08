@@ -282,7 +282,7 @@ void main() {
     });
 
     testWidgets('gift, super chat and local lines leave the name out; 本地 stays', (tester) async {
-      final gift = LiveMessage(
+      const gift = LiveMessage(
         type: LiveMessageType.gift,
         userName: '送礼人',
         message: '送出 辣条 ×1',

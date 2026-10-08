@@ -275,6 +275,9 @@ const Map<String, Object> newInV4 = {
   'themeColorMigration': 0, // A11.2
   'preferH264': true, // UPGRADES 22-3
   'autoPipOnLeave': false, // A07.8
+  'floatWindowSize': 'medium', // A07.22 (V01.5; A07.8 c6's size)
+  'floatWindowLandscapeScale': 1.0, // A07.22: 1 = not resized
+  'floatWindowPortraitScale': 1.0, // A07.22
   'portraitFullscreenSwipeSwitch': false, // A07.2, A07.3
   'livePlayChatCollapsed': false, // A07.5
   'roomSwitcherLayout': 'grid', // A07.13, D-022
@@ -306,6 +309,8 @@ const Map<String, (num?, num?)> ranges = {
   'fontSizeTitleMedium': (13, 20),
   'fontSizeTitleLarge': (16, 26),
   'videoFitIndex': (0, 5),
+  'floatWindowLandscapeScale': (0.25, 4), // A07.22: the window's own bounds apply on top
+  'floatWindowPortraitScale': (0.25, 4),
   'danmakuTopArea': (0, 300),
   'danmakuArea': (0, 1),
   'danmakuBottomArea': (0, 300),

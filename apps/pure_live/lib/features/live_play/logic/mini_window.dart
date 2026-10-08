@@ -104,19 +104,146 @@ double inAppMiniBase(Size screen) => (math.min(screen.width, screen.height) * 0.
 /// The in-app floating window's size for a picture of [aspectRatio] (3.x
 /// `resolveAppFloatingSize`): landscape pictures are [inAppMiniBase] wide; a
 /// portrait picture is 1.2 × the base high, its width by the ratio and at
-/// least 120.
-Size inAppMiniSize({required Size screen, required double aspectRatio}) {
-  final base = inAppMiniBase(screen);
-  final ratio = aspectRatio.isFinite && aspectRatio > 0 ? aspectRatio.clamp(1 / 2.39, 4.0) : 16 / 9;
+/// least [inAppMiniMinPortraitWidth]. A size from "小窗大小" multiplies the
+/// base by its [factor] (A07.22).
+Size inAppMiniSize({required Size screen, required double aspectRatio, double factor = 1}) {
+  final base = inAppMiniBase(screen) * factor;
+  final ratio = _windowRatio(aspectRatio);
   if (ratio >= 1) return Size(base, base / ratio);
   var height = base * 1.2;
   var width = height * ratio;
-  if (width < 120) {
-    width = 120;
+  if (width < inAppMiniMinPortraitWidth) {
+    width = inAppMiniMinPortraitWidth;
     height = width / ratio;
   }
   return Size(width, height);
 }
+
+double _windowRatio(double aspectRatio) =>
+    aspectRatio.isFinite && aspectRatio > 0 ? aspectRatio.clamp(1 / 2.39, 4.0) : 16 / 9;
+
+/// The narrowest a portrait picture's window gets (3.x: 120).
+const double inAppMiniMinPortraitWidth = 120;
+
+/// "小窗大小" (A07.22, V01.5): the factor of each size on [inAppMiniBase];
+/// `medium` is A07.8 c6's size (the default). On a phone 176, 220 and 275
+/// wide.
+const Map<String, double> inAppMiniSizes = {'small': 0.8, 'medium': 1, 'large': 1.25};
+
+/// The shortest a resize makes the window's long side (A07.22).
+const double inAppMiniMinExtent = 160;
+
+/// A resize makes the window's long side at most the screen's short side ×
+/// this (A07.22: the window does not cover the page it floats over).
+const double inAppMiniMaxFraction = 0.9;
+
+/// Whether the window of a picture of [aspectRatio] is a portrait one: its
+/// height is its long side, and its resize is remembered apart (A07.22).
+bool inAppMiniPortrait(double aspectRatio) => _windowRatio(aspectRatio) < 1;
+
+/// The room the floating window may take in an [area]: [inAppMiniMargin]
+/// from the sides, the clearances from the top and the bottom
+/// ([inAppMiniOffset]'s).
+Size inAppMiniRoom({required Size area, required double topClearance, required double bottomClearance}) =>
+    Size(math.max(0, area.width - inAppMiniMargin * 2), math.max(0, area.height - topClearance - bottomClearance));
+
+/// The user's resize [scale] of the floating window, bounded (A07.22): the
+/// window of [size] ("小窗大小", a key of [inAppMiniSizes]) times the scale
+/// keeps its long side from [inAppMiniMinExtent] (a portrait picture's
+/// width from [inAppMiniMinPortraitWidth]) up to the [screen]'s short side
+/// × [inAppMiniMaxFraction] and inside the [room]; the size's own window is
+/// always allowed, so 1 is never changed.
+double inAppMiniScale({
+  required Size screen,
+  required double aspectRatio,
+  required double scale,
+  String size = 'medium',
+  Size? room,
+}) {
+  if (!scale.isFinite || scale <= 0) return 1;
+  final ratio = _windowRatio(aspectRatio);
+  final natural = inAppMiniSize(screen: screen, aspectRatio: aspectRatio, factor: inAppMiniSizes[size] ?? 1);
+  final portrait = ratio < 1;
+  final long = portrait ? natural.height : natural.width;
+  final smallest = math.max(inAppMiniMinExtent, portrait ? inAppMiniMinPortraitWidth / ratio : 0);
+  var largest = math.min(screen.width, screen.height) * inAppMiniMaxFraction;
+  if (room != null) {
+    largest = math.min(
+      largest,
+      portrait ? math.min(room.height, room.width / ratio) : math.min(room.width, room.height * ratio),
+    );
+  }
+  final extent = (long * scale).clamp(math.min(long, smallest), math.max(long, largest));
+  return extent / long;
+}
+
+/// The floating window's size (A07.22): "小窗大小"'s [size] for a picture
+/// of [aspectRatio], times the user's resize [scale] as [inAppMiniScale]
+/// bounds it.
+Size inAppMiniWindowSize({
+  required Size screen,
+  required double aspectRatio,
+  String size = 'medium',
+  double scale = 1,
+  Size? room,
+}) {
+  final natural = inAppMiniSize(screen: screen, aspectRatio: aspectRatio, factor: inAppMiniSizes[size] ?? 1);
+  if (scale == 1) return natural;
+  final bounded = inAppMiniScale(screen: screen, aspectRatio: aspectRatio, scale: scale, size: size, room: room);
+  return natural * bounded;
+}
+
+/// Which bottom corner of the floating window has the resize grip (A07.22).
+enum MiniGripCorner {
+  /// For a window on the right half of the screen (where it starts).
+  bottomLeft,
+
+  /// For a window on the left half.
+  bottomRight,
+}
+
+/// The grip's corner for a floating [window] in an [area]: the bottom one
+/// towards the middle, so pulling it outwards has room to grow (a grip at
+/// the corner the window sits in has none: 16 from the edge).
+MiniGripCorner inAppMiniGripCorner({required Rect window, required Size area}) =>
+    window.center.dx > area.width / 2 ? MiniGripCorner.bottomLeft : MiniGripCorner.bottomRight;
+
+/// The long side a grip drag asks for (A07.22): the window's long side when
+/// the drag began ([from]) plus the way the finger [moved] sideways since:
+/// away from the window (leftwards on a [MiniGripCorner.bottomLeft] grip)
+/// grows it, the picture's shape kept. Up and down do not count: a window
+/// resting on the bottom has no room below, and a finger pulling it larger
+/// towards the middle of the screen goes up as well (by the upright axis it
+/// would shrink it; upstream media_core 7319d2d took the axis moved
+/// further).
+double inAppMiniGripExtent({required Size from, required MiniGripCorner corner, required Offset moved}) {
+  final portrait = from.width < from.height;
+  final wider = corner == MiniGripCorner.bottomLeft ? -moved.dx : moved.dx;
+  final long = portrait ? from.height : from.width;
+  return long + (portrait ? wider * from.height / from.width : wider);
+}
+
+/// How a resize moves the floating window (A07.22).
+enum MiniResizeAnchor {
+  /// A bottom-left grip: the top-right corner stays.
+  topRight,
+
+  /// A bottom-right grip: the top-left corner stays.
+  topLeft,
+
+  /// Two fingers: the centre stays.
+  centre,
+}
+
+/// The top-left of a window resized from [from] to [size], [anchor] kept in
+/// place; [inAppMiniOffset] then keeps it on screen (a window at the bottom
+/// grows upwards).
+Offset inAppMiniResizedOffset({required Rect from, required Size size, required MiniResizeAnchor anchor}) =>
+    switch (anchor) {
+      MiniResizeAnchor.topLeft => from.topLeft,
+      MiniResizeAnchor.topRight => Offset(from.right - size.width, from.top),
+      MiniResizeAnchor.centre => from.center - Offset(size.width / 2, size.height / 2),
+    };
 
 /// The gap between the in-app floating window and the edges (c6).
 const double inAppMiniMargin = 16;

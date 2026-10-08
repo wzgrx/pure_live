@@ -252,6 +252,90 @@ void main() {
       expect(portrait.width, closeTo(148.5, 0.01));
     });
 
+    test('A07.22: "小窗大小" is 0.8, 1 and 1.25 × c6; medium unresized is c6 exactly', () {
+      const phone = Size(393, 852);
+      for (final ratio in [16 / 9, 9 / 16, 4 / 3]) {
+        expect(
+          inAppMiniWindowSize(screen: phone, aspectRatio: ratio),
+          inAppMiniSize(screen: phone, aspectRatio: ratio),
+          reason: '$ratio',
+        );
+      }
+      expect(inAppMiniWindowSize(screen: phone, aspectRatio: 16 / 9, size: 'small').width, closeTo(176.06, 0.01));
+      expect(inAppMiniWindowSize(screen: phone, aspectRatio: 16 / 9, size: 'large').width, closeTo(275.1, 0.01));
+      expect(inAppMiniWindowSize(screen: const Size(1280, 800), aspectRatio: 16 / 9, size: 'large').width, 450);
+      // A portrait picture's window keeps 120 at least.
+      expect(inAppMiniWindowSize(screen: const Size(360, 640), aspectRatio: 9 / 16, size: 'small').width, 120);
+      expect(
+        inAppMiniWindowSize(screen: phone, aspectRatio: 16 / 9, size: 'other'),
+        inAppMiniSize(screen: phone, aspectRatio: 16 / 9),
+      );
+    });
+
+    test('A07.22: a resize keeps the long side 160 (portrait 120 wide) to short side × 0.9, inside the room', () {
+      const phone = Size(393, 852);
+      // 220 wide on a phone: up to 393 × 0.9, down to 160.
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 3), closeTo(393 * 0.9 / 220.08, 0.0001));
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 0.1), closeTo(160 / 220.08, 0.0001));
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 1.2), 1.2);
+      expect(inAppMiniWindowSize(screen: phone, aspectRatio: 16 / 9, scale: 1.5).width, closeTo(330.12, 0.01));
+      // 9:16 is 264 high; the smallest is 120 wide (213 high).
+      final narrow = inAppMiniWindowSize(screen: const Size(360, 640), aspectRatio: 9 / 16, scale: 0.1);
+      expect(narrow.width, closeTo(120, 0.001));
+      expect(narrow.height, closeTo(213.33, 0.01));
+      // A short room (a landscape phone's home) caps it; the size itself is
+      // never cut, so 1 stays 1.
+      const room = Size(820, 150);
+      expect(
+        inAppMiniWindowSize(screen: const Size(852, 393), aspectRatio: 16 / 9, scale: 2, room: room).height,
+        closeTo(150, 0.001),
+      );
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 3, room: const Size(100, 50)), 1);
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 1, size: 'small'), 1);
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: double.nan), 1);
+      expect(inAppMiniRoom(area: phone, topClearance: 40, bottomClearance: 120), const Size(393 - 32, 852 - 40 - 120));
+    });
+
+    test('A07.22: the grip on the bottom corner towards the middle; outwards grows; the far top corner stays', () {
+      const area = Size(393, 852);
+      const right = Rect.fromLTWH(157, 632, 220, 124);
+      expect(inAppMiniGripCorner(window: right, area: area), MiniGripCorner.bottomLeft);
+      expect(inAppMiniGripCorner(window: right.shift(const Offset(-140, 0)), area: area), MiniGripCorner.bottomRight);
+      // Leftwards on a left grip grows, rightwards shrinks, the picture's
+      // shape kept; up and down do not count: up and to the left (towards
+      // the middle, from the bottom-right corner) grows it.
+      expect(
+        inAppMiniGripExtent(from: right.size, corner: MiniGripCorner.bottomLeft, moved: const Offset(-50, 4)),
+        270,
+      );
+      expect(inAppMiniGripExtent(from: right.size, corner: MiniGripCorner.bottomLeft, moved: const Offset(30, 0)), 190);
+      expect(
+        inAppMiniGripExtent(from: right.size, corner: MiniGripCorner.bottomLeft, moved: const Offset(-40, -60)),
+        260,
+      );
+      expect(
+        inAppMiniGripExtent(from: right.size, corner: MiniGripCorner.bottomRight, moved: const Offset(5, 31)),
+        225,
+      );
+      const portrait = Size(149, 264);
+      expect(
+        inAppMiniGripExtent(from: portrait, corner: MiniGripCorner.bottomRight, moved: const Offset(20, 0)),
+        closeTo(264 + 20 * 264 / 149, 0.001),
+      );
+      expect(
+        inAppMiniResizedOffset(from: right, size: const Size(300, 169), anchor: MiniResizeAnchor.topRight),
+        const Offset(77, 632),
+      );
+      expect(
+        inAppMiniResizedOffset(from: right, size: const Size(300, 169), anchor: MiniResizeAnchor.topLeft),
+        right.topLeft,
+      );
+      expect(
+        inAppMiniResizedOffset(from: right, size: const Size(330, 186), anchor: MiniResizeAnchor.centre),
+        right.center - const Offset(165, 93),
+      );
+    });
+
     test('c6: bottom-right, above the home bar on narrow home pages, 16 from the edges; kept on screen', () {
       expect(inAppMiniBottomClearance(route: RoutePath.kInitial, width: 393, safeBottom: 24), 24 + 80 + 16);
       expect(inAppMiniBottomClearance(route: RoutePath.kInitial, width: 852, safeBottom: 0), 16);
@@ -778,6 +862,129 @@ void main() {
         await _close(tester, wide);
       },
     );
+
+    testWidgets('A07.22: the grip on the bottom corner towards the middle pulls it larger, kept for next time', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      var rect = tester.getRect(_window);
+      expect(rect.width, closeTo(220.08, 0.01));
+
+      // Shown with the buttons: a 48 disc on the bottom-left corner (the
+      // window sits on the right), an arrow out of the corner.
+      final grip = find.byKey(const ValueKey('mini-resize'));
+      expect(_inWindow(grip), findsOneWidget);
+      expect(_inKey('mini-resize', find.byIcon(AppIcons.miniResizeBottomLeft)), findsOneWidget);
+      final gripRect = tester.getRect(grip);
+      expect(gripRect.size, const Size(48, 48));
+      expect(gripRect.bottomLeft - rect.bottomLeft, const Offset(4, -4));
+      expect(_opacityOf(tester, 'mini-resize'), 1);
+
+      // 80 to the left (past the drag slop): 300 wide, its right edge and
+      // its bottom stay; the buttons stay while the grip is held.
+      final gesture = await tester.startGesture(gripRect.center);
+      await gesture.moveBy(const Offset(-40, 0));
+      await gesture.moveBy(const Offset(-80, 0));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 4));
+      expect(_opacityOf(tester, 'mini-resize'), 1);
+      await gesture.up();
+      await tester.pump();
+      await _settle(tester);
+      rect = tester.getRect(_window);
+      expect(rect.width, closeTo(300.08, 0.01));
+      expect(rect.height, closeTo(300.08 * 9 / 16, 0.01));
+      expect(rect.right, 393 - 16);
+      expect(rect.bottom, closeTo(852 - 80 - 16, 0.01));
+      expect(app.engines, hasLength(1), reason: 'the same player');
+      expect(app.engine.opens, hasLength(1), reason: 'not opened again');
+      expect(_window, findsOneWidget);
+      // The danmaku follow the window (D03.3).
+      expect(
+        tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay))).look.fontSize,
+        closeTo(12 * 300.08 / 350, 0.01),
+      );
+      expect(app.services.store.settings.get(Settings.floatWindowLandscapeScale), closeTo(300.08 / 220.08, 0.0001));
+      expect(app.services.store.settings.get(Settings.floatWindowPortraitScale), 1);
+
+      // Grown from its corner, it stays the corner one: turned, it goes to
+      // the new bottom-right corner (a dragged one would stay at its place).
+      tester.view.physicalSize = const Size(852, 393);
+      await tester.pump();
+      rect = tester.getRect(_window);
+      expect(rect.width, closeTo(300.08, 0.01));
+      expect(rect.right, closeTo(852 - 16, 0.01));
+      expect(rect.bottom, closeTo(393 - 16, 0.01));
+      tester.view.physicalSize = const Size(393, 852);
+      await tester.pump();
+
+      // Next time it comes back at that size.
+      await tester.tap(find.byKey(const ValueKey('mini-close')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(_window, findsNothing);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      expect(tester.getRect(_window).width, closeTo(300.08, 0.01));
+      await _close(tester, app);
+    });
+
+    testWidgets('A07.22: two fingers resize it around its middle; portrait pictures apart; "小窗大小" follows', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      // The buttons gone (as most of the time): it is all picture.
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pump(const Duration(milliseconds: 300));
+      final rect = tester.getRect(_window);
+      final first = await tester.startGesture(rect.center - const Offset(80, 0), pointer: 1);
+      final second = await tester.startGesture(rect.center + const Offset(80, 0), pointer: 2);
+      await first.moveBy(const Offset(-20, 0));
+      await second.moveBy(const Offset(20, 0));
+      await tester.pump();
+      // 160 apart → 180, where the pinch is recognized and counts from
+      // (the first finger left the tap's slop) → 200: 200 / 180 ×; kept on
+      // screen.
+      var now = tester.getRect(_window);
+      const pinched = 220.08 * 200 / 180;
+      expect(now.width, closeTo(pinched, 0.01));
+      expect(now.right, lessThanOrEqualTo(393 - 16 + 0.01));
+      expect(now.bottom, lessThanOrEqualTo(852 - 80 - 16 + 0.01));
+      await first.up();
+      await second.up();
+      await tester.pump();
+      await _settle(tester);
+      expect(_window, findsOneWidget, reason: 'not a tap: still floating');
+      expect(app.services.store.settings.get(Settings.floatWindowLandscapeScale), closeTo(200 / 180, 0.0001));
+      expect(app.engine.opens, hasLength(1));
+
+      // A portrait picture's window has its own size: 1.2 × high as before.
+      app.engine.emit(const EngineVideoSize(720, 1280));
+      await tester.pump();
+      expect(tester.getRect(_window).height, closeTo(264.1, 0.1));
+      app.engine.emit(const EngineVideoSize(1920, 1080));
+      await tester.pump();
+      expect(tester.getRect(_window).width, closeTo(pinched, 0.01));
+
+      // "小窗大小": a pick in the settings drops the resize (the row writes
+      // the three together).
+      await tester.runAsync(
+        () => app.services.store.settings.setAll({
+          Settings.floatWindowSize: 'small',
+          Settings.floatWindowLandscapeScale: 1.0,
+          Settings.floatWindowPortraitScale: 1.0,
+        }),
+      );
+      await _settle(tester);
+      now = tester.getRect(_window);
+      expect(now.width, closeTo(176.06, 0.01));
+      expect(now.right, lessThanOrEqualTo(393 - 16 + 0.01));
+      await _close(tester, app);
+    });
 
     testWidgets('c8: loading on black, the end of a broadcast with refresh, a portrait picture 1.2 × high', (
       tester,

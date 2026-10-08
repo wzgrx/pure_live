@@ -325,6 +325,41 @@ abstract final class Settings {
   /// Picture-in-picture on leaving.
   static const floatPlay = BoolSetting('floatPlay', section: 'player', defaultValue: false);
 
+  /// New (docs/A-界面设计/A07-直播间界面/A07.22-小窗改大小和尺寸设置; V01.5, D-036): how big the
+  /// in-app floating window is ("小窗大小"): `small`, `medium` or `large`,
+  /// 0.8, 1 and 1.25 × the size A07.8 c6 gives it. `medium` (the default)
+  /// is that size, so nothing changes for a user who never picks one; 3.x
+  /// had no such setting.
+  static const floatWindowSize = StringSetting(
+    'floatWindowSize',
+    section: 'player',
+    defaultValue: 'medium',
+    allowed: {'small', 'medium', 'large'},
+  );
+
+  /// New (A07.22, as [floatWindowSize]): the in-app floating window's size
+  /// for a landscape picture as the user pulled it (the grip or two
+  /// fingers), as a factor of [floatWindowSize]'s; 1 = not changed. A
+  /// factor, not pixels, so it fits another screen as well. Picking a size
+  /// puts it back to 1.
+  static const floatWindowLandscapeScale = DoubleSetting(
+    'floatWindowLandscapeScale',
+    section: 'player',
+    defaultValue: 1,
+    min: 0.25,
+    max: 4,
+  );
+
+  /// New (A07.22): [floatWindowLandscapeScale] for a portrait picture's
+  /// window (each kept on its own, as upstream pure_live a25facd94).
+  static const floatWindowPortraitScale = DoubleSetting(
+    'floatWindowPortraitScale',
+    section: 'player',
+    defaultValue: 1,
+    min: 0.25,
+    max: 4,
+  );
+
   /// Windows PiP on top.
   static const windowsPipAlwaysOnTop = BoolSetting('windowsPipAlwaysOnTop', section: 'player', defaultValue: false);
 
@@ -1581,6 +1616,9 @@ abstract final class Settings {
     audioOutputDriver,
     videoHardwareDecoder,
     floatPlay,
+    floatWindowSize,
+    floatWindowLandscapeScale,
+    floatWindowPortraitScale,
     windowsPipAlwaysOnTop,
     autoPipOnLeave,
     enableRtxVsr,

@@ -128,6 +128,24 @@ NOTES: dict[str, dict] = {
     'preferResolutionCellular': {'v3': "'原画'", 'v3src': 'player_settings_controller.dart:37'},
     'preferH264': _new('UPGRADES 统一原则、22-3'),
     'autoPipOnLeave': _new('A07.8，选择 J1'),
+    'floatWindowSize': {
+        **_new('A07.22，V01.5'),
+        'v3range': '3.x 没有这个设置，应用内小窗的大小按屏幕算（`player/core/player_manager.dart:4737`）',
+        'verdict': 'v4 新加（A07.22，V01.5，D-036）：小、中、大 = A07.8 c6 的大小 × 0.8、1、1.25；默认“中”和原来一样；'
+        '不认识的值读成“中”',
+    },
+    'floatWindowLandscapeScale': {
+        **_new('A07.22'),
+        'v3range': '3.x 不能拖小窗改大小',
+        'ui': '小窗上拖角或两指缩放；长边 160～屏幕短边 × 0.9（`mini_window.dart` 的 `inAppMiniScale`）',
+        'verdict': 'v4 新加（A07.22，V01.5）：横屏画面小窗拖过的大小，是“小窗大小”的倍数；1 = 没拖过；选一档“小窗大小”回到 1',
+    },
+    'floatWindowPortraitScale': {
+        **_new('A07.22'),
+        'v3range': '3.x 不能拖小窗改大小',
+        'ui': '同上；竖屏画面的小窗另记一份',
+        'verdict': 'v4 新加（A07.22，V01.5）：竖屏画面小窗拖过的大小，和横屏画面的分开记（上游 a25facd94 的做法）',
+    },
     'portraitLayoutMode': {'v3': "'balanced'", 'v3src': '`player_settings_controller.dart:58`，`player/core/portrait_stream_support.dart:9`'},
     'portraitFullscreenPolicy': {'v3': "'followSource'", 'v3src': 'player_settings_controller.dart:59-62'},
     'portraitFullscreenDisplayMode': {'v3': "'ambient'", 'v3src': 'player_settings_controller.dart:63-66'},

@@ -451,6 +451,32 @@ void main() {
       ).run();
       expect(resultOf(run, CheckId.p13).note, contains('聊天 7 条'));
     });
+
+    test('a silent first room tries the next live room', () async {
+      var calls = 0;
+      final run = await patrolOf(
+        _healthy(),
+        _target,
+        danmaku: (_, _, _) async => DanmakuSample(ready: const Duration(milliseconds: 90), chats: calls++ == 0 ? 0 : 5),
+        danmakuDuration: const Duration(seconds: 1),
+      ).run();
+      final result = resultOf(run, CheckId.p13);
+      expect(result.outcome, Outcome.ok);
+      expect(result.note, allOf(contains('聊天 0 条'), contains('聊天 5 条')));
+      expect(calls, 2);
+    });
+
+    test('every live room silent fails', () async {
+      final run = await patrolOf(
+        _healthy(),
+        _target,
+        danmaku: (_, _, _) async => const DanmakuSample(ready: Duration(milliseconds: 90)),
+        danmakuDuration: const Duration(seconds: 1),
+      ).run();
+      final result = resultOf(run, CheckId.p13);
+      expect(result.outcome, Outcome.failed);
+      expect(result.note, contains('都没有聊天'));
+    });
   });
 
   test('a check that hangs fails after its limit', () async {

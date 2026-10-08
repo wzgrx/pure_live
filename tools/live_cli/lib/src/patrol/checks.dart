@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:live_cli/src/patrol/media.dart';
 import 'package:live_cli/src/patrol/report.dart';
@@ -160,7 +161,7 @@ final class PlatformPatrol {
         ..add(await _check(CheckId.p10, _linesCheck, timeout: checkTimeout * 3))
         ..add(await _check(CheckId.p11, _leases))
         ..add(await _check(CheckId.p12, _links))
-        ..add(await _check(CheckId.p13, _danmaku, timeout: danmakuDuration + checkTimeout));
+        ..add(await _check(CheckId.p13, _danmaku, timeout: danmakuDuration * math.max(1, _live.length) + checkTimeout));
     }
     return SiteRun(site: target.site, name: target.name, network: network, results: results, elapsed: watch.elapsed);
   }
@@ -637,19 +638,26 @@ final class PlatformPatrol {
     if (danmakuDuration <= Duration.zero) throw const CheckSkipped('没加 --danmaku');
     final probe = danmaku;
     if (probe == null) throw const CheckSkipped('工具没有这个平台的弹幕连接');
-    final room = _live.firstOrNull;
-    if (room == null) throw const CheckSkipped('P6 没拿到在播房间');
-    _step = '连弹幕 ${room.roomId}';
-    final sample = await probe(site, room, danmakuDuration);
-    final ready = sample.ready;
-    final note =
+    if (_live.isEmpty) throw const CheckSkipped('P6 没拿到在播房间');
+    // A hot room can be silent to an anonymous client (斗鱼 288016, an
+    // official event room, 2026-10-08: entries but no chat): then the next
+    // live rooms; only all of them silent fails.
+    final notes = <String>[];
+    for (final room in _live) {
+      _step = '连弹幕 ${room.roomId}';
+      final sample = await probe(site, room, danmakuDuration);
+      final ready = sample.ready;
+      notes.add(
         '${room.roomId} ${danmakuDuration.inSeconds} 秒：'
         '${ready == null ? '没有就绪' : '就绪 ${ready.inMilliseconds} ms'}，'
         '聊天 ${sample.chats} 条，人数 ${sample.online} 次，重连 ${sample.reconnects} 次'
         '${sample.closed == null ? '' : '，关闭（${sample.closed}）'}'
-        '${sample.error == null ? '' : '，${sample.error}'}';
-    if (ready == null || sample.closed != null || sample.error != null) throw CheckFailure(note);
-    return note;
+        '${sample.error == null ? '' : '，${sample.error}'}',
+      );
+      if (ready == null || sample.closed != null || sample.error != null) throw CheckFailure(notes.join('；'));
+      if (sample.chats > 0) return notes.join('；');
+    }
+    throw CheckFailure('${notes.join('；')}；${notes.length} 个在播房间都没有聊天');
   }
 }
 

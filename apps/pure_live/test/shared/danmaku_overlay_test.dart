@@ -331,6 +331,31 @@ void main() {
     await layer.close();
   });
 
+  testWidgets('D03.3 c4: at most 48 remote danmaku on screen by default (3.x); local ones do not count', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(400, 4000)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final layer = _Layer(tester);
+    // Lanes for far more than 48 short ones.
+    await layer.pump(height: 4000);
+    for (var i = 0; i < 60; i++) {
+      layer.messages.add(_chat('$i'));
+    }
+    await layer.run(60, 1);
+    expect(layer.state.flyingCount, 48);
+    expect(layer.state.pendingCount, 12);
+    layer.messages
+      ..add(_local)
+      ..add(_local);
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(layer.state.flyingCount, 50, reason: 'the local ones still get a place');
+    await layer.close();
+  });
+
   testWidgets("Q02.1: a network emoticon loads through the app's image cache (the app proxy)", (tester) async {
     final previous = AppImageCache.manager;
     addTearDown(() => AppImageCache.manager = previous);

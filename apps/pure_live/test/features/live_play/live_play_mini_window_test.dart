@@ -8,6 +8,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:live_core/live_core.dart';
@@ -34,6 +35,7 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_observer.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
@@ -73,6 +75,7 @@ Future<_App> _app(
   Size size = const Size(393, 852),
   bool floatPlay = true,
   FakeSite? site,
+  List<Override> overrides = const [],
 }) async {
   tester.view
     ..physicalSize = size
@@ -140,6 +143,7 @@ Future<_App> _app(
           engines.add(engine);
           return fakeSession(engine);
         }),
+        ...overrides,
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -284,11 +288,34 @@ void main() {
       final phone = CompactDanmakuMetrics.resolve(width: 220, autoScale: true, fontSize: 12, speed: 90);
       expect(phone.fontSize, 10, reason: '3.x: 12 × 0.65 = 7.8');
       expect((124 * 0.5 / phone.laneHeight).floor(), 3);
-      expect(CompactDanmakuMetrics.resolve(width: 360, autoScale: true, fontSize: 12, speed: 90).fontSize, 12);
+      // D03.3 c3: wider than 350 they grow with the window (upstream
+      // b2cca41c7; 3.x stopped at 1×): 360 wide is 12 × 360 / 350.
+      expect(
+        CompactDanmakuMetrics.resolve(width: 360, autoScale: true, fontSize: 12, speed: 90).fontSize,
+        closeTo(12 * 360 / 350, 0.001),
+      );
       // The user's own smaller size stays.
       expect(CompactDanmakuMetrics.resolve(width: 220, autoScale: true, fontSize: 8, speed: 90).fontSize, 8);
       expect(CompactDanmakuMetrics.resolve(width: 220, autoScale: false, fontSize: 12, speed: 90).fontSize, 12);
       expect(CompactDanmakuMetrics.resolve(width: 220, autoScale: true, fontSize: 12, speed: 90).speed, 90 * 0.65);
+    });
+
+    test('D03.3 c3: a window wider than 350 enlarges them up to twice the settings; lanes up to 88', () {
+      final half = CompactDanmakuMetrics.resolve(width: 700, autoScale: true, fontSize: 12, speed: 90);
+      expect(half.fontSize, 24);
+      expect(half.speed, 180);
+      expect(half.laneHeight, closeTo(24 * 1.8, 0.001));
+      final wide = CompactDanmakuMetrics.resolve(width: 1000, autoScale: true, fontSize: 12, speed: 90);
+      expect((wide.fontSize, wide.speed), (24, 180), reason: 'at most twice');
+      expect(CompactDanmakuMetrics.maxScale, 2);
+      // The largest setting at twice: 48, its lane 86.4; the lane stops at 88.
+      final largest = CompactDanmakuMetrics.resolve(width: 1000, autoScale: true, fontSize: 24, speed: 90);
+      expect(largest.fontSize, 48);
+      expect(largest.laneHeight, closeTo(48 * 1.8, 0.001));
+      expect(CompactDanmakuMetrics.resolve(width: 1000, autoScale: true, fontSize: 30, speed: 90).laneHeight, 88);
+      // Without automatic scaling nothing changes.
+      final fixed = CompactDanmakuMetrics.resolve(width: 1000, autoScale: false, fontSize: 12, speed: 90);
+      expect((fixed.fontSize, fixed.speed), (12, 90));
     });
 
     test('the danmaku frame rate: 30, 60 or the display; a manual rate stays', () {
@@ -515,6 +542,62 @@ void main() {
       await tester.runAsync(() => app.services.store.settings.set(Settings.enablePipDanmaku, false));
       await _settle(tester);
       expect(tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay))).visible, isFalse);
+      await _close(tester, app);
+    });
+
+    testWidgets('D03.3 c1: the mini danmaku use the danmaku font; the default is the system one', (tester) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      DanmakuOverlay overlay() => tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay)));
+      DanmakuOverlayState layer() => tester.state<DanmakuOverlayState>(_inWindow(find.byType(DanmakuOverlay)));
+      expect(overlay().look.fontFamily, isNull);
+      await tester.runAsync(() => app.services.store.settings.set(Settings.danmakuFontFamilyName, 'LXGW'));
+      await _settle(tester);
+      expect(overlay().look.fontFamily, 'LXGW');
+      app.danmaku.chat('换了字体');
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(layer().lastTextStyle?.fontFamily, 'LXGW');
+      await _close(tester, app);
+    });
+
+    testWidgets('D03.3 c2: bundled emoticons fly as pictures in the mini window; text only drops them', (tester) async {
+      // The app's lists read from the files, as the room's library does.
+      final library = EmoteLibrary(bundle: FileAssetBundle());
+      final bilibili = (await tester.runAsync(() => library.load(SiteIds.bilibili)))!;
+      expect(bilibili.codes, contains('[dog]'));
+      final app = await _app(tester, overrides: [emoteLibraryProvider.overrideWithValue(library)]);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      DanmakuOverlay overlay() => tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay)));
+      DanmakuOverlayState layer() => tester.state<DanmakuOverlayState>(_inWindow(find.byType(DanmakuOverlay)));
+      expect(overlay().emotes, same(bilibili));
+      expect(overlay().look.textOnly, isFalse);
+
+      // Text only: the code goes too, so a danmaku of only an emoticon does
+      // not fly; the text of another still does.
+      await tester.runAsync(() => app.services.store.settings.set(Settings.pipDanmakuNoEmojiMode, true));
+      await _settle(tester);
+      expect(overlay().look.textOnly, isTrue);
+      app.danmaku.chat('[dog]');
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(layer().flyingCount, 0);
+      final plain = layer().debugFlying.length;
+      app.danmaku.chat('好[dog]', id: 'text');
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(layer().debugFlying.length, plain + 1);
+      final textOnly = layer().debugFlying.last.$2.width;
+
+      // Off: the picture, about 1.3 × the text.
+      await tester.runAsync(() => app.services.store.settings.set(Settings.pipDanmakuNoEmojiMode, false));
+      await _settle(tester);
+      app.danmaku.chat('好[dog]', id: 'picture');
+      for (var i = 0; i < 20 && layer().debugFlying.where((f) => f.$1.messageId == 'picture').isEmpty; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      final picture = layer().debugFlying.firstWhere((f) => f.$1.messageId == 'picture').$2.width;
+      expect(picture, greaterThan(textOnly + 8), reason: 'a picture in place of "[dog]"');
       await _close(tester, app);
     });
 

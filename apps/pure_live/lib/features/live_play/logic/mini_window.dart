@@ -190,27 +190,34 @@ bool shouldAutoEnterPip({
 
 /// The mini windows' danmaku size and speed (3.x `CompactDanmakuMetrics`):
 /// with automatic scaling the text and speed follow the window's width over
-/// 350 (0.65–1), but the text stays at least 10 (c7: 3.x's 220 wide window
-/// had 7.8) unless the user chose smaller.
+/// 350, from 0.65 up to [maxScale] (D03.3 c3: a picture-in-picture pulled
+/// larger, a tablet's or a desktop's window, grows them; 3.x stopped at 1),
+/// but the text stays at least 10 (c7: 3.x's 220 wide window had 7.8)
+/// unless the user chose smaller.
 final class CompactDanmakuMetrics {
   const new _({required this.fontSize, required this.speed, required this.laneHeight});
 
   /// Resolves the metrics for a window [width] wide.
   factory resolve({required double width, required bool autoScale, required double fontSize, required double speed}) {
     final safeWidth = width.isFinite && width > 0 ? width : referenceWidth;
-    final scale = autoScale ? (safeWidth / referenceWidth).clamp(0.65, 1.0) : 1.0;
+    final scale = autoScale ? (safeWidth / referenceWidth).clamp(0.65, maxScale) : 1.0;
     final scaled = fontSize * scale;
     final size = autoScale ? math.max(scaled, math.min(fontSize, minimumFontSize)) : fontSize;
     return CompactDanmakuMetrics._(
       fontSize: size,
       speed: speed * scale,
-      // 3.x's track: 1.8 × the text or the text + 10, within 18–44.
-      laneHeight: math.max(size * 1.8, size + 10).clamp(18.0, 44.0),
+      // 3.x's track: 1.8 × the text or the text + 10, within 18–88 (3.x
+      // 44, raised with [maxScale] as upstream did).
+      laneHeight: math.max(size * 1.8, size + 10).clamp(18.0, 88.0),
     );
   }
 
   /// The width the configured size is for.
   static const double referenceWidth = 350;
+
+  /// The most a wide window enlarges the configured size and speed (upstream
+  /// pure_live b2cca41c7, "画中画弹幕随窗口放大成比例缩放"; 3.x had 1).
+  static const double maxScale = 2;
 
   /// The smallest automatic size (c7).
   static const double minimumFontSize = 10;

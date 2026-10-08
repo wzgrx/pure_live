@@ -10,6 +10,12 @@ import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 // The danmaku look, shared by the live room and the multi-view page (M12.2);
 // the settings themselves are in danmaku_settings_content.dart (U.2f, U.8).
 
+/// The family of the danmaku font setting [name]: null for the system's
+/// (empty, or the stored default "Default"). The room's picture, the
+/// multi-view and the mini windows (D03.3 c1) use this one rule.
+String? danmakuFontFamilyOf(String name) =>
+    name.isEmpty || name == Settings.danmakuFontFamilyName.defaultValue ? null : name;
+
 /// The danmaku look from the settings.
 DanmakuLook danmakuLookOf(WidgetRef ref) {
   final font = watchSetting(ref, Settings.danmakuFontFamilyName);
@@ -25,7 +31,7 @@ DanmakuLook danmakuLookOf(WidgetRef ref) {
     stroke: watchSetting(ref, Settings.enableDanmakuStroke),
     strokeWidth: watchSetting(ref, Settings.danmakuFontBorder),
     // F.2a: the danmaku font ("Default" is the system's) and text-only mode.
-    fontFamily: font.isEmpty || font == Settings.danmakuFontFamilyName.defaultValue ? null : font,
+    fontFamily: danmakuFontFamilyOf(font),
     textOnly: watchSetting(ref, Settings.noEmojiMode),
   );
 }

@@ -90,3 +90,11 @@
 - `packages/live_store/lib/src/settings/settings.dart`（D02.1 加 meta 键）、`packages/live_ui/lib/live_ui.dart` 导出列表（A02.3、A10.3 也在 `live_ui` 加东西）、`packages/live_player/lib/src/session.dart`（R02.2 若改帧率声明）。
 - 翻译文件 `zh.json`、`en.json`（几乎每个任务都加键，按键名排序，合并时一般只是相邻行）。
 - 测试：`live_play_support.dart`（`FakeEngine.onOpen`）、`live_play_mini_window_test.dart`（`_App.danmakus`）。
+
+## K90 复查（2026-10-08，master ce7640a5b）
+
+- 第 1 条（竖屏，哔哩哔哩）：暂停后中间是深色半透明圆底上的白 ▶，10 秒后控制层还在 ✓；点 ▶ 继续播放 ✓。
+- 第 5 条：暂停 10 秒以上再继续，没出现“正在重连”，日志里没有 `playback: recovering` ✓。
+- 第 9 条：纯音频时暂停，封面中间写“纯音频已暂停”；继续后回到“纯音频播放中” ✓。
+- 第 7 条见 G02.3 的 K90 复查（断网出“正在重连”，恢复后自己接上）✓。
+- 第 2～4、6、8 条没看（横屏全屏、通知栏暂停、“暂停时的弹幕”、小窗和多画面、YY 起播、全屏锁定后失败）。

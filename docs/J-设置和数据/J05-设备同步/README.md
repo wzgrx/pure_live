@@ -38,18 +38,19 @@ RemoteSyncService.start()（remote_sync_service.dart:175）
   _busy（:427）同时只做一件、2 分钟超时；_request（:441）用 dart:io HttpClient 直连（不走应用代理），连接 5 秒超时
 ```
 
-- 线上格式（`remote_sync_protocol.dart`，和 3.x `lib/modules/remote_receiver/remote_sync_protocol.dart` 相同）：HTTP 端口 39888、UDP 39889、配对码头 `x-purelive-pairing`、6 位数字、二维码 `purelive://<ip>:<端口>/sync?code=<码>`、发现包 `type: pure_live_discovery`、设置包 `{type: pure_live_sync, version: 1, settings: <备份>}`。
-- 完成度：I08.1 做了服务和页面，I01.3 接上 mDNS（和 3.x 互相发现），A12.6（`965d41956`）按设计重做页面并把“接收”拆成 `fetch` + 预览 + `apply`。功能点 F-BAK-05（设备同步）、F-BAK-06（扫码）“没验证”：**两台真设备之间从没同步过**，归 S02.4 第 3 条。
+- 线上格式（`remote_sync_protocol.dart`，和 3.x `lib/modules/remote_receiver/remote_sync_protocol.dart` 相同）：HTTP 端口 39888、UDP 39889、配对码头 `x-purelive-pairing`、6 位数字、二维码 `purelive://<ip>:<端口>/sync?code=<码>`、发现包 `type: pure_live_discovery`、设置包 `{type: pure_live_sync, version: 1, settings: <备份>}`。J05.1 起：只勾了一部分时设置包多一个可选的 `sections`（留下的顶层分区名，和上游 pure_live `9483ccf03` 同名同义），全勾时和 3.x 一字不差；`/status` 的回答多一个 `syncParts`（能收部分内容的设备才有，发送方只给这样的设备发部分包，3.x 收到缺分区的包会把缺的重置成默认）。
+- 完成度：I08.1 做了服务和页面，I01.3 接上 mDNS（和 3.x 互相发现），A12.6（`965d41956`）按设计重做页面并把“接收”拆成 `fetch` + 预览 + `apply`。[J05.1](J05.1-同步前勾选内容/README.md)（2026-10-08，V01.6）：发送、接收、对方发来时都能按 9 类勾选，默认全勾，3.x 设备整份发（勾选框锁住）。功能点 F-BAK-05（设备同步）、F-BAK-06（扫码）“没验证”：**两台真设备之间从没同步过**，归 S02.4 第 3 条。
 - 和 3.x 比：协议、端口、配对码、带不带账号的规则不变；多了接收前预览、错 10 次换码、POST 正文先校验、不加 CORS 头；3.x 的 `receiveFromAddress`（`remote_sync_service.dart:1041`）只请求 `/status` 就算成功，4.x 的“接收”是真的取回并应用。
 
 ## 代码地图
 
 | 文件 | 职责 |
 |---|---|
-| `apps/pure_live/lib/features/remote_receiver/remote_sync_protocol.dart`（111 行） | 常量（`:9-31`）、`newPairingCode`（`:34`，`Random.secure`）、`pairingCodesMatch`（`:43`，常数时间）、`createQrUri`（`:55`）、`discoveryPacket`（`:59`）、`settingsPacket`（`:77`）、`parseHttpAddress`（`:85`，只认 IPv4 和主机名，默认端口 39888）、`parseQr`（`:99`） |
-| `apps/pure_live/lib/features/remote_receiver/remote_sync_service.dart`（590 行） | `RemoteSyncDevice`（`:17`）、`RemoteSyncConfirm`（`:61`）、`RemoteSyncService`（`:76`）：`maxWrongCodes = 10`（`:100`）、`includeAccounts`（`:122`）、`devices`（`:131`）、`qrData`（`:140`）、`deviceId`（`:145`，存 `remote_sync_device_id`）、`deviceName`（`:161`）、`start`（`:175`）、`stop`（`:216`）、`_pickLocalIp`（`:243`）、`handleRequest`（`:285`）、`_settings`（`:315`）、`send`（`:379`）、`receive`（`:387`）、`fetch`（`:395`）、`apply`（`:407`）、`_busy`（`:427`）、`_request`（`:441`）、`_startDiscovery`（`:464`）、`_startMdns`（`:489`）、`_announce`（`:537`）、`_heard`（`:567`） |
+| `apps/pure_live/lib/features/remote_receiver/remote_sync_protocol.dart`（135 行） | 常量（`:9-31`）、`newPairingCode`（`:34`，`Random.secure`）、`pairingCodesMatch`（`:43`，常数时间）、`createQrUri`（`:55`）、`discoveryPacket`（`:59`）、`partsKey`（`:81`）、`settingsPacket`（`:87`，可选 `sections`）、`sectionsOf`（`:96`）、`takesParts`（`:105`）、`parseHttpAddress`（`:109`，只认 IPv4 和主机名，默认端口 39888）、`parseQr`（`:123`） |
+| `apps/pure_live/lib/features/remote_receiver/remote_sync_service.dart`（658 行） | `RemoteSyncDevice`（`:18`）、`RemoteSyncConfirm`（`:62`）、`RemoteSyncChooseImport`（`:66`）、`RemoteSyncService`（`:84`）：`maxWrongCodes = 10`（`:108`）、`chooseImport`（`:116`）、`includeAccounts`（`:135`）、`devices`（`:144`）、`qrData`（`:153`）、`deviceId`（`:158`，存 `remote_sync_device_id`）、`deviceName`（`:174`）、`start`（`:188`）、`stop`（`:229`）、`_pickLocalIp`（`:256`）、`handleRequest`（`:298`）、`_settings`（`:330`，按 `sections` 过滤、先解析、`chooseImport` 问勾哪些）、`outgoing`（`:412`）、`takesParts`（`:418`）、`send`（`:434`）、`receive`（`:448`）、`fetch`（`:456`）、`apply`（`:469`）、`_busy`（`:489`）、`_request`（`:503`）、`_startDiscovery`（`:532`）、`_startMdns`（`:557`）、`_announce`（`:605`）、`_heard`（`:635`） |
+| `apps/pure_live/lib/shared/backup/sync_parts.dart`（178 行） | J05.1 的拆包：`SyncPart`（9 类）、`syncPartsIn`、`pickSyncParts`（`favorite`、`history` 按键拆）、`onlySyncParts`、`syncSectionsOf`、`withinSyncSections`、`syncPartCounts`；放在 shared，备份恢复以后要“只恢复勾选的”时可以直接用 |
 | `apps/pure_live/lib/features/remote_receiver/mdns_peers.dart`（122 行） | `MdnsPeer`、`MdnsPeers` 接口（`:12`，测试替换）、`BonsoirPeers`（`:29`，`_purelive-sync._tcp`，TXT 里带 id、name、platform、version、ip、port） |
-| `apps/pure_live/lib/features/remote_receiver/remote_receiver_page.dart`（772 行） | 界面（A12.6）；逻辑相关：页面创建和销毁服务、`confirm` 回调接对方请求的确认框、接收时 `fetch` → `previewRestore` → `apply` |
+| `apps/pure_live/lib/features/remote_receiver/remote_receiver_page.dart`（1032 行） | 界面（A12.6）；逻辑相关：页面创建和销毁服务、`confirm` 回调接对方读取的确认框、`chooseImport` 回调接对方发来的确认框（勾选，J05.1）、发送时 `takesParts` → 勾选 → 配对码 → `send`、接收时 `fetch` → `previewRestore` → 勾选 → `apply`；勾选对话框 `_SyncPartsDialog` |
 | `apps/pure_live/lib/platform/system_access.dart` | `SystemAccess.requestLocalNetwork`（O04） |
 | `apps/pure_live/lib/platform/platform_services.dart` | `MulticastLock`（`:70`，Android 收组播） |
 
@@ -57,7 +58,8 @@ RemoteSyncService.start()（remote_sync_service.dart:175）
 
 | 测试文件 | 覆盖什么 |
 |---|---|
-| `apps/pure_live/test/features/remote_receiver/remote_sync_test.dart`（12） | 读 3.x 的二维码和地址（`:40`）；两台服务经真实 HTTP 用配对码和同意收发设置（`:52`）；错码被拒、错 10 次换码、没同意被拒（`:71`）；页面：本机地址和码、三组和开关、拿不到地址时的说明、发送（对方名字和六格码）、接收（码 → 预览 → 应用）、对方请求的确认框、手机扫码后选方向、宽屏两栏、横屏 |
+| `apps/pure_live/test/shared/sync_parts_test.dart`（5） | J05.1：v4 的导出有哪几类、只勾关注时恢复后其余不变、按键拆 `favorite`、全勾和平铺的旧文件原样、按 `sections` 过滤 |
+| `apps/pure_live/test/features/remote_receiver/remote_sync_test.dart`（24） | J05.1：真 HTTP 下只发勾选的、错码仍被拒、3.x 的包当全量、上游带 `sections` 的包只读列出的、3.x 设备拿到整份、对方发来时只应用勾选的、`apply` 只恢复勾选的；页面的勾选框、“全选”、锁住、横屏 1.3 倍字号。以前的：读 3.x 的二维码和地址（`:40`）；两台服务经真实 HTTP 用配对码和同意收发设置（`:52`）；错码被拒、错 10 次换码、没同意被拒（`:71`）；页面：本机地址和码、三组和开关、拿不到地址时的说明、发送（对方名字和六格码）、接收（码 → 预览 → 应用）、对方请求的确认框、手机扫码后选方向、宽屏两栏、横屏 |
 
 ## 3.x 基线
 
@@ -73,8 +75,8 @@ RemoteSyncService.start()（remote_sync_service.dart:175）
 | 两台真设备之间（4.x↔4.x、4.x↔3.x）从没同步过；扫码没在真机看 | 整个子分类 | mDNS、广播、组播锁、配对码在真网络里的表现不知道 | [S02.4](../../S-质量和验证/S02-真机验证/S02.4-K90验证数据和其他/README.md) 第 3 条（CHECKLIST 第 5 节第 3 条）；另一台设备可以是电脑上的 Windows 版或模拟器，不能用用户手机上的 3.x |
 | 拿不到本机地址时仍启动服务（3.x 不启动），页面只能说“没连网络或没给权限”，分不清是哪种 | `:184-204`；`remote_receiver_page.dart:438` | 用户要自己判断（A12 已知问题也记了） | 服务给出原因时再改文字；随上一条一起做 |
 | 本机地址只在 `start` 时取一次，中途换 Wi-Fi 不更新 | `:184` | 换网络后二维码和地址是旧的，要离开页面再进 | 不做（3.x 一样） |
-| 服务端收到的导入（对方“发送”过来）只有“允许 / 拒绝”，没有预览 | `:342-365` | 允许后直接按备份规则恢复（文件里没有的部分保持不变） | 照 3.x；要预览先进 V01 提议 |
-| 只传 `BackupService` 的部分：搜索记录、网络电视列表、多画面上次的画面不随设备同步 | `:352`、`:380`、`:408` | 和本地完整备份不一样多 | 不做（3.x 设备读不了这些）；“发送前勾选同步哪些内容”见 [V01.6](../../V-需求和反馈/V01-新功能提议/V01.6-设备同步选择同步内容/README.md) |
+| ~~服务端收到的导入（对方“发送”过来）只有“允许 / 拒绝”，没有预览~~ | `_settings` | — | J05.1 改了：确认框列出会改什么，每类一个勾选框 |
+| 只传 `BackupService` 的部分：搜索记录、网络电视列表、多画面上次的画面不随设备同步 | `:352`、`:380`、`:408` | 和本地完整备份不一样多 | 不做（3.x 设备读不了这些；V01.6 S12）；发送、接收前勾选同步哪些内容已由 [J05.1](J05.1-同步前勾选内容/README.md) 做了 |
 | 明文 HTTP：设置（勾了“包含账号”时还有 Cookie）在局域网里明文传 | `_request` `:441` | 同一网络里能抓包的人能看到 | 照 3.x；默认不带账号，页面开关处有说明 |
 
 ## 相关决定和规范
@@ -91,7 +93,7 @@ RemoteSyncService.start()（remote_sync_service.dart:175）
 
 1. O04.1 + S02.4 第 3 条：真机走通，确认提示文字问题。
 2. 根据结果开小任务：设备同步专用的权限提示、拿不到地址时分清原因。
-3. V01.6（第三档提议）：发送、接收前勾选同步哪些内容（参考上游 pure_live `9483ccf03`），用户确认后在本组登记实现任务。
+3. ~~V01.6（第三档提议）~~：已做（J05.1，待真机）；真机步骤 [verify.md](J05.1-同步前勾选内容/verify.md) 和 S02.4 第 3 条一起看。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -100,9 +102,11 @@ RemoteSyncService.start()（remote_sync_service.dart:175）
 属于 [J 设置和数据](../README.md)。
 
 - 代码：`features/remote_receiver/`
-- 进度：还没有任务
+- 进度：`██████████████████░░` 90%
 
 
-还没有任务。
+| 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
+|---|---|---|---|---|---|---|
+| J05.1 | 同步前勾选内容：设备同步发送、接收前选同步哪几类（接 V01.6） | 功能 | 待真机 | 2026-10-08 | — | [设计或说明](J05.1-同步前勾选内容/README.md)、[任务书](J05.1-同步前勾选内容/brief.md)、[记录](J05.1-同步前勾选内容/record.md)、[真机验证](J05.1-同步前勾选内容/verify.md) |
 
 <!-- docs:生成结束 -->

@@ -3034,6 +3034,17 @@ commit = "c168fdb99"
 old = ["F.4b", "T09d.2"]
 
 [[task]]
+id = "J05.1"
+title = "同步前勾选内容：设备同步发送、接收前选同步哪几类（接 V01.6）"
+type = "功能"
+status = "待真机"
+size = "中"
+tier = 3
+date = "2026-10-08"
+from = "V01.6（D-036）；上游 pure_live 9483ccf03"
+note = "9 类勾选、默认全勾、不记住；只对 /status 声明 syncParts 的设备发部分包（带 sections），3.x、上游、旧 4.x 整份发并锁住勾选框；接收预览和对方发来的确认框都能少勾；配对码不变；真机看 verify.md（两台设备，S02.4 第 3 阶段）"
+
+[[task]]
 id = "J06.1"
 title = "3.x 数据迁移的真机验证（覆盖安装时用真实数据核对）"
 type = "验证"
@@ -3516,11 +3527,13 @@ note = "同意做（D-036）；参考上游 pure_live f9e03f446、582e355f7、b2
 id = "V01.6"
 title = "设备同步在发送、接收前先勾选同步哪些内容（保留配对码）"
 type = "功能"
-status = "未开始"
+status = "已确认"
 size = "小"
 tier = 3
 old = ["T09e.2"]
-note = "同意做（D-036）；参考上游 pure_live 9483ccf03"
+from = "上游 pure_live 9483ccf03（W01.1 对照）"
+to = ["J05.1"]
+note = "同意做（D-036）；2026-10-08 评估和设计定稿（README 文末 S1～S13，按 D-003），实现是 J05.1；J05.1 真机看过后改完成"
 
 
 [[task]]

@@ -73,12 +73,36 @@ abstract final class RemoteSyncProtocol {
     'version': version,
   };
 
-  /// The body of a settings POST.
-  static Map<String, Object?> settingsPacket({required Map<String, Object?> settings}) => {
+  /// The key of the status answer that lists the parts a device takes on
+  /// their own (new in v4, docs/J-设置和数据/J05-设备同步/J05.1-同步前勾选内容):
+  /// only such a device gets a packet with some parts left out. 3.x (and
+  /// upstream pure_live, and v4 before it) resets every section a packet
+  /// lacks to its defaults, or may, so they always get everything.
+  static const String partsKey = 'syncParts';
+
+  /// The body of a settings POST; [sections] lists the sections [settings]
+  /// keeps when some were left out (upstream pure_live `9483ccf03`'s optional
+  /// field, same name and meaning); without it the packet is the whole
+  /// backup, as 3.x sends it.
+  static Map<String, Object?> settingsPacket({required Map<String, Object?> settings, List<String>? sections}) => {
     'type': syncType,
     'version': 1,
     'settings': settings,
+    'sections': ?sections,
   };
+
+  /// The `sections` of a settings packet: null when it has none (a whole
+  /// backup) or when it is not a list of names.
+  static List<String>? sectionsOf(Map<Object?, Object?> packet) {
+    final sections = packet['sections'];
+    if (sections is! List || sections.isEmpty) return null;
+    final names = sections.whereType<String>().toList(growable: false);
+    return names.length == sections.length ? names : null;
+  }
+
+  /// Whether a status answer's [data] says the device takes parts on their
+  /// own ([partsKey]).
+  static bool takesParts(Object? data) => data is Map && data[partsKey] is List;
 
   /// An address typed by the user (`192.168.1.2`, `192.168.1.2:39888`,
   /// `http://…`): IPv4 addresses and host names only; null otherwise.

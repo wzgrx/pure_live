@@ -3862,12 +3862,15 @@ old = ["T00d.1"]
 id = "Z05.1"
 title = "翻译键：列出运行时拼出来的键，再清理不用的键（18 个）"
 type = "工程"
-status = "未开始"
+status = "待确认"
+date = "2026-10-08"
 size = "小"
 tier = 3
 old = ["T00e.1"]
 stages = ["列出拼接键", "核对 18 个键", "删除并跑全部测试"]
-done = 0
+done = 2
+next = "维护者决定 D-024 是否解除；解除后从两份翻译文件和 test/i18n_runtime_keys.dart 的 keptUnusedKeys 删 18 个键"
+note = "21 条拼键规则（227 个键）和 3 张键表有测试守着；没人用的键必须登记在 keptUnusedKeys（18 个 + 9 个 3.x 键）"
 
 [[task]]
 id = "Z05.2"

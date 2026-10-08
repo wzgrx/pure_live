@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
+import 'i18n_runtime_keys.dart';
 import 'support.dart';
 
 Map<String, Object?> read(String code) =>
@@ -30,6 +31,62 @@ void main() {
             if (!zh.containsKey(match.group(1)) && !en.containsKey(match.group(1))) '${match.group(1)} (${file.path})',
     };
     expect(missing, isEmpty);
+  });
+
+  test('Z05.1: runtime keys built from enums and tables are translated', () {
+    final zh = read('zh');
+    final en = read('en');
+    final rules = runtimeKeyRules();
+    // Every interpolated key literal in lib/ is listed (a new one must be
+    // added to i18n_runtime_keys.dart with its values).
+    final listed = {for (final rule in rules) rule.template, ...notTranslationKeyTemplates};
+    expect(interpolatedKeyTemplates('lib').difference(listed), isEmpty, reason: 'unlisted runtime keys');
+    expect(listed.difference(interpolatedKeyTemplates('lib')), isEmpty, reason: 'rules no longer in lib/');
+    for (final rule in rules) {
+      expect(rule.keys, isNotEmpty, reason: rule.template);
+      for (final key in rule.keys) {
+        if (rule.optional && !zh.containsKey(key) && !en.containsKey(key)) continue;
+        expect(zh.containsKey(key) && en.containsKey(key), isTrue, reason: '${rule.template}: $key');
+      }
+    }
+  });
+
+  test('Z05.1: keys handed over through tables are translated', () {
+    final zh = read('zh');
+    final en = read('en');
+    for (final MapEntry(key: table, value: keys) in variableKeyTables().entries) {
+      expect(keys, isNotEmpty, reason: table);
+      for (final key in keys) {
+        expect(zh.containsKey(key) && en.containsKey(key), isTrue, reason: '$table: $key');
+      }
+    }
+  });
+
+  test('Z05.1: every key is asked for, or kept on purpose', () {
+    final keys = {...read('zh').keys, ...read('en').keys};
+    final literal = RegExp("""['"]([A-Za-z0-9_.]+)['"]""");
+    final used = <String>{
+      for (final root in ['lib', ...Directory('../../packages').listSync().map((entry) => '${entry.path}/lib')])
+        if (Directory(root).existsSync())
+          for (final file in Directory(root).listSync(recursive: true).whereType<File>())
+            if (file.path.endsWith('.dart'))
+              for (final match in literal.allMatches(file.readAsStringSync())) match.group(1)!,
+      for (final rule in runtimeKeyRules()) ...rule.keys,
+    };
+    expect(keys.difference(used).difference(keptUnusedKeys), isEmpty, reason: 'unused keys (delete or keep them)');
+    expect(keptUnusedKeys.intersection(used), isEmpty, reason: 'kept keys that are used again');
+    expect(keptUnusedKeys.difference(keys), isEmpty, reason: 'kept keys that are gone');
+  });
+
+  test('Z05.1: translation files are sorted by key and indented with four spaces', () {
+    for (final code in ['zh', 'en']) {
+      final text = File('assets/translations/$code.json').readAsStringSync();
+      final table = jsonDecode(text) as Map<String, Object?>;
+      final keys = table.keys.toList();
+      expect(keys, [...keys]..sort(), reason: '$code.json is not sorted by key');
+      final encoded = const JsonEncoder.withIndent('    ').convert(table);
+      expect(text, '$encoded\n', reason: '$code.json is not four-space JSON');
+    }
   });
 
   test('F.5a: the directory and audience notes are words for users, not field names', () {

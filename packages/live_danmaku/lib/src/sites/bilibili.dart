@@ -14,22 +14,28 @@ import 'package:live_net/live_net.dart' show brotliDecode;
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
-/// `SEND_GIFT`, `COMBO_SEND` or `GUARD_BUY` (M4.D2, appendix C-2). Reported,
-/// not shown yet (M5 appendix B-21).
+/// `SEND_GIFT`, `COMBO_SEND` or `GUARD_BUY` (M4.D2, appendix C-2), as a
+/// [LiveGift] (E05.5): [goldCoins] is its value in gold seeds, [comboId] its
+/// combo key; a guard is a [LiveGiftKind.membership] of [count] months at
+/// [unitPrice] each; a silver `SEND_GIFT` is [free].
 @immutable
-final class BilibiliGift {
+final class BilibiliGift extends LiveGift {
   /// Creates the gift.
-  const new({required this.id, required this.name, required this.count, this.goldCoins = 0, this.comboId = ''});
-
-  /// `giftId` (`SEND_GIFT`) or `gift_id`; empty when missing or 0.
-  final String id;
-
-  /// `giftName` or `gift_name` (`小心心`, `舰长`).
-  final String name;
-
-  /// How many this message gave, at least 1: `num`, a combo's `total_num`,
-  /// the months of a `GUARD_BUY`.
-  final int count;
+  ///
+  /// [id] is `giftId` (`SEND_GIFT`) or `gift_id`, empty when missing or 0;
+  /// [name] `giftName` or `gift_name` (`小心心`, `舰长`); [count] how many
+  /// this message gave, at least 1: `num`, a combo's `total_num`, the months
+  /// of a `GUARD_BUY`.
+  const new({
+    required super.id,
+    required super.name,
+    required super.count,
+    this.goldCoins = 0,
+    this.comboId = '',
+    super.kind,
+    super.unitPrice,
+    super.free,
+  }) : super(comboKey: comboId, totalValue: goldCoins > 0 ? goldCoins : null, unit: LiveGiftUnit.goldSeed);
 
   /// What it cost in gold coins (1000 = 1 yuan): `total_coin` of a gold
   /// `SEND_GIFT`, a combo's `combo_total_coin`, `price × num` of a
@@ -42,15 +48,10 @@ final class BilibiliGift {
 
   @override
   bool operator ==(Object other) =>
-      other is BilibiliGift &&
-      other.id == id &&
-      other.name == name &&
-      other.count == count &&
-      other.goldCoins == goldCoins &&
-      other.comboId == comboId;
+      super == other && other is BilibiliGift && other.goldCoins == goldCoins && other.comboId == comboId;
 
   @override
-  int get hashCode => Object.hash(id, name, count, goldCoins, comboId);
+  int get hashCode => Object.hash(super.hashCode, goldCoins, comboId);
 
   @override
   String toString() => 'BilibiliGift($name ×$count, $goldCoins gold)';
@@ -752,8 +753,8 @@ abstract final class BilibiliDanmakuProtocol {
   /// `SEND_GIFT` (`giftName`, `giftId`, `num`, gold `total_coin`) and
   /// `COMBO_SEND` (a combo's `gift_name`, `gift_id`, `total_num`,
   /// `combo_total_coin`), both with `uid`, `uname` and `batch_combo_id`: a
-  /// [LiveMessageType.gift] holding a [BilibiliGift], text `<name> ×<count>`.
-  /// Not shown yet (B-21). Without a name, nothing.
+  /// [LiveMessageType.gift] holding a [BilibiliGift] (a silver `SEND_GIFT`
+  /// is free), text [LiveGift.plainText]. Without a name, nothing.
   static LiveMessage? _gift(Map<String, dynamic> notice, {required bool combo}) {
     final data = notice['data'];
     if (data is! Map) return null;
@@ -775,12 +776,13 @@ abstract final class BilibiliDanmakuProtocol {
         count: count > 0 ? count : 1,
         goldCoins: coins != null && coins > 0 ? coins : 0,
         comboId: jsonString(data['batch_combo_id']) ?? '',
+        free: !combo && data['coin_type'] == 'silver',
       ),
     );
   }
 
   /// `GUARD_BUY`: `username` bought `num` months of `gift_name` (舰长,
-  /// 提督, 总督) at `price` gold coins each. Not shown yet (B-21).
+  /// 提督, 总督) at `price` gold coins each: a [LiveGiftKind.membership].
   static LiveMessage? _guard(Map<String, dynamic> notice) {
     final data = notice['data'];
     if (data is! Map) return null;
@@ -799,6 +801,8 @@ abstract final class BilibiliDanmakuProtocol {
         name: name,
         count: months,
         goldCoins: price > 0 ? price * months : 0,
+        kind: LiveGiftKind.membership,
+        unitPrice: price > 0 ? price : null,
       ),
     );
   }
@@ -818,7 +822,7 @@ abstract final class BilibiliDanmakuProtocol {
     type: LiveMessageType.gift,
     userName: userName,
     userId: jsonString(data['uid']) ?? '',
-    message: '${gift.name} ×${gift.count}',
+    message: gift.plainText,
     color: LiveMessageColor.white,
     messageId: messageId,
     sentAt: sentAt != null && sentAt > 0 && sentAt < 100000000000

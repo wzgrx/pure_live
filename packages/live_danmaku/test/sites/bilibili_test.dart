@@ -806,11 +806,18 @@ void main() {
           gift.data,
           const BilibiliGift(id: '30607', name: '小心心', count: 3, goldCoins: 3000, comboId: 'batch:gift:combo_id:1'),
         );
+        // E05.5: the shared gift.
+        final shared = gift.gift!;
+        expect(
+          (shared.kind, shared.comboKey, shared.totalValue, shared.unit, shared.free, shared.tier),
+          (LiveGiftKind.gift, 'batch:gift:combo_id:1', 3000, LiveGiftUnit.goldSeed, false, LiveGiftTier.normal),
+        );
         final silver = messages({
           'cmd': 'SEND_GIFT',
           'data': {'giftName': '辣条', 'num': 0, 'coin_type': 'silver', 'total_coin': 100},
         }).single;
-        expect(silver.data, const BilibiliGift(id: '', name: '辣条', count: 1));
+        expect(silver.data, const BilibiliGift(id: '', name: '辣条', count: 1, free: true));
+        expect(silver.gift?.totalValue, isNull, reason: 'silver seeds are not kept');
 
         final combo = messages({
           'cmd': 'COMBO_SEND',
@@ -827,6 +834,7 @@ void main() {
         expect(combo.message, '小心心 ×20');
         expect(combo.messageId, isEmpty);
         expect((combo.data! as BilibiliGift).goldCoins, 20000);
+        expect((combo.gift?.free, combo.gift?.tier), (false, LiveGiftTier.valuable), reason: '20 yuan');
 
         // As recorded (1775719573, 2026-10-01), with a synthetic user.
         final guard = messages({
@@ -844,7 +852,18 @@ void main() {
           },
         }).single;
         expect((guard.userName, guard.userId, guard.message), ('观众', '1000001', '舰长 ×1'));
-        expect(guard.data, const BilibiliGift(id: '10003', name: '舰长', count: 1, goldCoins: 198000));
+        expect(
+          guard.data,
+          const BilibiliGift(
+            id: '10003',
+            name: '舰长',
+            count: 1,
+            goldCoins: 198000,
+            kind: LiveGiftKind.membership,
+            unitPrice: 198000,
+          ),
+        );
+        expect(guard.gift?.tier, LiveGiftTier.precious, reason: '198 yuan');
         expect(messages({'cmd': 'SEND_GIFT', 'data': <String, Object?>{}}), isEmpty);
       });
 

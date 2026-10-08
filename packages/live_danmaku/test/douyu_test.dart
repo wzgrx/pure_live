@@ -330,11 +330,28 @@ void main() {
       expect(gifts, hasLength(57));
       expect(gifts.every((m) => m.type == LiveMessageType.gift && m.userName.isNotEmpty), isTrue);
       final first = gifts.first.data! as DouyuGift;
-      expect(first, const DouyuGift(id: '22171', name: '精英宝典', count: 1, combo: 1, receiverName: '若若跑的贼快'));
+      expect(
+        first,
+        DouyuGift(
+          id: '22171',
+          name: '精英宝典',
+          count: 1,
+          combo: 1,
+          receiverName: '若若跑的贼快',
+          comboKey: '${gifts.first.userId}:22171',
+        ),
+      );
       expect(gifts.first.message, '精英宝典 ×1');
+      // E05.5: the shared gift; no price in the packet.
+      expect(
+        (first.comboTotal, first.unitPrice, first.totalValue, first.unit, first.tier),
+        (1, null, null, LiveGiftUnit.other, LiveGiftTier.normal),
+      );
+      expect(gifts.first.gift, same(first));
       // A backpack prop has gfid 0: no gift id.
       final prop = gifts.map((m) => m.data! as DouyuGift).firstWhere((gift) => gift.name == '陪伴印章');
       expect(prop.id, isEmpty);
+      expect(prop.comboKey, endsWith(':陪伴印章'), reason: 'named by gfn without a gfid');
       final names = {for (final m in gifts) (m.data! as DouyuGift).name};
       expect(names, containsAll(['陪伴印章', '粉丝荧光棒', '精英宝典', '精英令', '国庆快乐']));
     });

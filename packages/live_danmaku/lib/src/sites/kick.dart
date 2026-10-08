@@ -7,6 +7,28 @@ import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
+/// Kicks sent without a message (`KicksGifted`): the [LiveMessage.data] of
+/// a [LiveMessageType.gift] message, as a [LiveGift] (E05.5) of one worth
+/// [amount] Kicks.
+@immutable
+final class KickGift extends LiveGift {
+  /// Creates the gift; [name] is `gift.name`, `Kicks` when it has none.
+  const new({required super.name, this.amount = 0})
+    : super(unitPrice: amount > 0 ? amount : null, totalValue: amount > 0 ? amount : null, unit: LiveGiftUnit.kicks);
+
+  /// `gift.amount`, in Kicks (100 to a US dollar); 0 when missing.
+  final int amount;
+
+  @override
+  bool operator ==(Object other) => super == other && other is KickGift && other.amount == amount;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, amount);
+
+  @override
+  String toString() => 'KickGift($name, $amount Kicks)';
+}
+
 /// Kick's public chat over Pusher (pure_live_TV's `KickDanmaku`,
 /// e1cca224; checked against the recordings `fixtures/kick/danmaku`),
 /// without I/O.
@@ -159,8 +181,10 @@ abstract final class KickDanmakuProtocol {
   /// Kicks sent to the streamer (`KicksGifted`, Kick's paid gifts): with a
   /// message it is a super chat of `gift.amount` Kicks, kept for the
   /// gift's `pinned_time` seconds (or by amount, as [superChatDuration]);
-  /// without one a gift line. No recording yet: the shape is the one of the
-  /// public client libraries (kick-wss).
+  /// without one a gift holding a [KickGift], text `Hell Yeah ×1` (E05.5:
+  /// was a Chinese sentence with the sender's name, which the line showed
+  /// twice). No recording yet: the shape is the one of the public client
+  /// libraries (kick-wss).
   static LiveMessage? kicks(Map<String, Object?> data) {
     final sender = _object(data['sender']);
     final gift = _object(data['gift']);
@@ -172,14 +196,16 @@ abstract final class KickDanmakuProtocol {
     final id = _text(data['gift_transaction_id']);
     final sentAt = _time(data['created_at']);
     if (text.isEmpty) {
+      final present = KickGift(name: giftName.isEmpty ? 'Kicks' : giftName, amount: amount);
       return LiveMessage(
         type: LiveMessageType.gift,
         userName: name,
         userId: _text(sender?['id']),
-        message: '$name 送出了 ${giftName.isEmpty ? 'Kicks' : giftName}${amount > 0 ? '（$amount Kicks）' : ''}',
+        message: present.plainText,
         messageId: id,
         sentAt: sentAt,
         color: LiveMessageColor.white,
+        data: present,
       );
     }
     final start = sentAt ?? DateTime.now();

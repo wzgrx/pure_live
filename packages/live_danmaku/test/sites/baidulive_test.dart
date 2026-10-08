@@ -392,6 +392,9 @@ void main() {
       expect(gift.hashCode, const BaiduLiveGift(id: '11138', name: '拍拍', count: 2, free: true).hashCode);
       expect(gift == const BaiduLiveGift(id: '11138', name: '拍拍', count: 3, free: true), isFalse);
       expect('$gift', 'BaiduLiveGift(拍拍 ×2)');
+      // E05.5: a LiveGift without a value (the unit is not known).
+      expect((gift.free, gift.totalValue, gift.unit, gift.tier), (true, null, LiveGiftUnit.other, LiveGiftTier.normal));
+      expect(gift == const BaiduLiveGift(id: '11138', name: '拍拍', count: 2, free: false), isFalse);
     });
 
     test('a chat line: every field (S03); a gift (S05)', () {
@@ -422,6 +425,7 @@ void main() {
       ];
       expect(gifts, hasLength(3));
       expect(gifts.first.message, '拍拍 ×1');
+      expect(gifts.first.gift?.iconUrl, (gifts.first.data! as BaiduLiveGift).icon);
       expect(
         gifts.first.data,
         BaiduLiveGift(

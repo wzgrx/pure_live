@@ -1802,7 +1802,7 @@ void main() {
       expect((figure.data! as LiveAudienceUpdate).value, 7, reason: 'an unreadable marquee does not hide the figure');
     });
 
-    test('S10: a recorded gift is a gift message with the web player line; its gift bar is not kept', () {
+    test('S10: a recorded gift is a gift message with the shared text; its gift bar is not kept', () {
       final gifts = [
         for (final message in s10.messages)
           if (message.type == LiveMessageType.gift) message,
@@ -1812,7 +1812,13 @@ void main() {
       expect(gift.data, const NiconicoGift(itemId: 'user15119555_26', name: 'ぶんぶんみゅーと', point: 100));
       expect(gift.userName, matches(RegExp(r'^[a-z]{9}$')), reason: 'the scrubbed giver');
       expect(gift.userId, matches(RegExp(r'^[1-9][0-9]{6,8}$')), reason: 'the scrubbed advertiser_user_id');
-      expect(gift.message, '${gift.userName}さんがギフト「ぶんぶんみゅーと（100pt）」を贈りました');
+      // E05.5: the shared text (was the web player's sentence, which named
+      // the giver a second time on the chat line).
+      expect(gift.message, 'ぶんぶんみゅーと ×1');
+      expect(
+        (gift.gift?.id, gift.gift?.unitPrice, gift.gift?.totalValue, gift.gift?.unit, gift.gift?.free),
+        ('user15119555_26', 100, 100, LiveGiftUnit.point, false),
+      );
       expect(gift.messageId, isNotEmpty);
       expect(gift.sentAt, isNotNull);
       expect(gift.color, LiveMessageColor.white);
@@ -1832,7 +1838,7 @@ void main() {
       });
     });
 
-    test('gifts: the giver, the web player line and the gift; none without an item or with negative points', () {
+    test('gifts: the giver, the shared text and the gift; none without an item or with negative points', () {
       final gift = NiconicoDanmakuProtocol.message(
         _message(
           8,
@@ -1843,7 +1849,7 @@ void main() {
       expect(gift.type, LiveMessageType.gift);
       expect(gift.userName, 'ギフト太郎');
       expect(gift.userId, '12345');
-      expect(gift.message, '【ギフト貢献3位】ギフト太郎さんがギフト「ニコ子（500pt）」を贈りました');
+      expect(gift.message, 'ニコ子 ×1');
       expect(gift.messageId, 'g1');
       expect(gift.sentAt, DateTime.fromMillisecondsSinceEpoch(1790541800250));
       expect(gift.color, LiveMessageColor.white);
@@ -1854,13 +1860,17 @@ void main() {
       expect('${gift.data}', 'NiconicoGift(ニコ子, 500pt)');
       LiveMessage? read(Uint8List data) => NiconicoDanmakuProtocol.message(_message(8, data));
       final plain = read(_gift())!;
-      expect(plain.message, 'ギフト太郎さんがギフト「ニコ子（500pt）」を贈りました');
+      expect(plain.message, 'ニコ子 ×1');
       expect((plain.data! as NiconicoGift).contributionRank, isNull);
       expect((plain.data! as NiconicoGift).message, isEmpty);
-      expect(read(_gift(rank: 0))!.message, startsWith('【ギフト貢献0位】'));
-      expect(read(_gift(point: 0))!.message, contains('（0pt）'));
-      expect(read(_gift(point: null))!.message, contains('（0pt）'));
-      expect(read(_gift(name: null))!.message, 'ギフト太郎さんがギフト「（500pt）」を贈りました');
+      expect((read(_gift(rank: 0))!.data! as NiconicoGift).contributionRank, 0);
+      for (final point in [0, null]) {
+        final free = read(_gift(point: point))!.gift!;
+        expect((free.free, free.totalValue, free.tier), (true, 0, LiveGiftTier.normal), reason: '$point');
+      }
+      // Without a name the item id names it.
+      expect(read(_gift(name: null))!.message, 'nicoko ×1');
+      expect(read(_gift(name: null))!.gift?.displayName, 'nicoko');
       expect((read(_gift(itemId: null))!.data! as NiconicoGift).itemId, isEmpty);
       for (final (reason, id) in [('absent', null), ('zero', 0), ('negative', -5)]) {
         expect(read(_gift(giverId: id))!.userId, isEmpty, reason: reason);

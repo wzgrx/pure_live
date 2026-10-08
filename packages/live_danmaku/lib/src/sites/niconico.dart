@@ -74,18 +74,17 @@ final class NiconicoViewEntry {
 }
 
 /// A gift (`NicoliveMessage.gift`): the [LiveMessage.data] of a
-/// [LiveMessageType.gift] message (not shown yet), whose user is the giver
-/// (`advertiser_name`, `advertiser_user_id`).
+/// [LiveMessageType.gift] message, whose user is the giver
+/// (`advertiser_name`, `advertiser_user_id`), as a [LiveGift] (E05.5): one
+/// item worth [point] points, free at 0.
 @immutable
-final class NiconicoGift {
-  /// Creates the gift.
-  const new({required this.itemId, required this.name, required this.point, this.message = '', this.contributionRank});
+final class NiconicoGift extends LiveGift {
+  /// Creates the gift; [name] is `item_name`, or empty.
+  const new({required this.itemId, required super.name, required this.point, this.message = '', this.contributionRank})
+    : super(id: itemId, unitPrice: point, totalValue: point, unit: LiveGiftUnit.point, free: point == 0);
 
   /// `item_id`, or empty.
   final String itemId;
-
-  /// `item_name`, or empty.
-  final String name;
 
   /// `point`: what it cost, in niconico points (0 or more).
   final int point;
@@ -99,15 +98,15 @@ final class NiconicoGift {
 
   @override
   bool operator ==(Object other) =>
+      super == other &&
       other is NiconicoGift &&
       other.itemId == itemId &&
-      other.name == name &&
       other.point == point &&
       other.message == message &&
       other.contributionRank == contributionRank;
 
   @override
-  int get hashCode => Object.hash(itemId, name, point, message, contributionRank);
+  int get hashCode => Object.hash(super.hashCode, itemId, point, message, contributionRank);
 
   @override
   String toString() => 'NiconicoGift($name, ${point}pt)';
@@ -434,9 +433,11 @@ abstract final class NiconicoDanmakuProtocol {
       };
 
   /// `Gift`: 1 item_id, 2 advertiser_user_id, 3 advertiser_name, 4 point,
-  /// 5 message, 6 item_name, 7 contribution_rank. The text is the web
-  /// player's line for it (`eF`, domain.ce2c3387de.js); like the web player,
-  /// a gift of negative points is dropped, and so is one without an item.
+  /// 5 message, 6 item_name, 7 contribution_rank. The text is the shared
+  /// `ニコ子 ×1` (E05.5: was the web player's sentence with the giver's name
+  /// in it, `eF`, domain.ce2c3387de.js, so the chat line showed the name
+  /// twice). Like the web player, a gift of negative points is dropped, and
+  /// so is one without an item.
   static LiveMessage? _gift(ProtoMessage gift, ProtoMessage? meta) {
     final itemId = gift.string(1)?.trim() ?? '';
     final name = gift.string(6)?.trim() ?? '';
@@ -449,7 +450,7 @@ abstract final class NiconicoDanmakuProtocol {
       type: LiveMessageType.gift,
       userName: giver,
       userId: giverId != null && giverId > 0 ? '$giverId' : '',
-      message: '${rank == null ? '' : '【ギフト貢献$rank位】'}$giverさんがギフト「$name（${point}pt）」を贈りました',
+      message: '${name.isEmpty ? itemId : name} ×1',
       messageId: meta?.string(1)?.trim() ?? '',
       sentAt: time(meta?.message(2)),
       data: NiconicoGift(

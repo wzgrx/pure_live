@@ -620,7 +620,7 @@ void main() {
       expect(gift(decoded[0].single), [
         '观众1',
         '3794368537419',
-        '我送了${host}7个桃花风车',
+        '桃花风车 ×7',
         '411690',
         '桃花风车',
         7,
@@ -632,7 +632,7 @@ void main() {
       expect(gift(decoded[2].single), [
         '观众2',
         '2248408448274',
-        '我送了${host}6个克拉之星',
+        '克拉之星 ×6',
         '60355',
         '克拉之星',
         6,
@@ -644,7 +644,7 @@ void main() {
       expect(gift(decoded[3].single), [
         '观众3',
         '7877897429571',
-        '我送了豆咖1个守护灯牌',
+        '守护灯牌 ×1',
         '404769',
         '守护灯牌',
         1,
@@ -654,10 +654,27 @@ void main() {
         'img.kilamanbo.com',
       ]);
       // The line gives the price of one (68); the hit gave the send's (204).
-      expect(gift(decoded[7].single).sublist(2, 7), ['我送了${host}3个飞天小猪', '15545', '飞天小猪', 3, 204]);
+      expect(gift(decoded[7].single).sublist(2, 7), ['飞天小猪 ×3', '15545', '飞天小猪', 3, 204]);
       expect(frames[6].text, contains(r'\\\"price\\\":204'));
       expect(frames[7].text, contains(r'\\\"price\\\":68'));
-      expect(gift(decoded[9].single).sublist(2, 8), ['我送了${host}1个天空之城', '72', '天空之城', 1, 10000, false]);
+      expect(gift(decoded[9].single).sublist(2, 8), ['天空之城 ×1', '72', '天空之城', 1, 10000, false]);
+      // E05.5: the shared gift; the price of one only where it is known.
+      expect(
+        decoded[7].single.gift,
+        isA<LiveGift>().having((gift) => (gift.unitPrice, gift.totalValue), 'price', (68, 204)),
+      );
+      expect(
+        decoded[0].single.gift,
+        KilakilaGift(
+          id: '411690',
+          name: '桃花风车',
+          count: 7,
+          price: 700,
+          icon: (decoded[0].single.data! as KilakilaGift).icon,
+          receiverName: host,
+        ),
+      );
+      expect((decoded[2].single.gift!.free, decoded[3].single.gift!.receiverName), (true, ''));
       final line = decoded[2].single;
       expect(
         (line.messageId, line.sentAt, line.userLevel, line.color),
@@ -744,8 +761,10 @@ void main() {
       expect(gift(giftContent(name: ' 草莓项链 '))!.name, '草莓项链');
       expect(gift(giftContent(pic: 'http://img.hongrenshuo.com.cn/gift.png'))!.icon, isNull);
       expect(gift(giftContent(pic: 7))!.icon, isNull);
-      expect(one(giftContent(receiver: null))!.message, '我送了豆咖2个草莓项链');
-      expect(one(giftContent(receiver: ' '))!.message, '我送了豆咖2个草莓项链');
+      // E05.5: the shared text (was the page's “我送了豆咖2个草莓项链”).
+      expect(one(giftContent(receiver: null))!.message, '草莓项链 ×2');
+      expect(one(giftContent(receiver: ' '))!.gift?.receiverName, '');
+      expect(one(giftContent())!.gift?.receiverName, '主播');
       expect(gift(giftContent(withItem: false)), isNull);
       expect(one(giftContent(), room: '2260000000000000009'), isNull, reason: 'another broadcast');
       expect(one({...giftContent(), 't': '220'}), isNull, reason: 'the page switches on the number');

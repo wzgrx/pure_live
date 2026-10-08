@@ -1,3 +1,4 @@
+import 'package:live_core/src/live_gift.dart';
 import 'package:meta/meta.dart';
 
 /// Kind of a danmaku message.
@@ -5,7 +6,9 @@ enum LiveMessageType {
   /// Chat.
   chat,
 
-  /// Gift (not shown yet).
+  /// A gift, membership, gifted subscription or tip; [LiveMessage.data]
+  /// holds it as a [LiveGift] (a platform's subclass), the text is
+  /// [LiveGift.plainText]. Local gifts hold the local interaction's map.
   gift,
 
   /// Audience update; [LiveMessage.data] holds a [LiveAudienceUpdate].
@@ -313,7 +316,7 @@ final class LiveMessage {
   final String message;
 
   /// For [LiveMessageType.online] a [LiveAudienceUpdate] (older engines may
-  /// send a number).
+  /// send a number); for [LiveMessageType.gift] a [LiveGift].
   final Object? data;
 
   /// Colour.
@@ -363,6 +366,13 @@ final class LiveMessage {
   /// The badges the platform shows next to the sender's name, in its order
   /// (B-14); empty when it shows none.
   final List<LiveBadge> badges;
+
+  /// [data] when it is a [LiveGift] (E05.5: what every platform's gift
+  /// message holds); null for other kinds and for local gifts.
+  LiveGift? get gift => switch (data) {
+    final LiveGift gift => gift,
+    _ => null,
+  };
 
   /// Whether [sourceRoomId] names another room.
   bool get isFromOtherRoom => sourceRoomId.isNotEmpty;

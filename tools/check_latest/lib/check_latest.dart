@@ -212,6 +212,22 @@ Future<List<Finding>> collect({
     final xml = await androidRepository;
     return highestStable(RegExp('path="build-tools;([0-9.]+)"').allMatches(xml).map((m) => m.group(1)!));
   });
+  await check('toolchain', 'Android platform-tools', env['ANDROID_PLATFORM_TOOLS'] ?? '', () async {
+    final xml = await androidRepository;
+    final revision = RegExp(
+      r'path="platform-tools">.*?<major>(\d+)</major>\s*<minor>(\d+)</minor>\s*<micro>(\d+)</micro>',
+      dotAll: true,
+    ).firstMatch(xml)!;
+    return '${revision.group(1)}.${revision.group(2)}.${revision.group(3)}';
+  });
+  await check('toolchain', 'Android cmdline-tools', env['ANDROID_CMDLINE_TOOLS'] ?? '', () async {
+    final xml = await androidRepository;
+    return highestStable(RegExp('path="cmdline-tools;([0-9.]+)"').allMatches(xml).map((m) => m.group(1)!));
+  });
+  await check('toolchain', 'Android CMake', env['ANDROID_CMAKE_VERSION'] ?? '', () async {
+    final xml = await androidRepository;
+    return highestStable(RegExp('path="cmake;([0-9.]+)"').allMatches(xml).map((m) => m.group(1)!));
+  });
   await check('toolchain', 'mpv', env['MPV_VERSION'] ?? '', () async {
     final data =
         (await http.json('https://api.github.com/repos/mpv-player/mpv/releases/latest'))! as Map<String, Object?>;

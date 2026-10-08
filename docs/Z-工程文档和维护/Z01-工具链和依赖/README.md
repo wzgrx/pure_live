@@ -17,14 +17,15 @@
 
 ## 现状：做到哪、怎么工作的
 
-- 版本（`toolchain.env`，2026-09-28 核对时全部是最新稳定版）：
+- 版本（`toolchain.env`，2026-10-08 核对时全部是最新稳定版）：
 
 | 键 | 值 | 用在哪 |
 |---|---|---|
-| `FLUTTER_VERSION`、`DART_VERSION` | 3.47.5、3.13.4 | 全部成员；根 `pubspec.yaml` 的 `sdk: ^3.13.0` |
-| `GRADLE_VERSION`、`AGP_VERSION`、`KOTLIN_VERSION` | 9.8.0、9.4.1、2.4.20 | `apps/pure_live/android/`（AGP 9 自带 Kotlin，`gradle.properties` 的 `android.builtInKotlin=true`） |
-| `JDK_FEATURE_VERSION` | 27 | Gradle 运行时；字节码目标 17（`build.gradle.kts` 的 `JavaVersion.VERSION_17`） |
-| `ANDROID_COMPILE_SDK`、`ANDROID_BUILD_TOOLS`、`ANDROID_NDK_VERSION` | 37.2、37.0.0、30.0.16248370 | `build.gradle.kts`（`compileSdk = 37`、`targetSdk = 37`、`minSdk = 26`） |
+| `FLUTTER_VERSION`、`DART_VERSION` | 3.47.6、3.13.5 | 全部成员；根 `pubspec.yaml` 的 `sdk: ^3.13.0` |
+| `GRADLE_VERSION`、`AGP_VERSION`、`KOTLIN_VERSION` | 9.8.1、9.4.1、2.4.20 | `apps/pure_live/android/`（AGP 9 自带 Kotlin，`gradle.properties` 的 `android.builtInKotlin=true`） |
+| `JDK_FEATURE_VERSION` | 27（本机 Temurin 27.0.0+35） | Gradle 运行时；字节码目标 17（`build.gradle.kts` 的 `JavaVersion.VERSION_17`） |
+| `ANDROID_COMPILE_SDK`、`ANDROID_BUILD_TOOLS`、`ANDROID_NDK_VERSION` | 37.2、37.0.0、30.0.16248370 | `android/build.gradle.kts` 读取 `toolchain.env`，给 app 和全部插件模块设 `compileSdk` 37、`compileSdkMinor` 2、`buildToolsVersion`、`ndkVersion`（之前 app 用 Flutter 默认的 NDK 28.2，插件用 AGP 默认的，2026-10-08 统一）；`targetSdk = 37`、`minSdk = 26` |
+| `ANDROID_PLATFORM_TOOLS`、`ANDROID_CMDLINE_TOOLS`、`ANDROID_CMAKE_VERSION` | 37.0.1、23.0、4.1.2 | 本机 Android SDK；CMake 给带 C/C++ 的插件（`jni`、`cnativeapi`、`ffmpeg_kit_extended_flutter`，之前用 AGP 默认的 3.22.1），并加 `-DCMAKE_POLICY_VERSION_MINIMUM=3.5`（CMake 4 不接受要求低于 3.5 的工程） |
 | `MPV_VERSION`、`FFMPEG_VERSION` | 0.41.0、9.0.2 | 播放内核（`third_party/media_kit` 的原生包）、录制的 FFmpeg（`tools/ffmpeg_kit/bundles.txt`） |
 | `MEDIA_KIT_UPSTREAM_REPO`、`MEDIA_KIT_UPSTREAM_COMMIT` | `Predidit/media-kit`、`803c4a27` | 自维护分支对应的上游提交 |
 
@@ -37,7 +38,7 @@
 
 | 文件 | 职责 |
 |---|---|
-| `toolchain.env`（19 行） | 工具链版本，唯一来源；注释写明只在验证过的升级后改 |
+| `toolchain.env`（25 行） | 工具链版本，唯一来源；注释写明只在验证过的升级后改 |
 | `pubspec.yaml`（根，72 行） | workspace 成员（`:10-23`）、`dependency_overrides`（`:26-64`）、`ffmpeg_kit_extended_config`（`:66-72`） |
 | `pubspec.lock`（根） | 全部成员共用的锁文件 |
 | `tools/check_latest/lib/check_latest.dart`（255 行） | `Finding`（`:13`，`isBehind` 按版本号比较）、`readEnvFile`（`:64`）、`readWorkspaceDirectDependencies`（`:93`）、`readWorkspaceMembers`（`:108`）、`highestStable`（`:113`，跳过预发布）、`Fetcher`（`:129`，60 秒超时，带 `GITHUB_TOKEN`）、`collect`（`:159`）、`renderMarkdown`（`:241`） |
@@ -101,6 +102,6 @@
 ## 还没完成的
 
 - **Z01.2 例行依赖升级检查（每月用 check_latest 查一次，升级后跑门禁）**（开发中，第三档，规模 小）
-  - 接着做：工具链：Flutter 3.47.6、Gradle 9.8.1（改 toolchain.env，跑门禁和一次构建）；之后每月一次
+  - 接着做：每月一次，下次 2026-11 上旬（10-08 已升 Flutter 3.47.6、Gradle 9.8.1，Android 构建改读 toolchain.env）
 
 <!-- docs:生成结束 -->

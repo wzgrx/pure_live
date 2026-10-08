@@ -5,7 +5,7 @@
 ## 范围
 
 - 管什么：
-  - **工具链和依赖**（Z01）：`toolchain.env`（Flutter 3.47.5、Dart 3.13.4、Gradle 9.8.0、AGP 9.4.1、Kotlin 2.4.20、JDK 27、NDK 30.0.16248370、compileSdk 37.2、build-tools 37.0.0、mpv 0.41.0、FFmpeg 9.0.2、media_kit 上游提交）、根 `pubspec.yaml` 的 workspace（13 个成员）和 `dependency_overrides`（7 项，每项写了原因）、检查最新版的 `tools/check_latest/`。
+  - **工具链和依赖**（Z01）：`toolchain.env`（Flutter 3.47.6、Dart 3.13.5、Gradle 9.8.1、AGP 9.4.1、Kotlin 2.4.20、JDK 27、NDK 30.0.16248370、compileSdk 37.2、build-tools 37.0.0、platform-tools 37.0.1、cmdline-tools 23.0、CMake 4.1.2、mpv 0.41.0、FFmpeg 9.0.2、media_kit 上游提交）、根 `pubspec.yaml` 的 workspace（13 个成员）和 `dependency_overrides`（7 项，每项写了原因）、检查最新版的 `tools/check_latest/`。
   - **门禁**（Z02）：`tools/gate/gate.sh` 和它调用的三个检查脚本 `check_deps.py`（依赖方向）、`check_fixtures.py`（样本隐私）、`check_ui_structure.py`（界面结构，基线 `ui_baseline.json`），门禁自己的测试 `tools/gate/tests/`，Claude Code 钩子 `.claude/settings.json` 和 `tools/gate/hooks/format_dart.sh`。
   - **清点和归属**（Z03）：`tools/ui/inventory.py`（3.x 和 pure_live_TV 的界面文件分到任务）、它生成的 `docs/inventory/UI.md`、`UI_FILES.md`，以及计划中的全项目归属清点（代码文件、功能点、设置项、平台、原生插件）。
   - **构建和装机**（Z04）：Android 测试包和正式包怎么构建（`apps/pure_live/android/app/build.gradle.kts` 的三种构建类型）、录制用的 FFmpeg 包（`tools/ffmpeg_kit/`）、K90 装机和截图的助手（现在在仓库外的 `~/tools/pl-adb.sh`）。

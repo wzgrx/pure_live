@@ -37,7 +37,7 @@ dependency_overrides:
   # WakelockPlus.enable/disable).
   wakelock_plus: 1.8.1
   xml: 7.1.0
-  # Flutter 3.47.5's flutter_test pins test_api 0.7.12, below what test 1.32.0
+  # Flutter 3.47.6's flutter_test pins test_api 0.7.12, below what test 1.32.0
   # (the pure Dart members) needs; flutter_test runs on 0.7.14 (live_ui's tests).
   test_api: 0.7.14
   # ffmpeg_kit_extended_flutter 0.6.2 (the recorder's FFmpeg) declares

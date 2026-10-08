@@ -332,7 +332,7 @@ Android 8.0 及以上的手机和平板。
 
 ## 从源码构建
 
-需要 Linux 或 Windows 上的 Flutter 环境。工具链的版本统一写在 [`toolchain.env`](toolchain.env)（Flutter 3.47.5、Dart 3.13.4、JDK 27、Android SDK 37.2、build-tools 37.0.0、NDK 30.0.16248370），升级时只改这一处。
+需要 Linux 或 Windows 上的 Flutter 环境。工具链的版本统一写在 [`toolchain.env`](toolchain.env)（Flutter 3.47.6、Dart 3.13.5、Gradle 9.8.1、AGP 9.4.1、Kotlin 2.4.20、JDK 27、Android SDK 37.2、build-tools 37.0.0、platform-tools 37.0.1、cmdline-tools 23.0、NDK 30.0.16248370、CMake 4.1.2），升级时只改这一处（Android 构建直接读取其中的 compileSdk、build-tools、NDK、CMake；Gradle、AGP 另见 Z01）。
 
 ```bash
 git clone https://github.com/wzgrx/pure_live.git
@@ -340,7 +340,7 @@ cd pure_live
 
 # 1. 环境：按 toolchain.env 装好工具链，写一个环境脚本，每次构建前 source 一下
 #    （下面是示例路径，换成你自己的）
-export FLUTTER_ROOT="$HOME/tools/flutter-sdk/3.47.5"
+export FLUTTER_ROOT="$HOME/tools/flutter-sdk/3.47.6"
 export JAVA_HOME="$HOME/tools/jdk-27"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export PATH="$FLUTTER_ROOT/bin:$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"

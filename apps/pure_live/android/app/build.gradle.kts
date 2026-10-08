@@ -29,8 +29,11 @@ extensions.configure<com.android.build.api.dsl.ApplicationExtension> {
     buildFeatures {
         buildConfig = true
     }
-    compileSdk = 37
-    ndkVersion = flutter.ndkVersion
+    // toolchain.env (android/build.gradle.kts).
+    compileSdk = rootProject.extra["androidCompileSdk"] as Int
+    compileSdkMinor = rootProject.extra["androidCompileSdkMinor"] as Int?
+    ndkVersion = rootProject.extra["androidNdkVersion"] as String
+    buildToolsVersion = rootProject.extra["androidBuildTools"] as String
     lint {
         checkReleaseBuilds = true
         abortOnError = true

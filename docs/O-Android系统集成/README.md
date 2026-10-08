@@ -49,7 +49,7 @@ Android 原生部分：通知和前台服务、画中画、分享接收、权限
 ## 风险和注意
 
 - **厂商系统**：HyperOS 的返回键仍走 `onBackPressed`（`MainActivity.kt:663-671` 专门接住）；ColorOS 14 的预测返回有系统问题（上游）；国产系统常把应用限制在 60 Hz（D-010 的提示）、要用户手动给电池“无限制”和后台弹出权限。改原生前先想清楚在 K90 以外的机型上会怎样，写进任务书的风险。
-- **Android 版本**：targetSdk 和 compileSdk 都是 37（`apps/pure_live/android/app/build.gradle.kts:32`、`:47`），minSdk 26。Android 13 起通知要运行时权限；Android 15 起 `dataSync` 前台服务每天累计 6 小时（`RecorderForegroundService.onTimeout`）；大屏（最短边 ≥600dp）上系统忽略应用的方向请求（发布说明 v4.0.0 写 Android 16 起，[specs/UI.md](../specs/UI.md) 第 5.3 节写 Android 17 起；targetSdk 37 时两种说法都覆盖）；Android 17 起局域网套接字要 `ACCESS_LOCAL_NETWORK`。
+- **Android 版本**：compileSdk 37.2（`apps/pure_live/android/build.gradle.kts` 读 `toolchain.env` 的 `ANDROID_COMPILE_SDK`），targetSdk 37（`apps/pure_live/android/app/build.gradle.kts:50`），minSdk 26。Android 13 起通知要运行时权限；Android 15 起 `dataSync` 前台服务每天累计 6 小时（`RecorderForegroundService.onTimeout`）；大屏（最短边 ≥600dp）上系统忽略应用的方向请求（发布说明 v4.0.0 写 Android 16 起，[specs/UI.md](../specs/UI.md) 第 5.3 节写 Android 17 起；targetSdk 37 时两种说法都覆盖）；Android 17 起局域网套接字要 `ACCESS_LOCAL_NETWORK`。
 - **请求码唯一**：每个插件的权限和 Activity 结果都会广播给所有监听者，请求码必须全应用唯一（`PermissionsPlugin` 20261001、20261002，`SystemAccessPlugin` 20261003，`RecorderPlugin` 20260907；`apps/pure_live/test/platform/system_surfaces_test.dart` 有检查）。
 - **构建和验证**：改了 Kotlin 或清单必须本机 `flutter build apk --debug` 通过，并在 K90 上用测试包 `com.mystyle.purelive.v4dev` 看（D-019：只点测试包，不碰正式包和 3.x）；单元测试只能测到通道的调用。不在门禁运行时构建正式包（PROCESS 第 8 节）。
 - **规则**：3.x 的设置键名和含义不变（D-018）；横屏全屏按传感器翻转（D-023）；刷新率只用数值不用类别（D-010，`MainActivity.kt:781-782` 的注释）；签名和密钥不进 git（D-006）。

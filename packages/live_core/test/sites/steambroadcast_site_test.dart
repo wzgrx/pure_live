@@ -188,7 +188,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('steambroadcast', 'Steam Broadcasts'));
       expect(setup.site.directoryNoticeKey, 'steambroadcast_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the chat is M5');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {
@@ -519,10 +518,8 @@ void main() {
         expect(data.master?.toString(), legacyData?['master'], reason: '$depth: only with the checked master (3.x)');
         expect(
           room.danmakuData,
-          depth == 'getRoomDetail'
-              ? const SteamBroadcastDanmakuArgs(_live, broadcastId: '4005242549293303728')
-              : isNull,
-          reason: '27-6: the current broadcast, on entry only',
+          refresh ? isNull : const SteamBroadcastDanmakuArgs(_live, broadcastId: '4005242549293303728'),
+          reason: '27-6: the current broadcast, on entry and recording (E05.4, multi-view)',
         );
       }
     });

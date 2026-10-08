@@ -162,7 +162,6 @@ void main() {
       expect(site, isNot(isA<LivePlayUrlCursorResolver>()));
       expect(site, isNot(isA<LivePlayLeaseMetadata>()), reason: 'the lines carry their leases');
       expect(site, isNot(isA<LiveQualityDiscovery>()));
-      expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no TikTok danmaku');
       expect(await site.getCategories(1, 30), isEmpty);
     });
 

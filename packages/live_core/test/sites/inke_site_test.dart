@@ -158,7 +158,6 @@ void main() {
         expect(request.site, 'inke');
       }
       expect((setup.site.id, setup.site.name), ('inke', '映客'));
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Inke danmaku');
       expect(setup.site.directoryNoticeKey, 'inke_directory_scope');
     });
 

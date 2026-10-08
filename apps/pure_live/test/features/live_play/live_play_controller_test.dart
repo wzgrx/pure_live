@@ -456,6 +456,27 @@ void main() {
     controller.dispose();
   });
 
+  test('E05.4 c3: a live room without danmaku arguments does not connect (AcFun paid show)', () async {
+    final site = FakeSite(liveRoom(restriction: LiveRestriction.paid, danmakuData: null))..qualities = const [];
+    final controller = controllerFor(site);
+    await controller.start();
+    await settle();
+    expect(controller.stage, RoomStage.unplayable);
+    expect(controller.chatConnection, ChatConnection.idle);
+    expect(danmaku.connects, isEmpty);
+    expect(controller.chat.lines.map((line) => line.text), isNot(contains('弹幕连接失败')));
+    controller.dispose();
+
+    // A playing room without arguments stays idle too.
+    final playing = controllerFor(FakeSite(liveRoom(danmakuData: null)));
+    await playing.start();
+    await settle();
+    expect(playing.stage, RoomStage.playing);
+    expect(playing.chatConnection, ChatConnection.idle);
+    expect(danmaku.connects, isEmpty);
+    playing.dispose();
+  });
+
   test('a quality the platform downgrades shows the quality really played', () async {
     final site = DowngradingSite(liveRoom(), applied: 250);
     final controller = controllerFor(site);

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/startup.dart';
+import 'package:pure_live/app/system_bars.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -93,10 +94,10 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     final colors = theme.colorScheme;
     final dark = theme.brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // A see-through status bar with icons for the page's brightness.
-      value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark).copyWith(
-        statusBarColor: colors.surface.withValues(alpha: 0),
-      ),
+      // See-through status and navigation bars with icons for the page's
+      // brightness (A06.5; Flutter's `SystemUiOverlayStyle.light` and
+      // `.dark` paint the navigation bar black with light icons).
+      value: systemBarsStyle(theme.brightness),
       child: Scaffold(
         backgroundColor: colors.surface,
         body: Focus(

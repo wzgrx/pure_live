@@ -115,7 +115,6 @@ void main() {
     expect(site, isA<LiveCancellableSearch>());
     expect(site, isA<LivePlayUrlResolver>());
     expect(site, isA<LiveSiteLinks>());
-    expect(site.getDanmaku(), isA<EmptyDanmaku>());
   });
 
   group('catalog and directory', () {
@@ -350,11 +349,11 @@ void main() {
       }
     });
 
-    test('recording: the stream too (3.x used room entry), without danmaku arguments or start', () async {
+    test('recording: the stream too (3.x used room entry) and the danmaku arguments (E05.4), no start', () async {
       final setup = _setup(['S04-detail-live', 'S05-master']);
       final room = await setup.site.getRoomDetailForRecording(roomId: 'allatir');
       expect(room.data, isA<PicartoRoomData>());
-      expect(room.danmakuData, isNull);
+      expect((room.danmakuData! as PicartoDanmakuArgs).channelName, 'allatir');
       expect(room.startedAt, isNull);
       expect(setup.http.requests, hasLength(2));
     });

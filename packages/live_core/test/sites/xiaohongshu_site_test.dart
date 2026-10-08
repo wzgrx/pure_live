@@ -135,7 +135,6 @@ void main() {
     expect(site, isA<LiveSiteLinks>());
     expect(site, isNot(isA<LiveCancellableSearch>()));
     expect(site, isNot(isA<LiveSearchPaginationPolicy>()));
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Xiaohongshu danmaku');
     expect(AudiencePlatformCapability.of('xiaohongshu').supportsConcurrentOnline, isFalse);
   });
 

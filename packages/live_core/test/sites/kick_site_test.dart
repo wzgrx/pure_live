@@ -159,6 +159,15 @@ void main() {
       expect(master.headers['referer'], 'https://kick.com/xqc/');
     });
 
+    test("recording: room entry's answer, its danmaku arguments included (E05.4, multi-view)", () async {
+      final setup = _setup(['S05-channel-live'], media: ['S06-master']);
+      final room = await setup.site.getRoomDetailForRecording(roomId: 'XQC');
+      expect(room.data, isA<KickRoomData>());
+      expect(room.danmakuData, const KickDanmakuArgs(chatroomId: 668, channelId: 668, slug: 'xqc'));
+      expect(setup.api.requests, hasLength(1));
+      expect(setup.media.requests, hasLength(1));
+    });
+
     test('follow refresh: the channel only', () async {
       final setup = _setup(['S05-channel-live', 'S05-channel-offline']);
       final live = await setup.site.getRoomDetailForRefresh(roomId: 'xqc');

@@ -177,9 +177,10 @@ final class PicartoSite extends LiveSite
 
   /// The detail and, when live, the master playlist's qualities in
   /// [PicartoRoomData] (3.x's room entry; a private channel has no stream,
-  /// 11-9). [entry] (the room page) adds the danmaku arguments and, for a
-  /// live channel, the start of its broadcast, asked for beside the master
-  /// playlist (one request more than 3.x; the room stands without it).
+  /// 11-9) and the danmaku arguments (no request). [entry] (the room page)
+  /// adds, for a live channel, the start of its broadcast, asked for beside
+  /// the master playlist (one request more than 3.x; the room stands
+  /// without it).
   Future<LiveRoom> _entered(String roomId, {bool entry = false}) async {
     final channel = await _detail(roomId, stream: true);
     final since = entry && channel.room.isLiveNow ? _liveSince(channel.name) : null;
@@ -200,11 +201,7 @@ final class PicartoSite extends LiveSite
         rethrow;
       }
     }
-    return channel.room.copyWith(
-      data: data,
-      danmakuData: entry ? PicartoApi.danmakuArgs(channel) : null,
-      startedAt: await since,
-    );
+    return channel.room.copyWith(data: data, danmakuData: PicartoApi.danmakuArgs(channel), startedAt: await since);
   }
 
   /// The start of [name]'s broadcast on air ([PicartoApi.liveSince]), or
@@ -234,7 +231,8 @@ final class PicartoSite extends LiveSite
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async =>
       (await _detail(roomId, stream: false)).room;
 
-  /// Room entry's answer (the stream included), as 3.x's recorder asked.
+  /// Room entry's answer (the stream and the danmaku arguments included,
+  /// for multi-view; E05.4), as 3.x's recorder asked, without the start.
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId);
 

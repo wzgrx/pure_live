@@ -70,7 +70,7 @@ final class DouyuSite extends LiveSite
   /// Creates the adapter. [_cookies] holds the user's login cookie, if any;
   /// with [_login] an expiring login is renewed before play requests, as
   /// 3.x did. [forceRenewal] reads the cookie page's forced renewal setting
-  /// (`douyuForceRenewal`, off by default; see [DouyuApi.lease]) each time a
+  /// (`douyuForceRenew`, off by default; see [DouyuApi.lease]) each time a
   /// URL is resolved or its lease looked up. [now] and [random] are
   /// injectable for tests.
   new(this.http, {this._cookies, this._login, bool Function()? forceRenewal, DateTime Function()? now, Random? random})

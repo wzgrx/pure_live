@@ -16,6 +16,7 @@ import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/page_toasts.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/startup.dart';
+import 'package:pure_live/app/system_bars.dart';
 import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
 import 'package:pure_live/features/live_play/mini/floating_window.dart';
@@ -253,7 +254,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
                 // C-5).
                 data: MediaQuery.of(context)
                     .copyWith(textScaler: AppTextScaler(MediaQuery.textScalerOf(context), textScale)),
-                child: framed,
+                // See-through system bars, icons for the theme (A06.5).
+                child: SystemBarsScope(child: framed),
               ),
             );
           },

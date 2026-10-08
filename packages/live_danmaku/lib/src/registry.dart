@@ -38,8 +38,10 @@ final class EmptyDanmakuConnection implements DanmakuConnection {
   Future<void> close() async {}
 }
 
-/// Which platforms have danmaku and how to connect them: replaces 3.x's
-/// `LiveSite.getDanmaku()` (`live_core` cannot depend on this package). The
+/// Which platforms have danmaku and how to connect them: the only place
+/// (3.x asked each site with `LiveSite.getDanmaku()`; `live_core` cannot
+/// depend on this package, and its adapters only hand over the arguments
+/// in `LiveRoom.danmakuData`). The
 /// app builds it once with a factory per platform; each factory captures what
 /// its platform needs (proxy policy, HTTP client, cookies, settings).
 final class DanmakuRegistry {

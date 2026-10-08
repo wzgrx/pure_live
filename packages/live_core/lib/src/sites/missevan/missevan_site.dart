@@ -24,7 +24,7 @@ const _site = 'missevan';
 ///   also holds the pull URLs, so playing asks nothing more; recovery reads
 ///   it again for freshly signed URLs. Room entry also hands over the
 ///   danmaku arguments ([MissevanDanmakuArgs], 13-2); the connection is the
-///   danmaku module's (M5), so [getDanmaku] is still 3.x's `EmptyDanmaku`.
+///   danmaku module's (M5, `DanmakuRegistry` in `live_danmaku`).
 ///
 /// Failures are `SiteError`s; nothing is disguised as an offline room.
 final class MissevanSite extends LiveSite
@@ -220,9 +220,10 @@ final class MissevanSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
-  /// The room with the pull URLs the recorder starts from.
+  /// The room with the pull URLs the recorder starts from, and the danmaku
+  /// arguments of the same answer (multi-view connects them; E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withDanmaku: true);
 
   /// Whether the detail says live; a failed request is an error, never
   /// "offline".

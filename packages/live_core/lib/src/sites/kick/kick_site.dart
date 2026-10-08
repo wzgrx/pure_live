@@ -213,9 +213,10 @@ final class KickSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async => (await _channel(roomId)).room;
 
-  /// Room entry's answer (the stream included), for the recorder.
+  /// Room entry's answer (the stream and the danmaku arguments included),
+  /// for the recorder and multi-view (E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId, entry: true);
 
   @override
   Future<bool> getLiveStatus({required String roomId}) async =>

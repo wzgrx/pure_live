@@ -66,6 +66,24 @@ void main() {
     expect(find.text('home'), findsOneWidget);
   });
 
+  testWidgets('A06.5 c2: see-through system bars, icons for the theme (no black navigation bar)', (tester) async {
+    for (final dark in [false, true]) {
+      await _pump(tester, dark: dark);
+      final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+        find.byWidgetPredicate((widget) => widget is AnnotatedRegion<SystemUiOverlayStyle>).first,
+      );
+      final style = region.value;
+      final icons = dark ? Brightness.light : Brightness.dark;
+      expect(style.systemNavigationBarColor, const Color(0x00000000), reason: 'dark $dark');
+      expect(style.systemNavigationBarDividerColor, const Color(0x00000000), reason: 'dark $dark');
+      expect(style.systemNavigationBarIconBrightness, icons, reason: 'dark $dark');
+      expect(style.statusBarColor, const Color(0x00000000), reason: 'dark $dark');
+      expect(style.statusBarIconBrightness, icons, reason: 'dark $dark');
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pumpAndSettle();
+    }
+  });
+
   testWidgets('a tap skips the wait', (tester) async {
     await _pump(tester);
     await tester.tap(find.byKey(const ValueKey('splash')));

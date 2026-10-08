@@ -411,9 +411,10 @@ final class SixRoomSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, media: false);
 
-  /// The room with its stream, like [getRoomDetail] (3.x).
+  /// The room with its stream, like [getRoomDetail] (3.x), and the danmaku
+  /// arguments of the same answer (multi-view connects them; E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, media: true);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, media: true, danmaku: true);
 
   /// Whether the room is live (the refresh's requests, 3.x); a live private
   /// or black-screen room is live (M2.1; 3.x failed). A state the answer

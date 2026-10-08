@@ -17,7 +17,7 @@ import 'package:pure_live/app/recording.dart';
 /// Everything the pages use, made once at start (3.x registered these as
 /// GetX services and singletons: `SettingsService.to`, `Sites.of`,
 /// `site.getDanmaku()`; here they are one object handed down through
-/// [appServicesProvider]).
+/// [appServicesProvider], the danmaku in [DanmakuRegistry]).
 final class AppServices {
   /// Creates the services.
   new({
@@ -54,7 +54,8 @@ final class AppServices {
   /// The platforms (3.x `Sites.of(id)`).
   final SiteRegistry sites;
 
-  /// The danmaku connections (3.x `site.getDanmaku()`).
+  /// The danmaku connections per platform (3.x asked the site with
+  /// `getDanmaku()`; 4.x adapters have no danmaku).
   final DanmakuRegistry danmaku;
 
   /// The command line of this window.
@@ -111,8 +112,8 @@ final Provider<LiveStore> storeProvider = Provider((ref) => ref.watch(appService
 /// The platforms (3.x `Sites.of(id)`: `ref.read(sitesProvider).of(id)`).
 final Provider<SiteRegistry> sitesProvider = Provider((ref) => ref.watch(appServicesProvider).sites);
 
-/// The danmaku connections (3.x `site.getDanmaku()`:
-/// `ref.read(danmakuProvider).connectionFor(platform)`).
+/// The danmaku connections, `ref.read(danmakuProvider).connectionFor(platform)`
+/// (3.x asked the site with `getDanmaku()`).
 final Provider<DanmakuRegistry> danmakuProvider = Provider((ref) => ref.watch(appServicesProvider).danmaku);
 
 /// Makes playback sessions (`ref.read(playbackSessionFactoryProvider)()`);

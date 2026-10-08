@@ -58,6 +58,21 @@ final class _FakeSite extends LiveSite {
   }
 }
 
+/// Scripted chunks, as a deduplicating adapter (Kilakila) answers them.
+final class _ScriptedSource implements RoomSource {
+  new(this.chunks);
+
+  final List<RoomChunk> chunks;
+  int requests = 0;
+
+  @override
+  Future<RoomChunk> next(CancelToken cancel) async =>
+      requests < chunks.length ? chunks[requests++] : const RoomChunk([], hasMore: false);
+
+  @override
+  RoomSource restart() => _ScriptedSource(chunks);
+}
+
 /// A native directory with cursors and a scope note.
 final class _FakeDirectory extends LiveSite implements LiveSiteCursorDirectoryPager, LiveDirectoryNotice {
   @override
@@ -173,6 +188,23 @@ void main() {
       expect(rooms.rooms.map((room) => room.roomId), ['2', '1', '3']);
       expect(rooms.hasMore, isFalse);
       expect(site.requested, [1, 2, 3]);
+    });
+
+    test('an empty page that says more may follow does not end the list; two in a row do', () async {
+      final source = _ScriptedSource([
+        RoomChunk([_room('kilakila', 1), _room('kilakila', 2)], hasMore: true),
+        // The timeline repeated itself: the adapter dropped every room.
+        const RoomChunk([], hasMore: true),
+        RoomChunk([_room('kilakila', 3)], hasMore: true),
+        const RoomChunk([], hasMore: true),
+        const RoomChunk([], hasMore: true),
+        RoomChunk([_room('kilakila', 4)], hasMore: true),
+      ]);
+      final rooms = feed(source);
+      await rooms.ensure(10);
+      expect(rooms.rooms.map((room) => room.roomId), unorderedEquals(['1', '2', '3']));
+      expect(rooms.hasMore, isFalse);
+      expect(source.requests, 5);
     });
 
     test("3.x's window sizes: a short window is the last one; one answer for IPTV and Kuaishou", () async {

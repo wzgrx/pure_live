@@ -170,6 +170,20 @@ void main() {
     await store.close();
   });
 
+  test('E05.4 c5: a cell built from the recording detail connects its danmaku arguments', () async {
+    final store = await memoryStore();
+    final danmaku = <FakeDanmaku>[];
+    final controller = multiviewController(store, _RecordingSite(), danmaku: danmaku);
+    await controller.start();
+    await controller.assign(0, pickRoom('6'));
+    controller.setDanmakuEnabled(enabled: true);
+    await _settle();
+    expect(controller.cells[0].stage, CellStage.playing);
+    expect(danmaku.single.connects, ['recording-6']);
+    controller.dispose();
+    await store.close();
+  });
+
   test('danmaku follow the selected cell and pass the filters', () async {
     final store = await memoryStore();
     await store.blockLists.add(BlockKind.keyword, '广告');
@@ -262,6 +276,18 @@ void main() {
 }
 
 /// Rooms whose every request is served at 250 (a Bilibili guest).
+/// A platform whose cells are built from the recording detail (Six Room,
+/// AcFun, Kilakila since E05.4): it carries the danmaku arguments.
+class _RecordingSite extends RoomsSite implements LiveSiteRecordRoomResolver {
+  @override
+  Future<LiveRoom> getRoomDetail({required String roomId}) async =>
+      throw StateError('multi-view asks the recording detail');
+
+  @override
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) async =>
+      pickRoom(roomId).copyWith(danmakuData: 'recording-$roomId');
+}
+
 class _ServedSite extends RoomsSite implements LivePlayUrlResolver {
   @override
   Future<LivePlayUrlResolution> resolvePlayUrlsRaw({

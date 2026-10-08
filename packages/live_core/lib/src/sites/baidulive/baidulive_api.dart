@@ -898,13 +898,15 @@ abstract final class BaiduLiveApi {
   /// or unknown; the start and the restriction; the introduction (30-7);
   /// viewers while live; the restriction notice (paid or blocked) and
   /// [chatNotice]. [withData] keeps [room] for playback (room entry and
-  /// recordings), and its chat arguments ([BaiduLiveRoom.danmaku]) for the
-  /// danmaku connection (M5.26).
+  /// recordings); [withChat] (default [withData]) keeps its chat arguments
+  /// ([BaiduLiveRoom.danmaku]) for the danmaku connection (M5.26), which a
+  /// refresh also brings so that a connection whose signature expired
+  /// reconnects with fresh lists (E05.4).
   ///
   /// Unlike 3.x, no `httpHeaders`: the media headers travel on the lines;
   /// and no stand-in name or title (30-10): the UI shows the platform's
   /// name for an empty nick.
-  static LiveRoom liveRoom(BaiduLiveRoom room, {bool withData = false}) {
+  static LiveRoom liveRoom(BaiduLiveRoom room, {bool withData = false, bool? withChat}) {
     final online = room.currentViewers?.toString();
     return LiveRoom(
       platform: _site,
@@ -931,7 +933,7 @@ abstract final class BaiduLiveApi {
       introduction: room.introduction.isEmpty ? null : room.introduction,
       notice: [if (room.paid || room.blocked) restrictedNotice, chatNotice].join('\n'),
       data: withData ? room : null,
-      danmakuData: withData ? room.danmaku : null,
+      danmakuData: (withChat ?? withData) ? room.danmaku : null,
     );
   }
 

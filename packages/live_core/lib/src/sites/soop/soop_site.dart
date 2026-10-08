@@ -287,9 +287,10 @@ final class SoopSite extends LiveSite
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
   /// The same answer as the refresh; it holds everything the recorder's
-  /// streams need.
+  /// streams need, and the danmaku arguments it carries (multi-view
+  /// connects them; E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withDanmaku: true);
 
   @override
   Future<bool> getLiveStatus({required String roomId}) async =>

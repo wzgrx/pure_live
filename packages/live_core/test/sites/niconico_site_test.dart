@@ -347,7 +347,6 @@ void main() {
     expect(site, isA<LiveSiteLinks>());
     expect(site, isNot(isA<LivePlayLeaseMetadata>()));
     expect(site.directoryNoticeKey, 'niconico_directory_scope');
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no niconico comments');
   });
 
   group('catalog', () {

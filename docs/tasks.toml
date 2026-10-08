@@ -920,12 +920,14 @@ old = ["U.3c", "T07i.2"]
 id = "A06.5"
 title = "状态栏和导航栏样式和 3.x 核对：3.x 启动时全局设透明，v4 启动页留下黑色导航栏和浅色导航栏图标"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
+commit = "937f3eb65"
 size = "小"
 tier = 2
 stages = ["K90 截图核对", "启动时按主题设系统栏，启动页不再带黑色导航栏"]
-done = 0
-note = "读代码（V03.3）：3.x 的 MobileManager.initialize 启动时设透明、分隔线透明、导航栏图标固定深色；v4 没有对应代码，启动页的 AnnotatedRegion 用 Flutter 的 SystemUiOverlayStyle.light/dark（带黑色导航栏、浅色图标），首页不改回。先在 K90 截图确认（上一次没留下来的核对记过“首页导航栏是主题色、3.x 是透明”），没有差别就只改清点"
+done = 1
+note = "读代码（V03.3）：3.x 的 MobileManager.initialize 启动时设透明、分隔线透明、导航栏图标固定深色；v4 没有对应代码，启动页的 AnnotatedRegion 用 Flutter 的 SystemUiOverlayStyle.light/dark（带黑色导航栏、浅色图标），首页不改回。先在 K90 截图确认（上一次没留下来的核对记过“首页导航栏是主题色、3.x 是透明”），没有差别就只改清点。2026-10-08 维护者定 X1、X2 为 A，先改代码（阶段 2），K90 截图和改后核对一起做"
 from = "V03.3 功能清点 F-APP-23"
 
 [[task]]
@@ -2487,13 +2489,15 @@ from = "上游 pure_live fa67c637f、pure_live_TV 5bc53016（W01.1 对照）"
 id = "E05.4"
 title = "平台层小问题合集：克拉克拉列表提前到底、LOOK 搜索能力、AcFun 付费直播仍连弹幕、百度签名过期后重连用旧地址、多画面里六间房没有弹幕、京东酷狗百度的 3.x 占位名、getDanmaku 死代码、斗鱼设置键注释"
 type = "平台"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
+commit = "78d7fa94e"
 size = "中"
 tier = 2
 stages = ["列表和搜索：克拉克拉空页、LOOK 搜索说明", "弹幕参数：AcFun 付费直播、百度刷新带参数、录制详情带弹幕参数", "清理：3.x 占位名常量、getDanmaku 死代码、斗鱼注释"]
-done = 0
+done = 3
 from = "docs v2 E 组核对（E02、E02.6 说明）和 D 组核对（D01.27、D01.28），H、I 组更正（六间房影响的是多画面）"
-note = "占位名的清理在 J06.2 做，本任务只给常量；百度那条和 C01.6 互补"
+note = "占位名的清理在 J06.2 做，本任务只给常量；百度那条和 C01.6 互补。阶段提交 c0e306288、469081c60、78d7fa94e；录制详情另补 CHZZK、Kick、猫耳、Picarto、SOOP、Steam；多画面里 B 站仍没有弹幕（要多一个请求），见 record.md"
 
 [[task]]
 id = "E06.1"

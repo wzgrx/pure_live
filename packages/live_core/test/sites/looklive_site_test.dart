@@ -275,11 +275,6 @@ void main() {
       expect(_line(room), 'POST https://api.look.163.com/weapi/livestream/room/get/v3 {"liveRoomNo":"21623631"}');
       expect((setup.site.id, setup.site.name), ('looklive', 'LOOK 直播'));
       expect(setup.site.directoryNoticeKey, 'looklive_directory_scope');
-      expect(
-        setup.site.getDanmaku(),
-        isA<EmptyDanmaku>(),
-        reason: "3.x had no LOOK chat; since M5.28 it is live_danmaku's, from the room entry's danmakuData",
-      );
       expect(setup.site.deadline, const Duration(seconds: 20));
     });
 

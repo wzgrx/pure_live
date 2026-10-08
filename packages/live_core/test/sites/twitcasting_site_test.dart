@@ -125,7 +125,6 @@ void main() {
     expect(site, isA<LivePlayUrlResolver>());
     expect(site, isA<LiveSiteLinks>());
     expect(site, isNot(isA<LiveSiteDirectoryPager>()), reason: '3.x paged the window in its pages');
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no TwitCasting comments');
     final audience = AudiencePlatformCapability.of('twitcasting');
     expect(audience.onlineAvailableInRoomLists, isTrue);
     expect(audience.hasTotalViewers, isFalse);

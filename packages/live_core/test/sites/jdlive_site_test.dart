@@ -237,7 +237,6 @@ void main() {
       expect(play.url.queryParameters.containsKey('h5st'), isFalse, reason: 'the play answer needs no signature (§10)');
       expect((setup.site.id, setup.site.name), ('jdlive', 'JD Live'));
       expect(setup.site.directoryNoticeKey, 'jdlive_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no JD chat');
     });
 
     test("room entry downloads the live playlist with 3.x's media headers", () async {

@@ -286,7 +286,7 @@ void main() {
       final first = registry.connectionFor('huya');
       final second = registry.connectionFor(' huya');
       expect(first, isA<_Fake>());
-      expect(identical(first, second), isFalse, reason: 'a new connection per room page, like getDanmaku()');
+      expect(identical(first, second), isFalse, reason: 'a new connection per room page, like 3.x getDanmaku()');
       expect(built, 2);
       expect(registry.connectionFor(SiteIds.acfun), isA<EmptyDanmakuConnection>());
       expect(registry.connectionFor('unknown'), isA<EmptyDanmakuConnection>());

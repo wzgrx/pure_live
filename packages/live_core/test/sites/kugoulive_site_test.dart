@@ -259,7 +259,6 @@ void main() {
       expect(site, isA<LivePlayRecoveryResolver>());
       expect(site, isA<LivePlayLeaseMetadata>());
       expect(site, isNot(isA<LivePlayUrlCursorResolver>()));
-      expect(site.getDanmaku(), isA<EmptyDanmaku>());
       expect(site.needsResolving('https://fanxing.kugou.com/3197156'), isFalse);
       expect(SiteIds.supported, contains(site.id));
     });

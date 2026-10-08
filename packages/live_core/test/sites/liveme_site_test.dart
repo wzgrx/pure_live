@@ -204,7 +204,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('liveme', 'LiveMe'));
       expect(setup.site.directoryNoticeKey, 'liveme_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no LiveMe danmaku');
       expect(await setup.site.getCategories(1, 30), isEmpty, reason: 'LiveMe has no categories');
     });
 

@@ -116,7 +116,6 @@ void main() {
       }
       expect(setup.site.id, 'missevan');
       expect(setup.site.name, '猫耳 FM');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Missevan danmaku');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled', () async {
@@ -402,8 +401,11 @@ void main() {
       }
       expect(setup.http.requests, hasLength(2));
       expect((await setup.site.getRoomDetailForRefresh(roomId: _live)).danmakuData, isNull);
-      expect((await setup.site.getRoomDetailForRecording(roomId: _live)).danmakuData, isNull);
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the connection is M5');
+      // E05.4: the recording detail (multi-view) has them too.
+      expect(
+        (await setup.site.getRoomDetailForRecording(roomId: _live)).danmakuData.toString(),
+        live.danmakuData.toString(),
+      );
     });
 
     test('an offline refresh keeps what the card knew (mergeFrom)', () async {

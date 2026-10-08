@@ -222,7 +222,6 @@ void main() {
     expect(site, isA<LivePlayUrlResolver>());
     expect(site, isA<LivePlayRecoveryResolver>());
     expect(site, isNot(isA<LiveSearchPaginationPolicy>()));
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'danmaku is M5');
   });
 
   group('catalog and directory', () {
@@ -560,9 +559,12 @@ void main() {
       final room = await setup.site.getRoomDetailForRecording(roomId: _live);
       expect(setup.http.requests, hasLength(2));
       expect((room.data! as ChzzkRoomData).media, hasLength(2));
-      expect(room.danmakuData, isNull);
+      expect(room.danmakuData, isA<ChzzkDanmakuArgs>());
       expect(await setup.site.getPlayQualities(detail: room), hasLength(5));
       expect(setup.http.requests, hasLength(_legacyRequests('S06-live-detail-live', 'getRoomDetailForRecording')));
+      // E05.4: the live's chat, as room entry has it (multi-view).
+      final entered = await setup.site.getRoomDetail(roomId: _live);
+      expect(room.danmakuData.toString(), entered.danmakuData.toString());
     });
 
     test('an offline channel: two requests, and no stream without a request', () async {

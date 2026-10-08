@@ -442,15 +442,16 @@ final class AcfunSite extends LiveSite
   /// is `StreamUnavailable` (3.x failed the load too). `startPlay` decides
   /// the restriction: a paid show stays live with [LiveRestriction.paid]
   /// and no broadcast (3.x failed the load), a broadcast that plays has
-  /// none. The start comes from `live/info`, else from `startPlay`.
-  Future<LiveRoom> _withBroadcast(LiveRoom room, {required bool danmaku}) async {
+  /// none. The start comes from `live/info`, else from `startPlay`. The
+  /// danmaku arguments come from the same `startPlay` (no request).
+  Future<LiveRoom> _withBroadcast(LiveRoom room) async {
     if (!room.isLiveNow) return room;
     final play = await _startPlay(room.roomId);
     final data = play.data;
     if (data == null) return room.copyWith(restriction: play.restriction);
     return room.copyWith(
       data: data,
-      danmakuData: danmaku ? _danmakuArgs(room.roomId, data, play) : null,
+      danmakuData: _danmakuArgs(room.roomId, data, play),
       startedAt: room.startedAt ?? data.startedAt,
       restriction: play.restriction,
     );
@@ -458,17 +459,18 @@ final class AcfunSite extends LiveSite
 
   /// The room with its broadcast (the stream data) and danmaku arguments.
   @override
-  Future<LiveRoom> getRoomDetail({required String roomId}) async =>
-      await _withBroadcast(await _info(roomId), danmaku: true);
+  Future<LiveRoom> getRoomDetail({required String roomId}) async => await _withBroadcast(await _info(roomId));
 
   /// Follow-card refresh: `live/info` only, never a visitor session.
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _info(roomId);
 
-  /// The room with its broadcast, as 3.x's recorder read it.
+  /// The room with its broadcast, as 3.x's recorder read it, and the
+  /// danmaku arguments of the same answers (multi-view connects them;
+  /// E05.4).
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) async =>
-      await _withBroadcast(await _info(roomId), danmaku: false);
+      await _withBroadcast(await _info(roomId));
 
   @override
   Future<bool> getLiveStatus({required String roomId}) async => (await _info(roomId)).isLiveNow;

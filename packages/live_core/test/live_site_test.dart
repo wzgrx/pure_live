@@ -291,12 +291,6 @@ void main() {
     expect(await site.getRecommendRooms(), isEmpty);
     expect(await site.getLiveStatus(roomId: '1'), isFalse);
     expect(await site.getSuperChatMessage(roomId: '1'), isEmpty);
-    final danmaku = site.getDanmaku()..onMessage = (_) {};
-    expect(danmaku, isA<EmptyDanmaku>());
-    expect(danmaku.heartbeatTime, 60000);
-    await danmaku.stop();
-    expect(danmaku.onMessage, isNull, reason: 'stop drops the callbacks');
-    expect(danmaku.isConnected, isFalse);
   });
 
   test('super chats: only Bilibili, Huya and Douyu have them (3.x)', () {

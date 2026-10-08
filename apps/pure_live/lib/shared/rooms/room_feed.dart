@@ -458,7 +458,9 @@ final class RoomFeed extends ChangeNotifier {
 
   /// Fetches chunks from [source] into [into] until [count] rooms are
   /// visible; answers whether more may follow. Two chunks in a row without a
-  /// new room end the list (3.x).
+  /// new room end the list (3.x); an empty chunk that says more may follow
+  /// (Kilakila drops repeated timeline pages) counts as one of them, and the
+  /// platform's own `hasMore: false` ends it at once.
   Future<bool> _collect(
     RoomSource source,
     _Collected into,
@@ -480,7 +482,7 @@ final class RoomFeed extends ChangeNotifier {
       ];
       into.rooms.addAll(rank(platform, fresh));
       unchanged = fresh.isEmpty ? unchanged + 1 : 0;
-      hasMore = chunk.hasMore && chunk.rooms.isNotEmpty && unchanged < 2;
+      hasMore = chunk.hasMore && unchanged < 2;
       if (maxRooms case final limit? when into.rooms.length >= limit) hasMore = false;
       onProgress?.call();
     }

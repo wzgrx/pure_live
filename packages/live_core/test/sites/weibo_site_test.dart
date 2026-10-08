@@ -163,7 +163,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('weibo', '微博直播'));
       expect(setup.site.directoryNoticeKey, 'weibo_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Weibo danmaku');
     });
 
     test("3.x's capabilities, plus lines and links", () {

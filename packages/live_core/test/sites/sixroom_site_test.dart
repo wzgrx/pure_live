@@ -288,7 +288,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('sixroom', '六间房直播'));
       expect(setup.site.directoryNoticeKey, _legacy('S04-home')['directoryNoticeKey']);
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Six Rooms chat (31-6 is M5)');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {
@@ -720,7 +719,8 @@ void main() {
         final data = room.data! as SixRoomRoomData;
         expect((data.userId, data.state, data.restriction), (_liveUid, SixRoomState.live, LiveRestriction.none));
         expect(data.stream != null, media, reason: '$depth: the stream only with the media (3.x)');
-        expect(room.danmakuData, depth == 'getRoomDetail' ? isA<SixRoomDanmakuArgs>() : isNull);
+        // E05.4 c5: the recording detail (multi-view) has them too.
+        expect(room.danmakuData, media ? isA<SixRoomDanmakuArgs>() : isNull, reason: depth);
         expect((room.startedAt, room.restriction), (_liveStart, LiveRestriction.none), reason: 'M2.1');
         expect(room.title, '但行好事，莫问前程', reason: '31-2');
         expect(room.avatar, isNot(room.cover), reason: '31-1');

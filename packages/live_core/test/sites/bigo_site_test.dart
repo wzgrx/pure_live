@@ -231,7 +231,6 @@ void main() {
       expect(studio.headers.keys, isNot(contains('content-type')));
       expect((setup.site.id, setup.site.name), ('bigo', 'Bigo Live'));
       expect(setup.site.directoryNoticeKey, 'bigo_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Bigo chat');
     });
 
     test("3.x's default callback names: jsonpcallback_<ms>_<µs> of the clock, echoed by the service", () async {

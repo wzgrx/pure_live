@@ -6,11 +6,13 @@ import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// A quality's label; "?" marks one the platform has not confirmed (as the
 /// live room).
-String qualityLabel(LivePlayQuality quality) => quality.isPlaybackUnconfirmed ? '${quality.quality}?' : quality.quality;
+String qualityLabel(LivePlayQuality quality) =>
+    '${platformQualityName(quality.quality)}${quality.isPlaybackUnconfirmed ? '?' : ''}';
 
 /// The visible size of a control button (docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面, `.sr2 .ib`).
 const double _buttonSize = 40;
@@ -272,7 +274,7 @@ class _StreamButtons extends StatelessWidget {
               entryKey: 'multiview-quality-item',
               tooltip: i18n('select_quality'),
               label: qualityLabel(qualities[current]),
-              entries: [for (final quality in qualities) quality.quality],
+              entries: [for (final quality in qualities) platformQualityName(quality.quality)],
               current: current,
               busy: cell.switching,
               enabled: !cell.switching,

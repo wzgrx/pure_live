@@ -11,6 +11,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 
 /// What the stream panel does with the chosen address.
 enum StreamUse {
@@ -164,7 +165,7 @@ class _RoomStreamPanelState extends State<RoomStreamPanel> {
   /// Whether [index] is the quality that plays.
   bool _playingQuality(int? index) => !_replay && index == _room.qualityIndex;
 
-  String get _qualityName => _quality == null ? '' : _room.qualities[_quality!].quality;
+  String get _qualityName => _quality == null ? '' : platformQualityName(_room.qualities[_quality!].quality);
 
   String _lineName(int index) => i18n('toolbox_line', args: {'index': '${index + 1}'});
 
@@ -234,7 +235,7 @@ class _RoomStreamPanelState extends State<RoomStreamPanel> {
           for (final (index, quality) in qualities.indexed)
             DialogOptionRow(
               key: ValueKey('stream-quality-$index'),
-              label: quality.quality,
+              label: platformQualityName(quality.quality),
               description: _playingQuality(index) ? i18n('now_playing') : null,
               selected: _playingQuality(index),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),

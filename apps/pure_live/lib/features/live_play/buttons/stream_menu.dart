@@ -5,6 +5,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 
 /// The quality and line buttons, "原画 ⌄" "线路1 ⌄" (3.x `ResolutionSelector`
 /// and `LineSelector`), in the room strip and in the fullscreen bar alike
@@ -69,8 +70,8 @@ class StreamPickers extends StatelessWidget {
                 key: const ValueKey('live-play-quality'),
                 entryKey: 'live-play-quality-item',
                 tooltip: i18n('select_quality'),
-                label: current.isPlaybackUnconfirmed ? '${current.quality}?' : current.quality,
-                entries: [for (final quality in qualities) quality.quality],
+                label: '${platformQualityName(current.quality)}${current.isPlaybackUnconfirmed ? '?' : ''}',
+                entries: [for (final quality in qualities) platformQualityName(quality.quality)],
                 current: index,
                 busy: switchingQuality,
                 enabled: !switching,

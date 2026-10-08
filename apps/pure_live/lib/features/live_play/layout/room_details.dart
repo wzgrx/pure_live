@@ -11,6 +11,7 @@ import 'package:pure_live/features/live_play/logic/area_lookup.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -178,7 +179,7 @@ class _Content extends StatelessWidget {
           ),
         ],
         _Figures(controller: controller),
-        if (notice.isNotEmpty) _Expandable(label: i18n('live_play_info_notice'), text: notice),
+        if (notice.isNotEmpty) _Expandable(label: i18n('live_play_info_notice'), text: platformNotice(notice)),
         if (introduction.isNotEmpty && introduction != notice)
           _Expandable(label: i18n('live_play_info_introduction'), text: introduction),
         const SizedBox(height: 4),
@@ -289,7 +290,7 @@ class _StreamerState extends State<_Streamer> {
                         child: Text.rich(
                           TextSpan(
                             children: [
-                              TextSpan(text: area),
+                              TextSpan(text: platformAreaName(room.platform, area)),
                               if (_finding)
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,

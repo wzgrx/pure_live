@@ -6,6 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
 import 'package:pure_live/features/multiview/widgets/cell_controls.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 
 /// The large cell's controls in the immersive and fullscreen modes (3.x
 /// `_buildLargeControlBar`, docs/A-界面设计/A13-网络电视和多画面界面/A13.2-多画面 c14): pause, refresh, the
@@ -113,7 +114,7 @@ class FocusControlBar extends StatelessWidget {
                             entryKey: 'multiview-bar-quality-item',
                             tooltip: i18n('select_quality'),
                             label: qualityLabel(qualities[cell.qualityIndex.clamp(0, qualities.length - 1)]),
-                            entries: [for (final quality in qualities) quality.quality],
+                            entries: [for (final quality in qualities) platformQualityName(quality.quality)],
                             current: cell.qualityIndex,
                             busy: cell.switching,
                             enabled: !cell.switching,

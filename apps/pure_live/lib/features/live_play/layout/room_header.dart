@@ -12,6 +12,7 @@ import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/record/record_state.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The least width kept for the avatar and the names: the buttons turn into
@@ -192,7 +193,7 @@ class RoomTitle extends StatelessWidget {
                             style: theme.textTheme.titleMedium?.emphasis,
                           ),
                           Text(
-                            area.isEmpty ? platformLabel : '$platformLabel · $area',
+                            area.isEmpty ? platformLabel : '$platformLabel · ${platformAreaName(platform, area)}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.regular.copyWith(color: scheme.onSurfaceVariant),

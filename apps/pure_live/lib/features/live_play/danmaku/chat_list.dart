@@ -18,6 +18,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
 /// The contrast a name in a viewer's colour keeps on its background (WCAG
@@ -955,7 +956,7 @@ class _RoomNoticeStateState extends State<RoomNoticeState> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    notice,
+                    platformNotice(notice),
                     key: const ValueKey('live-play-offline-notice'),
                     maxLines: _open ? null : 3,
                     overflow: _open ? null : TextOverflow.ellipsis,

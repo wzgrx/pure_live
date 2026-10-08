@@ -15,7 +15,7 @@
   - 小窗（应用内小窗、画中画）里飞的弹幕 `features/live_play/mini/compact_danmaku.dart` → A07.8；它的设置项（“小窗弹幕”一组）在这里。
   - 设置总览里的“弹幕”“小窗弹幕”“本地互动体验”入口行、设置页的“小窗弹幕”页 `PipDanmakuPage`（`features/settings/playback_tiles.dart:604`）、视频页的“弹幕屏蔽”行 → [A11](../A11-设置界面/README.md)（A11.1、A11.3、A11.4）。
   - 多画面格子里的弹幕 → A13.2；电视直播间的弹幕设置和屏蔽 → A17.4、A17.9。
-  - 本地互动的数据和规则（`local_interaction/logic/`，A08.2 和界面一起做的，3.x 的 `localInteraction.*` 设置键在 `live_store`）：只改样子的在 A08 登记；改数据、规则、存储的没有专门的功能子分类，见“已知问题”。
+  - 本地互动的数据和规则（`local_interaction/logic/`，A08.2 和界面一起做的，3.x 的 `localInteraction.*` 设置键在 `live_store`）：只改样子的在 A08 登记；改数据、规则、存储的归 [D08 本地互动](../../D-弹幕/D08-本地互动/README.md)（2026-10-09 新开，D-040）。平台礼物的数据和规则归 [D07](../../D-弹幕/D07-礼物和付费消息/README.md)，礼物行和礼物开关的样子在 A08.11、A08.12。
 
 ## 现状：做到哪、怎么工作的
 
@@ -59,7 +59,7 @@
 | `local_interaction/local_chat_line.dart`（101） | `LocalChatLine`（`:11`，“本地”标签和徽章胶囊） | A08.2 c10 |
 | `local_interaction/local_interaction_settings_page.dart`（357） | `LocalInteractionSettingsPage`（`:24`，内容最宽 720 `:14`） | A08.2 c15 |
 | `local_interaction/local_interaction_scope.dart`（97） | `localInteractionProvider`（`:21`）、`localInteractionAvailable`（`:33`）、`LocalRoomScope`（`:36`）、emoji 字体（`_bundledEmoji` `:58`、`localEmojiStyle` `:63`、`localEmojiText` `:71`、许可登记 `:76`）、`localAccentInk`/`localGiftInk`（`:88`、`:94`） | A08.2 c16 |
-| `local_interaction/logic/local_catalog.dart`（606）、`local_interaction.dart`（419）、`local_room_session.dart`（112） | 本地互动的资料库、设置和操作、每个直播间的会话（不引 material） | A08.2 c1 |
+| `local_interaction/logic/local_catalog.dart`（606）、`local_interaction.dart`（419）、`local_room_session.dart`（112） | 本地互动的资料库、设置和操作、每个直播间的会话（不引 material）；2026-10-09 起归 D08 | A08.2 c1、D08 |
 | `buttons/room_menu_button.dart`（345） | 右上角菜单第三组“本地互动体验”（`:253`） | A07.6、A08.2 |
 
 共用（`apps/pure_live/lib/shared/danmaku/`）和设置：
@@ -114,7 +114,7 @@
 | A08.3、A08.4 登记为“完成”，记录里没有 K90 结果；A08.1 的列表状态（超时、平台不提供、醒目留言卡片）只在 S02.2 冒烟里看过“四个标签、系统提示” | 各任务 `record.md`；[S02.2 记录](../../S-质量和验证/S02-真机验证/S02.2-K90冒烟/record.md) | 不符合 PROCESS 3.2“完成必须有真机结果” | 写进本单元报告；建议这些检查并入 S02.6 或改回“待真机” |
 | 本地互动的礼物和徽章 emoji 是 COLRv1 字体，Windows 10 的 DirectWrite 可能画成空白 | `local_interaction/local_interaction_scope.dart:58`（`_bundledEmoji`：除 iOS、macOS 外都用自带字体） | Windows 10 上礼物图案看不见 | 没在 Windows 上看过；X01（Windows）验证，不行时让 Windows 用系统 emoji |
 | 本地礼物在列表里那一行没有长按菜单（3.x 的礼物和弹幕是同一种卡片，可以长按） | `features/live_play/danmaku/chat_list.dart:609-618`（本地礼物直接返回 `LocalChatLine`） | 不能复制礼物那一行 | A08.2 记录“没做的”；没有任务管，影响小，不做 |
-| 本地互动的数据和规则（`local_interaction/logic/`）没有登记在哪个功能子分类 | `features/live_play/local_interaction/logic/` | 以后改数据和规则时不知道在哪开任务 | 需要维护者决定（建议归 D 组新开子分类或并入 D05） |
+| 本地互动的数据和规则（`local_interaction/logic/`）没有登记在哪个功能子分类 | `features/live_play/local_interaction/logic/` | 以后改数据和规则时不知道在哪开任务 | 已解决：归 D 组新开的 D08（D-040，V03.6 E20） |
 | 设置的弹幕屏蔽页、弹幕页、本地互动设置页在电脑上按 Esc 不返回（没有 `EscapeBack`） | `features/shield/shield_page.dart:31`、`features/settings/danmaku_page.dart:46`、`local_interaction_settings_page.dart` | 规范 5.4 的 Esc 返回链不全 | A05.1 c3 |
 | A08.5 c3（清理翻译键）没做：旧弹幕目录行用过的 18 个键现在没有字面引用；A08.3 删掉的两个标签页用的 `shield_tab_*`、`shield_clear*`、`shield_duplicate` 已被 `00f5edf18`（2026-10-02 清理不用的键）删掉，`shield_*` 现在只剩在用的 `shield_title`、`shield_removed`（2026-10-07 核对） | 键名清单在 [A08.5 记录](A08.5-设置里的弹幕页/record.md)“留给以后” | 翻译文件里有不用的键 | D-024：这次不清理；以后按 D-016 先列清单（Z05） |
 | 代码注释里还用旧编号（`U.2e c8`、`U.2k-a`、`B09 c4`、`F02 c1`、`F.2b`、`UI_PLAN §7` 等），本子分类的文件里约 116 处 | `chat_panel.dart:17-18`、`:85`、`:117`、`danmaku_page.dart:21-22` 等 | 按注释找文档要先查 [MAPPING.md](../../MAPPING.md) | Z 组一次性替换（单元 2 已建议） |
@@ -139,7 +139,8 @@
 1. 维护者按 [A08.5 的 verify.md](A08.5-设置里的弹幕页/verify.md) 在 K90 上看设置的弹幕页和录制提醒定位，通过后改“完成”。同一轮顺带补看 CHECKLIST 第 2 节第 4～8 条，给 A08.1、A08.3、A08.4 补上真机结果（登记表问题见本单元报告）。
 2. A08.6：把“弹幕列表”“小窗弹幕”两组挪到 `shared/danmaku/`，设置的弹幕页末尾也显示（规模小，第二档）。先做它，A08.7 的颜色面板就只改一处。
 3. A08.7：小窗弹幕颜色改成在行下面展开的色板（直播间和设置页同一个），全屏里不再有居中对话框（规模小，第二档）。
-4. 以后：本地互动逻辑的归属（见“已知问题”）；Windows 上礼物 emoji（X01）；电视的弹幕设置样式（A17.4）。新想法写进 V01 提议，不直接加任务。
+4. 2026-10-09 按 V03.5、V03.6 登记（D-040）：A08.11 礼物行的样子 → A08.12 礼物开关和飞行弹幕里的礼物（礼物数据先做 E05.5、D07.1）；A08.14 长按弹幕面板“+1（本地）”；A08.15 聊天列表字号和行距（接 A08.10）。A08.13 是另一个任务登记的本地互动小修。
+5. 以后：Windows 上礼物 emoji（X01）；电视的弹幕设置样式（A17.4）。新想法写进 V01 提议，不直接加任务。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -148,7 +149,7 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：`features/live_play/danmaku/`、`shared/danmaku/`、`local_interaction/`
-- 进度：`████████████████████` 98%
+- 进度：`██████████████░░░░░░` 68%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -162,5 +163,26 @@
 | A08.7 | 小窗弹幕的颜色选择改成面板（全屏里最后一个居中对话框） | 界面 | 完成 | 2026-10-08 | — | [设计或说明](A08.7-小窗弹幕颜色改成面板/README.md)、[任务书](A08.7-小窗弹幕颜色改成面板/brief.md)、[记录](A08.7-小窗弹幕颜色改成面板/record.md) |
 | A08.8 | 长按弹幕面板加回 3.x 的等级 Lv.N | 界面 | 待真机 | 2026-10-08 | — | [设计或说明](A08.8-长按弹幕面板显示等级/README.md)、[任务书](A08.8-长按弹幕面板显示等级/brief.md)、[记录](A08.8-长按弹幕面板显示等级/record.md) |
 | A08.9 | 单击画面优先调出控制层：弹幕多时点画面总是打开长按弹幕面板 | 界面 | 完成 | 2026-10-08 | df901709a | [设计或说明](A08.9-单击画面优先调出控制层/README.md)、[任务书](A08.9-单击画面优先调出控制层/brief.md)、[记录](A08.9-单击画面优先调出控制层/record.md) |
+| A08.11 | 礼物行的样子：全平台统一（礼物图、名字、礼物名、×N、价值、档位线） | 界面 | 未开始 | — | — | [设计或说明](A08.11-礼物行的样子/README.md)、[任务书](A08.11-礼物行的样子/brief.md) |
+| A08.12 | 礼物开关和飞行弹幕里的礼物：只显示值钱的礼物、飞行弹幕显示礼物、价值换算成元 | 界面 | 未开始 | — | — | [设计或说明](A08.12-礼物开关和飞行弹幕里的礼物/README.md)、[任务书](A08.12-礼物开关和飞行弹幕里的礼物/brief.md) |
+| A08.14 | 长按弹幕面板加“+1（本地）”：用本地身份和样式再发一次 | 界面 | 未开始 | — | — | [设计或说明](A08.14-长按弹幕面板加一/README.md)、[任务书](A08.14-长按弹幕面板加一/brief.md) |
+| A08.15 | 聊天列表字号和行距（接 A08.10） | 界面 | 未开始 | — | — | [设计或说明](A08.15-聊天列表字号和行距/README.md)、[任务书](A08.15-聊天列表字号和行距/brief.md) |
+
+## 还没完成的
+
+- **A08.11 礼物行的样子：全平台统一（礼物图、名字、礼物名、×N、价值、档位线）**（未开始，第二档，规模 中）
+  - 阶段：设计和评审页（效果图、各平台档位门槛表） → 礼物行实现（紧凑、卡片、手机横屏 280 宽、长按）
+  - 说明：依赖 E05.5（礼物数据）、A08.10（名字的样子和“显示用户名”开关）；D07.1 的连击合并改的是同一行的数字
+  - 来源：V03.5 第 6.3、6.7 节；用户 2026-10-09（D-040）
+- **A08.12 礼物开关和飞行弹幕里的礼物：只显示值钱的礼物、飞行弹幕显示礼物、价值换算成元**（未开始，第二档，规模 中）
+  - 阶段：两个列表设置：只显示值钱的礼物、礼物价值换算成元 → 飞行弹幕显示礼物（直播间、小窗、多画面跟它）
+  - 说明：依赖 A08.11、D07.1；新设置默认关（D-040），“在聊天列表显示礼物”不变
+  - 来源：V03.5 第 6.6、6.7 节；用户 2026-10-09（D-040）
+- **A08.14 长按弹幕面板加“+1（本地）”：用本地身份和样式再发一次**（未开始，第二档，规模 小）
+  - 说明：同一个面板 message_panel.dart 还有 A08.13（V03.6 E2 本地互动小修，另一个任务登记）在改，先后做；本地互动关着时没有这一行
+  - 来源：V03.6 第 4 节 E3、第 5.1 节；用户 2026-10-09（D-040）
+- **A08.15 聊天列表字号和行距（接 A08.10）**（未开始，第二档，规模 小）
+  - 说明：依赖 A08.10（行样式和 ChatText）；两个新设置默认 = 现在的样子（D-040）
+  - 来源：V03.6 第 4 节 E4、第 5.2 节；用户 2026-10-09（D-040）
 
 <!-- docs:生成结束 -->

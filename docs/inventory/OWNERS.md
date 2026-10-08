@@ -6,7 +6,7 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 203 条；设置 226 个（分节默认 23 条、单独指定 75 个）；来源 35 个；通道 15 个。
+路径规则 204 条；设置 226 个（分节默认 23 条、单独指定 75 个）；来源 35 个；通道 15 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
@@ -16,7 +16,7 @@
 | A04 尺寸和适配 | 1 |  |  |  |  |
 | A06 首页和全局 | 3 |  |  |  |  |
 | A07 直播间界面 | 1 | 12 |  |  |  |
-| A08 弹幕界面 | 5 | 34 |  |  |  |
+| A08 弹幕界面 | 5 | 5 |  |  |  |
 | A09 浏览界面 | 9 | 9 |  |  |  |
 | A10 录制界面 | 6 |  |  |  |  |
 | A11 设置界面 | 1 |  |  |  |  |
@@ -33,6 +33,7 @@
 | D03 飞行弹幕引擎 | 2 |  |  |  |  |
 | D04 数据流和性能 | 1 |  |  |  |  |
 | D05 弹幕设置生效 | 2 | 33 |  |  |  |
+| D08 本地互动 | 1 | 29 |  |  |  |
 | E01 国内五大平台 | 5 |  | 5 |  |  |
 | E02 其他国内平台 | 1 |  | 13 |  |  |
 | E03 海外平台 | 16 | 1 | 16 |  |  |
@@ -122,8 +123,8 @@
 
 ## A08 弹幕界面
 
-- 代码：`apps/pure_live/lib/features/live_play/danmaku/`、`apps/pure_live/lib/features/live_play/local_interaction/`（含 logic/，没有功能子分类，待定）、`apps/pure_live/lib/features/settings/danmaku_page.dart`、`apps/pure_live/lib/features/shield/`、`apps/pure_live/lib/shared/danmaku/`
-- 设置：`danmakuListStyle`、`showChatGifts`、`enableDanmakuTapInteraction`、`enableDanmakuLongPressInteraction`、`holdDanmakuOnPress`、`localInteraction.enabled`、`localInteraction.userName`、`localInteraction.title`、`localInteraction.showAsDanmaku`、`localInteraction.showPlatformBadge`、`localInteraction.showLevelBadge`、`localInteraction.enableGiftEffects`、`localInteraction.previewPlatform`、`localInteraction.coins`、`localInteraction.experience`、`localInteraction.history`、`localInteraction.danmakuPreset`、`localInteraction.danmakuColor`、`localInteraction.danmakuFontSize`、`localInteraction.danmakuSpeed`、`localInteraction.danmakuFontWeight`、`localInteraction.danmakuShowStroke`、`localInteraction.danmakuStrokeWidth`、`localInteraction.danmakuPlacement`、`localInteraction.danmakuFontFamily`、`localInteraction.danmakuItalic`、`localInteraction.danmakuOpacity`、`localInteraction.danmakuLetterSpacing`、`localInteraction.danmakuStrokeColor`、`localInteraction.danmakuShowShadow`、`localInteraction.danmakuShadowColor`、`localInteraction.danmakuShadowBlur`、`localInteraction.danmakuShadowOffset`、`localInteraction.danmakuFixedDurationMs`
+- 代码：`apps/pure_live/lib/features/live_play/danmaku/`、`apps/pure_live/lib/features/live_play/local_interaction/`、`apps/pure_live/lib/features/settings/danmaku_page.dart`、`apps/pure_live/lib/features/shield/`、`apps/pure_live/lib/shared/danmaku/`
+- 设置：`danmakuListStyle`、`showChatGifts`、`enableDanmakuTapInteraction`、`enableDanmakuLongPressInteraction`、`holdDanmakuOnPress`
 
 ## A09 浏览界面
 
@@ -198,6 +199,11 @@
 
 - 代码：`apps/pure_live/lib/shared/danmaku/danmaku_settings.dart`、`apps/pure_live/lib/shared/danmaku/danmaku_templates.dart`
 - 设置：`danmakuFontFamilyFileName`、`hideDanmaku`、`noEmojiMode`、`danmakuTopArea`、`danmakuArea`、`danmakuBottomArea`、`danmakuSpeed`、`danmakuFontSize`、`danmakuFontWeight`、`danmakuFontBorder`、`danmakuOpacity`、`enableDanmakuDisplay`、`enableDanmakuStroke`、`danmakuPausedBehavior`、`danmakuFps`、`danmakuAutoFps`、`danmakuMaxVisibleCount`、`savedDanmakuTemplate`、`danmakuFontFamilyName`、`enablePipDanmaku`、`pipDanmakuAutoScale`、`pipDanmaNoEmojiMode`、`pipDanmakuUseOriginalColor`、`pipDanmakuColor`、`pipDanmakuFontSize`、`pipDanmakuFontWeight`、`pipDanmakuSpeed`、`pipDanmakuOpacity`、`pipDanmakuArea`、`pipDanmakuMaxVisibleCount`、`pipDanmakuEmitInterval`、`pipDanmakuFps`、`pipDanmakuAutoFps`
+
+## D08 本地互动
+
+- 代码：`apps/pure_live/lib/features/live_play/local_interaction/logic/`（本地互动的数据和规则（D-040））
+- 设置：`localInteraction.enabled`、`localInteraction.userName`、`localInteraction.title`、`localInteraction.showAsDanmaku`、`localInteraction.showPlatformBadge`、`localInteraction.showLevelBadge`、`localInteraction.enableGiftEffects`、`localInteraction.previewPlatform`、`localInteraction.coins`、`localInteraction.experience`、`localInteraction.history`、`localInteraction.danmakuPreset`、`localInteraction.danmakuColor`、`localInteraction.danmakuFontSize`、`localInteraction.danmakuSpeed`、`localInteraction.danmakuFontWeight`、`localInteraction.danmakuShowStroke`、`localInteraction.danmakuStrokeWidth`、`localInteraction.danmakuPlacement`、`localInteraction.danmakuFontFamily`、`localInteraction.danmakuItalic`、`localInteraction.danmakuOpacity`、`localInteraction.danmakuLetterSpacing`、`localInteraction.danmakuStrokeColor`、`localInteraction.danmakuShowShadow`、`localInteraction.danmakuShadowColor`、`localInteraction.danmakuShadowBlur`、`localInteraction.danmakuShadowOffset`、`localInteraction.danmakuFixedDurationMs`
 
 ## E01 国内五大平台
 

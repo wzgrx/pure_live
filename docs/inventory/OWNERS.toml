@@ -47,7 +47,8 @@ path = [
   # ---- 直播间（features/live_play）：界面 A07、A08、A10，逻辑 C、D、G、L、O、R 组 ----
   { glob = "apps/pure_live/lib/features/live_play/danmaku/chat_feed.dart", sub = "D04" },
   { glob = "apps/pure_live/lib/features/live_play/danmaku/", sub = "A08" },
-  { glob = "apps/pure_live/lib/features/live_play/local_interaction/", sub = "A08", note = "含 logic/，没有功能子分类，待定" },
+  { glob = "apps/pure_live/lib/features/live_play/local_interaction/logic/", sub = "D08", note = "本地互动的数据和规则（D-040）" },
+  { glob = "apps/pure_live/lib/features/live_play/local_interaction/", sub = "A08" },
   { glob = "apps/pure_live/lib/features/live_play/logic/audio_focus.dart", sub = "G05" },
   { glob = "apps/pure_live/lib/features/live_play/logic/background_playback.dart", sub = "C02" },
   { glob = "apps/pure_live/lib/features/live_play/logic/mini_window.dart", sub = "C02" },
@@ -392,7 +393,7 @@ favorite = "I03"
 font = "A01"
 history = "I06"
 iptv = "L01"
-localInteraction = "A08"
+localInteraction = "D08"
 log = "I01"
 meta = "J05"
 page = "A09"

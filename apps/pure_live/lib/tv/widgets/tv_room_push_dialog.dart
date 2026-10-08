@@ -16,8 +16,8 @@ enum TvRoomPushChoice {
   search,
 }
 
-/// Asks whether to open a room a phone pushed to the TV (docs/TASKS.md/
-/// U.15a c15): the phone's "口令导入" dialog of U.3d in the TV style, so the
+/// Asks whether to open a room a phone pushed to the TV
+/// (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件): the phone's "口令导入" dialog of U.3d in the TV style, so the
 /// room is recognised before asking (pure_live_TV showed the raw link, P16).
 ///
 /// With [room] it shows the streamer's picture, the title and "主播 · 平台 ·

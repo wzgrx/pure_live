@@ -136,8 +136,8 @@ int danmakuFrameDivisor({required double refreshRate, int? cap}) {
   return math.max(1, (refreshRate / cap - 0.02).ceil());
 }
 
-/// Danmaku flying over the video, right to left in lanes (docs/TASKS.md/
-/// U.2h; 3.x used flame_barrage, this is a plain painter: no game engine).
+/// Danmaku flying over the video, right to left in lanes
+/// (docs/D-弹幕/D03-飞行弹幕引擎/D03.1-飞行弹幕渲染; 3.x used flame_barrage, this is a plain painter: no game engine).
 ///
 /// Each danmaku keeps the time it entered and its own speed, and its place
 /// is speed × (this frame's vsync time − that time) in microseconds, so it

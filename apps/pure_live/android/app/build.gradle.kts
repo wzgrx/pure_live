@@ -6,7 +6,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// Release signing (docs/specs/ENGINEERING.md §9). key.properties and the keystore never
+// Release signing (docs/Y-发布和运营/Y01-版本签名和发布). key.properties and the keystore never
 // enter Git; without them a release build is signed with the debug key.
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties().apply {

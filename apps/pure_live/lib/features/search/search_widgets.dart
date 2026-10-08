@@ -15,8 +15,8 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 const double searchPlatformStripHeight = 56;
 
 /// The page width from which the search field and the platform row share
-/// one line and the filters and the scope line another (docs/TASKS.md/
-/// U.5a c12: phones held sideways and wide windows).
+/// one line and the filters and the scope line another
+/// (docs/A-界面设计/A09-浏览界面/A09.7-搜索: phones held sideways and wide windows).
 const double searchOneRowWidth = 600;
 
 /// The widest search field (U.5a c13).

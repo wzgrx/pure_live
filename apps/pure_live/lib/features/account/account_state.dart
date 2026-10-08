@@ -175,8 +175,8 @@ AccountStatus accountStatus(
 }
 
 /// The status card of a platform's own page: the list's [status], but an
-/// empty one says what to do ("未设置：粘贴登录后的 Cookie", docs/TASKS.md/
-/// U.10b c2).
+/// empty one says what to do ("未设置：粘贴登录后的 Cookie",
+/// docs/A-界面设计/A12-账号和数据界面/A12.2-登录和Cookie).
 AccountStatus accountPageStatus(AccountStatus status, AccountSnapshot stored) =>
     stored.cookie.isEmpty && !stored.unreadable && status.tone == AccountTone.idle
     ? AccountStatus(i18n('account_status_none_hint'))

@@ -523,10 +523,12 @@ def check_links(contents: dict[Path, str]) -> list[str]:
 def check_code_paths() -> list[str]:
     problems = []
     files = [ROOT / f for f in CODE_FILES if (ROOT / f).exists()]
+    files += [p for p in (ROOT / 'fixtures').rglob('*.md') if p.is_file()]
     for d in CODE_DIRS:
         for p in (ROOT / d).rglob('*'):
             if p.is_file() and p.suffix in CODE_EXT and 'build' not in p.parts and '.dart_tool' not in p.parts and 'kit' not in p.parts:
-                if p != Path(__file__).resolve():  # this file names the old documents on purpose
+                # This file names the old documents on purpose, its test made-up ones.
+                if p not in (Path(__file__).resolve(), ROOT / 'tools' / 'gate' / 'tests' / 'test_docs.py'):
                     files.append(p)
     for p in files:
         try:
@@ -536,6 +538,12 @@ def check_code_paths() -> list[str]:
         for m in PATH_RX.finditer(text):
             ref = m.group(0)
             if '<' in ref or ref.endswith(('.', '-')):
+                continue
+            # A path cut at a '/' and continued on the next comment line
+            # (Z06.4): the regex stops before the '/', and what is left may
+            # well exist (`docs/README.md/` + an old file name).
+            if text[m.end():m.end() + 2] in ('/\n', '/\r'):
+                problems.append(f'{p.relative_to(ROOT)}：提到的 {ref}/ 在注释里换行了，写成一行完整路径')
                 continue
             if not (ROOT / ref).exists():
                 problems.append(f'{p.relative_to(ROOT)}：提到的 {ref} 不存在')

@@ -137,8 +137,8 @@ List<double> frameRateMultiples(double fps, List<double> supported) {
 ///   not 144, for 60 frames);
 /// - no rate of the display is a whole multiple (25 and 50 frames at
 ///   60/90/120 Hz): the highest rate. A frame then stays one period more or
-///   less, and the shortest period judders least (docs/README.md/
-///   research-smoothness-2026-10-02.md 1.4).
+///   less, and the shortest period judders least
+///   (docs/V-需求和反馈/V03-审查和调研/V03.2-流畅度、刷新率、分辨率调研, 1.4).
 ///
 /// 0 too while the display's rates are not known.
 double playbackRefreshRate({required PlaybackRefresh playback, required bool high, required List<double> supported}) {

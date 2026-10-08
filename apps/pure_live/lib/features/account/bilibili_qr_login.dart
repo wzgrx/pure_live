@@ -177,8 +177,8 @@ final class BilibiliQrLogin extends ChangeNotifier {
   }
 }
 
-/// Bilibili's QR login page (3.x `BiliBiliQRLoginPage`, docs/TASKS.md/
-/// U.10b c11-c13): the code with its state laid over it, the line under it,
+/// Bilibili's QR login page (3.x `BiliBiliQRLoginPage`,
+/// docs/A-界面设计/A12-账号和数据界面/A12.2-登录和Cookie): the code with its state laid over it, the line under it,
 /// and "扫不了？" with the web login (phones) and the cookie.
 class BilibiliQrLoginView extends ConsumerStatefulWidget {
   /// Creates the page.

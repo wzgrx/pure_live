@@ -4,8 +4,8 @@
 // each frame takes here (debug mode on the test host: compare runs with
 // each other, not with a phone's profile build).
 //
-// The default run is 3 simulated seconds; the full one (docs/TASKS.md/
-// B08.md) is
+// The default run is 3 simulated seconds; the full one
+// (docs/D-弹幕/D04-数据流和性能/D04.1-弹幕性能和可读性) is
 //   flutter test test/features/live_play/chat_benchmark_test.dart \
 //     --dart-define=CHAT_BENCH_SECONDS=60
 import 'dart:math' as math;

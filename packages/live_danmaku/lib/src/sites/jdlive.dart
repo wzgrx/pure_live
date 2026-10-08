@@ -44,8 +44,8 @@ final class JdLiveDanmakuFrame {
 
 /// JD Live's chat: the website's guest `liveauth` and its socket
 /// (`lives.jd.com`'s live page script, 2026-09-29; checked against the
-/// recording `fixtures/jdlive/danmaku/S06-live`; docs/TASKS.md/
-/// M5.24-jdlive.md), without I/O.
+/// recording `fixtures/jdlive/danmaku/S06-live`;
+/// docs/D-弹幕/D01-平台弹幕协议/D01.25-京东直播弹幕), without I/O.
 ///
 /// - A handshake first POSTs `liveauth` (no h5st signature): the form's
 ///   `body` holds the website's app id and, as `content`, a JSON object

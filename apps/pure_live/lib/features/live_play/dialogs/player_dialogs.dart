@@ -41,8 +41,8 @@ String videoFitName(int index) => i18n(videoFitKeys[index.clamp(0, videoFitKeys.
 Future<void> advanceVideoFit(SettingsStore settings) =>
     settings.set(Settings.videoFitIndex, (videoFitIndexOf(settings) + 1) % videoFits.length);
 
-/// Picks the picture's fit in the small menu next to [anchor] (docs/README.md/
-/// compare/U.2n c5): the room menu's "画面比例" and the fullscreen bar's
+/// Picks the picture's fit in the small menu next to [anchor]
+/// (docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一): the room menu's "画面比例" and the fullscreen bar's
 /// button open this same menu; the current fit in the primary colour with
 /// a tick; a choice applies at once. [preferAbove] on a bar along the
 /// bottom.

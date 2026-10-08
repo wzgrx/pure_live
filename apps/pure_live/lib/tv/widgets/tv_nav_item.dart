@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_focusable.dart';
 
-/// An item of the TV side menu or of a list of destinations (docs/TASKS.md/
-/// U.15a, parts 3): the icon and the name; the current one is filled with the
+/// An item of the TV side menu or of a list of destinations
+/// (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件): the icon and the name; the current one is filled with the
 /// primary container, the focused one ringed and grown (c2, c3). The menu's
 /// own layout (collapsed rail, expanding on focus) is U.15b's.
 class TvNavItem extends StatelessWidget {

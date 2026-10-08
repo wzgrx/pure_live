@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_ui/live_ui.dart';
 
-// The dialog, the panel and the toast (docs/A-界面设计/A02-组件/A02.2-弹窗组件, docs/README.md/
-// tasks/U02.md): where each goes on a portrait phone (393 × 852), a
+// The dialog, the panel and the toast (docs/A-界面设计/A02-组件/A02.2-弹窗组件):
+// where each goes on a portrait phone (393 × 852), a
 // landscape phone (852 × 393) and a tablet (1280 × 800), the keys, and the
 // light and dark themes.
 

@@ -265,8 +265,8 @@ InputDecoration iptvFieldDecoration(
   helper: helper,
 ).copyWith(floatingLabelBehavior: FloatingLabelBehavior.always);
 
-/// The network import dialog (3.x `_NetworkImportDialog`, docs/TASKS.md/
-/// U.9 c10): "订阅地址" and "名称（可选）" (the file name of the address when
+/// The network import dialog (3.x `_NetworkImportDialog`,
+/// docs/A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理): "订阅地址" and "名称（可选）" (the file name of the address when
 /// empty). While it runs the bar shows and "取消" becomes "关闭" (closing
 /// does not stop the import). A failure says why under the address and the
 /// button becomes "重试"; it closes with the result when it succeeds.

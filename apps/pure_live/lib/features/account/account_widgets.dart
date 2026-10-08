@@ -14,8 +14,8 @@ Color accountToneColor(ThemeData theme, AccountTone tone) => switch (tone) {
   AccountTone.error => theme.colorScheme.error,
 };
 
-/// The state of one platform's login at the top of its page (docs/README.md/
-/// compare/U.10b c2): the logo, the name and the same sentence as the
+/// The state of one platform's login at the top of its page
+/// (docs/A-界面设计/A12-账号和数据界面/A12.2-登录和Cookie): the logo, the name and the same sentence as the
 /// accounts list, with an optional action ("重新核验").
 class AccountStatusCard extends StatelessWidget {
   /// Creates the card.

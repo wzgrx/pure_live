@@ -40,6 +40,9 @@ const double miniCentreSize = 58;
 ///   to the room; a mouse shows them while it hovers and a double click goes
 ///   back (3.x). Paused, the play button stays; buffering, it turns.
 /// - Bottom left: the recording mark; over the picture the "小窗弹幕".
+/// - The in-app floating window resizes (A07.22): a grip on the bottom
+///   corner towards the middle of the screen, shown with the buttons, and
+///   two fingers anywhere on the picture (one finger still moves it).
 /// - Android's picture-in-picture has none of the buttons (the system draws
 ///   its own).
 ///
@@ -60,6 +63,11 @@ class MiniPlayerSurface extends StatefulWidget {
     this.onDragStart,
     this.onDragUpdate,
     this.onDragEnd,
+    this.resizeGrip,
+    this.onResizeStart,
+    this.onGripMove,
+    this.onPinch,
+    this.onResizeEnd,
     super.key,
   });
 
@@ -99,6 +107,25 @@ class MiniPlayerSurface extends StatefulWidget {
   /// The drag ended.
   final GestureDragEndCallback? onDragEnd;
 
+  /// The corner of the resize grip, shown with the buttons (the in-app
+  /// floating window, A07.22); none when null.
+  final MiniGripCorner? resizeGrip;
+
+  /// A resize began: the grip (`pinch` false) or two fingers (`pinch`
+  /// true).
+  final void Function({required bool pinch})? onResizeStart;
+
+  /// The grip moved: the finger's way since the resize began.
+  final ValueChanged<Offset>? onGripMove;
+
+  /// Two fingers pinch or spread the window (A07.22, as Android's own
+  /// picture-in-picture): their scale since the resize began. With it, one
+  /// finger still drags ([onDragStart] …).
+  final ValueChanged<double>? onPinch;
+
+  /// The resize ended.
+  final VoidCallback? onResizeEnd;
+
   @override
   State<MiniPlayerSurface> createState() => _MiniPlayerSurfaceState();
 }
@@ -112,6 +139,13 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
   Timer? _volumeHide;
   Timer? _volumeSave;
   double _volume = 1;
+
+  /// Whether the running gesture on the picture is a two-finger resize.
+  bool _pinching = false;
+
+  /// Whether the grip is being dragged (the buttons stay meanwhile).
+  bool _gripping = false;
+  Offset _gripMoved = Offset.zero;
 
   LiveRoomController get _room => widget.controller;
 
@@ -172,7 +206,66 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
     });
   }
 
-  bool get _shown => _hovered || _revealed;
+  bool get _shown => _hovered || _revealed || _gripping;
+
+  // One finger drags the window, two resize it (A07.22). A finger added or
+  // lifted ends the gesture and starts the other kind (the recognizer
+  // reports an end and a new start).
+  void _onScaleStart(ScaleStartDetails details) {
+    _pinching = details.pointerCount >= 2;
+    if (_pinching) {
+      widget.onResizeStart?.call(pinch: true);
+    } else {
+      widget.onDragStart?.call(
+        DragStartDetails(globalPosition: details.focalPoint, localPosition: details.localFocalPoint),
+      );
+    }
+  }
+
+  void _onScaleUpdate(ScaleUpdateDetails details) {
+    if (_pinching) {
+      widget.onPinch?.call(details.scale);
+    } else {
+      widget.onDragUpdate?.call(
+        DragUpdateDetails(
+          globalPosition: details.focalPoint,
+          localPosition: details.localFocalPoint,
+          delta: details.focalPointDelta,
+        ),
+      );
+    }
+  }
+
+  void _onScaleEnd(ScaleEndDetails details) {
+    if (_pinching) {
+      widget.onResizeEnd?.call();
+    } else {
+      widget.onDragEnd?.call(DragEndDetails(velocity: details.velocity));
+    }
+    _pinching = false;
+  }
+
+  void _onGripStart(DragStartDetails details) {
+    // The buttons (and the grip with them) stay while it is dragged.
+    _hide?.cancel();
+    setState(() {
+      _gripping = true;
+      _gripMoved = Offset.zero;
+    });
+    widget.onResizeStart?.call(pinch: false);
+  }
+
+  void _onGripUpdate(DragUpdateDetails details) {
+    _gripMoved += details.delta;
+    widget.onGripMove?.call(_gripMoved);
+  }
+
+  void _onGripEnd() {
+    if (!_gripping) return;
+    setState(() => _gripping = false);
+    widget.onResizeEnd?.call();
+    _reveal();
+  }
 
   void _onTapUp(TapUpDetails details) {
     if (!_buttons) return;
@@ -245,14 +338,23 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
         ),
         if (_buttons) ...[
           Positioned.fill(
-            child: GestureDetector(
-              key: const ValueKey('mini-surface'),
-              behavior: HitTestBehavior.opaque,
-              onTapUp: _onTapUp,
-              onPanStart: widget.onDragStart,
-              onPanUpdate: widget.onDragUpdate,
-              onPanEnd: widget.onDragEnd,
-            ),
+            child: widget.onPinch == null
+                ? GestureDetector(
+                    key: const ValueKey('mini-surface'),
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: _onTapUp,
+                    onPanStart: widget.onDragStart,
+                    onPanUpdate: widget.onDragUpdate,
+                    onPanEnd: widget.onDragEnd,
+                  )
+                : GestureDetector(
+                    key: const ValueKey('mini-surface'),
+                    behavior: HitTestBehavior.opaque,
+                    onTapUp: _onTapUp,
+                    onScaleStart: _onScaleStart,
+                    onScaleUpdate: _onScaleUpdate,
+                    onScaleEnd: _onScaleEnd,
+                  ),
           ),
           _buttonsLayer(context),
           if (_desktop) _volumeBar(context),
@@ -350,6 +452,22 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                               size: miniCentreSize,
                               onPressed: _togglePlay,
                             ),
+                    ),
+                  ),
+                ),
+              if (widget.resizeGrip case final corner?)
+                _fade(
+                  shown: shown,
+                  child: Align(
+                    alignment: corner == MiniGripCorner.bottomLeft ? Alignment.bottomLeft : Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: _ResizeGrip(
+                        corner: corner,
+                        onStart: _onGripStart,
+                        onUpdate: _onGripUpdate,
+                        onEnd: _onGripEnd,
+                      ),
                     ),
                   ),
                 ),
@@ -454,6 +572,46 @@ class _MiniButton extends StatelessWidget {
         minimumSize: const Size.square(miniButtonSize),
       ),
       icon: Icon(icon),
+    ),
+  );
+}
+
+/// The floating window's resize grip (A07.22): a corner button's disc with
+/// an arrow out of the corner; dragging it outwards grows the window, the
+/// picture's shape kept. 48 to touch (A04).
+class _ResizeGrip extends StatelessWidget {
+  const new({required this.corner, required this.onStart, required this.onUpdate, required this.onEnd});
+
+  final MiniGripCorner corner;
+  final GestureDragStartCallback onStart;
+  final GestureDragUpdateCallback onUpdate;
+  final VoidCallback onEnd;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: i18n('mini_window_resize'),
+    child: Tooltip(
+      message: i18n('mini_window_resize'),
+      excludeFromSemantics: true,
+      child: GestureDetector(
+        key: const ValueKey('mini-resize'),
+        behavior: HitTestBehavior.opaque,
+        onPanStart: onStart,
+        onPanUpdate: onUpdate,
+        onPanEnd: (_) => onEnd(),
+        onPanCancel: onEnd,
+        child: SizedBox.square(
+          dimension: miniButtonSize,
+          child: DecoratedBox(
+            decoration: const BoxDecoration(color: OnVideoColors.button, shape: BoxShape.circle),
+            child: Icon(
+              corner == MiniGripCorner.bottomLeft ? AppIcons.miniResizeBottomLeft : AppIcons.miniResizeBottomRight,
+              size: 20,
+              color: OnVideoColors.foreground,
+            ),
+          ),
+        ),
+      ),
     ),
   );
 }

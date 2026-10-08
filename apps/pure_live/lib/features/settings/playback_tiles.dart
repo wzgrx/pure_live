@@ -205,6 +205,65 @@ class _PipOnTopTileState extends ConsumerState<PipOnTopTile> {
   );
 }
 
+/// "小窗大小" (docs/A-界面设计/A07-直播间界面/A07.22-小窗改大小和尺寸设置, V01.5): small,
+/// medium (the default, A07.8 c6's size) or large for the in-app floating
+/// window. After the window was resized on screen the row says "自定义";
+/// picking a size (the same one too) drops the resize of both kinds of
+/// picture. Only for the in-app window, so it waits for "退出小窗播放".
+class MiniWindowSizeTile extends ConsumerWidget {
+  /// Creates the row.
+  const new({required this.entry, super.key});
+
+  /// The entry drawn.
+  final SettingsEntry entry;
+
+  /// The sizes, smallest first.
+  static List<SettingsChoice<String>> options() => [
+    (value: 'small', label: i18n('mini_window_size_small'), description: null),
+    (value: 'medium', label: i18n('mini_window_size_medium'), description: i18n('mini_window_size_default')),
+    (value: 'large', label: i18n('mini_window_size_large'), description: null),
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final size = watchSetting(ref, Settings.floatWindowSize);
+    final resized =
+        watchSetting(ref, Settings.floatWindowLandscapeScale) != 1 ||
+        watchSetting(ref, Settings.floatWindowPortraitScale) != 1;
+    final choices = options();
+    final current = choices.where((choice) => choice.value == size).firstOrNull;
+    final unmet = watchUnmet(ref, [needsOn(Settings.floatPlay, 'settings_leave_room_mini')]);
+    return SettingsLinkRow(
+      key: entry.rowKey,
+      icon: AppIcons.settingsMiniSize,
+      title: entry.titleText,
+      choice: true,
+      subtitle: entry.descriptionText,
+      value: resized ? i18n('mini_window_size_custom') : current?.label ?? size,
+      enabled: unmet == null,
+      disabledReason: unmetReason(unmet),
+      onTap: () async {
+        final picked = await showChoiceDialog<String>(
+          context: context,
+          title: entry.titleText,
+          options: choices,
+          selected: size,
+          hint: resized ? i18n('mini_window_size_custom_hint') : null,
+        );
+        if (picked == null || !context.mounted) return;
+        final settings = ref.read(storeProvider).settings;
+        unawaited(
+          settings.setAll({
+            Settings.floatWindowSize: picked,
+            Settings.floatWindowLandscapeScale: 1.0,
+            Settings.floatWindowPortraitScale: 1.0,
+          }),
+        );
+      },
+    );
+  }
+}
+
 /// The player engine: v4 plays everything with mpv (PLAN §4, M7.1), so the
 /// row shows it and cannot be changed (3.x on computers).
 class KernelTile extends StatelessWidget {

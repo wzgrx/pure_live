@@ -829,6 +829,15 @@ List<SettingsEntry> _build() {
       desc: 'settings_leave_room_mini_desc',
       keywords: ['画中画', '小窗', 'PiP', '悬浮窗'],
     )
+    // A07.22 (V01.5): how big the in-app floating window is.
+    ..add(
+      'float_window_size',
+      'mini_window_size',
+      (context, entry) => MiniWindowSizeTile(entry: entry),
+      desc: 'mini_window_size_desc',
+      settings: [Settings.floatWindowSize, Settings.floatWindowLandscapeScale, Settings.floatWindowPortraitScale],
+      keywords: ['小窗', '大小', '尺寸', '悬浮窗', '画中画'],
+    )
     ..toggle(
       'auto_pip',
       'auto_pip_on_leave',

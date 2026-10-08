@@ -6,7 +6,7 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 199 条；设置 221 个（分节默认 23 条、单独指定 70 个）；来源 35 个；通道 14 个。
+路径规则 199 条；设置 224 个（分节默认 23 条、单独指定 73 个）；来源 35 个；通道 14 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
@@ -26,7 +26,7 @@
 | A16 桌面界面 | 1 | 12 |  |  |  |
 | A17 电视界面 | 2 | 1 |  |  |  |
 | C01 进房和房间逻辑 | 2 | 3 |  |  |  |
-| C02 小窗、画中画、后台播放 | 3 | 5 |  |  | 1 |
+| C02 小窗、画中画、后台播放 | 3 | 8 |  |  | 1 |
 | C03 直播间工具 |  | 2 |  |  |  |
 | D01 平台弹幕协议 | 1 | 1 |  | 30 |  |
 | D02 过滤和屏蔽 | 2 | 7 |  |  |  |
@@ -168,7 +168,7 @@
 ## C02 小窗、画中画、后台播放
 
 - 代码：`apps/pure_live/lib/features/live_play/logic/background_playback.dart`、`apps/pure_live/lib/features/live_play/logic/mini_window.dart`、`apps/pure_live/lib/features/live_play/mini/room_mini_window.dart`
-- 设置：`enableBackgroundPlay`、`floatPlay`、`windowsPipAlwaysOnTop`、`autoPipOnLeave`、`useHardStopOnExit`
+- 设置：`enableBackgroundPlay`、`floatPlay`、`floatWindowSize`、`floatWindowLandscapeScale`、`floatWindowPortraitScale`、`windowsPipAlwaysOnTop`、`autoPipOnLeave`、`useHardStopOnExit`
 - 通道：`pure_live/background_playback`
 
 ## C03 直播间工具

@@ -46,6 +46,7 @@ void main() {
           'asmr_sleep',
           'asmr_minutes',
           'float_play',
+          'float_window_size',
           'auto_pip',
           'video_danmaku_show',
           'danmaku_style',
@@ -63,6 +64,7 @@ void main() {
         ('background_play', AppIcons.settingsBackgroundPlay),
         ('asmr_sleep', AppIcons.settingsAutoSleep),
         ('float_play', AppIcons.settingsLeaveRoomMini),
+        ('float_window_size', AppIcons.settingsMiniSize),
         ('video_danmaku_font', AppIcons.settingsDanmakuFont),
         ('video_block_list', AppIcons.settingsDanmakuBlock),
       ]) {
@@ -88,6 +90,7 @@ void main() {
           for (final id in [
             'desktop_volume',
             'float_play',
+            'float_window_size',
             'pip_on_top',
             'pip_remember_position',
             'pip_reset_position',
@@ -165,6 +168,42 @@ void main() {
       await tapSettings(tester, find.byKey(const ValueKey('settings-choice-超清')));
       expect(h.settings.get(Settings.preferResolution), '超清');
       expect(find.byType(DialogOptionRow), findsNothing);
+    });
+
+    testWidgets('A07.22 (V01.5): "小窗大小" is medium; a resized window says "自定义"; a pick drops the resize', (
+      tester,
+    ) async {
+      final h = await pumpSettings(tester, height: 3200, arguments: 'video');
+      // It is the in-app window's: greyed out until "离开直播间时小窗播放".
+      expect(_rowWidget(tester, 'float_window_size').enabled, isFalse);
+      expect(_inRow('float_window_size', _text(withoutOrphan('打开“离开直播间时小窗播放”后生效'))), findsOneWidget);
+      await tapSettings(tester, settingsRow('float_play'));
+      expect(_rowWidget(tester, 'float_window_size').enabled, isTrue);
+      expect(_inRow('float_window_size', _text('小窗大小')), findsOneWidget);
+      expect(_inRow('float_window_size', _text('中')), findsOneWidget);
+
+      await tapSettings(tester, settingsRow('float_window_size'));
+      expect(find.byKey(const ValueKey('settings-choice-small')), findsOneWidget);
+      expect(_text('默认'), findsOneWidget, reason: 'medium is the default');
+      await tapSettings(tester, find.byKey(const ValueKey('settings-choice-large')));
+      expect(h.settings.get(Settings.floatWindowSize), 'large');
+      expect(_inRow('float_window_size', _text('大')), findsOneWidget);
+
+      // Pulled larger on screen: "自定义"; the dialog says a pick puts it back.
+      await tester.runAsync(() => h.settings.set(Settings.floatWindowPortraitScale, 1.4));
+      await settleSettings(tester);
+      expect(_inRow('float_window_size', _text('自定义')), findsOneWidget);
+      await tapSettings(tester, settingsRow('float_window_size'));
+      expect(find.textContaining('选一档会换回这一档的大小'), findsOneWidget);
+      await tapSettings(tester, find.byKey(const ValueKey('settings-choice-large')));
+      expect(h.settings.get(Settings.floatWindowSize), 'large');
+      expect(h.settings.get(Settings.floatWindowPortraitScale), 1);
+      expect(h.settings.get(Settings.floatWindowLandscapeScale), 1);
+      expect(_inRow('float_window_size', _text('大')), findsOneWidget);
+
+      await pumpSettings(tester);
+      await searchSettingsFor(tester, '小窗大小');
+      expect(settingsRow('float_window_size'), findsOneWidget);
     });
 
     testWidgets('"弹幕样式" opens the room\'s danmaku settings (c12)', (tester) async {

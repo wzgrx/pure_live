@@ -12,6 +12,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/backup/backup_data.dart';
 import 'package:pure_live/shared/backup/backup_preview_dialog.dart';
+import 'package:pure_live/shared/backup/sync_parts.dart';
 import 'package:pure_live/shared/qr_scan.dart';
 
 /// Makes the page's sync service (tests replace it).
@@ -25,6 +26,9 @@ const double remoteSyncTwoColumns = 840;
 
 /// Who another device is: its name and the line under it.
 typedef _Peer = ({String name, String ip, int port, String detail});
+
+/// One box of [_SyncPartsDialog]: the part and its words.
+typedef _PartRow = ({SyncPart part, String text});
 
 /// Device sync (3.x `lib/modules/remote_receiver`, docs/A-界面设计/A12-账号和数据界面/A12.6-设备同步).
 ///
@@ -47,7 +51,9 @@ class RemoteReceiverPage extends ConsumerStatefulWidget {
 }
 
 class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
-  late final RemoteSyncService _service = ref.read(remoteSyncServiceProvider)()..confirm = _confirmIncoming;
+  late final RemoteSyncService _service = ref.read(remoteSyncServiceProvider)()
+    ..confirm = _confirmIncoming
+    ..chooseImport = _chooseIncoming;
   final _address = TextEditingController();
   final _addressFocus = FocusNode();
 
@@ -61,6 +67,7 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
   void dispose() {
     _service
       ..confirm = null
+      ..chooseImport = null
       ..dispose();
     _address.dispose();
     _addressFocus.dispose();
@@ -121,22 +128,51 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
     return normalized;
   }
 
-  /// Send: say to whom and what it does (c3), the code, then send.
+  /// Send: to whom and what goes, ticked (c3; J05.1), the code, then send.
+  /// A device that cannot take parts on their own (3.x) gets everything:
+  /// the boxes stay ticked and say why.
   Future<void> _send(_Peer peer, {String? code}) async {
-    final confirmed = await _confirm(
-      title: i18n('remote_sync_send'),
-      message: i18n('remote_sync_confirm_send_named', args: {'name': peer.name}),
-      action: i18n('remote_sync_send_action'),
+    final partial = await _service.takesParts(peer.ip, peer.port);
+    if (!mounted) return;
+    final Map<SyncPart, int> counts;
+    final Set<SyncPart> held;
+    try {
+      final outgoing = await _service.outgoing();
+      counts = syncPartCounts(outgoing);
+      held = syncPartsIn(outgoing).toSet();
+    } on FormatException {
+      AppNavigator.toast(i18n('remote_sync_send_failed'));
+      return;
+    }
+    if (!mounted) return;
+    final parts = await showAppDialog<Set<SyncPart>>(
+      context: context,
+      builder: (_) => _SyncPartsDialog(
+        title: i18n('remote_sync_send'),
+        message: i18n(
+          partial ? 'remote_sync_parts_send_named' : 'remote_sync_confirm_send_named',
+          args: {'name': peer.name},
+        ),
+        rows: [
+          for (final MapEntry(key: part, value: count) in counts.entries)
+            (part: part, text: i18n('remote_sync_part_count', args: {'part': i18n(part.labelKey), 'count': '$count'})),
+        ],
+        always: held.difference(counts.keys.toSet()),
+        locked: !partial,
+        note: partial ? null : i18n('remote_sync_parts_legacy'),
+        confirmLabel: i18n('remote_sync_send_action'),
+        confirmKey: const ValueKey('remote-sync-confirm'),
+      ),
     );
-    if (!confirmed || !mounted) return;
+    if (parts == null || !mounted) return;
     final pairing = code ?? await _askPairingCode(peer, action: i18n('remote_sync_send_action'));
     if (pairing == null) return;
-    final ok = await _service.send(peer.ip, peer.port, pairing);
+    final ok = await _service.send(peer.ip, peer.port, pairing, parts: partial ? parts : null);
     AppNavigator.toast(i18n(ok ? 'remote_sync_send_success' : 'remote_sync_send_failed'));
   }
 
-  /// Receive: the code, then what the other device's settings change, then
-  /// apply them (c2, S1).
+  /// Receive: the code, then what the other device's settings change, each
+  /// part ticked, then apply the ticked ones (c2, S1; J05.1).
   Future<void> _receive(_Peer peer, {String? code}) async {
     final pairing = code ?? await _askPairingCode(peer, action: i18n('remote_sync_receive_action'));
     if (pairing == null || !mounted) return;
@@ -152,84 +188,127 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
       AppNavigator.toast(i18n('remote_sync_receive_failed'));
       return;
     }
-    if (!mounted || !await _confirmReceive(peer, preview)) return;
-    final ok = await _service.apply(settings);
+    if (!mounted) return;
+    final styles = context.textStyles;
+    final colors = Theme.of(context).colorScheme;
+    final parts = await showAppDialog<Set<SyncPart>>(
+      context: context,
+      builder: (_) => _previewDialog(
+        settings,
+        preview,
+        title: i18n('remote_sync_receive'),
+        header: [
+          Text(i18n('remote_sync_from', args: {'name': peer.name}), style: styles.t14SemiBold),
+          const SizedBox(height: 2),
+          Text(peer.detail, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
+          const SizedBox(height: 12),
+        ],
+        confirmLabel: i18n('remote_sync_receive_action'),
+        confirmKey: const ValueKey('remote-sync-receive-confirm'),
+      ),
+    );
+    if (parts == null || !mounted) return;
+    final ok = await _service.apply(settings, parts: parts);
     AppNavigator.toast(i18n(ok ? 'remote_sync_receive_success' : 'remote_sync_receive_failed'));
   }
 
-  Future<bool> _confirmReceive(_Peer peer, RestorePreview preview) async =>
-      await showAppDialog<bool>(
-        context: context,
-        builder: (dialogContext) {
-          final styles = dialogContext.textStyles;
-          final colors = Theme.of(dialogContext).colorScheme;
-          Widget line(String text) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 3),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 18,
-                  height: 20,
-                  child: Center(child: Icon(AppIcons.bullet, size: 6, color: colors.primary)),
-                ),
-                const SizedBox(width: 6),
-                Expanded(child: Text(text, style: styles.t13)),
-              ],
-            ),
-          );
-          return AppDialog(
-            title: i18n('remote_sync_receive'),
-            onEnter: () => Navigator.pop(dialogContext, true),
-            content: Column(
-              key: const ValueKey('remote-sync-preview'),
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(i18n('remote_sync_from', args: {'name': peer.name}), style: styles.t14SemiBold),
-                const SizedBox(height: 2),
-                Text(peer.detail, style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
-                const SizedBox(height: 12),
-                Text(i18n('remote_sync_preview_title'), style: styles.t13SemiBold),
-                const SizedBox(height: 4),
-                if (preview.settingsInFile > 0)
-                  line(
-                    i18n(
-                      'remote_sync_preview_settings',
-                      args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
-                    ),
-                  ),
-                for (final part in preview.parts) line(restorePartText(part)),
-                line(
-                  preview.accounts > 0
-                      ? i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})
-                      : i18n('remote_sync_preview_no_accounts'),
-                ),
-                const SizedBox(height: 8),
-                Text(i18n('remote_sync_preview_warning'), style: styles.t12.copyWith(color: colors.onSurfaceVariant)),
-              ],
-            ),
-            actions: [
-              DialogCancelButton(onPressed: () => Navigator.pop(dialogContext, false)),
-              DialogActionButton(
-                key: const ValueKey('remote-sync-receive-confirm'),
-                label: i18n('remote_sync_receive_action'),
-                onPressed: () => Navigator.pop(dialogContext, true),
-              ),
-            ],
-          );
-        },
-      ) ??
-      false;
+  /// Another device sends its settings: who, what they change, each part
+  /// ticked; "拒绝" / "允许" and no closing outside (c8; J05.1). Null
+  /// refuses them.
+  Future<Set<SyncPart>?> _chooseIncoming(String remoteAddress, Map<String, Object?> settings) async {
+    if (!mounted) return null;
+    final RestorePreview preview;
+    try {
+      preview = await previewRestore(ref.read(storeProvider), settings, BackupScope.all);
+    } on FormatException {
+      return null;
+    }
+    if (!mounted) return null;
+    final name = _service.nameOf(remoteAddress);
+    return await showAppDialog<Set<SyncPart>>(
+      context: context,
+      dismissible: false,
+      builder: (_) => _previewDialog(
+        settings,
+        preview,
+        key: const ValueKey('remote-sync-incoming'),
+        title: i18n('remote_sync'),
+        message: i18n(
+          name == null ? 'remote_sync_incoming_import' : 'remote_sync_incoming_import_named',
+          args: {'address': remoteAddress, 'name': name ?? ''},
+        ),
+        header: const [],
+        cancelLabel: i18n('remote_sync_reject'),
+        cancelKey: const ValueKey('remote-sync-reject'),
+        confirmLabel: i18n('remote_sync_allow'),
+        confirmKey: const ValueKey('remote-sync-allow'),
+      ),
+    );
+  }
 
-  Future<bool> _confirm({required String title, required String message, required String action}) =>
-      showAppConfirmDialog(
-        context: context,
-        title: title,
-        message: message,
-        confirmLabel: action,
-        confirmKey: const ValueKey('remote-sync-confirm'),
-      );
+  /// What [settings] change ([preview]), one ticked box per part they hold
+  /// (the receive and the incoming send share it); the old flat file has no
+  /// parts to pick and goes whole.
+  Widget _previewDialog(
+    Map<String, Object?> settings,
+    RestorePreview preview, {
+    required String title,
+    required List<Widget> header,
+    required String confirmLabel,
+    required Key confirmKey,
+    Key? key,
+    String? message,
+    String? cancelLabel,
+    Key? cancelKey,
+  }) {
+    final splittable = syncPartsSplittable(settings);
+    final held = splittable
+        ? syncPartsIn(settings).toSet()
+        : {
+            SyncPart.settings,
+            for (final part in preview.parts) ?SyncPart.of(part.kind),
+            if (preview.accounts > 0) SyncPart.accounts,
+          };
+    final rows = <_PartRow>[
+      if (preview.settingsInFile > 0 && held.contains(SyncPart.settings))
+        (
+          part: SyncPart.settings,
+          text: i18n(
+            'remote_sync_preview_settings',
+            args: {'count': '${preview.settingsInFile}', 'changed': '${preview.settingsChanged}'},
+          ),
+        ),
+      for (final part in preview.parts)
+        if (SyncPart.of(part.kind) case final sync? when held.contains(sync)) (part: sync, text: restorePartText(part)),
+      if (held.contains(SyncPart.accounts))
+        (
+          part: SyncPart.accounts,
+          text: preview.accounts > 0
+              ? i18n('backup_preview_accounts', args: {'count': '${preview.accounts}'})
+              : i18n('remote_sync_preview_accounts_empty'),
+        ),
+    ];
+    return _SyncPartsDialog(
+      key: key,
+      title: title,
+      message: message,
+      header: [
+        ...header,
+        Text(i18n('remote_sync_preview_title'), style: context.textStyles.t14SemiBold),
+        const SizedBox(height: 4),
+      ],
+      rows: rows,
+      always: held.difference({for (final row in rows) row.part}),
+      lines: [if (!held.contains(SyncPart.accounts)) i18n('remote_sync_preview_no_accounts')],
+      locked: !splittable,
+      note: i18n('remote_sync_preview_warning'),
+      contentKey: const ValueKey('remote-sync-preview'),
+      cancelLabel: cancelLabel,
+      cancelKey: cancelKey,
+      confirmLabel: confirmLabel,
+      confirmKey: confirmKey,
+    );
+  }
 
   _Peer _peerOf(RemoteSyncDevice device) => (
     name: device.name,
@@ -783,6 +862,170 @@ class _PairingCodeDialogState extends State<_PairingCodeDialog> {
           label: widget.action,
           onPressed: () => Navigator.of(context).pop(_code.text),
         ),
+      ],
+    );
+  }
+}
+
+/// The parts of a sync, one tick box each, all ticked to start with (the
+/// whole sync, as before; docs/J-设置和数据/J05-设备同步/J05.1-同步前勾选内容):
+/// "全选" above them when there are several; the main button needs one
+/// ticked. [locked] keeps every box ticked (a 3.x device takes everything).
+/// Closes with the ticked parts, or null.
+class _SyncPartsDialog extends StatefulWidget {
+  const new({
+    required this.title,
+    required this.rows,
+    required this.confirmLabel,
+    required this.confirmKey,
+    this.message,
+    this.header = const [],
+    this.lines = const [],
+    this.always = const {},
+    this.locked = false,
+    this.note,
+    this.contentKey,
+    this.cancelLabel,
+    this.cancelKey,
+    super.key,
+  });
+
+  final String title;
+
+  /// The text under the title.
+  final String? message;
+
+  /// Above the boxes.
+  final List<Widget> header;
+
+  final List<_PartRow> rows;
+
+  /// Lines after the boxes that cannot be ticked.
+  final List<String> lines;
+
+  /// Parts the data holds without a box of their own (nothing to show for
+  /// them): they go with the result when every box is ticked, so that sends
+  /// or applies everything, as before.
+  final Set<SyncPart> always;
+
+  final bool locked;
+
+  /// A small line at the bottom.
+  final String? note;
+
+  final Key? contentKey;
+  final String confirmLabel;
+  final Key confirmKey;
+  final String? cancelLabel;
+  final Key? cancelKey;
+
+  @override
+  State<_SyncPartsDialog> createState() => _SyncPartsDialogState();
+}
+
+class _SyncPartsDialogState extends State<_SyncPartsDialog> {
+  late final Set<SyncPart> _chosen = {for (final row in widget.rows) row.part};
+
+  bool get _all => _chosen.length == widget.rows.length;
+
+  void _set(SyncPart part, bool on) => setState(() => on ? _chosen.add(part) : _chosen.remove(part));
+
+  void _done() => Navigator.of(context).pop(<SyncPart>{..._chosen, if (_all) ...widget.always});
+
+  Widget _box({
+    required Key key,
+    required String text,
+    required bool? value,
+    required VoidCallback? onTap,
+    bool tristate = false,
+    TextStyle? style,
+  }) => InkWell(
+    key: key,
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(8),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: kMinInteractiveDimension),
+      child: Row(
+        children: [
+          Checkbox(
+            value: value,
+            tristate: tristate,
+            visualDensity: VisualDensity.compact,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            onChanged: onTap == null ? null : (_) => onTap(),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6),
+              child: Text(text, style: style ?? context.textStyles.t14),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final styles = context.textStyles;
+    final colors = Theme.of(context).colorScheme;
+    final locked = widget.locked;
+    final none = _chosen.isEmpty;
+    return AppDialog(
+      title: widget.title,
+      message: widget.message,
+      onEnter: none ? null : _done,
+      content: Column(
+        key: widget.contentKey,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...widget.header,
+          if (widget.rows.length > 1 && !locked)
+            _box(
+              key: const ValueKey('remote-sync-part-all'),
+              text: i18n('remote_sync_parts_all'),
+              value: _all ? true : (none ? false : null),
+              tristate: true,
+              style: styles.t14SemiBold,
+              onTap: () => setState(() {
+                if (_all) {
+                  _chosen.clear();
+                } else {
+                  _chosen.addAll([for (final row in widget.rows) row.part]);
+                }
+              }),
+            ),
+          for (final row in widget.rows)
+            _box(
+              key: ValueKey('remote-sync-part-${row.part.name}'),
+              text: row.text,
+              value: _chosen.contains(row.part),
+              onTap: locked ? null : () => _set(row.part, !_chosen.contains(row.part)),
+            ),
+          for (final line in widget.lines)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(4, 6, 0, 6),
+              child: Text(line, style: styles.t14.copyWith(color: colors.onSurfaceVariant)),
+            ),
+          if (widget.note case final note?) ...[
+            const SizedBox(height: 8),
+            Text(
+              note,
+              key: const ValueKey('remote-sync-parts-note'),
+              style: styles.t12.copyWith(color: colors.onSurfaceVariant),
+            ),
+          ],
+        ],
+      ),
+      actions: [
+        DialogCancelButton(
+          key: widget.cancelKey,
+          label: widget.cancelLabel,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        DialogActionButton(key: widget.confirmKey, label: widget.confirmLabel, onPressed: none ? null : _done),
       ],
     );
   }

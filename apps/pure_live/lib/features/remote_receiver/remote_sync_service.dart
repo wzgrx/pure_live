@@ -11,6 +11,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/backup/sync_parts.dart';
 
 /// Another device on the network, from its announcement.
 @immutable
@@ -60,6 +61,10 @@ final class RemoteSyncDevice {
 /// (`import`) this device's settings.
 typedef RemoteSyncConfirm = Future<bool> Function(String action, String remoteAddress);
 
+/// Asks the user which parts of the [settings] [remoteAddress] sends to
+/// apply here; null refuses them all.
+typedef RemoteSyncChooseImport = Future<Set<SyncPart>?> Function(String remoteAddress, Map<String, Object?> settings);
+
 /// The device-sync server and client (3.x `RemoteSyncService`), alive while
 /// the page is open.
 ///
@@ -68,7 +73,10 @@ typedef RemoteSyncConfirm = Future<bool> Function(String action, String remoteAd
 ///   consent ([confirm]); after [maxWrongCodes] wrong codes the code changes.
 /// - Sends this device's settings to another device, or takes its settings,
 ///   in 3.x's backup layout ([BackupService]); account cookies only with
-///   [includeAccounts].
+///   [includeAccounts]. The user may pick parts ([SyncPart]): a send leaves
+///   the others out only for a device that [takesParts] (3.x resets what a
+///   packet lacks), and a receive or an incoming import applies only the
+///   parts picked here.
 /// - Announces itself and lists other devices over UDP broadcast (port
 ///   39889, v4 devices) and over mDNS (`_purelive-sync._tcp` with 3.x's TXT
 ///   record, so 3.x and v4 devices find each other); Android holds the Wi-Fi
@@ -99,8 +107,13 @@ class RemoteSyncService extends ChangeNotifier {
   /// Wrong pairing codes before the code changes.
   static const int maxWrongCodes = 10;
 
-  /// Asks the user about an incoming request; refused without it.
+  /// Asks the user about an incoming request; refused without it (and
+  /// without [chooseImport] for an import).
   RemoteSyncConfirm? confirm;
+
+  /// Asks the user which parts of incoming settings to apply; when set it
+  /// answers imports instead of [confirm].
+  RemoteSyncChooseImport? chooseImport;
 
   HttpServer? _server;
   RawDatagramSocket? _discovery;
@@ -297,6 +310,8 @@ class RemoteSyncService extends ChangeNotifier {
             'version': appVersion,
             'ip': localIp,
             'port': port,
+            // Senders leave parts out only for a device that says this.
+            RemoteSyncProtocol.partsKey: [for (final part in SyncPart.values) part.name],
           });
         case RemoteSyncProtocol.apiSettings:
           return await _settings(request);
@@ -337,13 +352,31 @@ class RemoteSyncService extends ChangeNotifier {
       if (packet is! Map || packet['type'] != RemoteSyncProtocol.syncType || packet['settings'] is! Map) {
         return await _reply(response, 400, 'Invalid sync packet');
       }
-      settings = (packet['settings']! as Map).cast<String, Object?>();
+      // Only the sections the sender lists; all of them without a list (3.x,
+      // older v4, a whole send).
+      settings = withinSyncSections(
+        (packet['settings']! as Map).cast<String, Object?>(),
+        RemoteSyncProtocol.sectionsOf(packet),
+      );
+      try {
+        LegacySnapshot.fromBackup(settings);
+      } on FormatException {
+        return await _reply(response, 400, 'Invalid sync packet');
+      }
     }
     final ask = confirm;
+    final choose = chooseImport;
     final remote = request.connectionInfo?.remoteAddress.address ?? '';
     var allowed = false;
+    // The parts the user keeps; null applies everything the packet has.
+    Set<SyncPart>? parts;
     try {
-      allowed = ask != null && !_disposed && await ask(action, remote);
+      if (settings != null && choose != null) {
+        parts = _disposed ? null : await choose(remote, settings);
+        allowed = parts != null && parts.isNotEmpty;
+      } else {
+        allowed = ask != null && !_disposed && await ask(action, remote);
+      }
     } on Object {
       allowed = false;
     }
@@ -355,7 +388,7 @@ class RemoteSyncService extends ChangeNotifier {
     syncing = true;
     _changed();
     try {
-      await BackupService(store).restoreAll(settings);
+      await BackupService(store).restoreAll(onlySyncParts(settings, parts));
       return await _reply(response, 200, 'ok', true);
     } on Object {
       return await _reply(response, 500, 'apply settings failed');
@@ -374,13 +407,41 @@ class RemoteSyncService extends ChangeNotifier {
 
   // ---- client ----
 
+  /// What a send carries: this device's settings in 3.x's backup layout,
+  /// with account cookies and WebDAV servers only with [includeAccounts].
+  Future<Map<String, Object?>> outgoing() => BackupService(store).exportAll(includeSensitiveData: includeAccounts);
+
+  /// Whether the device at `ip:port` takes parts on their own (its status
+  /// says [RemoteSyncProtocol.partsKey]); false for 3.x, upstream pure_live
+  /// and older v4 devices, and when it does not answer: they get whole
+  /// sends. Needs no code and asks nothing on the other device.
+  Future<bool> takesParts(String ip, int port) => _busy(() async {
+    final answer = await _request(
+      'GET',
+      ip,
+      port,
+      null,
+      null,
+      path: RemoteSyncProtocol.apiStatus,
+    ).timeout(const Duration(seconds: 5));
+    return answer is Map && RemoteSyncProtocol.takesParts(answer['data']);
+  });
+
   /// Sends this device's settings to `ip:port` with [code]; true when the
-  /// other device applied them (3.x `syncToAddress`).
-  Future<bool> send(String ip, int port, String code) => _busy(() async {
-    final settings = await BackupService(store).exportAll(includeSensitiveData: includeAccounts);
-    final answer = await _request('POST', ip, port, code, RemoteSyncProtocol.settingsPacket(settings: settings));
+  /// other device applied them (3.x `syncToAddress`). With [parts] that
+  /// leave something out, only those parts travel and the packet lists its
+  /// sections; send them only to a device that [takesParts].
+  Future<bool> send(String ip, int port, String code, {Set<SyncPart>? parts}) => _busy(() async {
+    final settings = await outgoing();
+    final packet = syncPartsLeaveOut(settings, parts)
+        ? _partialPacket(pickSyncParts(settings, parts!))
+        : RemoteSyncProtocol.settingsPacket(settings: settings);
+    final answer = await _request('POST', ip, port, code, packet);
     return answer is Map && answer['data'] == true;
   });
+
+  static Map<String, Object?> _partialPacket(Map<String, Object?> settings) =>
+      RemoteSyncProtocol.settingsPacket(settings: settings, sections: syncSectionsOf(settings));
 
   /// Takes the settings of `ip:port` with [code] and applies them here;
   /// true on success (3.x `getRemoteSettings` + import).
@@ -403,9 +464,10 @@ class RemoteSyncService extends ChangeNotifier {
     return settings;
   }
 
-  /// Applies settings [fetch] read; true on success.
-  Future<bool> apply(Map<String, Object?> settings) => _busy(() async {
-    await BackupService(store).restoreAll(settings);
+  /// Applies settings [fetch] read, only [parts] of them when given (the
+  /// rest stays as it is); true on success.
+  Future<bool> apply(Map<String, Object?> settings, {Set<SyncPart>? parts}) => _busy(() async {
+    await BackupService(store).restoreAll(onlySyncParts(settings, parts));
     return true;
   });
 
@@ -438,14 +500,20 @@ class RemoteSyncService extends ChangeNotifier {
     }
   }
 
-  Future<Object?> _request(String method, String ip, int port, String code, Object? body) async {
+  Future<Object?> _request(
+    String method,
+    String ip,
+    int port,
+    String? code,
+    Object? body, {
+    String path = RemoteSyncProtocol.apiSettings,
+  }) async {
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 5);
     try {
-      final request = await client.openUrl(
-        method,
-        Uri(scheme: 'http', host: ip, port: port, path: RemoteSyncProtocol.apiSettings),
-      );
-      request.headers.set(RemoteSyncProtocol.pairingHeader, RemoteSyncProtocol.normalizePairingCode(code));
+      final request = await client.openUrl(method, Uri(scheme: 'http', host: ip, port: port, path: path));
+      if (code != null) {
+        request.headers.set(RemoteSyncProtocol.pairingHeader, RemoteSyncProtocol.normalizePairingCode(code));
+      }
       if (body != null) {
         request.headers.contentType = ContentType('application', 'json', charset: 'utf-8');
         request.write(jsonEncode(body));

@@ -506,29 +506,32 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     child: RepaintBoundary(
       child: ValueListenableBuilder<DisplayModeInfo?>(
         valueListenable: DisplayMode.info,
-        builder: (context, display, _) => StreamBuilder<PlaybackState>(
-          stream: _room.session.states,
-          initialData: _room.session.state,
-          builder: (context, snapshot) => DanmakuOverlay(
-            key: _flying,
-            messages: _room.flying,
-            retractions: _room.retractions,
-            look: look,
-            visible: visible,
-            fps: resolvedDanmakuFps(
-              automatic: fps.automatic,
-              configured: fps.configured,
-              mode: fps.mode,
-              maxRefreshRate: display?.maxRefreshRate,
-              currentRefreshRate: display?.currentRefreshRate,
+        builder: (context, display, _) {
+          // The multi-view cells ask the same rule (N01.2 c2).
+          final rate = danmakuFrameRate(
+            automatic: fps.automatic,
+            configured: fps.configured,
+            mode: fps.mode,
+            display: display,
+          );
+          return StreamBuilder<PlaybackState>(
+            stream: _room.session.states,
+            initialData: _room.session.state,
+            builder: (context, snapshot) => DanmakuOverlay(
+              key: _flying,
+              messages: _room.flying,
+              retractions: _room.retractions,
+              look: look,
+              visible: visible,
+              fps: rate.fps,
+              refreshRate: rate.refreshRate,
+              // B02 c3: paused, as "暂停时的弹幕" says.
+              running: danmakuRunning((snapshot.data ?? _room.session.state).status, pausedBehavior),
+              held: _danmakuHeld,
+              emotes: _emotes,
             ),
-            refreshRate: (display?.currentRefreshRate ?? 0) > 0 ? display!.currentRefreshRate : null,
-            // B02 c3: paused, as "暂停时的弹幕" says.
-            running: danmakuRunning((snapshot.data ?? _room.session.state).status, pausedBehavior),
-            held: _danmakuHeld,
-            emotes: _emotes,
-          ),
-        ),
+          );
+        },
       ),
     ),
   );

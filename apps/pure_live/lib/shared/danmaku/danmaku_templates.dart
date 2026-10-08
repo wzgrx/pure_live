@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/platform/display_mode.dart';
 
 /// A danmaku look in one tap (3.x `DanmakuViewingPreset` and
 /// `DanmakuViewingTemplate`): the area, margins, speed, size, weight,
@@ -202,6 +203,25 @@ final class DanmakuTemplate {
         stroke == other.stroke;
   }
 }
+
+/// The flying layer's frame rate for the danmaku settings on [display] and
+/// the display's current rate (`DanmakuOverlay.fps`, `refreshRate`): the
+/// room's picture and the multi-view cells ask this one rule (N01.2 c2).
+({int fps, double? refreshRate}) danmakuFrameRate({
+  required bool automatic,
+  required int configured,
+  required String mode,
+  DisplayModeInfo? display,
+}) => (
+  fps: resolvedDanmakuFps(
+    automatic: automatic,
+    configured: configured,
+    mode: mode,
+    maxRefreshRate: display?.maxRefreshRate,
+    currentRefreshRate: display?.currentRefreshRate,
+  ),
+  refreshRate: (display?.currentRefreshRate ?? 0) > 0 ? display!.currentRefreshRate : null,
+);
 
 /// The danmaku frame rate in use (3.x `resolvedDanmakuFps`): the manual
 /// [configured] rate, or with [automatic] the display's highest rate capped

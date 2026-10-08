@@ -24,6 +24,7 @@ class MultiviewCellView extends StatelessWidget {
     required this.onRetry,
     this.saver = false,
     this.showVideo = true,
+    this.keepScreenOn = true,
     this.nameInset = 0,
     this.danmaku,
     this.footer,
@@ -58,6 +59,9 @@ class MultiviewCellView extends StatelessWidget {
   /// False while the page closes (the video leaves the tree first).
   final bool showVideo;
 
+  /// The screen stays on while the cell plays ("屏幕常亮", N01.2 c4).
+  final bool keepScreenOn;
+
   /// Moves the corner marks right, past a button over the cell's corner
   /// (the fullscreen exit on a screen without black sides).
   final double nameInset;
@@ -89,7 +93,11 @@ class MultiviewCellView extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   if (video) ...[
-                    LiveVideoView(session: session, outputSize: defaultTargetPlatform == TargetPlatform.windows),
+                    LiveVideoView(
+                      session: session,
+                      outputSize: defaultTargetPlatform == TargetPlatform.windows,
+                      keepScreenOn: keepScreenOn,
+                    ),
                     if (danmaku case final layer?) Positioned.fill(child: IgnorePointer(child: layer)),
                     StreamBuilder<PlaybackState>(
                       stream: session.states,

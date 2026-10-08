@@ -28,6 +28,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 import 'package:pure_live/shared/panels/side_panel.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -863,6 +864,9 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       pickTarget: _pickerVisible && index == _targetIndex && cell.assignable,
       saver: focusLayout && _controller.smallCellsLowQuality && !large,
       showVideo: !_exiting,
+      // N01.2 c4 (D-035): "屏幕常亮" as in the room (3.x's cells always kept
+      // the screen on).
+      keepScreenOn: watchSetting(ref, Settings.enableScreenKeepOn),
       nameInset: nameInset,
       onTap: () => _onCellTap(index),
       onLongPress: cell.stage == CellStage.empty ? null : () => _onCellLongPress(index),
@@ -874,14 +878,24 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
               builder: (context, ref, _) {
                 final look = danmakuLookOf(ref);
                 final pausedBehavior = watchSetting(ref, Settings.danmakuPausedBehavior);
-                return StreamBuilder<PlaybackState>(
-                  stream: cell.session?.states,
-                  initialData: cell.playback,
-                  builder: (context, snapshot) => DanmakuOverlay(
-                    messages: _controller.flying,
-                    retractions: _controller.retractions,
-                    look: look,
-                    running: danmakuRunning((snapshot.data ?? cell.playback).status, pausedBehavior),
+                // N01.2: the danmaku frame rate as in the room (c1, c2), and
+                // the selected cell's bundled emoticons as pictures (c3).
+                return DanmakuFrameRateBuilder(
+                  builder: (context, fps, refreshRate) => EmoteTableBuilder(
+                    platform: cell.room?.platform,
+                    builder: (context, emotes) => StreamBuilder<PlaybackState>(
+                      stream: cell.session?.states,
+                      initialData: cell.playback,
+                      builder: (context, snapshot) => DanmakuOverlay(
+                        messages: _controller.flying,
+                        retractions: _controller.retractions,
+                        look: look,
+                        fps: fps,
+                        refreshRate: refreshRate,
+                        emotes: emotes,
+                        running: danmakuRunning((snapshot.data ?? cell.playback).status, pausedBehavior),
+                      ),
+                    ),
                   ),
                 );
               },

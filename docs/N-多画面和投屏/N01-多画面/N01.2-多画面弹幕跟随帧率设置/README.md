@@ -36,6 +36,7 @@
 
 - 自动测试：`apps/pure_live/test/features/multiview/multiview_page_test.dart`（`:301` 已有取格子里 `DanmakuOverlay` 的写法）加：手动 30 帧时格子里的 `DanmakuOverlay.fps` 是 30；跟随界面刷新率、界面刷新率“省电”时是 60；改设置后不重进多画面就变。可选阶段各加一个用例。
 - 真机：待真机（任务书的真机步骤）。
+- 2026-10-08 两个阶段都做完（第 2 阶段按 D-035），见 [record.md](record.md)。
 
 ## 留下的问题
 

@@ -37,6 +37,17 @@ final class HlsMasterSelection {
   }
 }
 
+/// Chooses one variant (and its audio) in each fresh copy of a line's HLS
+/// master, so a quality named after a variant plays only that variant
+/// (G01.4: Steam's `720p`). The choice must hold across copies whose hosts
+/// and paths change (a recovery's new master), so it is made from the
+/// variants' attributes, not their addresses.
+abstract interface class HlsVariantSelector {
+  /// The variant in [text], the master read at [source]; throws
+  /// [FormatException] when the master cannot be read or no longer has it.
+  HlsMasterSelection selectIn(String text, {required Uri source});
+}
+
 /// One `#EXT-X-STREAM-INF` variant of a master playlist.
 @immutable
 final class HlsMasterVariant {

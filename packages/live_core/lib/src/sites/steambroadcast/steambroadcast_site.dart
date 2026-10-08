@@ -436,16 +436,21 @@ final class SteamBroadcastSite extends LiveSite
   }
 
   /// The resolution of [offered] in [data]: the checked master as the one
-  /// line (a variant's quality plays it restricted to the variant, M7), the
-  /// variant's codec when it names one.
+  /// line, the variant's codec when it names one. A variant's quality names
+  /// the variant as the line's selector, so the player plays the master
+  /// restricted to it (G01.4; before, every quality played the whole
+  /// master and the player chose); the adaptive quality has none.
   static LivePlayUrlResolution _resolution(SteamBroadcastRoomData data, LivePlayQuality offered) {
     final variant = offered.data;
-    return LivePlayUrlResolution.lines([
-      SteamBroadcastApi.line(
-        data.master!,
-        codec: variant is SteamBroadcastVariant ? variant.codec ?? data.codec : data.codec,
-      ),
-    ], appliedQualityData: '${offered.selectionId}');
+    final line = SteamBroadcastApi.line(
+      data.master!,
+      codec: variant is SteamBroadcastVariant ? variant.codec ?? data.codec : data.codec,
+    );
+    return LivePlayUrlResolution.lines(
+      [line],
+      appliedQualityData: '${offered.selectionId}',
+      sourceVariantSelectors: {if (variant is SteamBroadcastVariant) line.url: variant},
+    );
   }
 
   /// 3.x's adaptive quality, 自适应 HLS, then one per variant of the

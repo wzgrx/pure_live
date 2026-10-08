@@ -2650,9 +2650,10 @@ next = "K90 上按 record.md“真机上要看的”看；之后补 17LIVE、百
 id = "G01.4"
 title = "Steam 选清晰度实际仍是自适应：用档位限定 HLS 变体"
 type = "平台"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 3
+date = "2026-10-08"
 from = "docs v2 G 组核对和 E 组核对：UPGRADES 27-7 只做了列表（SteamBroadcastVariant.selectIn 没人调用）"
 
 [[task]]

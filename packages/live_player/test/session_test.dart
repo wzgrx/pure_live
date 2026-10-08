@@ -45,6 +45,26 @@ void main() {
     });
   });
 
+  test('G01.4: a line with a variant selector opens through the relay, which restricts its master', () async {
+    final relay = await LoopbackRelay.start();
+    addTearDown(relay.close);
+    const master = LivePlayLine('https://steam.example/master.m3u8', format: StreamFormat.hls);
+    fakeAsync((async) {
+      engine = FakeEngine();
+      session = PlaybackSession(
+        engine: () async => engine,
+        opener: MediaOpener(relay: () async => relay),
+      );
+      final plan = PlaybackPlan.of(
+        LivePlayUrlResolution.lines(const [master], sourceVariantSelectors: {master.url: _Selector()}),
+      );
+      unawaited(session.open(PlaybackRequest(site: 'steambroadcast', plan: plan)));
+      async.flushMicrotasks();
+      expect(engine.opens.single.uri.host, '127.0.0.1', reason: 'the relay, not the CDN master');
+      expect(session.state.status, PlaybackStatus.playing);
+    });
+  });
+
   test('a network failure without a refresher walks to the next line', () {
     fakeAsync((async) {
       start(PlaybackRequest(site: 'douyu', plan: _plan([_a, _b])), async);
@@ -984,4 +1004,11 @@ void main() {
       });
     });
   });
+}
+
+/// A variant selector that selects nothing; the engine is fake and never
+/// reads the master (G01.4).
+final class _Selector implements HlsVariantSelector {
+  @override
+  HlsMasterSelection selectIn(String text, {required Uri source}) => throw const FormatException('unused');
 }

@@ -786,6 +786,12 @@ void main() {
       final variant = hd.data! as SteamBroadcastVariant;
       final selection = variant.selectIn(Fixture.load('steambroadcast', 'S09-master-live').body, source: _scsMasterUrl);
       expect(selection.video.path, endsWith('/3500000/video.m3u8'));
+      expect(resolution.sourceVariantSelectors, {
+        '$_scsMasterUrl': variant,
+      }, reason: 'G01.4: the player restricts the master to the variant');
+      final adaptive = await setup.site.resolvePlayUrlsRaw(detail: room, quality: qualities.first);
+      expect(adaptive.appliedQualityData, 'auto');
+      expect(adaptive.sourceVariantSelectors, isEmpty, reason: 'G01.4: the adaptive quality plays the whole master');
       expect(
         (await setup.site.resolvePlayUrlsRaw(
           detail: room,
@@ -798,12 +804,18 @@ void main() {
       final recovered = await setup.site.resolvePlayUrlsForRecoveryRaw(detail: room, quality: hd);
       expect(recovered.urls, ['$_scsMasterUrl']);
       expect(recovered.appliedQualityData, '720p');
+      expect(
+        (recovered.sourceVariantSelectors['$_scsMasterUrl']! as SteamBroadcastVariant).id,
+        '720p',
+        reason: 'G01.4: the fresh master is restricted to the same variant',
+      );
       expect(setup.http.requests.map((request) => request.url.host), ['steamcommunity.com', _scsMasterUrl.host]);
       final gone = await setup.site.resolvePlayUrlsForRecoveryRaw(
         detail: room,
         quality: const LivePlayQuality(quality: '1440p60', id: '1440p60'),
       );
       expect(gone.appliedQualityData, 'auto', reason: 'a variant the fresh master lacks plays the adaptive quality');
+      expect(gone.sourceVariantSelectors, isEmpty);
       await expectLater(
         setup.site.resolvePlayUrlsForRecoveryRaw(
           detail: room,

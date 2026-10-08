@@ -239,6 +239,30 @@ void main() {
       );
     });
 
+    test('G01.4: variant selectors belong to resolved lines and survive normalizing', () {
+      const url = 'https://cdn.test/live/master.m3u8';
+      final selector = _Selector();
+      final resolution = LivePlayUrlResolution.lines(
+        const [LivePlayLine(url, format: StreamFormat.hls), LivePlayLine(url, format: StreamFormat.hls)],
+        sourceVariantSelectors: {url: selector},
+      );
+      expect(resolution.sourceVariantSelectors, {url: same(selector)});
+      final normalized = resolution.normalized();
+      expect(normalized.urls, [url]);
+      expect(normalized.sourceVariantSelectors[url], same(selector));
+      expect(LivePlayUrlResolution.lines(const [LivePlayLine(url)]).sourceVariantSelectors, isEmpty);
+      expect(LivePlayUrlResolution(urls: const [url]).sourceVariantSelectors, isEmpty);
+      expect(LivePlayUrlResolution.owned(input: _Recipe()).sourceVariantSelectors, isEmpty);
+      expect(
+        () => LivePlayUrlResolution.lines(
+          const [LivePlayLine(url)],
+          sourceVariantSelectors: {'https://other.test/master.m3u8': selector},
+        ),
+        throwsFormatException,
+        reason: 'a selector for a line the resolution does not have',
+      );
+    });
+
     test('an owned input counts as one line and has no URLs', () {
       final resolution = LivePlayUrlResolution.owned(input: _Recipe());
       expect(resolution.urls, isEmpty);
@@ -327,4 +351,10 @@ final class _IdSite extends LiveSite {
 
   @override
   String get name => id;
+}
+
+/// A variant selector that selects nothing (G01.4).
+final class _Selector implements HlsVariantSelector {
+  @override
+  HlsMasterSelection selectIn(String text, {required Uri source}) => throw const FormatException('unused');
 }

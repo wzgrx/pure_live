@@ -1073,12 +1073,13 @@ from = "上游 pure_live 1cdcb7b2a（W01.1 对照）"
 id = "A07.16"
 title = "京东直播间用模糊封面作背景（UPGRADES 28-3，先改直播间设计）"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-08"
 size = "小"
 tier = 3
 stages = ["出图和评审", "沉浸背景和暗封面用 JdLiveRoom.background"]
-done = 0
-note = "平台层的模糊图 JdLiveRoom.background 已有（E02.9），应用没读；3.x 进房后的封面就是这张模糊图，直播间背景用它。没见过卡片时 v4 的背景只有渐变"
+done = 2
+note = "设计按 D-003 定稿（X1、X2 选 A，不出图）；roomBackdropOf：京东模糊图 → 封面 → 头像，沉浸背景、纯音频、恢复中等暗封面都用它；其他平台不变"
 from = "UPGRADES 28-3（V03.3 核对）"
 
 

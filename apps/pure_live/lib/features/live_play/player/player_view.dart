@@ -17,6 +17,7 @@ import 'package:pure_live/features/live_play/local_interaction/local_gift_effect
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
+import 'package:pure_live/features/live_play/logic/room_backdrop.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
@@ -536,11 +537,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     ),
   );
 
-  /// The cover behind a portrait picture (3.x: the cover, else the avatar).
-  String get _cover {
-    final room = _room.room;
-    return room.cover.trim().isNotEmpty ? room.cover : room.avatar;
-  }
+  /// The picture behind a portrait stream (3.x: the cover, else the
+  /// avatar; JD Live's blurred frame first, A07.16).
+  String get _cover => roomBackdropOf(_room.room);
 
   /// The picture as [PicturePresentation] says.
   Widget _picture(BoxFit fit) {

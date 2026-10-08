@@ -23,8 +23,8 @@
 - 两份文件有 4 个键不对称，是从 3.x 带来的：`count_wan`、`videofit_scaleDown` 只有中文，`count_k`、`double_click_to_exit` 只有英文（`i18n_test.dart:14-20` 固定了这一点）。
 - 键的来源：3.x 的 2066 个键（`git show v3.2.11:assets/translations/zh.json`）+ 4.x 新加的；2026-10-02 `00f5edf18`（F.5a 第 6 条）删了 930 个“代码里没有字面引用”的键，结果误删了运行时拼出来的键：`portrait_orientation_*`（`b67399a09` 补回）、刷新率三档的说明（`584da6662` 补回，4.0.0 构建号 5000 里刷新率对话框显示成键名，5001 的发布说明写了“修了刷新率对话框里显示成键名的三条说明”）。由此定了 D-016（清理前先列出运行时拼出来的键）和 D-024（这次不再清理）。
 - 运行时拼出来的键：`apps/pure_live/lib` 里 `i18n('…$…')` 这种写法 19 处（例如 `features/backup/log_page.dart:123` 的 `settings_log_level_${level.name}`、`features/settings/settings_editors.dart:965` 的 `settings_refresh_rate_short_$value`、`shared/rooms/room_texts.dart:15` 的 `site_<平台>`、`:120` 的 `room_mark_<限制>`、`features/live_play/player/bar_parts.dart:258` 的 `portrait_fullscreen_display_<模式>`、`features/live_play/local_interaction/` 的 `local_title_`、`local_danmaku_preset_`、`local_danmaku_placement_`、`local_danmaku_font_`）；另有 226 处把变量传给 `i18n`（设置目录 `settings_catalog.dart` 里的标题、说明键写成字符串常量，再由 `settings_model.dart:266` 等处翻译；平台的 `directoryNoticeKey` 从 `live_core` 来）。
-- 平台层的中文：`packages/live_core` 不依赖翻译（ENGINEERING 第 4 节），公告、受限说明、我们翻译的分区名写成中文常量（例如 `packages/live_core/lib/src/sites/chzzk/chzzk_api.dart:252-260`），英文界面下照样显示中文；3.x 的平台适配器直接调 `i18n`（22 个文件、96 个键），跟界面语言。只有目录说明已经有键机制（`LiveDirectoryNotice`，`packages/live_core/lib/src/live_site.dart:412-415`）。这是 Z05.2。
-- 完成度：两种语言都能切换，D-005 的规则在合并审查里查（PROCESS 第 8 节第 4 条）；Z05.1、Z05.2 未开始。
+- 平台层的中文：`packages/live_core` 不依赖翻译（ENGINEERING 第 4 节），公告、受限说明、我们翻译的分区名写成中文常量（例如 `packages/live_core/lib/src/sites/chzzk/chzzk_api.dart:252-260`），英文界面下照样显示中文；3.x 的平台适配器直接调 `i18n`（22 个文件、96 个键），跟界面语言。只有目录说明已经有键机制（`LiveDirectoryNotice`，`packages/live_core/lib/src/live_site.dart:412-415`）。Z05.2 起，应用用 `apps/pure_live/lib/shared/rooms/platform_texts.dart` 的“适配器常量 → 键”表在显示时换成界面语言（公告、分区名、画质名、弹幕系统提示），平台层仍写中文。
+- 完成度：两种语言都能切换，D-005 的规则在合并审查里查（PROCESS 第 8 节第 4 条）；Z05.1 的测试守着运行时拼出来的键、表里的键、没人用的键和文件排序（删 18 个键等 D-024）；Z05.2 待真机，带参数的弹幕行和画质名留给以后。
 
 ## 代码地图
 
@@ -54,9 +54,9 @@
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | 18 个键已经没有字面引用（A08.5 换掉旧弹幕目录行留下的）。A08 子分类说明还写着 A08.3 留下了 `shield_tab_*`、`shield_clear*`、`shield_duplicate`，2026-10-07 核对：它们已经不在翻译文件里（现在只有 `shield_removed`、`shield_title`） | 清单在 [A08.5 记录](../../A-界面设计/A08-弹幕界面/A08.5-设置里的弹幕页/record.md)“留给以后” | 翻译文件里有不用的键 | D-024 这次不清理；Z05.1 按 D-016 先列运行时键再删 |
-| 运行时拼出来的键没有清单，`i18n_test.dart:22` 的检查看不到它们 | 19 处 `i18n('…$…')`，见“现状” | 再清理时还会误删（2026-10-02 已经发生两次） | Z05.1 第 1 阶段 |
-| 键名排序、缩进没有自动检查；AGENTS.md 和 PROCESS 第 8 节第 4 条要求“按键名排序、4 空格缩进” | `apps/pure_live/test/i18n_test.dart` | 合并时只能靠人看 | Z05.1 顺手加一个测试（建议） |
-| 英文界面下平台层给的公告、分区名、画质名、弹幕系统提示还是中文 | `packages/live_core/lib/src/sites/*/`、`packages/live_danmaku/lib/src/sites/` | 和 3.x 不一致（3.x 跟界面语言）；UPGRADES 20-10 等 6 条的余项 | Z05.2 |
+| 运行时拼出来的键没有清单，`i18n_test.dart:22` 的检查看不到它们 | 19 处 `i18n('…$…')`，见“现状” | 再清理时还会误删（2026-10-02 已经发生两次） | Z05.1 已加清单和测试（`test/i18n_runtime_keys.dart`） |
+| 键名排序、缩进没有自动检查；AGENTS.md 和 PROCESS 第 8 节第 4 条要求“按键名排序、4 空格缩进” | `apps/pure_live/test/i18n_test.dart` | 合并时只能靠人看 | Z05.1 已加测试 |
+| 英文界面下平台层给的公告、分区名、画质名、弹幕系统提示还是中文 | `packages/live_core/lib/src/sites/*/`、`packages/live_danmaku/lib/src/sites/` | 和 3.x 不一致（3.x 跟界面语言）；UPGRADES 20-10 等 6 条的余项 | Z05.2 已做（待真机）；带参数的弹幕行（礼物、订阅、置顶）和带编号的画质名没做，见 Z05.2 记录 |
 | Z05.2 的旧任务书写“`check_ui_structure.py` 检查翻译键排序和硬编码文字”，实际不检查 | 旧版 `Z05.2/brief.md` 的“测试”一节 | 执行者会以为门禁守着 | v2 任务书已改正 |
 
 ## 相关决定和规范
@@ -84,21 +84,19 @@
 属于 [Z 工程文档和维护](../README.md)。
 
 - 代码：`apps/pure_live/assets/translations/`
-- 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
+- 进度：`█████████████████░░░` 84%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| Z05.1 | 翻译键：列出运行时拼出来的键，再清理不用的键（18 个） | 工程 | 未开始 | — | — | [设计或说明](Z05.1-翻译键/README.md)、[任务书](Z05.1-翻译键/brief.md) |
-| Z05.2 | 英文界面下平台层给的文字还是中文：公告、目录说明、分区名、画质名（3.x 在平台层用翻译键；UPGRADES 20-10、25-7、25-8、26-6、29-6、30-10） | 功能 | 未开始 | — | — | [设计或说明](Z05.2-英文界面里平台给的中文/README.md)、[任务书](Z05.2-英文界面里平台给的中文/brief.md) |
+| Z05.1 | 翻译键：列出运行时拼出来的键，再清理不用的键（18 个） | 工程 | 待确认 | 2026-10-08 | 675c3b191 | [设计或说明](Z05.1-翻译键/README.md)、[任务书](Z05.1-翻译键/brief.md)、[记录](Z05.1-翻译键/record.md) |
+| Z05.2 | 英文界面下平台层给的文字还是中文：公告、目录说明、分区名、画质名（3.x 在平台层用翻译键；UPGRADES 20-10、25-7、25-8、26-6、29-6、30-10） | 功能 | 待真机 | 2026-10-08 | 9d13632b7 | [设计或说明](Z05.2-英文界面里平台给的中文/README.md)、[任务书](Z05.2-英文界面里平台给的中文/brief.md)、[记录](Z05.2-英文界面里平台给的中文/record.md) |
 
 ## 还没完成的
 
-- **Z05.1 翻译键：列出运行时拼出来的键，再清理不用的键（18 个）**（未开始，第三档，规模 小）
-  - 阶段：列出拼接键 → 核对 18 个键 → 删除并跑全部测试
-- **Z05.2 英文界面下平台层给的文字还是中文：公告、目录说明、分区名、画质名（3.x 在平台层用翻译键；UPGRADES 20-10、25-7、25-8、26-6、29-6、30-10）**（未开始，第三档，规模 大）
-  - 阶段：列出平台层给界面的中文文字，对照 3.x 平台层的 96 个翻译键 → 公告和目录说明按界面语言 → 分区名、画质名和弹幕系统消息按界面语言
-  - 说明：3.x 的平台适配器直接调 i18n（22 个文件、96 个键），跟界面语言；v4 的 live_core 不依赖翻译，这些文字成了中文常量，v4 的翻译文件里只剩 15 个（V03.3 核对）
-  - 来源：UPGRADES 20-10、25-7、25-8、26-6、29-6、30-10（V03.3 核对）
+- **Z05.1 翻译键：列出运行时拼出来的键，再清理不用的键（18 个）**（待确认，第三档，规模 小）
+  - 阶段：✓ 列出拼接键 → ✓ 核对 18 个键 → 删除并跑全部测试
+  - 接着做：维护者决定 D-024 是否解除；解除后从两份翻译文件和 test/i18n_runtime_keys.dart 的 keptUnusedKeys 删 18 个键
+  - 说明：21 条拼键规则（227 个键）和 3 张键表有测试守着；没人用的键必须登记在 keptUnusedKeys（18 个 + 9 个 3.x 键）
 
 <!-- docs:生成结束 -->

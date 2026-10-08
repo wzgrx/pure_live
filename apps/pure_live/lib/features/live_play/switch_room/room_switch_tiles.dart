@@ -3,6 +3,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/logic/room_switch.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -59,7 +60,7 @@ final class RoomSwitchTileData {
       nick: room.displayNick(platform),
       title: title.isEmpty ? i18n('untitled_room') : title,
       platform: platform,
-      area: room.area?.trim() ?? '',
+      area: platformAreaName(room.platform, room.area?.trim() ?? ''),
       cover: normalizeImageUrl(room.cover),
       state: room.isLiveNow
           ? RoomSwitchState.live

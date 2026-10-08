@@ -12,6 +12,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/multiview/logic/multiview_session.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -604,7 +605,7 @@ class MultiviewController extends ChangeNotifier {
     final appliedIndex = cell._qualities.indexWhere((q) => q.selectionId == applied.selectionId);
     final playing = appliedIndex >= 0 ? appliedIndex : index;
     if (manual && applied.selectionId != requested.selectionId) {
-      toast?.call(i18n('quality_limited_to', args: {'quality': applied.quality}));
+      toast?.call(i18n('quality_limited_to', args: {'quality': platformQualityName(applied.quality)}));
     }
     cell
       .._qualities = List.unmodifiable(List.of(cell._qualities)..[playing] = applied)

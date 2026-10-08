@@ -9,6 +9,7 @@ import 'package:pure_live/features/areas/area_card.dart';
 import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/rooms/paging.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_grid.dart';
 
 /// Room under the grid for the floating "关注分区" button.
@@ -122,7 +123,7 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     key: const ValueKey('area-category-tabs'),
     controller: tabs,
     physics: const PureLiveBoundedScrollPhysics(),
-    tabs: [for (final category in categories) TabLabel(label: category.name)],
+    tabs: [for (final category in categories) TabLabel(label: platformAreaName(_catalog.site.id, category.name))],
   );
 
   @override

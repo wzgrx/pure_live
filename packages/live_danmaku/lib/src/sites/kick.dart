@@ -109,6 +109,10 @@ abstract final class KickDanmakuProtocol {
         _ => null,
       };
 
+  /// The notice of the broadcast's end (the app shows it in the interface
+  /// language, Z05.2).
+  static const String streamEndedNotice = '直播已结束';
+
   /// One event of the broadcast channel: the end of the broadcast shows a
   /// notice (as niconico's programme end, B-11); the rest nothing.
   static LiveMessage? broadcastEvent(String event, Map<String, Object?> data, KickDanmakuArgs args) {
@@ -116,7 +120,7 @@ abstract final class KickDanmakuProtocol {
     final channel = _object(_object(data['livestream'])?['channel']);
     final id = channel == null ? null : jsonInt(channel['id']);
     if (id != null && id != args.channelId) return null;
-    return _notice('直播已结束', LiveNoticeKind.system);
+    return _notice(streamEndedNotice, LiveNoticeKind.system);
   }
 
   /// A chat line (`ChatMessageEvent`; `type` `message` or `reply`, an empty

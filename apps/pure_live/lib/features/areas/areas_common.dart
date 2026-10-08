@@ -11,6 +11,7 @@ import 'package:pure_live/features/areas/area_artwork.dart';
 import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -74,7 +75,7 @@ final Provider<AreaCatalogs> areaCatalogsProvider = Provider((ref) {
 /// The name of [area] to show: its name, else "unnamed area" (3.x).
 String areaDisplayName(LiveArea area) {
   final name = area.areaName.trim();
-  return name.isEmpty ? i18n('unnamed_area') : name;
+  return name.isEmpty ? i18n('unnamed_area') : platformAreaName(area.platform, name);
 }
 
 /// Height of an area card [itemWidth] wide (docs/A-界面设计/A09-浏览界面/A09.4-分区 c3): the

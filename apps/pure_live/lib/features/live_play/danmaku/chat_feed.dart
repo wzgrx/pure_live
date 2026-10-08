@@ -3,6 +3,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 
 /// What a line of the chat list is.
 enum ChatLineKind {
@@ -33,8 +34,12 @@ final class ChatLine {
       text = superChat.message,
       message = null;
 
-  /// A platform notice.
-  new notice(LiveMessage this.message) : kind = ChatLineKind.notice, text = message.message, superChat = null;
+  /// A platform notice, in the interface language when the adapter wrote
+  /// it (Z05.2).
+  new notice(LiveMessage this.message)
+    : kind = ChatLineKind.notice,
+      text = platformNotice(message.message),
+      superChat = null;
 
   /// A gift.
   new gift(LiveMessage this.message) : kind = ChatLineKind.gift, text = message.message, superChat = null;

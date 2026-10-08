@@ -11,6 +11,7 @@ import 'package:pure_live/features/area_rooms/follow_area_button.dart';
 import 'package:pure_live/features/areas/areas_common.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/route_args.dart';
+import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/room_grid.dart';
@@ -114,7 +115,7 @@ class _AreaRoomsViewState extends ConsumerState<AreaRoomsView> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final area = widget.area;
-    final category = area.typeName.trim();
+    final category = platformAreaName(area.platform, area.typeName.trim());
     final platform = platformName(widget.site.id, fallback: widget.site.name);
     return Scaffold(
       appBar: AppBar(

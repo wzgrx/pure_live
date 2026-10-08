@@ -218,6 +218,7 @@ path = [
   # ---- tools ----
   { glob = "tools/brotli/", sub = "Q01" },
   { glob = "tools/check_latest/", sub = "Z01" },
+  { glob = "tools/coverage/", sub = "S01" },
   { glob = "tools/docs/", sub = "Z06" },
   { glob = "tools/device/", sub = "Z04" },
   { glob = "tools/ffmpeg_kit/", sub = "Z04" },

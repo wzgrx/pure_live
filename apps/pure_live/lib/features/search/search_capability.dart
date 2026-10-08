@@ -69,6 +69,9 @@ final class SearchCapability {
 ///   finds an offline channel.
 /// - YouTube searches keywords with the live filter and pages (23-2); exact
 ///   references (links, `@handle`, channel ids) find offline channels.
+/// - LOOK filters its two showcase lists by number, name and title when the
+///   keyword is not a room number or link (E05.4; 3.x said room lookup
+///   only, which its own search contradicted).
 /// - Anchor search is offered where the adapter implements it.
 abstract final class SearchCapabilities {
   static const Map<String, SearchCapability> _byPlatform = {
@@ -136,7 +139,7 @@ abstract final class SearchCapabilities {
     SiteIds.kugouLive: SearchCapability(coverage: SearchCoverage.liveAndOffline, paged: true),
     SiteIds.baiduLive: SearchCapability(coverage: SearchCoverage.roomLookup, paged: false),
     SiteIds.sixRoom: SearchCapability(coverage: SearchCoverage.liveAndOffline, paged: false),
-    SiteIds.lookLive: SearchCapability(coverage: SearchCoverage.roomLookup, paged: false),
+    SiteIds.lookLive: SearchCapability(coverage: SearchCoverage.showcaseSnapshot, paged: false),
     SiteIds.seventeenLive: SearchCapability(coverage: SearchCoverage.liveOnly, paged: false),
     SiteIds.iptv: SearchCapability(coverage: SearchCoverage.localChannels, paged: false),
   };

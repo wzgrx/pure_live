@@ -109,6 +109,13 @@ void main() {
       expect(searchCoverageText(SearchCapabilities.of(SiteIds.yy), 'YY'), 'YY：只能搜到正在直播的房间。');
     });
 
+    test('E05.4 c2: LOOK finds exact numbers and links, otherwise filters its showcase by nickname', () {
+      final look = SearchCapabilities.of(SiteIds.lookLive);
+      expect(look.coverage, SearchCoverage.showcaseSnapshot);
+      expect(searchCoverageText(look, 'LOOK'), 'LOOK：输入号码或粘贴链接可精确查找；其他关键词只在平台当前推荐的直播里按昵称筛选，搜不到未开播的主播。');
+      expect(searchCoverageShortText(look), '只在平台当前推荐的直播里按昵称筛选');
+    });
+
     test('ranking: live, then replays, then offline; hiding offline keeps replays', () {
       final rooms = [
         _room('huya', 'off', status: LiveStatus.offline),

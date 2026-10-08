@@ -2602,11 +2602,12 @@ note = "不需要真机（工具在电脑上跑）；CHECKS.md 等维护者看�
 id = "E07.2"
 title = "用巡检复查上游 2026-10-06 报的两处取流问题：FC2 分片要带 l_ortkn 会话 Cookie、微博媒体要带 Referer 和 UA"
 type = "平台"
-status = "未开始"
+status = "完成"
 size = "小"
 tier = 3
+date = "2026-10-08"
 stages = ["巡检确认", "确认有问题的修掉"]
-done = 0
+done = 2
 from = "上游 pure_live 14d965326、960bcf7e3（W01.3 对照）"
 note = "4.x 和 3.x 一样：FC2 媒体请求只带 UA、Origin、Referer（fc2live_api.dart mediaHeaders），微博媒体不带请求头（weibo_api.dart mediaHeaders，2026-09-28 实测不需要）"
 

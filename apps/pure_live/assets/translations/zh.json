@@ -1213,6 +1213,7 @@
     "open_app_failed_fallback_browser": "无法打开APP，将使用浏览器打开",
     "open_folder": "打开文件夹",
     "open_font_dir_failed": "字体目录打开失败，请检查目录访问权限",
+    "open_in_new_window": "在新窗口打开",
     "open_in_system_browser": "使用系统浏览器打开",
     "open_log_dir": "打开日志目录",
     "open_log_dir_desc": "查看并管理日志文件",

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:live_core/live_core.dart';
-import 'package:live_store/live_store.dart';
 
 /// The command line of a desktop window (3.x `WindowsMultiInstanceLauncher`).
 ///
@@ -108,8 +107,3 @@ final class LaunchArgs {
 Future<void> startWindowProcess({LiveRoom? room}) async {
   await Process.start(Platform.resolvedExecutable, LaunchArgs.build(room: room), mode: ProcessStartMode.detached);
 }
-
-/// [startWindowProcess] for the callers written before the data was shared
-/// ([store] and [cipher] are no longer needed); new code calls
-/// `DesktopWindow.openNewWindow`.
-Future<void> launchNewWindow(LiveStore store, SecretCipher cipher, {LiveRoom? room}) => startWindowProcess(room: room);

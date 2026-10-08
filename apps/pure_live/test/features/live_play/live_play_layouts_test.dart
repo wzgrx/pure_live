@@ -17,6 +17,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
@@ -1174,7 +1175,8 @@ void main() {
 
   testWidgets('the room menu on each platform: cast only on Android, the new window only on Windows', (tester) async {
     // docs/A-界面设计/A07-直播间界面/A07.4-横屏全屏, U.2d: "投屏只有 Android" (the menu as well as the
-    // top bar; U.17a for iOS); U.13: "在新窗口打开" on Windows.
+    // top bar; U.17a for iOS); U.13: "在新窗口打开" where the desktop shell
+    // opens windows (A16.2: the Windows shell sets the launcher).
     const group1 = ['room-menu-switchRoom', 'room-menu-timer', 'room-menu-volume', 'room-menu-videoFit'];
     const local = ['room-menu-localInteraction'];
     const passOn = ['room-menu-streamLink', 'room-menu-share', 'room-menu-external'];
@@ -1191,7 +1193,9 @@ void main() {
         if (_key(key).evaluate().isNotEmpty) key,
     ]..sort((a, b) => tester.getCenter(_key(a)).dy.compareTo(tester.getCenter(_key(b)).dy));
 
+    addTearDown(() => DesktopWindow.newWindowLauncher = null);
     for (final (platform, size, expected) in cases) {
+      DesktopWindow.newWindowLauncher = platform == TargetPlatform.windows ? ({room}) async {} : null;
       final room = await _pump(tester, width: size.width, height: size.height, platform: platform);
       await _tap(tester, 'live-play-menu');
       expect(menu(), expected, reason: '$platform');

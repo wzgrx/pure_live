@@ -76,9 +76,6 @@ final class RoomPlatform {
   /// fullscreen.
   bool get mobile => android || platform == TargetPlatform.iOS;
 
-  /// Windows: the room menu's new window.
-  bool get windows => platform == TargetPlatform.windows;
-
   /// Windows, Linux and macOS: the volume slider and the in-window
   /// fullscreen.
   bool get desktop => !mobile;
@@ -401,13 +398,7 @@ class PlayerTopBar extends StatelessWidget {
           builder: (context, _, _) =>
               RecordButton(room: controller.room, latest: () => controller.room, onVideo: true, showTime: time),
         ),
-      RoomMenuButton(
-        controller: controller,
-        windows: actions.platform.windows,
-        onVideo: true,
-        onBars: onBars,
-        onMenu: actions.onMenu,
-      ),
+      RoomMenuButton(controller: controller, onVideo: true, onBars: onBars, onMenu: actions.onMenu),
     ];
   }
 

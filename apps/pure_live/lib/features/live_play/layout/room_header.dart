@@ -24,16 +24,13 @@ const double roomHeaderTitleMinWidth = 100;
 /// the menu (docs/A-界面设计/A07-直播间界面/A07.1-竖屏普通布局, changes 1, 12, 13 and choice B).
 class RoomHeader extends ConsumerStatefulWidget {
   /// Creates the row.
-  const new({required this.controller, required this.onDetails, this.windows = false, super.key});
+  const new({required this.controller, required this.onDetails, super.key});
 
   /// The room.
   final LiveRoomController controller;
 
   /// Opens or closes the room details.
   final VoidCallback onDetails;
-
-  /// Windows menu entries.
-  final bool windows;
 
   @override
   ConsumerState<RoomHeader> createState() => _RoomHeaderState();
@@ -106,7 +103,7 @@ class _RoomHeaderState extends ConsumerState<RoomHeader> {
                 builder: (context, _, _) =>
                     RecordButton(room: controller.room, latest: () => controller.room, compact: compact),
               ),
-            RoomMenuButton(controller: controller, windows: widget.windows),
+            RoomMenuButton(controller: controller),
             const SizedBox(width: 4),
           ],
         );

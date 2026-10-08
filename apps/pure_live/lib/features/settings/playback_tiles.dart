@@ -67,13 +67,20 @@ enum SwitchGateResult {
 typedef SwitchGate = Future<SwitchGateResult> Function(BoolSetting setting);
 
 /// The check before background play or the automatic sleep turns on (the
-/// notification permission and the battery exemption, U.14 c12, c13; F.0a):
-/// the shared [BackgroundPermissions] where the platform asks (Android),
-/// else null.
+/// notification permission and the battery exemption, U.14 c12, c13; F.0a),
+/// and before "开播提醒" (only the notification permission, with its own
+/// words; O01.1): the shared [BackgroundPermissions] where the platform asks
+/// (Android), else null.
 final Provider<SwitchGate?> switchGateProvider = Provider((ref) {
   final permissions = ref.watch(backgroundPermissionsProvider);
   if (permissions == null) return null;
-  return (setting) async => switch (await permissions.confirm()) {
+  Future<PermissionAnswer> ask(BoolSetting setting) => setting == Settings.liveAlertEnabled
+      ? permissions.confirmNotifications(
+          content: i18n('permission_live_alert_content'),
+          blockedContent: i18n('permission_live_alert_blocked_content'),
+        )
+      : permissions.confirm();
+  return (setting) async => switch (await ask(setting)) {
     PermissionAnswer.granted => SwitchGateResult.granted,
     PermissionAnswer.denied => SwitchGateResult.denied,
     PermissionAnswer.cancelled => SwitchGateResult.cancelled,

@@ -33,6 +33,7 @@ path = [
 
   # ---- apps/pure_live/lib/platform：原生通道的 Dart 一侧 ----
   { glob = "apps/pure_live/lib/platform/display_mode.dart", sub = "O05" },
+  { glob = "apps/pure_live/lib/platform/live_alert_channel.dart", sub = "O01" },
   { glob = "apps/pure_live/lib/platform/screen_orientation.dart", sub = "O05" },
   { glob = "apps/pure_live/lib/platform/native_http.dart", sub = "Q03" },
   { glob = "apps/pure_live/lib/platform/twitch_webview_http.dart", sub = "Q03" },
@@ -77,6 +78,7 @@ path = [
   { glob = "apps/pure_live/lib/features/favorite/favorite_controller.dart", sub = "I04" },
   { glob = "apps/pure_live/lib/features/favorite/favorite_rules.dart", sub = "I04" },
   { glob = "apps/pure_live/lib/features/favorite/follow_refresher.dart", sub = "I04" },
+  { glob = "apps/pure_live/lib/features/favorite/live_alerts.dart", sub = "O01" },
   { glob = "apps/pure_live/lib/features/favorite/", sub = "A09" },
   { glob = "apps/pure_live/lib/features/history/history_refresh.dart", sub = "I06" },
   { glob = "apps/pure_live/lib/features/history/history_sections.dart", sub = "I06" },
@@ -150,6 +152,7 @@ path = [
   { glob = "apps/pure_live/android/**/MainActivity.kt", sub = "O02", note = "多个通道的宿主，待定" },
   { glob = "apps/pure_live/android/**/AppChannelsPlugin.kt", sub = "Q03", note = "原生 HTTP、加密、GBK、组播锁，待定" },
   { glob = "apps/pure_live/android/**/Recorder*.kt", sub = "O01" },
+  { glob = "apps/pure_live/android/**/LiveAlerts.kt", sub = "O01" },
   { glob = "apps/pure_live/android/**/ShareIntakePlugin.kt", sub = "O03" },
   { glob = "apps/pure_live/android/**/PermissionsPlugin.kt", sub = "O04" },
   { glob = "apps/pure_live/android/**/SystemAccessPlugin.kt", sub = "O04" },
@@ -279,6 +282,7 @@ channel = [
   { name = "pure_live/multicast_lock", sub = "N02" },
   { name = "pure_live/native_http", sub = "Q03" },
   { name = "pure_live/permissions", sub = "O04" },
+  { name = "pure_live/live_alerts", sub = "O01" },
   { name = "pure_live/pip", sub = "O02" },
   { name = "pure_live/predictive_back", sub = "O06" },
   { name = "pure_live/recorder", sub = "O01" },
@@ -357,6 +361,9 @@ setting = [
   { key = "danmakuSimilarityCacheDuration", sub = "D02" },
   { key = "danmakuSimilarityMaxCacheSize", sub = "D02" },
   { key = "youtubeShowAllChat", sub = "D01" },
+  # refresh 分节（默认 I04）
+  { key = "liveAlertEnabled", sub = "O01" },
+  { key = "liveAlertTagIds", sub = "O01" },
   # exit 分节（默认 A16）
   { key = "autoShutDownTime", sub = "J01" },
   { key = "enableAutoShutDownTime", sub = "J01" },

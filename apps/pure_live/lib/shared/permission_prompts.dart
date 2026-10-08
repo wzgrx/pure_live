@@ -102,7 +102,16 @@ final class BackgroundPermissions {
     return PermissionAnswer.granted;
   }
 
-  Future<PermissionAnswer> _notifications() async {
+  /// Only the notification step of [confirm], explained with [content]
+  /// (askable) or [blockedContent] (refused for good): "开播提醒" needs
+  /// nothing else (O01.1; the battery exemption does not keep a frozen
+  /// app checking, V01.1 L8).
+  Future<PermissionAnswer> confirmNotifications({required String content, required String blockedContent}) async {
+    if (!permissions.applies) return PermissionAnswer.granted;
+    return await _notifications(content: content, blockedContent: blockedContent);
+  }
+
+  Future<PermissionAnswer> _notifications({String? content, String? blockedContent}) async {
     final state = await permissions.notifications();
     if (state == NotificationPermission.granted) return PermissionAnswer.granted;
     final context = _navigator();
@@ -111,7 +120,7 @@ final class BackgroundPermissions {
       final go = await showPermissionDialog(
         context,
         title: i18n('permission_notification_title'),
-        message: i18n('permission_notification_content'),
+        message: content ?? i18n('permission_notification_content'),
         confirm: i18n('permission_go_enable'),
       );
       if (!go) return PermissionAnswer.cancelled;
@@ -120,7 +129,7 @@ final class BackgroundPermissions {
     final go = await showPermissionDialog(
       context,
       title: i18n('permission_notification_blocked_title'),
-      message: i18n('permission_notification_blocked_content'),
+      message: blockedContent ?? i18n('permission_notification_blocked_content'),
       confirm: i18n('permission_open_settings'),
     );
     if (!go) return PermissionAnswer.cancelled;

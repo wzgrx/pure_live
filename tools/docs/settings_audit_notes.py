@@ -257,6 +257,18 @@ NOTES: dict[str, dict] = {
         'when': '立即（重排定时器）',
     },
     'autoRefreshFavorite': {'when': '立即（重排定时器）'},
+    'liveAlertEnabled': {
+        **_new('O01.1，V01.1'),
+        'verdict': 'v4 新加（O01.1，V01.1，D-036）：默认关，和以前一样不发通知；开了以后关注的主播开播时发系统通知（只在 Android）',
+        'reads': '`features/favorite/favorite_controller.dart` 的 `liveAlerts`（每轮刷新后比较）和 `_scheduleAutoRefresh`'
+        '（没开“关注自动刷新”时每 15 分钟只查要提醒的关注）',
+        'when': '立即（重排定时器；关掉时忘记看到过的状态）',
+    },
+    'liveAlertTagIds': {
+        **_new('O01.1，V01.1'),
+        'verdict': 'v4 新加（O01.1，V01.1）：空 = 提醒全部关注；选了标签只提醒带这些标签的关注，已删除的标签不算',
+        'when': '下一轮检查',
+    },
     'maxConcurrentRefresh': {'v3range': '1～20（`refresh_config_controller.dart:9-18`）'},
     'thumbnailRefreshInterval': {
         'v3range': '5～360（`refresh_config_controller.dart:6-14`）',

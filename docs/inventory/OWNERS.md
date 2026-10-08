@@ -6,7 +6,7 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 199 条；设置 221 个（分节默认 23 条、单独指定 70 个）；来源 35 个；通道 14 个。
+路径规则 202 条；设置 223 个（分节默认 23 条、单独指定 72 个）；来源 35 个；通道 15 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
@@ -70,7 +70,7 @@
 | L03 点播和音乐 | 1 |  |  |  |  |
 | N01 多画面 | 1 | 1 |  |  |  |
 | N02 投屏 | 1 |  |  |  | 1 |
-| O01 通知和前台服务 | 1 |  |  |  | 1 |
+| O01 通知和前台服务 | 4 | 2 |  |  | 2 |
 | O02 画中画 | 1 |  |  |  | 1 |
 | O03 分享接收和快捷方式 | 3 | 1 |  |  | 1 |
 | O04 权限 | 4 |  |  |  | 2 |
@@ -374,8 +374,9 @@
 
 ## O01 通知和前台服务
 
-- 代码：`apps/pure_live/android/**/Recorder*.kt`
-- 通道：`pure_live/recorder`
+- 代码：`apps/pure_live/lib/platform/live_alert_channel.dart`、`apps/pure_live/lib/features/favorite/live_alerts.dart`、`apps/pure_live/android/**/Recorder*.kt`、`apps/pure_live/android/**/LiveAlerts.kt`
+- 设置：`liveAlertEnabled`、`liveAlertTagIds`
+- 通道：`pure_live/live_alerts`、`pure_live/recorder`
 
 ## O02 画中画
 

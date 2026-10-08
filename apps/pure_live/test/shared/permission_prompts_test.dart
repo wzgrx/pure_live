@@ -141,6 +141,48 @@ void main() {
     );
   });
 
+  testWidgets('O01.1 "开播提醒": only the notification question, in its own words; never the battery', (tester) async {
+    await pumpApp(tester);
+    final permissions = _Permissions(state: NotificationPermission.askable, battery: false);
+    final confirm = questions(permissions).confirmNotifications(content: '开播提醒的说明', blockedContent: '已关闭的说明');
+    await tester.pumpAndSettle();
+    expect(find.text('需要通知权限'), findsOneWidget);
+    expect(find.text('开播提醒的说明'), findsOneWidget);
+    expect(await run(tester, confirm, ['去开启']), PermissionAnswer.granted);
+    expect(permissions.calls, ['request'], reason: 'no battery question');
+
+    permissions.state = NotificationPermission.blocked;
+    final blocked = questions(
+      permissions,
+      resumed: () async {},
+    ).confirmNotifications(content: '开播提醒的说明', blockedContent: '已关闭的说明');
+    await tester.pumpAndSettle();
+    expect(find.text('已关闭的说明'), findsOneWidget);
+    expect(await run(tester, blocked, ['去设置']), PermissionAnswer.denied);
+  });
+
+  testWidgets('the "开播提醒" switch asks only for notifications, with its words (O01.1)', (tester) async {
+    await pumpApp(tester);
+    final permissions = _Permissions(state: NotificationPermission.askable, battery: false);
+    final container = ProviderContainer(
+      overrides: [
+        backgroundPermissionsProvider.overrideWithValue(
+          BackgroundPermissions(permissions: permissions, navigator: () => navigator.currentContext),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final gate = container.read(switchGateProvider)!;
+    SwitchGateResult? result;
+    unawaited(gate(Settings.liveAlertEnabled).then((value) => result = value));
+    await tester.pumpAndSettle();
+    expect(find.text('开播提醒要用通知告诉你关注的主播开播了，需要开启通知权限。'), findsOneWidget);
+    await tester.tap(find.text('去开启'));
+    await tester.pumpAndSettle();
+    expect(result, SwitchGateResult.granted);
+    expect(permissions.calls, ['request']);
+  });
+
   testWidgets('the settings switch maps the answers (U.6c gate)', (tester) async {
     final permissions = _Permissions(state: NotificationPermission.askable);
     final container = ProviderContainer(

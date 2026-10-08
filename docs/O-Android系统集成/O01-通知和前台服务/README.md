@@ -11,6 +11,7 @@
   - 后台播放时的唤醒锁和 Wi-Fi 锁（`pure_live/background_playback`）。
   - 录制的前台服务 `RecorderForegroundService`（`dataSync`）和它的通道 `pure_live/recorder`：启动要等真正进入前台、15 秒超时；被系统停掉（Android 15 的 6 小时上限、服务被杀）时告诉 Dart；录制时绑住媒体服务，避免划掉界面后引擎被 audio_service 销毁。
   - 两个通知渠道（“录制”、“录制提醒”）、通知小图标资源、点通知和按钮打开录制中心的 `PendingIntent`。
+  - “开播提醒”（O01.1，V01.1 提议）：判断哪位关注的主播开播了（`features/favorite/live_alerts.dart`，读关注刷新和录制等开播的结果）、通知渠道“开播提醒”、点通知进直播间的 `PendingIntent`（`LiveAlerts.kt`）、开关和按标签选择。
 - 不包括（归哪里）：
   - 通知上的文字、标题怎么写、哪些状态发提醒 → H05（`app/recording_notice.dart`）、A14.1 c2～c6。
   - 直播间什么时候显示媒体通知、按钮做什么 → C02（`RoomBackgroundPolicy`、`RoomMediaNotification`）。
@@ -21,6 +22,7 @@
 用户看得到的：
 
 - **媒体通知**：直播间开着“后台播放”或助眠时，进房播放就在通知栏出现（标题是直播间标题、正文是主播名、封面、“暂停”“停止”中文按钮，小图标是单色电视）；按 Home 后继续播放。没开时不显示（C01.2 的确认改动：Android 不允许应用进入后台后再启动前台服务）。
+- **开播提醒**（O01.1，2026-10-09，待真机）：设置 → 刷新设置 →“开播提醒”打开后（默认关，只在 Android），关注的主播开播时来一条“主播名 开播了”，正文是直播标题，点了进直播间；可以只提醒带某些标签的关注。只在应用开着时（在前台，或在后台播放、录制时）提醒，没开“关注自动刷新”时每 15 分钟只查要提醒的关注；同一场只一次。
 - **录制通知**：开始录制后常驻通知“正在录制 · 主播名”，正文“标题 · 清晰度”，系统计时从第一段开始；按钮“停止录制”“录制中心”；点通知打开录制中心。录制被系统停掉或在后台失败时发“录制已停止”提醒，点它打开录制中心并定位到那条任务（A08.5 的 F02 c2）。
 
 内部怎么工作：
@@ -52,6 +54,9 @@
 | `apps/pure_live/lib/features/live_play/logic/background_playback.dart` | Dart 一侧：`BackgroundKeepAlive`（:233）、`RoomMediaNotification`（:299）、`mediaControls`（:276）——行为归 C02 |
 | `apps/pure_live/lib/platform/recording_platform.dart`（404 行） | `AndroidRecordKeepAlive`（:166，第一个持有者启动、最后一个释放时停止，被系统停掉后拒绝自动重试直到用户手动开始）、`androidStorageAccess`（:322）、`platformAppRecording`（:348） |
 | `apps/pure_live/lib/app/recording_notice.dart` | 录制通知的文字（H05） |
+| `.../LiveAlerts.kt` | “开播提醒”（O01.1）：渠道 `pure_live_live_alerts`（默认重要性）、一个房间一条（标签 `live_alert:<平台>:<房间号>`）、点了走 `ShareIntakePlugin.ACTION_OPEN` 进直播间、请求码 `0x20000000 + 28 位哈希`；通道 `pure_live/live_alerts` 由 `AppChannelsPlugin` 注册 |
+| `apps/pure_live/lib/platform/live_alert_channel.dart` | 开播提醒的文字（`liveAlertContent`）、通道参数、`liveAlertPosterProvider`（只有 Android 有） |
+| `apps/pure_live/lib/features/favorite/live_alerts.dart` | 开播提醒的判断：`LiveAlertTracker`（同一场只一次）、`liveAlertRooms`（按标签选）、`LiveAlerts`（开关、录制检查）；接在 `favorite_controller.dart` 的每一轮刷新和定时器上 |
 
 测试：
 
@@ -59,6 +64,7 @@
 |---|---|
 | `apps/pure_live/test/platform/system_surfaces_test.dart`（12 个） | 录制通知文字（一个房间、几个房间、计时起点）；保活只在文字变化时发；“停止录制”停全部；“录制已停止”提醒；媒体按钮中文；小图标是单色、release 资源压缩后还在；请求码唯一 |
 | `apps/pure_live/test/features/live_play/live_play_more_test.dart` | 离开应用的规则（后台播放时持锁、不暂停） |
+| `apps/pure_live/test/features/favorite/live_alerts_test.dart`（12）、`favorite_test.dart` 的“live alerts”组（3） | 开播提醒：同一场只一次、第一次看到只记下、重连和开播时间、按标签选、录制检查；控制器里哪几轮发、只查要提醒的关注的定时器 |
 
 ## 3.x 基线
 
@@ -87,7 +93,8 @@
 
 ## 路线
 
-- 这个子分类没有登记的任务。要做的真机项（划掉应用后继续录）建议放进 S02.5 第二阶段；H05.2（单个录制点通知定位到任务）在 H05。新的通知需求（例如开播提醒）先走 V01 提议。
+- O01.1 开播提醒（V01.1 拆出的第一个任务）代码做完，等 K90 照 [record.md](O01.1-开播提醒/record.md)“真机上要看的”看；O01.2（应用被冻结或清理后也查，WorkManager）第三档，等 O01.1 用一段时间再定。
+- 要做的真机项（划掉应用后继续录）建议放进 S02.5 第二阶段；H05.2（单个录制点通知定位到任务）在 H05。新的通知需求先走 V01 提议。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
 
@@ -96,9 +103,19 @@
 属于 [O Android系统集成](../README.md)。
 
 - 代码：`apps/pure_live/android/`
-- 进度：还没有任务
+- 进度：`██████░░░░░░░░░░░░░░` 30%
 
 
-还没有任务。
+| 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
+|---|---|---|---|---|---|---|
+| O01.1 | 开播提醒：关注的主播开播时发系统通知，点通知进直播间（应用开着时；接 V01.1） | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](O01.1-开播提醒/README.md)、[任务书](O01.1-开播提醒/brief.md)、[记录](O01.1-开播提醒/record.md) |
+| O01.2 | 开播提醒（接 O01.1）：应用被系统冻结或清理后也能定时检查（WorkManager 周期任务） | 原生 | 未开始 | — | — | — |
+
+## 还没完成的
+
+- **O01.2 开播提醒（接 O01.1）：应用被系统冻结或清理后也能定时检查（WorkManager 周期任务）**（未开始，第三档，规模 大）
+  - 阶段：方案和真机测量：HyperOS 上周期任务能不能按时跑 → 后台检查：原生请求或后台 Dart 引擎，只查要提醒的关注 → 和 O01.1 共用去重、真机验证
+  - 说明：等 O01.1 在真机上用一段时间、用户还想更及时时再做；最短 15 分钟、系统决定实际时间，HyperOS 可能延后或不跑；不用精确闹钟（SCHEDULE_EXACT_ALARM 只给闹钟和日历类应用）
+  - 来源：V01.1 设计 L1、L14（做法 B）
 
 <!-- docs:生成结束 -->

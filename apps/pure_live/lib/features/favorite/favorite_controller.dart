@@ -4,23 +4,34 @@ import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_record/live_record.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/favorite/favorite_rules.dart';
 import 'package:pure_live/features/favorite/follow_refresher.dart';
+import 'package:pure_live/features/favorite/live_alerts.dart';
 import 'package:pure_live/features/home/home_menu.dart';
+import 'package:pure_live/platform/live_alert_channel.dart';
 
 /// The follows state, kept for the whole app session like 3.x's
 /// `FavoriteController` (a GetX singleton): the home shell builds only the
 /// visible tab, so the page itself comes and goes.
+///
+/// "开播提醒" (O01.1) posts through [liveAlertPosterProvider] (Android) and
+/// also reads the recorder's checks of the same rooms.
 final Provider<FavoriteController> favoriteControllerProvider = Provider((ref) {
   final services = ref.watch(appServicesProvider);
   final controller = FavoriteController(
     store: services.store,
     refresher: FollowRefresher(sites: services.sites),
     followsReady: services.followsReady,
+    postLiveAlert: ref.watch(liveAlertPosterProvider),
   );
-  ref.onDispose(controller.dispose);
+  final recorderChecks = services.recorder?.changes.listen(controller.recorderChanged);
+  ref.onDispose(() {
+    unawaited(recorderChecks?.cancel());
+    controller.dispose();
+  });
   return controller..start();
 });
 
@@ -38,17 +49,38 @@ final Provider<FavoriteController> favoriteControllerProvider = Provider((ref) {
 /// refresh button and when the follows tab is selected again; every follow
 /// on the `autoRefreshFavorite` timer (silently) and when the app returns
 /// from the background (`refreshFavoriteOnResume`, at most every 15 s).
+///
+/// "开播提醒" ([liveAlerts], O01.1; V01.1 L2, L5): every pass's rooms go to
+/// it; the passes the user starts and watches (the start check, pull,
+/// selecting follows again, the room switcher's button) only record what
+/// is live. With "关注自动刷新" off and the alerts on, a timer checks only
+/// the follows the alerts cover, every [liveAlertCheckInterval].
 final class FavoriteController extends ChangeNotifier {
-  /// Creates the controller.
-  new({required this.store, required this.refresher, Future<void>? followsReady, DateTime Function()? now})
-    : _followsReady = followsReady ?? Future<void>.value(),
-      _now = now ?? DateTime.now;
+  /// Creates the controller; [postLiveAlert] posts "开播提醒" (null: none on
+  /// this platform), whose own checks run every [liveAlertCheckInterval].
+  new({
+    required this.store,
+    required this.refresher,
+    Future<void>? followsReady,
+    DateTime Function()? now,
+    LiveAlertPoster? postLiveAlert,
+    this.liveAlertCheckInterval = LiveAlerts.checkInterval,
+  }) : _followsReady = followsReady ?? Future<void>.value(),
+       _now = now ?? DateTime.now,
+       liveAlerts = postLiveAlert == null ? null : LiveAlerts(settings: store.settings, post: postLiveAlert, now: now);
 
   /// Storage and settings.
   final LiveStore store;
 
   /// Runs the requests.
   final FollowRefresher refresher;
+
+  /// "开播提醒"; null where nothing can be posted.
+  final LiveAlerts? liveAlerts;
+
+  /// How often "开播提醒" checks the follows it covers while "关注自动刷新"
+  /// is off ([LiveAlerts.checkInterval]; shorter in tests).
+  final Duration liveAlertCheckInterval;
 
   final Future<void> _followsReady;
   final DateTime Function() _now;
@@ -186,12 +218,29 @@ final class FavoriteController extends ChangeNotifier {
             (tagId == allTags || (assignments[room.identityKey]?.contains(tagId) ?? false)))
           room,
     ];
-    return _enqueue(targets, full: false, visible: true, bypassCooldown: true);
+    return _enqueue(targets, full: false, visible: true, bypassCooldown: true, alert: false);
   }
 
-  /// Refreshes every follow.
-  Future<void> refreshAll({bool visible = true, bool bypassCooldown = true}) =>
-      _enqueue(rooms, full: true, visible: visible, bypassCooldown: bypassCooldown);
+  /// Refreshes every follow; [alert]: "开播提醒" may post for this pass
+  /// (false when the user started it and sees the result).
+  Future<void> refreshAll({bool visible = true, bool bypassCooldown = true, bool alert = true}) =>
+      _enqueue(rooms, full: true, visible: visible, bypassCooldown: bypassCooldown, alert: alert);
+
+  /// The follows "开播提醒" covers ([liveAlertRooms]).
+  List<LiveRoom> get liveAlertTargets =>
+      liveAlertRooms(rooms, chosen: store.settings.get(Settings.liveAlertTagIds), tags: tags, assignments: assignments);
+
+  /// The recorder's task list after a change: its fresh checks of rooms go
+  /// to "开播提醒" like a pass's rooms.
+  void recorderChanged(List<RecordTask> tasks) {
+    final alerts = liveAlerts;
+    if (alerts == null || _disposed) return;
+    final checked = alerts.recorderChecks(tasks);
+    if (checked.isEmpty) return;
+    alerts.observe(checked, covered: _covered());
+  }
+
+  Set<String> _covered() => {for (final room in liveAlertTargets) room.identityKey};
 
   /// The first check of every follow (started by [start]; the splash page
   /// waits for it a little, 3.x).
@@ -209,7 +258,7 @@ final class FavoriteController extends ChangeNotifier {
       // otherwise the watched list is current.
       final all = first.any(LegacyRules.needsIdentityMigration) ? await store.follows.all() : rooms;
       if (_disposed) return;
-      await _enqueue(all, full: true, visible: true, bypassCooldown: true);
+      await _enqueue(all, full: true, visible: true, bypassCooldown: true, alert: false);
     } on Object catch (error, stack) {
       _logError(error, stack);
     } finally {
@@ -225,6 +274,7 @@ final class FavoriteController extends ChangeNotifier {
     required bool full,
     required bool visible,
     required bool bypassCooldown,
+    required bool alert,
   }) async {
     // Waiters wake in order; each looks again, so passes never overlap.
     for (var running = _running; running != null; running = _running) {
@@ -233,7 +283,7 @@ final class FavoriteController extends ChangeNotifier {
       if (coveredByRunning) return;
     }
     if (_disposed) return;
-    final pass = _pass(targets, full: full, visible: visible, bypassCooldown: bypassCooldown);
+    final pass = _pass(targets, full: full, visible: visible, bypassCooldown: bypassCooldown, alert: alert);
     _running = pass;
     _runningFull = full;
     try {
@@ -248,6 +298,7 @@ final class FavoriteController extends ChangeNotifier {
     required bool full,
     required bool visible,
     required bool bypassCooldown,
+    required bool alert,
   }) async {
     refreshing = true;
     if (visible) progress.value = 0;
@@ -261,6 +312,7 @@ final class FavoriteController extends ChangeNotifier {
         onProgress: visible ? (done, total) => progress.value = total == 0 ? 1 : done / total : null,
       );
       if (_disposed) return;
+      liveAlerts?.observe(result.rooms, covered: _covered(), quiet: !alert);
       lastFailed = result.failed;
       if (result.rooms.isNotEmpty) await store.follows.update(result.rooms);
       if (full) lastFullRefreshAt = _now();
@@ -286,7 +338,10 @@ final class FavoriteController extends ChangeNotifier {
   }
 
   void _settingChanged(Setting<Object> setting) {
-    if (setting == Settings.autoRefreshFavorite || setting == Settings.autoRefreshInterval) {
+    if (setting == Settings.autoRefreshFavorite ||
+        setting == Settings.autoRefreshInterval ||
+        setting == Settings.liveAlertEnabled) {
+      if (setting == Settings.liveAlertEnabled && !(liveAlerts?.enabled ?? false)) liveAlerts?.tracker.forget();
       _scheduleAutoRefresh();
     } else if (setting == Settings.preferRealOnlineCounts ||
         setting == Settings.realOnlinePlatforms ||
@@ -295,15 +350,24 @@ final class FavoriteController extends ChangeNotifier {
     }
   }
 
+  /// "关注自动刷新" checks every follow at its interval; without it, the
+  /// alerts check only the follows they cover, every
+  /// [liveAlertCheckInterval]; with neither nothing runs (V01.1 L2).
   void _scheduleAutoRefresh() {
     _autoRefresh?.cancel();
     _autoRefresh = null;
-    if (!store.settings.get(Settings.autoRefreshFavorite)) return;
-    final minutes = store.settings.get(Settings.autoRefreshInterval);
-    _autoRefresh = Timer.periodic(
-      Duration(minutes: minutes),
-      (_) => unawaited(refreshAll(visible: false, bypassCooldown: false)),
-    );
+    if (store.settings.get(Settings.autoRefreshFavorite)) {
+      final minutes = store.settings.get(Settings.autoRefreshInterval);
+      _autoRefresh = Timer.periodic(
+        Duration(minutes: minutes),
+        (_) => unawaited(refreshAll(visible: false, bypassCooldown: false)),
+      );
+    } else if (liveAlerts?.enabled ?? false) {
+      _autoRefresh = Timer.periodic(
+        liveAlertCheckInterval,
+        (_) => unawaited(_enqueue(liveAlertTargets, full: false, visible: false, bypassCooldown: false, alert: true)),
+      );
+    }
   }
 
   void _notify() {

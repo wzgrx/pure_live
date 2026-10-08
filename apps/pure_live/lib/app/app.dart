@@ -92,10 +92,12 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     // F.1c: the room switcher's refresh is the follows' silent full refresh
     // (3.x `refresh_favorite_rooms`).
     // B05: its last refresh time and failures show on the button.
+    // O01.1: the user pressed it and sees the result, so "开播提醒" only
+    // records what is live (V01.1 L10).
     RoomSwitchPanel.follows = FollowsRefresher(
       refresh: () async {
         final follows = ref.read(favoriteControllerProvider);
-        await follows.refreshAll(visible: false);
+        await follows.refreshAll(visible: false, alert: false);
         return follows.lastFailed;
       },
       lastRefreshedAt: () => ref.read(favoriteControllerProvider).lastFullRefreshAt,

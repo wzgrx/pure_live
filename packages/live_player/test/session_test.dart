@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
@@ -901,6 +902,38 @@ void main() {
         engine.playing();
         async.elapse(const Duration(seconds: 5));
         expect(timings, hasLength(1));
+      });
+    });
+
+    test('timing: the wall clock set back while a room opens does not bend the line', () {
+      // K90: `detail=869 … load=19 firstFrame=475 playing=0 total=13`, the
+      // steps adding up to 1.37 s. Only a wall clock going back between the
+      // marks and the end gives that; the timing reads a monotonic one.
+      fakeAsync((async) {
+        final origin = DateTime.utc(2026, 10, 8, 12);
+        final monotonic = timingNow;
+        timingNow = () => origin.add(async.elapsed);
+        addTearDown(() => timingNow = monotonic);
+        var setBack = Duration.zero;
+        withClock(Clock(() => origin.add(async.elapsed - setBack)), () {
+          final timings = <PlaybackTiming>[];
+          final startup = StartupMarks();
+          async.elapse(const Duration(seconds: 1));
+          startup
+            ..markDetail()
+            ..markQualities()
+            ..markUrls();
+          start(PlaybackRequest(site: 'kilakila', plan: _plan([_a]), startup: startup, onTiming: timings.add), async);
+          async.elapse(const Duration(seconds: 1));
+          setBack = const Duration(seconds: 3);
+          engine.emit(const EngineVideoSize(1280, 720));
+          final timing = timings.single;
+          final steps = [for (final step in timing.segments) step ?? Duration.zero].reduce((a, b) => a + b);
+          expect(timing.total, steps);
+          expect(timing.total, const Duration(seconds: 2));
+          expect(timing.segment('detail'), const Duration(seconds: 1));
+          expect(timing.segment('firstFrame'), const Duration(seconds: 1));
+        });
       });
     });
 

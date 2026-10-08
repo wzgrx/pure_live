@@ -2,6 +2,7 @@
 // session (bootstrap, device report, 30-minute lifetime, one retry after a
 // refusal), the browser identity, catalog and area paging, search, room
 // depths, streams from the page, links and error mapping.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -69,7 +70,8 @@ final class _Sequenced implements LiveHttp {
     final queue = script[request.url.path];
     if (queue == null || queue.isEmpty) return await inner.send(request);
     inner.requests.add(request);
-    final next = queue.removeAt(0);
+    var next = queue.removeAt(0);
+    if (next is Future<Object>) next = await next;
     if (next is TransportReason) throw TransportFailure('kuaishou', next, 'scripted');
     final sample = next as ReplaySample;
     return LiveResponse(status: sample.status, headers: sample.headers, bytes: sample.bytes, url: request.url);
@@ -418,10 +420,11 @@ void main() {
   });
 
   group('anonymous session', () {
-    test('room entry: a bare visit makes the session, its did is reported, then the page with it', () async {
+    test('room entry: a bare visit makes the session and is the room page; its did is reported', () async {
       final setup = _setup(['S09-room-live']);
       final room = await setup.site.getRoomDetail(roomId: _live);
-      expect(_trace(setup.http), ['GET /u/$_live -', 'POST $_report -', 'GET /u/$_live $_session']);
+      // G03.1: the visit is the room page, so no second request for it.
+      expect(_trace(setup.http), ['GET /u/$_live -', 'POST $_report -']);
       final report = jsonDecode(utf8.decode(setup.http.requests[1].body!)) as Map<String, dynamic>;
       expect(
         ((report['common'] as Map)['identity_package'] as Map)['device_id'],
@@ -448,11 +451,48 @@ void main() {
         'GET /u/$_live -',
         'POST $_report -',
         'GET /u/$_live $_session',
-        'GET /u/$_live $_session',
         'GET /u/$_live -',
         'POST $_report -',
-        'GET /u/$_live $_session',
       ]);
+    });
+
+    test('G03.1: the report does not hold up a room its visit has read', () async {
+      final report = Completer<Object>();
+      final setup = _setup(
+        ['S09-room-live'],
+        script: {
+          _report: [report.future],
+        },
+      );
+      LiveRoom? room;
+      unawaited(setup.site.getRoomDetail(roomId: _live).then((value) => room = value));
+      await pumpEventQueue();
+      expect(room?.isLiveNow, isTrue, reason: 'the report is still out');
+      expect(_trace(setup.http), ['GET /u/$_live -', 'POST $_report -']);
+      report.complete(_reportAnswer);
+      await pumpEventQueue();
+    });
+
+    test('G03.1: a visit that is no room page leaves it to the page with the session, after the report', () async {
+      final recorded = ReplaySample.load('$_root/S09-room-live');
+      final refused = _synthetic(_page(_live), _captcha, headers: recorded.headers);
+      final report = Completer<Object>();
+      final setup = _setup(
+        ['S09-room-live'],
+        script: {
+          '/u/$_live': [refused],
+          _report: [report.future],
+        },
+      );
+      LiveRoom? room;
+      unawaited(setup.site.getRoomDetail(roomId: _live).then((value) => room = value));
+      await pumpEventQueue();
+      expect(_trace(setup.http), ['GET /u/$_live -', 'POST $_report -'], reason: 'the page waits for the report');
+      report.complete(_reportAnswer);
+      await pumpEventQueue();
+      expect(_trace(setup.http), ['GET /u/$_live -', 'POST $_report -', 'GET /u/$_live $_session']);
+      expect(room?.isLiveNow, isTrue);
+      expect((room!.danmakuData! as KuaishouDanmakuArgs).cookie, _session);
     });
 
     test('concurrent room entries share one bootstrap', () async {
@@ -480,21 +520,26 @@ void main() {
 
     test('a refused page drops the session, makes a new one and is retried once', () async {
       final refused = _synthetic(_page(_live), _captcha);
+      final withSession = _synthetic(
+        _page(_live),
+        _captcha,
+        headers: ReplaySample.load('$_root/S09-room-live').headers,
+      );
       final setup = _setup(
         ['S09-room-live'],
         script: {
-          '/u/$_live': [ReplaySample.load('$_root/S09-room-live'), refused],
+          '/u/$_live': [withSession, refused],
         },
       );
       final room = await setup.site.getRoomDetail(roomId: _live);
       expect(room.isLiveNow, isTrue);
+      // The new session's visit reads as the room: no further request.
       expect(_trace(setup.http), [
         'GET /u/$_live -',
         'POST $_report -',
         'GET /u/$_live $_session',
         'GET /u/$_live -',
         'POST $_report -',
-        'GET /u/$_live $_session',
       ]);
     });
 
@@ -506,7 +551,7 @@ void main() {
         },
       );
       expect((await setup.site.getRoomDetailForRefresh(roomId: _live)).isLiveNow, isTrue);
-      expect(_trace(setup.http), ['GET /u/$_live -', 'GET /u/$_live -', 'POST $_report -', 'GET /u/$_live $_session']);
+      expect(_trace(setup.http), ['GET /u/$_live -', 'GET /u/$_live -', 'POST $_report -']);
     });
 
     test('refused twice is RiskControl; missing streamers and offline rooms are answers, not retried', () async {
@@ -537,7 +582,7 @@ void main() {
         },
       );
       expect((await setup.site.getRoomDetail(roomId: _live)).isLiveNow, isTrue);
-      expect(_trace(setup.http).last, 'GET /u/$_live $_session');
+      expect(_trace(setup.http), ['GET /u/$_live -', 'POST $_report -']);
     });
   });
 

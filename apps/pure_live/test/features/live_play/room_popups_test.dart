@@ -416,6 +416,56 @@ void main() {
     });
   });
 
+  group('A03.3 c4 (research S9): the brightness and volume drags', () {
+    testWidgets('every move shows the level; the system is told at most once a frame, the latest level', (
+      tester,
+    ) async {
+      var volume = 0.5;
+      final sets = <double>[];
+      DeviceControls.debugAvailable = true;
+      const channel = MethodChannel('pure_live/device_controls');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (call) async {
+        switch (call.method) {
+          case 'getVolume':
+            return volume;
+          case 'getBrightness':
+            return 0.5;
+          case 'setVolume':
+            volume = ((call.arguments as Map)['value'] as num).toDouble();
+            sets.add(volume);
+        }
+        return null;
+      });
+      addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, null));
+      final room = await _pump(tester, width: 852, height: 393);
+      await tester.tap(_key('live-play-fullscreen'));
+      await tester.pump();
+      await _settle(tester);
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump();
+
+      final gesture = await tester.startGesture(const Offset(700, 260));
+      // Takes the drag and reads the volume it starts from.
+      await gesture.moveBy(const Offset(0, -20));
+      await _settle(tester);
+      sets.clear();
+      // A 480 Hz touch screen: four moves within one 120 Hz frame.
+      for (var i = 0; i < 4; i++) {
+        await gesture.moveBy(const Offset(0, -10));
+      }
+      await tester.pump();
+      expect(_key('gesture-level-volume'), findsOneWidget);
+      await _settle(tester);
+      expect(sets, hasLength(1), reason: 'one call a frame, not one a move');
+      // 40 of 393 high, 1.2 a full height.
+      expect(sets.single, closeTo(0.5 + 40 / 393 * 1.2, 0.001));
+      await gesture.up();
+      await _settle(tester);
+      expect(sets, hasLength(1));
+      await _close(tester, room);
+    });
+  });
+
   group('U.2n c2, c3 (B-3, B-14): the room volume', () {
     testWidgets('Android: the system media volume, the same one the drag on the picture changes', (tester) async {
       var system = 0.8;

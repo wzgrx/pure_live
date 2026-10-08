@@ -13,6 +13,7 @@ import 'package:pure_live/features/live_play/logic/room_layout.dart';
 import 'package:pure_live/features/live_play/player/room_swipe.dart';
 
 import '../../support.dart';
+import 'no_images.dart';
 
 const _frame = Duration(microseconds: 8333);
 const double _frameSeconds = 8333 / 1e6;
@@ -312,6 +313,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(swipe.steps, [1]);
     });
+  });
+
+  testWidgets('A03.3 c5: the cover a swipe brings sits whole over the ambient background, decoded for its width', (
+    tester,
+  ) async {
+    _k90(tester);
+    final room = LiveRoom(
+      platform: SiteIds.bilibili,
+      roomId: '7',
+      nick: '主播7',
+      cover: 'https://i.example/7.jpg',
+      liveStatus: LiveStatus.live,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: const LiveTheme().light,
+        home: LiveUiScope(
+          config: LiveUiConfig(imageCacheManager: NoImages()),
+          child: RoomSwipePreview(room: room),
+        ),
+      ),
+    );
+    final cover = tester.widget<LiveNetworkImage>(find.byKey(const ValueKey('live-play-swipe-cover')));
+    expect(cover.url, 'https://i.example/7.jpg');
+    // A landscape stream sits whole in the portrait fullscreen (contain):
+    // as wide as the screen, 400 dp at 3× (at most 1080 px).
+    expect(cover.fit, BoxFit.contain);
+    expect(cover.memCacheWidth, 1080);
   });
 
   group('A03.3 c2: the end of the list', () {

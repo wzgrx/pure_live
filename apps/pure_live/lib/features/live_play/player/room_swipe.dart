@@ -293,8 +293,13 @@ class RoomSwipePreview extends StatelessWidget {
           children: [
             AmbientBackdrop(cover: cover),
             if (cover.isNotEmpty)
+              // Whole, as a landscape stream sits in the portrait fullscreen
+              // (A03.3 c5): as wide as the screen, and decoded for that
+              // width. Filling the screen scaled a 16:9 cover about 4×.
               LiveNetworkImage(
+                key: const ValueKey('live-play-swipe-cover'),
                 url: cover,
+                fit: BoxFit.contain,
                 memCacheWidth: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context))
                     .round()
                     .clamp(240, 1080),

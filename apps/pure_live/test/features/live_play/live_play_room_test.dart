@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -434,6 +435,68 @@ void main() {
     await tester.drag(find.byKey(const ValueKey('live-play-details-list')), const Offset(0, 300));
     await tester.pumpAndSettle();
     expect(details, findsNothing);
+    await _close(tester, room);
+  });
+
+  testWidgets('A03.3 c4: the details handle is 48 high; the panel follows it 1:1 and springs back or closes', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    final room = await _pump(tester);
+    await tester.tap(find.byKey(const ValueKey('live-play-info')));
+    await tester.pumpAndSettle();
+    final details = find.byKey(const ValueKey('live-play-details'));
+    final handle = find.byKey(const ValueKey('live-play-details-handle'));
+    expect(tester.getSize(handle).height, 48, reason: 'research S7: 20 was hard to catch');
+    expect(tester.getSize(find.byKey(const ValueKey('live-play-details-grip'))), const Size(32, 4));
+    // Android's tap target guideline (48 × 48) on the handle's node; the
+    // page-wide check stops at the strip's title line (40 high, A04.1).
+    final node = tester.getSemantics(handle);
+    expect(node.label, '收起');
+    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
+    expect(node.rect.height, greaterThanOrEqualTo(48));
+    expect(node.rect.width, greaterThanOrEqualTo(48));
+    final rest = tester.getTopLeft(details).dy;
+
+    // A finger 30 dp further down: the panel 30 dp further; let go
+    // slowly under 64, back.
+    const frame = Duration(microseconds: 8333);
+    var gesture = await tester.startGesture(tester.getCenter(handle));
+    await gesture.moveBy(const Offset(0, 20));
+    await tester.pump(frame);
+    final taken = tester.getTopLeft(details).dy;
+    expect(taken, greaterThan(rest));
+    await gesture.moveBy(const Offset(0, 30));
+    await tester.pump(frame);
+    expect(tester.getTopLeft(details).dy, closeTo(taken + 30, 0.01));
+    final pulled = tester.getTopLeft(details).dy;
+    expect(pulled - rest, lessThan(64));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump(frame);
+    expect(tester.getTopLeft(details).dy, inExclusiveRange(rest, pulled), reason: 'a spring, not a jump');
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(details).dy, rest);
+    expect(details, findsOneWidget);
+
+    // A fling down carries on at its speed and closes it.
+    gesture = await tester.startGesture(tester.getCenter(handle));
+    var time = Duration.zero;
+    final tops = <double>[];
+    for (var i = 0; i < 6; i++) {
+      time += frame;
+      await gesture.moveBy(const Offset(0, 20), timeStamp: time);
+      await tester.pump(frame);
+      tops.add(tester.getTopLeft(details).dy);
+    }
+    await gesture.up(timeStamp: time);
+    await tester.pump(frame);
+    tops.add(tester.getTopLeft(details).dy);
+    final carried = (tops[6] - tops[5]) / (tops[5] - tops[4]);
+    expect(carried, inInclusiveRange(0.8, 1.25));
+    await tester.pumpAndSettle();
+    expect(details, findsNothing);
+    semantics.dispose();
     await _close(tester, room);
   });
 

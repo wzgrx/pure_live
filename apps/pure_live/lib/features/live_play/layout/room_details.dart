@@ -55,14 +55,25 @@ class RoomDetailsPanel extends StatefulWidget {
   State<RoomDetailsPanel> createState() => _RoomDetailsPanelState();
 }
 
-class _RoomDetailsPanelState extends State<RoomDetailsPanel> {
-  /// How far a pull past the top closes the panel.
+class _RoomDetailsPanelState extends State<RoomDetailsPanel> with SingleTickerProviderStateMixin {
+  /// How far a pull (past the list's top, or on the handle) closes the
+  /// panel.
   static const double _closePull = 64;
 
+  /// How far the list has been pulled past its top.
   double _pull = 0;
+
+  /// How far the handle has taken the panel down from its place (A03.3).
+  late final AnimationController _drop = AnimationController.unbounded(vsync: this);
   bool _closing = false;
 
   LiveRoomController get _controller => widget.controller;
+
+  @override
+  void dispose() {
+    _drop.dispose();
+    super.dispose();
+  }
 
   void _close() {
     if (_closing) return;
@@ -88,6 +99,53 @@ class _RoomDetailsPanelState extends State<RoomDetailsPanel> {
     return false;
   }
 
+  /// How far down the panel is out of sight.
+  double get _height => context.size?.height ?? 0;
+
+  void _started(DragStartDetails details) {
+    // Catches the panel springing back.
+    if (!_closing) _drop.stop();
+  }
+
+  void _dragged(DragUpdateDetails details) {
+    if (_closing) return;
+    // With the finger, down to out of sight; never above its place.
+    _drop.value = (_drop.value + details.delta.dy).clamp(0, _height);
+  }
+
+  /// A spring takes the panel on from the finger at its speed (research
+  /// 2026-10-02 S7): out of sight and closed, or back to its place, as the
+  /// room's other panels (`RoomSidePanel`). A fling decides which, else how
+  /// far it was pulled.
+  void _released(DragEndDetails details) {
+    if (_closing) return;
+    final velocity = details.primaryVelocity ?? 0;
+    final close = velocity.abs() >= AppMotion.panelFlingVelocity ? velocity > 0 : _drop.value > _closePull;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _drop.value = 0;
+      if (close) _close();
+      return;
+    }
+    final height = _height;
+    final run = _drop.animateRelease(
+      ReleaseSpringSimulation(
+        spring: AppMotion.panelSpring,
+        start: _drop.value,
+        end: close ? height : 0,
+        velocity: velocity,
+        // Out of sight is the end: no slow tail at the edge.
+        beyond: close ? height * 0.01 : 0,
+        tolerance: AppMotion.tolerance(MediaQuery.devicePixelRatioOf(context)),
+      ),
+      refreshRate: View.of(context).display.refreshRate,
+    );
+    if (!close) return;
+    _closing = true;
+    run.whenCompleteOrCancel(() {
+      if (mounted) widget.onClose();
+    });
+  }
+
   int _signature() {
     final room = _controller.room;
     return Object.hash(
@@ -100,30 +158,36 @@ class _RoomDetailsPanelState extends State<RoomDetailsPanel> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Material(
+    final panel = Material(
       key: const ValueKey('live-play-details'),
       color: scheme.surfaceContainerLow,
       child: Column(
         children: [
           const Divider(height: 1),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onVerticalDragUpdate: (details) {
-              if (details.delta.dy > 0) _pull += details.delta.dy;
-              if (_pull >= _closePull) _close();
-            },
-            onVerticalDragEnd: (details) {
-              if ((details.primaryVelocity ?? 0) > 600) _close();
-              _pull = 0;
-            },
-            child: SizedBox(
-              height: 20,
-              child: Center(
-                child: SizedBox(
-                  width: 32,
-                  height: 4,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(color: scheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
+          // The handle (research S7): a 48 high row to catch, the 32 × 4
+          // bar in it; a screen reader taps it to fold the details, as
+          // Material's bottom sheet handle.
+          Semantics(
+            key: const ValueKey('live-play-details-handle'),
+            container: true,
+            label: i18n('live_play_details_fold'),
+            onTap: _close,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragStart: _started,
+              onVerticalDragUpdate: _dragged,
+              onVerticalDragEnd: _released,
+              onVerticalDragCancel: () => _released(DragEndDetails(primaryVelocity: 0)),
+              child: SizedBox(
+                height: kMinInteractiveDimension,
+                child: Center(
+                  child: SizedBox(
+                    key: const ValueKey('live-play-details-grip'),
+                    width: 32,
+                    height: 4,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(color: scheme.outlineVariant, borderRadius: BorderRadius.circular(2)),
+                    ),
                   ),
                 ),
               ),
@@ -140,6 +204,14 @@ class _RoomDetailsPanelState extends State<RoomDetailsPanel> {
             ),
           ),
         ],
+      ),
+    );
+    // It moves over the chat below it, never out of its own place.
+    return ClipRect(
+      child: AnimatedBuilder(
+        animation: _drop,
+        builder: (context, panel) => Transform.translate(offset: Offset(0, _drop.value), child: panel),
+        child: panel,
       ),
     );
   }

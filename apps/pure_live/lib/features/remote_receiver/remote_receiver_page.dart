@@ -468,11 +468,17 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // One line: an address split mid-number misleads (A04.1);
+                // large text shrinks it to fit instead.
                 Flexible(
-                  child: SelectableText(
-                    service.address,
-                    key: const ValueKey('remote-sync-address'),
-                    style: styles.t18.copyWith(fontWeight: FontWeight.w600).tabular,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: SelectableText(
+                      service.address,
+                      key: const ValueKey('remote-sync-address'),
+                      maxLines: 1,
+                      style: styles.t18.copyWith(fontWeight: FontWeight.w600).tabular,
+                    ),
                   ),
                 ),
                 IconButton(

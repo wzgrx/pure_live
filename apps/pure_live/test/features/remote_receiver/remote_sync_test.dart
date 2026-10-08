@@ -245,6 +245,20 @@ Future<void> _until(WidgetTester tester, bool Function() done) async {
 double _y(WidgetTester tester, Finder finder) => tester.getTopLeft(finder).dy;
 
 void _pageTests() {
+  testWidgets('A04.1: with 2× text the address stays on one line', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await _pumpPage(tester, devices: [_windows, _legacy]);
+    final address = find.byKey(const ValueKey('remote-sync-address'));
+    final line = tester.getRect(address).height;
+    final style = tester.widget<SelectableText>(address).style!;
+    expect(line, lessThan(style.fontSize! * 2 * 2), reason: 'one line, not two');
+    expect(
+      tester.getRect(address).right,
+      lessThanOrEqualTo(tester.getTopLeft(find.byKey(const ValueKey('remote-sync-copy'))).dx),
+    );
+  });
+
   testWidgets('phone: the note, three groups with titles outside the cards, this device, the switch', (tester) async {
     await _pumpPage(tester, devices: [_windows, _legacy]);
     expect(find.text('请确保两台设备连接到同一个局域网'), findsOneWidget);

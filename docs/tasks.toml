@@ -3268,11 +3268,12 @@ next = "K90 上按 record.md“真机上要看的”看（开着应用代理看 
 id = "Q03.1"
 title = "弹幕握手的 User-Agent 去掉 Dart 前缀：在 K90 上逐平台验证后默认打开（UPGRADES B-2）"
 type = "功能"
-status = "未开始"
+status = "开发中"
 size = "小"
 tier = 3
 stages = ["K90 上逐平台测两种构建", "按结果改默认值"]
 done = 0
+next = "代码部分已做（SOOP 不再拿通用连接器、UA 测试，record.md）；K90 上两种构建逐平台测握手时间和 UA"
 from = "UPGRADES 附录 B-2（V03.3 核对）"
 
 [[task]]

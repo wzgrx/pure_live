@@ -145,6 +145,46 @@ void main() {
     client!.close();
   });
 
+  group('the handshake User-Agent (UPGRADES B-2, Q03.1)', () {
+    /// A loopback WebSocket server that records each upgrade's User-Agent.
+    Future<(HttpServer, List<String?>)> recordingServer() async {
+      final agents = <String?>[];
+      final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+      server.listen((request) async {
+        agents.add(request.headers.value(HttpHeaders.userAgentHeader));
+        final socket = await WebSocketTransformer.upgrade(request);
+        await socket.close();
+      });
+      addTearDown(() => server.close(force: true));
+      return (server, agents);
+    }
+
+    Future<void> connect(HttpServer server, {Map<String, String> headers = const {}, bool plain = false}) async {
+      final channel = await connectIoSocket(
+        Uri.parse('ws://127.0.0.1:${server.port}/'),
+        headers: headers,
+        protocols: null,
+        route: const DirectRoute(),
+        connectTimeout: const Duration(seconds: 5),
+        plainUserAgent: plain,
+      );
+      await channel.close();
+    }
+
+    test("the default handshake sends dart:io's User-Agent prefix", () async {
+      final (server, agents) = await recordingServer();
+      await connect(server, headers: {'user-agent': 'Mozilla/5.0 test'});
+      expect(agents.single, startsWith('Dart/'));
+    });
+
+    test("plainUserAgent sends only the caller's User-Agent, or none", () async {
+      final (server, agents) = await recordingServer();
+      await connect(server, headers: {'user-agent': 'Mozilla/5.0 test'}, plain: true);
+      await connect(server, plain: true);
+      expect(agents, ['Mozilla/5.0 test', null]);
+    });
+  });
+
   test('remote close diagnostics include the close code and reason', () async {
     final failures = <String>[];
     final connector = _Connector(make: () => _FakeChannel(closeCode: 1008, closeReason: 'policy'));

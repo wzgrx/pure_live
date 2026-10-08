@@ -194,4 +194,29 @@ void main() {
       );
     });
   });
+
+  group('the plain danmaku handshake (UPGRADES B-2, Q03.1)', () {
+    test('off by default; on, a connector for the dart:io sockets', () {
+      expect(danmakuHandshake(), isNull);
+      expect(danmakuHandshake(plain: true), isNotNull);
+    });
+
+    test('SOOP, YY and FC2 keep their own handshake; the other 20 sockets take the generic one', () {
+      expect(genericDanmakuHandshakeSites, hasLength(20));
+      expect(
+        genericDanmakuHandshakeSites,
+        isNot(anyOf(contains(SiteIds.soop), contains(SiteIds.yy), contains(SiteIds.fc2Live))),
+      );
+      // No socket of ours to shake hands on.
+      for (final site in [
+        SiteIds.kuaishou,
+        SiteIds.niconico,
+        SiteIds.youtube,
+        SiteIds.steamBroadcast,
+        SiteIds.baiduLive,
+      ]) {
+        expect(genericDanmakuHandshakeSites, isNot(contains(site)), reason: site);
+      }
+    });
+  });
 }

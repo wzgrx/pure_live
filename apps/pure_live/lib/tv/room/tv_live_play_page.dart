@@ -466,6 +466,8 @@ class _Picture extends ConsumerWidget {
           retractions: controller.retractions,
           look: danmakuLookOf(ref),
           visible: showDanmaku,
+          // D05.2: the room's "同屏最大弹幕条数".
+          maxVisible: watchSetting(ref, Settings.danmakuMaxVisibleCount),
         ),
       ],
     );

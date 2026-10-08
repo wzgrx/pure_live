@@ -77,6 +77,7 @@ final class _Layer {
     double refreshRate = 60,
     bool running = true,
     bool held = false,
+    int? maxVisible = 48,
     EmoteTable emotes = EmoteTable.empty,
   }) => tester.pumpWidget(
     Directionality(
@@ -94,6 +95,7 @@ final class _Layer {
             refreshRate: refreshRate,
             running: running,
             held: held,
+            maxVisible: maxVisible,
             emotes: emotes,
           ),
         ),
@@ -353,6 +355,36 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16));
     await tester.pump(const Duration(milliseconds: 16));
     expect(layer.state.flyingCount, 50, reason: 'the local ones still get a place');
+    await layer.close();
+  });
+
+  testWidgets('D05.2: "同屏最大弹幕条数": a lower limit lets the next ones wait; a higher one lets them in', (tester) async {
+    tester.view
+      ..physicalSize = const Size(400, 4000)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final layer = _Layer(tester);
+    await layer.pump(height: 4000, maxVisible: 10);
+    for (var i = 0; i < 30; i++) {
+      layer.messages.add(_chat('$i'));
+    }
+    await layer.run(60, 1);
+    expect(layer.state.flyingCount, 10);
+    expect(layer.state.pendingCount, 20);
+
+    // Raised while they wait: the waiting ones enter at once (four a frame).
+    await layer.pump(height: 4000, maxVisible: 24);
+    await layer.run(60, 0.5);
+    expect(layer.state.flyingCount, 24);
+    expect(layer.state.pendingCount, 6);
+
+    // Lowered: the ones on screen fly on, nothing new enters until fewer
+    // than the limit are left.
+    await layer.pump(height: 4000, maxVisible: 12);
+    layer.messages.add(_chat('等着'));
+    await layer.run(60, 0.5);
+    expect(layer.state.flyingCount, 24, reason: 'none is taken off the screen');
+    expect(layer.state.pendingCount, 7);
     await layer.close();
   });
 

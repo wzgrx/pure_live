@@ -6,7 +6,7 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 199 条；设置 219 个（分节默认 23 条、单独指定 69 个）；来源 35 个；通道 14 个。
+路径规则 199 条；设置 220 个（分节默认 23 条、单独指定 69 个）；来源 35 个；通道 14 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
@@ -32,7 +32,7 @@
 | D02 过滤和屏蔽 | 2 | 7 |  |  |  |
 | D03 飞行弹幕引擎 | 2 |  |  |  |  |
 | D04 数据流和性能 | 1 |  |  |  |  |
-| D05 弹幕设置生效 | 2 | 32 |  |  |  |
+| D05 弹幕设置生效 | 2 | 33 |  |  |  |
 | E01 国内五大平台 | 5 |  | 5 |  |  |
 | E02 其他国内平台 | 1 |  | 13 |  |  |
 | E03 海外平台 | 16 | 1 | 16 |  |  |
@@ -197,7 +197,7 @@
 ## D05 弹幕设置生效
 
 - 代码：`apps/pure_live/lib/shared/danmaku/danmaku_settings.dart`、`apps/pure_live/lib/shared/danmaku/danmaku_templates.dart`
-- 设置：`danmakuFontFamilyFileName`、`hideDanmaku`、`noEmojiMode`、`danmakuTopArea`、`danmakuArea`、`danmakuBottomArea`、`danmakuSpeed`、`danmakuFontSize`、`danmakuFontWeight`、`danmakuFontBorder`、`danmakuOpacity`、`enableDanmakuDisplay`、`enableDanmakuStroke`、`danmakuPausedBehavior`、`danmakuFps`、`danmakuAutoFps`、`savedDanmakuTemplate`、`danmakuFontFamilyName`、`enablePipDanmaku`、`pipDanmakuAutoScale`、`pipDanmaNoEmojiMode`、`pipDanmakuUseOriginalColor`、`pipDanmakuColor`、`pipDanmakuFontSize`、`pipDanmakuFontWeight`、`pipDanmakuSpeed`、`pipDanmakuOpacity`、`pipDanmakuArea`、`pipDanmakuMaxVisibleCount`、`pipDanmakuEmitInterval`、`pipDanmakuFps`、`pipDanmakuAutoFps`
+- 设置：`danmakuFontFamilyFileName`、`hideDanmaku`、`noEmojiMode`、`danmakuTopArea`、`danmakuArea`、`danmakuBottomArea`、`danmakuSpeed`、`danmakuFontSize`、`danmakuFontWeight`、`danmakuFontBorder`、`danmakuOpacity`、`enableDanmakuDisplay`、`enableDanmakuStroke`、`danmakuPausedBehavior`、`danmakuFps`、`danmakuAutoFps`、`danmakuMaxVisibleCount`、`savedDanmakuTemplate`、`danmakuFontFamilyName`、`enablePipDanmaku`、`pipDanmakuAutoScale`、`pipDanmaNoEmojiMode`、`pipDanmakuUseOriginalColor`、`pipDanmakuColor`、`pipDanmakuFontSize`、`pipDanmakuFontWeight`、`pipDanmakuSpeed`、`pipDanmakuOpacity`、`pipDanmakuArea`、`pipDanmakuMaxVisibleCount`、`pipDanmakuEmitInterval`、`pipDanmakuFps`、`pipDanmakuAutoFps`
 
 ## E01 国内五大平台
 

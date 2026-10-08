@@ -504,6 +504,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     required bool visible,
     required _FpsSettings fps,
     required String pausedBehavior,
+    required int maxVisible,
   }) => ClipRect(
     child: RepaintBoundary(
       child: ValueListenableBuilder<DisplayModeInfo?>(
@@ -525,6 +526,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               retractions: _room.retractions,
               look: look,
               visible: visible,
+              // D05.2: "同屏最大弹幕条数" (3.x's 48 by default).
+              maxVisible: maxVisible,
               fps: rate.fps,
               refreshRate: rate.refreshRate,
               // B02 c3: paused, as "暂停时的弹幕" says.
@@ -609,6 +612,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     final longPress = showDanmaku && watchSetting(ref, Settings.enableDanmakuLongPressInteraction);
     final diagnostics = watchSetting(ref, Settings.showPortraitDiagnostics);
     final pausedBehavior = watchSetting(ref, Settings.danmakuPausedBehavior);
+    final maxVisible = watchSetting(ref, Settings.danmakuMaxVisibleCount);
     final video = RepaintBoundary(child: _picture(fit));
     if (pip) {
       // U.2j: the same surface as the in-app floating window; the picture
@@ -759,6 +763,7 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
                         visible: showDanmaku && !(widget.portraitStream && portraitDanmaku == 'hidden'),
                         fps: fps,
                         pausedBehavior: pausedBehavior,
+                        maxVisible: maxVisible,
                       ),
                     ],
                   ),

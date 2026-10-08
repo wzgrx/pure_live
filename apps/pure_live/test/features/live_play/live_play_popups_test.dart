@@ -789,6 +789,7 @@ void main() {
       'longPress': '长按画面弹幕打开屏蔽操作',
       'autoFps': '弹幕帧率跟随界面刷新率',
       'fps': '弹幕帧率',
+      'maxVisible': '同屏最大弹幕条数',
     };
     for (final MapEntry(:key, :value) in items.entries) {
       expect(_in('danmaku-setting-$key', find.text(value)), findsOneWidget, reason: key);
@@ -822,6 +823,19 @@ void main() {
       reason: 'follows the display: greyed, with the rate in use',
     );
     expect(_in('danmaku-setting-fps', find.text('60 FPS')), findsOneWidget);
+    // D05.2 (V01.4): "同屏最大弹幕条数" after the frame rate, 3.x's 48 by
+    // default, 10..120 in steps of 2; a change is the room's setting.
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-maxVisible'))).dy,
+      greaterThan(tester.getTopLeft(find.byKey(const ValueKey('danmaku-setting-fps'))).dy),
+    );
+    final maxVisible = tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-maxVisible')));
+    expect((maxVisible.min, maxVisible.max, maxVisible.divisions, maxVisible.value), (10, 120, 55, 48));
+    expect(_in('danmaku-setting-maxVisible', find.text('48 条')), findsOneWidget);
+    maxVisible.onChanged!(20);
+    await _settle(tester);
+    expect(room.services.store.settings.get(Settings.danmakuMaxVisibleCount), 20);
+    expect(_in('danmaku-setting-maxVisible', find.text('20 条')), findsOneWidget);
 
     // D4: the stroke width greys out (stays) while the stroke is off.
     expect(tester.widget<Slider>(find.byKey(const ValueKey('danmaku-slider-strokeWidth'))).onChanged, isNotNull);

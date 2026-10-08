@@ -158,6 +158,11 @@ NOTES: dict[str, dict] = {
     'showChatGifts': _new('A08.6 c3，B-21'),
     'danmakuPausedBehavior': _new('A07.10 c3'),
     'danmakuFps': _danmaku('123', '30', '240'),
+    'danmakuMaxVisibleCount': {
+        **_new('D05.2，V01.4'),
+        'v3range': '3.x 没有这个设置，直播间和多画面写死 48',
+        'verdict': 'v4 新加（D05.2，V01.4，D-036）：默认 48 和 3.x 一样；10～120，超出范围（上游电视版存 0 表示按设备）读成 48',
+    },
     'repeatedDanmakuWindowSeconds': {
         'v3range': f'1～30（`{_D}:259-261`，导入备份时）',
         'kind': 'fixed',

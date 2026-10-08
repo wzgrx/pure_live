@@ -148,7 +148,8 @@ int danmakuFrameDivisor({required double refreshRate, int? cap}) {
 /// message is laid out once and recorded as a picture, cached by content and
 /// look (c6); a frame only moves the pictures. The opacity goes into the
 /// colours (c5). A message that finds no lane waits (at most 120, 5 s), four
-/// enter a frame at most, 48 are on screen at most (c7). Messages arrive
+/// enter a frame at most, [maxVisible] are on screen at most (c7; 3.x's 48,
+/// the room's "同屏最大弹幕条数", D05.2). Messages arrive
 /// only while [running]; a danmaku composed on this device (U.2k) always
 /// enters and flies on while the video is paused (c10).
 class DanmakuOverlay extends StatefulWidget {
@@ -180,8 +181,10 @@ class DanmakuOverlay extends StatefulWidget {
   /// Hidden: nothing flies and nothing waits.
   final bool visible;
 
-  /// At most this many messages on screen at once (3.x 48; the mini
-  /// windows' "最大同时显示数量", U.2j); null for no limit.
+  /// At most this many of the platform's messages on screen at once (3.x
+  /// 48; the room's "同屏最大弹幕条数", D05.2; the mini windows' "最大同时显示数量",
+  /// U.2j); null for no limit. A lower one lets the ones on screen fly out
+  /// and the next ones wait; a higher one lets the waiting ones in.
   final int? maxVisible;
 
   /// The frame-rate cap ([danmakuFrameDivisor]); null paints every refresh.

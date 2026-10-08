@@ -495,6 +495,7 @@ void main() {
     });
     await _settle(tester);
     var overlay = tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay));
+    expect(overlay.maxVisible, 48, reason: 'D05.2: "同屏最大弹幕条数" is 3.x\'s 48 by default');
     expect(overlay.fps, 30);
     expect(overlay.look.fontFamily, 'LXGWWenKai');
     expect(overlay.look.textOnly, isTrue);
@@ -519,6 +520,18 @@ void main() {
     await tester.runAsync(() => services.store.settings.set(Settings.danmakuPausedBehavior, 'pause'));
     await tester.pump();
     expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).running, isFalse);
+    await _close(tester, services);
+  });
+
+  testWidgets('D05.2: "同屏最大弹幕条数" applies to the room\'s picture at once', (tester) async {
+    final danmaku = FakeDanmaku();
+    final services = await _pump(tester, site: FakeSite(liveRoom()), danmaku: danmaku);
+    await tester.runAsync(() => services.store.settings.set(Settings.danmakuMaxVisibleCount, 10));
+    await _settle(tester);
+    expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).maxVisible, 10);
+    await tester.runAsync(() => services.store.settings.set(Settings.danmakuMaxVisibleCount, 120));
+    await _settle(tester);
+    expect(tester.widget<DanmakuOverlay>(find.byType(DanmakuOverlay)).maxVisible, 120);
     await _close(tester, services);
   });
 

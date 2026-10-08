@@ -515,6 +515,20 @@ abstract final class Settings {
   /// Automatic frame rate.
   static const danmakuAutoFps = BoolSetting('danmakuAutoFps', section: 'danmaku', defaultValue: true);
 
+  /// New (docs/D-弹幕/D05-弹幕设置生效/D05.2-同屏最大弹幕条数可以设置; V01.4, D-036): at most this many
+  /// of the platform's danmaku fly over the picture at once ("同屏最大弹幕条数";
+  /// 3.x always 48, the default). Danmaku composed on this device do not
+  /// count. 10..120; a value out of range (pure_live_TV's backups store 0
+  /// for "by device") reads as 48.
+  static const danmakuMaxVisibleCount = IntSetting(
+    'danmakuMaxVisibleCount',
+    section: 'danmaku',
+    defaultValue: 48,
+    min: 10,
+    max: 120,
+    resetOutOfRange: true,
+  );
+
   /// Tap a danmaku for actions.
   static const enableDanmakuTapInteraction = BoolSetting(
     'enableDanmakuTapInteraction',
@@ -1594,6 +1608,7 @@ abstract final class Settings {
     danmakuPausedBehavior,
     danmakuFps,
     danmakuAutoFps,
+    danmakuMaxVisibleCount,
     enableDanmakuTapInteraction,
     enableDanmakuLongPressInteraction,
     collapseRepeatedDanmaku,

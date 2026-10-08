@@ -39,7 +39,8 @@ String danmakuTemplateDescription(String? preset) => switch (preset) {
 /// Every danmaku setting of 3.x's `DanmakuSettingsContent`
 /// (`pages/danmaku_settings_page.dart:195-420`), with its ranges and keys,
 /// grouped as U.2f confirmed: 观看模板, 显示范围, 样式, 重复弹幕, 画面弹幕交互,
-/// 流畅度 (显示范围 also holds "暂停时的弹幕", B02 c3, new in v4); then the
+/// 流畅度 (显示范围 also holds "暂停时的弹幕", B02 c3, and 流畅度 "同屏最大弹幕条数",
+/// D05.2, both new in v4); then the
 /// groups of [extra] (the live room's chat list and
 /// picture-in-picture danmaku). Settings that depend on a switch grey out
 /// instead of vanishing (D4, D5). Everything applies at once. The live
@@ -76,6 +77,7 @@ class DanmakuSettingsContent extends ConsumerWidget {
     final fps = watchSetting(ref, Settings.danmakuFps);
     final refreshMode = watchSetting(ref, Settings.refreshRateMode);
     final paused = watchSetting(ref, Settings.danmakuPausedBehavior);
+    final maxVisible = watchSetting(ref, Settings.danmakuMaxVisibleCount);
     watchSetting(ref, Settings.savedDanmakuTemplate);
     return ListView(
       key: const ValueKey('live-play-danmaku-settings'),
@@ -265,6 +267,18 @@ class DanmakuSettingsContent extends ConsumerWidget {
                   onChanged: autoFps ? null : (value) => set(Settings.danmakuFps, value.round()),
                 );
               },
+            ),
+            // D05.2 (V01.4): how many fly over the picture at once, 3.x's 48 by
+            // default; in steps of 2 so 48 stays on the slider.
+            SettingSliderRow(
+              settingKey: 'maxVisible',
+              title: i18n('danmaku_max_visible'),
+              value: maxVisible.clamp(10, 120).toDouble(),
+              min: 10,
+              max: 120,
+              divisions: 55,
+              display: i18n('danmaku_max_visible_value', args: {'count': '$maxVisible'}),
+              onChanged: (value) => set(Settings.danmakuMaxVisibleCount, value.round()),
             ),
           ],
         ),

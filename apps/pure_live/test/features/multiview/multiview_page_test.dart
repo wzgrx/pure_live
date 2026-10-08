@@ -810,6 +810,19 @@ void main() {
       await _close(tester, services);
     });
 
+    testWidgets('D05.2: the cell\'s danmaku follow "同屏最大弹幕条数" (48 by default, 3.x)', (tester) async {
+      final (services, _) = await _pump(tester, const Size(393, 852));
+      await _pick(tester, '1');
+      await tester.tap(_key('multiview-danmaku'));
+      await _wait(tester);
+      DanmakuOverlay overlay() => tester.widget<DanmakuOverlay>(_inCell(1, find.byType(DanmakuOverlay)));
+      expect(overlay().maxVisible, 48);
+      await tester.runAsync(() => services.store.settings.set(Settings.danmakuMaxVisibleCount, 20));
+      await _wait(tester);
+      expect(overlay().maxVisible, 20);
+      await _close(tester, services);
+    });
+
     testWidgets('c4 (D-035): the cells follow "屏幕常亮"', (tester) async {
       final (services, _) = await _pump(tester, const Size(393, 852));
       await _pick(tester, '1');

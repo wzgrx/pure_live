@@ -2097,6 +2097,17 @@ commit = "b8462638a"
 old = ["F.2a", "T06e.1"]
 
 [[task]]
+id = "D05.2"
+title = "同屏最大弹幕条数可以设置（接 V01.4）"
+type = "功能"
+status = "待真机"
+date = "2026-10-08"
+size = "小"
+tier = 3
+from = "V01.4 提议（D-036）；上游 pure_live_TV 9a7bb104"
+note = "新设置 danmakuMaxVisibleCount，默认 48（和 3.x 一样），10～120；直播间、多画面、电视直播间跟它；小窗另有自己的条数"
+
+[[task]]
 id = "D06.1"
 title = "弹幕功能余项：功能清点里弹幕部分的 3 项缺失、2 项有问题"
 type = "功能"
@@ -3494,11 +3505,12 @@ note = "同意做（D-036）；参考 flame_barrage 3eddae8"
 id = "V01.4"
 title = "同屏最大弹幕条数可以设置"
 type = "功能"
-status = "未开始"
+status = "已确认"
 size = "小"
 tier = 3
 old = ["T06e.5"]
-note = "同意做（D-036）；参考 pure_live_TV 9a7bb104"
+note = "同意做（D-036）；评估和设计写在 README（维护者按 D-003 选），实现任务 D05.2"
+to = ["D05.2"]
 
 [[task]]
 id = "V01.5"

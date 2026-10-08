@@ -54,3 +54,8 @@
 ## 可能和别的任务冲突的文件
 
 - `features/live_play/logic/room_controller.dart`（C01.4、E06.2 也改它）；`features/settings/playback_tiles.dart`、`settings_catalog.dart`（A04.1）；`shared/danmaku/pip_danmaku_settings.dart`（A08.7 接着改颜色行）。
+
+## K90 复查（2026-10-08，master a3b799737）
+
+- 设置 → 弹幕的最后几组：画面弹幕交互 → 流畅度 → 弹幕列表（列表样式、在聊天列表显示礼物）→ 小窗弹幕 → 更多 ✓。
+- 在这里关礼物开关、开着的直播间马上生效：没看。

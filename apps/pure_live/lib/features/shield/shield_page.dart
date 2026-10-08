@@ -27,9 +27,8 @@ class ShieldPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
-      appBar: AppBar(toolbarHeight: short ? 48 : null, title: Text(i18n('shield_title'))),
+      appBar: AppBar(toolbarHeight: WindowClassScope.toolbarHeightOf(context), title: Text(i18n('shield_title'))),
       body: LayoutBuilder(
         builder: (context, constraints) {
           // The component's cards keep 12 from its edges: the column is

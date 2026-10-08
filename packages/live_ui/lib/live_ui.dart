@@ -59,3 +59,4 @@ export 'src/widgets/stream_menu_button.dart';
 export 'src/widgets/tab_label.dart';
 export 'src/widgets/video_centre_button.dart';
 export 'src/widgets/video_state_view.dart';
+export 'src/widgets/window_layout.dart';

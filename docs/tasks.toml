@@ -862,14 +862,14 @@ branch = "worktree-agent-a770fdd52c3109749（刚开始，未提交）"
 id = "A04.1"
 title = "尺寸和字号适配：高度分档、分屏、折叠屏、字号上限、触控区域"
 type = "性能"
-status = "暂停"
+status = "开发中"
 size = "中"
 tier = 2
 old = ["P06", "T14g.1"]
 stages = ["高度分档", "字号上限", "触控区域"]
-done = 0
-next = "先看旧工作区里的改动能否直接用，再补测试"
-branch = "worktree-agent-a39fe9339ffb138a9（做了大半，未提交）"
+done = 1
+next = "第 2 阶段字号上限"
+branch = "本机工作区 worktree-agent-a0aa96c1b7aaaa422"
 
 [[task]]
 id = "A05.1"

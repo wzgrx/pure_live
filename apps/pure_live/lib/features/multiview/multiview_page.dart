@@ -438,8 +438,9 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
   // ---- build ----
 
   static _Arrangement _arrangementOf(Size size) {
-    // A short and wide page is a landscape phone, whatever its width (5.1).
-    if (size.height < 480 && size.width > size.height) return _Arrangement.landscape;
+    // A short and wide page is a landscape phone, whatever its width (5.1);
+    // a phone's split screen (compact both ways) stays upright (A04.1).
+    if (WindowClass.of(size).isPhoneLandscape) return _Arrangement.landscape;
     if (size.width >= 840) return _Arrangement.wide;
     return _Arrangement.portrait;
   }

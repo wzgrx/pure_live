@@ -177,7 +177,7 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
       selected: _source == source,
       onSelected: (_) => _select(source),
     );
-    return Column(
+    final picker = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ?widget.header,
@@ -238,7 +238,7 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
               return ListView.builder(
                 key: const ValueKey('multiview-picker-list'),
                 padding: const EdgeInsets.only(bottom: 16),
-                itemExtent: 56,
+                itemExtent: _RoomTile.height,
                 itemCount: rooms.length,
                 itemBuilder: (context, index) {
                   final room = rooms[index];
@@ -250,11 +250,27 @@ class _MultiviewRoomPickerState extends ConsumerState<MultiviewRoomPicker> {
         ),
       ],
     );
+    // Too short for the search, the sources and a few rooms (a phone's
+    // split screen, large text; A04.1): the whole picker scrolls instead of
+    // squeezing the list away.
+    final least = MediaQuery.textScalerOf(context).scale(140) + 3 * _RoomTile.height;
+    return LayoutBuilder(
+      builder: (context, constraints) => !constraints.hasBoundedHeight || constraints.maxHeight >= least
+          ? picker
+          : SingleChildScrollView(
+              key: const ValueKey('multiview-picker-scroll'),
+              physics: const PureLiveScrollPhysics(),
+              child: SizedBox(height: least, child: picker),
+            ),
+    );
   }
 }
 
 class _RoomTile extends StatelessWidget {
   const new({required this.room, required this.shownIn, required this.onTap});
+
+  /// The height of a row.
+  static const double height = 56;
 
   final LiveRoom room;
   final int? shownIn;

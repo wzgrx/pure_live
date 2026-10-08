@@ -3,11 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_ui/src/scope.dart';
+import 'package:live_ui/src/theme/grid_columns.dart';
 import 'package:live_ui/src/theme/text_styles.dart';
 import 'package:live_ui/src/theme/text_wrapping.dart';
 import 'package:live_ui/src/widgets/app_dialog.dart';
 import 'package:live_ui/src/widgets/app_toast.dart';
 import 'package:live_ui/src/widgets/loading_styles.dart';
+import 'package:live_ui/src/widgets/window_layout.dart';
 
 // The one status component (docs/A-界面设计/A02-组件/A02.1-通用组件 c2–c7): six states
 // (skeleton, loading, empty, error, restricted, offline) in four places
@@ -36,8 +38,9 @@ enum AppStatusType {
 
 /// The window height under which a page's state lies on its side (icon
 /// left, words right; a phone held sideways, whose content is about 300
-/// high, U.1c c7): UI_PLAN §5.1's compact height.
-const double statusSideBySideHeight = 480;
+/// high, U.1c c7): docs/specs/UI.md §5.1's compact height
+/// ([WindowClass.isPhoneLandscape]).
+const double statusSideBySideHeight = windowCompactHeight;
 
 /// Loading, empty, error, restricted and offline states of a page, a block
 /// or a card cover (3.x `AppStatusView`, docs/A-界面设计/A02-组件/A02.1-通用组件).
@@ -48,8 +51,9 @@ const double statusSideBySideHeight = 480;
 /// first tonal filled with an icon that says what it does, the second a text
 /// button (C1). [details] (the raw error) adds "详情" as the second button
 /// when there is none; it opens the whole text, selectable and copyable (C4).
-/// In a window lower than [statusSideBySideHeight] and wider than high the
-/// state lies on its side.
+/// On a phone held sideways ([WindowClass.isPhoneLandscape]: lower than
+/// [statusSideBySideHeight] and at least 600 wide) the state lies on its
+/// side; a phone's split screen (compact both ways) keeps it upright.
 ///
 /// [compact] is the form inside a block (a tab, a panel): a 32 icon in the
 /// variant ink without the circle. [isMini] is the card cover's: a small
@@ -61,7 +65,9 @@ const double statusSideBySideHeight = 480;
 /// it ([title], "加载中..." by default).
 ///
 /// No `LayoutBuilder`: the view also sits where its height is measured
-/// first (`SliverFillRemaining`), which a `LayoutBuilder` cannot answer.
+/// first (`SliverFillRemaining`), which a `LayoutBuilder` cannot answer. It
+/// reads the classes of the app's area instead ([WindowClassScope], kept on
+/// purpose by A02.1 and A04.1).
 class AppStatusView extends StatelessWidget {
   /// Creates the view.
   const new({
@@ -150,7 +156,8 @@ class AppStatusView extends StatelessWidget {
     final theme = Theme.of(context);
     final config = LiveUiScope.of(context);
     final small = isMini || compact;
-    final size = small ? 24.0 : (MediaQuery.sizeOf(context).width >= 600 ? 32.0 : 28.0);
+    final wide = WindowClassScope.of(context).width != WindowWidthClass.compact;
+    final size = small ? 24.0 : (wide ? 32.0 : 28.0);
     final spinner = LoadingStyles.build(
       LoadingStyles.normalize(config.loadingStyle),
       color: config.loadingColor ?? iconColor ?? theme.colorScheme.primary,
@@ -235,8 +242,7 @@ class AppStatusView extends StatelessWidget {
       );
     }
 
-    final window = MediaQuery.sizeOf(context);
-    final sideways = !compact && window.height < statusSideBySideHeight && window.width > window.height;
+    final sideways = !compact && WindowClassScope.of(context).isPhoneLandscape;
     final mark = compact
         ? Icon(glyph, size: 32, color: iconColor ?? scheme.onSurfaceVariant)
         : Container(

@@ -1,4 +1,7 @@
 import 'dart:math' as math;
+import 'dart:ui' show Size;
+
+import 'package:flutter/foundation.dart' show immutable;
 
 /// The window width classes (docs/specs/UI.md §5.1, Android's window size
 /// classes).
@@ -26,6 +29,78 @@ enum WindowWidthClass {
     if (width < 1600) return large;
     return extraLarge;
   }
+}
+
+/// Heights below this are compact (docs/specs/UI.md §5.1): a phone held
+/// sideways, a phone's split screen, a small window.
+const double windowCompactHeight = 480;
+
+/// Heights from this on are expanded (docs/specs/UI.md §5.1).
+const double windowExpandedHeight = 900;
+
+/// The window height classes (docs/specs/UI.md §5.1, Android's window size
+/// classes).
+enum WindowHeightClass {
+  /// Lower than 480 (phones held sideways, a phone's split screen, small
+  /// windows).
+  compact,
+
+  /// 480–899 (phones held upright, tablets held sideways).
+  medium,
+
+  /// 900 and higher (tall phones, tablets held upright).
+  expanded;
+
+  /// The class of a window [height] logical pixels high.
+  static WindowHeightClass of(double height) {
+    if (height < windowCompactHeight) return compact;
+    if (height < windowExpandedHeight) return medium;
+    return expanded;
+  }
+}
+
+/// The width and height classes of an area (a window, a page or a pane),
+/// read from the constraints its parent gives (docs/specs/UI.md §5.1; A04.1).
+///
+/// | area | classes | |
+/// |---|---|---|
+/// | 400×869 (K90 upright) | compact / medium | |
+/// | 821×400 (K90 sideways, less the camera hole) | medium / compact | [isPhoneLandscape] |
+/// | 400×420 (a phone's split screen) | compact / compact | upright, not sideways |
+/// | 673×841 (a foldable's inner screen) | medium / medium | |
+/// | 1280×800 (a tablet) | large / medium | |
+@immutable
+final class WindowClass {
+  /// The classes [width] and [height].
+  const new(this.width, this.height);
+
+  /// The classes of an area [size] large.
+  new of(Size size) : this(WindowWidthClass.of(size.width), WindowHeightClass.of(size.height));
+
+  /// The width class.
+  final WindowWidthClass width;
+
+  /// The height class.
+  final WindowHeightClass height;
+
+  /// Lower than [windowCompactHeight]: app bars take their compact height.
+  bool get isShort => height == WindowHeightClass.compact;
+
+  /// A phone held sideways: short and at least 600 wide. "Height compact
+  /// first" (§5.1): it is laid out as a landscape phone whatever its width
+  /// class. A phone's split screen (about 400×420, or half of a phone held
+  /// sideways) is short too but compact both ways, and keeps the upright
+  /// layout.
+  bool get isPhoneLandscape => isShort && width != WindowWidthClass.compact;
+
+  @override
+  bool operator ==(Object other) => other is WindowClass && other.width == width && other.height == height;
+
+  @override
+  int get hashCode => Object.hash(width, height);
+
+  @override
+  String toString() => 'WindowClass(${width.name}, ${height.name})';
 }
 
 /// How many columns a grid takes (docs/specs/UI.md §5.3, U.4a c15):

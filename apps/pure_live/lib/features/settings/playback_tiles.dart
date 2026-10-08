@@ -658,7 +658,9 @@ class PipDanmakuPage extends ConsumerWidget {
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final side = constraints.maxWidth >= 840 || (constraints.maxHeight < 480 && constraints.maxWidth >= 560);
+          final side =
+              constraints.maxWidth >= 840 ||
+              (constraints.maxHeight < windowCompactHeight && constraints.maxWidth >= 560);
           final intro = SettingsNote(
             i18n('settings_pip_danmaku_intro'),
             padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),

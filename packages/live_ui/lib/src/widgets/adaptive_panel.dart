@@ -27,6 +27,11 @@ const double sidePanelBreakpoint = 600;
 /// list scrolls with the [PrimaryScrollController] (`primary: true`), which
 /// moves the panel first. Without it the panel is as tall as its content,
 /// at most 85% of the screen.
+///
+/// A fold or hinge that splits the window (A04.1) keeps the panel on one
+/// side of it: the lower half when the fold lies across (tabletop posture:
+/// the controls on the part that rests on the table), otherwise the end half
+/// for the side panel and the start half for the bottom one.
 Future<T?> showAdaptivePanel<T>(
   BuildContext context, {
   required WidgetBuilder builder,
@@ -34,6 +39,9 @@ Future<T?> showAdaptivePanel<T>(
   String? barrierLabel,
   double? openHeight,
 }) {
+  final rtl = Directionality.of(context) == TextDirection.rtl;
+  // Where the panel goes on a split window (DisplayFeatureSubScreen).
+  final bottomAnchor = Offset(rtl ? double.maxFinite : 0, double.maxFinite);
   if (!(side ?? MediaQuery.sizeOf(context).width >= sidePanelBreakpoint)) {
     final height = MediaQuery.sizeOf(context).height;
     if (openHeight != null) {
@@ -42,6 +50,7 @@ Future<T?> showAdaptivePanel<T>(
       final open = room <= 0 ? 1.0 : ((height * openHeight - kMinInteractiveDimension) / room).clamp(0.3, 1.0);
       return showModalBottomSheet<T>(
         context: context,
+        anchorPoint: bottomAnchor,
         isScrollControlled: true,
         showDragHandle: true,
         useSafeArea: true,
@@ -63,6 +72,7 @@ Future<T?> showAdaptivePanel<T>(
     }
     return showModalBottomSheet<T>(
       context: context,
+      anchorPoint: bottomAnchor,
       isScrollControlled: true,
       showDragHandle: true,
       useSafeArea: true,
@@ -72,6 +82,7 @@ Future<T?> showAdaptivePanel<T>(
   }
   return showGeneralDialog<T>(
     context: context,
+    anchorPoint: Offset(rtl ? 0 : double.maxFinite, double.maxFinite),
     barrierDismissible: true,
     barrierLabel: barrierLabel ?? MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: OnVideoColors.scrimMid,

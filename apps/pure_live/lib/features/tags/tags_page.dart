@@ -179,10 +179,9 @@ class _TagsPageState extends ConsumerState<TagsPage> {
       ref.watch(tagAssignmentsProvider).value ?? const {},
       ref.watch(tagFollowsProvider).value ?? const [],
     );
-    final short = MediaQuery.sizeOf(context).height < 480;
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: short ? 48 : null,
+        toolbarHeight: WindowClassScope.toolbarHeightOf(context),
         title: Text(i18n('tag_management')),
         actions: [
           IconButton(

@@ -232,14 +232,18 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
           localizationsDelegates: GlobalMaterialLocalizations.delegates,
           builder: (context, child) {
             // The room's in-app floating window over every page (U.2j); not
-            // on the television, whose room is always full screen.
+            // on the television, whose room is always full screen. The pages
+            // read their size classes from the area they get (A04.1), not
+            // from the whole screen.
             Widget result = MaterialUiThemeBridge(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  child ?? const SizedBox.shrink(),
-                  if (!tv) const Positioned.fill(child: FloatingRoomLayer()),
-                ],
+              child: WindowClassScope(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    child ?? const SizedBox.shrink(),
+                    if (!tv) const Positioned.fill(child: FloatingRoomLayer()),
+                  ],
+                ),
               ),
             );
             if (Platform.isAndroid && refreshMode != null) {

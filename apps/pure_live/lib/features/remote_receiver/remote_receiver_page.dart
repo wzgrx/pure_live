@@ -334,8 +334,10 @@ class _RemoteReceiverPageState extends ConsumerState<RemoteReceiverPage> {
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Two columns on wide windows; a phone held sideways (short)
-          // keeps one (UI_PLAN §5.1).
-          final two = constraints.maxWidth >= remoteSyncTwoColumns && constraints.maxHeight >= 480 - kToolbarHeight;
+          // keeps one (docs/specs/UI.md §5.1).
+          final two =
+              constraints.maxWidth >= remoteSyncTwoColumns &&
+              constraints.maxHeight >= windowCompactHeight - kToolbarHeight;
           final note = Padding(
             padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
             child: Text(

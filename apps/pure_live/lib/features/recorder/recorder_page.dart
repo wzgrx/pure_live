@@ -334,7 +334,7 @@ class _RecorderPageState extends ConsumerState<RecorderPage> {
               builder: (context, constraints) {
                 // Wide: a tablet, a desktop window (not a phone on its side,
                 // whose height is compact). Only the page's own size counts.
-                final wide = constraints.maxWidth >= 840 && constraints.maxHeight >= 480;
+                final wide = constraints.maxWidth >= 840 && constraints.maxHeight >= windowCompactHeight;
                 final gutter = wide ? 24.0 : 16.0;
                 _listTop = wide ? 16.0 : 12.0;
                 return Column(

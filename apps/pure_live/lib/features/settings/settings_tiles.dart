@@ -641,7 +641,8 @@ class SettingActionTile extends StatelessWidget {
 
 /// The app bar of the settings pages: the title centred on phones (3.x
 /// `MyTheme`), at the start in the wide layout's right pane; a compact
-/// height when the window is short (a phone held sideways).
+/// height when the area is short (a phone held sideways or in split screen;
+/// [WindowClassScope], A04.1).
 PreferredSizeWidget settingsAppBar(
   BuildContext context, {
   required String title,
@@ -649,7 +650,6 @@ PreferredSizeWidget settingsAppBar(
   Widget? leading,
   bool embedded = false,
 }) {
-  final short = MediaQuery.sizeOf(context).height < 480;
   return AppBar(
     title: Text(
       title,
@@ -657,7 +657,7 @@ PreferredSizeWidget settingsAppBar(
     ),
     leading: leading,
     automaticallyImplyLeading: leading == null,
-    toolbarHeight: short ? 48 : kToolbarHeight,
+    toolbarHeight: WindowClassScope.toolbarHeightOf(context),
     scrolledUnderElevation: 0,
     actions: [...actions, if (actions.isNotEmpty) const SizedBox(width: 4)],
   );

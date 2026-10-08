@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'package:live_ui/live_ui.dart' show windowCompactHeight;
+
 /// How the live room is shown (docs/specs/UI.md §5.3: one state for the
 /// room; the picture is mounted once and moves between them). Android's
 /// picture-in-picture is followed separately (the system's window).
@@ -60,8 +62,9 @@ enum ControlsArrangement {
 /// "expanded"; 3.x split from 680, which squeezed the picture, U.2d W1).
 const double roomWideMinWidth = 840;
 
-/// Heights below this are a phone held sideways, whatever the width.
-const double roomCompactMaxHeight = 480;
+/// Heights below this are a phone held sideways, whatever the width (the
+/// compact height of docs/specs/UI.md §5.1, A04.1).
+const double roomCompactMaxHeight = windowCompactHeight;
 
 /// The chat list's column of a phone held sideways (A07.17 c2).
 const double phoneLandscapeChatWidth = 280;

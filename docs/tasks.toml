@@ -2497,9 +2497,10 @@ old = ["M3", "T02d.1"]
 id = "E04.2"
 title = "小红书分享短链认 xhslink.com/o/ 前缀：整段分享文案粘贴后能打开直播间"
 type = "平台"
-status = "未开始"
+status = "完成"
 size = "小"
 tier = 3
+date = "2026-10-08"
 from = "上游 pure_live 6229284a8（W01.3 对照）"
 note = "从分享文案里抽链接 4.x 已有（links.dart sharedHttpUrls），缺的是 /o/ 前缀（xiaohongshu_api.dart _shortPath 只认 /m/）"
 

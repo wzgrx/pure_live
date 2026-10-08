@@ -531,7 +531,11 @@ abstract final class XiaohongshuApi {
   static final RegExp _canonicalPath = RegExp(r'^/livestream/([1-9][0-9]{0,19})/?$');
   static final RegExp _dynamicPath = RegExp(r'^/livestream/dynpath[A-Za-z0-9]{8}/([1-9][0-9]{0,19})/?$');
   static final RegExp _hinaPath = RegExp(r'^/hina/livestream/([1-9][0-9]{0,19})(?:/[A-Za-z0-9_-]{1,64})?/?$');
-  static final RegExp _shortPath = RegExp(r'^/(?:m/)?[A-Za-z0-9]{1,64}/?$');
+
+  /// `/<code>` or `/<prefix>/<code>` with a prefix of one to four letters:
+  /// 3.x knew `/m/`; the app's shares give `/o/` (seen 2026-10-06, E04.2,
+  /// upstream pure_live 6229284a8).
+  static final RegExp _shortPath = RegExp(r'^/(?:[A-Za-z]{1,4}/)?[A-Za-z0-9]{1,64}/?$');
 
   /// The room [raw] names without a request (3.x's `XiaohongshuLink.parse`):
   /// a bare room id, an app deep link ([deepLinkRoomId]) or a share page
@@ -580,8 +584,9 @@ abstract final class XiaohongshuApi {
         ?.group(1);
   }
 
-  /// A short link `xhslink.com/<code>` or `xhslink.com/m/<code>` (3.x's
-  /// `shortUri`), else null.
+  /// A short link `xhslink.com/<code>` or `xhslink.com/<prefix>/<code>`
+  /// (3.x's `shortUri` knew only the prefix `m`; `/o/` and any prefix of
+  /// one to four letters since E04.2), else null.
   static Uri? shortLink(String raw) {
     final uri = _webUri(raw);
     return uri != null && uri.host == 'xhslink.com' && _shortPath.hasMatch(uri.path) ? uri : null;

@@ -944,6 +944,7 @@ final class Recorder {
               finalizedBytes: finalized,
             );
           }
+          if (attempt.inputIntegrityError) task.inputDamagedKept = true;
           task.removePendingAttempt(attempt);
           _update(task);
         } else {

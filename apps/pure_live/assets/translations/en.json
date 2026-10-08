@@ -1466,6 +1466,7 @@
     "recorder_folder_open_failed": "Could not open the recording folder",
     "recorder_folder_private_copied": "The recording folder is inside the app's own storage, which the system file manager cannot open; path copied: {path}. To open it directly, choose a shared folder (such as Download) in the recording settings",
     "recorder_input_coverage_incomplete": "Missing or expired live segments were skipped during recording. Content is incomplete; valid captured segments can still be kept and merged.",
+    "recorder_input_damaged_kept": "Some packets were damaged while recording. The MP4 was made anyway; the original segments are kept in the recording folder for checking.",
     "recorder_input_format_failed": "The recorder could not identify this route's media format. It will try the next route or quality.",
     "recorder_input_integrity_failed": "The recording input contains damaged packets. Original segments were retained without automatic remuxing or deletion. Inspect the files before deciding whether to record again.",
     "recorder_input_open_failed": "The recorder could not open this live CDN route. It will refresh the URL and try the next route or quality.",

@@ -167,6 +167,12 @@ final class RecordCapture {
   var _mediaStarted = false;
   var _packetError = false;
   var _tailDiscarded = false;
+  // FFmpeg describes the input in pieces (one log call per part of a
+  // "Stream #0:1[0x101]: Audio: aac" line); they are put together here
+  // until the output is described.
+  final _streamLine = StringBuffer();
+  var _inputDescribed = false;
+  final _audioStreams = <int>{};
   var _coverageGap = false;
   var _seconds = 0;
 
@@ -223,9 +229,16 @@ final class RecordCapture {
   }
 
   void _log(String message) {
+    _noteStreams(message);
     final text = sanitizeFfmpegLog(message).trim();
     if (text.isEmpty) return;
-    if (FfmpegMediaIntegrity.hasPacketError(text)) {
+    // HLS live (YY's sslproxy playlists on the K90, H01.6) cuts an audio
+    // packet at every segment boundary; FFmpeg drops it (`discardcorrupt`)
+    // and the recording loses a few milliseconds of sound, nothing a player
+    // notices: not damage.
+    final dropped = FfmpegMediaIntegrity.corruptPacketStream(text);
+    final audioDrop = dropped != null && _audioStreams.contains(dropped);
+    if (!audioDrop && FfmpegMediaIntegrity.hasPacketError(text)) {
       // Ending the input at a stop or lease boundary can cut its last packet,
       // which FFmpeg reports as corrupt and drops (`discardcorrupt`): that
       // is the tail, not damage of what was recorded (3.x's relay finished
@@ -301,6 +314,26 @@ final class RecordCapture {
       _done.complete();
     }
   }
+
+  void _noteStreams(String message) {
+    if (_inputDescribed) return;
+    _streamLine.write(message.toLowerCase());
+    final text = _streamLine.toString();
+    if (text.contains('output #0')) {
+      _inputDescribed = true;
+      _streamLine.clear();
+      return;
+    }
+    final match = _audioStream.firstMatch(text);
+    if (match != null) _audioStreams.add(int.parse(match.group(1)!));
+    final end = text.lastIndexOf('\n');
+    if (match != null || end >= 0 || text.length > 400) {
+      _streamLine.clear();
+      if (match == null && end >= 0) _streamLine.write(text.substring(end + 1));
+    }
+  }
+
+  static final _audioStream = RegExp(r'stream #0:(\d+)[^:\n]*: audio');
 
   CaptureEnded _ended(int code) {
     final tail = _lines.join('\n');

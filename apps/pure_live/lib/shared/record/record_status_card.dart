@@ -26,6 +26,7 @@ typedef RecordCardFacts = ({
   String? failure,
   bool coverageIncomplete,
   bool tailDiscarded,
+  bool damagedKept,
   int seconds,
   int bytes,
   DateTime? started,
@@ -62,6 +63,7 @@ RecordCardFacts recordCardFacts(
     failure: state == RecordCardState.failed && task != null ? failure?.call(task) : null,
     coverageIncomplete: task?.inputCoverageIncomplete ?? false,
     tailDiscarded: task?.inputTailDiscarded ?? false,
+    damagedKept: task?.inputDamagedKept ?? false,
     // The counters of a running task redraw in their own small parts.
     seconds: moving ? 0 : task?.recordedSeconds ?? 0,
     bytes: moving ? 0 : task?.fileSize ?? 0,
@@ -516,7 +518,8 @@ class RecordStatusCard extends StatelessWidget {
       ),
     };
     // The recording's gaps (3.x's warning on the card; the centre only).
-    final gaps = compact && (facts.coverageIncomplete || facts.tailDiscarded) && _showsGaps(facts.state);
+    final gaps =
+        compact && (facts.coverageIncomplete || facts.tailDiscarded || facts.damagedKept) && _showsGaps(facts.state);
     final textGap = compact ? 6.0 : 10.0;
     return DecoratedBox(
       key: ValueKey('record-card-${facts.state.name}'),
@@ -558,6 +561,7 @@ class RecordStatusCard extends StatelessWidget {
                       [
                         if (facts.coverageIncomplete) i18n('recorder_input_coverage_incomplete'),
                         if (facts.tailDiscarded) i18n('recorder_input_tail_discarded'),
+                        if (facts.damagedKept) i18n('recorder_input_damaged_kept'),
                       ].join('\n'),
                       style: theme.textTheme.bodySmall?.copyWith(color: warning, height: 1.45),
                     ),

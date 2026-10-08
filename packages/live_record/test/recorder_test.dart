@@ -327,16 +327,46 @@ void main() {
       expect(task.inputTailDiscarded, isTrue);
     });
 
-    test('a damaged attempt keeps its source and fails the join', () async {
+    test('a damaged attempt is joined and keeps its source (H01.6)', () async {
       final task = (await recorder.addTask(room()))!;
       await until(() => task.status == RecordStatus.running);
       ffmpeg.executions.single.log('[h264 @ 0x1] Packet corrupt (stream = 0, dts = 1)');
       await Future<void>.delayed(const Duration(milliseconds: 20));
       await recorder.stopTask(task);
-      expect(task.status, RecordStatus.failed);
-      expect(task.lastErrorStage, 'ffmpeg.inputintegrity');
-      expect(task.pendingAttempts.single.inputIntegrityError, isTrue);
+      expect(task.status, RecordStatus.stopped);
+      expect(task.lastError, isNull);
+      expect(task.pendingAttempts, isEmpty);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      expect(task.inputDamagedKept, isTrue);
       expect(Directory(task.outputDir!).listSync().where((file) => file.path.endsWith('.ts')), hasLength(1));
+    });
+
+    test('HLS audio drops at segment boundaries are not damage (H01.6, YY on the K90)', () async {
+      final task = (await recorder.addTask(room()))!;
+      await until(() => task.status == RecordStatus.running);
+      // FFmpeg Kit hands over each av_log call: a stream line comes in parts.
+      [
+        '  Stream #0:0',
+        '[0x100]',
+        ': Video: h264 (High), yuv420p, 1280x720, 25 fps\n',
+        '  Stream #0:1',
+        '[0x101]',
+        ': Audio: aac (LC), 44100 Hz, stereo, fltp\n',
+        "Output #0, mpegts, to 'seg.ts':\n",
+        '  Stream #0:0: Video: h264\n',
+      ].forEach(ffmpeg.executions.single.log);
+      for (var i = 0; i < 5; i++) {
+        ffmpeg.executions.single.log(
+          '[mpegts @ 0x1] Packet corrupt (stream = 1, dts = ${257745150 + i * 180000}), dropping it.',
+        );
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      await recorder.stopTask(task);
+      expect(task.status, RecordStatus.stopped);
+      expect(task.lastError, isNull);
+      expect(task.lastOutputPath, endsWith('.mp4'));
+      expect(task.inputDamagedKept, isFalse);
+      expect(Directory(task.outputDir!).listSync().where((file) => file.path.endsWith('.ts')), isEmpty);
     });
 
     test('restore joins an interrupted recording and drops unsupported platforms', () async {

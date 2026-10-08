@@ -344,6 +344,15 @@ abstract final class FfmpegMediaIntegrity {
     ].any(value.contains);
   }
 
+  /// The stream of a demuxer's "Packet corrupt (stream = N, dts = …)", or
+  /// null for any other line.
+  static int? corruptPacketStream(String message) {
+    final match = _corruptPacket.firstMatch(message);
+    return match == null ? null : int.tryParse(match.group(1)!);
+  }
+
+  static final _corruptPacket = RegExp(r'packet corrupt \(stream = (\d+)', caseSensitive: false);
+
   /// Damage that makes a join output untrustworthy.
   static bool hasError(String message) {
     final value = message.toLowerCase();

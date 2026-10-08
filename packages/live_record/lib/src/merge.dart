@@ -14,9 +14,6 @@ enum MergeFailure {
   /// No segment of the attempt.
   noSegments,
 
-  /// The capture reported damaged packets; the source is kept.
-  inputIntegrity,
-
   /// The clock-v1 journal is missing, partial or foreign.
   segmentClock,
 
@@ -72,7 +69,9 @@ final class RecordMerger {
 
   /// Joins attempt [filePrefix] in [directory]. [recordedSeconds] scales the
   /// timeout; [allowLegacy] admits 3.x schema-1 segments (crash recovery);
-  /// [damaged] refuses the join; [cancelled] is checked between steps.
+  /// [damaged] (the capture reported damaged packets) still joins but keeps
+  /// the segments next to the MP4 (H01.6; 3.x refused the join and the user
+  /// got nothing); [cancelled] is checked between steps.
   /// [onProgress] gets the join's progress from FFmpeg's statistics
   /// ([mergeProgress]): rising only, at most 0.99 while FFmpeg runs, and 1
   /// once the MP4 is committed. The skipped empty tail is deleted with the
@@ -88,7 +87,6 @@ final class RecordMerger {
     void Function(double progress)? onProgress,
   }) async {
     bool isCancelled() => cancelled?.call() ?? false;
-    if (damaged) return const MergeResult.failed(MergeFailure.inputIntegrity);
     final dir = Directory(directory);
     if (!dir.existsSync()) return const MergeResult.failed(MergeFailure.directoryMissing);
     final candidates = <File>[];
@@ -195,7 +193,7 @@ final class RecordMerger {
       }
       await partial.rename(output.path);
       onProgress?.call(1);
-      if (deleteSources) {
+      if (deleteSources && !damaged) {
         var removedAll = true;
         for (final segment in all) {
           try {

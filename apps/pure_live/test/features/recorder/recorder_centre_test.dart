@@ -96,7 +96,8 @@ void _nineStates(AppRecording recording, String file) {
     ..selectedQuality = '原画'
     ..lastUpdate = _now
     ..lastOutputPath = file
-    ..inputCoverageIncomplete = true;
+    ..inputCoverageIncomplete = true
+    ..inputDamagedKept = true;
 }
 
 const _ids = ['r', 'c', 'j', 'p', 'q', 'w', 'f', 's', 'i'];
@@ -424,6 +425,7 @@ void main() {
     expect(_inCard('s', _key('record-panel-view')), findsNothing, reason: 'the centre is here already');
     expect(_inCard('s', _key('record-card-gaps')), findsOneWidget);
     expect(_inCard('s', find.textContaining('录制中已跳过缺失或过期的直播片段')), findsOneWidget);
+    expect(_inCard('s', find.textContaining('MP4 已照常合成')), findsOneWidget, reason: 'H01.6');
     // Not recording: no sentence, just "开始录制".
     expect(_inCard('i', find.text('没在录制')), findsOneWidget);
     expect(_inCard('i', find.text('开始后一直录到主播下播，或你点“停止录制”。')), findsNothing);

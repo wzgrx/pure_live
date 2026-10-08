@@ -157,6 +157,7 @@ final class RecordTask {
     this.lastErrorStage,
     this.inputTailDiscarded = false,
     this.inputCoverageIncomplete = false,
+    this.inputDamagedKept = false,
     this.qualityOverride,
     this.recordDanmakuOverride,
     this.autoRecord,
@@ -237,6 +238,7 @@ final class RecordTask {
       lastErrorStage: _stage(json['lastErrorStage']),
       inputTailDiscarded: _bool(json['inputTailDiscarded']),
       inputCoverageIncomplete: _bool(json['inputCoverageIncomplete']),
+      inputDamagedKept: _bool(json['inputDamagedKept']),
       wasStoppedByUser: _bool(json['wasStoppedByUser']),
       qualityOverride: _nullableString(json['qualityOverride']),
       recordDanmakuOverride: _nullableBool(json['recordDanmakuOverride']),
@@ -358,6 +360,10 @@ final class RecordTask {
   /// FFmpeg reported skipped HLS segments (a gap, not damage).
   bool inputCoverageIncomplete;
 
+  /// An attempt of this session had damaged packets: it was joined anyway
+  /// and its segments were kept next to the MP4 (H01.6).
+  bool inputDamagedKept;
+
   /// The user stopped the task.
   bool wasStoppedByUser;
 
@@ -419,6 +425,7 @@ final class RecordTask {
     final startedAt = now ?? DateTime.now();
     inputTailDiscarded = false;
     inputCoverageIncomplete = false;
+    inputDamagedKept = false;
     recordedSeconds = 0;
     fileSize = 0;
     recordingStartedAt = startedAt;
@@ -532,6 +539,7 @@ final class RecordTask {
     'qualityOverride': ?qualityOverride,
     'recordDanmakuOverride': ?recordDanmakuOverride,
     'autoRecord': ?autoRecord,
+    if (inputDamagedKept) 'inputDamagedKept': true,
     'lastOutputPath': ?lastOutputPath,
   };
 

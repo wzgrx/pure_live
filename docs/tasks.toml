@@ -2618,10 +2618,11 @@ from = "上游 pure_live 2b9ffc7a3（W01.1 对照）；正常下播不合并是 
 id = "H01.6"
 title = "YY 等 HLS 直播每两秒报一次音频“Packet corrupt”，录制被当成损坏、一直拿不到 MP4"
 type = "功能"
-status = "未开始"
+status = "待真机"
 size = "小"
 tier = 1
 from = "S02.5 K90 复测 H01.5（2026-10-08）"
+date = "2026-10-08"
 [[task]]
 id = "H02.1"
 title = "录制中心与录制设置（含录制接入）"

@@ -393,7 +393,8 @@ final class HuyaSite extends LiveSite
 
   /// The media User-Agent: `huya.user_agent` of the player configuration
   /// once [loadPlayUserAgent] read it, else the built-in HYSDK UA
-  /// (REG-HUYA-024).
+  /// (REG-HUYA-024; an older HYSDK client than the built-in one is
+  /// ignored, [HuyaApi.playUserAgent]).
   String get playUserAgent => _playUserAgent ?? HuyaApi.hysdkUserAgent;
 
   /// Races [playConfigUrls] once for the player configuration (3.x

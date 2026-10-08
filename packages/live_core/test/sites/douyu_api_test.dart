@@ -612,6 +612,12 @@ void main() {
       expect(DouyuApi.statedLifetime('https://a.test/r.flv?wsAuth=x&expire=300'), const Duration(seconds: 300));
       expect(DouyuApi.statedLifetime('https://a.test/r.flv?expire=0'), isNull);
       expect(DouyuApi.statedLifetime('https://a.test/r.flv'), isNull);
+      // E01.8: the CDN signs the first `expire` and still cuts at 300 s when
+      // `&expire=0` is appended (upstream a858550bb), so the lease keeps it.
+      expect(
+        DouyuApi.statedLifetime('https://a.test/r.flv?wsAuth=x&expire=300&fcdn=ws&expire=0'),
+        const Duration(seconds: 300),
+      );
     });
 
     test('forced renewal (2-1): a FLV URL stating no lease gets five minutes; stated leases and HLS are unchanged', () {

@@ -232,8 +232,9 @@ abstract final class HuyaApi {
       'Chrome/90.0.4430.91 Mobile Safari/537.36 Edg/117.0.0.0';
 
   /// Huya's PC client UA: the media requests' default, the native WUP token
-  /// request and the message board (3.x `HuyaRequestParams.hysdkUa`).
-  static const String hysdkUserAgent = 'HYSDK(Windows,30000002)_APP(pc_exe&7090000&official)_SDK(trans&2.35.0.5996)';
+  /// request and the message board (3.x `HuyaRequestParams.hysdkUa`), at
+  /// the client version upstream and simple_live send (upstream a858550bb).
+  static const String hysdkUserAgent = 'HYSDK(Windows,30000002)_APP(pc_exe&7100004&official)_SDK(trans&2.40.0.6448)';
 
   /// A desktop Chrome UA for room pages (alias lookup).
   static const String desktopUserAgent =
@@ -1027,8 +1028,18 @@ abstract final class HuyaApi {
   }
 
   /// `huya.user_agent` of the player configuration
-  /// (`assets/play_config.json`), or null.
-  static String? playUserAgent(Map<String, Object?>? config) => jsonString(_object(config?['huya'])?['user_agent']);
+  /// (`assets/play_config.json`), or null. A HYSDK UA naming an older PC
+  /// client (`pc_exe&<version>`) than [hysdkUserAgent] is null too, so a
+  /// stale file never downgrades the built-in UA.
+  static String? playUserAgent(Map<String, Object?>? config) {
+    final configured = jsonString(_object(config?['huya'])?['user_agent']);
+    if (configured == null || !configured.startsWith('HYSDK(')) return configured;
+    final version = _pcExeVersion(configured);
+    return version != null && version < _pcExeVersion(hysdkUserAgent)! ? null : configured;
+  }
+
+  static int? _pcExeVersion(String userAgent) =>
+      int.tryParse(RegExp(r'pc_exe&(\d+)&').firstMatch(userAgent)?.group(1) ?? '');
 
   /// The numeric room of a room page: `var TT_ROOM_DATA = {...}`'s
   /// `profileRoom`, else the first `"profileRoom"` in the page; null

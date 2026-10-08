@@ -156,6 +156,11 @@ NOTES: dict[str, dict] = {
     'danmakuOpacity': _danmaku('122', '0', '1'),
     'danmakuListStyle': _new('A07.1，U.2a'),
     'showChatGifts': _new('A08.6 c3，B-21'),
+    'showChatNames': {
+        **_new('A08.10'),
+        'v3range': '3.x 没有这个设置，弹幕列表总显示用户名',
+        'verdict': 'v4 新加（A08.10，用户 2026-10-09）：默认开，和 3.x 一样显示用户名；关掉后直播间的弹幕列表只显示内容，长按面板仍显示用户名',
+    },
     'danmakuPausedBehavior': _new('A07.10 c3'),
     'danmakuFps': _danmaku('123', '30', '240'),
     'holdDanmakuOnPress': {

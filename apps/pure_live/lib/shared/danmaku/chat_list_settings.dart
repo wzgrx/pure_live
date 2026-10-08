@@ -11,8 +11,8 @@ import 'package:pure_live/shared/danmaku/setting_rows.dart';
 /// The look of the chat list (the `danmakuListStyle` setting, U.2a choice
 /// A): compact lines by default, 3.x's cards on request.
 enum ChatListStyle {
-  /// One line per message: "用户名：" in a secondary colour (or the message's
-  /// own colour), then the message.
+  /// One line per message: "用户名：" in the name role (A08.10: semibold, a
+  /// secondary colour or the platform's), then the message.
   compact,
 
   /// 3.x `DanmakuItem`: a card per message with a coloured dot.
@@ -33,8 +33,8 @@ List<Widget> danmakuListAndPipGroups() => [
   const PipDanmakuSettings(),
 ];
 
-/// "弹幕列表": the room's chat list look (U.2a, v4) and whether gifts show
-/// in it (B-21). Both are settings of every room (A08.6 c3), so a change
+/// "弹幕列表": the room's chat list look (U.2a, v4), whether it names the
+/// senders (A08.10) and whether gifts show in it (B-21). Both are settings of every room (A08.6 c3), so a change
 /// here applies to the rooms already open.
 class ChatListSettings extends ConsumerWidget {
   /// Creates the group.
@@ -64,6 +64,14 @@ class ChatListSettings extends ConsumerWidget {
             selected: {listStyle},
             onSelectionChanged: (selection) => set(Settings.danmakuListStyle, selection.first.name),
           ),
+        ),
+        // A08.10: names on or off, right under the look they change.
+        SettingSwitchRow(
+          settingKey: 'names',
+          title: i18n('danmaku_list_show_names'),
+          subtitle: i18n('danmaku_list_show_names_desc'),
+          value: watchSetting(ref, Settings.showChatNames),
+          onChanged: (value) => set(Settings.showChatNames, value),
         ),
         SettingSwitchRow(
           settingKey: 'gifts',

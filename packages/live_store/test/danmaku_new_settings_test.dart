@@ -70,4 +70,18 @@ void main() {
     });
     expect(fresh.settings.get(Settings.holdDanmakuOnPress), isTrue);
   });
+
+  test('A08.10: "显示用户名" is on by default (3.x always named senders); a danmaku setting carried by backups', () async {
+    expect(store.settings.get(Settings.showChatNames), isTrue);
+    expect(Settings.showChatNames.section, 'danmaku');
+    expect(Settings.showChatNames.scope, SettingScope.synced);
+    expect(Settings.byKey('showChatNames'), Settings.showChatNames);
+    await store.settings.set(Settings.showChatNames, false);
+    final file = await BackupService(store).exportAll();
+    expect((file['danmaku']! as Map)['showChatNames'], isFalse);
+    final other = await memoryStore();
+    addTearDown(other.close);
+    await BackupService(other).restoreAll(file);
+    expect(other.settings.get(Settings.showChatNames), isFalse);
+  });
 }

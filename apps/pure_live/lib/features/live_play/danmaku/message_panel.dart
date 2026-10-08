@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -114,23 +115,19 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
     final scheme = theme.colorScheme;
     final message = _message;
     final name = message.userName.trim();
-    final body = theme.textTheme.bodyLarge?.regular;
     final hint = theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant);
     final level = message.userLevel.trim();
     final text = Text.rich(
       TextSpan(
         children: [
+          // A08.10: the chat list's two roles; the name shows here even
+          // with "显示用户名" off (this is where the sender is blocked).
           if (name.isNotEmpty)
             TextSpan(
-              text: '$name：',
-              style: body?.copyWith(
-                color: chatNameColor(message.color, scheme.surfaceContainerLowest) ?? scheme.onSurfaceVariant,
-              ),
+              text: '$name${ChatText.nameEnd}',
+              style: ChatText.name(theme, chatNameInk(message, scheme.surfaceContainerLowest, scheme)),
             ),
-          TextSpan(
-            text: message.message,
-            style: body?.copyWith(color: scheme.onSurface),
-          ),
+          TextSpan(text: message.message, style: ChatText.content(theme)),
         ],
       ),
       maxLines: 6,

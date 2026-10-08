@@ -1751,6 +1751,14 @@ List<SettingsEntry> _build() {
       keywords: ['聊天', '列表', '卡片', '紧凑'],
     )
     ..toggle(
+      'danmaku_show_names',
+      'danmaku_list_show_names',
+      Settings.showChatNames,
+      null,
+      desc: 'danmaku_list_show_names_desc',
+      keywords: ['用户名', '昵称', '名字', '聊天', '列表'],
+    )
+    ..toggle(
       'danmaku_show_gifts',
       'live_play_show_gifts',
       Settings.showChatGifts,

@@ -90,6 +90,10 @@ void main() {
       find.descendant(of: find.byKey(const ValueKey('danmaku-list-style')), matching: find.text('卡片')),
     );
     expect(h.settings.get(Settings.danmakuListStyle), 'card');
+    // A08.10: "显示用户名", on by default.
+    expect(tester.widget<Switch>(_switch('names')).value, isTrue);
+    await tapSettings(tester, _switch('names'));
+    expect(h.settings.get(Settings.showChatNames), isFalse);
     expect(tester.widget<Switch>(_switch('gifts')).value, isTrue);
     await tapSettings(tester, _switch('gifts'));
     expect(h.settings.get(Settings.showChatGifts), isFalse);
@@ -140,6 +144,10 @@ void main() {
     expect(find.text('弹幕 › 弹幕列表'), findsOneWidget);
     await searchSettingsFor(tester, '列表样式');
     expect(settingsRow('danmaku_list_style'), findsOneWidget);
+    // A08.10: "显示用户名" next to them.
+    await searchSettingsFor(tester, '用户名');
+    expect(settingsRow('danmaku_show_names'), findsOneWidget);
+    expect(find.text('弹幕 › 弹幕列表'), findsOneWidget);
 
     // The similarity and Douyu filters live on the block page (U.12d).
     await searchSettingsFor(tester, '相似');

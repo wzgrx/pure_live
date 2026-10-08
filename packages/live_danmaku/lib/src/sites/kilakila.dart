@@ -8,53 +8,39 @@ import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`): a gift
 /// line (10004), or a gift animation (220) that is not a combo hit
-/// ([KilakilaDanmakuProtocol.gift]).
+/// ([KilakilaDanmakuProtocol.gift]), as a [LiveGift] (E05.5): [price] is its
+/// value in red beans, free at 0, [icon] its picture.
 @immutable
-final class KilakilaGift {
+final class KilakilaGift extends LiveGift {
   /// Creates the gift.
+  ///
+  /// [id] is `c.id`, or empty; [name] `c.name` (`念念相守`); [count]
+  /// `c.doubleCount`, at least 1; [receiverName] `c.giftReceiverName`, the
+  /// broadcaster or a guest on the microphone, empty when missing;
+  /// [unitPrice] the price of one when it is known.
   const new({
-    required this.id,
-    required this.name,
-    required this.count,
+    required super.id,
+    required super.name,
+    required super.count,
     required this.price,
-    this.receiverName = '',
+    super.receiverName,
     this.icon,
-  });
+    super.unitPrice,
+  }) : super(totalValue: price, unit: LiveGiftUnit.redBean, free: price == 0, iconUrl: icon);
 
-  /// `c.id`, or empty.
-  final String id;
-
-  /// `c.name` (`念念相守`).
-  final String name;
-
-  /// `c.doubleCount`, at least 1.
-  final int count;
-
-  /// Red beans (红豆) for all [count] gifts.
+  /// Red beans (红豆) for all [count] gifts; 0 for a gift that costs
+  /// nothing (克拉之星, 守护灯牌…), which is [free].
   final int price;
-
-  /// `c.giftReceiverName`: the broadcaster, or a guest on the microphone;
-  /// empty when missing.
-  final String receiverName;
 
   /// `c.pic` when it is an https URL.
   final Uri? icon;
 
-  /// A gift that costs nothing (price 0: 克拉之星, 守护灯牌…).
-  bool get free => price == 0;
-
   @override
   bool operator ==(Object other) =>
-      other is KilakilaGift &&
-      other.id == id &&
-      other.name == name &&
-      other.count == count &&
-      other.price == price &&
-      other.receiverName == receiverName &&
-      other.icon == icon;
+      super == other && other is KilakilaGift && other.price == price && other.icon == icon;
 
   @override
-  int get hashCode => Object.hash(id, name, count, price, receiverName, icon);
+  int get hashCode => Object.hash(super.hashCode, price, icon);
 
   @override
   String toString() => 'KilakilaGift($name ×$count, $price)';
@@ -302,10 +288,12 @@ abstract final class KilakilaDanmakuProtocol {
   /// line that ends the combo has the total (2026-09-30: all 1,932 lines of
   /// 30 broadcasts ended a combo, none followed a gift sent at once).
   ///
-  /// The text is the page's line (`SEND_TEXT`):
-  /// `我送了{receiver}{count}个{gift}`, with “豆咖” for a missing receiver;
-  /// the sender is `n` and `u`, the level `l`, the id and time the
-  /// response's `mid` and `created_at`. Null without a `c` object or a gift
+  /// The price of one is known for a line (`c.price`) and for an animation
+  /// of one gift. The text is the shared `念念相守 ×3` (E05.5: was the
+  /// page's line `我送了{receiver}{count}个{gift}`, which the app could not
+  /// translate; the receiver stays in [LiveGift.receiverName]). The sender
+  /// is `n` and `u`, the level `l`, the id and time the response's `mid` and
+  /// `created_at`. Null without a `c` object or a gift
   /// name.
   static LiveMessage? gift(Map<Object?, Object?> content, Map<Object?, Object?> response) {
     final item = content['c'];
@@ -332,13 +320,14 @@ abstract final class KilakilaDanmakuProtocol {
       price: line ? price * count : price,
       receiverName: receiverName,
       icon: icon != null && icon.scheme == 'https' ? icon : null,
+      unitPrice: line || count == 1 ? price : null,
     );
     final sender = content['n'];
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: sender is String ? sender : '',
       userId: _id(content['u']),
-      message: '我送了${receiverName.isEmpty ? '豆咖' : receiverName}$count个${present.name}',
+      message: present.plainText,
       color: LiveMessageColor.white,
       userLevel: _level(content['l']),
       messageId: _id(response['mid']),

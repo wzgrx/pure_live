@@ -261,7 +261,21 @@ void main() {
         }),
       ).single;
       expect(gift.type, LiveMessageType.gift);
-      expect(gift.message, 'patron 送出了 Hype（100 Kicks）');
+      // E05.5: the shared text, without the sender (the line shows the name)
+      // and without Chinese written in the adapter.
+      expect(gift.message, 'Hype ×1');
+      expect(gift.data, const KickGift(name: 'Hype', amount: 100));
+      expect(
+        (gift.gift?.unitPrice, gift.gift?.totalValue, gift.gift?.unit, gift.gift?.tier),
+        (100, 100, LiveGiftUnit.kicks, LiveGiftTier.normal),
+      );
+      final unnamed = _read(
+        _frame('KicksGifted', {
+          'sender': {'id': 5, 'username': 'patron'},
+          'gift': {'amount': 0},
+        }),
+      ).single;
+      expect((unnamed.message, unnamed.gift?.totalValue), ('Kicks ×1', null));
     });
 
     test('Pusher errors and refused subscriptions ask for a reconnect', () {

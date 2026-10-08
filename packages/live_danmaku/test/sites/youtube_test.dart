@@ -1557,8 +1557,9 @@ void main() {
           ('S1', '@sticker 送出 Super Sticker'),
           ('S2', '@sticker 送出 Super Sticker：A cat waving'),
           ('S3', '送出 Super Sticker €2.00'),
-          // B-23: the gift item is read now, as a gift (was not read).
-          ('X2', 'sent Donut'),
+          // B-23: the gift item is read now, as a gift (was not read); E05.5:
+          // its text is the shared `<name> ×<count>`.
+          ('X2', 'Donut ×1'),
         ],
       );
       final messages = YouTubeDanmakuProtocol.chat(answer).messages;
@@ -2644,7 +2645,7 @@ void main() {
               LiveMessageType.gift,
               name,
               '',
-              'sent $gift',
+              '$gift ×1',
               id,
               null,
               LiveMessageColor.white,
@@ -2660,6 +2661,19 @@ void main() {
       final gift = poll.messages.first.data! as YouTubeGift;
       expect('$gift', 'YouTubeGift(sent Donut)');
       expect(gift.hashCode, poll.messages.first.data.hashCode);
+      // E05.5: the same gift as every platform gives it.
+      expect(poll.messages.map((message) => message.gift), [
+        for (final file in ['donut', 'ramen_jp', 'heart'])
+          isA<LiveGift>()
+              .having((gift) => gift.count, 'count', 1)
+              .having((gift) => gift.totalValue, 'value', isNull)
+              .having(
+                (gift) => gift.iconUrl,
+                'icon',
+                Uri.parse('https://www.gstatic.com/youtube/img/pdg/gift/assets/$file.png=w640-h640'),
+              ),
+      ]);
+      expect(poll.messages.first.gift?.name, 'Donut');
     });
 
     test('fields: the text, the name, the image; channel id and time when present; items without text', () {
@@ -2729,7 +2743,7 @@ void main() {
             'G1',
             '@giver',
             'UCsyntheticGiver00000001',
-            'sent Cake',
+            'Cake ×1',
             1790781300000000,
             YouTubeGift(name: 'Cake', text: 'sent Cake', image: Uri.parse('https://www.gstatic.com/a.png=w640')),
           ),
@@ -2742,9 +2756,12 @@ void main() {
             const YouTubeGift(name: '', text: 'a gift in another wording'),
           ),
           ('', '', '', 'sent', null, const YouTubeGift(name: '', text: 'sent')),
-          ('G4', '', '', 'sent Tea', null, const YouTubeGift(name: 'Tea', text: 'sent Tea')),
+          ('G4', '', '', 'Tea ×1', null, const YouTubeGift(name: 'Tea', text: 'sent Tea')),
         ],
       );
+      // E05.5: a gift not written `sent <name>` has no name and keeps its
+      // text.
+      expect(messages.map((message) => message.gift?.name), ['Cake', '', '', 'Tea']);
       expect(messages.every((message) => message.type == LiveMessageType.gift), isTrue);
       expect(const YouTubeGift(name: 'a', text: 'b'), isNot(const YouTubeGift(name: 'a', text: 'c')));
     });
@@ -2761,7 +2778,7 @@ void main() {
           for (final entry in trace)
             if (entry['event'] == 'chat') '${entry['type']} ${entry['userName']} ${entry['text']}',
         ],
-        ['gift @b2tm11fb1ixskbc sent Donut', 'gift @rmkwwr2ljd sent Ramen', 'gift @sddw613ul0fh sent Heart'],
+        ['gift @b2tm11fb1ixskbc Donut ×1', 'gift @rmkwwr2ljd Ramen ×1', 'gift @sddw613ul0fh Heart ×1'],
       );
       // Gifts pass the message filter (it filters chat only); the gate
       // tells a gift sent again by its id.

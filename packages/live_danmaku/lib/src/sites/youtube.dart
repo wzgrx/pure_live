@@ -32,16 +32,16 @@ final class YouTubeChatEntry {
 }
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`): YouTube's
-/// newer gift item, `giftMessageViewModel` ("sent Donut"; M5.F, B-23). The
-/// item names no price, count, channel or time.
+/// newer gift item, `giftMessageViewModel` ("sent Donut"; M5.F, B-23), as a
+/// [LiveGift] (E05.5) of one, with [image] its picture. The item names no
+/// price, count, channel or time.
 @immutable
-final class YouTubeGift {
+final class YouTubeGift extends LiveGift {
   /// Creates the gift.
-  const new({required this.name, required this.text, this.image});
-
-  /// The gift's name: [text] without its leading `sent ` (`Donut`), the
-  /// requests asking for English; empty when [text] is not written so.
-  final String name;
+  ///
+  /// [name] is [text] without its leading `sent ` (`Donut`), the requests
+  /// asking for English; empty when [text] is not written so.
+  const new({required super.name, required this.text, this.image}) : super(iconUrl: image);
 
   /// `text.content`, trimmed: what the page shows after the sender's name
   /// (`sent Donut`).
@@ -52,10 +52,10 @@ final class YouTubeGift {
 
   @override
   bool operator ==(Object other) =>
-      other is YouTubeGift && other.name == name && other.text == text && other.image == image;
+      super == other && other is YouTubeGift && other.text == text && other.image == image;
 
   @override
-  int get hashCode => Object.hash(name, text, image);
+  int get hashCode => Object.hash(super.hashCode, text, image);
 
   @override
   String toString() => 'YouTubeGift($text)';
@@ -664,25 +664,28 @@ abstract final class YouTubeDanmakuProtocol {
   /// A gift (`giftMessageViewModel`, B-23) as the page shows it: the
   /// sender's name (`authorName.content`, trimmed) and the text after it
   /// (`text.content`, trimmed: `sent Donut`), with the gift's image
-  /// (`giftImage.sources`); the item's id. The recorded items have no
+  /// (`giftImage.sources`); the item's id. The text is the shared
+  /// `Donut ×1` (E05.5: was the page's English `sent Donut`), or the page's
+  /// text when it is not written `sent <name>`. The recorded items have no
   /// channel id or time; they are read when present. Null without text.
   static LiveMessage? _gift(Map<Object?, Object?> gift) {
     final text = _content(gift['text']);
     if (text.isEmpty) return null;
     final image = _largest(_map(gift['giftImage'])['sources']);
+    final present = YouTubeGift(
+      name: text.startsWith(_giftVerb) ? text.substring(_giftVerb.length).trim() : '',
+      text: text,
+      image: image.isEmpty ? null : Uri.tryParse(image),
+    );
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: _content(gift['authorName']),
       userId: _string(gift['authorExternalChannelId']),
-      message: text,
+      message: present.name.isEmpty ? text : present.plainText,
       messageId: _string(gift['id']),
       sentAt: _time(gift['timestampUsec']),
       color: LiveMessageColor.white,
-      data: YouTubeGift(
-        name: text.startsWith(_giftVerb) ? text.substring(_giftVerb.length).trim() : '',
-        text: text,
-        image: image.isEmpty ? null : Uri.tryParse(image),
-      ),
+      data: present,
     );
   }
 

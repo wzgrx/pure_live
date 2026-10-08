@@ -3,10 +3,12 @@ import 'package:live_danmaku/src/filters/block_list.dart';
 import 'package:live_danmaku/src/filters/message_gate.dart';
 import 'package:live_danmaku/src/filters/repeated_filter.dart';
 import 'package:live_danmaku/src/filters/similarity_filter.dart';
+import 'package:live_danmaku/src/filters/text_shape.dart';
 import 'package:meta/meta.dart';
 
 /// The filter settings of 3.x (danmaku settings and the block lists), with
-/// its defaults: both optional filters are off.
+/// its defaults: both optional filters are off; and the two blocks v4 added
+/// (D02.2 c3), off too.
 @immutable
 final class DanmakuFilterSettings {
   /// Creates the settings.
@@ -19,6 +21,9 @@ final class DanmakuFilterSettings {
     this.similarityMaxCacheSize = 100,
     this.blockedUsers = const [],
     this.blockedKeywords = const [],
+    this.blockEmoteOnly = false,
+    this.blockLong = false,
+    this.blockLongLength = 30,
   });
 
   /// Collapse repeated text (`collapseRepeatedDanmaku`).
@@ -44,15 +49,49 @@ final class DanmakuFilterSettings {
   /// Blocked viewer names as stored (`blockedDanmakuUsers`).
   final List<String> blockedUsers;
 
-  /// Blocked words as stored (`shieldList`).
+  /// Blocked words as stored (`shieldList`); `/…/` ones are patterns
+  /// (D02.2).
   final List<String> blockedKeywords;
+
+  /// Hide the messages that are nothing but emoticons
+  /// (`blockEmoteOnlyDanmaku`, D02.2).
+  final bool blockEmoteOnly;
+
+  /// Hide the messages longer than [blockLongLength] (`blockLongDanmaku`,
+  /// D02.2).
+  final bool blockLong;
+
+  /// The most characters [blockLong] lets through, used clamped to 10–100
+  /// (`blockLongDanmakuLength`).
+  final int blockLongLength;
+}
+
+/// What the filter did with a message ([DanmakuMessageFilter.judge]).
+enum DanmakuVerdict {
+  /// Shown.
+  shown,
+
+  /// Hidden by the duplicate gate (a repeated packet or an old message).
+  duplicate,
+
+  /// Hidden by the user's blocks: the block list, "屏蔽只有表情的弹幕" or
+  /// "屏蔽超长弹幕" (the room counts these, D02.2 c4).
+  blocked,
+
+  /// Hidden as a repeat of a text just shown.
+  repeated,
+
+  /// Hidden as similar to a text just shown.
+  similar,
 }
 
 /// Decides which chat messages of one room reach the screen and the list,
 /// in 3.x's order (`DanmakuController._installCallbacks`):
 ///
 /// 1. the duplicate gate ([DanmakuMessageGate]), always;
-/// 2. the block list ([DanmakuBlockList]), always;
+/// 2. the block list ([DanmakuBlockList]), always; then the emoticon-only
+///    and the length blocks when enabled, for platform messages only
+///    (D02.2);
 /// 3. repeated-text collapsing ([RepeatedDanmakuFilter]) when enabled;
 /// 4. the similarity filter ([DanmakuSimilarityFilter]) when enabled, for
 ///    platform messages only.
@@ -79,6 +118,10 @@ final class DanmakuMessageFilter {
 
   late DanmakuBlockList _blockList;
 
+  /// How step 2 reads a message's emoticons and length; the app's reads the
+  /// platform's bundled emoticon lists too.
+  DanmakuTextShaper shapeOf = danmakuMessageShape;
+
   /// The settings in use.
   DanmakuFilterSettings get settings => _settings;
   late DanmakuFilterSettings _settings;
@@ -101,13 +144,30 @@ final class DanmakuMessageFilter {
   }
 
   /// Whether [message] should be shown.
-  bool accepts(LiveMessage message) {
-    if (message.type != LiveMessageType.chat) return true;
+  bool accepts(LiveMessage message) => judge(message) == DanmakuVerdict.shown;
+
+  /// Whether [message] should be shown, and what hid it.
+  DanmakuVerdict judge(LiveMessage message) {
+    if (message.type != LiveMessageType.chat) return DanmakuVerdict.shown;
     final now = _clock();
-    if (!gate.accepts(message, now: now) || _blockList.blocks(message)) return false;
+    if (!gate.accepts(message, now: now)) return DanmakuVerdict.duplicate;
+    if (_blockList.blocks(message) || _blocksShape(message)) return DanmakuVerdict.blocked;
     final window = Duration(seconds: _settings.repeatedWindowSeconds.clamp(1, 30));
-    if (!repeated.accepts(message, enabled: _settings.collapseRepeated, window: window, now: now)) return false;
-    return message.isLocal || !_settings.similarityEnabled || similarity.shouldDisplay(message.message);
+    if (!repeated.accepts(message, enabled: _settings.collapseRepeated, window: window, now: now)) {
+      return DanmakuVerdict.repeated;
+    }
+    if (message.isLocal || !_settings.similarityEnabled || similarity.shouldDisplay(message.message)) {
+      return DanmakuVerdict.shown;
+    }
+    return DanmakuVerdict.similar;
+  }
+
+  bool _blocksShape(LiveMessage message) {
+    final settings = _settings;
+    if (message.isLocal || !(settings.blockEmoteOnly || settings.blockLong)) return false;
+    final shape = shapeOf(message);
+    return (settings.blockEmoteOnly && shape.emoteOnly) ||
+        (settings.blockLong && shape.length > settings.blockLongLength.clamp(10, 100));
   }
 
   /// Forgets everything seen (another room).

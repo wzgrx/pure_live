@@ -54,6 +54,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_observer.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 
 /// The live room (argument: the `LiveRoom`, or a `LiveRoomArgs` with the
 /// list it was opened from) (3.x `lib/modules/live_play`).
@@ -288,6 +289,7 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
       // 3.x's automatic ASMR mode: Android only.
       sleepSessionOnStart: _platform.android && store.settings.get(Settings.enableAsmrSleepMode),
       network: ref.read(networkProbeProvider),
+      emotes: ref.read(emoteLibraryProvider),
     );
     final background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
     return RoomRuntime(

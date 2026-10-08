@@ -756,6 +756,27 @@ abstract final class Settings {
     max: 1000,
   );
 
+  /// New (docs/D-弹幕/D02-过滤和屏蔽/D02.2-正则屏蔽和更多屏蔽; V03.6 E11, D-040): a platform
+  /// message that is nothing but emoticons (pictures or Unicode emoji) is
+  /// hidden ("屏蔽只有表情的弹幕"). Off by default, as 3.x, which had no such
+  /// block.
+  static const blockEmoteOnlyDanmaku = BoolSetting('blockEmoteOnlyDanmaku', section: 'danmaku', defaultValue: false);
+
+  /// New (D02.2, as [blockEmoteOnlyDanmaku]): a platform message longer than
+  /// [blockLongDanmakuLength] characters is hidden ("屏蔽超长弹幕"). Off by
+  /// default, as 3.x.
+  static const blockLongDanmaku = BoolSetting('blockLongDanmaku', section: 'danmaku', defaultValue: false);
+
+  /// New (D02.2): the most characters [blockLongDanmaku] lets through, an
+  /// emoticon counting as one (10..100).
+  static const blockLongDanmakuLength = IntSetting(
+    'blockLongDanmakuLength',
+    section: 'danmaku',
+    defaultValue: 30,
+    min: 10,
+    max: 100,
+  );
+
   /// New (UPGRADES B-13): YouTube "Live chat" (every message) instead of
   /// the web page's default "Top chat".
   static const youtubeShowAllChat = BoolSetting('youtubeShowAllChat', section: 'danmaku', defaultValue: false);
@@ -1696,6 +1717,9 @@ abstract final class Settings {
     danmakuSimilarityThreshold,
     danmakuSimilarityCacheDuration,
     danmakuSimilarityMaxCacheSize,
+    blockEmoteOnlyDanmaku,
+    blockLongDanmaku,
+    blockLongDanmakuLength,
     youtubeShowAllChat,
     defaultMobileVolume,
     defaultDesktopVolume,

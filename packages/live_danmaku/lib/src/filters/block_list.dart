@@ -1,4 +1,5 @@
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/src/filters/block_pattern.dart';
 import 'package:live_danmaku/src/sites/bilibili.dart';
 
 /// The user's blocked viewers and words (3.x `DanmakuController._isBlocked`
@@ -10,33 +11,61 @@ import 'package:live_danmaku/src/sites/bilibili.dart';
 ///   every viewer whose name starts the same way (audit B-1).
 /// - A message is blocked when its trimmed, lower-cased sender name is a
 ///   blocked name, or when its lower-cased text contains a blocked word.
+/// - A word written `/…/` is a pattern instead ([DanmakuBlockPattern],
+///   D02.2): compiled once here, without regard to case, and matched with
+///   the first [DanmakuBlockPattern.matchedLength] characters of the text;
+///   a pattern that does not compile or is refused blocks nothing.
 final class DanmakuBlockList {
   /// Creates the list from the stored names ([users]) and words
   /// ([keywords]), as the user typed them.
-  new({Iterable<String> users = const [], Iterable<String> keywords = const []})
-    : _users = {
+  factory({Iterable<String> users = const [], Iterable<String> keywords = const []}) {
+    final words = <String>[];
+    final patterns = <RegExp>[];
+    for (final keyword in keywords) {
+      final word = keyword.trim();
+      if (word.isEmpty) continue;
+      if (DanmakuBlockPattern.isPattern(word)) {
+        if (DanmakuBlockPattern.compile(word) case final pattern?) patterns.add(pattern);
+      } else {
+        words.add(word.toLowerCase());
+      }
+    }
+    return DanmakuBlockList._(
+      {
         for (final user in users)
           if (user.trim().toLowerCase() case final name
               when name.isNotEmpty && !BilibiliDanmakuProtocol.isMaskedName(name))
             name,
       },
-      _keywords = List.unmodifiable([
-        for (final keyword in keywords)
-          if (keyword.trim().toLowerCase() case final word when word.isNotEmpty) word,
-      ]);
+      List.unmodifiable(words),
+      List.unmodifiable(patterns),
+    );
+  }
+
+  const new _(this._users, this._keywords, this._patterns);
 
   final Set<String> _users;
   final List<String> _keywords;
+  final List<RegExp> _patterns;
 
   /// Whether nothing is blocked.
-  bool get isEmpty => _users.isEmpty && _keywords.isEmpty;
+  bool get isEmpty => _users.isEmpty && _keywords.isEmpty && _patterns.isEmpty;
 
   /// Whether [message] is from a blocked viewer or contains a blocked word.
   bool blocks(LiveMessage message) {
     final user = message.userName.trim().toLowerCase();
     if (user.isNotEmpty && _users.contains(user)) return true;
-    if (_keywords.isEmpty) return false;
-    final text = message.message.toLowerCase();
-    return _keywords.any(text.contains);
+    return matchesText(message.message);
+  }
+
+  /// Whether [text] contains a blocked word or matches a blocked pattern.
+  bool matchesText(String text) {
+    if (_keywords.isNotEmpty) {
+      final lower = text.toLowerCase();
+      if (_keywords.any(lower.contains)) return true;
+    }
+    if (_patterns.isEmpty) return false;
+    final part = DanmakuBlockPattern.matchedPart(text);
+    return _patterns.any((pattern) => pattern.hasMatch(part));
   }
 }

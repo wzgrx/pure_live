@@ -18,6 +18,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/tv/room/tv_room_overlays.dart';
 import 'package:pure_live/tv/tv_navigation.dart';
@@ -147,6 +148,7 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
       mobile: defaultTargetPlatform == TargetPlatform.android,
       toast: (message) => AppNavigator.toast(message),
       network: ref.read(networkProbeProvider),
+      emotes: ref.read(emoteLibraryProvider),
     );
     _background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
     unawaited(controller.start());

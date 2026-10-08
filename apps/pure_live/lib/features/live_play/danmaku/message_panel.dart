@@ -10,6 +10,7 @@ import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/block_manager.dart';
 import 'package:pure_live/shared/danmaku/masked_blocks.dart';
 
 /// The room's actions on [message] (UI_PLAN §7: a long-pressed danmaku is a
@@ -235,6 +236,9 @@ class _KeywordPageState extends State<_KeywordPage> {
     ..selection = TextSelection(baseOffset: 0, extentOffset: widget.initial.length);
   bool _busy = false;
 
+  /// What is wrong with the word, under the field (D02.2: a bad `/…/`).
+  String? _error;
+
   @override
   void initState() {
     super.initState();
@@ -247,12 +251,16 @@ class _KeywordPageState extends State<_KeywordPage> {
     super.dispose();
   }
 
-  void _edited() => setState(() {});
+  void _edited() => setState(() => _error = null);
 
   String get _text => _input.text.trim();
 
   Future<void> _submit() async {
     if (_busy || _text.isEmpty) return;
+    if (blockKeywordProblem(_text) case final problem?) {
+      setState(() => _error = problem);
+      return;
+    }
     setState(() => _busy = true);
     await widget.onBlock(_text);
   }
@@ -266,13 +274,15 @@ class _KeywordPageState extends State<_KeywordPage> {
         controller: _input,
         autofocus: true,
         enabled: !_busy,
-        maxLength: RoomMessagePanel.keywordMaxLength,
+        // A `/…/` pattern may be longer (D02.2).
+        maxLength: blockKeywordMaxLengthOf(_input.text),
         textInputAction: TextInputAction.done,
         onSubmitted: (_) => unawaited(_submit()),
         decoration: dialogFieldDecoration(
           context,
           hint: i18n('please_enter_keyword'),
           helper: i18n('live_play_block_word_desc'),
+          error: _error,
         ),
       ),
       const SizedBox(height: 12),

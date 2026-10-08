@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
@@ -12,6 +14,27 @@ import 'package:pure_live/shared/danmaku/setting_rows.dart';
 
 /// The longest keyword (3.x `KeywordBlockPage`'s field).
 const int blockKeywordMaxLength = 40;
+
+/// The longest entry for what is typed so far: a pattern (`/` first, D02.2
+/// c1) may be up to [DanmakuBlockPattern.maxLength], a word stays at
+/// [blockKeywordMaxLength].
+int blockKeywordMaxLengthOf(String text) =>
+    text.trimLeft().startsWith('/') ? DanmakuBlockPattern.maxLength : blockKeywordMaxLength;
+
+/// What is wrong with [word] as a block word, said under the field; null
+/// when it can be added (D02.2 c1: a `/…/` pattern is checked here, before
+/// it reaches the list, and a bad one is not added). Shared by the block
+/// list and the long-press panel's keyword page.
+String? blockKeywordProblem(String word) => switch (DanmakuBlockPattern.check(word)) {
+  null => null,
+  DanmakuBlockPatternProblem.tooLong => i18n(
+    'block_pattern_too_long',
+    args: {'count': '${DanmakuBlockPattern.maxLength}'},
+  ),
+  DanmakuBlockPatternProblem.invalid => i18n('block_pattern_invalid'),
+  DanmakuBlockPatternProblem.nestedRepeat => i18n('block_pattern_nested_repeat'),
+  DanmakuBlockPatternProblem.tooSlow => i18n('block_pattern_too_slow'),
+};
 
 /// How long a removal can be undone (docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页 c15; a SnackBar's
 /// own default).
@@ -26,6 +49,12 @@ const Duration blockUndoDuration = Duration(seconds: 4);
 /// "屏蔽管理" tab and the settings page "弹幕屏蔽" (U.12d, E4) use this
 /// same component. The first one opened after [MaskedNameBlocks.cleanOnce]
 /// removed masked names says so at the top, once (B01 c2).
+///
+/// D02.2: a word written `/…/` is a pattern, checked when it is added (a bad
+/// one is said under the field and not added); "按内容屏蔽" holds the
+/// emoticon-only and the length blocks, after the viewers; in a room the
+/// first line says how many messages the blocks hid there
+/// ([blockedCount]).
 class DanmakuBlockManager extends ConsumerStatefulWidget {
   /// Creates the block list.
   const new({
@@ -33,8 +62,12 @@ class DanmakuBlockManager extends ConsumerStatefulWidget {
     this.showFilters = true,
     this.padding = const EdgeInsets.only(bottom: 24),
     this.showUsers = false,
+    this.blockedCount,
     super.key,
   });
+
+  /// The room's "本场已屏蔽 N 条" (D02.2 c4); null outside a room.
+  final ValueListenable<int>? blockedCount;
 
   /// Scrolls to "已屏蔽用户" when it opens (the settings page opened for the
   /// blocked users, U.12d).
@@ -60,6 +93,9 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
   late final Stream<List<String>> _users;
   final GlobalKey _usersSection = GlobalKey();
   String? _error;
+
+  /// The field's limit for what is typed ([blockKeywordMaxLengthOf]).
+  int _limit = blockKeywordMaxLength;
 
   /// How many masked names the one-time cleanup removed, while its notice
   /// shows.
@@ -119,6 +155,23 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
     );
   }
 
+  /// D02.2 c4: "本场已屏蔽 N 条", the room's first line, following the count
+  /// (at most once a frame).
+  Widget _sessionCount(BuildContext context, ValueListenable<int> count) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: ValueListenableBuilder<int>(
+        valueListenable: count,
+        builder: (context, value, _) => Text(
+          i18n('danmaku_blocked_this_room', args: {'count': '$value'}),
+          key: const ValueKey('block-session-count'),
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant).tabular,
+        ),
+      ),
+    );
+  }
+
   /// Brings "已屏蔽用户" into view once the lists have arrived.
   Future<void> _revealUsers(BlockListStore lists) async {
     await lists.list(BlockKind.keyword);
@@ -145,6 +198,11 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
       AppNavigator.toast(i18n('please_enter_keyword'));
       return;
     }
+    if (blockKeywordProblem(word) case final problem?) {
+      // D02.2 c1: kept in the field to be put right.
+      setState(() => _error = problem);
+      return;
+    }
     final add = widget.addKeyword ?? (word) => ref.read(storeProvider).blockLists.add(BlockKind.keyword, word);
     final added = await add(word);
     if (!mounted) return;
@@ -154,7 +212,10 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
       return;
     }
     _input.clear();
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _limit = blockKeywordMaxLength;
+    });
   }
 
   Future<void> _remove(BlockKind kind, String value, int index) async {
@@ -218,6 +279,8 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
     final threshold = watchSetting(ref, Settings.danmakuSimilarityThreshold);
     final cache = watchSetting(ref, Settings.danmakuSimilarityCacheDuration);
     final size = watchSetting(ref, Settings.danmakuSimilarityMaxCacheSize);
+    final blockLong = watchSetting(ref, Settings.blockLongDanmaku);
+    final longLength = watchSetting(ref, Settings.blockLongDanmakuLength);
     // A short page of four groups, built at once so the users' group can
     // be scrolled to (showUsers).
     return SingleChildScrollView(
@@ -227,6 +290,7 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_maskedCleaned case final count?) _maskedNotice(context, count),
+          if (widget.blockedCount case final count?) _sessionCount(context, count),
           // c11 (E3): adding a word comes first, its list right under it.
           PanelGroupTitle(i18n('danmaku_keyword_block')),
           PanelCard(
@@ -240,7 +304,7 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
                       child: TextField(
                         key: const ValueKey('live-play-block-input'),
                         controller: _input,
-                        maxLength: blockKeywordMaxLength,
+                        maxLength: _limit,
                         // A01.4 c6: the count sits at the box's bottom-right
                         // corner, not inset like the text (which left it
                         // floating towards "添加").
@@ -254,13 +318,22 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
                               ),
                             ),
                         textInputAction: TextInputAction.done,
-                        onChanged: (_) {
-                          if (_error != null) setState(() => _error = null);
+                        onChanged: (text) {
+                          // The count follows a pattern's longer limit.
+                          final limit = blockKeywordMaxLengthOf(text);
+                          if (_error == null && limit == _limit) return;
+                          setState(() {
+                            _error = null;
+                            _limit = limit;
+                          });
                         },
                         onSubmitted: (_) => unawaited(_add()),
                         decoration: InputDecoration(
                           hintText: i18n('please_enter_keyword'),
+                          helperText: i18n('block_pattern_hint'),
+                          helperMaxLines: 2,
                           errorText: _error,
+                          errorMaxLines: 3,
                           filled: true,
                           fillColor: scheme.surface,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -336,6 +409,37 @@ class _DanmakuBlockManagerState extends ConsumerState<DanmakuBlockManager> {
             },
           ),
           if (widget.showFilters) ...[
+            // D02.2 c3: off by default; the length greys out while off.
+            PanelGroupTitle(i18n('danmaku_content_block')),
+            PanelCard(
+              children: [
+                SettingSwitchRow(
+                  settingKey: 'blockEmoteOnly',
+                  title: i18n('danmaku_block_emote_only'),
+                  subtitle: i18n('danmaku_block_emote_only_desc'),
+                  value: watchSetting(ref, Settings.blockEmoteOnlyDanmaku),
+                  onChanged: (value) => set(Settings.blockEmoteOnlyDanmaku, value),
+                ),
+                SettingSwitchRow(
+                  settingKey: 'blockLong',
+                  title: i18n('danmaku_block_long'),
+                  subtitle: i18n('danmaku_block_long_desc', args: {'count': '$longLength'}),
+                  value: blockLong,
+                  onChanged: (value) => set(Settings.blockLongDanmaku, value),
+                ),
+                SettingSliderRow(
+                  settingKey: 'blockLongLength',
+                  title: i18n('danmaku_block_long_length'),
+                  value: longLength.clamp(10, 100).toDouble(),
+                  min: 10,
+                  max: 100,
+                  divisions: 90,
+                  display: i18n('danmaku_block_long_length_value', args: {'count': '$longLength'}),
+                  onChanged: blockLong ? (value) => set(Settings.blockLongDanmakuLength, value.round()) : null,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
             PanelGroupTitle(i18n('platform_danmaku_filter')),
             PanelCard(
               children: [

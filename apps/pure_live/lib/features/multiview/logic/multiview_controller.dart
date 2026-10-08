@@ -12,6 +12,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/multiview/logic/multiview_session.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -159,6 +160,7 @@ class MultiviewController extends ChangeNotifier {
     int? maxCells,
     this.toast,
     this.danmakuStartTimeout = const Duration(seconds: 30),
+    this.emotes,
     DateTime Function()? now,
   }) : maxCells = maxCells ?? (mobile ? MultiviewLayout.focus.capacity : desktopMaxCells),
        _now = now ?? DateTime.now {
@@ -168,6 +170,11 @@ class MultiviewController extends ChangeNotifier {
     _filter = DanmakuMessageFilter(clock: _now);
     _cells.addAll([for (var i = 0; i < _layout.capacity; i++) _newCell()]);
   }
+
+  /// The bundled emoticon lists, for "屏蔽只有表情的弹幕" and "屏蔽超长弹幕"
+  /// (D02.2 c3, as the room); null knows only the codes a message names and
+  /// Unicode emoji.
+  final EmoteLibrary? emotes;
 
   /// Most decoders at once on desktop (3.x); phones stay at four.
   static const int desktopMaxCells = 9;
@@ -293,6 +300,9 @@ class MultiviewController extends ChangeNotifier {
     Settings.danmakuSimilarityThreshold,
     Settings.danmakuSimilarityCacheDuration,
     Settings.danmakuSimilarityMaxCacheSize,
+    Settings.blockEmoteOnlyDanmaku,
+    Settings.blockLongDanmaku,
+    Settings.blockLongDanmakuLength,
   ];
 
   Future<void> _reloadFilter() async {
@@ -309,6 +319,9 @@ class MultiviewController extends ChangeNotifier {
       similarityMaxCacheSize: settings.get(Settings.danmakuSimilarityMaxCacheSize),
       blockedUsers: users,
       blockedKeywords: keywords,
+      blockEmoteOnly: settings.get(Settings.blockEmoteOnlyDanmaku),
+      blockLong: settings.get(Settings.blockLongDanmaku),
+      blockLongLength: settings.get(Settings.blockLongDanmakuLength),
     );
   }
 
@@ -977,7 +990,8 @@ class MultiviewController extends ChangeNotifier {
     if (target == null) return;
     final connection = _danmaku = danmakuFor(target.platform);
     _danmakuKey = key;
-    _filter = DanmakuMessageFilter(settings: _filter.settings, clock: _now);
+    _filter = DanmakuMessageFilter(settings: _filter.settings, clock: _now)
+      ..shapeOf = chatTextShaper(emotes, target.platform);
     _danmakuEvents = connection.events.listen((event) {
       if (epoch == _danmakuEpoch && !_disposed) _onDanmaku(event);
     });

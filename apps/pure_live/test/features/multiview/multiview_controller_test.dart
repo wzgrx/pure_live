@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
@@ -167,6 +168,32 @@ void main() {
     expect(toasts, ['Twitch 的 Cookie 已失效，已改为匿名观看，请在账号页重新填写']);
     controller.dispose();
     expect(site.refusals.hasListener, isFalse);
+    await store.close();
+  });
+
+  test('E06.2 c5: a cell whose recovery switched quality names the quality now played (11-1)', () async {
+    final store = await memoryStore();
+    final toasts = <String>[];
+    final engines = <FakeEngine>[];
+    final site = _ProfileChangedRooms()
+      ..qualities = const [
+        LivePlayQuality(quality: '720p60', id: '720p60'),
+        LivePlayQuality(quality: '360p', id: '360p'),
+      ];
+    final controller = multiviewController(store, site, engines: engines, toasts: toasts);
+    await controller.start();
+    await controller.assign(0, pickRoom('1'));
+    final cell = controller.cells[0];
+    expect(cell.qualities[cell.qualityIndex].quality, '720p60');
+    engines.single.emit(
+      const EngineError(PlayerException(message: 'connection reset', type: PlayerErrorType.network, code: 'transport')),
+    );
+    await _settle();
+    expect(engines.single.opens.last.uri.path, '/1080p60.m3u8');
+    final shown = cell.qualities[cell.qualityIndex];
+    expect((shown.quality, shown.isPlaybackUnconfirmed), ('1080p60', false));
+    expect(toasts, isEmpty);
+    controller.dispose();
     await store.close();
   });
 
@@ -355,6 +382,20 @@ class _CarouselRooms extends RoomsSite implements LivePlayUrlResolver {
           urls: await getPlayUrls(detail: detail, quality: quality),
           appliedQualityData: quality.selectionId,
         );
+}
+
+/// Rooms whose recovery plays another profile than the one opened
+/// (Picarto, UPGRADES 11-1).
+class _ProfileChangedRooms extends RoomsSite implements LivePlayRecoveryResolver {
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution.lines(
+    const [LivePlayLine('https://edge.example/1080p60.m3u8')],
+    appliedQualityData: '1080p60',
+    appliedQuality: const LivePlayQuality(quality: '1080p60', id: '1080p60'),
+  );
 }
 
 /// Rooms of a platform that refuses stored cookies when the test says (B-7).

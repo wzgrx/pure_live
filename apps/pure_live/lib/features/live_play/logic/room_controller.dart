@@ -199,6 +199,10 @@ class LiveRoomController extends ChangeNotifier {
   bool _servedToastShown = false;
   int _loggedRecovery = 0;
 
+  /// Counts the streams handed to the session: a recovery of an older one
+  /// no longer names the quality shown ([_refreshPlan]).
+  int _opens = 0;
+
   /// G03.1: the start-up marks of entering the room (T0 is this
   /// controller's creation: the page's `initState`, or the release of a
   /// swipe); only the first load's open is timed, so a refresh, a retry or
@@ -655,6 +659,7 @@ class LiveRoomController extends ChangeNotifier {
     }
     _qualities = List.unmodifiable(List.of(_qualities)..[playing] = applied);
     _qualityIndex = playing;
+    final opened = ++_opens;
     _stage = RoomStage.playing;
     _failure = null;
     _notify();
@@ -664,7 +669,7 @@ class LiveRoomController extends ChangeNotifier {
       PlaybackRequest(
         site: site.id,
         plan: _plan(resolution),
-        refresh: () => _refreshPlan(quality),
+        refresh: () => _refreshPlan(opened, quality),
         audioOnly: _audioOnly,
         volume: _volume(),
         startup: startup,
@@ -708,9 +713,43 @@ class LiveRoomController extends ChangeNotifier {
     lease: line?.lease,
   );
 
-  Future<PlaybackPlan> _refreshPlan(LivePlayQuality quality) async {
-    final resolution = await site.resolvePlayUrlsForRecovery(detail: _room, quality: quality);
+  /// The plan of a recovery (or a lease renewal) of open [opened], which
+  /// played [quality]: the quality shown now is asked for again, and the
+  /// tier the platform answers with is what the quality button names
+  /// ([_showServed]).
+  Future<PlaybackPlan> _refreshPlan(int opened, LivePlayQuality quality) async {
+    bool current() => !_disposed && opened == _opens && _stage == RoomStage.playing;
+    final requested = current() ? _qualities[_qualityIndex] : quality;
+    final resolution = await site.resolvePlayUrlsForRecovery(detail: _room, quality: requested);
+    if (current()) _showServed(requested, resolution);
     return _plan(resolution);
+  }
+
+  /// UPGRADES 11-1 (E06.2 c5): a recovery the platform answered with
+  /// another tier (Picarto's streamer changed the profile, 720p60 →
+  /// 1080p60) names the tier now played, by C01.4's rule
+  /// ([resolveServedPlayQuality]: a tier outside the list takes the
+  /// requested entry's place). No toast: C01.4 says it on entering and on
+  /// the user's own choice only. 3.x kept the old name.
+  void _showServed(LivePlayQuality requested, LivePlayUrlResolution resolution) {
+    final served = resolveServedPlayQuality(
+      platform: site.id,
+      qualities: _qualities,
+      requested: requested,
+      resolution: resolution,
+    );
+    final found = _qualities.indexWhere((q) => q.selectionId == served.selectionId);
+    final at = found >= 0 ? found : _qualityIndex;
+    final shown = _qualities[at];
+    if (at == _qualityIndex &&
+        shown.quality == served.quality &&
+        '${shown.selectionId}' == '${served.selectionId}' &&
+        shown.isPlaybackUnconfirmed == served.isPlaybackUnconfirmed) {
+      return;
+    }
+    _qualities = List.unmodifiable(List.of(_qualities)..[at] = served);
+    _qualityIndex = at;
+    _notify();
   }
 
   double _volume() {

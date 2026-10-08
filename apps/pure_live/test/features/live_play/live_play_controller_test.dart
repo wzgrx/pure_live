@@ -617,6 +617,37 @@ void main() {
     expect(site.refusals.hasListener, isFalse);
   });
 
+  test('a recovery that switched quality shows the quality now played (11-1)', () async {
+    final site = _ProfileChangedSite(liveRoom());
+    final controller = controllerFor(site);
+    await controller.start();
+    await settle();
+    expect(controller.qualities[controller.qualityIndex].quality, '720p60');
+    final toastsBefore = toasts.length;
+    var notified = 0;
+    controller.addListener(() => notified++);
+
+    // The stream drops; the recovery's playlist has the new profile only.
+    engine.emit(
+      const EngineError(PlayerException(message: 'connection reset', type: PlayerErrorType.network, code: 'transport')),
+    );
+    await settle();
+    expect(site.recoveries, ['720p60']);
+    expect(engine.opens.last.uri.path, '/1080p60.m3u8');
+    final shown = controller.qualities[controller.qualityIndex];
+    expect((shown.quality, shown.isPlaybackUnconfirmed), ('1080p60', false), reason: 'the button names it, no "?"');
+    expect(controller.qualities.map((q) => q.quality), ['1080p60', '360p'], reason: "C01.4: in the request's place");
+    expect(notified, greaterThan(0), reason: 'the button hears of it');
+    expect(toasts, hasLength(toastsBefore), reason: 'C01.4: a recovery says nothing');
+
+    // The next recovery asks for the tier that plays now.
+    engine.emit(const EngineError(PlayerException(message: 'reset', type: PlayerErrorType.network, code: 'b')));
+    await settle();
+    expect(site.recoveries, ['720p60', '1080p60']);
+    expect(controller.qualities[controller.qualityIndex].quality, '1080p60');
+    controller.dispose();
+  });
+
   test('a platform without danmaku says so once', () async {
     final controller = controllerFor(FakeSite(liveRoom()), danmakuSupported: false);
     await controller.start();
@@ -933,6 +964,32 @@ void main() {
     expect(readableAudience('123456'), '12.3万');
     expect(readableAudience('999'), '999');
   });
+}
+
+/// Picarto after the streamer changed the profile (UPGRADES 11-1): the
+/// room opens at 720p60; a recovery's playlist has 1080p60 only, which it
+/// plays and names ([LivePlayUrlResolution.appliedQuality]).
+class _ProfileChangedSite extends FakeSite implements LivePlayRecoveryResolver {
+  new(super.room) {
+    siteId = SiteIds.picarto;
+    qualities = const [LivePlayQuality(quality: '720p60', id: '720p60'), LivePlayQuality(quality: '360p', id: '360p')];
+  }
+
+  /// Recovery requests so far, by the quality asked for.
+  final List<String> recoveries = [];
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async {
+    recoveries.add('${quality.selectionId}');
+    return LivePlayUrlResolution.lines(
+      const [LivePlayLine('https://edge.example/1080p60.m3u8')],
+      appliedQualityData: '1080p60',
+      appliedQuality: const LivePlayQuality(quality: '1080p60', id: '1080p60'),
+    );
+  }
 }
 
 /// A platform that refuses stored cookies when the test says (Twitch, B-7).

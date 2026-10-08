@@ -9,8 +9,9 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 // What Android's recording notifications say (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c3–c5;
 // 3.x always showed "直播录制进行中 / 录制与封装由独立后台服务保护…").
 
-/// The words of the recording notification.
-typedef RecordNotificationContent = ({String title, String text, String stop, DateTime? since});
+/// The words of the recording notification, and the one active task's id
+/// (H05.2: a tap opens the recording centre at it; null with none or several).
+typedef RecordNotificationContent = ({String title, String text, String stop, DateTime? since, String? task});
 
 String _nick(RecordTask task) => task.nick.trim().isEmpty ? platformName(task.platform) : task.nick.trim();
 
@@ -30,6 +31,7 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
       text: i18n('recorder_background_notification_text'),
       stop: i18n('record_notify_stop'),
       since: null,
+      task: null,
     );
   }
   DateTime? since;
@@ -44,6 +46,7 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
       text: [task.title.trim(), task.selectedQuality?.trim() ?? ''].where((part) => part.isNotEmpty).join(' · '),
       stop: i18n('record_notify_stop'),
       since: since,
+      task: task.taskId,
     );
   }
   return (
@@ -51,6 +54,7 @@ RecordNotificationContent recordNotificationContent(Iterable<RecordTask> tasks) 
     text: active.map(_nick).join('、'),
     stop: i18n('record_notify_stop_all'),
     since: since,
+    task: null,
   );
 }
 

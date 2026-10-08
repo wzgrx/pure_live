@@ -21,13 +21,15 @@ import android.os.PowerManager
  * What the recording notifications say (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c3–c5), sent
  * by Dart with every change: [title] and [text] ("正在录制 · 晚风" over the
  * title and quality, or "正在录制 N 个直播间" over the streamers), [since]
- * for the system's clock (no refresh every second), the button words and
- * the channel names.
+ * for the system's clock (no refresh every second), [task] (the one active
+ * task's id: a tap opens the recording centre at it, H05.2; null with none
+ * or several), the button words and the channel names.
  */
 internal data class RecordWords(
     val title: String,
     val text: String,
     val since: Long?,
+    val task: String?,
     val stop: String,
     val center: String,
     val open: String,
@@ -46,6 +48,8 @@ internal data class RecordWords(
                 title = text("title", "直播录制进行中"),
                 text = text("text", "", 240),
                 since = (map["since"] as? Number)?.toLong(),
+                // At most ShareIntakePlugin's MAX_TASK_ID (200), which the centre takes.
+                task = (map["task"] as? String)?.trim()?.takeIf { it.isNotEmpty() && it.length <= 200 },
                 stop = text("stop", "停止录制"),
                 center = text("center", "录制中心"),
                 open = text("open", "打开录制中心"),
@@ -331,9 +335,11 @@ class RecorderForegroundService : Service() {
             .setSmallIcon(R.drawable.ic_stat_recording)
             .setContentTitle(words.title)
             .setContentText(words.text)
-            .setContentIntent(openRecordings(this, 0))
+            // Codes 0 and 4 stay: FLAG_UPDATE_CURRENT replaces the extras, so
+            // the task goes again when a second recording starts (H05.2).
+            .setContentIntent(openRecordings(this, 0, words.task))
             .addAction(Notification.Action.Builder(null, words.stop, stopAll).build())
-            .addAction(Notification.Action.Builder(null, words.center, openRecordings(this, 4)).build())
+            .addAction(Notification.Action.Builder(null, words.center, openRecordings(this, 4, words.task)).build())
             .setCategory(Notification.CATEGORY_PROGRESS)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

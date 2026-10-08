@@ -186,8 +186,9 @@ final class AndroidRecordKeepAlive implements RecordingKeepAlive {
   /// Notification text.
   final String Function() text;
 
-  /// More of the notification: `since` (milliseconds since the epoch), the
-  /// button words and the channel names (U.14 c3–c5).
+  /// More of the notification: `since` (milliseconds since the epoch),
+  /// `task` (the one active task's id, where a tap opens the recording
+  /// centre; H05.2), the button words and the channel names (U.14 c3–c5).
   final Map<String, Object?> Function()? extra;
 
   /// Called when Android ended the service.
@@ -369,6 +370,7 @@ AppRecording platformAppRecording({
             final now = content();
             return {
               'since': now.since?.millisecondsSinceEpoch,
+              'task': now.task,
               'stop': now.stop,
               'center': words('record_center'),
               'open': words('record_notify_open_center'),

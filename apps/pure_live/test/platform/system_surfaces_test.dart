@@ -100,6 +100,49 @@ void main() {
       await keepAlive.refresh();
       expect(calls.last.method, 'setActive', reason: 'no update once stopped');
     });
+
+    test('one room names its task; several or none name none (H05.2)', () {
+      expect(recordNotificationContent([_task('a', '晚风')]).task, 'a');
+      for (final status in [RecordStatus.preparing, RecordStatus.reconnecting, RecordStatus.processing]) {
+        expect(recordNotificationContent([_task('a', '晚风', status: status)]).task, 'a', reason: '$status');
+      }
+      expect(
+        recordNotificationContent([_task('a', '晚风'), _task('b', '星河长明', status: RecordStatus.waitingLive)]).task,
+        'a',
+      );
+      expect(recordNotificationContent([_task('a', '晚风'), _task('b', '星河长明')]).task, isNull);
+      expect(recordNotificationContent([_task('b', '星河长明', status: RecordStatus.waitingLive)]).task, isNull);
+      expect(recordNotificationContent(const []).task, isNull);
+    });
+
+    test('the keep-alive sends the task again when the recording changes (H05.2)', () async {
+      const channel = MethodChannel('pure_live/recorder');
+      final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      final calls = <MethodCall>[];
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        calls.add(call);
+        return null;
+      });
+      addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
+      String? task = 'a';
+      final keepAlive = AndroidRecordKeepAlive(
+        title: () => '正在录制 · 晚风',
+        text: () => '深夜电台',
+        extra: () => {'task': task},
+        onInterrupted: (_) async {},
+      );
+      final owner = Object();
+      await keepAlive.acquire(owner);
+      expect((calls.single.method, (calls.single.arguments as Map)['task']), ('setActive', 'a'));
+      task = 'b';
+      await keepAlive.refresh();
+      expect((calls.last.method, (calls.last.arguments as Map)['task']), ('update', 'b'));
+      task = null;
+      await keepAlive.refresh();
+      expect(calls, hasLength(3));
+      expect((calls.last.method, (calls.last.arguments as Map)['task']), ('update', null));
+      await keepAlive.release(owner);
+    });
   });
 
   group('"录制已停止" (c5)', () {

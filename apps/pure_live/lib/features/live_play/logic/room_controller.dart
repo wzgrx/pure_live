@@ -347,6 +347,12 @@ class LiveRoomController extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+  /// B-7: "Twitch 的 Cookie 已失效，已改为匿名观看…" (Twitch is the one
+  /// platform that reports a refused cookie).
+  void _onCookieRefused() {
+    if (!_disposed) toast?.call(i18n('twitch_cookie_expired'));
+  }
+
   /// G02.2: one app log line per recovery attempt of the session, with its
   /// count and the failure's code (no address, no headers), also on logcat:
   /// `playback: recovering #2 buffering_stall_timeout`.
@@ -408,6 +414,11 @@ class LiveRoomController extends ChangeNotifier {
     }
     // A08.6 c3: the settings page changes it for the rooms already open.
     _subscriptions.add(store.settings.watch(Settings.showChatGifts).skip(1).listen(_onShowGifts));
+    // B-7 (E06.2 c4): the platform refused the stored cookie and plays on
+    // anonymously; it reports each cookie once, and the room says so.
+    if (site case final LiveSiteCookieRefusals refusals) {
+      _subscriptions.add(refusals.cookieRefusals.listen((_) => _onCookieRefused()));
+    }
     // YouTube's connection reads "show all chat" when it starts (C01.6).
     if (site.id == SiteIds.youtube) {
       _subscriptions.add(

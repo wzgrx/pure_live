@@ -2461,6 +2461,7 @@
     "tv_text_size_desc": "房间网格的列数随文字变大而减少",
     "tv_ui_mode_desc": "切换后立即生效",
     "tv_under_construction": "建设中",
+    "twitch_cookie_expired": "Twitch 的 Cookie 已失效，已改为匿名观看，请在账号页重新填写",
     "twitch_cookie_expired_notice": "Twitch 的 Cookie 已失效，弹幕已改为匿名接收，请重新填写 Twitch Cookie",
     "twitch_cookie_hint": "粘贴 Twitch Cookie",
     "twitch_cookie_tip": "登录 Twitch 网页并进入任意直播间，在浏览器开发者工具的网络请求中复制完整 Cookie；其中 auth-token 与 login 用于读取聊天。Cookie 仅保存在本机。",

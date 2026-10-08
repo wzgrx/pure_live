@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -601,6 +602,21 @@ void main() {
     });
   });
 
+  test('B-7: a refused cookie is said once per refusal, and not after the room closed', () async {
+    final site = _RefusingSite(liveRoom());
+    final controller = controllerFor(site);
+    await controller.start();
+    await settle();
+    final before = toasts.length;
+    site.refusals.add(null);
+    expect(toasts.skip(before), ['Twitch 的 Cookie 已失效，已改为匿名观看，请在账号页重新填写']);
+    controller.dispose();
+    await settle();
+    site.refusals.add(null);
+    expect(toasts.skip(before), hasLength(1), reason: 'the subscription ended with the room');
+    expect(site.refusals.hasListener, isFalse);
+  });
+
   test('a platform without danmaku says so once', () async {
     final controller = controllerFor(FakeSite(liveRoom()), danmakuSupported: false);
     await controller.start();
@@ -917,6 +933,16 @@ void main() {
     expect(readableAudience('123456'), '12.3万');
     expect(readableAudience('999'), '999');
   });
+}
+
+/// A platform that refuses stored cookies when the test says (Twitch, B-7).
+class _RefusingSite extends FakeSite implements LiveSiteCookieRefusals {
+  new(super.room);
+
+  final StreamController<void> refusals = StreamController.broadcast(sync: true);
+
+  @override
+  Stream<void> get cookieRefusals => refusals.stream;
 }
 
 /// A platform expected to confirm the quality that did not.

@@ -2462,6 +2462,7 @@
     "tv_text_size_desc": "Room grids show fewer columns as text grows",
     "tv_ui_mode_desc": "Takes effect at once",
     "tv_under_construction": "Coming soon",
+    "twitch_cookie_expired": "The Twitch cookie has expired; playing anonymously now. Please enter it again on the account page",
     "twitch_cookie_expired_notice": "The Twitch cookie has expired; chat is now received anonymously. Please enter the Twitch cookie again",
     "twitch_cookie_hint": "Paste the Twitch Cookie",
     "twitch_cookie_tip": "Sign in to Twitch and open a live channel, then copy the complete Cookie from a browser developer-tools network request. The auth-token and login fields are used to read chat. The Cookie stays on this device.",

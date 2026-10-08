@@ -220,6 +220,10 @@ class MultiviewController extends ChangeNotifier {
   String? _danmakuKey;
   int _danmakuEpoch = 0;
 
+  /// The cookie refusals heard, one per platform however many cells show
+  /// it (B-7, E06.2 c4).
+  final Map<String, StreamSubscription<void>> _refusals = {};
+
   MultiviewCell _newCell() => MultiviewCell._(_nextCellId++);
 
   /// The cells, in grid order.
@@ -478,6 +482,12 @@ class MultiviewController extends ChangeNotifier {
       .._volume = _roomVolume(picked)
       .._stage = site == null ? CellStage.failed : CellStage.resolving;
     if (site == null) cell._failure = UnsupportedPlatform(picked.platform);
+    if (site case final LiveSiteCookieRefusals refusals when !_refusals.containsKey(picked.platform)) {
+      // B-7: a refused cookie is said once, not once per cell.
+      _refusals[picked.platform] = refusals.cookieRefusals.listen((_) {
+        if (!_disposed) toast?.call(i18n('twitch_cookie_expired'));
+      });
+    }
     _notify();
     final previous = cell._session;
     if (previous != null && previous.state.status != PlaybackStatus.idle) await previous.stop();
@@ -965,7 +975,7 @@ class MultiviewController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _danmakuEpoch++;
-    for (final subscription in _subscriptions) {
+    for (final subscription in [..._subscriptions, ..._refusals.values]) {
       unawaited(subscription.cancel());
     }
     unawaited(_danmakuEvents?.cancel());

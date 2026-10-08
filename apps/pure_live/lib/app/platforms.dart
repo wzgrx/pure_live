@@ -98,6 +98,14 @@ final class StoreDouyuLogin implements DouyuLoginStore {
 /// HLS order for a side-by-side check on the phone.
 const bool yyFlvFirst = bool.fromEnvironment('YY_FLV_FIRST', defaultValue: true);
 
+/// The video codecs the player decodes, as stream lines name them (UPGRADES
+/// 8-8, E06.2 c4): the app's libmpv carries FFmpeg's H.264 and HEVC
+/// decoders and dav1d for AV1, and falls back to software when the
+/// hardware cannot (`hwdec-software-fallback`), so all three play. Twitch
+/// asks usher for HEVC and AV1 only within this set when "优先 H.264" is
+/// off; a build whose engine lacks one names the others here.
+const Set<String> engineVideoCodecs = {'avc', 'hevc', 'av1'};
+
 /// What the platform adapters share.
 final class PlatformDeps {
   /// Creates the dependencies.
@@ -109,7 +117,10 @@ final class PlatformDeps {
     this.twitchFallbacks = const [],
     this.kickApi,
     this.iptv,
+    this.videoCodecs = _engineVideoCodecs,
   });
+
+  static Set<String> _engineVideoCodecs() => engineVideoCodecs;
 
   /// The HTTP client of every adapter (per-platform proxy routes inside).
   final LiveHttp http;
@@ -134,6 +145,10 @@ final class PlatformDeps {
 
   /// The IPTV platform; null leaves IPTV out.
   final IptvSite? iptv;
+
+  /// The video codecs the player decodes ([engineVideoCodecs]), read at
+  /// every Twitch stream request.
+  final Set<String> Function() videoCodecs;
 }
 
 /// The 33 platforms of 3.x, Kick (where [PlatformDeps.kickApi] exists) and
@@ -162,6 +177,7 @@ SiteRegistry buildSiteRegistry(PlatformDeps deps) {
       gqlFallbacks: deps.twitchFallbacks,
       languages: () => settings.get(Settings.twitchLanguages),
       preferH264: preferH264,
+      codecs: deps.videoCodecs,
     ),
     SiteIds.soop: () => SoopSite(http, cookies: cookies),
     SiteIds.yy: () => YySite(http, cookies: cookies, flvFirst: yyFlvFirst),

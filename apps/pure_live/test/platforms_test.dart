@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
+import 'package:live_net/testing.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/platforms.dart';
 import 'package:pure_live/platform/native_http.dart';
@@ -28,6 +31,60 @@ void main() {
     final services = await testServices();
     addTearDown(services.close);
     expect((services.sites.of(SiteIds.yy) as YySite).flvFirst, isTrue);
+  });
+
+  test('E06.2 c4: Twitch asks usher for the codecs the player decodes (UPGRADES 8-8)', () async {
+    final services = await testServices();
+    addTearDown(services.close);
+    await services.store.settings.set(Settings.preferH264, false);
+    const twitch = '../../fixtures/twitch';
+    final recorded = ReplaySample.load('$twitch/S06-usher-live');
+    final usher = ReplaySample(
+      method: 'GET',
+      url: TwitchApi.usherUrl('zarbex', (value: '', signature: ''), Random(0), preferH264: false),
+      status: recorded.status,
+      headers: recorded.headers,
+      bytes: recorded.bytes,
+    );
+    Future<String> asked(PlatformDeps Function(LiveHttp http) deps) async {
+      final http = ReplayHttp(
+        [ReplaySample.load('$twitch/S06-pat-live'), usher],
+        ignoredQuery: const {'p', 'play_session_id', 'sig', 'token'},
+      );
+      final site = buildSiteRegistry(deps(http)).of(SiteIds.twitch);
+      try {
+        await site.getPlayQualities(
+          detail: LiveRoom(platform: SiteIds.twitch, roomId: 'zarbex', liveStatus: LiveStatus.live),
+        );
+      } on Object {
+        // The replay answers one codec list; the request is what counts.
+      }
+      return http.requests
+          .lastWhere((request) => request.url.host == 'usher.ttvnw.net')
+          .url
+          .queryParameters['supported_codecs']!;
+    }
+
+    expect(engineVideoCodecs, {'avc', 'hevc', 'av1'}, reason: "libmpv's FFmpeg with dav1d decodes all three");
+    expect(
+      await asked(
+        (http) => PlatformDeps(http: http, proxy: services.proxy, cookies: services.cookies, store: services.store),
+      ),
+      'av1,h265,h264',
+    );
+    // The adapter gets the app's set: an engine without HEVC and AV1 asks for H.264 only.
+    expect(
+      await asked(
+        (http) => PlatformDeps(
+          http: http,
+          proxy: services.proxy,
+          cookies: services.cookies,
+          store: services.store,
+          videoCodecs: () => {'avc'},
+        ),
+      ),
+      'h264',
+    );
   });
 
   test('Kick is registered with its API transport, after CHZZK', () async {

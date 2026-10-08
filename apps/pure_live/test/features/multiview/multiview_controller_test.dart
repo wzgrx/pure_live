@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -150,6 +151,22 @@ void main() {
     expect(engines, hasLength(1));
     expect(engines.single.opens, hasLength(1));
     controller.dispose();
+    await store.close();
+  });
+
+  test('B-7: four cells of one platform say a refused cookie once', () async {
+    final store = await memoryStore();
+    final toasts = <String>[];
+    final site = _RefusingRooms();
+    final controller = multiviewController(store, site, toasts: toasts);
+    await controller.start();
+    for (var i = 0; i < 4; i++) {
+      await controller.assign(i, pickRoom('${i + 1}'));
+    }
+    site.refusals.add(null);
+    expect(toasts, ['Twitch 的 Cookie 已失效，已改为匿名观看，请在账号页重新填写']);
+    controller.dispose();
+    expect(site.refusals.hasListener, isFalse);
     await store.close();
   });
 
@@ -338,6 +355,14 @@ class _CarouselRooms extends RoomsSite implements LivePlayUrlResolver {
           urls: await getPlayUrls(detail: detail, quality: quality),
           appliedQualityData: quality.selectionId,
         );
+}
+
+/// Rooms of a platform that refuses stored cookies when the test says (B-7).
+class _RefusingRooms extends RoomsSite implements LiveSiteCookieRefusals {
+  final StreamController<void> refusals = StreamController.broadcast(sync: true);
+
+  @override
+  Stream<void> get cookieRefusals => refusals.stream;
 }
 
 class _ServedSite extends RoomsSite implements LivePlayUrlResolver {

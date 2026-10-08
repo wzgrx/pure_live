@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/account/account_services.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
+import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -128,4 +133,257 @@ Future<void> verifyBilibiliLogin({required AccountActions actions, required Acco
     log('Bilibili login check failed', name: 'Startup', error: error, stackTrace: stack);
     if (actions.cookieOf(SiteIds.bilibili) == cookie) AppNavigator.toast(i18n('bilibili_user_info_failed'));
   }
+}
+
+/// The steps before `runApp`, in their order; each one's number in the
+/// `startup-timing` line is how long that step took (ms):
+///
+/// * `binding`: `main` until `WidgetsFlutterBinding.ensureInitialized`;
+/// * `imageCache`: the decoded-image budget (reads /proc/meminfo);
+/// * `tvDetect`: `TvDevice.detect` (one native call);
+/// * `dataRoot`: the command line, the data folder and the cipher;
+/// * `store`: `LiveStore.open`;
+/// * `legacy`: the 3.x settings and IPTV import (main window; a `stat` once
+///   imported);
+/// * `wire`: `AppBootstrap.wire`;
+/// * `log`: the plugin hooks and the log file;
+/// * `strings`: the language and its words;
+/// * `fonts`: the app and danmaku fonts;
+/// * `desktop`: the desktop window (nothing on a phone).
+const List<String> startupSteps = [
+  'binding',
+  'imageCache',
+  'tvDetect',
+  'dataRoot',
+  'store',
+  'legacy',
+  'wire',
+  'log',
+  'strings',
+  'fonts',
+  'desktop',
+];
+
+/// The moments from `runApp` on, in their order; each one's number is the
+/// time since `main` began (ms): `runApp` called, the first frame
+/// rasterized (the splash page when it is on), home's first frame, and
+/// home's first content ([StartupTiming.firstContent]).
+const List<String> startupMarks = ['runApp', 'firstFrame', 'home', 'firstPage'];
+
+/// What Android says about the process when asked once at start: `cold` is
+/// true for the first `main` of the process (false after the activity was
+/// recreated over a live process, or a Dart restart in it), and
+/// `processToMain` is how long the process ran before `main` (ms), null when
+/// unknown (not Android).
+typedef StartupProcess = ({bool cold, int? processToMain});
+
+/// The time from the process's start to `main` (ms): the process's age that
+/// Android measured between [sent] and [received] (times since `main`), less
+/// the middle of that call, so the call's own time counts at most half.
+int processToMainMs({required int sinceProcessStart, required Duration sent, required Duration received}) {
+  final middle = (sent.inMicroseconds + received.inMicroseconds) ~/ 2000;
+  return math.max(0, sinceProcessStart - middle);
+}
+
+/// The `startup-timing` line
+/// (docs/R-性能和流畅度/R04-启动速度/R04.1-启动速度/record.md), for example:
+///
+/// ```text
+/// startup-timing cold=true splash=on tab=popular content=rooms process=180 binding=12 … desktop=0 runApp=131 firstFrame=260 home=1420 firstPage=1980 total=2160
+/// ```
+///
+/// [steps] are durations, [marks] times since `main` (both ms, by name,
+/// [startupSteps] and [startupMarks] in that order); a missing one shows as
+/// `-`. `process` is the process's start to `main`, `total` the process's
+/// start to `firstPage`; both need [processToMain].
+String formatStartupTiming({
+  required bool cold,
+  required bool? splash,
+  required String? tab,
+  required String? content,
+  required int? processToMain,
+  required Map<String, int> steps,
+  required Map<String, int> marks,
+}) {
+  String value(int? ms) => ms == null ? '-' : '$ms';
+  final firstPage = marks['firstPage'];
+  return [
+    'startup-timing',
+    'cold=$cold',
+    'splash=${splash == null ? '-' : (splash ? 'on' : 'off')}',
+    'tab=${tab ?? '-'}',
+    'content=${content ?? '-'}',
+    'process=${value(processToMain)}',
+    for (final name in startupSteps) '$name=${value(steps[name])}',
+    for (final name in startupMarks) '$name=${value(marks[name])}',
+    'total=${value(processToMain == null || firstPage == null ? null : processToMain + firstPage)}',
+  ].join(' ');
+}
+
+/// The start-up's timing (docs/R-性能和流畅度/R04-启动速度/R04.1-启动速度): `main`
+/// begins it ([begin]); the start records its [step]s before `runApp` and
+/// its [mark]s after; home's first content ([firstContent]) calls Android's
+/// `reportFullyDrawn` once and, on a cold start only, writes one
+/// `startup-timing` line ([formatStartupTiming]) to the app log and
+/// `debugPrint`.
+///
+/// Home's first content, the first of these, once per `main`:
+///
+/// * popular as the first home tab: the first rooms of the platform shown,
+///   or its empty or error state, drawn (the popular page reports it);
+/// * follows as the first home tab: the stored follows read and drawn
+///   ([followsFirstContent]; the first check of their live states runs on
+///   afterwards);
+/// * areas or the recording centre as the first home tab, and the TV
+///   interface: home's first frame (their pages do not report);
+/// * with the splash page on, home is built only once the splash page has
+///   left, so its content always comes after it.
+///
+/// Everything is measured from `main`; the clock and the native side are
+/// replaceable for tests.
+final class StartupTiming {
+  /// A timing over `clock` (the time since `main`); [process] asks Android
+  /// about the process, [write] puts the line out and [reportFullyDrawn]
+  /// tells Android that home is usable.
+  new({
+    required this._clock,
+    Future<StartupProcess> Function(Duration Function() clock)? process,
+    void Function(String line)? write,
+    Future<void> Function()? reportFullyDrawn,
+  }) : _ask = process ?? askAndroidProcess,
+       _write = write ?? _writeLine,
+       _reportFullyDrawn = reportFullyDrawn ?? _reportToAndroid;
+
+  /// The timing of this `main`; null before [begin] (tests set their own).
+  static StartupTiming? current;
+
+  /// Starts the timing of this `main` (its first line).
+  static void begin() {
+    final watch = Stopwatch()..start();
+    current = StartupTiming(clock: () => watch.elapsed);
+  }
+
+  /// The activity's app channel (`startupInfo`, `reportFullyDrawn`).
+  static const MethodChannel channel = MethodChannel('pure_live/app');
+
+  final Duration Function() _clock;
+  final Future<StartupProcess> Function(Duration Function() clock) _ask;
+  final void Function(String line) _write;
+  final Future<void> Function() _reportFullyDrawn;
+  final Map<String, int> _steps = {};
+  final Map<String, int> _marks = {};
+  Duration _lap = Duration.zero;
+  Future<StartupProcess>? _process;
+  bool _abandoned = false;
+  bool _reported = false;
+
+  /// Whether the splash page was on (`splash=` in the line).
+  bool? splash;
+
+  /// Whether home's first content was reported.
+  bool get reported => _reported;
+
+  /// Records step [name] as the time since the previous step (or `main`);
+  /// a step recorded again (a retried start) keeps its first time.
+  void step(String name) {
+    if (_steps.containsKey(name)) return;
+    final now = _clock();
+    _steps[name] = (now - _lap).inMilliseconds;
+    _lap = now;
+  }
+
+  /// Records moment [name] as the time since `main`; once.
+  void mark(String name) => _marks.putIfAbsent(name, () => _clock().inMilliseconds);
+
+  /// Asks Android about the process (once; after the binding, which the
+  /// channel needs). [firstContent] asks when this was not called.
+  void askProcess() => _process ??= _ask(_clock);
+
+  /// The start failed and showed why: the numbers include the failure page
+  /// and the retry, so no line is written (home still reports drawn).
+  void abandon() => _abandoned = true;
+
+  /// Home's first content is drawn ([tab]: the home tab's id or `tv`;
+  /// [content]: `rooms`, `empty`, `error`, or `home` for a page measured at
+  /// home's first frame): marks `firstPage`, reports fully drawn and, on a
+  /// cold start, writes the line. Only the first call counts.
+  Future<void> firstContent({required String tab, required String content}) async {
+    if (_reported) return;
+    _reported = true;
+    mark('firstPage');
+    try {
+      await _reportFullyDrawn();
+    } on Object catch (error) {
+      log('reportFullyDrawn failed', name: 'Startup', error: error);
+    }
+    if (_abandoned) return;
+    final process = await (_process ??= _ask(_clock));
+    if (!process.cold) return;
+    _write(
+      formatStartupTiming(
+        cold: true,
+        splash: splash,
+        tab: tab,
+        content: content,
+        processToMain: process.processToMain,
+        steps: _steps,
+        marks: _marks,
+      ),
+    );
+  }
+
+  /// Android's answer to `startupInfo` (see [StartupProcess]); not cold
+  /// when no activity answers (an engine started by a service). Other
+  /// systems have no such warm start: cold, without the process's time.
+  static Future<StartupProcess> askAndroidProcess(Duration Function() clock) async {
+    if (!Platform.isAndroid) return (cold: true, processToMain: null);
+    try {
+      final sent = clock();
+      final info = await channel.invokeMapMethod<String, Object?>('startupInfo');
+      final received = clock();
+      final since = info?['sinceProcessStart'];
+      return (
+        cold: info?['cold'] == true,
+        processToMain: since is int ? processToMainMs(sinceProcessStart: since, sent: sent, received: received) : null,
+      );
+    } on Object {
+      // No activity, or an answer it did not expect: not measured.
+      return (cold: false, processToMain: null);
+    }
+  }
+
+  static void _writeLine(String line) {
+    AppLog.instance.info('startup', line);
+    debugPrint(line);
+  }
+
+  static Future<void> _reportToAndroid() async {
+    if (!Platform.isAndroid) return;
+    try {
+      await channel.invokeMethod<void>('reportFullyDrawn');
+    } on MissingPluginException {
+      // No activity.
+    }
+  }
+}
+
+/// Reports the follows as home's first content to [timing] once they were
+/// read from storage (at once when they were) and drawn: `rooms`, or
+/// `empty` without any (also when reading them failed).
+Future<void> followsFirstContent(FavoriteController follows, StartupTiming timing) async {
+  if (!follows.loaded) {
+    final read = Completer<void>();
+    void listener() {
+      if (follows.loaded && !read.isCompleted) read.complete();
+    }
+
+    follows.addListener(listener);
+    try {
+      await read.future;
+    } finally {
+      follows.removeListener(listener);
+    }
+    await WidgetsBinding.instance.endOfFrame;
+  }
+  await timing.firstContent(tab: HomeMenu.favorites.id, content: follows.rooms.isEmpty ? 'empty' : 'rooms');
 }

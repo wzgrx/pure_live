@@ -24,6 +24,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
 import android.os.Process
+import android.os.SystemClock
 import android.provider.Settings
 import android.text.InputType
 import android.util.Rational
@@ -46,6 +47,7 @@ import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The app's activity (3.x MainActivity at v3.2.11). Like 3.x it is
@@ -80,6 +82,9 @@ import io.flutter.plugin.common.MethodChannel
  *   ([PermissionsPlugin]): F.0a;
  * - `pure_live/app` `setSplashTheme {mode}`: Android 13's splash screen in
  *   the app's own light or dark (U.14 c9);
+ * - `pure_live/app` `startupInfo`, `reportFullyDrawn`: the start-up's
+ *   timing (R04.1): whether this is the process's first start of Dart (a
+ *   cold start) and the process's age; home's first content drawn;
  * - `pure_live/device_controls`: the media volume and the window's
  *   brightness for the live room's gestures (3.x used the volume_controller
  *   and screen_brightness plugins), and the battery level of the fullscreen
@@ -96,6 +101,10 @@ class MainActivity : AudioServiceActivity() {
         private const val PIP_TOGGLE = "com.mystyle.purelive.PIP_TOGGLE"
         private var playbackWakeLock: PowerManager.WakeLock? = null
         private var playbackWifiLock: WifiManager.WifiLock? = null
+
+        // R04.1: taken by the first `startupInfo` of the process; a Dart
+        // start after it (a recreated activity, a restart) is not cold.
+        private val coldStartTaken = AtomicBoolean(false)
     }
 
     // Android's dynamic policy until Dart asks for the high rate.
@@ -252,6 +261,16 @@ class MainActivity : AudioServiceActivity() {
                 "isTelevision" -> result.success(isTelevision())
                 "setSplashTheme" -> {
                     setSplashTheme(call.argument<String>("mode"))
+                    result.success(null)
+                }
+                "startupInfo" -> result.success(
+                    mapOf(
+                        "cold" to coldStartTaken.compareAndSet(false, true),
+                        "sinceProcessStart" to SystemClock.elapsedRealtime() - Process.getStartElapsedRealtime(),
+                    ),
+                )
+                "reportFullyDrawn" -> {
+                    reportFullyDrawn()
                     result.success(null)
                 }
                 "inputText" -> showTextInput(

@@ -19,6 +19,7 @@ import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/app/system_bars.dart';
 import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/features/favorite/favorite_controller.dart';
+import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/live_play/mini/floating_window.dart';
 import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/features/splash/splash_page.dart';
@@ -26,6 +27,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/platform_services.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/app_router.dart';
+import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/routes/tv_router.dart';
 import 'package:pure_live/shared/images.dart';
 import 'package:pure_live/tv/tv_app.dart';
@@ -74,6 +76,7 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
   // A02.4 c3: an undo toast closes with its page.
   VoidCallback? _stopPageToasts;
   late final FontLibrary _fonts;
+  VoidCallback? _stopHomeWatch;
 
   @override
   void initState() {
@@ -102,12 +105,59 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) ref.read(appStartupProvider).start();
     });
+    _stopHomeWatch = _watchHome(_router);
+  }
+
+  /// R04.1: marks home's first frame and, when its first tab's page does not
+  /// report its own first content (every tab but popular, and the TV
+  /// interface), reports it ([StartupTiming] has the rule). Returns the
+  /// function that stops waiting for home; null without a timing.
+  VoidCallback? _watchHome(GoRouter router) {
+    final timing = StartupTiming.current;
+    if (timing == null || timing.reported) return null;
+    final delegate = router.routerDelegate;
+    var done = false;
+    void changed({bool drawn = false}) {
+      if (done || delegate.currentConfiguration.uri.path != RoutePath.kInitial) return;
+      done = true;
+      delegate.removeListener(changed);
+      unawaited(_homeShown(timing, drawn: drawn));
+    }
+
+    delegate.addListener(changed);
+    // Without the splash page home is the first route, drawn by now.
+    WidgetsBinding.instance.addPostFrameCallback((_) => changed(drawn: true));
+    return () {
+      done = true;
+      delegate.removeListener(changed);
+    };
+  }
+
+  Future<void> _homeShown(StartupTiming timing, {required bool drawn}) async {
+    if (!drawn) await WidgetsBinding.instance.endOfFrame;
+    if (!mounted) return;
+    timing.mark('home');
+    final first = _tv
+        ? null
+        : visibleHomeMenus(ref.read(appServicesProvider).store.settings.get(Settings.savedMenuIds)).first;
+    switch (first) {
+      case HomeMenu.popular:
+        // The popular page reports its first rooms.
+        break;
+      case HomeMenu.favorites:
+        await followsFirstContent(ref.read(favoriteControllerProvider), timing);
+      case HomeMenu.areas || HomeMenu.record:
+        await timing.firstContent(tab: first!.id, content: 'home');
+      case null:
+        await timing.firstContent(tab: 'tv', content: 'home');
+    }
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _stopPageToasts?.call();
+    _stopHomeWatch?.call();
     RoomSwitchPanel.follows = null;
     imageCacheEpoch.removeListener(_imagesCleared);
     _fonts.removeListener(_imagesCleared);
@@ -134,6 +184,8 @@ class _PureLiveAppState extends ConsumerState<PureLiveApp> with WidgetsBindingOb
     if (widget.router != null) return;
     final old = _router;
     _stopPageToasts?.call();
+    _stopHomeWatch?.call();
+    _stopHomeWatch = null;
     _router = tv ? buildTvRouter() : buildAppRouter();
     AppNavigator.router = _router;
     _stopPageToasts = closeToastsOnNewPage(_router, () => _messenger.currentState);

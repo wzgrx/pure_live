@@ -12,6 +12,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/app/startup.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/popular/popular_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -372,6 +373,58 @@ void main() {
     AppNavigator.back();
     await tester.pumpAndSettle();
     await tester.pump(AppNavigator.openGuard);
+    await tester.runAsync(services.close);
+  });
+
+  testWidgets('R04.1: home reports fully drawn once, when the first rooms show; a refresh does not again', (
+    tester,
+  ) async {
+    var drawn = 0;
+    final lines = <String>[];
+    StartupTiming.current = StartupTiming(
+      clock: () => Duration.zero,
+      process: (_) async => (cold: true, processToMain: 100),
+      write: lines.add,
+      reportFullyDrawn: () async => drawn++,
+    );
+    addTearDown(() => StartupTiming.current = null);
+    final bilibili = _FakeSite(SiteIds.bilibili, [
+      [for (var i = 0; i < 30; i++) _room('bilibili', i, heat: 100 - i)],
+    ])..gate = Completer();
+    tester.view
+      ..physicalSize = const Size(1000, 3200)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final services = (await tester.runAsync(() => _services({SiteIds.bilibili: bilibili})))!;
+    final strings = (await tester.runAsync(loadStrings))!;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [appServicesProvider.overrideWithValue(services)],
+        child: PureLiveApp(strings: strings, bundle: FileAssetBundle()),
+      ),
+    );
+    // Home is up, the platform is asked; its rooms have not come.
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(bilibili.requested, [1]);
+    expect(find.byType(LiveRoomCard), findsNothing);
+    expect(drawn, 0);
+
+    bilibili.gate!.complete();
+    bilibili.gate = null;
+    await tester.pumpAndSettle();
+    expect(find.byType(LiveRoomCard), findsWidgets);
+    expect(drawn, 1);
+    expect(lines, hasLength(1));
+    expect(lines.single, contains(' tab=popular content=rooms '));
+
+    // A refresh brings the rooms again: not reported again.
+    await tester.tap(find.widgetWithText(OutlinedButton, '刷新'));
+    await tester.pumpAndSettle();
+    expect(bilibili.requested, [1, 1]);
+    expect(drawn, 1);
+    expect(lines, hasLength(1));
     await tester.runAsync(services.close);
   });
 

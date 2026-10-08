@@ -1117,6 +1117,16 @@ tier = 1
 from = "K90 复查 A07.18（2026-10-08）"
 date = "2026-10-08"
 [[task]]
+id = "A07.20"
+title = "语音直播（猫耳FM、克拉克拉）画面换成房间封面：不再把 16×16 的占位画面或纯色背景拉满"
+type = "界面"
+status = "未开始"
+size = "小"
+tier = 3
+from = "上游 pure_live 559690d48、01fd4fec5（W01.3 对照）"
+note = "封面层已有（纯音频模式的 AudioOnlyCover），只是只在纯音频模式下显示；3.x 也是拉满占位画面"
+
+[[task]]
 id = "A08.1"
 title = "弹幕列表和弹幕设置页"
 type = "界面"
@@ -2141,6 +2151,19 @@ date = "2026-10-08"
 from = "E01.6 第 1 轮巡检（2026-10-08）"
 note = "getH5PlayV1 元数据 streamStatus 0 是 StreamUnavailable（douyu_api.dart qualities）；当天 14 个 0 全 404、约 60 个 1 全 200；只看元数据，单档回答不判（S09-24422-r2）。巡检 P9 把没有流的房间记跳过。K90 进一个这样的房间看提示"
 
+
+[[task]]
+id = "E01.8"
+title = "虎牙播放 UA 跟到 7100004（远端配置比内置旧时用内置）；斗鱼 5 分钟有效的 ws 线路加 expire=0"
+type = "平台"
+status = "未开始"
+size = "小"
+tier = 2
+stages = ["虎牙 UA", "斗鱼 expire=0（先在真实接口上确认 CDN 认）"]
+done = 0
+from = "上游 pure_live a858550bb（W01.3 对照；上游照 simple_live 改）"
+note = "4.x 的虎牙 UA 从上游仓库的 assets/play_config.json 读，那里还是 7090000；斗鱼现在靠租约到期前续期接上，加 expire=0 能少续期"
+
 [[task]]
 id = "E02.1"
 title = "YY 直播"
@@ -2446,6 +2469,17 @@ date = "2026-10-08"
 from = "E07.1 第一轮巡检（2026-10-08，经代理）：P10 每个房间 tencent 线路 404、wansu 线路超时；P1、P3 第 2 页只有 1 个且和第 1 页重复"
 note = "不是地区限制：平台把多数房间换到网宿，网宿不出 H.264 转码，默认的 H.264 档播不了；网宿排第一时不再给 H.264 档（seventeenlive_api.dart untranscodedCdns）。第 2 页重复是平台数据（应用已去重），改巡检判定。巡检 11 正常 0 失败；K90 经代理看默认档有画面"
 
+
+[[task]]
+id = "E03.19"
+title = "BIGO 请求头换成完整浏览器形态：只带 Mozilla/5.0 会被平台防火墙降级（接口 418、详情回 needLogin 空壳）"
+type = "平台"
+status = "未开始"
+size = "小"
+tier = 3
+from = "上游 pure_live 2e84d68d3、3a960050b、21e981da5（W01.3 对照）"
+note = "先用 E07 的巡检工具确认 4.x 现在拿不拿得到流；换请求头后仍要登录才加账号 Cookie（另开任务，K 组）"
+
 [[task]]
 id = "E04.1"
 title = "平台框架与链接解析：站点注册、链接工具和短链"
@@ -2454,6 +2488,17 @@ status = "完成"
 date = "2026-09-28"
 commit = "e49c4bdd3"
 old = ["M3", "T02d.1"]
+
+
+[[task]]
+id = "E04.2"
+title = "小红书分享短链认 xhslink.com/o/ 前缀：整段分享文案粘贴后能打开直播间"
+type = "平台"
+status = "未开始"
+size = "小"
+tier = 3
+from = "上游 pure_live 6229284a8（W01.3 对照）"
+note = "从分享文案里抽链接 4.x 已有（links.dart sharedHttpUrls），缺的是 /o/ 前缀（xiaohongshu_api.dart _shortPath 只认 /m/）"
 
 [[task]]
 id = "E05.1"
@@ -2547,6 +2592,19 @@ old = ["T02e.1"]
 stages = ["定检查项", "写工具", "跑一遍并记录"]
 done = 3
 note = "不需要真机（工具在电脑上跑）；CHECKS.md 等维护者看过；巡检频率（每两周、发布前）PROCESS 第 12 节已有"
+
+
+[[task]]
+id = "E07.2"
+title = "用巡检复查上游 2026-10-06 报的两处取流问题：FC2 分片要带 l_ortkn 会话 Cookie、微博媒体要带 Referer 和 UA"
+type = "平台"
+status = "未开始"
+size = "小"
+tier = 3
+stages = ["巡检确认", "确认有问题的修掉"]
+done = 0
+from = "上游 pure_live 14d965326、960bcf7e3（W01.3 对照）"
+note = "4.x 和 3.x 一样：FC2 媒体请求只带 UA、Origin、Referer（fc2live_api.dart mediaHeaders），微博媒体不带请求头（weibo_api.dart mediaHeaders，2026-09-28 实测不需要）"
 
 [[task]]
 id = "G01.1"
@@ -3409,6 +3467,27 @@ tier = 3
 old = ["T09e.2"]
 note = "同意做（D-036）；参考上游 pure_live 9483ccf03"
 
+
+[[task]]
+id = "V01.7"
+title = "退到后台继续播放时停止视频解码省电，回到前台再恢复画面"
+type = "功能"
+status = "未开始"
+size = "小"
+tier = 3
+from = "上游 pure_live 15cec5bbf（W01.3 对照）"
+note = "3.x 和 4.x 退到后台都照常解码视频；4.x 已有纯音频模式的关画面通道（mpv_engine.dart setVideoOutputEnabled），等用户决定做不做（D-026）"
+
+[[task]]
+id = "V01.8"
+title = "录像在应用内播放：按房间列出录像、记住每个文件看到哪、倍速、选集、小窗"
+type = "功能"
+status = "未开始"
+size = "大"
+tier = 3
+from = "上游 pure_live 0b23c32fa、796823afd、d8dc94af5 等 45 个提交（W01.3 对照）"
+note = "4.x 录制中心的“播放”交给系统里的其他应用；等用户决定做不做（D-026）"
+
 [[task]]
 id = "V02.1"
 title = "回复并关闭 issue #36、#37"
@@ -3519,10 +3598,19 @@ commit = "d54772d54"
 id = "W01.2"
 title = "上游跟踪：每周看一次 pure_live、pure_live_TV、media_core、flame_barrage、flv_lzc 的新提交，结论写进 W01 的对照记录"
 type = "工程"
-status = "未开始"
+status = "完成"
+date = "2026-10-08"
 size = "小"
-tier = 2
 old = ["T00a.3"]
+note = "第一次按新流程做完（W01.3）；以后每周一个 W01.n"
+
+[[task]]
+id = "W01.3"
+title = "2026-10-08 上游对照：pure_live 321 个、pure_live_TV 24 个、media_core 44 个、flame_barrage 2 个"
+type = "工程"
+status = "完成"
+date = "2026-10-08"
+size = "小"
 
 [[task]]
 id = "W02.1"

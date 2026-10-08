@@ -264,10 +264,20 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
                               ? Settings.floatWindowPortraitScale
                               : Settings.floatWindowLandscapeScale;
                           final kept = setting.normalize(_scale ?? stored);
+                          // Still in the corner (a grip pulled towards the
+                          // middle grows it from there): it stays the corner
+                          // one, following a turn or another page's bottom
+                          // bar as before; elsewhere it stays where it is.
+                          final corner = inAppMiniOffset(
+                            area: area,
+                            window: size,
+                            topClearance: topClearance,
+                            bottomClearance: bottomClearance,
+                          );
                           setState(() {
                             _scale = kept;
                             _resizeFrom = null;
-                            _dragged = offset;
+                            _dragged = (offset - corner).distance < 0.5 ? null : offset;
                           });
                           // Remembered for the next time (A07.22 c2).
                           unawaited(ref.read(storeProvider).settings.set(setting, kept));

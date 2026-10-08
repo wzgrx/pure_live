@@ -909,6 +909,17 @@ void main() {
       expect(app.services.store.settings.get(Settings.floatWindowLandscapeScale), closeTo(300.08 / 220.08, 0.0001));
       expect(app.services.store.settings.get(Settings.floatWindowPortraitScale), 1);
 
+      // Grown from its corner, it stays the corner one: turned, it goes to
+      // the new bottom-right corner (a dragged one would stay at its place).
+      tester.view.physicalSize = const Size(852, 393);
+      await tester.pump();
+      rect = tester.getRect(_window);
+      expect(rect.width, closeTo(300.08, 0.01));
+      expect(rect.right, closeTo(852 - 16, 0.01));
+      expect(rect.bottom, closeTo(393 - 16, 0.01));
+      tester.view.physicalSize = const Size(393, 852);
+      await tester.pump();
+
       // Next time it comes back at that size.
       await tester.tap(find.byKey(const ValueKey('mini-close')));
       await tester.pump();

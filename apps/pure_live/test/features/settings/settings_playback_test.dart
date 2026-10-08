@@ -7,6 +7,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/playback_tiles.dart';
 import 'package:pure_live/routes/route_path.dart';
+import 'package:pure_live/shared/danmaku/danmaku_color_palette.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/pip_danmaku_settings.dart';
 
@@ -451,6 +452,41 @@ void main() {
       final preview = find.byKey(const ValueKey('settings-pip-preview'));
       expect(tester.getCenter(preview).dx, lessThan(tester.getCenter(pipRow('pip')).dx));
       expect(tester.getSize(find.byType(PipDanmakuSettings)).width, lessThanOrEqualTo(720));
+    });
+
+    testWidgets('A08.7 (H1 A): the colour unfolds the same palette on the page and in search; no dialog', (
+      tester,
+    ) async {
+      final h = await pumpSettings(tester, width: 393, height: 2600, arguments: 'pipDanmaku');
+      await tapSettings(tester, find.byKey(const ValueKey('danmaku-switch-pipOriginalColor')));
+      await tapSettings(tester, pipRow('pipColor'));
+      expect(find.byType(Dialog), findsNothing);
+      expect(find.byType(DanmakuColorPalette), findsOneWidget);
+      await tapSettings(tester, find.byKey(const ValueKey('danmaku-color-ff00cd00')));
+      expect(h.settings.get(Settings.pipDanmakuColor), 0xFF00CD00);
+
+      // The search row of the same setting unfolds the same palette.
+      final search = await pumpSettings(
+        tester,
+        seed: (settings) =>
+            settings.setAll({Settings.pipDanmakuUseOriginalColor: false, Settings.pipDanmakuColor: 0xFF00CD00}),
+      );
+      await searchSettingsFor(tester, '小窗 颜色');
+      expect(settingsRow('pip_color'), findsOneWidget);
+      await tapSettings(tester, settingsRow('pip_color'));
+      expect(find.byType(Dialog), findsNothing);
+      expect(find.byType(DanmakuColorPalette), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('danmaku-color-ff00cd00')),
+          matching: find.byKey(const ValueKey('danmaku-color-selected')),
+        ),
+        findsOneWidget,
+      );
+      await tapSettings(tester, find.byKey(const ValueKey('danmaku-color-fffe0302')));
+      expect(search.settings.get(Settings.pipDanmakuColor), 0xFFFE0302);
+      await tapSettings(tester, settingsRow('pip_color'));
+      expect(find.byType(DanmakuColorPalette), findsNothing);
     });
 
     testWidgets('count: − and +; restore asks and brings everything back', (tester) async {

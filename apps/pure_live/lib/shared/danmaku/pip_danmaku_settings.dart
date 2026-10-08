@@ -6,7 +6,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
-import 'package:pure_live/shared/danmaku/danmaku_color_dialog.dart';
+import 'package:pure_live/shared/danmaku/danmaku_color_palette.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 import 'package:pure_live/shared/danmaku/setting_rows.dart';
@@ -67,24 +67,14 @@ class PipDanmakuSettings extends ConsumerWidget {
           value: keepColors,
           onChanged: (value) => set(Settings.pipDanmakuUseOriginalColor, value),
         ),
-        // c10: greyed out while the platform's colours are kept.
-        InkWell(
-          onTap: keepColors
-              ? null
-              : () async {
-                  final picked = await showDanmakuColorDialog(
-                    context: context,
-                    title: i18n('pip_danmaku_color'),
-                    current: color,
-                  );
-                  if (picked != null) set(Settings.pipDanmakuColor, picked.toARGB32());
-                },
-          child: SettingRow(
-            settingKey: 'pipColor',
-            title: i18n('pip_danmaku_color'),
-            enabled: !keepColors,
-            trailing: DanmakuColorChip(color: color, enabled: !keepColors),
-          ),
+        // c10: greyed out while the platform's colours are kept; A08.7:
+        // the palette unfolds under the row, no dialog over the picture.
+        DanmakuColorPickerRow(
+          settingKey: 'pipColor',
+          title: i18n('pip_danmaku_color'),
+          color: color,
+          enabled: !keepColors,
+          onChanged: (picked) => set(Settings.pipDanmakuColor, picked.toARGB32()),
         ),
         SettingSliderRow(
           settingKey: 'pipFontSize',

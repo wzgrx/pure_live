@@ -17,6 +17,7 @@ import 'package:pure_live/features/settings/settings_tiles.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/display_mode.dart';
 import 'package:pure_live/routes/app_navigator.dart';
+import 'package:pure_live/shared/danmaku/danmaku_color_palette.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings_content.dart';
 import 'package:pure_live/shared/danmaku/danmaku_templates.dart';
 import 'package:pure_live/shared/danmaku/pip_danmaku_settings.dart';
@@ -505,9 +506,11 @@ class DanmakuStylePage extends StatelessWidget {
   }
 }
 
-/// "统一弹幕颜色" of the mini windows: the colour dialog of U.6b; greyed out
-/// while the platform's colours are kept (U.6c c5).
-class PipColorTile extends ConsumerWidget {
+/// "统一弹幕颜色" of the mini windows as a search result: the same palette as
+/// the page's row (A08.7 c3, H1 A; [DanmakuColorPalette], no opacity as in
+/// 3.x) unfolds under it instead of a colour dialog; greyed out while the
+/// platform's colours are kept (U.6c c5).
+class PipColorTile extends ConsumerStatefulWidget {
   /// Creates the row.
   const new({required this.entry, super.key});
 
@@ -515,7 +518,15 @@ class PipColorTile extends ConsumerWidget {
   final SettingsEntry entry;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PipColorTile> createState() => _PipColorTileState();
+}
+
+class _PipColorTileState extends ConsumerState<PipColorTile> {
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final entry = widget.entry;
     final color = Color(watchSetting(ref, Settings.pipDanmakuColor));
     final unmet = watchUnmet(ref, [
       needsOn(Settings.enablePipDanmaku, 'pip_danmaku_enable'),
@@ -525,17 +536,40 @@ class PipColorTile extends ConsumerWidget {
         reason: i18n('settings_needs_off', args: {'name': i18n('pip_danmaku_original_color')}),
       ),
     ]);
-    return SettingsLinkRow(
-      key: entry.rowKey,
-      title: entry.titleText,
-      value: '#${colorHex(color)}',
-      valueWidget: SettingsSwatch(color, size: 24),
-      enabled: unmet == null,
-      disabledReason: unmetReason(unmet),
-      onTap: () async {
-        final picked = await showColorDialog(context: context, title: entry.titleText, current: color);
-        if (picked != null && context.mounted) writeSetting(ref, Settings.pipDanmakuColor, picked.toARGB32());
-      },
+    final open = _open && unmet == null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SettingsLinkRow(
+          key: entry.rowKey,
+          title: entry.titleText,
+          value: '#${colorHex(color)}',
+          valueWidget: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SettingsSwatch(color, size: 24),
+              const SizedBox(width: 4),
+              Icon(
+                open ? AppIcons.foldUp : AppIcons.dropDown,
+                size: 20,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+          chevron: false,
+          enabled: unmet == null,
+          disabledReason: unmetReason(unmet),
+          onTap: () => setState(() => _open = !_open),
+        ),
+        if (open)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+            child: DanmakuColorPalette(
+              current: color,
+              onChanged: (picked) => writeSetting(ref, Settings.pipDanmakuColor, picked.toARGB32()),
+            ),
+          ),
+      ],
     );
   }
 }

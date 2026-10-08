@@ -1705,6 +1705,15 @@ date = "2026-10-02"
 commit = "7b37e6f5f"
 old = ["F.1c", "T05g.3"]
 
+
+[[task]]
+id = "C03.2"
+title = "HyperOS 拦截“在快手打开”：跳转失败时说清楚怎么放行"
+type = "原生"
+status = "未开始"
+size = "小"
+tier = 3
+from = "K90 S02.6 第 11 步（2026-10-08）"
 [[task]]
 id = "D01.1"
 title = "弹幕框架和过滤"

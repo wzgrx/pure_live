@@ -127,6 +127,67 @@ void main() {
       expect((unconfirmed.codec, unconfirmed.isPlaybackUnconfirmed, unconfirmed.id), ('hevc', true, 'origin'));
     });
 
+    group('C01.4: the served quality', () {
+      const original = LivePlayQuality(quality: '原画', id: 10000);
+      const hd = LivePlayQuality(quality: '超清', id: 250);
+
+      test('a confirmed id in the list is that option', () {
+        final served = resolveServedPlayQuality(
+          platform: 'bilibili',
+          qualities: const [original, hd],
+          requested: original,
+          resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: 250),
+        );
+        expect(served, same(hd));
+      });
+
+      test("a confirmed id outside the list is named by the platform's codes and is confirmed", () {
+        final served = resolveServedPlayQuality(
+          platform: 'bilibili',
+          qualities: const [original],
+          requested: original,
+          resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: 250),
+        );
+        expect((served.quality, served.id, served.data, served.isPlaybackUnconfirmed), ('超清', 250, 250, false));
+        expect(served.selectionId, 250);
+      });
+
+      test('a quality the platform did not confirm stays the request, unconfirmed', () {
+        final missing = resolveServedPlayQuality(
+          platform: 'bilibili',
+          qualities: const [original],
+          requested: original,
+          resolution: LivePlayUrlResolution(urls: const ['u'], qualityUnconfirmed: true),
+        );
+        expect((missing.quality, missing.isPlaybackUnconfirmed), ('原画', true));
+        final odd = resolveServedPlayQuality(
+          platform: 'bilibili',
+          qualities: const [original],
+          requested: original,
+          resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: 250, qualityUnconfirmed: true),
+        );
+        expect((odd.quality, odd.isPlaybackUnconfirmed), ('原画', true));
+        final blank = resolveServedPlayQuality(
+          platform: 'bilibili',
+          qualities: const [original],
+          requested: original,
+          resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: ' '),
+        );
+        expect((blank.quality, blank.isPlaybackUnconfirmed), ('原画', true));
+      });
+
+      test('a quality the platform switched to and named is that quality (11-1)', () {
+        const switched = LivePlayQuality(quality: '1080p 60fps', id: 'new');
+        final served = resolveServedPlayQuality(
+          platform: 'youtube',
+          qualities: const [original],
+          requested: original,
+          resolution: LivePlayUrlResolution(urls: const ['u'], appliedQualityData: 'new', appliedQuality: switched),
+        );
+        expect(served, same(switched));
+      });
+    });
+
     test('11-1: a quality the platform switched to and named is shown confirmed; normalizing keeps it', () {
       const switched = LivePlayQuality(quality: '1080p 60fps', id: 'new');
       final resolution = LivePlayUrlResolution(

@@ -592,11 +592,19 @@ class MultiviewController extends ChangeNotifier {
     // permission first; refused, the user is told and the open fails as usual.
     await ensureLocalNetworkFor(resolution.lines.map((line) => line.url), toast: toast);
     if (!_current(cell, epoch)) return false;
-    final applied = resolveAppliedPlayQuality(qualities: cell._qualities, requested: requested, resolution: resolution);
+    // C01.4: the live room's rule (a confirmed tier outside the list is
+    // named by the platform); only a quality picked by hand is answered with
+    // a toast, so cells entering together stay quiet.
+    final applied = resolveServedPlayQuality(
+      platform: site.id,
+      qualities: cell._qualities,
+      requested: requested,
+      resolution: resolution,
+    );
     final appliedIndex = cell._qualities.indexWhere((q) => q.selectionId == applied.selectionId);
     final playing = appliedIndex >= 0 ? appliedIndex : index;
-    if (manual && playing != index) {
-      toast?.call(i18n('quality_limited_to', args: {'quality': cell._qualities[playing].quality}));
+    if (manual && applied.selectionId != requested.selectionId) {
+      toast?.call(i18n('quality_limited_to', args: {'quality': applied.quality}));
     }
     cell
       .._qualities = List.unmodifiable(List.of(cell._qualities)..[playing] = applied)

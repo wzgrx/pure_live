@@ -349,30 +349,19 @@ final class RecordStreamResolver {
     return index;
   }
 
-  /// The quality the platform served for [requested]: the option of
-  /// [qualities] whose id it confirmed (`resolveAppliedPlayQuality`, as the
-  /// player); a confirmed id outside [qualities] — a room listed as 原画
-  /// only, where a Bilibili guest asking for 10000 is served 250 — named by
-  /// the platform's codes ([LiveQualityLabel]) instead of falling back to
-  /// the request; else [requested], unconfirmed when the platform did not
-  /// say what it was expected to.
+  /// The quality the platform served for [requested]
+  /// ([resolveServedPlayQuality], the live room's rule): the option of
+  /// [qualities] whose id it confirmed; a confirmed id outside [qualities] —
+  /// a room listed as 原画 only, where a Bilibili guest asking for 10000 is
+  /// served 250 — named by the platform's codes; else [requested],
+  /// unconfirmed when the platform did not say what it was expected to.
   static LivePlayQuality servedQuality({
     required String platform,
     required List<LivePlayQuality> qualities,
     required LivePlayQuality requested,
     required LivePlayUrlResolution resolution,
-  }) {
-    final applied = resolveAppliedPlayQuality(qualities: qualities, requested: requested, resolution: resolution);
-    final id = resolution.appliedQualityData;
-    if (!applied.isPlaybackUnconfirmed || resolution.qualityUnconfirmed || id == null || '$id'.trim().isEmpty) {
-      return applied;
-    }
-    return LivePlayQuality(
-      quality: LiveQualityLabel.normalize(platform: platform, rawLabel: '', id: id),
-      data: id,
-      id: id,
-    );
-  }
+  }) =>
+      resolveServedPlayQuality(platform: platform, qualities: qualities, requested: requested, resolution: resolution);
 
   static List<LivePlayQuality> _moveToFront(List<LivePlayQuality> qualities, int index) =>
       List.unmodifiable([qualities[index], ...qualities.take(index), ...qualities.skip(index + 1)]);

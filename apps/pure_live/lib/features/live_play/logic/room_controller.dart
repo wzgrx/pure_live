@@ -185,6 +185,9 @@ class LiveRoomController extends ChangeNotifier {
   int _namedChats = 0;
   bool _unsupportedShown = false;
   bool _historyRecorded = false;
+  // C01.4: entering the room says once that the platform served another
+  // tier; a refresh or a reload does not say it again.
+  bool _servedToastShown = false;
 
   LiveRoom _room;
   RoomStage _stage = RoomStage.loading;
@@ -509,11 +512,20 @@ class LiveRoomController extends ChangeNotifier {
     // permission first; refused, the user is told and the open fails as usual.
     await ensureLocalNetworkFor(resolution.lines.map((line) => line.url), toast: toast);
     if (!_current(epoch)) return false;
-    final applied = resolveAppliedPlayQuality(qualities: _qualities, requested: requested, resolution: resolution);
+    // C01.4: a confirmed tier the list does not have (a Bilibili guest in a
+    // room listed as 原画 only, served 250) is named by the platform, as the
+    // recorder names it, and takes the requested entry's place.
+    final applied = resolveServedPlayQuality(
+      platform: site.id,
+      qualities: _qualities,
+      requested: requested,
+      resolution: resolution,
+    );
     final appliedIndex = _qualities.indexWhere((q) => q.selectionId == applied.selectionId);
     final playing = appliedIndex >= 0 ? appliedIndex : index;
-    if (userChoice && playing != index) {
-      toast?.call(i18n('quality_limited_to', args: {'quality': _qualities[playing].quality}));
+    if (applied.selectionId != requested.selectionId && (userChoice || !_servedToastShown)) {
+      if (!userChoice) _servedToastShown = true;
+      toast?.call(i18n('quality_limited_to', args: {'quality': applied.quality}));
     }
     _qualities = List.unmodifiable(List.of(_qualities)..[playing] = applied);
     _qualityIndex = playing;

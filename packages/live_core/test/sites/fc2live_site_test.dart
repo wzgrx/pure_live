@@ -303,7 +303,6 @@ void main() {
     test("the platform: 3.x's id, name and directory note; no account or cookie; comments are M5's", () {
       final site = _setup(const []).site;
       expect((site.id, site.name, site.directoryNoticeKey), ('fc2live', 'FC2 Live', 'fc2live_directory_scope'));
-      expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the connection is M5 (DanmakuRegistry)');
       expect(Fc2LiveSite.snapshotLifetime, const Duration(seconds: 20), reason: "3.x's 20 s (26-1)");
       expect(site, isA<LiveSiteDirectoryPager>());
       expect(site, isA<LiveCancellableSearch>());

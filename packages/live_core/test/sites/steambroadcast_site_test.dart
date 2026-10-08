@@ -188,7 +188,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('steambroadcast', 'Steam Broadcasts'));
       expect(setup.site.directoryNoticeKey, 'steambroadcast_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the chat is M5');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {

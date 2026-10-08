@@ -983,7 +983,6 @@ void main() {
       expect(setup.http.requests, isEmpty);
       expect(setup.site.directoryNoticeKey, catalog['directoryNoticeKey']);
       expect((setup.site.id, setup.site.name), (catalog['id'], catalog['name']));
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the chat connection is M5 (23-3)');
     });
   });
 

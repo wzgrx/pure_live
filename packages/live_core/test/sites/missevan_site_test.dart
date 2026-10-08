@@ -116,7 +116,6 @@ void main() {
       }
       expect(setup.site.id, 'missevan');
       expect(setup.site.name, '猫耳 FM');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Missevan danmaku');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled', () async {
@@ -407,7 +406,6 @@ void main() {
         (await setup.site.getRoomDetailForRecording(roomId: _live)).danmakuData.toString(),
         live.danmakuData.toString(),
       );
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the connection is M5');
     });
 
     test('an offline refresh keeps what the card knew (mergeFrom)', () async {

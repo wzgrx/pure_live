@@ -115,7 +115,6 @@ void main() {
     expect(site, isA<LiveCancellableSearch>());
     expect(site, isA<LivePlayUrlResolver>());
     expect(site, isA<LiveSiteLinks>());
-    expect(site.getDanmaku(), isA<EmptyDanmaku>());
   });
 
   group('catalog and directory', () {

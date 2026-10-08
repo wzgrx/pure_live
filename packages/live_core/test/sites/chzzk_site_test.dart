@@ -222,7 +222,6 @@ void main() {
     expect(site, isA<LivePlayUrlResolver>());
     expect(site, isA<LivePlayRecoveryResolver>());
     expect(site, isNot(isA<LiveSearchPaginationPolicy>()));
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'danmaku is M5');
   });
 
   group('catalog and directory', () {

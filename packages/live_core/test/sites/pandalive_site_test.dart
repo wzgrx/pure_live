@@ -268,7 +268,6 @@ void main() {
       expect(site, isA<LivePlayRecoveryResolver>());
       expect(site, isA<LiveSiteLinks>());
       expect(site, isNot(isA<LiveSiteCursorDirectoryPager>()));
-      expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the chat connection is M5 (25-2)');
       final categories = await site.getCategories(1, 30);
       expect(categories.single.children.map((area) => area.areaId), ['public', 'newbj'], reason: '25-1');
       expect(await site.getCategories(2, 30), isEmpty);

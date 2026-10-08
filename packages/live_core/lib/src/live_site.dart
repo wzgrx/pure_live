@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:live_core/src/hls_source_query_policy.dart';
 import 'package:live_core/src/input_recipe.dart';
 import 'package:live_core/src/live_area.dart';
-import 'package:live_core/src/live_danmaku.dart';
 import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
@@ -23,9 +22,6 @@ abstract class LiveSite {
 
   /// Display name (`斗鱼`).
   String get name;
-
-  /// A new danmaku connection for a room.
-  LiveDanmaku getDanmaku() => EmptyDanmaku();
 
   /// Categories with their areas.
   Future<List<LiveCategory>> getCategories(int page, int pageSize) async => const [];

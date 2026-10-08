@@ -186,7 +186,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('kilakila', '克拉克拉'));
       expect(setup.site.directoryNoticeKey, 'kilakila_directory_scope');
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no KilaKila danmaku');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled', () async {

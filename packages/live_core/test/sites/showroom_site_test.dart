@@ -145,11 +145,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('showroom', 'SHOWROOM'));
       expect(setup.site.directoryNoticeKey, 'showroom_directory_scope');
-      expect(
-        setup.site.getDanmaku(),
-        isA<EmptyDanmaku>(),
-        reason: '3.x had no SHOWROOM comments; M5 connects them from danmakuData',
-      );
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {

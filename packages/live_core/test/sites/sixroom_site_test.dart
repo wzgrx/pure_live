@@ -288,7 +288,6 @@ void main() {
       }
       expect((setup.site.id, setup.site.name), ('sixroom', '六间房直播'));
       expect(setup.site.directoryNoticeKey, _legacy('S04-home')['directoryNoticeKey']);
-      expect(setup.site.getDanmaku(), isA<EmptyDanmaku>(), reason: '3.x had no Six Rooms chat (31-6 is M5)');
     });
 
     test('transport failures are NetworkFailure; a cancelled transport stays cancelled; statuses are mapped', () async {

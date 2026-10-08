@@ -136,7 +136,6 @@ void main() {
     expect(site, isA<LivePlayRecoveryResolver>());
     expect(site, isNot(isA<LiveSearchPaginationPolicy>()));
     expect(site, isNot(isA<LivePlayLeaseMetadata>()));
-    expect(site.getDanmaku(), isA<EmptyDanmaku>(), reason: 'the chat is the danmaku module (M5, 33-4)');
     // changed: 3.x had no catalog (its LiveSite default); 33-1.
     final categories = await site.getCategories(1, 30);
     expect(categories.single.id, 'region');

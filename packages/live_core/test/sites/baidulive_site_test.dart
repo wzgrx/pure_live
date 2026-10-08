@@ -265,7 +265,6 @@ void main() {
       expect(site, isA<LivePlayRecoveryResolver>());
       expect(site, isNot(isA<LiveSiteCursorDirectoryPager>()));
       expect(site, isNot(isA<LivePlayLeaseMetadata>()));
-      expect(site.getDanmaku(), isA<EmptyDanmaku>());
     });
 
     test("3.x's device ids: one for the feed per adapter, a new one for every room command", () async {

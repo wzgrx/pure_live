@@ -272,6 +272,15 @@ abstract final class LocalCatalog {
   /// The longest local nickname.
   static const nameLimit = 20;
 
+  /// The longest local danmaku, in characters (A08.13: the platforms let a
+  /// viewer send 20 to 40; 40 still crosses a landscape phone in about one
+  /// screen width at the default size).
+  static const danmakuLimit = 40;
+
+  /// From this many characters on the composer shows its count (the last
+  /// ten before [danmakuLimit]).
+  static const int danmakuCountFrom = danmakuLimit - 10;
+
   /// The gifts of a platform without its own (3.x `gifts`).
   static const genericGifts = <LocalGift>[
     LocalGift(id: 'heart', nameKey: 'local_gift_heart', emoji: '💗', price: 10, color: LiveMessageColor(255, 105, 180)),
@@ -577,6 +586,15 @@ abstract final class LocalCatalog {
     SiteIds.soop => 'local_badge_soop',
     _ => 'local_badge_generic',
   };
+
+  /// The weight "粗体" turns [weight] into (A08.13): 200 heavier, at
+  /// least 700, so turning it off again with [regularWeight] gives back the
+  /// weight the style had (500 ⇄ 700, 600 ⇄ 800).
+  static int boldWeight(int weight) => (weight + 200).clamp(700, 900);
+
+  /// The weight turning "粗体" off gives [weight]: 200 lighter, at most 600
+  /// (under the 700 that reads as bold) and at least 400.
+  static int regularWeight(int weight) => (weight - 200).clamp(400, 600);
 
   /// The level of [experience]: one per 500, from 1.
   static int levelFor(int experience) => (experience < 0 ? 0 : experience) ~/ 500 + 1;

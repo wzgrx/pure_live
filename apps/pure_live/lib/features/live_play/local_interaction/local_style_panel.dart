@@ -390,7 +390,14 @@ class LocalDanmakuStyleControls extends StatelessWidget {
                 label: i18n('local_danmaku_bold'),
                 selected: local.fontWeight >= 700,
                 avatar: const Icon(AppIcons.localBold, size: 17),
-                onSelected: () => custom(Settings.localDanmakuFontWeight, local.fontWeight >= 700 ? 500 : 800),
+                // A08.13: back and forth keeps the style's own weight
+                // (3.x wrote 800 and 500, so 600 came back as 500).
+                onSelected: () => custom(
+                  Settings.localDanmakuFontWeight,
+                  local.fontWeight >= 700
+                      ? LocalCatalog.regularWeight(local.fontWeight)
+                      : LocalCatalog.boldWeight(local.fontWeight),
+                ),
               ),
               _choice(
                 context,

@@ -1059,6 +1059,7 @@
     "local_group_on_video": "On the picture",
     "local_group_profile_mine": "My profile",
     "local_history": "Local interaction history",
+    "local_history_cleared": "Cleared {count} local interaction records",
     "local_history_count": "{count}",
     "local_history_empty": "No interaction history yet",
     "local_import": "Local import",

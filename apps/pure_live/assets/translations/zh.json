@@ -1058,6 +1058,7 @@
     "local_group_on_video": "画面上",
     "local_group_profile_mine": "我的资料",
     "local_history": "本地互动记录",
+    "local_history_cleared": "已清空 {count} 条本地互动记录",
     "local_history_count": "{count} 条",
     "local_history_empty": "还没有互动记录",
     "local_import": "本地导入",

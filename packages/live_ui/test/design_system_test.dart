@@ -86,6 +86,8 @@ void main() {
       // U.2k: the local interaction keeps 3.x's glyphs.
       (AppIcons.localStyle, Icons.auto_awesome_rounded),
       (AppIcons.localSend, Icons.send_rounded),
+      // A08.13: opening the composer is not the style's star.
+      (AppIcons.localCompose, Icons.rate_review_rounded),
       (AppIcons.localCoins, Icons.toll_rounded),
       (AppIcons.localOverlay, Icons.subtitles_rounded),
       (AppIcons.localBadge, Icons.workspace_premium_rounded),

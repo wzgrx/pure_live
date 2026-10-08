@@ -414,6 +414,11 @@ abstract final class AppIcons {
   /// Send a local danmaku (3.x `send_rounded`).
   static const IconData localSend = Icons.send_rounded;
 
+  /// Open the local danmaku composer: the chat list's button and the narrow
+  /// fullscreen bar's (A08.13; they showed the style's star, one icon for
+  /// two things). A speech bubble with a pen: write, not send yet.
+  static const IconData localCompose = Icons.rate_review_rounded;
+
   /// Local coins (3.x `toll_rounded`).
   static const IconData localCoins = Icons.toll_rounded;
 

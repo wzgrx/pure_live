@@ -443,7 +443,9 @@ class _LocalProfileEditorState extends State<LocalProfileEditor> {
 }
 
 /// "本地互动记录" with its count, the lines (newest first, up to 30) and
-/// clearing them (c12: in the panel and on the settings page).
+/// clearing them (c12: in the panel and on the settings page). A08.13: a
+/// clear is undone from its toast for 4 s (docs/specs/UI.md §7, as removing
+/// a blocked word or unfollowing), no question first.
 class LocalHistory extends StatelessWidget {
   /// Creates the history.
   const new({required this.interaction, required this.clearLabel, this.inPanel = false, super.key});
@@ -456,6 +458,22 @@ class LocalHistory extends StatelessWidget {
 
   /// In the room panel: the title is a group title.
   final bool inPanel;
+
+  void _clear(BuildContext context) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final cleared = interaction.clearHistory();
+    final toast = AppToast(
+      i18n('local_history_cleared', args: {'count': '${cleared.length}'}),
+      key: const ValueKey('local-history-undo'),
+      actionLabel: i18n('room_undo'),
+      onAction: () => interaction.restoreHistory(cleared),
+    );
+    if (messenger == null) {
+      AppNavigator.showToast(toast);
+    } else {
+      showAppToastOn(messenger, toast);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -516,7 +534,7 @@ class LocalHistory extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: TextButton.icon(
               key: const ValueKey('local-history-clear'),
-              onPressed: history.isEmpty ? null : interaction.clearHistory,
+              onPressed: history.isEmpty ? null : () => _clear(context),
               icon: const Icon(AppIcons.localClearHistory, size: 18),
               label: Text(clearLabel),
             ),

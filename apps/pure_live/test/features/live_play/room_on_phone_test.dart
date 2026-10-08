@@ -327,6 +327,9 @@ void main() {
       final chat = tester.getRect(_key('live-play-chat-body'));
       expect(star.right, closeTo(chat.right - 12, 1));
       expect(star.bottom, closeTo(chat.bottom - 12, 1));
+      // A08.13: it opens the composer, so it is not the style's star.
+      expect(_in('local-composer-chat-star', find.byIcon(AppIcons.localCompose)), findsOneWidget);
+      expect(find.byIcon(AppIcons.localStyle), findsNothing);
       await _chat(tester, room);
       expect(_visibleLines(tester), greaterThanOrEqualTo(5));
       // No black above the picture: it sits at the top of its area.

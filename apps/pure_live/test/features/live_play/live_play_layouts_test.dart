@@ -266,7 +266,9 @@ void main() {
         'live-play-video-fit',
         'live-play-fullscreen',
       ]);
-      expect(_in('local-composer-star', find.byIcon(AppIcons.localStyle)), findsOneWidget);
+      // A08.13: the button opens the composer; the star is the style's.
+      expect(_in('local-composer-star', find.byIcon(AppIcons.localCompose)), findsOneWidget);
+      expect(_in('local-composer-star', find.byIcon(AppIcons.localStyle)), findsNothing);
       // The star opens the field above the bar (U.2k c14).
       await _tap(tester, 'local-composer-star');
       expect(_key('local-composer-row'), findsOneWidget);

@@ -224,8 +224,20 @@ final class LocalInteraction extends ChangeNotifier {
     });
   }
 
-  /// Empties the history (coins and level stay).
-  void clearHistory() => _set(Settings.localInteractionHistory, const <String>[]);
+  /// Empties the history (coins and level stay) and returns what it held,
+  /// for [restoreHistory] (A08.13: the clear can be undone).
+  List<String> clearHistory() {
+    final cleared = history;
+    _set(Settings.localInteractionHistory, const <String>[]);
+    return cleared;
+  }
+
+  /// Puts [lines] (what [clearHistory] returned) back under the lines added
+  /// since, up to [LocalCatalog.historyLimit].
+  void restoreHistory(List<String> lines) {
+    if (lines.isEmpty) return;
+    _set(Settings.localInteractionHistory, [...history, ...lines].take(LocalCatalog.historyLimit).toList());
+  }
 
   List<String> _withHistory(String line) => [line, ...history].take(LocalCatalog.historyLimit).toList();
 

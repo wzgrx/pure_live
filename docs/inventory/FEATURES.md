@@ -1,6 +1,6 @@
 # 功能清点（v3 → v4）
 
-- 更新：2026-10-08（F-NET-01“部分”→“没验证”：Q02.1 让图片走应用代理，等 K90）；2026-10-07（docs v2 收尾：F-NET-01、F-NET-03 改“部分”，补 F-MINI-05 音频焦点，见“统计”一节）；2026-10-03（第 3 版：逐项对照当前代码和各任务的记录重新核对，改动和依据见 [V03.3](../V-需求和反馈/V03-审查和调研/V03.3-功能清点和已批准升级核对/README.md)）；2026-10-02（第 2 版：整理进新文档）
+- 更新：2026-10-08（F-NET-01“部分”→“没验证”：Q02.1 让图片走应用代理，等 K90；F-MINI-05“缺失”→“没验证”：G05.1 音频焦点，等 K90）；2026-10-07（docs v2 收尾：F-NET-01、F-NET-03 改“部分”，补 F-MINI-05 音频焦点，见“统计”一节）；2026-10-03（第 3 版：逐项对照当前代码和各任务的记录重新核对，改动和依据见 [V03.3](../V-需求和反馈/V03-审查和调研/V03.3-功能清点和已批准升级核对/README.md)）；2026-10-02（第 2 版：整理进新文档）
 - 计划：[PLAN.md](../PLAN.md)；任务：[TASKS.md](../TASKS.md)；做法：[PROCESS.md](../PROCESS.md)
 - 范围：v3（标签 `v3.2.11`，本机只读副本 `~/ref/v3ref`）里用户能用到的每一个功能点。界面怎么画不在这里（见 [specs/UI.md](../specs/UI.md) 和各界面任务），这里只管“能做什么、做了没有、对不对”。
 - **本阶段只判断 Android（手机和平板）**（用户 2026-10-02 决定）。Windows、Linux、电视、苹果平台的功能以后再清点；Windows 专属的功能点列在第 13 节，只写“以后”。
@@ -33,12 +33,12 @@
 | 5 房间卡片 CARD | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | 6 关注 FAV | 8 | 8 | 0 | 0 | 0 | 0 | 0 |
 | 7 搜索和历史 SRC、HIS | 7 | 6 | 0 | 0 | 0 | 1 | 0 |
-| 8 直播间 ROOM、RT、PORT、MINI | 47 | 43 | 0 | 1 | 0 | 2 | 1 |
+| 8 直播间 ROOM、RT、PORT、MINI | 47 | 43 | 0 | 0 | 0 | 3 | 1 |
 | 9 弹幕和本地互动 DM、LOC | 20 | 20 | 0 | 0 | 0 | 0 | 0 |
 | 10 多画面 MV | 6 | 4 | 1 | 0 | 0 | 1 | 0 |
 | 11 录制 REC | 13 | 9 | 0 | 0 | 0 | 4 | 0 |
 | 12 网络电视、账号、备份、工具、标签 | 25 | 19 | 0 | 0 | 0 | 5 | 1 |
-| **合计** | **177** | **145** | **2** | **1** | **0** | **27** | **2** |
+| **合计** | **177** | **145** | **2** | **0** | **0** | **28** | **2** |
 
 2026-10-07 docs v2 收尾核对后改了 3 项：F-NET-01 应用代理“完成”→“部分”（封面和头像不走应用代理 → Q02.1）；F-NET-03 断网预检和移动数据提示“完成”→“部分”（只有热门做了 → I03.2）；新增 F-MINI-05 音频焦点（3.x 有、v4 缺失 → G05.1）。下面是第 3 版的说明。
 
@@ -223,7 +223,7 @@ v3 没有的、不在清点里的：开播提醒（v3 没有通知开播的功�
 | F-MINI-02 | 离开直播间时应用内悬浮小窗 | `player/core/player_manager.dart:2970` | 是 | 完成 | `features/live_play/mini/floating_window.dart`、`logic/room_runtime.dart`（A07.8） | |
 | F-MINI-03 | 小窗弹幕（13 项设置） | `modules/live_play/widgets/danmaku/compact_danmaku_overlay.dart:6`、`modules/settings/pages/pip_danmaku_settings_page.dart:12` | 是 | 完成 | `features/live_play/mini/compact_danmaku.dart`（A07.8） | |
 | F-MINI-04 | 小窗弹幕设置的实时预览 | `modules/settings/pages/pip_danmaku_settings_page.dart:31` | 是 | 完成 | `features/settings/playback_tiles.dart` 的 `PipDanmakuPreviewBinding`、`packages/live_ui` 的 `PipDanmakuPreview`（A11.3） | 清点时 A11.3 还没合并，C02.1 核对后改 |
-| F-MINI-05 | 音频焦点：来电、别的应用要独占声音时暂停，结束后继续；提示音时压低到 20%；拔耳机、蓝牙断开时暂停 | `player/core/live_audio_handler.dart:98`（`audio_session`，`:103` 中断、`:163` 拔耳机） | 是 | 缺失 | 没有（`apps/pure_live/pubspec.yaml` 没有 `audio_session`） | 2026-10-07 docs v2 G 组核对补登 → G05.1 |
+| F-MINI-05 | 音频焦点：来电、别的应用要独占声音时暂停，结束后继续；提示音时压低到 20%；拔耳机、蓝牙断开时暂停 | `player/core/live_audio_handler.dart:98`（`audio_session`，`:103` 中断、`:163` 拔耳机） | 是 | 没验证 | G05.1 第 1、2 阶段：`features/live_play/logic/audio_focus.dart` 的 `RoomAudioFocus`（`audio_session`，开播时拿焦点、离开直播间释放；来电暂停、结束只恢复自己暂停的；压低到 20%；别的应用永久拿走焦点时暂停不恢复；拔耳机暂停），接在 `RoomRuntime`（Android）；测试 `audio_focus_test.dart`。多画面没做 | 2026-10-07 docs v2 G 组核对补登；2026-10-08 G05.1 合并，来电、导航播报、拔耳机要在 K90 上看 → G05.1 |
 
 ## 9 弹幕（DM）和本地互动（LOC）
 

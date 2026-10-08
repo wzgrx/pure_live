@@ -87,6 +87,7 @@ final class MpvEngine implements PlayerEngine {
   final StreamController<EngineEvent> _events = StreamController.broadcast(sync: true);
   final List<StreamSubscription<Object?>> _subscriptions = [];
   VoidCallback? _frameListener;
+  Timer? _bufferingProbe;
   var _audioOnly = false;
   var _disposed = false;
   var _opens = 0;
@@ -116,6 +117,7 @@ final class MpvEngine implements PlayerEngine {
         stream.buffering.listen((buffering) {
           _gate.playback(playing: player.state.playing, buffering: buffering, audioOnly: _audioOnly);
           _add(EngineBuffering(buffering: buffering));
+          _watchBuffering(buffering);
         }),
       )
       ..add(
@@ -151,6 +153,30 @@ final class MpvEngine implements PlayerEngine {
       _frameListener = onFrame;
       controller.frameRevision.addListener(onFrame);
     }
+  }
+
+  /// G02.2's diagnostic (debug and profile builds): a buffering flag still
+  /// set after 3 s logs the two mpv properties that set and clear it (the
+  /// fork's `core-idle` and `paused-for-cache`) and `time-pos`, to tell a
+  /// real wait from a flag that missed its clearing notification.
+  void _watchBuffering(bool buffering) {
+    _bufferingProbe?.cancel();
+    _bufferingProbe = null;
+    if (!buffering || kReleaseMode) return;
+    _bufferingProbe = Timer(const Duration(seconds: 3), () async {
+      _bufferingProbe = null;
+      if (_disposed || !player.state.buffering) return;
+      final values = <String>[];
+      final watch = Stopwatch()..start();
+      for (final name in const ['core-idle', 'paused-for-cache', 'time-pos']) {
+        try {
+          values.add('$name=${await _readProperty(name)}');
+        } on Object {
+          values.add('$name=?');
+        }
+      }
+      if (!_disposed) debugPrint('mpv: buffering for 3 s: ${values.join(' ')} (${watch.elapsedMicroseconds} us)');
+    });
   }
 
   Future<void> _setProperty(String name, String value) async {
@@ -262,6 +288,7 @@ final class MpvEngine implements PlayerEngine {
     if (_disposed) return;
     _disposed = true;
     _opens++;
+    _bufferingProbe?.cancel();
     _gate.close();
     final listener = _frameListener;
     if (listener != null) controller.frameRevision.removeListener(listener);

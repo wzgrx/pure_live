@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_net/testing.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -553,6 +555,40 @@ void main() {
       expect(engine.opens.last.uri.toString(), endsWith('/origin.flv'));
       controller.dispose();
     });
+  });
+
+  test('G02.2: every recovery attempt leaves one app log line with its count and cause', () async {
+    final controller = controllerFor(FakeSite(liveRoom()));
+    await controller.start();
+    await settle();
+    expect(session.state.status, PlaybackStatus.playing);
+    List<String> lines() => [
+      for (final entry in AppLog.instance.entries)
+        if (entry.tag == 'playback') entry.message,
+    ];
+    final before = lines().length;
+
+    // The reopened line does not play yet: the recovery goes on.
+    engine
+      ..onOpen = ((_) async {})
+      ..emit(
+        const EngineError(
+          PlayerException(message: 'connection reset', type: PlayerErrorType.network, code: 'transport'),
+        ),
+      );
+    await settle();
+    expect(session.state.recovery, 1);
+    expect(lines().skip(before), ['recovering #1 transport']);
+    expect(AppLog.instance.entries.last.format(), endsWith('[INFO] playback: recovering #1 transport'));
+
+    // Playing again ends it; the next drop counts on.
+    engine
+      ..emit(const EngineBuffering(buffering: false))
+      ..emit(const EnginePlaying(playing: true))
+      ..emit(const EngineError(PlayerException(message: 'reset', type: PlayerErrorType.network, code: 'b')));
+    await settle();
+    expect(lines().skip(before), ['recovering #1 transport', 'recovering #2 b']);
+    controller.dispose();
   });
 
   test('texts: time on air, audience numbers', () {

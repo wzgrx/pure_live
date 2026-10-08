@@ -7,6 +7,8 @@ import 'package:live_player/src/engine.dart';
 import 'package:live_player/src/state.dart';
 import 'package:meta/meta.dart';
 
+const _playbackStallCode = 'playback_stall_timeout';
+
 /// Resolves the playing quality again (3.x's `PlaybackSourceResolver`): a
 /// fresh plan with renewed signatures. The room page builds it from the
 /// platform's `resolvePlayUrlsForRecovery`.
@@ -142,6 +144,16 @@ final class SessionTimings {
 ///   every [SessionTimings.networkProbe] (each look another attempt), after
 ///   [SessionTimings.offlineGrace] publishes [networkLostCode] and keeps
 ///   looking, and reopens the stream once the platform answers.
+///
+/// G02.2, a buffering flag that never clears: while the user wants playback,
+/// the engine says it plays and the session shows buffering, media moving
+/// ends the buffering as if the engine had said so: the position (live or
+/// on demand) at least [bufferingProgress] past the first one seen in this
+/// buffering, by no more than the wall clock plus [bufferingProgressSlack]
+/// (a seek or a timestamp jump is no progress), or
+/// [bufferingProgressFrames] presented frames within a second (engines that
+/// report frames, video shown). It only ends a buffering, never starts one
+/// or a pause; the buffering deadline checks the same before it fails.
 final class PlaybackSession {
   /// Creates a session. The opener is the caller's (it may share a relay
   /// with other players); [engine] creates the engine on first open.
@@ -155,6 +167,16 @@ final class PlaybackSession {
 
   /// Deadlines.
   final SessionTimings timings;
+
+  /// How far the position has to move to end a buffering (G02.2).
+  static const bufferingProgress = Duration(seconds: 1);
+
+  /// How much further than the wall clock the position may move and still
+  /// count as progress (G02.2).
+  static const bufferingProgressSlack = Duration(seconds: 2);
+
+  /// Presented frames within a second that end a buffering (G02.2).
+  static const bufferingProgressFrames = 10;
 
   final EngineFactory _createEngine;
   final MediaOpener _opener;
@@ -215,6 +237,21 @@ final class PlaybackSession {
   /// The source stood still for [SessionTimings.stallNotice]: the
   /// recovery's attempt is shown before the recovery acts.
   bool _stallNoticed = false;
+
+  /// The code of the failure the current recovery is about
+  /// ([PlaybackState.recoveryCause]).
+  String? _recoveryCause;
+
+  /// G02.2: the first position seen in the current buffering, when it was
+  /// seen, and the latest one.
+  Duration? _progressFrom;
+  DateTime? _progressAt;
+  Duration? _progressTo;
+
+  /// G02.2: frames presented in the current buffering since
+  /// [_progressFramesAt].
+  int _progressFrames = 0;
+  DateTime? _progressFramesAt;
 
   /// The network is gone: [_probe] owns the recovery.
   bool _offline = false;
@@ -526,6 +563,7 @@ final class PlaybackSession {
     _openingError = null;
     _playing = false;
     _buffering = true;
+    _resetProgress();
     _lastPosition = null;
     _lastMove = null;
     _moved = false;
@@ -548,6 +586,7 @@ final class PlaybackSession {
         clearVideoSize: true,
         appliedQualityData: plan.appliedQualityData,
         recovery: recovering ? _recoveries : 0,
+        recoveryCause: recovering ? _recoveryCause : null,
       ),
     );
     try {
@@ -642,6 +681,7 @@ final class PlaybackSession {
         _playing = playing;
         if (_accepting) _onPlaying(playing, session);
       case EngineBuffering(:final buffering):
+        if (buffering != _buffering) _resetProgress();
         _buffering = buffering;
         if (_accepting) _onBuffering(buffering, session);
       case EngineCompleted():
@@ -652,7 +692,10 @@ final class PlaybackSession {
         if (_accepting && fps > 0) _emit(_state.copyWith(frameRate: fps));
       case EnginePosition(:final position):
         if (_accepting && _state.onDemand) _emit(_state.copyWith(position: position));
-        if (_accepting) _onPosition(position, session);
+        if (_accepting) {
+          _onPosition(position, session);
+          if (_buffering) _onBufferingPosition(position, session);
+        }
       case EngineDuration(:final duration):
         if (_accepting && _state.onDemand) _emit(_state.copyWith(duration: duration));
       case EngineFrame():
@@ -774,8 +817,76 @@ final class PlaybackSession {
   }
 
   void _onFrame(int session) {
-    _lastFrame = clock.now();
+    final now = _lastFrame = clock.now();
     _armFrameWatchdog(session);
+    if (!_buffering || !_reconcilable || _state.audioOnly) return;
+    final since = _progressFramesAt;
+    if (since == null || now.difference(since) > const Duration(seconds: 1)) {
+      _progressFramesAt = now;
+      _progressFrames = 1;
+    } else if (++_progressFrames >= bufferingProgressFrames) {
+      _reconcile(session);
+    }
+  }
+
+  // G02.2: a buffering that the engine never ends.
+
+  /// The session shows a buffering the user wants to end and the engine
+  /// says it plays.
+  bool get _reconcilable =>
+      _wantPlaying &&
+      _playing &&
+      !_offline &&
+      (_state.status == PlaybackStatus.buffering || _state.status == PlaybackStatus.opening);
+
+  void _resetProgress() {
+    _progressFrom = null;
+    _progressAt = null;
+    _progressTo = null;
+    _progressFrames = 0;
+    _progressFramesAt = null;
+  }
+
+  /// A position during a buffering: only comparisons, no snapshot, until it
+  /// proves progress.
+  void _onBufferingPosition(Duration position, int session) {
+    final from = _progressFrom;
+    if (from == null || position < from) {
+      // The first one of this buffering, or a jump back (a seek).
+      _progressFrom = position;
+      _progressAt = clock.now();
+      _progressTo = position;
+      return;
+    }
+    _progressTo = position;
+    if (position - from < bufferingProgress) return;
+    if (!_progressed()) {
+      // Further than the clock allows: a seek or a timestamp jump; the
+      // next progress counts from here.
+      _progressFrom = position;
+      _progressAt = clock.now();
+      return;
+    }
+    if (_reconcilable) _reconcile(session);
+  }
+
+  /// Whether the position moved on by [bufferingProgress] in this
+  /// buffering, and no further than the wall clock allows.
+  bool _progressed() {
+    final from = _progressFrom;
+    final to = _progressTo;
+    final at = _progressAt;
+    if (from == null || to == null || at == null) return false;
+    final moved = to - from;
+    return moved >= bufferingProgress && moved <= clock.now().difference(at) + bufferingProgressSlack;
+  }
+
+  /// Ends the buffering the engine did not end, the way its own
+  /// notification would.
+  void _reconcile(int session) {
+    _buffering = false;
+    _resetProgress();
+    _onBuffering(false, session);
   }
 
   /// A live source's position: moving on is the proof that it plays.
@@ -807,6 +918,10 @@ final class PlaybackSession {
     _bufferingTimer = Timer(timings.bufferingStall, () {
       _bufferingTimer = null;
       if (!_current(session) || !_buffering || !_wantPlaying) return;
+      if (_accepting && _reconcilable && _progressed()) {
+        _reconcile(session);
+        return;
+      }
       _handleError(
         const PlayerException(
           message: 'Buffering did not end before the deadline',
@@ -901,7 +1016,7 @@ final class PlaybackSession {
           const PlayerException(
             message: 'The live source did not move before the deadline',
             type: PlayerErrorType.source,
-            code: 'playback_stall_timeout',
+            code: _playbackStallCode,
           ),
           session,
         );
@@ -919,9 +1034,10 @@ final class PlaybackSession {
   void _noticeStall() {
     _stallNoticed = true;
     _recoveries++;
+    _recoveryCause = _playbackStallCode;
     _cancelFrameWatchdog();
     _budgetTimer?.cancel();
-    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
+    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries, recoveryCause: _recoveryCause));
   }
 
   void _cancelMoveWatchdog() {
@@ -1062,7 +1178,8 @@ final class PlaybackSession {
     } else {
       _recoveries++;
     }
-    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
+    _recoveryCause = error.code ?? error.type.name;
+    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries, recoveryCause: _recoveryCause));
     final transport = error.type == PlayerErrorType.network || error.type == PlayerErrorType.source;
 
     if (transport && await _tryRefresh(session)) return;
@@ -1171,7 +1288,7 @@ final class PlaybackSession {
     _recoveringSession = session;
     // Each round is another attempt.
     _recoveries++;
-    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
+    _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries, recoveryCause: _recoveryCause));
     try {
       if (await _tryRefresh(session)) return;
       final source = _source;
@@ -1198,6 +1315,7 @@ final class PlaybackSession {
   /// the network until it answers.
   void _enterOffline(Object error, int session) {
     _offline = true;
+    _recoveryCause = networkLostCode;
     _offlineSince = clock.now();
     _offlineError = error;
     _cancelWatchdogs();
@@ -1231,7 +1349,7 @@ final class PlaybackSession {
     final published = _state.status == PlaybackStatus.error;
     if (!published) {
       _recoveries++;
-      _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries));
+      _emit(_state.copyWith(status: PlaybackStatus.buffering, recovery: _recoveries, recoveryCause: _recoveryCause));
     }
     PlaybackPlan? plan;
     try {

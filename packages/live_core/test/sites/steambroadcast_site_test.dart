@@ -519,10 +519,8 @@ void main() {
         expect(data.master?.toString(), legacyData?['master'], reason: '$depth: only with the checked master (3.x)');
         expect(
           room.danmakuData,
-          depth == 'getRoomDetail'
-              ? const SteamBroadcastDanmakuArgs(_live, broadcastId: '4005242549293303728')
-              : isNull,
-          reason: '27-6: the current broadcast, on entry only',
+          refresh ? isNull : const SteamBroadcastDanmakuArgs(_live, broadcastId: '4005242549293303728'),
+          reason: '27-6: the current broadcast, on entry and recording (E05.4, multi-view)',
         );
       }
     });

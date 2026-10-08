@@ -220,9 +220,10 @@ final class MissevanSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId);
 
-  /// The room with the pull URLs the recorder starts from.
+  /// The room with the pull URLs the recorder starts from, and the danmaku
+  /// arguments of the same answer (multi-view connects them; E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, withDanmaku: true);
 
   /// Whether the detail says live; a failed request is an error, never
   /// "offline".

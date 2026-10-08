@@ -1109,28 +1109,29 @@ void main() {
   });
 
   group('M5.26', () {
-    test(
-      'room entry and recordings carry the chat lists of the same room command; refresh and search do not',
-      () async {
-        const room = '11548522172';
-        final body = Fixture.load('baidulive', 'S02-room-chat').body;
-        final http = _Scripted((request) => _response(request, body));
-        final site = BaiduLiveSite(http, deviceId: _device, now: () => _captured('S02-room-chat'));
-        final entered = await site.getRoomDetail(roomId: room);
-        final args = entered.danmakuData! as BaiduLiveDanmakuArgs;
-        expect(args.roomId, room);
-        expect(args.chatList.path, '/v1/liveshowstatic/live_11548522172.m3u8');
-        expect(args.reliableList!.path, '/v1/liveshowstatic/live_11548522173.m3u8');
-        expect(args.hostList!.path, '/v1/liveshowstatic/live_11548522174.m3u8');
-        expect(args.isExpiredAt(_captured('S02-room-chat')), isFalse);
-        expect(http.requests, hasLength(1), reason: 'no request of its own');
-        expect((await site.getRoomDetailForRecording(roomId: room)).danmakuData, args);
-        expect((await site.getRoomDetailForRefresh(roomId: room)).danmakuData, isNull);
-        expect((await site.searchRooms(room)).single.danmakuData, isNull);
-        expect(http.requests, hasLength(4));
-        expect(entered.notice, BaiduLiveApi.chatNotice);
-      },
-    );
+    test('room entry, recordings and refresh carry the chat lists of the same room command; search does not', () async {
+      const room = '11548522172';
+      final body = Fixture.load('baidulive', 'S02-room-chat').body;
+      final http = _Scripted((request) => _response(request, body));
+      final site = BaiduLiveSite(http, deviceId: _device, now: () => _captured('S02-room-chat'));
+      final entered = await site.getRoomDetail(roomId: room);
+      final args = entered.danmakuData! as BaiduLiveDanmakuArgs;
+      expect(args.roomId, room);
+      expect(args.chatList.path, '/v1/liveshowstatic/live_11548522172.m3u8');
+      expect(args.reliableList!.path, '/v1/liveshowstatic/live_11548522173.m3u8');
+      expect(args.hostList!.path, '/v1/liveshowstatic/live_11548522174.m3u8');
+      expect(args.isExpiredAt(_captured('S02-room-chat')), isFalse);
+      expect(http.requests, hasLength(1), reason: 'no request of its own');
+      expect((await site.getRoomDetailForRecording(roomId: room)).danmakuData, args);
+      // E05.4 c4: a refresh after the signature expired brings fresh
+      // lists, without the playback data and without another request.
+      final refreshed = await site.getRoomDetailForRefresh(roomId: room);
+      expect(refreshed.danmakuData, args);
+      expect(refreshed.data, isNull);
+      expect((await site.searchRooms(room)).single.danmakuData, isNull);
+      expect(http.requests, hasLength(4));
+      expect(entered.notice, BaiduLiveApi.chatNotice);
+    });
 
     test('not live, no lists', () async {
       final (:site, http: _) = _setup(['S02-room-ended', 'S02-room-preview']);

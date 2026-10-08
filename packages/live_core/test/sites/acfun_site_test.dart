@@ -616,12 +616,13 @@ void main() {
       expect(args.enterRoomAttach, isNotEmpty);
     });
 
-    test('recording reads the broadcast too, without danmaku arguments (3.x)', () async {
+    test('recording reads the broadcast too, with the danmaku arguments of the same answers (E05.4)', () async {
       final setup = _setup(_live);
       final room = await setup.site.getRoomDetailForRecording(roomId: '40740702');
       expect(room.data, isA<AcfunRoomData>());
-      expect(room.danmakuData, isNull);
-      expect(setup.http.requests, hasLength(3));
+      final args = room.danmakuData! as AcfunDanmakuArgs;
+      expect((args.authorId, args.liveId, args.tickets.length), ('40740702', '29RchpoKMpA', 4));
+      expect(setup.http.requests, hasLength(3), reason: 'no request for them');
     });
 
     test('an offline room: one request, no broadcast, and no stream without a request', () async {
@@ -712,6 +713,7 @@ void main() {
       expect(http.requests, hasLength(3));
       final recording = await site.getRoomDetailForRecording(roomId: '42');
       expect((recording.isLiveNow, recording.restriction), (true, LiveRestriction.paid));
+      expect(recording.danmakuData, isNull, reason: 'a paid show has no danmaku arguments');
     });
 
     test('refresh marks the paid show from live/info alone (3.x: live, unmarked)', () async {

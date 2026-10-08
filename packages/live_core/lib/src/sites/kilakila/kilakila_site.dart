@@ -332,9 +332,9 @@ final class KilakilaSite extends LiveSite
       KilakilaApi.profileDetail(await _profile(roomId));
 
   /// Room entry's answer (the stream data included), as 3.x's recorder
-  /// asked.
+  /// asked, with the danmaku room (multi-view connects it; E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId, withDanmaku: true);
 
   /// Whether the refresh detail says live; a failed request is an error,
   /// never "offline".

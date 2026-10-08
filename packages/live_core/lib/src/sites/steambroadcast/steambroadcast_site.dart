@@ -392,9 +392,10 @@ final class SteamBroadcastSite extends LiveSite
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) => _detail(roomId, media: false);
 
-  /// The room with its checked master, like [getRoomDetail] (3.x).
+  /// The room with its checked master and danmaku arguments, like
+  /// [getRoomDetail] (3.x; multi-view connects the danmaku, E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, media: true);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _detail(roomId, media: true, danmaku: true);
 
   /// Whether the broadcast is live (the refresh's two requests, 3.x's
   /// count). Offline, a restricted account and a replay are not; an unknown

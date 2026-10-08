@@ -720,7 +720,8 @@ void main() {
         final data = room.data! as SixRoomRoomData;
         expect((data.userId, data.state, data.restriction), (_liveUid, SixRoomState.live, LiveRestriction.none));
         expect(data.stream != null, media, reason: '$depth: the stream only with the media (3.x)');
-        expect(room.danmakuData, depth == 'getRoomDetail' ? isA<SixRoomDanmakuArgs>() : isNull);
+        // E05.4 c5: the recording detail (multi-view) has them too.
+        expect(room.danmakuData, media ? isA<SixRoomDanmakuArgs>() : isNull, reason: depth);
         expect((room.startedAt, room.restriction), (_liveStart, LiveRestriction.none), reason: 'M2.1');
         expect(room.title, '但行好事，莫问前程', reason: '31-2');
         expect(room.avatar, isNot(room.cover), reason: '31-1');

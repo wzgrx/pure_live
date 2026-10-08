@@ -279,9 +279,11 @@ final class ChzzkSite extends LiveSite
   }
 
   /// Room entry's answer, the masters to read included, as 3.x's recorder
-  /// asked; unreadable playback data is `ApiChanged` here already.
+  /// asked; unreadable playback data is `ApiChanged` here already. The
+  /// live's chat comes along (multi-view connects it; E05.4).
   @override
-  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) => _entered(roomId, strict: true);
+  Future<LiveRoom> getRoomDetailForRecording({required String roomId}) =>
+      _entered(roomId, withDanmaku: true, strict: true);
 
   /// Whether the refresh detail says live (the live, not the channel:
   /// 20-7); a failed request is an error, never "offline".

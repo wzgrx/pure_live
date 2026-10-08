@@ -316,10 +316,13 @@ final class BaiduLiveSite extends LiveSite
   Future<LiveRoom> getRoomDetail({required String roomId}) async =>
       BaiduLiveApi.liveRoom(await _room(_checkedId(roomId)), withData: true);
 
-  /// Follow-card refresh: the same room command, without the playback data.
+  /// Follow-card and room refresh: the same room command, without the
+  /// playback data but with the chat arguments of the same answer, so a
+  /// danmaku connection that ended when its signature expired reconnects
+  /// with fresh lists (E05.4).
   @override
   Future<LiveRoom> getRoomDetailForRefresh({required String roomId}) async =>
-      BaiduLiveApi.liveRoom(await _room(_checkedId(roomId)));
+      BaiduLiveApi.liveRoom(await _room(_checkedId(roomId)), withChat: true);
 
   /// Room entry's answer, as 3.x's recorder asked.
   @override

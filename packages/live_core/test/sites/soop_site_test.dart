@@ -256,12 +256,13 @@ void main() {
       }
     });
 
-    test('refresh and recording: the player API alone, without danmaku arguments (one request, as in 3.x)', () async {
+    test('refresh and recording: the player API alone (one request, as in 3.x); recording has the chat', () async {
       final setup = _setup(['S05-live-live']);
       final refresh = await setup.site.getRoomDetailForRefresh(roomId: 'khm11903');
       final recording = await setup.site.getRoomDetailForRecording(roomId: 'khm11903');
       expect(refresh.danmakuData, isNull);
-      expect(recording.danmakuData, isNull);
+      // E05.4: the same answer's chat arguments, for multi-view.
+      expect(recording.danmakuData, isA<SoopDanmakuArgs>());
       expect(recording.data, isA<SoopRoomData>(), reason: "the recorder's streams need the broadcast");
       expect(_trace(setup.http), ['POST $_player live', 'POST $_player live']);
       expect(refresh.startedAt, DateTime.utc(2026, 9, 22, 10, 59, 31));

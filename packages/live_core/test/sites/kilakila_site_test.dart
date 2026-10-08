@@ -602,7 +602,7 @@ void main() {
       final recorded = await setup.site.getRoomDetailForRecording(roomId: _liveOwner);
       expect(_urls(setup.http.requests), _legacyRequests('S04-owner-live', 'getRoomDetailForRecording'));
       expect(recorded.data, isA<KilakilaRoomData>());
-      expect(recorded.danmakuData, isNull, reason: 'recording needs no danmaku');
+      expect(recorded.danmakuData.toString(), 'KilakilaDanmakuArgs($_liveBroadcast)', reason: 'E05.4: multi-view');
       setup.http.requests.clear();
       expect(await setup.site.getLiveStatus(roomId: _liveOwner), isTrue);
       expect(_urls(setup.http.requests), _legacyRequests('S04-owner-live', 'getLiveStatus'));

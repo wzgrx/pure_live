@@ -855,8 +855,11 @@ class LiveRoomController extends ChangeNotifier {
       store.settings.get(Settings.enableDanmakuDisplay) || store.settings.get(Settings.enablePipDanmaku);
 
   /// The room has a stream, or is on air and only its stream is withheld
-  /// (U.2g c11): its danmaku connects.
-  bool get _danmakuStage => _stage == RoomStage.playing || (_stage == RoomStage.unplayable && _room.isLiveNow);
+  /// (U.2g c11), and the platform gave danmaku arguments: its danmaku
+  /// connects. A room without arguments (an AcFun paid show) stays idle
+  /// instead of failing the connection (E05.4), as multi-view does.
+  bool get _danmakuStage =>
+      (_stage == RoomStage.playing || (_stage == RoomStage.unplayable && _room.isLiveNow)) && _room.danmakuData != null;
 
   Future<void> _syncDanmaku({bool force = false}) async {
     if (_disposed) return;

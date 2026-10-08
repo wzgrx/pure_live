@@ -207,6 +207,7 @@ LiveRoom liveRoom({
   LiveRestriction? restriction,
   DateTime? startedAt,
   String? link,
+  Object? danmakuData = 'args-6',
 }) => LiveRoom(
   link: link,
   platform: SiteIds.bilibili,
@@ -219,5 +220,5 @@ LiveRoom liveRoom({
   restriction: restriction,
   startedAt: startedAt,
   notice: '每晚八点开播',
-  danmakuData: 'args-6',
+  danmakuData: danmakuData,
 );

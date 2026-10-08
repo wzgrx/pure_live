@@ -186,6 +186,34 @@ void main() {
       expect(find.text('84.7万'), findsNothing);
     });
 
+    testWidgets('A09.11: the introduction line takes the second line; the size, the avatar and RoomRow keep the name', (
+      tester,
+    ) async {
+      const channel = RoomCardData(
+        platformId: 'picarto',
+        title: 'Streamer',
+        anchorName: 'Streamer',
+        introLine: 'Home of the art stream',
+      );
+      await tester.pumpWidget(_host(const LiveRoomCard(data: _live)));
+      final size = tester.getSize(find.byType(LiveRoomCard));
+      for (final appearance in [RoomCardAppearance.standard, RoomCardAppearance.compact]) {
+        await tester.pumpWidget(_host(LiveRoomCard(data: channel, appearance: appearance)));
+        final line = tester.widget<Text>(find.byKey(const ValueKey('room-card-anchor-name')));
+        expect(line.data, 'Home of the art stream', reason: appearance.toString());
+        expect(line.maxLines, 1);
+        expect(find.text('S'), findsOneWidget, reason: "the avatar's letter is the streamer's");
+      }
+      await tester.pumpWidget(_host(const LiveRoomCard(data: channel)));
+      expect(tester.getSize(find.byType(LiveRoomCard)), size);
+      await tester.pumpWidget(_host(const RoomRow(data: channel), width: 393));
+      expect(find.text('Home of the art stream'), findsNothing);
+      expect(find.text('Streamer'), findsNWidgets(2));
+      const plain = RoomCardData(platformId: 'picarto', title: 'Streamer', anchorName: 'Streamer');
+      expect(channel == plain, isFalse);
+      expect(channel.hashCode == plain.hashCode, isFalse);
+    });
+
     testWidgets('c8: the skeleton is the size of the card and has no animation', (tester) async {
       await tester.pumpWidget(_host(const RoomCardSkeleton()));
       final skeleton = tester.getSize(find.byKey(const ValueKey('room-card-skeleton')));

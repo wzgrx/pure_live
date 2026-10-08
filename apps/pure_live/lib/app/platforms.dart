@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_iptv/live_iptv.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
 import 'package:live_store/live_store.dart';
 
@@ -98,6 +99,14 @@ final class StoreDouyuLogin implements DouyuLoginStore {
 /// HLS order for a side-by-side check on the phone.
 const bool yyFlvFirst = bool.fromEnvironment('YY_FLV_FIRST', defaultValue: true);
 
+/// The video codecs the player decodes, as stream lines name them (UPGRADES
+/// 8-8, E06.2 c4): the app's libmpv carries FFmpeg's H.264 and HEVC
+/// decoders and dav1d for AV1, and falls back to software when the
+/// hardware cannot (`hwdec-software-fallback`), so all three play. Twitch
+/// asks usher for HEVC and AV1 only within this set when "优先 H.264" is
+/// off; a build whose engine lacks one names the others here.
+const Set<String> engineVideoCodecs = {'avc', 'hevc', 'av1'};
+
 /// What the platform adapters share.
 final class PlatformDeps {
   /// Creates the dependencies.
@@ -109,7 +118,10 @@ final class PlatformDeps {
     this.twitchFallbacks = const [],
     this.kickApi,
     this.iptv,
+    this.videoCodecs = _engineVideoCodecs,
   });
+
+  static Set<String> _engineVideoCodecs() => engineVideoCodecs;
 
   /// The HTTP client of every adapter (per-platform proxy routes inside).
   final LiveHttp http;
@@ -134,6 +146,10 @@ final class PlatformDeps {
 
   /// The IPTV platform; null leaves IPTV out.
   final IptvSite? iptv;
+
+  /// The video codecs the player decodes ([engineVideoCodecs]), read at
+  /// every Twitch stream request.
+  final Set<String> Function() videoCodecs;
 }
 
 /// The 33 platforms of 3.x, Kick (where [PlatformDeps.kickApi] exists) and
@@ -162,6 +178,7 @@ SiteRegistry buildSiteRegistry(PlatformDeps deps) {
       gqlFallbacks: deps.twitchFallbacks,
       languages: () => settings.get(Settings.twitchLanguages),
       preferH264: preferH264,
+      codecs: deps.videoCodecs,
     ),
     SiteIds.soop: () => SoopSite(http, cookies: cookies),
     SiteIds.yy: () => YySite(http, cookies: cookies, flvFirst: yyFlvFirst),
@@ -182,7 +199,7 @@ SiteRegistry buildSiteRegistry(PlatformDeps deps) {
     SiteIds.youtube: () => YouTubeSite(http),
     SiteIds.bigo: () => BigoSite(http),
     SiteIds.pandaLive: () => PandaLiveSite(http),
-    SiteIds.fc2Live: () => Fc2LiveSite(http, proxy: deps.proxy),
+    SiteIds.fc2Live: () => fc2LiveSite(http, proxy: deps.proxy),
     SiteIds.steamBroadcast: () => SteamBroadcastSite(http),
     SiteIds.jdLive: () => JdLiveSite(http),
     SiteIds.kugouLive: () => KugouLiveSite(http, preferH264: preferH264),
@@ -192,6 +209,17 @@ SiteRegistry buildSiteRegistry(PlatformDeps deps) {
     SiteIds.seventeenLive: () => SeventeenLiveSite(http, preferH264: preferH264),
     if (deps.iptv case final iptv?) SiteIds.iptv: () => iptv,
   });
+}
+
+/// FC2 with its quality probe's control handed to playback (UPGRADES 26-2,
+/// E06.2 c6): the probe opens a control to learn the tiers, and the next
+/// open of that channel (the live room, a multi-view cell, a recording)
+/// plays from it instead of a second grant and socket
+/// ([Fc2ControlPool.of] of the adapter, which every [Fc2RecipeOpener] of it
+/// takes from). One nobody takes is closed after 20 s.
+Fc2LiveSite fc2LiveSite(LiveHttp http, {required ProxyPolicy proxy}) {
+  late final Fc2LiveSite site;
+  return site = Fc2LiveSite(http, proxy: proxy, probeControl: (control) => Fc2ControlPool.of(site).adopt(control));
 }
 
 /// The danmaku connections (M5 "登记方式" of every platform).

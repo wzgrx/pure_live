@@ -579,6 +579,28 @@ void main() {
       await _close(tester, app);
     });
 
+    testWidgets("E06.2 c2: the mini window's danmaku keep the name colour, badges and source room", (tester) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      DanmakuOverlayState layer() => tester.state<DanmakuOverlayState>(_inWindow(find.byType(DanmakuOverlay)));
+      const message = LiveMessage(
+        type: LiveMessageType.chat,
+        userName: '观众4',
+        message: '带徽章',
+        color: LiveMessageColor.white,
+        messageId: 'marked',
+        nameColor: LiveMessageColor(0x9e, 0x7b, 0xff),
+        badges: [LiveBadge(url: 'https://cdn.17app.co/a.png', id: 'vip')],
+        sourceRoomId: '5138284',
+      );
+      app.danmaku.emit(const DanmakuReceived(message));
+      await tester.pump(const Duration(milliseconds: 500));
+      final flown = layer().debugFlying.lastWhere((f) => f.$1.messageId == 'marked').$1;
+      expect((flown.nameColor, flown.badges, flown.sourceRoomId), (message.nameColor, message.badges, '5138284'));
+      await _close(tester, app);
+    });
+
     testWidgets('D03.3 c2: bundled emoticons fly as pictures in the mini window; text only drops them', (tester) async {
       // The app's lists read from the files, as the room's library does.
       final library = EmoteLibrary(bundle: FileAssetBundle());

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/multiview/logic/multiview_controller.dart';
@@ -120,6 +122,77 @@ void main() {
     expect(controller.cells[1].session, isNull);
     // The sound moves to the first cell that still plays.
     expect(controller.audioIndex, 0);
+    controller.dispose();
+    await store.close();
+  });
+
+  test('E06.2 c1: a carousel cell stays offline until asked, then plays from play_time', () async {
+    final store = await memoryStore();
+    final site = _CarouselRooms()..carousel.add('5');
+    final engines = <FakeEngine>[];
+    final controller = multiviewController(store, site, engines: engines);
+    await controller.start();
+    await controller.assign(0, pickRoom('5'));
+    final cell = controller.cells[0];
+    expect(cell.stage, CellStage.offline);
+    expect(cell.session, isNull);
+
+    await controller.playCarousel(0);
+    expect(cell.stage, CellStage.playing);
+    expect(cell.qualities.single.quality, '轮播');
+    final media = engines.single.opens.single;
+    expect((media.uri.path, media.start, media.onDemand), ('/5.mp4', const Duration(seconds: 37), false));
+    expect(cell.room!.isPlayableNow, isFalse, reason: 'still a carousel for follows and recording');
+    // A cell that plays, or one that is simply offline, has nothing to start.
+    await controller.playCarousel(0);
+    site.offline.add('6');
+    await controller.assign(1, pickRoom('6'));
+    await controller.playCarousel(1);
+    expect(controller.cells[1].stage, CellStage.offline);
+    expect(engines, hasLength(1));
+    expect(engines.single.opens, hasLength(1));
+    controller.dispose();
+    await store.close();
+  });
+
+  test('B-7: four cells of one platform say a refused cookie once', () async {
+    final store = await memoryStore();
+    final toasts = <String>[];
+    final site = _RefusingRooms();
+    final controller = multiviewController(store, site, toasts: toasts);
+    await controller.start();
+    for (var i = 0; i < 4; i++) {
+      await controller.assign(i, pickRoom('${i + 1}'));
+    }
+    site.refusals.add(null);
+    expect(toasts, ['Twitch 的 Cookie 已失效，已改为匿名观看，请在账号页重新填写']);
+    controller.dispose();
+    expect(site.refusals.hasListener, isFalse);
+    await store.close();
+  });
+
+  test('E06.2 c5: a cell whose recovery switched quality names the quality now played (11-1)', () async {
+    final store = await memoryStore();
+    final toasts = <String>[];
+    final engines = <FakeEngine>[];
+    final site = _ProfileChangedRooms()
+      ..qualities = const [
+        LivePlayQuality(quality: '720p60', id: '720p60'),
+        LivePlayQuality(quality: '360p', id: '360p'),
+      ];
+    final controller = multiviewController(store, site, engines: engines, toasts: toasts);
+    await controller.start();
+    await controller.assign(0, pickRoom('1'));
+    final cell = controller.cells[0];
+    expect(cell.qualities[cell.qualityIndex].quality, '720p60');
+    engines.single.emit(
+      const EngineError(PlayerException(message: 'connection reset', type: PlayerErrorType.network, code: 'transport')),
+    );
+    await _settle();
+    expect(engines.single.opens.last.uri.path, '/1080p60.m3u8');
+    final shown = cell.qualities[cell.qualityIndex];
+    expect((shown.quality, shown.isPlaybackUnconfirmed), ('1080p60', false));
+    expect(toasts, isEmpty);
     controller.dispose();
     await store.close();
   });
@@ -286,6 +359,51 @@ class _RecordingSite extends RoomsSite implements LiveSiteRecordRoomResolver {
   @override
   Future<LiveRoom> getRoomDetailForRecording({required String roomId}) async =>
       pickRoom(roomId).copyWith(danmakuData: 'recording-$roomId');
+}
+
+/// Rooms whose ids are in [RoomsSite.carousel] loop old videos (UPGRADES
+/// 1-1): one 轮播 quality, an MP4 started at its `play_time`.
+class _CarouselRooms extends RoomsSite implements LivePlayUrlResolver {
+  @override
+  Future<List<LivePlayQuality>> getPlayQualities({required LiveRoom detail}) async =>
+      detail.effectiveLiveStatus == LiveStatus.carousel ? const [BilibiliApi.carouselQuality] : qualities;
+
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => quality.data == BilibiliApi.carouselQualityId
+      ? LivePlayUrlResolution.lines(
+          [LivePlayLine('https://upos.example/${detail.roomId}.mp4', format: StreamFormat.other)],
+          appliedQualityData: BilibiliApi.carouselQualityId,
+          start: const Duration(seconds: 37),
+        )
+      : LivePlayUrlResolution(
+          urls: await getPlayUrls(detail: detail, quality: quality),
+          appliedQualityData: quality.selectionId,
+        );
+}
+
+/// Rooms whose recovery plays another profile than the one opened
+/// (Picarto, UPGRADES 11-1).
+class _ProfileChangedRooms extends RoomsSite implements LivePlayRecoveryResolver {
+  @override
+  Future<LivePlayUrlResolution> resolvePlayUrlsForRecoveryRaw({
+    required LiveRoom detail,
+    required LivePlayQuality quality,
+  }) async => LivePlayUrlResolution.lines(
+    const [LivePlayLine('https://edge.example/1080p60.m3u8')],
+    appliedQualityData: '1080p60',
+    appliedQuality: const LivePlayQuality(quality: '1080p60', id: '1080p60'),
+  );
+}
+
+/// Rooms of a platform that refuses stored cookies when the test says (B-7).
+class _RefusingRooms extends RoomsSite implements LiveSiteCookieRefusals {
+  final StreamController<void> refusals = StreamController.broadcast(sync: true);
+
+  @override
+  Stream<void> get cookieRefusals => refusals.stream;
 }
 
 class _ServedSite extends RoomsSite implements LivePlayUrlResolver {

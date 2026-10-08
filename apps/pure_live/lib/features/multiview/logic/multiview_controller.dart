@@ -93,6 +93,9 @@ final class MultiviewCell {
   bool _switching = false;
   double _volume = 1;
   int _epoch = 0;
+
+  /// Counts the streams handed to the session (see the live room's).
+  int _opens = 0;
   LiveQualityDiscoveryScope? _scope;
 
   /// The room (the fetched detail once known).
@@ -219,6 +222,10 @@ class MultiviewController extends ChangeNotifier {
   StreamSubscription<DanmakuEvent>? _danmakuEvents;
   String? _danmakuKey;
   int _danmakuEpoch = 0;
+
+  /// The cookie refusals heard, one per platform however many cells show
+  /// it (B-7, E06.2 c4).
+  final Map<String, StreamSubscription<void>> _refusals = {};
 
   MultiviewCell _newCell() => MultiviewCell._(_nextCellId++);
 
@@ -478,6 +485,12 @@ class MultiviewController extends ChangeNotifier {
       .._volume = _roomVolume(picked)
       .._stage = site == null ? CellStage.failed : CellStage.resolving;
     if (site == null) cell._failure = UnsupportedPlatform(picked.platform);
+    if (site case final LiveSiteCookieRefusals refusals when !_refusals.containsKey(picked.platform)) {
+      // B-7: a refused cookie is said once, not once per cell.
+      _refusals[picked.platform] = refusals.cookieRefusals.listen((_) {
+        if (!_disposed) toast?.call(i18n('twitch_cookie_expired'));
+      });
+    }
     _notify();
     final previous = cell._session;
     if (previous != null && previous.state.status != PlaybackStatus.idle) await previous.stop();
@@ -506,7 +519,29 @@ class MultiviewController extends ChangeNotifier {
       unawaited(_save());
       return;
     }
+    await _play(cell, epoch, site, room);
+  }
 
+  /// A carousel cell's "播放轮播" (E06.2 c1, as the live room's): the video
+  /// in rotation from the platform's `play_time`; the room stays offline in
+  /// the model, so follows and recording are untouched.
+  Future<void> playCarousel(int index) async {
+    if (_disposed || index < 0 || index >= _cells.length) return;
+    final cell = _cells[index];
+    final site = cell._site;
+    final room = cell._room;
+    if (cell._stage != CellStage.offline || site == null || room == null || !carouselPlayable(room)) return;
+    final epoch = ++cell._epoch;
+    cell
+      .._stage = CellStage.resolving
+      .._failure = null;
+    _notify();
+    await _play(cell, epoch, site, room);
+  }
+
+  /// The qualities of [room] and its stream in [cell], then the sound and
+  /// the danmaku.
+  Future<void> _play(MultiviewCell cell, int epoch, LiveSite site, LiveRoom room) async {
     final scope = cell._scope = LiveQualityDiscoveryScope();
     final List<LivePlayQuality> found;
     try {
@@ -612,6 +647,7 @@ class MultiviewController extends ChangeNotifier {
       .._qualityIndex = playing
       .._stage = CellStage.playing
       .._failure = null;
+    final opened = ++cell._opens;
     final session = cell._session ??= newSession();
     _notify();
     final quality = cell._qualities[playing];
@@ -620,12 +656,49 @@ class MultiviewController extends ChangeNotifier {
       PlaybackRequest(
         site: site.id,
         plan: _plan(room, resolution),
-        refresh: () async => _plan(room, await site.resolvePlayUrlsForRecovery(detail: room, quality: quality)),
+        refresh: () => _refreshPlan(cell, epoch, opened, site, room, quality),
         audioOnly: cell._offscreen,
         volume: _audibleVolume(cell),
       ),
     );
     return _current(cell, epoch);
+  }
+
+  /// The plan of a recovery of [cell]'s open [opened], which played
+  /// [quality]; the tier the platform answers with is what the cell names
+  /// (UPGRADES 11-1, E06.2 c5, as the live room: C01.4's rule, no toast).
+  Future<PlaybackPlan> _refreshPlan(
+    MultiviewCell cell,
+    int epoch,
+    int opened,
+    LiveSite site,
+    LiveRoom room,
+    LivePlayQuality quality,
+  ) async {
+    bool current() => _current(cell, epoch) && cell._opens == opened && cell.playing;
+    final requested = current() ? cell._qualities[cell._qualityIndex] : quality;
+    final resolution = await site.resolvePlayUrlsForRecovery(detail: room, quality: requested);
+    if (current()) {
+      final served = resolveServedPlayQuality(
+        platform: site.id,
+        qualities: cell._qualities,
+        requested: requested,
+        resolution: resolution,
+      );
+      final found = cell._qualities.indexWhere((q) => q.selectionId == served.selectionId);
+      final at = found >= 0 ? found : cell._qualityIndex;
+      final shown = cell._qualities[at];
+      if (at != cell._qualityIndex ||
+          shown.quality != served.quality ||
+          '${shown.selectionId}' != '${served.selectionId}' ||
+          shown.isPlaybackUnconfirmed != served.isPlaybackUnconfirmed) {
+        cell
+          .._qualities = List.unmodifiable(List.of(cell._qualities)..[at] = served)
+          .._qualityIndex = at;
+        _notify();
+      }
+    }
+    return _plan(room, resolution);
   }
 
   /// The cells whose video is out of sight ([MultiviewCell.offscreen], by
@@ -644,8 +717,14 @@ class MultiviewController extends ChangeNotifier {
     }
   }
 
-  PlaybackPlan _plan(LiveRoom room, LivePlayUrlResolution resolution) =>
-      PlaybackPlan.of(resolution, preferH264: store.settings.get(Settings.preferH264), onDemand: room.isRecord);
+  /// The plan of [resolution]; a carousel video starts where the loop is
+  /// (1-1: `play_time`), also after a recovery took the next one.
+  PlaybackPlan _plan(LiveRoom room, LivePlayUrlResolution resolution) => PlaybackPlan.of(
+    resolution,
+    preferH264: store.settings.get(Settings.preferH264),
+    onDemand: room.isRecord,
+    start: resolution.start,
+  );
 
   /// Plays quality [qualityIndex] in cell [index]; the old stream plays
   /// until the new one resolves.
@@ -937,7 +1016,7 @@ class MultiviewController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _danmakuEpoch++;
-    for (final subscription in _subscriptions) {
+    for (final subscription in [..._subscriptions, ..._refusals.values]) {
       unawaited(subscription.cancel());
     }
     unawaited(_danmakuEvents?.cancel());

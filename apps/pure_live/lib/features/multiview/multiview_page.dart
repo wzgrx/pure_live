@@ -872,6 +872,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       onTap: () => _onCellTap(index),
       onLongPress: cell.stage == CellStage.empty ? null : () => _onCellLongPress(index),
       onRetry: () => unawaited(_controller.retry(index)),
+      onPlayCarousel: () => unawaited(_controller.playCarousel(index)),
       danmaku: showDanmaku
           ? Consumer(
               // B02 c3: they stand while the cell's video is paused, as

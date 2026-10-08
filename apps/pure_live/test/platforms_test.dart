@@ -1,14 +1,50 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_net/live_net.dart';
+import 'package:live_net/testing.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/platforms.dart';
+import 'package:pure_live/app/recording.dart';
 import 'package:pure_live/platform/native_http.dart';
 
 import 'support.dart';
+
+/// A fake FC2 control socket replaying the recorded server frames of
+/// fixtures/fc2live/control/S04-control.
+final class _Fc2Socket implements SocketChannel {
+  new() {
+    for (final line in File('../../fixtures/fc2live/control/S04-control/frames.jsonl').readAsLinesSync()) {
+      if (line.trim().isEmpty) continue;
+      if (jsonDecode(line) case {'dir': 'in', 'text': final String text}) incoming.add(text);
+    }
+  }
+
+  final StreamController<Object?> incoming = StreamController<Object?>();
+  bool closed = false;
+
+  @override
+  Stream<Object?> get stream => incoming.stream;
+
+  @override
+  void add(Object data) {}
+
+  @override
+  Future<void> close([int? code, String? reason]) async => closed = true;
+
+  @override
+  int? get closeCode => null;
+
+  @override
+  String? get closeReason => null;
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +64,86 @@ void main() {
     final services = await testServices();
     addTearDown(services.close);
     expect((services.sites.of(SiteIds.yy) as YySite).flvFirst, isTrue);
+  });
+
+  test('E06.2 c4: Twitch asks usher for the codecs the player decodes (UPGRADES 8-8)', () async {
+    final services = await testServices();
+    addTearDown(services.close);
+    await services.store.settings.set(Settings.preferH264, false);
+    const twitch = '../../fixtures/twitch';
+    final recorded = ReplaySample.load('$twitch/S06-usher-live');
+    final usher = ReplaySample(
+      method: 'GET',
+      url: TwitchApi.usherUrl('zarbex', (value: '', signature: ''), Random(0), preferH264: false),
+      status: recorded.status,
+      headers: recorded.headers,
+      bytes: recorded.bytes,
+    );
+    Future<String> asked(PlatformDeps Function(LiveHttp http) deps) async {
+      final http = ReplayHttp(
+        [ReplaySample.load('$twitch/S06-pat-live'), usher],
+        ignoredQuery: const {'p', 'play_session_id', 'sig', 'token'},
+      );
+      final site = buildSiteRegistry(deps(http)).of(SiteIds.twitch);
+      try {
+        await site.getPlayQualities(
+          detail: LiveRoom(platform: SiteIds.twitch, roomId: 'zarbex', liveStatus: LiveStatus.live),
+        );
+      } on Object {
+        // The replay answers one codec list; the request is what counts.
+      }
+      return http.requests
+          .lastWhere((request) => request.url.host == 'usher.ttvnw.net')
+          .url
+          .queryParameters['supported_codecs']!;
+    }
+
+    expect(engineVideoCodecs, {'avc', 'hevc', 'av1'}, reason: "libmpv's FFmpeg with dav1d decodes all three");
+    expect(
+      await asked(
+        (http) => PlatformDeps(http: http, proxy: services.proxy, cookies: services.cookies, store: services.store),
+      ),
+      'av1,h265,h264',
+    );
+    // The adapter gets the app's set: an engine without HEVC and AV1 asks for H.264 only.
+    expect(
+      await asked(
+        (http) => PlatformDeps(
+          http: http,
+          proxy: services.proxy,
+          cookies: services.cookies,
+          store: services.store,
+          videoCodecs: () => {'avc'},
+        ),
+      ),
+      'h264',
+    );
+  });
+
+  test("E06.2 c6: FC2's probe control goes to the pool its openers take from; the app's end closes it", () async {
+    final services = await testServices();
+    final fc2 = services.sites.of(SiteIds.fc2Live) as Fc2LiveSite;
+    final pool = Fc2ControlPool.of(fc2);
+    // Playback and recording each build their openers; both take from it.
+    expect(
+      [for (final opener in recipeOpeners(services.sites).whereType<Fc2RecipeOpener>()) opener.pool],
+      [same(pool)],
+    );
+    final socket = _Fc2Socket();
+    final control = await Fc2LiveControl.open(
+      Fc2LiveGrant(
+        channelId: '62996200',
+        socket: Uri.parse('wss://ws.live.fc2.com/control/channels/62996200'),
+        controlToken: 'token',
+        orz: 'orz',
+      ),
+      connector: (endpoint, {required headers, required protocols, required route, required connectTimeout}) async =>
+          socket,
+    );
+    fc2.probeControl!(control);
+    expect((pool.length, control.isClosed), (1, false));
+    await services.close();
+    expect((pool.length, control.isClosed, socket.closed), (0, true, true));
   });
 
   test('Kick is registered with its API transport, after CHZZK', () async {

@@ -185,6 +185,10 @@ class LiveRoomController extends ChangeNotifier {
   /// A refresh while playing found the room off air (C01.6): on air again
   /// is a new broadcast.
   bool _sawOffline = false;
+
+  /// The stream open is the platform's carousel video ([playCarousel]), not
+  /// a broadcast; a load forgets it.
+  bool _carousel = false;
   bool _disposed = false;
   int _maskedChats = 0;
   int _namedChats = 0;
@@ -194,6 +198,10 @@ class LiveRoomController extends ChangeNotifier {
   // tier; a refresh or a reload does not say it again.
   bool _servedToastShown = false;
   int _loggedRecovery = 0;
+
+  /// Counts the streams handed to the session: a recovery of an older one
+  /// no longer names the quality shown ([_refreshPlan]).
+  int _opens = 0;
 
   /// G03.1: the start-up marks of entering the room (T0 is this
   /// controller's creation: the page's `initState`, or the release of a
@@ -343,6 +351,12 @@ class LiveRoomController extends ChangeNotifier {
     if (!_disposed) notifyListeners();
   }
 
+  /// B-7: "Twitch 的 Cookie 已失效，已改为匿名观看…" (Twitch is the one
+  /// platform that reports a refused cookie).
+  void _onCookieRefused() {
+    if (!_disposed) toast?.call(i18n('twitch_cookie_expired'));
+  }
+
   /// G02.2: one app log line per recovery attempt of the session, with its
   /// count and the failure's code (no address, no headers), also on logcat:
   /// `playback: recovering #2 buffering_stall_timeout`.
@@ -404,6 +418,11 @@ class LiveRoomController extends ChangeNotifier {
     }
     // A08.6 c3: the settings page changes it for the rooms already open.
     _subscriptions.add(store.settings.watch(Settings.showChatGifts).skip(1).listen(_onShowGifts));
+    // B-7 (E06.2 c4): the platform refused the stored cookie and plays on
+    // anonymously; it reports each cookie once, and the room says so.
+    if (site case final LiveSiteCookieRefusals refusals) {
+      _subscriptions.add(refusals.cookieRefusals.listen((_) => _onCookieRefused()));
+    }
     // YouTube's connection reads "show all chat" when it starts (C01.6).
     if (site.id == SiteIds.youtube) {
       _subscriptions.add(
@@ -462,6 +481,7 @@ class LiveRoomController extends ChangeNotifier {
     }
     _startWhenBack = false;
     _sawOffline = false;
+    _carousel = false;
     _stage = RoomStage.loading;
     _failure = null;
     _catchup = null;
@@ -499,6 +519,30 @@ class LiveRoomController extends ChangeNotifier {
   }
 
   bool _current(int epoch) => !_disposed && epoch == _epoch;
+
+  /// The carousel video plays ([playCarousel]): the room is still not on
+  /// air.
+  bool get playingCarousel => _carousel && _stage == RoomStage.playing;
+
+  /// The picture's "播放轮播" (E06.2 c1, UPGRADES 1-1; 3.x could not play a
+  /// carousel): a room the platform loops old videos in plays the one in
+  /// rotation from the platform's `play_time` ([LivePlayUrlResolution.start]).
+  /// The room stays offline in the model ([LiveRoom.isPlayableNow]), so
+  /// follows and recording are untouched; the video's end is no replay's
+  /// end (`onDemand` stays false): recovery asks again and gets the next
+  /// video. A refresh that finds the broadcast on air loads it instead.
+  Future<void> playCarousel() async {
+    if (_disposed || _stage != RoomStage.offline || !carouselPlayable(_room)) return;
+    final epoch = ++_epoch;
+    _startup = null;
+    _carousel = true;
+    // As a room entry: "正在进入直播间…" while the qualities and the video
+    // are fetched.
+    _stage = RoomStage.loading;
+    _failure = null;
+    _notify();
+    await _startStream(epoch);
+  }
 
   Future<void> _stopStream() async {
     _qualityScope.cancel();
@@ -615,6 +659,7 @@ class LiveRoomController extends ChangeNotifier {
     }
     _qualities = List.unmodifiable(List.of(_qualities)..[playing] = applied);
     _qualityIndex = playing;
+    final opened = ++_opens;
     _stage = RoomStage.playing;
     _failure = null;
     _notify();
@@ -624,7 +669,7 @@ class LiveRoomController extends ChangeNotifier {
       PlaybackRequest(
         site: site.id,
         plan: _plan(resolution),
-        refresh: () => _refreshPlan(quality),
+        refresh: () => _refreshPlan(opened, quality),
         audioOnly: _audioOnly,
         volume: _volume(),
         startup: startup,
@@ -634,10 +679,13 @@ class LiveRoomController extends ChangeNotifier {
     return _current(epoch);
   }
 
+  /// The plan of [resolution]; a carousel video starts where the platform's
+  /// loop is (1-1: `play_time`), also after a recovery took the next one.
   PlaybackPlan _plan(LivePlayUrlResolution resolution) => PlaybackPlan.of(
     site.id == SiteIds.iptv ? _withIptvHeaders(resolution) : resolution,
     preferH264: store.settings.get(Settings.preferH264),
     onDemand: _room.isRecord,
+    start: resolution.start,
   );
 
   /// IPTV lines with the user's agent (`customIptvUserAgent`) under the
@@ -665,9 +713,43 @@ class LiveRoomController extends ChangeNotifier {
     lease: line?.lease,
   );
 
-  Future<PlaybackPlan> _refreshPlan(LivePlayQuality quality) async {
-    final resolution = await site.resolvePlayUrlsForRecovery(detail: _room, quality: quality);
+  /// The plan of a recovery (or a lease renewal) of open [opened], which
+  /// played [quality]: the quality shown now is asked for again, and the
+  /// tier the platform answers with is what the quality button names
+  /// ([_showServed]).
+  Future<PlaybackPlan> _refreshPlan(int opened, LivePlayQuality quality) async {
+    bool current() => !_disposed && opened == _opens && _stage == RoomStage.playing;
+    final requested = current() ? _qualities[_qualityIndex] : quality;
+    final resolution = await site.resolvePlayUrlsForRecovery(detail: _room, quality: requested);
+    if (current()) _showServed(requested, resolution);
     return _plan(resolution);
+  }
+
+  /// UPGRADES 11-1 (E06.2 c5): a recovery the platform answered with
+  /// another tier (Picarto's streamer changed the profile, 720p60 →
+  /// 1080p60) names the tier now played, by C01.4's rule
+  /// ([resolveServedPlayQuality]: a tier outside the list takes the
+  /// requested entry's place). No toast: C01.4 says it on entering and on
+  /// the user's own choice only. 3.x kept the old name.
+  void _showServed(LivePlayQuality requested, LivePlayUrlResolution resolution) {
+    final served = resolveServedPlayQuality(
+      platform: site.id,
+      qualities: _qualities,
+      requested: requested,
+      resolution: resolution,
+    );
+    final found = _qualities.indexWhere((q) => q.selectionId == served.selectionId);
+    final at = found >= 0 ? found : _qualityIndex;
+    final shown = _qualities[at];
+    if (at == _qualityIndex &&
+        shown.quality == served.quality &&
+        '${shown.selectionId}' == '${served.selectionId}' &&
+        shown.isPlaybackUnconfirmed == served.isPlaybackUnconfirmed) {
+      return;
+    }
+    _qualities = List.unmodifiable(List.of(_qualities)..[at] = served);
+    _qualityIndex = at;
+    _notify();
   }
 
   double _volume() {
@@ -899,10 +981,12 @@ class LiveRoomController extends ChangeNotifier {
     final playing = _stage == RoomStage.playing;
     // A room that came on air starts playing (U.2g c8); a failed stream of a
     // broadcast that ended is reloaded. A room on air whose stream is
-    // withheld keeps its danmaku; it is tried again by "重试".
+    // withheld keeps its danmaku; it is tried again by "重试". A carousel
+    // video gives way to the broadcast when the streamer comes on air.
     final reload =
         (!playing && _stage != RoomStage.unplayable && fetched.isPlayableNow) ||
-        (playing && !fetched.isPlayableNow && session.state.status == PlaybackStatus.error);
+        (playing && !fetched.isPlayableNow && session.state.status == PlaybackStatus.error) ||
+        (playing && _carousel && fetched.isPlayableNow);
     if (reload && (mayAutoStart?.call() ?? true)) {
       await load();
       return;

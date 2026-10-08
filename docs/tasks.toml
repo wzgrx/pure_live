@@ -2588,14 +2588,15 @@ note = "第 2、4 条的代码在 4f1a8b4a8、8d7da2dfc（合并 46e978094）；
 id = "E06.2"
 title = "平台层新数据接到界面：哔哩哔哩轮播、17LIVE 名字颜色和徽章、酷狗 PK 标签、Twitch Cookie 提示和编码、恢复后的实际清晰度、FC2 接手"
 type = "功能"
-status = "暂停"
+status = "待真机"
 size = "中"
 tier = 2
+date = "2026-10-08"
 old = ["F01", "T02f.2"]
 stages = ["哔哩哔哩轮播", "名字颜色和徽章", "酷狗 PK", "Twitch", "实际清晰度", "FC2"]
-done = 0
-next = "按任务书从头做；旧工作区里的半成品可参考"
-branch = "worktree-agent-af6f5e80c4e19804f（半成品，未提交）"
+done = 6
+next = "合并审查后在 K90 上按 record.md“真机上要看的”看：第 1～6 步游客就能做（哔哩哔哩轮播、多画面），第 7、9～11 步要代理，第 8 步要碰上酷狗 PK；旧工作区 agent-af6f5e80c4e19804f 的半成品已用上，可以删"
+branch = "worktree-agent-af018d13b17ed503a（6 个阶段做完，未合并）"
 note = "UPGRADES 1-1、8-8、11-1、B-7、B-14、B-16 和 26-2 的界面余项都在这里（V03.3 核对）；“实际清晰度”阶段和 C01.4 改同一处（room_controller.dart 的取流和刷新），最好一起做"
 
 [[task]]

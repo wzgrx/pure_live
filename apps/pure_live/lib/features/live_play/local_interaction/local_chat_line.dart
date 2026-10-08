@@ -22,7 +22,7 @@ class LocalChatLine extends StatelessWidget {
     final body = theme.textTheme.bodyLarge?.regular;
     final profile = LocalProfile.of(message);
     final gift = LocalGiftData.of(message);
-    final chip = theme.textTheme.labelSmall?.emphasis.copyWith(fontSize: 12, height: 18 / 12);
+    final chip = ChatChip.styleOf(theme);
     final badge = profile?.badgeLabel ?? '';
     return Padding(
       key: const ValueKey('live-play-local-line'),
@@ -32,7 +32,7 @@ class LocalChatLine extends StatelessWidget {
           children: [
             WidgetSpan(
               alignment: PlaceholderAlignment.middle,
-              child: _Chip(
+              child: ChatChip(
                 key: const ValueKey('live-play-local-tag'),
                 text: i18n('local_tag'),
                 background: scheme.primaryContainer,
@@ -42,7 +42,7 @@ class LocalChatLine extends StatelessWidget {
             if (badge.isNotEmpty)
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,
-                child: _Chip(
+                child: ChatChip(
                   key: const ValueKey('live-play-local-badge'),
                   text: localEmojiText(badge),
                   background: Color(profile!.accent).withValues(alpha: 0.14),
@@ -80,12 +80,24 @@ class LocalChatLine extends StatelessWidget {
   }
 }
 
-class _Chip extends StatelessWidget {
+/// A small mark before a name in the chat list: "本地", the local badge,
+/// and the PK partner's "对方" (E06.2 c3, the same block as "本地").
+class ChatChip extends StatelessWidget {
+  /// Creates the mark.
   const new({required this.text, required this.background, required this.style, super.key});
 
+  /// The words.
   final String text;
+
+  /// The block's colour.
   final Color background;
+
+  /// The words' style.
   final TextStyle? style;
+
+  /// The chip text style of [theme]: 12, semibold, 18 high.
+  static TextStyle? styleOf(ThemeData theme) =>
+      theme.textTheme.labelSmall?.emphasis.copyWith(fontSize: 12, height: 18 / 12);
 
   @override
   Widget build(BuildContext context) => Padding(

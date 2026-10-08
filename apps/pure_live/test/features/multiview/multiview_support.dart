@@ -17,11 +17,21 @@ class RoomsSite extends FakeSite {
   /// Rooms whose detail fails.
   final Set<String> failing = {};
 
+  /// Rooms that loop old videos (Bilibili's carousel).
+  final Set<String> carousel = {};
+
   @override
   Future<LiveRoom> getRoomDetail({required String roomId}) async {
     detailCalls++;
     if (failing.contains(roomId)) throw const TransportFailure(SiteIds.bilibili, TransportReason.connect);
-    return pickRoom(roomId, status: offline.contains(roomId) ? LiveStatus.offline : LiveStatus.live);
+    return pickRoom(
+      roomId,
+      status: carousel.contains(roomId)
+          ? LiveStatus.carousel
+          : offline.contains(roomId)
+          ? LiveStatus.offline
+          : LiveStatus.live,
+    );
   }
 }
 

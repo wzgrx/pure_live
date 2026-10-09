@@ -68,6 +68,48 @@ void main() {
     expect(find.text('设置'), findsNothing);
   });
 
+  testWidgets('a row that takes no taps is greyed: text, icon and second line', (tester) async {
+    tester.view
+      ..physicalSize = const Size(393, 852)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    int? chosen = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: const LiveTheme().light,
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () async => chosen = await showAppMenu<int>(
+                context,
+                entries: const [
+                  AppMenuEntry(value: 1, icon: Icons.settings, label: '可以', description: '10'),
+                  AppMenuEntry(value: 2, icon: Icons.info, label: '不够', description: '5200', enabled: false),
+                ],
+              ),
+              child: const Text('打开'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('打开'));
+    await tester.pumpAndSettle();
+    final scheme = Theme.of(tester.element(find.text('可以'))).colorScheme;
+    final off = scheme.onSurface.withValues(alpha: 0.38);
+    expect(tester.widget<Text>(find.text('可以')).style?.color, scheme.onSurface);
+    expect(tester.widget<Text>(find.text('不够')).style?.color, off);
+    expect(tester.widget<Text>(find.text('5200')).style?.color, off);
+    expect(tester.widget<Icon>(find.byIcon(Icons.info)).color, off);
+    expect(tester.widget<Icon>(find.byIcon(Icons.settings)).color, scheme.onSurfaceVariant);
+    await tester.tap(find.text('不够'), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    expect(find.text('不够'), findsOneWidget, reason: 'still open, nothing chosen');
+    await tester.tap(find.text('可以'));
+    await tester.pumpAndSettle();
+    expect(chosen, 1);
+  });
+
   testWidgets('opens above a button at the bottom; Esc closes it without a choice', (tester) async {
     final chosen = await _pump(tester, at: Alignment.bottomRight);
     await tester.tap(find.byTooltip('菜单'));

@@ -81,20 +81,43 @@ final class LocalProfile {
 @immutable
 final class LocalGiftData {
   /// Creates the data.
-  const new({required this.emoji, required this.name, required this.color, required this.big, required this.effect});
+  const new({
+    required this.emoji,
+    required this.name,
+    required this.color,
+    required this.big,
+    required this.effect,
+    this.id = '',
+    this.count = 1,
+    this.price = 0,
+  });
 
   /// [message]'s gift, or null when it is not a local gift.
   static LocalGiftData? of(LiveMessage message) {
     final data = message.data;
     if (!message.isLocal || message.type != LiveMessageType.gift || data is! Map) return null;
+    final count = data['count'];
+    final price = data['price'];
     return LocalGiftData(
       emoji: '${data['emoji'] ?? ''}',
       name: '${data['giftName'] ?? ''}',
       color: message.color,
       big: data['big'] == true,
       effect: data['effect'] != 'none',
+      id: '${data['giftId'] ?? ''}',
+      count: count is int && count > 0 ? count : 1,
+      price: price is int ? price : 0,
     );
   }
+
+  /// The gift's id ([LocalGift.id]).
+  final String id;
+
+  /// How many (D08.4: the count chosen, and a combo's total so far).
+  final int count;
+
+  /// The price of one.
+  final int price;
 
   /// The picture.
   final String emoji;
@@ -110,6 +133,35 @@ final class LocalGiftData {
 
   /// Whether the banner shows ("显示本地礼物特效" when it was sent).
   final bool effect;
+}
+
+/// A run of one gift (D08.4 c1): the sends of the same gift in a room, each
+/// within [LocalCatalog.giftComboWindow] of the last. The room session keeps
+/// it and hands it to [LocalInteraction.sendGift] with each send of the
+/// run; the run is one history entry, one chat line and one banner whose
+/// count goes up.
+final class LocalGiftCombo {
+  /// Starts a run of [gift] (empty until its first send).
+  new(this.gift);
+
+  /// The gift.
+  final LocalGift gift;
+
+  /// How many so far (every send's count added).
+  int get count => _count;
+  int _count = 0;
+
+  /// The coins the run took so far.
+  int get coins => _coins;
+  int _coins = 0;
+
+  /// The run's history entry as last shown, and its id once the store gave
+  /// one.
+  LocalEvent? _entry;
+  Future<int>? _stored;
+
+  /// The run's 3.x history line (`localInteraction.history`).
+  String? _line;
 }
 
 /// Where a local message is sent (D08.1): the room's platform and id, and
@@ -768,42 +820,70 @@ final class LocalInteraction extends ChangeNotifier {
     );
   }
 
-  /// Sends [gift] in a room of [platform]: takes its price, adds as much
-  /// experience and a history line (3.x `sendGift`). Null when the
-  /// interaction is off or the coins do not cover it.
+  /// Sends [count] of [gift] in a room of [platform]: takes their price,
+  /// adds as much experience and a history line (3.x `sendGift`, one at a
+  /// time). Null when the interaction is off or the coins do not cover them
+  /// all.
   ///
-  /// The entry (D08.1) names [place] when it was sent in a room.
-  LiveMessage? sendGift(LocalGift gift, {required String platform, LocalPlace? place}) {
-    if (!enabled || coins < gift.price) return null;
+  /// The entry (D08.1) names [place] when it was sent in a room. [combo]
+  /// (D08.4 c1) is the run of this gift the send belongs to: an empty one
+  /// starts with it, one with gifts in it grows, so the run is one history
+  /// entry and one 3.x line whose count goes up, and the message says the
+  /// run's count so far. Each send still takes its own coins and gives its
+  /// own experience.
+  LiveMessage? sendGift(
+    LocalGift gift, {
+    required String platform,
+    LocalPlace? place,
+    int count = 1,
+    LocalGiftCombo? combo,
+  }) {
+    assert(combo == null || combo.gift.id == gift.id, 'a combo holds one gift');
+    final cost = gift.price * count;
+    if (!enabled || count < 1 || coins < cost) return null;
+    final joining = combo != null && combo.count > 0;
+    final total = joining ? combo.count + count : count;
     final profile = profileFor(platform);
     final giftName = i18n(gift.nameKey);
     final sent = i18n('local_sent_gift');
     final before = level;
+    final line = '${gift.emoji} ${profile.legacyLabel} · ${profile.name} $sent $giftName ×$total';
+    final lines = history;
     _setAll({
-      Settings.localInteractionCoins: coins - gift.price,
-      Settings.localInteractionExperience: experience + gift.price,
-      Settings.localInteractionHistory: _withHistory(
-        '${gift.emoji} ${profile.legacyLabel} · ${profile.name} $sent $giftName ×1',
-      ),
+      Settings.localInteractionCoins: coins - cost,
+      Settings.localInteractionExperience: experience + cost,
+      // The run's line with its count raised while it is still the newest.
+      Settings.localInteractionHistory: joining && lines.isNotEmpty && lines.first == combo._line
+          ? [line, ...lines.skip(1)]
+          : _withHistory(line),
     });
-    _record(
-      LocalEvent(
-        at: _now(),
-        kind: LocalEventKind.gift,
-        platform: place?.platform ?? platform,
-        roomId: place?.roomId ?? '',
-        roomName: place?.roomName ?? '',
-        giftId: gift.id,
-        count: 1,
-        coins: gift.price,
-      ),
-    );
+    if (!joining || !_growGift(combo, count, cost)) {
+      _recordGift(
+        LocalEvent(
+          at: _now(),
+          kind: LocalEventKind.gift,
+          platform: place?.platform ?? platform,
+          roomId: place?.roomId ?? '',
+          roomName: place?.roomName ?? '',
+          giftId: gift.id,
+          count: count,
+          coins: cost,
+        ),
+        combo,
+      );
+    }
+    if (combo != null) {
+      combo
+        .._count = total
+        .._coins += cost
+        .._line = line;
+    }
     _recordLevel(before, place);
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: profile.name,
       // U.2k c10: what flies over the picture, without the badge.
-      message: '${profile.name} $sent $giftName ×1',
+      message: '${profile.name} $sent $giftName ×$total',
       color: gift.color,
       userLevel: profile.level?.toString() ?? '',
       fansName: profile.title,
@@ -813,7 +893,7 @@ final class LocalInteraction extends ChangeNotifier {
         'giftName': giftName,
         'emoji': gift.emoji,
         'price': gift.price,
-        'count': 1,
+        'count': total,
         'platform': platform,
         'big': gift.big,
         'effect': enableGiftEffects ? (gift.big ? 'full' : 'ticker') : 'none',
@@ -821,6 +901,49 @@ final class LocalInteraction extends ChangeNotifier {
       isLocal: true,
       style: currentStyle,
     );
+  }
+
+  /// Records [entry], a new gift entry, as [combo]'s (its id comes from the
+  /// store).
+  void _recordGift(LocalEvent entry, LocalGiftCombo? combo) {
+    combo
+      ?.._entry = entry
+      .._stored = null;
+    _keep([entry, ..._entries], (store) {
+      final id = store.add(entry);
+      combo?._stored = id;
+      return id;
+    });
+  }
+
+  /// Adds [count] gifts and [cost] coins to [combo]'s entry where it is
+  /// (D08.4 c1); false when the entry is gone (the history was cleared
+  /// meanwhile), so the send starts a new one.
+  bool _growGift(LocalGiftCombo combo, int count, int cost) {
+    final entry = combo._entry;
+    if (entry == null) return false;
+    final at = _entries.indexWhere((old) => _sameEntry(old, entry));
+    if (at < 0) return false;
+    final current = _entries[at];
+    final grown = current.withCount(current.count + count, current.coins + cost);
+    combo._entry = grown;
+    final stored = combo._stored;
+    _keep([..._entries]..[at] = grown, (store) async {
+      final id = grown.id ?? await stored;
+      if (id != null) await store.updateCount(id, count: grown.count, coins: grown.coins);
+    });
+    return true;
+  }
+
+  /// Whether [a] and [b] are the same entry: the same id, or before the
+  /// store gave one, the same gift at the same time in the same room.
+  static bool _sameEntry(LocalEvent a, LocalEvent b) {
+    if (a.id != null && b.id != null) return a.id == b.id;
+    return a.kind == b.kind &&
+        a.giftId == b.giftId &&
+        a.at.millisecondsSinceEpoch == b.at.millisecondsSinceEpoch &&
+        a.platform == b.platform &&
+        a.roomId == b.roomId;
   }
 
   // ---- local danmaku style ----

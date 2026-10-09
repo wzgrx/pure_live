@@ -4,25 +4,15 @@ import 'package:flutter/widgets.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_gift_queue.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_growth.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_interaction.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-/// A gift banner on the picture; [serial] tells two banners of the same
-/// gift apart (the new one replaces the old one and starts afresh).
-@immutable
-final class LocalGiftShow {
-  /// Creates the banner of [message].
-  const new(this.message, this.serial);
-
-  /// The gift's message.
-  final LiveMessage message;
-
-  /// Counts the banners of the room.
-  final int serial;
-}
+export 'package:pure_live/features/live_play/local_interaction/logic/local_gift_queue.dart';
 
 /// The local interaction inside one live room: sending local danmaku and
 /// gifts into the room's chat list and over its picture, and the gift banner
@@ -37,12 +27,19 @@ final class LocalGiftShow {
 /// the local danmaku sent there in the last [replayWindow] back at the top
 /// of the chat list ([replayCount] at most, "之前发的", not over the
 /// picture) while "进房放回" is on.
+///
+/// D08.4: the same gift again within [LocalCatalog.giftComboWindow] joins
+/// the last one's combo: its chat line, banner and history entry count up
+/// instead of a new one each; different gifts' banners wait their turn
+/// ([giftEffect]).
 final class LocalRoomSession {
   /// Creates the session of [room] and starts putting back what was sent
   /// there before ([events]: the stored history; none in previews).
   ///
   /// D08.3: entering checks in for the day, and the room's player counts
-  /// the time it plays ([LocalRoomWatch], [periodic] its tick).
+  /// the time it plays ([LocalRoomWatch], [periodic] its tick). [now] is
+  /// the clock of the combos and the put back (the interaction's by
+  /// default); [timer] starts the banners' timers.
   new({
     required this.interaction,
     required this.room,
@@ -51,9 +48,11 @@ final class LocalRoomSession {
     LocalEventStore? events,
     DateTime Function()? now,
     LocalTimerFactory? periodic,
+    LocalOneShotTimer? timer,
     this.effectDuration = const Duration(seconds: 3),
-  }) {
-    if (events != null) unawaited(_replay(events, (now ?? DateTime.now)()));
+  }) : _now = now ?? interaction.now,
+       giftEffect = LocalGiftQueue(duration: effectDuration, timer: timer) {
+    if (events != null) unawaited(_replay(events, _now()));
     LocalRoomWatch.of(interaction, room.session, periodic: periodic)
       ..place = (() => place)
       ..toast = toast;
@@ -84,11 +83,18 @@ final class LocalRoomSession {
   /// How long a gift banner stays (3.x: 3 s).
   final Duration effectDuration;
 
-  /// The gift banner on the picture, or null.
-  final ValueNotifier<LocalGiftShow?> giftEffect = ValueNotifier(null);
+  /// The gift banners: the one on the picture ([LocalGiftQueue.value], or
+  /// null) and those waiting (D08.4 c4).
+  final LocalGiftQueue giftEffect;
 
-  Timer? _effectTimer;
-  int _serial = 0;
+  final DateTime Function() _now;
+
+  /// The gift run going on (D08.4 c1): its gift, when it was last sent,
+  /// its chat line and its banner.
+  LocalGiftCombo? _combo;
+  DateTime? _comboAt;
+  ChatLine? _comboLine;
+  LocalGiftShow? _comboShow;
   bool _overlayHinted = false;
   bool _disposed = false;
 
@@ -144,46 +150,68 @@ final class LocalRoomSession {
     return true;
   }
 
-  /// Sends [gift]; false (and "体验币余额不足") when the coins do not cover
-  /// it.
-  bool sendGift(LocalGift gift) {
+  /// Sends [count] of [gift] (D08.4 c3: a count from the long press); false
+  /// (and "体验币余额不足") when the coins do not cover them all.
+  ///
+  /// D08.4 c1: the same gift as the last send, less than
+  /// [LocalCatalog.giftComboWindow] after it, joins its combo: the chat line
+  /// is replaced by one saying the new count (newest again, its "×N"
+  /// pulses), the banner says it too and starts its time again (or keeps
+  /// its place while it waits), and the history entry counts up. It does
+  /// not fly over the picture again: the first send did, the banner and the
+  /// line carry the count. A different gift, or a pause of the window,
+  /// starts a new combo.
+  bool sendGift(LocalGift gift, {int count = 1}) {
     if (_disposed) return false;
+    final now = _now();
+    final last = _comboAt;
+    final previous = _combo;
+    final joining =
+        previous != null &&
+        previous.gift.id == gift.id &&
+        last != null &&
+        !now.isBefore(last) &&
+        now.difference(last) < LocalCatalog.giftComboWindow;
+    final combo = joining ? previous : LocalGiftCombo(gift);
     final before = interaction.level;
-    final message = interaction.sendGift(gift, platform: platform, place: place);
+    final message = interaction.sendGift(gift, platform: platform, place: place, count: count, combo: combo);
     if (message == null) {
       if (interaction.enabled) toast(i18n('local_coins_insufficient'));
       return false;
     }
-    _deliver(message);
+    final line = joining ? _comboLine : null;
+    final show = joining ? _comboShow : null;
+    _combo = combo;
+    _comboAt = now;
+    _comboLine = line != null ? room.replaceLocal(line, message) : _deliver(message);
     _announce(before);
     if (LocalGiftData.of(message)?.effect ?? false) {
-      _effectTimer?.cancel();
-      giftEffect.value = LocalGiftShow(message, ++_serial);
-      _effectTimer = Timer(effectDuration, () {
-        if (!_disposed) giftEffect.value = null;
-      });
+      // A combo whose banner did not find a place tries again.
+      _comboShow = (show == null ? null : giftEffect.grow(show, message)) ?? giftEffect.add(message);
+    } else {
+      _comboShow = null;
     }
     return true;
   }
 
-  void _deliver(LiveMessage message) {
+  ChatLine? _deliver(LiveMessage message) {
     final fly = interaction.showAsDanmaku;
-    room.addLocal(message, fly: fly);
+    final line = room.addLocal(message, fly: fly);
     if (fly && !overlayShown() && !_overlayHinted) {
       _overlayHinted = true;
       toast(i18n('local_overlay_off_hint'));
     }
+    return line;
   }
 
   /// "本地等级升到 Lv.N" when the level rose above [before] (D08.3).
   void _announce(int before) => announceLocalLevel(interaction, before, toast);
 
-  /// Stops the banner's timer. The watch time goes on while the player
+  /// Stops the banners' timer. The watch time goes on while the player
   /// plays (the in-app floating window); leaving the room stops the player,
   /// which settles it.
   void dispose() {
     _disposed = true;
-    _effectTimer?.cancel();
     giftEffect.dispose();
   }
 }

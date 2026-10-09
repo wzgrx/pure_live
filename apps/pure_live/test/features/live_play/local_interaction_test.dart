@@ -322,7 +322,9 @@ void main() {
       // c9: in the middle of the picture, not of the page.
       final video = tester.getRect(_key('live-play-video-box'));
       expect((tester.getCenter(banner) - video.center).distance, lessThan(1));
-      expect(_in('local-gift-banner', find.text('Pure Live 送出 辣条 ×1')), findsOneWidget);
+      expect(_in('local-gift-banner', find.text('Pure Live 送出 辣条')), findsOneWidget);
+      // D08.4: the count on its own, so a combo's can jump.
+      expect(_in('local-gift-banner', find.text('×1')), findsOneWidget);
       expect(_in('local-gift-banner', find.text('📺 舰队等级 Lv.1 · 听众')), findsOneWidget);
       expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1090 电池')), findsOneWidget);
       expect(room.settings.get(Settings.localInteractionCoins), anyOf(1090, 1100), reason: 'written behind');

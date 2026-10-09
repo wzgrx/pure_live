@@ -538,6 +538,13 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     return EdgeInsets.only(top: top, bottom: bottom);
   }
 
+  /// What the local gift banner keeps clear of (D08.4): the bars, as the
+  /// flying gifts, and in fullscreen a cut-out at the sides.
+  EdgeInsets _bannerClearance() {
+    final sides = _inline ? EdgeInsets.zero : MediaQuery.paddingOf(context);
+    return _giftClearance() + EdgeInsets.only(left: sides.left, right: sides.right);
+  }
+
   /// The message's actions (U.2f 长按弹幕); the danmaku stand meanwhile
   /// (3.x paused the barrage until the sheet closed).
   Future<void> _openMessage(LiveMessage message) async {
@@ -839,8 +846,9 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
           ),
         ),
         // U.2k c9: the local gift banner, on its own layer in the middle of
-        // the picture.
-        if (LocalRoomScope.maybeOf(context) case final local?) LocalGiftLayer(session: local, fullscreen: !_inline),
+        // the picture, clear of the bars (D08.4).
+        if (LocalRoomScope.maybeOf(context) case final local?)
+          LocalGiftLayer(session: local, fullscreen: !_inline, clearance: _bannerClearance()),
         // U.2g c18: the replay mark stays whether the controls show or not.
         Positioned(
           left: 10 + (_inline ? 0 : padding.left),

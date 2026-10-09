@@ -97,7 +97,12 @@ class _LocalInteractionPanelState extends ConsumerState<LocalInteractionPanel> {
           child: LocalDanmakuComposer(place: LocalComposerPlace.panel),
         ),
         PanelGroupTitle(i18n('local_gift_center')),
-        _GiftGrid(gifts: gifts, coins: local.coins, onSend: (gift) => session?.sendGift(gift)),
+        _GiftGrid(
+          gifts: gifts,
+          coins: local.coins,
+          currency: i18n(pack.currencyKey),
+          onSend: (gift, count) => session?.sendGift(gift, count: count),
+        ),
         // D08.3 c5: "+500/+2000/+10000" are in the card's "更多" (D-001).
         PanelGroupTitle(i18n('local_group_profile_mine')),
         LocalProfileEditor(interaction: local),
@@ -311,12 +316,20 @@ class LocalLevelBar extends StatelessWidget {
 
 /// Four gifts a row (3.x); a gift the coins do not cover is faded but still
 /// says so when tapped (c11); the price has the coin icon.
+///
+/// D08.4 c3: a tap sends one; a long press (a right click) opens the small
+/// menu beside the gift with [LocalCatalog.giftCounts], each with what it
+/// costs in all, the ones the coins do not cover greyed; a choice sends
+/// that many at once.
 class _GiftGrid extends StatelessWidget {
-  const new({required this.gifts, required this.coins, required this.onSend});
+  const new({required this.gifts, required this.coins, required this.currency, required this.onSend});
 
   final List<LocalGift> gifts;
   final int coins;
-  final ValueChanged<LocalGift> onSend;
+
+  /// The room's coin name ("电池").
+  final String currency;
+  final void Function(LocalGift gift, int count) onSend;
 
   @override
   Widget build(BuildContext context) {
@@ -337,7 +350,12 @@ class _GiftGrid extends StatelessWidget {
                   Expanded(
                     child: gift == null
                         ? const SizedBox.shrink()
-                        : _GiftTile(gift: gift, affordable: coins >= gift.price, onTap: () => onSend(gift)),
+                        : _GiftTile(
+                            gift: gift,
+                            affordable: coins >= gift.price,
+                            onTap: () => onSend(gift, 1),
+                            onCount: (context) => _pickCount(context, gift),
+                          ),
                   ),
                 ],
               ],
@@ -347,14 +365,35 @@ class _GiftGrid extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _pickCount(BuildContext context, LocalGift gift) async {
+    final chosen = await showAppMenu<int>(
+      context,
+      title: i18n('local_gift_count_title', args: {'gift': i18n(gift.nameKey)}),
+      entries: [
+        for (final count in LocalCatalog.giftCounts)
+          AppMenuEntry(
+            key: ValueKey('local-gift-count-$count'),
+            value: count,
+            label: '×$count',
+            description: i18n('local_gift_count_cost', args: {'coins': '${gift.price * count}', 'currency': currency}),
+            enabled: coins >= gift.price * count,
+          ),
+      ],
+    );
+    if (chosen != null) onSend(gift, chosen);
+  }
 }
 
 class _GiftTile extends StatelessWidget {
-  const new({required this.gift, required this.affordable, required this.onTap});
+  const new({required this.gift, required this.affordable, required this.onTap, required this.onCount});
 
   final LocalGift gift;
   final bool affordable;
   final VoidCallback onTap;
+
+  /// Opens the count menu next to the tile ([BuildContext] of the tile).
+  final void Function(BuildContext context) onCount;
 
   @override
   Widget build(BuildContext context) {
@@ -370,9 +409,12 @@ class _GiftTile extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(14),
           onTap: onTap,
+          onLongPress: () => onCount(context),
+          onSecondaryTap: () => onCount(context),
           child: Semantics(
             button: true,
             label: '$name, ${gift.price}',
+            onLongPressHint: i18n('local_gift_count_hint'),
             excludeSemantics: true,
             child: SizedBox(
               height: 88,
@@ -608,7 +650,10 @@ class _LocalHistoryState extends State<LocalHistory> {
       case LocalEventKind.chat:
         if (session.sendChat(event.text)) session.toast(i18n('local_history_sent_again'));
       case LocalEventKind.gift:
-        if (LocalCatalog.giftById(event.giftId) case final gift?) session.sendGift(gift);
+        // D08.4: as many as the entry (a count chosen, a combo).
+        if (LocalCatalog.giftById(event.giftId) case final gift?) {
+          session.sendGift(gift, count: event.count < 1 ? 1 : event.count);
+        }
       case LocalEventKind.recharge || LocalEventKind.level || LocalEventKind.legacy:
         break;
     }

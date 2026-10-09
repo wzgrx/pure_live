@@ -64,6 +64,30 @@ void main() {
     );
   });
 
+  test("D08.4: a combo's entry grows in place; a cleared one stays gone", () async {
+    final store = await memoryStore();
+    addTearDown(store.close);
+    final events = store.localEvents;
+    final gift = LocalEvent(
+      at: _at(1),
+      kind: LocalEventKind.gift,
+      platform: 'bilibili',
+      roomId: '6',
+      giftId: 'bili_snack',
+      count: 1,
+      coins: 10,
+    );
+    final id = await events.add(gift);
+    await events.add(_chat('之后', minutes: 2));
+    await events.updateCount(id, count: 5, coins: 50);
+    final all = await events.all();
+    expect(all, hasLength(2), reason: 'one entry, not five');
+    expect(all.last, gift.withCount(5, 50).withId(id), reason: 'its time and place stay');
+    await events.clear();
+    await events.updateCount(id, count: 6, coins: 60);
+    expect(await events.all(), isEmpty);
+  });
+
   test('at most 2000: the oldest go first', () async {
     final store = await memoryStore();
     addTearDown(store.close);

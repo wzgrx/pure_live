@@ -6,6 +6,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
+import 'package:pure_live/features/live_play/danmaku/gift_count_pulse.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
@@ -79,7 +80,7 @@ double giftTierMarkWidth(LiveGiftTier tier) => switch (tier) {
 ///   as one piece when it does not fit;
 /// - when the shown count changes (D07.1's combo), only "×N" grows to 1.2
 ///   times and back in 200 ms, not with the system's reduced motion.
-class GiftLine extends StatefulWidget {
+class GiftLine extends StatelessWidget {
   /// Creates the line of [message].
   const new({
     required this.message,
@@ -134,87 +135,45 @@ class GiftLine extends StatefulWidget {
   static const Duration pulse = Duration(milliseconds: 200);
 
   @override
-  State<GiftLine> createState() => _GiftLineState();
-}
-
-class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin {
-  AnimationController? _pulse;
-  Animation<double>? _scale;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_started) return;
-    _started = true;
-    if (widget.merged) _startPulse();
-  }
-
-  bool _started = false;
-
-  @override
-  void didUpdateWidget(GiftLine oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final before = oldWidget.message.gift;
-    final now = widget.message.gift;
-    if (before == null || now == null || giftShownCount(before) == giftShownCount(now)) return;
-    _startPulse();
-  }
-
-  void _startPulse() {
-    if (widget.message.gift == null || MediaQuery.disableAnimationsOf(context)) return;
-    final pulse = _pulse ??= AnimationController(vsync: this, duration: GiftLine.pulse);
-    // Up decelerating, back down decelerating (UI.md §8.6: no bounce).
-    _scale ??= TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 1, end: 1.2).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.2, end: 1).chain(CurveTween(curve: Curves.easeOut)), weight: 1),
-    ]).animate(pulse);
-    pulse.forward(from: 0);
-  }
-
-  @override
-  void dispose() {
-    _pulse?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final card = widget.style == ChatListStyle.card;
+    final card = style == ChatListStyle.card;
     final ground = card ? scheme.surfaceContainerLowest : scheme.surface;
-    final message = widget.message;
     final gift = message.gift;
     final tier = gift == null ? LiveGiftTier.normal : giftShownTier(gift);
-    final platformInk = tier == LiveGiftTier.precious ? giftPlatformInk(widget.room.platform, ground) : null;
+    final platformInk = tier == LiveGiftTier.precious ? giftPlatformInk(room.platform, ground) : null;
     final giftInk = platformInk ?? scheme.tertiary;
-    final sizing = widget.sizing;
     final body = ChatText.content(theme, sizing: sizing);
     final secondary = body?.copyWith(color: scheme.onSurfaceVariant);
     final named = body?.emphasis.copyWith(color: giftInk);
-    final name = widget.showName ? message.userName.trim() : '';
-    final notes = gift == null
-        ? const <String>[]
-        : [?giftValueText(gift, inYuan: widget.valueInYuan), ...giftNotes(gift)];
+    final name = showName ? message.userName.trim() : '';
+    final notes = gift == null ? const <String>[] : [?giftValueText(gift, inYuan: valueInYuan), ...giftNotes(gift)];
     final count = gift == null ? '' : giftCountText(gift);
-    final text = Text.rich(
+    final words = Text.rich(
       key: const ValueKey('live-play-gift-text'),
       TextSpan(
         children: [
-          ...widget.lead,
+          ...lead,
           if (name.isNotEmpty)
             TextSpan(text: '$name ', style: ChatText.name(theme, chatNameInk(message, ground, scheme), sizing)),
           if (gift == null)
-            TextSpan(text: widget.text, style: named)
+            TextSpan(text: text, style: named)
           else ...[
             TextSpan(
-              text: '${giftVerb(gift, streamer: widget.room.streamer)} ',
+              text: '${giftVerb(gift, streamer: room.streamer)} ',
               style: secondary,
             ),
             TextSpan(text: giftName(gift), style: named),
             if (count.isNotEmpty) ...[
               TextSpan(text: ' ', style: named),
-              _piece(Text(count, key: const ValueKey('live-play-gift-count'), style: named?.tabular), pulse: true),
+              _piece(
+                GiftCountPulse(
+                  count: giftShownCount(gift),
+                  jumpFirst: merged,
+                  child: Text(count, key: const ValueKey('live-play-gift-count'), style: named?.tabular),
+                ),
+              ),
             ],
           ],
           if (notes.isNotEmpty)
@@ -247,7 +206,7 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         icon,
-        Expanded(child: text),
+        Expanded(child: words),
       ],
     );
     final mark = giftTierMarkWidth(tier);
@@ -305,14 +264,8 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
   }
 
   /// A piece of the line that moves to the next line whole ([chatInline]).
-  WidgetSpan _piece(Widget child, {bool pulse = false}) {
-    final scale = _scale;
-    return chatInline(
-      pulse && scale != null ? ScaleTransition(scale: scale, child: child) : child,
-      alignment: PlaceholderAlignment.baseline,
-      baseline: TextBaseline.alphabetic,
-    );
-  }
+  WidgetSpan _piece(Widget child) =>
+      chatInline(child, alignment: PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic);
 }
 
 /// A gift's picture (c1): [size] square, decoded at the size it is drawn

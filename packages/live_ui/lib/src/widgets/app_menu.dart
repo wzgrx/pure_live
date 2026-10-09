@@ -97,6 +97,9 @@ Future<T?> showAppMenu<T>(
   final text = context.textStyles.t14.copyWith(color: scheme.onSurface);
   final current = text.emphasis.copyWith(color: scheme.primary);
   final small = context.textStyles.t12.copyWith(color: scheme.onSurfaceVariant);
+  // A row that takes no taps is greyed (Material's 38 % disabled ink); its
+  // own colours would otherwise hide that it is off.
+  final off = text.copyWith(color: scheme.onSurface.withValues(alpha: 0.38));
   final currentRow = GlobalKey();
   final currentIndex = selected == null ? -1 : entries.indexWhere((entry) => entry.value == selected);
   return showAnchoredMenu<T>(
@@ -129,7 +132,11 @@ Future<T?> showAppMenu<T>(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (entry.icon case final icon?) ...[
-                  Icon(icon, size: 24, color: entry.danger ? scheme.error : scheme.onSurfaceVariant),
+                  Icon(
+                    icon,
+                    size: 24,
+                    color: !entry.enabled ? off.color : (entry.danger ? scheme.error : scheme.onSurfaceVariant),
+                  ),
                   const SizedBox(width: 12),
                 ],
                 Flexible(
@@ -139,14 +146,21 @@ Future<T?> showAppMenu<T>(
                     children: [
                       Text(
                         entry.label,
-                        style: entry.danger
+                        style: !entry.enabled
+                            ? off
+                            : entry.danger
                             ? text.copyWith(color: scheme.error)
                             : (selected != null && entry.value == selected ? current : text),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       if (entry.description case final description?)
-                        Text(description, style: small, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text(
+                          description,
+                          style: entry.enabled ? small : small.copyWith(color: off.color),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                     ],
                   ),
                 ),

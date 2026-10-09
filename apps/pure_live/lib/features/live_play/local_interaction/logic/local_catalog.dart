@@ -277,6 +277,21 @@ abstract final class LocalCatalog {
   /// The longest local nickname.
   static const nameLimit = 20;
 
+  /// The counts a long press on a gift offers (D08.4 c3): 1 (a tap), 10,
+  /// and the two the platforms' own count lists all have, 66 ("六六大顺") and
+  /// 520 ("我爱你"); 1314 is left out, as the cheapest gift (10) times it is
+  /// more than any recharge button adds.
+  static const giftCounts = <int>[1, 10, 66, 520];
+
+  /// How long after a gift the same gift joins its combo (D08.4 c1: 3 s,
+  /// the banner's time, so a combo's banner is still up when it grows).
+  static const Duration giftComboWindow = Duration(seconds: 3);
+
+  /// The most gift banners shown or waiting at once (D08.4 c4): five at 3 s
+  /// each is 15 s at most from a send to its banner; a later one would show
+  /// long after the tap, so beyond them a gift only joins the chat list.
+  static const int giftBannerLimit = 5;
+
   /// The longest local danmaku, in characters (A08.13: the platforms let a
   /// viewer send 20 to 40; 40 still crosses a landscape phone in about one
   /// screen width at the default size).

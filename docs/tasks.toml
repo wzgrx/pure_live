@@ -2391,13 +2391,14 @@ note = "新设置 localInteraction.growthEnabled（默认开，D-040 写明的�
 id = "D08.4"
 title = "本地礼物连击、数量和横幅队列"
 type = "功能"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "中"
 tier = 2
 stages = ["3 秒内同一礼物连击：横幅 ×N 跳动、列表和记录合成一条", "长按礼物选数量（1、10、66、520）、不同礼物排队（最多 5 个）"]
-done = 0
+done = 2
 from = "V03.6 第 4 节 E8、第 5.5 节第一段（P6）；用户 2026-10-09（D-040）"
-note = "连击的数字动画照 flame_barrage ComboAnimation（MIT）；系统要求减少动态时不跳；记录合并依赖 D08.1（没做完时只合并列表）"
+note = "连击 = 同一直播间连着送同一礼物、离上一次不到 3 秒：一个横幅（×N 从 1.8 倍缩回，借 flame_barrage ComboAnimation，MIT）、列表一行（ChatFeed.replace，×N 和平台礼物行一样跳）、一条记录（local_events 的 count 累加）；接着连击不再飞本地弹幕；横幅队列 LocalGiftQueue 一次一个、最多 5 个，躲开控制层（giftClearance）、放不下时缩小；长按礼物格的小菜单 1/10/66/520，币不够的变灰；没有新设置；给 D08.5 的接口 LocalGiftQueue.durationOf、LocalGiftLayer.presenter；设计选择 g1～g14 见任务 README"
 
 [[task]]
 id = "D08.5"

@@ -2279,13 +2279,15 @@ note = "依赖 E05.5（kind、unit）；“上舰和开会员进醒目留言”�
 id = "D07.3"
 title = "斗鱼礼物目录（betard）和礼物字段"
 type = "平台"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "中"
 tier = 2
 stages = ["读 betard 的 room_gift（单价、图标、动画），dgb 留等级、粉丝牌、背包标记", "核实完整的礼物接口，补表里没有的礼物"]
-done = 0
+done = 2
 from = "V03.5 第 2、3 节斗鱼、第 7 节；用户 2026-10-09（D-040）"
-note = "依赖 E05.5；第 2 阶段要访问真实接口录样本（按 fixtures/README.md 脱敏）"
+note = "依赖 E05.5；礼物目录三处合并：betard 的 room_gift、房间礼物列表 gift.douyucdn.cn/api/gift/v3/web/list（154 个）、平台道具表 prop_gift_config.json（1585 个，荧光棒在里面），后两个连弹幕时后台取、在 DouyuSite 里缓存，取不到照旧；样本 S17-gift-list、S18-prop-config（匿名、无 Cookie、删减）；设计选择（D-003）写在 record.md"
+next = "K90 上按 verify.md 看"
 
 [[task]]
 id = "D07.4"

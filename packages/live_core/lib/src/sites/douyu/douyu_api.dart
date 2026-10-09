@@ -51,18 +51,109 @@ final class DouyuPlayData {
 }
 
 /// What the danmaku connection needs to join one room: the canonical rid
-/// sent in `loginreq` and `joingroup` (3.x passed the rid alone). The
-/// endpoint is [DouyuApi.danmakuServer].
+/// sent in `loginreq` and `joingroup` (3.x passed the rid alone), and the
+/// gifts its `dgb` packets may name (D07.3). The endpoint is
+/// [DouyuApi.danmakuServer].
 @immutable
 final class DouyuDanmakuArgs {
   /// Creates the arguments.
-  const new(this.roomId);
+  const new(this.roomId, {this.gifts = DouyuGiftCatalog.empty, this.moreGifts});
 
   /// Canonical numeric room id (`room.room_id`).
   final String roomId;
 
+  /// The gifts `betard` listed (`room_gift`, no request of its own).
+  final DouyuGiftCatalog gifts;
+
+  /// Fetches the room's full gift list and the platform's prop table
+  /// (cached by the adapter); never fails, an empty catalogue when neither
+  /// arrives. Null: no more than [gifts].
+  final Future<DouyuGiftCatalog> Function()? moreGifts;
+
   @override
-  String toString() => 'DouyuDanmakuArgs($roomId)';
+  String toString() => 'DouyuDanmakuArgs($roomId, ${gifts.length} gifts)';
+}
+
+/// One gift of a [DouyuGiftCatalog] (D07.3).
+@immutable
+final class DouyuGiftInfo {
+  /// Creates the entry.
+  const new({required this.id, required this.name, this.price, this.free = false, this.iconUrl, this.effect = ''});
+
+  /// The gift id `dgb` sends as `gfid`.
+  final String id;
+
+  /// The gift's name.
+  final String name;
+
+  /// The price of one in fen (Douyu's 鱼翅: 100 fen each); null when it is
+  /// free or unknown.
+  final int? price;
+
+  /// Paid in 鱼丸 (Douyu's free currency), or a prop from the backpack.
+  final bool free;
+
+  /// The gift's picture.
+  final Uri? iconUrl;
+
+  /// The effect id of `betard`'s `gift_effect`, kept for effects to come;
+  /// empty when none.
+  final String effect;
+
+  @override
+  bool operator ==(Object other) =>
+      other is DouyuGiftInfo &&
+      other.id == id &&
+      other.name == name &&
+      other.price == price &&
+      other.free == free &&
+      other.iconUrl == iconUrl &&
+      other.effect == effect;
+
+  @override
+  int get hashCode => Object.hash(id, name, price, free, iconUrl, effect);
+
+  @override
+  String toString() => 'DouyuGiftInfo($id $name${price == null ? '' : ', $price fen'}${free ? ', free' : ''})';
+}
+
+/// The gifts a Douyu room's danmaku may name, by gift id (D07.3): what
+/// `betard` lists (`room_gift`, [DouyuApi.roomGifts]), the room's gift list
+/// ([DouyuApi.giftList]) and the platform's prop table
+/// ([DouyuApi.propGifts]), merged with [merge].
+@immutable
+final class DouyuGiftCatalog {
+  /// Creates the catalogue.
+  new(Map<String, DouyuGiftInfo> gifts) : _gifts = Map.unmodifiable(gifts);
+
+  const new _empty() : _gifts = const {};
+
+  /// No gifts.
+  static const DouyuGiftCatalog empty = DouyuGiftCatalog._empty();
+
+  final Map<String, DouyuGiftInfo> _gifts;
+
+  /// The gift of [id], or null.
+  DouyuGiftInfo? operator [](String id) => _gifts[id];
+
+  /// The gift ids.
+  Iterable<String> get ids => _gifts.keys;
+
+  /// How many gifts.
+  int get length => _gifts.length;
+
+  /// Whether it has no gifts.
+  bool get isEmpty => _gifts.isEmpty;
+
+  /// These gifts with [other]'s over them (an id in both is [other]'s).
+  DouyuGiftCatalog merge(DouyuGiftCatalog other) {
+    if (other.isEmpty) return this;
+    if (isEmpty) return other;
+    return DouyuGiftCatalog({..._gifts, ...other._gifts});
+  }
+
+  @override
+  String toString() => 'DouyuGiftCatalog($length)';
 }
 
 /// The encryption descriptor of `getEncryption`, which signs play requests
@@ -155,6 +246,19 @@ abstract final class DouyuApi {
 
   /// The only danmaku endpoint.
   static const String danmakuServer = 'wss://danmuproxy.douyu.com:8506';
+
+  /// Where `betard`'s relative gift pictures (`pc_icon`) live: the prefix
+  /// the gift list names (`picUrlPrefix`), checked 2026-10-09 (火箭's
+  /// `pc_icon` answers 200 image/png there and 404 on `gfs-test-op`).
+  static const String giftPictureBase = 'https://gfs-op.douyucdn.cn/dygift';
+
+  /// A room's full gift list (`?rid=<rid>`; D07.3).
+  static final Uri giftListUrl = Uri.parse('https://gift.douyucdn.cn/api/gift/v3/web/list');
+
+  /// The platform's prop (backpack gift) table, JSONP (D07.3).
+  static final Uri propGiftUrl = Uri.parse(
+    'https://webconf.douyucdn.cn/resource/common/prop_gift_list/prop_gift_config.json',
+  );
 
   /// How long before `expire` a play URL is renewed (at most a quarter of
   /// its lifetime).
@@ -352,8 +456,13 @@ abstract final class DouyuApi {
   /// `【回放】` title is live; anything else offline, as in 3.x. A live room
   /// starts at `show_time` (Unix seconds; offline it is the last show's, so
   /// it is left out). A 200 HTML page ("该房间目前没有开放", or "已被关闭"
-  /// for a 靓号) is `NotFound`; 403 (an alias) is `RiskControl`.
-  static ({LiveRoom room, String rid}) roomDetail(String body, {required String requestedId, int status = 200}) {
+  /// for a 靓号) is `NotFound`; 403 (an alias) is `RiskControl`. The gifts are
+  /// [roomGifts] of the same answer.
+  static ({LiveRoom room, String rid, DouyuGiftCatalog gifts}) roomDetail(
+    String body, {
+    required String requestedId,
+    int status = 200,
+  }) {
     _status(status, 'betard', body);
     if (body.trimLeft().startsWith('<')) throw NotFound(_site, 'betard/$requestedId: HTML page (${_pageText(body)})');
     if (status < 200 || status >= 300) throw ApiChanged(_site, 'betard: HTTP $status (${_snippet(body)})');
@@ -391,7 +500,144 @@ abstract final class DouyuApi {
         notice: '',
         startedAt: live ? _seconds(room['show_time']) : null,
       ),
+      gifts: _roomGiftsOf(decoded),
     );
+  }
+
+  // Gifts (D07.3) -------------------------------------------------------------
+
+  /// The gifts of a `betard` answer ([roomDetail] reads them too):
+  /// `room_gift.gift`, by id, each with `name`, `price` and `unit` (2 is
+  /// 鱼翅, priced in fen; 1 is 鱼丸, free), the picture `pc_icon` (a path
+  /// under [giftPictureBase]) and the effect `gift_effect`. Only a room's
+  /// paid gifts, and not every one (fixtures/douyu/S05-offline has 13, while
+  /// the gifts the danmaku samples got are not among them). Anything it
+  /// cannot read is left out; never throws.
+  static DouyuGiftCatalog roomGifts(String body) {
+    var decoded = _decode(body);
+    if (decoded is String) decoded = _decode(decoded);
+    return _roomGiftsOf(decoded);
+  }
+
+  static DouyuGiftCatalog _roomGiftsOf(Object? decoded) {
+    final table = _object(_object(_object(decoded)?['room_gift'])?['gift']);
+    if (table == null) return DouyuGiftCatalog.empty;
+    final gifts = <String, DouyuGiftInfo>{};
+    for (final value in table.values) {
+      final item = _object(value);
+      final id = _giftId(item?['id']);
+      final name = jsonString(item?['name']);
+      if (item == null || id == null || name == null) continue;
+      final free = jsonInt(item['unit']) == 1;
+      final price = jsonCount(item['price']);
+      final effect = jsonInt(item['gift_effect']) ?? 0;
+      gifts[id] = DouyuGiftInfo(
+        id: id,
+        name: name,
+        price: free || price == null || price == 0 ? null : price,
+        free: free,
+        iconUrl: _giftPicture(giftPictureBase, item['pc_icon']),
+        effect: effect > 0 ? '$effect' : '',
+      );
+    }
+    return DouyuGiftCatalog(gifts);
+  }
+
+  /// The room's gift list ([giftListUrl]): `data.giftList`, each with `id`,
+  /// `name`, `priceInfo` (`price` in fen when `priceType` is `YUCHI`; a
+  /// `YUWAN` gift is free) and the picture `picUrlPrefix` +
+  /// `basicInfo.giftPic`. 154 gifts for a room on 2026-10-09
+  /// (fixtures/douyu/S17-gift-list keeps 10). A gift it cannot read is left
+  /// out; an answer that is not the list is `ApiChanged`, a refusal or
+  /// failure the `SiteError` [_status] gives.
+  static DouyuGiftCatalog giftList(String body, {int status = 200}) {
+    final root = _checked(body, status: status, what: 'gift list');
+    final list = _object(root['data'])?['giftList'];
+    if (list is! List) throw const ApiChanged(_site, 'gift list: no data.giftList');
+    final gifts = <String, DouyuGiftInfo>{};
+    for (final value in list) {
+      final item = _object(value);
+      final id = _giftId(item?['id']);
+      final name = jsonString(item?['name']);
+      if (item == null || id == null || name == null) continue;
+      final priceInfo = _object(item['priceInfo']);
+      final type = jsonString(priceInfo?['priceType'])?.toUpperCase();
+      final price = jsonCount(priceInfo?['price']);
+      final free = type == 'YUWAN';
+      gifts[id] = DouyuGiftInfo(
+        id: id,
+        name: name,
+        price: type == 'YUCHI' && price != null && price > 0 ? price : null,
+        free: free,
+        iconUrl: _giftPicture(
+          jsonString(item['picUrlPrefix']) ?? giftPictureBase,
+          _object(item['basicInfo'])?['giftPic'],
+        ),
+      );
+    }
+    return DouyuGiftCatalog(gifts);
+  }
+
+  /// The platform's prop table ([propGiftUrl]): JSONP
+  /// `DYConfigCallback({"error":0,"data":{<id>:{…}}})`, by the gift id `dgb`
+  /// sends (`gfid` 824 is 粉丝荧光棒), each with `name` and pictures (`bimg`,
+  /// else `pc_full_icon`, else the animated `himg`; never one on the test
+  /// host `gfs-test-op`, which answers 404). Every prop is free: it is sent
+  /// from the backpack. 1585 props on 2026-10-09 (1.4 MB;
+  /// fixtures/douyu/S18-prop-config keeps 4). Errors as [giftList].
+  static DouyuGiftCatalog propGifts(String body, {int status = 200}) {
+    _status(status, 'prop table', body);
+    final start = body.indexOf('(');
+    final end = body.lastIndexOf(')');
+    final json = start >= 0 && end > start ? body.substring(start + 1, end) : body;
+    final root = _checked(json, status: status, what: 'prop table');
+    final table = _object(root['data']);
+    if (table == null) throw const ApiChanged(_site, 'prop table: no data');
+    final gifts = <String, DouyuGiftInfo>{};
+    for (final MapEntry(:key, :value) in table.entries) {
+      final item = _object(value);
+      final id = _giftId(key);
+      final name = jsonString(item?['name']);
+      if (item == null || id == null || name == null) continue;
+      gifts[id] = DouyuGiftInfo(
+        id: id,
+        name: name,
+        free: true,
+        iconUrl: [
+          for (final field in const ['bimg', 'pc_full_icon', 'himg']) ?_giftPicture(giftPictureBase, item[field]),
+        ].firstOrNull,
+      );
+    }
+    return DouyuGiftCatalog(gifts);
+  }
+
+  /// A positive gift id as text, or null.
+  static String? _giftId(Object? value) {
+    final id = jsonInt(value);
+    return id != null && id > 0 ? '$id' : null;
+  }
+
+  /// A relative picture path (`1609/….png`, `/2026/03/03/….png`, with a
+  /// size suffix such as `/rs144`).
+  static final RegExp _giftPath = RegExp(r'^/?[\w./-]+\.(png|gif|jpe?g|webp)(/\w+)?$');
+
+  /// A gift picture: an https address as it is, a path under [base]; null
+  /// for anything else and for the test host.
+  static Uri? _giftPicture(String base, Object? value) {
+    final text = jsonString(value);
+    if (text == null) return null;
+    final absolute = jsonUrl(text.startsWith('//') ? 'https:$text' : text);
+    final Uri? url;
+    if (absolute != null) {
+      url = absolute.replace(scheme: 'https');
+    } else if (_giftPath.hasMatch(text)) {
+      final root = base.endsWith('/') ? base.substring(0, base.length - 1) : base;
+      url = jsonUrl('$root/${text.startsWith('/') ? text.substring(1) : text}');
+    } else {
+      url = null;
+    }
+    if (url == null || url.host == 'gfs-test-op.douyucdn.cn') return null;
+    return url;
   }
 
   /// A Unix-seconds time; null when missing or not after 1970.

@@ -250,6 +250,83 @@ void main() {
       expect(await setup.site.getLiveStatus(roomId: '5526219'), isTrue);
     });
 
+    test("D07.3: the danmaku arguments carry betard's gifts and fetch the gift list and prop table once", () async {
+      var clock = _captured;
+      final list = ReplaySample.load('$_root/S17-gift-list');
+      final setup = _setup(
+        ['S05-live', 'S18-prop-config'],
+        extra: [
+          // The recorded list of room 9263298, asked for this room.
+          ReplaySample(
+            method: 'GET',
+            url: Uri.parse('https://gift.douyucdn.cn/api/gift/v3/web/list?rid=5526219'),
+            status: 200,
+            bytes: list.bytes,
+            headers: list.headers,
+          ),
+        ],
+        now: () => clock,
+      );
+      final room = await setup.site.getRoomDetail(roomId: '5526219');
+      final args = room.danmakuData! as DouyuDanmakuArgs;
+      expect(args.gifts, hasLength(12), reason: "betard's room_gift, no request of its own");
+      expect(args.gifts['196']?.price, 50000);
+      expect(setup.http.requests, hasLength(1));
+      final (first, second) = await (args.moreGifts!(), args.moreGifts!()).wait;
+      expect(first, hasLength(10 + 4), reason: 'the list and the props share no id');
+      expect(identical(first['20004'], second['20004']), isTrue, reason: 'one fetch for both');
+      expect(first['824']?.free, isTrue);
+      expect(_count(setup.http, '/api/gift/v3/web/list'), 1);
+      expect(_count(setup.http, '/resource/common/prop_gift_list/prop_gift_config.json'), 1);
+      final request = setup.http.requests.firstWhere((r) => r.url.host == 'gift.douyucdn.cn');
+      expect(request.headers, {'user-agent': DouyuApi.userAgent, 'referer': 'https://www.douyu.com/5526219'});
+      expect(request.headers.containsKey('cookie'), isFalse, reason: 'anonymous');
+
+      // Within their lifetimes nothing is asked again; then each on its own.
+      clock = clock.add(DouyuSite.giftListLifetime - const Duration(seconds: 1));
+      await setup.site.moreGifts('5526219');
+      expect(setup.http.requests, hasLength(3));
+      clock = clock.add(const Duration(seconds: 1));
+      await setup.site.moreGifts('5526219');
+      expect(_count(setup.http, '/api/gift/v3/web/list'), 2);
+      expect(_count(setup.http, '/resource/common/prop_gift_list/prop_gift_config.json'), 1);
+      clock = _captured.add(DouyuSite.propTableLifetime);
+      await setup.site.moreGifts('5526219');
+      expect(_count(setup.http, '/resource/common/prop_gift_list/prop_gift_config.json'), 2);
+    });
+
+    test('D07.3: a failed gift list or prop table is empty, never thrown, and asked again after 5 minutes', () async {
+      var clock = _captured;
+      // No sample for either: each request fails.
+      final setup = _setup([], now: () => clock);
+      expect((await setup.site.moreGifts('1')).isEmpty, isTrue);
+      expect(setup.http.requests, hasLength(2));
+      expect((await setup.site.moreGifts('1')).isEmpty, isTrue);
+      expect(setup.http.requests, hasLength(2), reason: 'not again at once');
+      clock = clock.add(DouyuSite.giftRetryAfter);
+      await setup.site.moreGifts('1');
+      expect(setup.http.requests, hasLength(4));
+      // A transport failure is the same.
+      final failing = DouyuSite(_Failing(TransportReason.connect), now: () => _captured);
+      expect((await failing.moreGifts('1')).isEmpty, isTrue);
+      // A blank rid asks only for the props.
+      final blank = _setup(['S18-prop-config']);
+      expect(await blank.site.moreGifts(' '), hasLength(4));
+      expect(blank.http.requests, hasLength(1));
+    });
+
+    test('D07.3: gift lists of at most 16 rooms are kept, the least recent going first', () async {
+      final setup = _setup([], now: () => _captured);
+      for (var room = 1; room <= DouyuSite.giftListRooms + 1; room++) {
+        await setup.site.moreGifts('$room');
+      }
+      final before = setup.http.requests.length;
+      await setup.site.moreGifts('${DouyuSite.giftListRooms + 1}');
+      expect(setup.http.requests, hasLength(before), reason: 'the newest is kept (as a failure)');
+      await setup.site.moreGifts('1');
+      expect(setup.http.requests, hasLength(before + 1), reason: 'the oldest went');
+    });
+
     test('a loop room is a replay, not live', () async {
       final setup = _setup(['S05-replay-videoloop']);
       expect((await setup.site.getRoomDetail(roomId: '9804176')).isRecord, isTrue);

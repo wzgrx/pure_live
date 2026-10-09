@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S17-gift-list",
+  "capturedAt": "2026-10-09T01:48:03Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://gift.douyucdn.cn/api/gift/v3/web/list?rid=9263298",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+      "Referer": "https://www.douyu.com/9263298"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "Tengine",
+      "content-type": "application/json;charset=UTF-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "vary": "Accept-Encoding",
+      "cache-control": "max-age=60",
+      "date": "Fri, 09 Oct 2026 01:48:03 GMT",
+      "x-request-id": "60ad984b-1b8e-4f7a-9dcf-216d87a50a8b",
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET,POST,PUT,DELETE,PATCH,HEAD,OPTIONS,CONNECT,TRACE",
+      "access-control-max-age": "-1",
+      "access-control-expose-headers": "**",
+      "access-control-allow-credentials": "true",
+      "content-encoding": "gzip",
+      "via": "cache49.l2nm125-2[51,51,200-0,M], cache55.l2nm125-2[53,0], ens-cache12.cn7633[124,123,200-0,M], ens-cache4.cn7633[127,0]",
+      "ali-swift-global-savetime": "1791510484",
+      "x-cache": "MISS TCP_MISS dirn:-2:-2",
+      "x-swift-savetime": "Fri, 09 Oct 2026 01:48:04 GMT",
+      "x-swift-cachetime": "60",
+      "timing-allow-origin": "*",
+      "eagleid": "de4b3f9917915104843633262e"
+    }
+  },
+  "raw": {
+    "sha256": "5c0643ebc4a259367905a1bf7acf96f39d1e676857853eac21607e74c19dbe64",
+    "length": 445377
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "trimmed": [
+    "$.data.giftList: 10 of 154 gifts kept, whole (冠军烟花, 国庆快乐 of S15-gifts, 100鱼丸 and 超大丸星 paid in 鱼丸, 飞机, 火箭, 超级火箭, 宇宙飞船, 赞, 小心心)",
+    "$.data.skinData emptied, $.data.tabs cut to 2"
+  ],
+  "tool": "curl, anonymous, no cookie (D07.3); trimmed by hand"
+}

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
@@ -10,35 +12,49 @@ import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from a
 /// `dgb` packet ([DouyuDanmakuProtocol.gift]), as a [LiveGift] (E05.5):
-/// [combo] is its combo total; the packet has no price.
+/// [combo] is its combo total. The packet has no price: the price, the
+/// picture and whether it is free come from the room's [DouyuGiftCatalog]
+/// (D07.3), when it knows the gift.
 @immutable
 final class DouyuGift extends LiveGift {
   /// Creates the gift.
   ///
-  /// [id] is `gfid`, empty when missing or 0 (a backpack prop such as
-  /// 陪伴印章, whose id is `pid`); [name] `gfn` (`粉丝荧光棒`); [count]
+  /// [id] is `gfid`, or for a backpack prop sent with `gfid` 0 (陪伴印章)
+  /// its `pid`; empty when neither; [name] `gfn` (`粉丝荧光棒`); [count]
   /// `gfcnt`, at least 1; [receiverName] `receive_nn`, the broadcaster or a
-  /// guest, empty when missing.
+  /// guest, empty when missing; [backpack] the packet says it came from
+  /// the backpack (`gpf` 1), which makes it [free].
   const new({
     required super.id,
     required super.name,
     required super.count,
     this.combo = 0,
+    this.backpack = false,
     super.receiverName,
     super.comboKey,
-  }) : super(comboTotal: combo > 0 ? combo : null);
+    super.unitPrice,
+    super.totalValue,
+    super.unit,
+    bool free = false,
+    super.iconUrl,
+  }) : super(comboTotal: combo > 0 ? combo : null, free: free || backpack);
 
   /// `hits`, the combo so far including this send; 0 when missing.
   final int combo;
 
-  @override
-  bool operator ==(Object other) => super == other && other is DouyuGift && other.combo == combo;
+  /// Sent from the backpack (`gpf` 1): a prop the sender got for free
+  /// (粉丝荧光棒, 陪伴印章).
+  final bool backpack;
 
   @override
-  int get hashCode => Object.hash(super.hashCode, combo);
+  bool operator ==(Object other) =>
+      super == other && other is DouyuGift && other.combo == combo && other.backpack == backpack;
 
   @override
-  String toString() => 'DouyuGift($name ×$count, combo $combo)';
+  int get hashCode => Object.hash(super.hashCode, combo, backpack);
+
+  @override
+  String toString() => 'DouyuGift($name ×$count, combo $combo${backpack ? ', backpack' : ''})';
 }
 
 /// Douyu's STT text format (3.x `sttToJObject`, docs/D-弹幕/D01-平台弹幕协议/D01.3-斗鱼弹幕/record.md):
@@ -150,11 +166,13 @@ abstract final class DouyuDanmakuProtocol {
   /// are ignored. A packet that fails to decode
   /// is skipped without losing the others. [filterSuspectedAutomated] is read
   /// for each suspected chat, so a changed setting applies at once.
+  /// [gifts] prices and pictures the gifts it knows ([gift]).
   static List<LiveMessage> decode(
     List<int> frame, {
     required String roomId,
     bool Function()? filterSuspectedAutomated,
-  }) => read(frame, roomId: roomId, filterSuspectedAutomated: filterSuspectedAutomated).messages;
+    DouyuGiftCatalog gifts = DouyuGiftCatalog.empty,
+  }) => read(frame, roomId: roomId, filterSuspectedAutomated: filterSuspectedAutomated, gifts: gifts).messages;
 
   /// [decode], and whether the frame says room [roomId]'s broadcast ended
   /// ([endsBroadcast]); the packets after that one are not read.
@@ -162,6 +180,7 @@ abstract final class DouyuDanmakuProtocol {
     List<int> frame, {
     required String roomId,
     bool Function()? filterSuspectedAutomated,
+    DouyuGiftCatalog gifts = DouyuGiftCatalog.empty,
   }) {
     final messages = <LiveMessage>[];
     for (final body in bodies(frame)) {
@@ -172,7 +191,7 @@ abstract final class DouyuDanmakuProtocol {
           'chatmsg' => _chat(fields, roomId, filterSuspectedAutomated),
           'comm_chatmsg' => _superChat(fields),
           'voice_trlt' => _voiceSuperChat(fields),
-          'dgb' => gift(fields, roomId),
+          'dgb' => gift(fields, roomId, gifts: gifts),
           _ => null,
         };
         if (message != null) messages.add(message);
@@ -287,28 +306,57 @@ abstract final class DouyuDanmakuProtocol {
 
   /// `dgb`: a gift sent in this room, reported as a [LiveMessageType.gift]
   /// holding a [DouyuGift] (the archived v4 read the same fields). The
-  /// sender is `nn`/`uid`, the text `<gfn> ×<gfcnt>`; while `hits` counts,
-  /// the combo key is the sender and the gift (`gfid`, or `gfn` for a
-  /// backpack prop), as the packet has no combo id. Another room's packet and a gift without a name give
-  /// nothing. The packet has no id and no time.
-  static LiveMessage? gift(Map<String, String> fields, String roomId) {
+  /// sender is `nn`/`uid`, with their level (`level`) and fan medal (`bnn`,
+  /// level `bl`); the text `<gfn> ×<gfcnt>`. While `hits` counts, the combo
+  /// key is the sender and the gift (its id, or `gfn` without one), as the
+  /// packet has no combo id.
+  ///
+  /// From [gifts] (D07.3), by `gfid`: the price of one in fen
+  /// ([LiveGift.unitPrice], times `gfcnt` the [LiveGift.totalValue]), the
+  /// picture, free for a 鱼丸 gift or a prop, and the name when `gfn` is
+  /// blank. A gift it does not know keeps its name only and is neither
+  /// priced nor free (not every gift is in the catalogue: 精英宝典 of
+  /// S15-gifts is in none), unless the packet says it came from the
+  /// backpack (`gpf` 1, or `gfid` 0 with a `pid`), which is free. Another
+  /// room's packet and a gift without a name give nothing. The packet has
+  /// no id and no time.
+  static LiveMessage? gift(
+    Map<String, String> fields,
+    String roomId, {
+    DouyuGiftCatalog gifts = DouyuGiftCatalog.empty,
+  }) {
     final packetRoomId = fields['rid'] ?? '';
     if (packetRoomId.isNotEmpty && roomId.isNotEmpty && packetRoomId != roomId) return null;
+    final giftId = _id(fields['gfid']);
+    final propId = _id(fields['pid']);
+    final info = giftId.isEmpty ? null : gifts[giftId];
     final name = (fields['gfn'] ?? '').trim();
-    if (name.isEmpty) return null;
-    final id = fields['gfid'] ?? '';
-    final count = int.tryParse(fields['gfcnt'] ?? '') ?? 0;
+    final shownName = name.isNotEmpty ? name : info?.name ?? '';
+    if (shownName.isEmpty) return null;
+    final id = giftId.isNotEmpty ? giftId : propId;
+    final count = math.max(int.tryParse(fields['gfcnt'] ?? '') ?? 0, 1);
     final combo = int.tryParse(fields['hits'] ?? '') ?? 0;
-    final giftId = id == '0' ? '' : id;
+    final backpack = fields['gpf'] == '1' || (giftId.isEmpty && propId.isNotEmpty);
+    final free = backpack || (info?.free ?? false);
+    final price = free ? null : info?.price;
     final senderId = fields['uid'] ?? '';
     final present = DouyuGift(
-      id: giftId,
-      name: name,
-      count: count > 0 ? count : 1,
+      id: id,
+      name: shownName,
+      count: count,
       combo: combo > 0 ? combo : 0,
+      backpack: backpack,
       receiverName: fields['receive_nn'] ?? '',
-      comboKey: combo > 0 && senderId.isNotEmpty ? '$senderId:${giftId.isEmpty ? name : giftId}' : '',
+      comboKey: combo > 0 && senderId.isNotEmpty ? '$senderId:${id.isEmpty ? shownName : id}' : '',
+      unitPrice: price,
+      totalValue: price == null ? null : price * count,
+      unit: price == null ? LiveGiftUnit.other : LiveGiftUnit.fen,
+      free: free,
+      iconUrl: info?.iconUrl,
     );
+    final level = int.tryParse(fields['level'] ?? '') ?? 0;
+    final fans = (fields['bnn'] ?? '').trim();
+    final fansLevel = int.tryParse(fields['bl'] ?? '') ?? 0;
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: fields['nn'] ?? '',
@@ -316,7 +364,16 @@ abstract final class DouyuDanmakuProtocol {
       message: present.plainText,
       color: LiveMessageColor.white,
       data: present,
+      userLevel: level > 0 ? '$level' : '',
+      fansName: fans,
+      fansLevel: fans.isNotEmpty && fansLevel > 0 ? '$fansLevel' : '',
     );
+  }
+
+  /// A positive id as the packet writes it; empty for 0 or anything else.
+  static String _id(String? value) {
+    final id = int.tryParse(value?.trim() ?? '') ?? 0;
+    return id > 0 ? '$id' : '';
   }
 
   static LiveMessage _superChatMessage(LiveSuperChatMessage data) => LiveMessage(
@@ -360,11 +417,37 @@ final class DouyuDanmakuConnection extends DanmakuSocketConnection<DouyuDanmakuA
 
   final bool Function()? _filterSuspectedAutomatedMessages;
   String _roomId = '';
+  DouyuDanmakuArgs? _giftArgs;
+  DouyuGiftCatalog _gifts = DouyuGiftCatalog.empty;
+
+  /// The gifts the room's `dgb` packets are looked up in (D07.3): `betard`'s
+  /// from the start, with the room's gift list and the prop table over them
+  /// once [DouyuDanmakuArgs.moreGifts] answers. Gifts before that, or
+  /// without it, are reported as the catalogue knows them so far.
+  DouyuGiftCatalog get gifts => _gifts;
 
   @override
   Future<DanmakuSocketTarget> target(DouyuDanmakuArgs args, DanmakuRun run) async {
     _roomId = args.roomId;
+    // A reconnect of the same arguments keeps what it has.
+    if (!identical(args, _giftArgs)) {
+      _giftArgs = args;
+      _gifts = args.gifts;
+      if (args.moreGifts case final more?) unawaited(_addGifts(args, more));
+    }
     return DanmakuSocketTarget(endpoints: [DouyuDanmakuProtocol.endpoint]);
+  }
+
+  /// Adds what [more] fetches to the gifts while [args] are still the
+  /// connection's; a failure leaves them as they are.
+  Future<void> _addGifts(DouyuDanmakuArgs args, Future<DouyuGiftCatalog> Function() more) async {
+    final DouyuGiftCatalog extra;
+    try {
+      extra = await more();
+    } on Object {
+      return;
+    }
+    if (identical(args, _giftArgs)) _gifts = _gifts.merge(extra);
   }
 
   @override
@@ -382,6 +465,7 @@ final class DouyuDanmakuConnection extends DanmakuSocketConnection<DouyuDanmakuA
       data,
       roomId: _roomId,
       filterSuspectedAutomated: _filterSuspectedAutomatedMessages,
+      gifts: _gifts,
     );
     messages.forEach(session.message);
     if (ended) session.run.closed(DanmakuCloseReason.connectionFailed, detail: broadcastEnded);

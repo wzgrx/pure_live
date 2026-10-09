@@ -5,12 +5,17 @@
 // the off switch.
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:live_ui/live_ui.dart';
+import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_settings_page.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_growth.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -559,6 +564,111 @@ void main() {
       );
       await closeLocalRoom(tester, room);
     });
+  });
+
+  group('the identity card and the settings page (c5)', () {
+    Finder key(String key) => find.byKey(ValueKey(key));
+    Finder inside(String parent, Finder finder) => find.descendant(of: key(parent), matching: finder);
+
+    for (final (name, width, height, scale) in [
+      ('portrait', 400.0, 900.0, 1.0),
+      ('landscape', 900.0, 400.0, 1.0),
+      ('portrait at 2× text', 400.0, 900.0, 2.0),
+      ('landscape at 2× text', 900.0, 400.0, 2.0),
+    ]) {
+      testWidgets('$name: the level, its tier and progress, today; "更多" adds coins as the buttons did', (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        final clock = _Clock(DateTime(2026, 10, 9, 20));
+        final room = await pumpLocalRoom(
+          tester,
+          width: width,
+          height: height,
+          settings: {Settings.localInteractionExperience: 1360},
+          interaction: (store) => LocalInteraction(store.settings, events: store.localEvents, now: clock.now),
+        );
+        final session = LocalRoomScope.maybeOf(tester.element(find.byType(DanmakuOverlay)))!..sendChat('晚上好');
+        // What the room menu's "本地互动体验" does (a phone's landscape menu
+        // scrolls).
+        RoomPanelScope.maybeOf(tester.element(find.byType(DanmakuOverlay)))!.open(RoomPanelKind.localInteraction);
+        await tester.pumpAndSettle();
+        // 1360 + 20 (the check-in) + 1 (the danmaku): Lv.3, 381 into it.
+        expect(inside('local-identity-card', find.text('Lv.3 · 新人')), findsOneWidget);
+        expect(inside('local-identity-card', find.text('还差 119 经验到 Lv.4')), findsOneWidget);
+        expect(tester.widget<LinearProgressIndicator>(key('local-level-bar')).value, closeTo(381 / 500, 1e-9));
+        expect(inside('local-identity-card', find.text('今天已签到 · 看直播 +0/300 · 弹幕 +1/50')), findsOneWidget);
+        final card = tester.getRect(key('local-identity-card'));
+        final panel = tester.getRect(key('local-interaction-panel'));
+        expect(card.left >= panel.left && card.right <= panel.right, isTrue, reason: 'inside the panel');
+        expect(
+          tester.getRect(key('local-level-progress')).bottom,
+          lessThanOrEqualTo(card.bottom),
+          reason: 'the progress inside the card',
+        );
+
+        // c5: the three amounts are in "更多", in the room's coin.
+        expect(key('local-recharge-2000'), findsNothing);
+        await tester.tap(key('local-identity-more'));
+        await tester.pumpAndSettle();
+        expect(
+          [
+            for (final amount in [500, 2000, 10000]) find.text('+$amount 电池').evaluate().length,
+          ],
+          [1, 1, 1],
+        );
+        await tester.tap(key('local-recharge-2000'));
+        await tester.pumpAndSettle();
+        final local = session.interaction;
+        expect((local.coins, local.experience), (3100, 1381), reason: 'coins only, as 3.x');
+        expect(local.events.first.kind, LocalEventKind.recharge);
+        expect(inside('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.3 · 3100 电池')), findsOneWidget);
+        await closeLocalRoom(tester, room);
+      });
+    }
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('settings page ×$scale: the progress under the status; the switch, on; off hides today', (
+        tester,
+      ) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        tester.view
+          ..physicalSize = const Size(400, 900)
+          ..devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final services = (await tester.runAsync(() async {
+          final services = await testServices();
+          await services.store.settings.set(Settings.localInteractionExperience, 4520);
+          return services;
+        }))!;
+        await tester.runAsync(loadStrings);
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [appServicesProvider.overrideWithValue(services)],
+            child: MaterialApp(theme: const LiveTheme().light, home: const LocalInteractionSettingsPage()),
+          ),
+        );
+        await settleLocal(tester);
+        expect(inside('local-settings-list', find.text('Lv.10 · 常客')), findsOneWidget);
+        expect(find.text('还差 480 经验到 Lv.11'), findsOneWidget);
+        expect(find.text('今天还没签到 · 看直播 +0/300 · 弹幕 +0/50'), findsOneWidget, reason: 'no room yet');
+        expect(
+          tester.getTopLeft(key('local-level-progress')).dy,
+          greaterThan(tester.getTopLeft(key('local-settings-status')).dy),
+        );
+        await tester.ensureVisible(key('local-settings-growth'));
+        await tester.pumpAndSettle();
+        expect(find.text('本地成长'), findsOneWidget);
+        expect(tester.widget<Switch>(key('local-settings-switch-growth')).value, isTrue);
+        await tester.tap(key('local-settings-switch-growth'));
+        await tester.pump();
+        expect(services.store.settings.get(Settings.localInteractionGrowthEnabled), isFalse);
+        expect(key('local-growth-today'), findsNothing);
+        expect(key('local-level-progress'), findsOneWidget, reason: 'the level is there either way');
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.runAsync(services.close);
+      });
+    }
   });
 
   group('the off switch (c1)', () {

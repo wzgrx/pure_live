@@ -270,23 +270,14 @@ void main() {
         tester.getCenter(_key('local-panel-settings')).dx,
         lessThan(tester.getCenter(_key('room-panel-close')).dx),
       );
-      // c3: who you are, compose, gifts, coins first; then the profile.
+      // c3: who you are, compose, gifts first; then the profile. D08.3 c5:
+      // the coin buttons are in the card's "更多" (D-001: moved, not gone).
       expect(
-        _column(tester, [
-          'local-identity-card',
-          'local-panel-composer',
-          'local-gift-bili_snack',
-          'local-recharge-500',
-          'local-name-input',
-        ]),
-        [
-          'local-identity-card',
-          'local-panel-composer',
-          'local-gift-bili_snack',
-          'local-recharge-500',
-          'local-name-input',
-        ],
+        _column(tester, ['local-identity-card', 'local-panel-composer', 'local-gift-bili_snack', 'local-name-input']),
+        ['local-identity-card', 'local-panel-composer', 'local-gift-bili_snack', 'local-name-input'],
       );
+      expect(_key('local-recharge-500'), findsNothing);
+      expect(_in('local-identity-card', _key('local-identity-more')), findsOneWidget);
       expect(_in('local-identity-card', find.text('听众 · Pure Live')), findsOneWidget);
       // D08.3: entering checked in for the day (+100 coins, +20 experience).
       expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1100 电池')), findsOneWidget);
@@ -629,8 +620,10 @@ void main() {
     testWidgets('P4: clearing the history in the panel says how many and undoes for 4 s', (tester) async {
       final room = await pumpLocalRoom(tester);
       await _openPanel(tester);
+      await tester.tap(_key('local-identity-more'));
+      await tester.pumpAndSettle();
       await tester.tap(_key('local-recharge-500'));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await tester.tap(_key('local-gift-bili_snack'));
       await tester.pump();
       final local = _session(tester).interaction;

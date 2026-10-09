@@ -620,6 +620,22 @@ final class LocalInteraction extends ChangeNotifier {
   /// "Lv.3 · 新人": the level now and its tier's name.
   String get levelLabel => 'Lv.$level · ${i18n(LocalCatalog.tierKeyFor(level))}';
 
+  /// What growth gave today: "今天已签到 · 看直播 +30/300 · 弹幕 +5/50".
+  String get growthTodayLine {
+    final day = today;
+    return [
+      i18n(day.checkedIn ? 'local_growth_checked_in' : 'local_growth_not_checked_in'),
+      i18n(
+        'local_growth_watch',
+        args: {'exp': '${day.watchExperience}', 'limit': '${LocalCatalog.watchExperienceDailyLimit}'},
+      ),
+      i18n(
+        'local_growth_chat',
+        args: {'exp': '${day.chatExperience}', 'limit': '${LocalCatalog.chatExperienceDailyLimit}'},
+      ),
+    ].join(' · ');
+  }
+
   /// "还差 120 经验到 Lv.4".
   String get nextLevelLabel {
     final progress = LocalCatalog.progressFor(experience);

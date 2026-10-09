@@ -113,6 +113,8 @@ void main() {
       (AppIcons.localPhraseSave, Icons.playlist_add_rounded),
       (AppIcons.localPhraseSaved, Icons.playlist_add_check_rounded),
       (AppIcons.localPhrases, Icons.format_list_bulleted_rounded),
+      // D08.3: the "本地成长" switch.
+      (AppIcons.localGrowth, Icons.trending_up_rounded),
       // U.2j: the mini windows' buttons (3.x's play and pause; the new back
       // and pin).
       (AppIcons.backToRoom, Icons.open_in_full_rounded),

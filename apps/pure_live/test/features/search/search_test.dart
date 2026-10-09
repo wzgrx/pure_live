@@ -779,10 +779,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(opened, hasLength(1));
       // The room is a page over the results.
-      unawaited(
-        Navigator.of(tester.element(results))
-            .push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('room')))),
-      );
+      Navigator.of(tester.element(results))
+          .push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('room'))));
       await tester.pumpAndSettle();
       Navigator.of(tester.element(find.text('room'))).pop();
       await tester.pumpAndSettle();

@@ -154,7 +154,7 @@ class PureLiveRouteScrollScope extends StatelessWidget {
 /// its route stays: a page shown in its place and closed (the settings
 /// overview on phones), a layout that crosses a breakpoint (A11.6).
 ///
-/// The position goes to the route's [PageStorage] under [id] (a
+/// The position goes to the route's [PageStorage] under `id` (a
 /// [PageStorageKey]); lists under one route need different ids, and a list
 /// that should start at the top again (another search) gets a new one. A
 /// page pushed over the list does not need this: the list stays in the tree

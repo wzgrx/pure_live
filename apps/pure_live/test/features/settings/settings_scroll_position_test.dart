@@ -33,7 +33,7 @@ void main() {
 
   group('phone (one column)', () {
     testWidgets('overview → a page → back (button and system back): the overview is where it was', (tester) async {
-      await pumpSettings(tester, width: 400, height: 800);
+      await pumpSettings(tester, height: 800);
       await _scroll(tester, 'settings-overview', 600);
       final before = await _open(tester, 'settings-overview', settingsSection(SettingsSection.network));
       expect(find.byKey(const ValueKey('settings-page-network')), findsOneWidget);
@@ -49,7 +49,7 @@ void main() {
     });
 
     testWidgets('two levels deep: video → its sub-page → back → back, each list where it was', (tester) async {
-      await pumpSettings(tester, width: 400, height: 800);
+      await pumpSettings(tester, height: 800);
       await _scroll(tester, 'settings-overview', 300);
       final overview = await _open(tester, 'settings-overview', settingsSection(SettingsSection.video));
       await _scroll(tester, 'settings-section-view-video', 500);
@@ -66,7 +66,7 @@ void main() {
     });
 
     testWidgets('a page opened as a route (backup) → back: the overview is where it was', (tester) async {
-      final h = await pumpSettings(tester, width: 400, height: 800);
+      final h = await pumpSettings(tester, height: 800);
       await _scroll(tester, 'settings-overview', 600);
       final before = await _open(tester, 'settings-overview', settingsSection(SettingsSection.backup));
       expect(h.opened.last, RoutePath.kBackup);
@@ -76,7 +76,7 @@ void main() {
     });
 
     testWidgets('the danmaku page → the block list (a route) → back: the page is where it was', (tester) async {
-      final h = await pumpSettings(tester, width: 400, height: 800);
+      final h = await pumpSettings(tester, height: 800);
       await _open(tester, 'settings-overview', settingsSection(SettingsSection.danmaku));
       final before = await _open(tester, 'settings-page-danmaku', find.byKey(const ValueKey('danmaku-link-block')));
       expect(before, greaterThan(0));
@@ -87,7 +87,7 @@ void main() {
     });
 
     testWidgets('search results → the page of a result → back: the results are where they were', (tester) async {
-      await pumpSettings(tester, width: 400, height: 800);
+      await pumpSettings(tester, height: 800);
       await searchSettingsFor(tester, '弹幕');
       // The block list's row (a page of its own) at the top of the list,
       // the rows before it scrolled away.

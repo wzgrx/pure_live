@@ -2,7 +2,6 @@
 // filters with counts, the cards with the live room's status card in its
 // compact size, the menu, deleting, the live check's warning, the empty
 // states and the columns of each form.
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -705,10 +704,7 @@ void main() {
     final before = scrollPositionOf(tester, list).pixels;
     expect(before, greaterThan(0));
 
-    unawaited(
-      Navigator.of(tester.element(list))
-          .push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('sub')))),
-    );
+    Navigator.of(tester.element(list)).push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('sub'))));
     await _frames(tester);
     expect(find.text('sub'), findsOneWidget);
     Navigator.of(tester.element(find.text('sub'))).pop();

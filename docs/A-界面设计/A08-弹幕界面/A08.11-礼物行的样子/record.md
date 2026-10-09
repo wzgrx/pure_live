@@ -75,9 +75,11 @@
 
 - `e14ca4efc` [A08.11] One gift line for every platform: picture, name, gift, count, value, tier mark
 - `e18fcffde` [A08.11] Scale the chat line's inline pieces once with the system text
-- 本记录、登记表和生成的文档是第三个提交。没有推送、没有合并。
-- 门禁：见文末“门禁”。
+- `94b05f540` [A08.11] Record the gift line design (G1-G14, tier table) and mark it 待真机
+- `32045cd1e` [A08.11] Format ChatInline
+- 本节的更新是最后一个提交。没有推送、没有合并；合并后在登记表补 `commit`。
 
 ## 门禁
 
-- （跑完后补）
+- 第一次在 `94b05f540` 上跑：只有 `apps/pure_live format` 不过（`chat_text.dart` 的 `ChatInline.build` 最后改的一行没格式化），其余全过，测试全过。
+- 格式化后在 `32045cd1e` 上：`bash tools/gate/gate.sh --all` 通过（`gate: passed (all, 14 members)`）。

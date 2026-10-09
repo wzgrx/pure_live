@@ -963,6 +963,100 @@ void main() {
     });
   });
 
+  group('gifts (D07.7, S06-gifts)', () {
+    final lines = [
+      for (final line in File('../../fixtures/looklive/danmaku/S06-gifts/frames.jsonl').readAsLinesSync())
+        (jsonDecode(line) as Map<String, Object?>)['text']! as String,
+    ];
+
+    test('S06: every recorded custom message 102 is a gift: name, count, worth in notes, picture, sender', () {
+      final messages = [for (final line in lines) ...LookLiveDanmakuProtocol.decode(line).messages];
+      expect(
+        [for (final m in messages) (m.userName, m.message, (m.data! as LiveGift).totalValue)],
+        [('观众1', '小麦穗 ×1', 1), ('观众2', '时光相册 ×1', 1), ('观众3', '时光相册 ×1', 1), ('观众4', '旋转木马 ×1', 100)],
+      );
+      final first = messages.first;
+      expect(
+        (first.type, first.userId, first.userLevel, first.fansLevel, first.fansName, first.messageId, first.sentAt),
+        (
+          LiveMessageType.gift,
+          '7000000001',
+          '38',
+          '18',
+          '口果汁',
+          '5ec5af7d94fc432bbe36dcb7eb6d43b7',
+          DateTime.fromMillisecondsSinceEpoch(1791531626046),
+        ),
+      );
+      expect(
+        first.data,
+        LiveGift(
+          id: '14193526',
+          name: '小麦穗',
+          unitPrice: 1,
+          totalValue: 1,
+          unit: LiveGiftUnit.note,
+          iconUrl: Uri.parse('https://p1.music.126.net/rS6UvA8RznaFOobx26Uj8g==/109951173868759962.jpg'),
+        ),
+      );
+      final masked = LookLiveDanmakuProtocol.decode(lines.last, anonymousMode: true).messages.single;
+      expect(masked.userName, '观***');
+    });
+
+    test('what is not a gift: chat, other custom types, no gift id; a receiver', () {
+      Map<String, Object?> message(Map<String, Object?> custom, {String type = '100'}) => {
+        '1': 'id',
+        '2': type,
+        '4': jsonEncode(custom),
+        '20': '1791531626046',
+      };
+      LiveMessage? read(Map<String, Object?> m) => LookLiveDanmakuProtocol.gift(m);
+      const content = {
+        'giftId': 7,
+        'giftName': '花',
+        'number': 3,
+        'giftWorth': 10,
+        'user': {'userId': 5, 'nickName': 'a'},
+      };
+      expect(read(message({'type': 102, 'content': content}, type: '0')), isNull);
+      expect(read(message({'type': 114, 'content': content})), isNull);
+      expect(
+        read(
+          message({
+            'type': 102,
+            'content': {...content, 'giftId': 0},
+          }),
+        ),
+        isNull,
+      );
+      expect(read(message({'type': 102})), isNull);
+      final gift =
+          read(
+                message({
+                  'type': 102,
+                  'content': {
+                    ...content,
+                    'receiver': {'nickName': '嘉宾'},
+                    'giftIconUrl': 'x',
+                  },
+                }),
+              )!.data!
+              as LiveGift;
+      expect(
+        gift,
+        const LiveGift(
+          id: '7',
+          name: '花',
+          count: 3,
+          unitPrice: 10,
+          totalValue: 30,
+          unit: LiveGiftUnit.note,
+          receiverName: '嘉宾',
+        ),
+      );
+    });
+  });
+
   group('connection', () {
     test('timing and registration', () {
       final connection = LookLiveDanmakuConnection(http: _Http());

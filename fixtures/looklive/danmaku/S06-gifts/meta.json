@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "platform": "looklive",
+  "case": "S06-gifts",
+  "capturedAt": "2026-10-09T07:39:00Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chatwl02.yunxinfw.com:443/socket.io/1/websocket/<sid>"
+    }
+  ],
+  "frames": 4,
+  "sources": [
+    {
+      "room": "490591575",
+      "chatroom": "2491384966",
+      "sha256": "f8cf5ae00fab78fd328ce3b5a014da0007d74277db3bb3a7b19dd8b97f4395d4",
+      "length": 120913
+    },
+    {
+      "room": "435869220",
+      "chatroom": "435947765",
+      "sha256": "96e5a7df484fcc0c1e1394a5aa5978139d51ef15a830daf694639501b906be1a",
+      "length": 129414
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "13-7 message 4 (custom) content.user.userId, nickName",
+      "rule": "person"
+    },
+    {
+      "where": "13-7 message 4 (custom) content.user.avatarUrl, now a placeholder",
+      "rule": "person"
+    },
+    {
+      "where": "every packet but the 4-10 notifications of 13-7 messages with custom type 102 (chat, entries 114, follows, PK, red packets, emoji, room state), the socket.io handshake answer and session id, the login and heartbeats",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running LookLiveDanmakuConnection with a connector that tees the frames; anonymous and read-only: the chat address, the socket.io handshake, the SDK's anonymous chatroom login and its heartbeats)",
+  "note": "Direct, 15 minutes in the five busiest rooms of the recommended list at 15:39 Beijing time: 4 gifts (custom type 102) in two of them, all kept as received, each its own frame: 小麦穗 and two 时光相册 (giftWorth 1) in room 490591575 and 旋转木马 (giftWorth 100, giftValue 20) in room 435869220; none had a receiver or a song (songId 0). The fan-club names and anchor ids are the broadcasters' (public, kept). Senders became 700000000N and 观众N with a placeholder avatar. t is milliseconds after the room's first gift (the next room after a 60 s gap). No IPv4 address, cookie or token is left."
+}

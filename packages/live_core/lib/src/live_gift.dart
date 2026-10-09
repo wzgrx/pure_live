@@ -95,6 +95,10 @@ enum LiveGiftUnit {
   /// (D07.7).
   heart,
 
+  /// LOOK's notes (音符), the currency its gifts are priced in (D07.7). Its
+  /// rate in yuan is not checked, so it is not ranked.
+  note,
+
   /// A unit the platform does not document (Huya's `lPayTotal`), or no
   /// value at all.
   other,
@@ -106,7 +110,7 @@ enum LiveGiftUnit {
 /// a star balloon or a PandaTV heart about 110 won, a niconico point about a
 /// yen) and only
 /// rank gifts, never convert a value shown. A unit missing here (red beans,
-/// six coins, silver seeds, bananas, [LiveGiftUnit.other]) is never ranked
+/// six coins, LOOK's notes, silver seeds, bananas, [LiveGiftUnit.other]) is never ranked
 /// above [LiveGiftTier.normal].
 ///
 /// The table and the [giftValuableYuan], [giftPreciousYuan] thresholds were

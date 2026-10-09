@@ -2,7 +2,7 @@ name: pure_live
 description: Pure Live, a third-party live stream aggregator (docs/specs/ENGINEERING.md). The app shell (M12) - entry, routes, home, languages, Android and Windows.
 publish_to: none
 # 3.x's version until the first v4 release (AGENTS.md: changed only when releasing).
-version: 4.0.0+5001
+version: 4.1.0+5002
 
 environment:
   sdk: ^3.13.0

@@ -17,11 +17,12 @@ export 'package:pure_live/features/live_play/local_interaction/logic/local_room_
 ///
 /// Creating it also takes over 3.x values an earlier import parked in
 /// `legacy_values` (the recorder's start does the same; it runs once per key)
-/// and lists the emoji font's licence.
+/// and lists the emoji font's licence. Then the history is loaded, the lines
+/// from before D08.1 taken in once.
 final Provider<LocalInteraction> localInteractionProvider = Provider((ref) {
   final store = ref.watch(storeProvider);
-  final interaction = LocalInteraction(store.settings);
-  unawaited(LegacyMigration.adoptLegacyValues(store).catchError((Object _) => 0));
+  final interaction = LocalInteraction(store.settings, events: store.localEvents);
+  unawaited(interaction.start(before: () => LegacyMigration.adoptLegacyValues(store)));
   registerLocalEmojiLicense();
   ref.onDispose(interaction.dispose);
   return interaction;

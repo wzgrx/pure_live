@@ -322,12 +322,15 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
     final controller = _controller = runtime.controller;
     _orientation = runtime.orientation;
     _reconnect = runtime.reconnect;
-    final settings = ref.read(storeProvider).settings;
+    final store = ref.read(storeProvider);
+    final settings = store.settings;
     _local = LocalRoomSession(
       interaction: ref.read(localInteractionProvider),
       room: controller,
       overlayShown: () => localOverlayShown(settings),
       toast: (message) => AppNavigator.toast(message),
+      // D08.1 c6: what was sent here before comes back.
+      events: store.localEvents,
     );
     _mini =
         RoomMiniWindow(

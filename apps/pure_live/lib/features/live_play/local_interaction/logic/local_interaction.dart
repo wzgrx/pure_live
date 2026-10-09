@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
@@ -45,6 +46,13 @@ final class LocalProfile {
 
   /// The level; null while "显示本地体验等级" is off.
   final int? level;
+
+  /// Whether [message] is a local danmaku sent before the room was entered,
+  /// shown again (D08.1 c6: "之前发的").
+  static bool replayedIn(LiveMessage message) {
+    final data = message.data;
+    return message.isLocal && data is Map && data['replayed'] == true;
+  }
 
   /// The badge chip's words: "📺 舰队等级 Lv.1", or empty when both are off.
   String get badgeLabel => [if (badge != null) '$badge $badgeName', if (level != null) 'Lv.$level'].join(' ');
@@ -103,6 +111,43 @@ final class LocalGiftData {
   final bool effect;
 }
 
+/// Where a local message is sent (D08.1): the room's platform and id, and
+/// its name then (the streamer, else the title).
+typedef LocalPlace = ({String platform, String roomId, String roomName});
+
+/// What [LocalInteraction.clearHistory] took, for
+/// [LocalInteraction.restoreHistory] (A08.13: the clear can be undone):
+/// 3.x's lines and the entries (D08.1).
+typedef LocalHistoryCleared = ({List<String> lines, List<LocalEvent> events});
+
+/// A part of the history (D08.1 c5: "全部 / 弹幕 / 礼物 / 币").
+enum LocalHistoryFilter {
+  /// Everything, the old lines and levels too.
+  all('local_history_filter_all'),
+
+  /// Local danmaku.
+  chat('local_history_filter_chat'),
+
+  /// Gifts.
+  gift('local_history_filter_gift'),
+
+  /// Coins added.
+  coins('local_history_filter_coins');
+
+  new(this.labelKey);
+
+  /// The segment's words.
+  final String labelKey;
+
+  /// Whether [event] belongs here.
+  bool accepts(LocalEvent event) => switch (this) {
+    all => true,
+    chat => event.kind == LocalEventKind.chat,
+    gift => event.kind == LocalEventKind.gift,
+    coins => event.kind == LocalEventKind.recharge,
+  };
+}
+
 /// The local interaction (3.x `LocalInteractionController`) over the
 /// settings: the profile, the coins and experience, the history and the
 /// local danmaku style, stored under 3.x's `localInteraction.*` keys.
@@ -111,8 +156,12 @@ final class LocalGiftData {
 /// listeners hear every change, also those made elsewhere (the settings
 /// page, a backup restore).
 final class LocalInteraction extends ChangeNotifier {
-  /// Creates the interaction over the settings store.
-  new(this._settings) {
+  /// Creates the interaction over the settings store; the history entries
+  /// (D08.1) live in [events], or only in memory without it. [start] loads
+  /// them.
+  new(this._settings, {LocalEventStore? events, DateTime Function()? now})
+    : _store = events,
+      _now = now ?? DateTime.now {
     _subscription = _settings.changes.listen((setting) {
       if (setting.section == _section) notifyListeners();
     });
@@ -121,7 +170,14 @@ final class LocalInteraction extends ChangeNotifier {
   static const _section = 'localInteraction';
 
   final SettingsStore _settings;
+  final LocalEventStore? _store;
+  final DateTime Function() _now;
   late final StreamSubscription<Setting<Object>> _subscription;
+  StreamSubscription<List<LocalEvent>>? _events;
+  List<LocalEvent> _entries = const [];
+  int _storing = 0;
+  bool _stale = false;
+  bool _started = false;
   final Map<String, Object> _pending = {};
   final Map<String, int> _writes = {};
   bool _disposed = false;
@@ -205,8 +261,14 @@ final class LocalInteraction extends ChangeNotifier {
   /// The level (one per 500 experience).
   int get level => LocalCatalog.levelFor(experience);
 
-  /// Gifts and coins added, newest first.
+  /// Gifts and coins added, newest first: 3.x's sentences, still written
+  /// (D-018: an install put back to 3.x reads them). The pages show
+  /// [events].
   List<String> get history => _get(Settings.localInteractionHistory);
+
+  /// The history (D08.1): local danmaku, gifts, coins and the lines from
+  /// before, newest first, at most [LocalEventStore.limit].
+  List<LocalEvent> get events => _entries;
 
   /// Saves [value] as the nickname (trimmed, at most 20 characters); an
   /// empty one is not saved (3.x).
@@ -215,6 +277,74 @@ final class LocalInteraction extends ChangeNotifier {
     if (name.isNotEmpty && name != userName) _set(Settings.localInteractionUserName, name);
   }
 
+  /// Entering a room puts the local danmaku sent there in the last day back
+  /// at the top of its chat list (D08.1 c6).
+  bool get replayOnEnter => _get(Settings.localInteractionReplayOnEnter);
+
+  set replayOnEnter(bool value) => _set(Settings.localInteractionReplayOnEnter, value);
+
+  /// Loads the history once: after [before] (taking over values a 3.x import
+  /// parked), the old lines of `localInteraction.history` become entries the
+  /// first time (D08.1 c3), then the stored entries are followed (a restore,
+  /// another window).
+  Future<void> start({Future<Object?> Function()? before}) async {
+    if (_started) return;
+    _started = true;
+    try {
+      await before?.call();
+    } on Object {
+      // Tried again on the next start.
+    }
+    final store = _store;
+    if (store == null || _disposed) return;
+    try {
+      await store.adoptLegacyHistory(history, now: _now());
+    } on Object {
+      // The lines stay in the setting; tried again on the next start.
+    }
+    if (_disposed) return;
+    _events = store.watch().listen(_stored, onError: (Object _) {});
+  }
+
+  void _stored(List<LocalEvent> entries) {
+    if (_storing > 0) {
+      // A write of this one is under way: the entries shown hold it already.
+      _stale = true;
+      return;
+    }
+    _entries = List.unmodifiable(entries);
+    if (!_disposed) notifyListeners();
+  }
+
+  /// Shows [entries] at once and has [write] store them.
+  void _keep(List<LocalEvent> entries, Future<void> Function(LocalEventStore store) write) {
+    _entries = List.unmodifiable(entries.take(LocalEventStore.limit));
+    if (!_disposed) notifyListeners();
+    final store = _store;
+    if (store == null) return;
+    _storing++;
+    unawaited(
+      write(store).catchError((Object _) {}).whenComplete(() async {
+        if (--_storing > 0 || !_stale || _disposed) return;
+        _stale = false;
+        try {
+          _stored(await store.all());
+        } on Object {
+          // The next change brings them.
+        }
+      }),
+    );
+  }
+
+  void _record(LocalEvent event) => _keep([event, ..._entries], (store) => store.add(event));
+
+  /// The style local danmaku are sent with, as the stored settings
+  /// (`localInteraction.danmaku*`), JSON.
+  String get _styleJson => jsonEncode({
+    for (final setting in Settings.localInteraction)
+      if (setting.key.startsWith('localInteraction.danmaku')) setting.key: setting.encode(_get(setting)),
+  });
+
   /// Adds [amount] coins and a history line (3.x `recharge`).
   void recharge(int amount) {
     if (amount <= 0) return;
@@ -222,24 +352,85 @@ final class LocalInteraction extends ChangeNotifier {
       Settings.localInteractionCoins: coins + amount,
       Settings.localInteractionHistory: _withHistory('${i18n('local_recharge_record')} +$amount'),
     });
+    _record(LocalEvent(at: _now(), kind: LocalEventKind.recharge, coins: amount));
+  }
+
+  /// Records a local danmaku saying [text] sent in [place] (D08.1 c2; 3.x
+  /// kept none).
+  void recordChat(String text, LocalPlace place) {
+    final words = text.trim();
+    if (words.isEmpty) return;
+    _record(
+      LocalEvent(
+        at: _now(),
+        kind: LocalEventKind.chat,
+        platform: place.platform,
+        roomId: place.roomId,
+        roomName: place.roomName,
+        text: words,
+        style: _styleJson,
+      ),
+    );
   }
 
   /// Empties the history (coins and level stay) and returns what it held,
   /// for [restoreHistory] (A08.13: the clear can be undone).
-  List<String> clearHistory() {
-    final cleared = history;
+  LocalHistoryCleared clearHistory() {
+    final cleared = (lines: history, events: _entries);
     _set(Settings.localInteractionHistory, const <String>[]);
+    _keep(const [], (store) => store.clear());
     return cleared;
   }
 
-  /// Puts [lines] (what [clearHistory] returned) back under the lines added
-  /// since, up to [LocalCatalog.historyLimit].
-  void restoreHistory(List<String> lines) {
-    if (lines.isEmpty) return;
-    _set(Settings.localInteractionHistory, [...history, ...lines].take(LocalCatalog.historyLimit).toList());
+  /// Puts [cleared] (what [clearHistory] returned) back under what was added
+  /// since: the lines up to [LocalCatalog.historyLimit], the entries under
+  /// their own ids.
+  void restoreHistory(LocalHistoryCleared cleared) {
+    if (cleared.lines.isNotEmpty) {
+      _set(Settings.localInteractionHistory, [...history, ...cleared.lines].take(LocalCatalog.historyLimit).toList());
+    }
+    if (cleared.events.isEmpty) return;
+    final merged = [..._entries, ...cleared.events]..sort((a, b) => b.at.compareTo(a.at));
+    _keep(merged, (store) => store.addAll(cleared.events));
   }
 
   List<String> _withHistory(String line) => [line, ...history].take(LocalCatalog.historyLimit).toList();
+
+  /// [event] in the interface language now (D08.1 c5): what a danmaku said,
+  /// "🌶️ 送出 辣条 ×1", "增加本地体验币 +500", "升到 Lv.3", an old line as it
+  /// was.
+  String describe(LocalEvent event) {
+    switch (event.kind) {
+      case LocalEventKind.chat || LocalEventKind.legacy:
+        return event.text;
+      case LocalEventKind.gift:
+        final gift = LocalCatalog.giftById(event.giftId);
+        final name = gift == null ? event.giftId : i18n(gift.nameKey);
+        final count = event.count < 1 ? 1 : event.count;
+        return [if (gift != null) gift.emoji, i18n('local_sent_gift'), '$name ×$count'].join(' ');
+      case LocalEventKind.recharge:
+        return '${i18n('local_recharge_record')} +${event.coins}';
+      case LocalEventKind.level:
+        return i18n('local_history_level', args: {'level': '${event.count}'});
+    }
+  }
+
+  /// The local danmaku [event] once more in a room of [platform], as the
+  /// room shows one sent before it was entered (D08.1 c6): marked
+  /// "之前发的" ([LocalProfile.replayedIn]), by the profile of now.
+  LiveMessage replayed(LocalEvent event, {required String platform}) {
+    final message = createChat(event.text, platform: platform);
+    return LiveMessage(
+      type: message.type,
+      userName: message.userName,
+      message: message.message,
+      color: message.color,
+      userLevel: message.userLevel,
+      data: {...profileFor(platform).toData(), 'replayed': true, 'at': event.at.millisecondsSinceEpoch},
+      isLocal: true,
+      style: message.style,
+    );
+  }
 
   /// "用户等级 Lv.1 · 1000 电池" for [pack] (U.2k c12: one way everywhere).
   String statusLine(LocalPlatformPack pack) => '${i18n(pack.levelKey)} Lv.$level · $coins ${i18n(pack.currencyKey)}';
@@ -276,7 +467,9 @@ final class LocalInteraction extends ChangeNotifier {
   /// Sends [gift] in a room of [platform]: takes its price, adds as much
   /// experience and a history line (3.x `sendGift`). Null when the
   /// interaction is off or the coins do not cover it.
-  LiveMessage? sendGift(LocalGift gift, {required String platform}) {
+  ///
+  /// The entry (D08.1) names [place] when it was sent in a room.
+  LiveMessage? sendGift(LocalGift gift, {required String platform, LocalPlace? place}) {
     if (!enabled || coins < gift.price) return null;
     final profile = profileFor(platform);
     final giftName = i18n(gift.nameKey);
@@ -288,6 +481,18 @@ final class LocalInteraction extends ChangeNotifier {
         '${gift.emoji} ${profile.legacyLabel} · ${profile.name} $sent $giftName ×1',
       ),
     });
+    _record(
+      LocalEvent(
+        at: _now(),
+        kind: LocalEventKind.gift,
+        platform: place?.platform ?? platform,
+        roomId: place?.roomId ?? '',
+        roomName: place?.roomName ?? '',
+        giftId: gift.id,
+        count: 1,
+        coins: gift.price,
+      ),
+    );
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: profile.name,
@@ -426,6 +631,7 @@ final class LocalInteraction extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     unawaited(_subscription.cancel());
+    unawaited(_events?.cancel());
     super.dispose();
   }
 }

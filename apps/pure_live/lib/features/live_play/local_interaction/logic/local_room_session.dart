@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_interaction.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
@@ -29,15 +30,31 @@ final class LocalGiftShow {
 /// waited 2 s and said so; its sheet did not). When the danmaku over the
 /// picture are off, the first message of the room says it only joined the
 /// chat list.
+///
+/// D08.1: what is sent is recorded with the room; entering the room puts
+/// the local danmaku sent there in the last [replayWindow] back at the top
+/// of the chat list ([replayCount] at most, "之前发的", not over the
+/// picture) while "进房放回" is on.
 final class LocalRoomSession {
-  /// Creates the session of [room].
+  /// Creates the session of [room] and starts putting back what was sent
+  /// there before ([events]: the stored history; none in previews).
   new({
     required this.interaction,
     required this.room,
     required this.overlayShown,
     required this.toast,
+    LocalEventStore? events,
+    DateTime Function()? now,
     this.effectDuration = const Duration(seconds: 3),
-  });
+  }) {
+    if (events != null) unawaited(_replay(events, (now ?? DateTime.now)()));
+  }
+
+  /// How far back entering a room looks (D08.1 c6).
+  static const Duration replayWindow = Duration(hours: 24);
+
+  /// The most local danmaku put back.
+  static const int replayCount = 20;
 
   /// The profile, coins and style.
   final LocalInteraction interaction;
@@ -66,11 +83,48 @@ final class LocalRoomSession {
   /// The room's platform (its pack, gifts and badge).
   String get platform => room.room.platform;
 
+  /// The room now, as the history records it.
+  LocalPlace get place {
+    final current = room.room;
+    final name = current.nick.trim().isNotEmpty ? current.nick.trim() : current.title.trim();
+    return (platform: current.platform, roomId: current.roomId, roomName: name);
+  }
+
+  /// Puts back what was sent in this room before [entered] (not what this
+  /// visit sends meanwhile). The room hears of it even with nothing to put
+  /// back: a room the floating window hands back to a new session holds this
+  /// visit's lines already.
+  Future<void> _replay(LocalEventStore events, DateTime entered) async {
+    bool wanted() => interaction.enabled && interaction.replayOnEnter;
+    final here = room.room;
+    var sent = const <LocalEvent>[];
+    if (wanted()) {
+      try {
+        sent = await events.recentChats(
+          platform: here.platform,
+          roomId: here.roomId,
+          since: entered.subtract(replayWindow),
+          before: entered,
+          count: replayCount,
+        );
+      } on Object {
+        // Nothing comes back this time.
+      }
+    }
+    if (_disposed) return;
+    room.replayLocal([
+      if (wanted())
+        for (final event in sent) interaction.replayed(event, platform: here.platform),
+    ]);
+  }
+
   /// Sends [text] as a local danmaku; false when there is nothing to send
   /// or the interaction is off.
   bool sendChat(String text) {
     if (_disposed || !interaction.enabled || text.trim().isEmpty) return false;
-    _deliver(interaction.createChat(text, platform: platform));
+    final message = interaction.createChat(text, platform: platform);
+    _deliver(message);
+    interaction.recordChat(message.message, place);
     return true;
   }
 
@@ -78,7 +132,7 @@ final class LocalRoomSession {
   /// it.
   bool sendGift(LocalGift gift) {
     if (_disposed) return false;
-    final message = interaction.sendGift(gift, platform: platform);
+    final message = interaction.sendGift(gift, platform: platform, place: place);
     if (message == null) {
       if (interaction.enabled) toast(i18n('local_coins_insufficient'));
       return false;

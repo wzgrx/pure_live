@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
@@ -140,7 +142,12 @@ class _LocalInteractionPanelState extends ConsumerState<LocalInteractionPanel> {
             ),
           ),
         ),
-        LocalHistory(interaction: local, clearLabel: i18n('local_clear_history_short'), inPanel: true),
+        LocalHistory(
+          interaction: local,
+          clearLabel: i18n('local_clear_history_short'),
+          inPanel: true,
+          session: session,
+        ),
       ],
     );
   }
@@ -442,13 +449,27 @@ class _LocalProfileEditorState extends State<LocalProfileEditor> {
   }
 }
 
-/// "本地互动记录" with its count, the lines (newest first, up to 30) and
-/// clearing them (c12: in the panel and on the settings page). A08.13: a
-/// clear is undone from its toast for 4 s (docs/specs/UI.md §7, as removing
-/// a blocked word or unfollowing), no question first.
-class LocalHistory extends StatelessWidget {
+/// "本地互动记录" (c12: in the panel and on the settings page, one widget).
+///
+/// D08.1 c5: the entries (data, read in the language of now), newest first,
+/// split "全部 / 弹幕 / 礼物 / 币"; each says when and in which room; in a
+/// room a local danmaku or gift has "再发一次" (a gift costs its coins
+/// again, "体验币余额不足" as usual) and "只看本直播间" narrows the list. The
+/// settings page copies them to the clipboard ([exportable]). The newest
+/// [pageSize] show first, "显示更多" adds as many.
+///
+/// A08.13: a clear is undone from its toast for 4 s (docs/specs/UI.md §7,
+/// as removing a blocked word or unfollowing), no question first.
+class LocalHistory extends StatefulWidget {
   /// Creates the history.
-  const new({required this.interaction, required this.clearLabel, this.inPanel = false, super.key});
+  const new({
+    required this.interaction,
+    required this.clearLabel,
+    this.inPanel = false,
+    this.session,
+    this.exportable = false,
+    super.key,
+  });
 
   /// The history's owner.
   final LocalInteraction interaction;
@@ -459,11 +480,35 @@ class LocalHistory extends StatelessWidget {
   /// In the room panel: the title is a group title.
   final bool inPanel;
 
+  /// The room the panel is in: "再发一次" and "只看本直播间" (null on the
+  /// settings page).
+  final LocalRoomSession? session;
+
+  /// "导出到剪贴板" (the settings page).
+  final bool exportable;
+
+  /// How many entries show at first, and how many more each "显示更多"
+  /// adds.
+  static const int pageSize = 50;
+
+  @override
+  State<LocalHistory> createState() => _LocalHistoryState();
+}
+
+class _LocalHistoryState extends State<LocalHistory> {
+  LocalHistoryFilter _filter = LocalHistoryFilter.all;
+  bool _thisRoom = false;
+  int _shown = LocalHistory.pageSize;
+
+  LocalInteraction get _local => widget.interaction;
+
   void _clear(BuildContext context) {
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final interaction = _local;
     final cleared = interaction.clearHistory();
+    final count = cleared.events.isNotEmpty ? cleared.events.length : cleared.lines.length;
     final toast = AppToast(
-      i18n('local_history_cleared', args: {'count': '${cleared.length}'}),
+      i18n('local_history_cleared', args: {'count': '$count'}),
       key: const ValueKey('local-history-undo'),
       actionLabel: i18n('room_undo'),
       onAction: () => interaction.restoreHistory(cleared),
@@ -475,12 +520,48 @@ class LocalHistory extends StatelessWidget {
     }
   }
 
+  /// "再发一次" of [event] in the panel's room.
+  void _again(LocalRoomSession session, LocalEvent event) {
+    switch (event.kind) {
+      case LocalEventKind.chat:
+        if (session.sendChat(event.text)) session.toast(i18n('local_history_sent_again'));
+      case LocalEventKind.gift:
+        if (LocalCatalog.giftById(event.giftId) case final gift?) session.sendGift(gift);
+      case LocalEventKind.recharge || LocalEventKind.level || LocalEventKind.legacy:
+        break;
+    }
+  }
+
+  Future<void> _export(List<LocalEvent> events) async {
+    final text = [for (final event in events) localHistoryLine(_local, event)].join('\n');
+    await Clipboard.setData(ClipboardData(text: text));
+    AppNavigator.toast(i18n('local_history_exported', args: {'count': '${events.length}'}));
+  }
+
+  bool _canAgain(LocalEvent event) => switch (event.kind) {
+    LocalEventKind.chat => event.text.isNotEmpty,
+    LocalEventKind.gift => LocalCatalog.giftById(event.giftId) != null,
+    LocalEventKind.recharge || LocalEventKind.level || LocalEventKind.legacy => false,
+  };
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final history = interaction.history;
-    final count = i18n('local_history_count', args: {'count': '${history.length}'});
+    final inPanel = widget.inPanel;
+    final session = widget.session;
+    final place = session?.place;
+    final all = _local.events;
+    final events = [
+      for (final event in all)
+        if (_filter.accepts(event) &&
+            (!_thisRoom || place == null || (event.platform == place.platform && event.roomId == place.roomId)))
+          event,
+    ];
+    final shown = events.take(_shown).toList();
+    final side = EdgeInsets.symmetric(horizontal: inPanel ? 16 : 0);
+    final count = i18n('local_history_count', args: {'count': '${events.length}'});
+    final again = session != null && _local.enabled;
     return Column(
       key: const ValueKey('local-history'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -505,9 +586,44 @@ class LocalHistory extends StatelessWidget {
             ],
           ),
         ),
-        if (history.isEmpty)
+        Padding(
+          padding: side.add(const EdgeInsets.only(top: 4, bottom: 4)),
+          child: SegmentedButton<LocalHistoryFilter>(
+            key: const ValueKey('local-history-filter'),
+            showSelectedIcon: false,
+            segments: [
+              for (final filter in LocalHistoryFilter.values)
+                ButtonSegment(
+                  value: filter,
+                  label: Text(i18n(filter.labelKey), key: ValueKey('local-history-filter-${filter.name}')),
+                ),
+            ],
+            selected: {_filter},
+            onSelectionChanged: (selection) => setState(() {
+              _filter = selection.first;
+              _shown = LocalHistory.pageSize;
+            }),
+          ),
+        ),
+        if (place != null)
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: inPanel ? 16 : 0, vertical: 8),
+            padding: side,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: FilterChip(
+                key: const ValueKey('local-history-room'),
+                label: Text(i18n('local_history_this_room')),
+                selected: _thisRoom,
+                onSelected: (value) => setState(() {
+                  _thisRoom = value;
+                  _shown = LocalHistory.pageSize;
+                }),
+              ),
+            ),
+          ),
+        if (shown.isEmpty)
+          Padding(
+            padding: side.add(const EdgeInsets.symmetric(vertical: 8)),
             child: Text(
               i18n('local_history_empty'),
               key: const ValueKey('local-history-empty'),
@@ -515,34 +631,152 @@ class LocalHistory extends StatelessWidget {
             ),
           )
         else
-          for (final line in history)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: inPanel ? 16 : 0, vertical: 7),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6))),
-              ),
-              child: Text(
-                localEmojiText(line),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: localEmojiStyle(theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant)),
+          for (final (index, event) in shown.indexed)
+            _HistoryRow(
+              key: ValueKey('local-history-row-$index'),
+              index: index,
+              text: _local.describe(event),
+              detail: localHistoryDetail(event, DateTime.now()),
+              padding: side,
+              onAgain: again && _canAgain(event) ? () => _again(session, event) : null,
+            ),
+        if (events.length > shown.length)
+          Padding(
+            padding: side,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                key: const ValueKey('local-history-more'),
+                onPressed: () => setState(() => _shown += LocalHistory.pageSize),
+                child: Text(i18n('local_history_more', args: {'count': '${events.length - shown.length}'})),
               ),
             ),
+          ),
         Padding(
           padding: EdgeInsets.fromLTRB(inPanel ? 8 : 0, 6, 0, 0),
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton.icon(
-              key: const ValueKey('local-history-clear'),
-              onPressed: history.isEmpty ? null : () => _clear(context),
-              icon: const Icon(AppIcons.localClearHistory, size: 18),
-              label: Text(clearLabel),
-            ),
+          child: Wrap(
+            spacing: 8,
+            children: [
+              TextButton.icon(
+                key: const ValueKey('local-history-clear'),
+                onPressed: all.isEmpty && _local.history.isEmpty ? null : () => _clear(context),
+                icon: const Icon(AppIcons.localClearHistory, size: 18),
+                label: Text(widget.clearLabel),
+              ),
+              if (widget.exportable)
+                TextButton.icon(
+                  key: const ValueKey('local-history-export'),
+                  onPressed: all.isEmpty ? null : () => unawaited(_export(all)),
+                  icon: const Icon(AppIcons.copy, size: 18),
+                  label: Text(i18n('local_history_export')),
+                ),
+            ],
           ),
         ),
       ],
     );
   }
+}
+
+/// One entry: what happened, then when and where; "再发一次" at the end
+/// when [onAgain] is given.
+class _HistoryRow extends StatelessWidget {
+  const new({
+    required this.index,
+    required this.text,
+    required this.detail,
+    required this.padding,
+    required this.onAgain,
+    super.key,
+  });
+
+  final int index;
+  final String text;
+  final String detail;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onAgain;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final again = onAgain;
+    return Container(
+      padding: padding.add(const EdgeInsets.symmetric(vertical: 6)),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: scheme.outlineVariant.withValues(alpha: 0.6))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localEmojiText(text),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: localEmojiStyle(theme.textTheme.bodyMedium),
+                ),
+                Text(
+                  detail,
+                  key: ValueKey('local-history-detail-$index'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.tabular.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+          if (again != null) ...[
+            const SizedBox(width: 8),
+            TextButton(
+              key: ValueKey('local-history-again-$index'),
+              onPressed: again,
+              child: Text(i18n('local_history_again')),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// When and where [event] happened, for its row: "20:05 · 主播" today,
+/// "10-08 20:05 · 主播" this year, the year too before; an old line says
+/// "旧记录" instead of a time (it never had one).
+String localHistoryDetail(LocalEvent event, DateTime now) {
+  if (event.kind == LocalEventKind.legacy) return i18n('local_history_legacy');
+  final at = event.at.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  final clock = '${two(at.hour)}:${two(at.minute)}';
+  final time = at.year == now.year && at.month == now.month && at.day == now.day
+      ? clock
+      : at.year == now.year
+      ? '${two(at.month)}-${two(at.day)} $clock'
+      : '${at.year}-${two(at.month)}-${two(at.day)} $clock';
+  return [time, if (event.roomName.isNotEmpty) event.roomName].join(' · ');
+}
+
+/// [event] as one line of the export: "2026-10-09 20:05 · 主播 · 弹幕 · 晚上好".
+String localHistoryLine(LocalInteraction interaction, LocalEvent event) {
+  final kind = switch (event.kind) {
+    LocalEventKind.chat => i18n(LocalHistoryFilter.chat.labelKey),
+    LocalEventKind.gift => i18n(LocalHistoryFilter.gift.labelKey),
+    LocalEventKind.recharge => i18n(LocalHistoryFilter.coins.labelKey),
+    LocalEventKind.level || LocalEventKind.legacy => null,
+  };
+  final at = event.at.toLocal();
+  String two(int value) => value.toString().padLeft(2, '0');
+  return [
+    if (event.kind == LocalEventKind.legacy)
+      i18n('local_history_legacy')
+    else
+      '${at.year}-${two(at.month)}-${two(at.day)} ${two(at.hour)}:${two(at.minute)}',
+    if (event.roomName.isNotEmpty) event.roomName,
+    ?kind,
+    interaction.describe(event),
+  ].join(' · ');
 }
 
 /// A switch row of the panel (the U.2f rows: the whole row switches).

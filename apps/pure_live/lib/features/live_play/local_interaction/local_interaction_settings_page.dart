@@ -103,6 +103,15 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
             value: local.showLevelBadge,
             onChanged: (value) => local.showLevelBadge = value,
           ),
+          // D08.1 c6: the chat list of a room entered again.
+          _Tile(
+            id: 'replay',
+            icon: AppIcons.localReplay,
+            title: i18n('local_replay_on_enter'),
+            subtitle: i18n('local_replay_on_enter_desc'),
+            value: local.replayOnEnter,
+            onChanged: (value) => local.replayOnEnter = value,
+          ),
           _Tile(
             id: 'giftEffects',
             icon: AppIcons.localGiftEffects,
@@ -156,7 +165,7 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
           Text(i18n('local_experience_economy_desc'), style: hint),
           const SizedBox(height: 10),
           LocalRechargeRow(interaction: local),
-          LocalHistory(interaction: local, clearLabel: i18n('local_clear_history')),
+          LocalHistory(interaction: local, clearLabel: i18n('local_clear_history'), exportable: true),
         ],
       ),
     ];

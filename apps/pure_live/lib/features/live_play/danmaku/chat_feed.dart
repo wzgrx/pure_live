@@ -114,6 +114,7 @@ final class ChatFeed extends ChangeNotifier {
   final ChatFlushScheduler _schedule;
   final List<ChatLine> _lines = [];
   int _next = 0;
+  int _before = 0;
   int _removals = 0;
   final List<bool Function(ChatLine line)> _removalTests = [];
   static const int _keptRemovalTests = 64;
@@ -150,6 +151,20 @@ final class ChatFeed extends ChangeNotifier {
   void add(ChatLine line) {
     line.id = _next++;
     _lines.add(line);
+    if (_lines.length > capacity) _lines.removeRange(0, _lines.length - capacity);
+    _changed();
+  }
+
+  /// Puts [lines] (oldest first) before every line (D08.1: what was sent
+  /// before the room was entered). They are not counted in [added] (no "N
+  /// 条新弹幕") and take ids below every other line's; beyond [capacity]
+  /// the oldest go as usual.
+  void addOldest(List<ChatLine> lines) {
+    if (lines.isEmpty) return;
+    for (var i = lines.length - 1; i >= 0; i--) {
+      lines[i].id = --_before;
+    }
+    _lines.insertAll(0, lines);
     if (_lines.length > capacity) _lines.removeRange(0, _lines.length - capacity);
     _changed();
   }

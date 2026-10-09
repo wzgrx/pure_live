@@ -565,6 +565,19 @@ abstract final class LocalCatalog {
   /// The gifts of [platform] (the generic four for most).
   static List<LocalGift> giftsFor(String platform) => _platformGifts[platform.trim().toLowerCase()] ?? genericGifts;
 
+  /// The gift [id] of any pack (a history entry names it, D08.1), or null.
+  static LocalGift? giftById(String id) {
+    for (final gift in genericGifts) {
+      if (gift.id == id) return gift;
+    }
+    for (final gifts in _platformGifts.values) {
+      for (final gift in gifts) {
+        if (gift.id == id) return gift;
+      }
+    }
+    return null;
+  }
+
   /// The pack of [platform] (the generic one when it has none).
   static LocalPlatformPack packFor(String platform) {
     final id = platform.trim().toLowerCase();

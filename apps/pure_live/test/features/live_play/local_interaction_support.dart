@@ -37,7 +37,9 @@ final class LocalRoom {
 }
 
 /// Opens a live Bilibili room [width] × [height] wide, with [settings]
-/// stored first.
+/// stored first and [prepare] run on the store (D08.1: what was sent
+/// before). [reuse] enters again with the services of an earlier room
+/// (left with [leaveLocalRoom]).
 Future<LocalRoom> pumpLocalRoom(
   WidgetTester tester, {
   double width = 400,
@@ -45,6 +47,8 @@ Future<LocalRoom> pumpLocalRoom(
   Map<Setting<Object>, Object> settings = const {},
   ThemeData? theme,
   Widget Function(Widget child)? wrap,
+  Future<void> Function(LiveStore store)? prepare,
+  AppServices? reuse,
 }) async {
   tester.view
     ..physicalSize = Size(width, height)
@@ -52,8 +56,9 @@ Future<LocalRoom> pumpLocalRoom(
   addTearDown(tester.view.reset);
   RoomOrientationChoice.clearSession();
   final services = (await tester.runAsync(() async {
-    final services = await testServices();
+    final services = reuse ?? await testServices();
     if (settings.isNotEmpty) await services.store.settings.setAll(settings);
+    await prepare?.call(services.store);
     return services;
   }))!;
   await tester.runAsync(loadStrings);
@@ -96,6 +101,13 @@ Future<void> settleLocal(WidgetTester tester) async {
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pump();
   }
+}
+
+/// Leaves the room and keeps its services (to enter again).
+Future<void> leaveLocalRoom(WidgetTester tester) async {
+  await tester.pumpWidget(const SizedBox.shrink());
+  await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+  await tester.pump(const Duration(seconds: 5));
 }
 
 /// Closes [room] and its services.

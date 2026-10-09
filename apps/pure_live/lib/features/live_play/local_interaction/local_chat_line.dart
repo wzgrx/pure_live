@@ -45,6 +45,17 @@ class LocalChatLine extends StatelessWidget {
                 style: chip?.copyWith(color: scheme.onPrimaryContainer),
               ),
             ),
+            // D08.1 c6: sent before the room was entered, shown again.
+            if (LocalProfile.replayedIn(message))
+              WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: ChatChip(
+                  key: const ValueKey('live-play-local-replayed'),
+                  text: i18n('local_replayed_tag'),
+                  background: scheme.surfaceContainerHighest,
+                  style: chip?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ),
             if (badge.isNotEmpty)
               WidgetSpan(
                 alignment: PlaceholderAlignment.middle,

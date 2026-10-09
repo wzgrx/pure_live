@@ -1163,6 +1163,23 @@ class LiveRoomController extends ChangeNotifier {
     chat.flush();
   }
 
+  bool _localReplayed = false;
+
+  /// Local danmaku sent here before the room was entered (D08.1 c6),
+  /// oldest first: at the top of the chat list, not over the picture, not
+  /// counted as new and past the platform filters, as [addLocal]. Once per
+  /// controller: a room handed back by the floating window has them already.
+  void replayLocal(List<LiveMessage> messages) {
+    if (_disposed || _localReplayed) return;
+    _localReplayed = true;
+    chat
+      ..addOldest([
+        for (final message in messages)
+          if (message.message.trim().isNotEmpty) ChatLine.chat(message),
+      ])
+      ..flush();
+  }
+
   void _system(String text) {
     if (!_statusLines.accepts(text)) return;
     chat.add(ChatLine.system(text));

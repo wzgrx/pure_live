@@ -104,6 +104,8 @@ void main() {
       (AppIcons.localItalic, Icons.format_italic_rounded),
       (AppIcons.localStroke, Icons.border_color_rounded),
       (AppIcons.localShadow, Icons.blur_on_rounded),
+      // D08.1: "进房放回之前发的本地弹幕" (new in v4).
+      (AppIcons.localReplay, Icons.history_toggle_off_rounded),
       // U.2j: the mini windows' buttons (3.x's play and pause; the new back
       // and pin).
       (AppIcons.backToRoom, Icons.open_in_full_rounded),

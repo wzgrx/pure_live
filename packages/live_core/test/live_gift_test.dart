@@ -115,6 +115,7 @@ void main() {
         (LiveGiftUnit.goldSeed, 1000),
         (LiveGiftUnit.diamond, 10),
         (LiveGiftUnit.douyinCoin, 10),
+        (LiveGiftUnit.acCoin, 10),
       ]) {
         expect(giftUnitsPerYuan[unit], perYuan, reason: unit.name);
         LiveGiftTier tierAt(double yuan) => giftTierOf(unit, (yuan * perYuan).round());
@@ -131,7 +132,7 @@ void main() {
       expect(giftTierOf(LiveGiftUnit.goldSeed, null), LiveGiftTier.normal);
       expect(giftTierOf(LiveGiftUnit.goldSeed, 0), LiveGiftTier.normal);
       expect(giftTierOf(LiveGiftUnit.goldSeed, -5), LiveGiftTier.normal);
-      for (final unit in [LiveGiftUnit.other, LiveGiftUnit.redBean, LiveGiftUnit.silverSeed]) {
+      for (final unit in [LiveGiftUnit.other, LiveGiftUnit.redBean, LiveGiftUnit.silverSeed, LiveGiftUnit.banana]) {
         expect(giftUnitsPerYuan.containsKey(unit), isFalse, reason: unit.name);
         expect(giftTierOf(unit, 1 << 40), LiveGiftTier.normal, reason: unit.name);
       }

@@ -98,7 +98,7 @@ class _LocalInteractionPanelState extends ConsumerState<LocalInteractionPanel> {
         ),
         PanelGroupTitle(i18n('local_gift_center')),
         _GiftGrid(gifts: gifts, coins: local.coins, onSend: (gift) => session?.sendGift(gift)),
-        LocalRechargeRow(interaction: local, label: i18n('local_experience_coins')),
+        // D08.3 c5: "+500/+2000/+10000" are in the card's "更多" (D-001).
         PanelGroupTitle(i18n('local_group_profile_mine')),
         LocalProfileEditor(interaction: local),
         PanelGroupTitle(i18n('local_group_on_video')),
@@ -155,6 +155,9 @@ class _LocalInteractionPanelState extends ConsumerState<LocalInteractionPanel> {
 
 /// Who you are in this room (c3, c12): the badge, "听众 · Pure Live" and
 /// "哔哩哔哩 · 用户等级 Lv.1 · 1000 电池" in the platform's colours.
+///
+/// D08.3 c5: under them the level's progress ([LocalLevelBar]); "更多"
+/// (⋮) at the end holds "+500/+2000/+10000" (D-001: still there, moved).
 class LocalIdentityCard extends StatelessWidget {
   /// Creates the card.
   const new({required this.interaction, required this.pack, required this.platform, super.key});
@@ -184,45 +187,124 @@ class LocalIdentityCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: accent.withValues(alpha: 0.25)),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: scheme.surfaceContainerLowest, shape: BoxShape.circle),
-              child: Text(
-                localEmojiText(pack.badge),
-                style: localEmojiStyle(theme.textTheme.titleLarge?.copyWith(fontSize: 22, color: ink)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${interaction.titleLabel} · ${interaction.userName}',
-                    key: const ValueKey('local-identity-name'),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleSmall?.emphasis.copyWith(fontSize: 15, color: scheme.onSurface),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(color: scheme.surfaceContainerLowest, shape: BoxShape.circle),
+                  child: Text(
+                    localEmojiText(pack.badge),
+                    style: localEmojiStyle(theme.textTheme.titleLarge?.copyWith(fontSize: 22, color: ink)),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    [
-                      if (pack != LocalCatalog.genericPack) i18n(pack.nameKey),
-                      interaction.statusLine(pack),
-                    ].join(' · '),
-                    key: const ValueKey('local-identity-status'),
-                    style: theme.textTheme.bodySmall?.emphasis.tabular.copyWith(color: ink),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${interaction.titleLabel} · ${interaction.userName}',
+                        key: const ValueKey('local-identity-name'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.emphasis.copyWith(fontSize: 15, color: scheme.onSurface),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [
+                          if (pack != LocalCatalog.genericPack) i18n(pack.nameKey),
+                          interaction.statusLine(pack),
+                        ].join(' · '),
+                        key: const ValueKey('local-identity-status'),
+                        style: theme.textTheme.bodySmall?.emphasis.tabular.copyWith(color: ink),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                AppMenuButton<int>(
+                  key: const ValueKey('local-identity-more'),
+                  tooltip: i18n('more'),
+                  icon: Icon(AppIcons.more, size: 22, color: scheme.onSurfaceVariant),
+                  entries: () => [
+                    for (final amount in LocalCatalog.rechargeAmounts)
+                      AppMenuEntry(
+                        key: ValueKey('local-recharge-$amount'),
+                        value: amount,
+                        icon: AppIcons.localCoins,
+                        label: '+$amount ${i18n(pack.currencyKey)}',
+                      ),
+                  ],
+                  onSelected: interaction.recharge,
+                ),
+              ],
             ),
+            const SizedBox(height: 10),
+            LocalLevelBar(interaction: interaction, color: ink),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The level's progress (D08.3 c5): "Lv.3 · 新人" and "还差 120 经验到
+/// Lv.4" over a bar of the experience gathered in the level; while local
+/// growth is on, what today gave under it ("今天已签到 · 看直播 +30/300 ·
+/// 弹幕 +5/50"). The identity card and the settings page show the same.
+class LocalLevelBar extends StatelessWidget {
+  /// Creates the progress of [interaction] in [color] (the theme's primary
+  /// when null).
+  const new({required this.interaction, this.color, super.key});
+
+  /// The experience.
+  final LocalInteraction interaction;
+
+  /// The bar's and the level's colour.
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final ink = color ?? scheme.primary;
+    final progress = LocalCatalog.progressFor(interaction.experience);
+    final hint = theme.textTheme.bodySmall?.tabular.copyWith(color: scheme.onSurfaceVariant);
+    return Column(
+      key: const ValueKey('local-level-progress'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          spacing: 12,
+          children: [
+            Text(
+              interaction.levelLabel,
+              key: const ValueKey('local-level-label'),
+              style: theme.textTheme.labelLarge?.emphasis.tabular.copyWith(color: ink),
+            ),
+            Text(interaction.nextLevelLabel, key: const ValueKey('local-level-next'), style: hint),
+          ],
+        ),
+        const SizedBox(height: 6),
+        LinearProgressIndicator(
+          key: const ValueKey('local-level-bar'),
+          value: progress.into / LocalCatalog.levelStep,
+          minHeight: 6,
+          borderRadius: BorderRadius.circular(3),
+          color: ink,
+          backgroundColor: ink.withValues(alpha: 0.16),
+          semanticsLabel: interaction.levelLabel,
+        ),
+        if (interaction.growing) ...[
+          const SizedBox(height: 6),
+          Text(interaction.growthTodayLine, key: const ValueKey('local-growth-today'), style: hint),
+        ],
+      ],
     );
   }
 }

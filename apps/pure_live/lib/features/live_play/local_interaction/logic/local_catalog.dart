@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:live_core/live_core.dart';
 
+/// How far an amount of experience is into its level (D08.3): the `level`,
+/// the experience gathered in it (`into`) and still `missing` to the next.
+typedef LocalLevelProgress = ({int level, int into, int missing});
+
 /// A gift of the local interaction (3.x `LocalGift`): only simulated, it
 /// costs local coins and earns experience.
 @immutable
@@ -618,8 +622,70 @@ abstract final class LocalCatalog {
   /// (under the 700 that reads as bold) and at least 400.
   static int regularWeight(int weight) => (weight - 200).clamp(400, 600);
 
-  /// The level of [experience]: one per 500, from 1.
-  static int levelFor(int experience) => (experience < 0 ? 0 : experience) ~/ 500 + 1;
+  /// The experience of one level (3.x, D-001).
+  static const int levelStep = 500;
+
+  /// The level of [experience]: one per [levelStep], from 1.
+  static int levelFor(int experience) => (experience < 0 ? 0 : experience) ~/ levelStep + 1;
+
+  /// How far [experience] is into its level: the level, the experience
+  /// gathered in it and the experience still missing to the next.
+  static LocalLevelProgress progressFor(int experience) {
+    final into = (experience < 0 ? 0 : experience) % levelStep;
+    return (level: levelFor(experience), into: into, missing: levelStep - into);
+  }
+
+  // ---- local growth (D08.3, V03.6 §5.4): the rules, as numbers ----
+  //
+  // Changing them leaves the stored coins and experience as they are; only
+  // what is earned from then on follows the new numbers.
+
+  /// Watching earns once per this much playing time.
+  static const Duration watchStep = Duration(minutes: 10);
+
+  /// The experience of a [watchStep].
+  static const int watchExperience = 10;
+
+  /// The coins of a [watchStep].
+  static const int watchCoins = 20;
+
+  /// The most experience watching earns a day: past it, watching earns
+  /// neither experience nor coins until the next day.
+  static const int watchExperienceDailyLimit = 300;
+
+  /// The first room of the day: its experience.
+  static const int checkInExperience = 20;
+
+  /// The first room of the day: its coins.
+  static const int checkInCoins = 100;
+
+  /// A local danmaku's experience.
+  static const int chatExperience = 1;
+
+  /// The most experience local danmaku earn a day.
+  static const int chatExperienceDailyLimit = 50;
+
+  /// Levels of one tier name.
+  static const int levelsPerTier = 10;
+
+  /// The tier names, one per [levelsPerTier] levels: Lv.1–9 the first,
+  /// Lv.10–19 the second, …; the last one stays from Lv.90 on.
+  static const List<String> tierKeys = [
+    'local_level_tier_0',
+    'local_level_tier_1',
+    'local_level_tier_2',
+    'local_level_tier_3',
+    'local_level_tier_4',
+    'local_level_tier_5',
+    'local_level_tier_6',
+    'local_level_tier_7',
+    'local_level_tier_8',
+    'local_level_tier_9',
+  ];
+
+  /// The tier name's key of [level].
+  static String tierKeyFor(int level) =>
+      tierKeys[(level < 1 ? 0 : level ~/ levelsPerTier).clamp(0, tierKeys.length - 1)];
 
   /// [value] as a nickname: trimmed, at most [nameLimit] characters; empty
   /// when nothing is left (not saved).

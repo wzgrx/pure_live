@@ -77,6 +77,21 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
             title: i18n('local_interaction_status'),
             subtitle: local.statusLine(LocalCatalog.genericPack),
           ),
+          // D08.3: the level's progress, as on the identity card, and the
+          // switch of what earns it.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(52, 0, 16, 12),
+            child: LocalLevelBar(interaction: local),
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          _Tile(
+            id: 'growth',
+            icon: AppIcons.localGrowth,
+            title: i18n('local_growth'),
+            subtitle: i18n('local_growth_desc'),
+            value: local.growthEnabled,
+            onChanged: (value) => local.growthEnabled = value,
+          ),
         ],
       ),
       _Title(i18n('local_group_on_video')),

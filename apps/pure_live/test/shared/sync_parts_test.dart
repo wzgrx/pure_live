@@ -181,4 +181,25 @@ void main() {
     await BackupService(target).restoreAll(pickSyncParts(file, {SyncPart.settings}));
     expect(target.settings.get(Settings.localInteractionPhrases), ['主播晚上好', '666']);
   });
+
+  test("D08.3: local growth (the switch, today's counts) travels with the settings part, with the coins", () async {
+    const today = '{"day":"2026-10-09","watchedMs":600000,"watchExp":10,"checkedIn":true,"chatExp":0}';
+    final source = await _filled(room: '2');
+    await source.settings.setAll({
+      Settings.localInteractionGrowthEnabled: false,
+      Settings.localInteractionGrowthDay: today,
+      Settings.localInteractionExperience: 30,
+    });
+    final target = await _filled();
+    final file = await BackupService(source).exportAll();
+
+    await BackupService(target).restoreAll(pickSyncParts(file, {SyncPart.follows, SyncPart.localEvents}));
+    expect(target.settings.get(Settings.localInteractionGrowthEnabled), isTrue, reason: 'settings not picked');
+    expect(target.settings.get(Settings.localInteractionGrowthDay), '');
+
+    await BackupService(target).restoreAll(pickSyncParts(file, {SyncPart.settings}));
+    expect(target.settings.get(Settings.localInteractionGrowthEnabled), isFalse);
+    expect(target.settings.get(Settings.localInteractionGrowthDay), today);
+    expect(target.settings.get(Settings.localInteractionExperience), 30);
+  });
 }

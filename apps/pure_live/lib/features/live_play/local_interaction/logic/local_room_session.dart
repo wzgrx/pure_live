@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_growth.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_interaction.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -38,6 +40,9 @@ final class LocalGiftShow {
 final class LocalRoomSession {
   /// Creates the session of [room] and starts putting back what was sent
   /// there before ([events]: the stored history; none in previews).
+  ///
+  /// D08.3: entering checks in for the day, and the room's player counts
+  /// the time it plays ([LocalRoomWatch], [periodic] its tick).
   new({
     required this.interaction,
     required this.room,
@@ -45,9 +50,16 @@ final class LocalRoomSession {
     required this.toast,
     LocalEventStore? events,
     DateTime Function()? now,
+    LocalTimerFactory? periodic,
     this.effectDuration = const Duration(seconds: 3),
   }) {
     if (events != null) unawaited(_replay(events, (now ?? DateTime.now)()));
+    LocalRoomWatch.of(interaction, room.session, periodic: periodic)
+      ..place = (() => place)
+      ..toast = toast;
+    final before = interaction.level;
+    interaction.checkIn(place: place);
+    _announce(before);
   }
 
   /// How far back entering a room looks (D08.1 c6).
@@ -124,7 +136,11 @@ final class LocalRoomSession {
     if (_disposed || !interaction.enabled || text.trim().isEmpty) return false;
     final message = interaction.createChat(text, platform: platform);
     _deliver(message);
-    interaction.recordChat(message.message, place);
+    final here = place;
+    interaction.recordChat(message.message, here);
+    final before = interaction.level;
+    interaction.rewardChat(place: here);
+    _announce(before);
     return true;
   }
 
@@ -132,12 +148,14 @@ final class LocalRoomSession {
   /// it.
   bool sendGift(LocalGift gift) {
     if (_disposed) return false;
+    final before = interaction.level;
     final message = interaction.sendGift(gift, platform: platform, place: place);
     if (message == null) {
       if (interaction.enabled) toast(i18n('local_coins_insufficient'));
       return false;
     }
     _deliver(message);
+    _announce(before);
     if (LocalGiftData.of(message)?.effect ?? false) {
       _effectTimer?.cancel();
       giftEffect.value = LocalGiftShow(message, ++_serial);
@@ -157,10 +175,112 @@ final class LocalRoomSession {
     }
   }
 
-  /// Stops the banner's timer.
+  /// "本地等级升到 Lv.N" when the level rose above [before] (D08.3).
+  void _announce(int before) => announceLocalLevel(interaction, before, toast);
+
+  /// Stops the banner's timer. The watch time goes on while the player
+  /// plays (the in-app floating window); leaving the room stops the player,
+  /// which settles it.
   void dispose() {
     _disposed = true;
     _effectTimer?.cancel();
     giftEffect.dispose();
+  }
+}
+
+/// Says "本地等级升到 Lv.N" through [toast] when [interaction]'s level rose
+/// above [before] while growth is on (D08.3 c1: off, sending is as before).
+void announceLocalLevel(LocalInteraction interaction, int before, void Function(String message) toast) {
+  final level = interaction.level;
+  if (level > before && interaction.growing) toast(i18n('local_level_up', args: {'level': '$level'}));
+}
+
+/// The watch time of one room player (D08.3 c2): it counts while the player
+/// plays (not while it opens, buffers, is paused or stopped), the app is on
+/// the screen or in picture-in-picture (Flutter reports the system
+/// picture-in-picture as inactive) and local growth is on. One per player,
+/// so a room handed to the in-app floating window carries on, and a room
+/// page opened again on the same player picks it up; the player's end (the
+/// room left, the floating window closed) settles it.
+///
+/// It does not start anything in the background: the app hidden stops the
+/// count and stores it. Within a run of counting, a minute's tick hands the
+/// time to [LocalInteraction.watched], which writes only when ten minutes
+/// are complete; stopping stores the rest ([LocalInteraction.settleWatch]).
+/// A tick past midnight also checks in for the new day.
+final class LocalRoomWatch {
+  new _(this.interaction, this._player, LocalTimerFactory? periodic) {
+    _clock = LocalWatchTime(
+      onWatched: _watched,
+      onSettle: interaction.settleWatch,
+      now: interaction.now,
+      periodic: periodic,
+    );
+    _states = _player.states.listen((_) => _update(), onDone: _end);
+    _lifecycle = AppLifecycleListener(
+      onStateChange: (state) {
+        _state = state;
+        _update();
+      },
+    );
+    interaction.addListener(_update);
+    _update();
+  }
+
+  /// The watch of [player] for [interaction]: the one it has, or a new one.
+  factory of(LocalInteraction interaction, PlaybackSession player, {LocalTimerFactory? periodic}) {
+    final current = _watches[player];
+    if (current != null && !current._ended && identical(current.interaction, interaction)) return current;
+    current?._end();
+    return _watches[player] = LocalRoomWatch._(interaction, player, periodic);
+  }
+
+  static final Expando<LocalRoomWatch> _watches = Expando('LocalRoomWatch');
+
+  /// What the watch time goes to.
+  final LocalInteraction interaction;
+
+  final PlaybackSession _player;
+  late final LocalWatchTime _clock;
+  late final StreamSubscription<PlaybackState> _states;
+  late final AppLifecycleListener _lifecycle;
+  AppLifecycleState? _state = WidgetsBinding.instance.lifecycleState;
+  bool _ended = false;
+
+  /// The room the player plays now (its level entries name it); the last
+  /// room session sets it.
+  LocalPlace Function()? place;
+
+  /// Shows "本地等级升到 Lv.N"; the last room session sets it.
+  void Function(String message)? toast;
+
+  /// Whether the time counts now.
+  bool get counting => _clock.counting;
+
+  void _update() {
+    if (_ended) return;
+    final front = switch (_state) {
+      null || AppLifecycleState.resumed || AppLifecycleState.inactive => true,
+      _ => false,
+    };
+    _clock.update(counting: interaction.growing && front && _player.state.status == PlaybackStatus.playing);
+  }
+
+  void _watched(DateTime from, DateTime to) {
+    final here = place?.call();
+    final before = interaction.level;
+    interaction
+      ..watched(from, to, place: here)
+      ..checkIn(place: here);
+    if (toast case final say?) announceLocalLevel(interaction, before, say);
+  }
+
+  void _end() {
+    if (_ended) return;
+    _ended = true;
+    _clock.dispose();
+    unawaited(_states.cancel());
+    _lifecycle.dispose();
+    interaction.removeListener(_update);
   }
 }

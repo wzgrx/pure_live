@@ -489,6 +489,10 @@ abstract final class AppIcons {
   /// The phrases group on the local interaction settings page (D08.2).
   static const IconData localPhrases = Icons.format_list_bulleted_rounded;
 
+  /// The "本地成长" switch: watching, the daily check-in and local danmaku
+  /// earn experience and coins (D08.3; 3.x had no such thing).
+  static const IconData localGrowth = Icons.trending_up_rounded;
+
   // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
   // desktop mini window; 3.x player_manager.dart) ----
 

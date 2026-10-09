@@ -58,7 +58,7 @@
 
 ## 门禁
 
-- 和 A08.14 一起跑，结果写在下面一次提交里。
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `77e317e2c`，A08.14 和 D08.2 的全部提交）：`gate: passed (all, 14 members)`。第一次跑在 `apps/pure_live analyze` 停下（新测试文件里 4 个 info：转义的单引号、`prefer_foreach`），改了以后重跑通过。
 
 ## 真机上要看的
 

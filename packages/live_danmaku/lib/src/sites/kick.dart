@@ -35,8 +35,11 @@ final class KickGift extends LiveGift {
 ///
 /// - One WebSocket of JSON text frames to Kick's Pusher app. The server
 ///   opens with `pusher:connection_established`; the client then subscribes
-///   to the public channels `chatrooms.<chatroomId>.v2` (chat and moderation)
-///   and `channel.<channelId>` (the broadcast's own events), without auth.
+///   to the public channels `chatrooms.<chatroomId>.v2` (chat and moderation),
+///   `channel.<channelId>` (the broadcast's own events) and
+///   `channel_<channelId>` (Kicks sent to the channel, `KicksGifted`; D07.7:
+///   the web client listens there, `useRealtime(channel_${channelId},
+///   "KicksGifted")`), without auth.
 /// - `pusher_internal:subscription_succeeded` of the chat channel is the
 ///   join. `pusher:ping` is answered `pusher:pong`; the client pings too.
 /// - Events carry their payload as a JSON string in `data`.
@@ -68,6 +71,9 @@ abstract final class KickDanmakuProtocol {
 
   /// The broadcast channel of [args].
   static String broadcastChannel(KickDanmakuArgs args) => 'channel.${args.channelId}';
+
+  /// The channel of [args]'s Kicks (`KicksGifted`, D07.7).
+  static String kicksChannel(KickDanmakuArgs args) => 'channel_${args.channelId}';
 
   /// The subscription to [channel].
   static String subscribe(String channel) => jsonEncode({
@@ -110,6 +116,9 @@ abstract final class KickDanmakuProtocol {
     if (payload == null) return const KickFrame();
     if (channel == broadcastChannel(args)) {
       return KickFrame(messages: [?broadcastEvent(event, payload, args)]);
+    }
+    if (channel == kicksChannel(args)) {
+      return KickFrame(messages: [if (_name(event) == 'KicksGifted') ?kicks(payload)]);
     }
     if (channel != chatChannel(args)) return const KickFrame();
     return KickFrame(messages: [?chatEvent(event, payload, args)]);
@@ -432,7 +441,8 @@ final class KickDanmakuConnection extends DanmakuSocketConnection<KickDanmakuArg
     if (frame.established) {
       session
         ..send(KickDanmakuProtocol.subscribe(KickDanmakuProtocol.chatChannel(room.args)))
-        ..send(KickDanmakuProtocol.subscribe(KickDanmakuProtocol.broadcastChannel(room.args)));
+        ..send(KickDanmakuProtocol.subscribe(KickDanmakuProtocol.broadcastChannel(room.args)))
+        ..send(KickDanmakuProtocol.subscribe(KickDanmakuProtocol.kicksChannel(room.args)));
     }
     if (frame.ping) session.send(KickDanmakuProtocol.pong);
     if (frame.error != null) {

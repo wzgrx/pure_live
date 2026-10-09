@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "platform": "douyu",
+  "sample": "S18-prop-config",
+  "capturedAt": "2026-10-09T01:48:03Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://webconf.douyucdn.cn/resource/common/prop_gift_list/prop_gift_config.json",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+      "Referer": "https://www.douyu.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "server": "Tengine",
+      "content-type": "application/json",
+      "date": "Fri, 09 Oct 2026 01:48:38 GMT",
+      "vary": "Accept-Encoding",
+      "x-oss-request-id": "6AC847F69A7EF8323197C7C6",
+      "last-modified": "Fri, 09 Oct 2026 01:44:32 GMT",
+      "x-oss-object-type": "Normal",
+      "x-oss-hash-crc64ecma": "1029388711440232796",
+      "x-oss-storage-class": "Standard",
+      "content-md5": "IQDbmzTvPMfRhtG3SQjQyw==",
+      "x-oss-server-time": "10",
+      "content-encoding": "gzip",
+      "x-request-id": "9db4cb7e-3aa1-44d4-94bf-da48d5b11283",
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "*",
+      "access-control-max-age": "5",
+      "access-control-expose-headers": "*",
+      "access-control-allow-headers": "*",
+      "cache-control": "max-age=60",
+      "x-gw-cache-status": "MISS",
+      "via": "cache24.l2nm125-2[28,27,200-0,M], cache24.l2nm125-2[29,0], ens-cache5.cn9479[57,57,200-0,M], ens-cache4.cn9479[59,0]",
+      "ali-swift-global-savetime": "1791510518",
+      "x-cache": "MISS TCP_MISS dirn:11:719865714",
+      "x-swift-savetime": "Fri, 09 Oct 2026 01:48:38 GMT",
+      "x-swift-cachetime": "60",
+      "c-via": "200",
+      "timing-allow-origin": "*",
+      "eagleid": "76b7ae1817915105186193129e"
+    }
+  },
+  "raw": {
+    "sha256": "ae8c069a415c68344a6b30347a84d73675f0e38207143797037b2cff42310126",
+    "length": 1473612
+  },
+  "body": "body.txt",
+  "scrubbed": [],
+  "trimmed": [
+    "$.data: 4 of 1585 props kept, whole (824 粉丝荧光棒 and 520 稳 of S13-live and S15-gifts, 22037 锦鲤飞舟, 1537 心里只有你)"
+  ],
+  "tool": "curl, anonymous, no cookie (D07.3); trimmed by hand"
+}

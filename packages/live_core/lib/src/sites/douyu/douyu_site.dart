@@ -1,3 +1,4 @@
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:live_core/src/links.dart';
@@ -223,8 +224,126 @@ final class DouyuSite extends LiveSite
     );
     final result = DouyuApi.roomDetail(response.text, requestedId: requested, status: response.status);
     _remember(requested, result.rid);
-    return result.room.copyWith(data: DouyuRoomData(result.rid), danmakuData: DouyuDanmakuArgs(result.rid));
+    final canonical = result.rid;
+    return result.room.copyWith(
+      data: DouyuRoomData(canonical),
+      danmakuData: DouyuDanmakuArgs(canonical, gifts: result.gifts, moreGifts: () => moreGifts(canonical)),
+    );
   }
+
+  // Gifts (D07.3) -------------------------------------------------------------
+
+  /// How long a room's gift list ([DouyuApi.giftListUrl]) is reused.
+  static const Duration giftListLifetime = Duration(minutes: 30);
+
+  /// How long the prop table ([DouyuApi.propGiftUrl], 1.4 MB, the same for
+  /// every room) is reused.
+  static const Duration propTableLifetime = Duration(hours: 6);
+
+  /// How long a failed gift list or prop table is not asked for again.
+  static const Duration giftRetryAfter = Duration(minutes: 5);
+
+  /// Rooms whose gift lists are kept; the least recent goes first.
+  static const int giftListRooms = 16;
+
+  final Map<String, ({Future<DouyuGiftCatalog> gifts, DateTime at, bool failed})> _giftLists = {};
+  ({Future<DouyuGiftCatalog> gifts, DateTime at, bool failed})? _propTable;
+
+  /// The gifts room [rid]'s danmaku may name beyond `betard`'s: its gift
+  /// list with the prop table over it (the two share no id). Each is
+  /// fetched once for concurrent callers and reused ([giftListLifetime],
+  /// [propTableLifetime]); one that fails counts as empty and is asked for
+  /// again after [giftRetryAfter]. Parsed off the calling isolate (the prop
+  /// table is 1.4 MB). Never throws: no catalogue is the danmaku as before.
+  Future<DouyuGiftCatalog> moreGifts(String rid) async {
+    final id = rid.trim();
+    final (list, props) = await (id.isEmpty ? Future.value(DouyuGiftCatalog.empty) : _giftListOf(id), _props()).wait;
+    return list.merge(props);
+  }
+
+  Future<DouyuGiftCatalog> _giftListOf(String rid) {
+    final cached = _giftLists.remove(rid);
+    if (cached != null && _fresh(cached, giftListLifetime)) {
+      _giftLists[rid] = cached;
+      return cached.gifts;
+    }
+    final at = _now();
+    late final Future<DouyuGiftCatalog> gifts;
+    gifts = _catalogue(
+      LiveRequest(
+        site: _site,
+        url: DouyuApi.giftListUrl.replace(queryParameters: {'rid': rid}),
+        headers: {'user-agent': DouyuApi.userAgent, 'referer': 'https://www.douyu.com/$rid'},
+      ),
+      _parseGiftList,
+      failed: () {
+        if (identical(_giftLists[rid]?.gifts, gifts)) {
+          _giftLists[rid] = (gifts: Future.value(DouyuGiftCatalog.empty), at: _now(), failed: true);
+        }
+      },
+    );
+    _giftLists[rid] = (gifts: gifts, at: at, failed: false);
+    while (_giftLists.length > giftListRooms) {
+      _giftLists.remove(_giftLists.keys.first);
+    }
+    return gifts;
+  }
+
+  Future<DouyuGiftCatalog> _props() {
+    final cached = _propTable;
+    if (cached != null && _fresh(cached, propTableLifetime)) return cached.gifts;
+    final at = _now();
+    late final Future<DouyuGiftCatalog> gifts;
+    gifts = _catalogue(
+      LiveRequest(
+        site: _site,
+        url: DouyuApi.propGiftUrl,
+        headers: const {'user-agent': DouyuApi.userAgent, 'referer': 'https://www.douyu.com/'},
+      ),
+      _parsePropTable,
+      failed: () {
+        if (identical(_propTable?.gifts, gifts)) {
+          _propTable = (gifts: Future.value(DouyuGiftCatalog.empty), at: _now(), failed: true);
+        }
+      },
+    );
+    _propTable = (gifts: gifts, at: at, failed: false);
+    return gifts;
+  }
+
+  bool _fresh(({Future<DouyuGiftCatalog> gifts, DateTime at, bool failed}) entry, Duration lifetime) {
+    final age = _now().difference(entry.at);
+    return age >= Duration.zero && age < (entry.failed ? giftRetryAfter : lifetime);
+  }
+
+  /// [request]'s answer through [parse] in another isolate; an empty
+  /// catalogue after calling [failed] when either fails.
+  Future<DouyuGiftCatalog> _catalogue(
+    LiveRequest request,
+    DouyuGiftCatalog Function(({String text, int status})) parse, {
+    required void Function() failed,
+  }) async {
+    try {
+      final response = await _send(request);
+      return await _parseOff(parse, (text: response.text, status: response.status));
+    } on Object {
+      failed();
+      return DouyuGiftCatalog.empty;
+    }
+  }
+
+  /// [parse] of [answer] in a new isolate; static, so the closure it sends
+  /// holds nothing else.
+  static Future<DouyuGiftCatalog> _parseOff(
+    DouyuGiftCatalog Function(({String text, int status})) parse,
+    ({String text, int status}) answer,
+  ) => Isolate.run(() => parse(answer));
+
+  static DouyuGiftCatalog _parseGiftList(({String text, int status}) answer) =>
+      DouyuApi.giftList(answer.text, status: answer.status);
+
+  static DouyuGiftCatalog _parsePropTable(({String text, int status}) answer) =>
+      DouyuApi.propGifts(answer.text, status: answer.status);
 
   /// The rid behind room page `www.douyu.com/<address>`: an alias redirects
   /// to `/<rid>`, a 靓号 page names its rid; null when neither.

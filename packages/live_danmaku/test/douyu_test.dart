@@ -18,6 +18,14 @@ final List<({String dir, Uint8List bytes})> _frames = [
     if (jsonDecode(line) case {'dir': final String dir, 'b64': final String b64}) (dir: dir, bytes: base64Decode(b64)),
 ];
 
+/// The catalogue of the recorded answers (D07.3): `betard`'s room gifts
+/// (S05-offline), the room's gift list (S17) and the prop table (S18), as
+/// `DouyuSite` merges them.
+DouyuGiftCatalog _catalogue() =>
+    DouyuApi.roomGifts(File('../../fixtures/douyu/S05-offline/body.json').readAsStringSync())
+        .merge(DouyuApi.giftList(File('../../fixtures/douyu/S17-gift-list/body.json').readAsStringSync()))
+        .merge(DouyuApi.propGifts(File('../../fixtures/douyu/S18-prop-config/body.txt').readAsStringSync()));
+
 /// 3.x's output for S13-live (fixtures/douyu/danmaku/legacy_expected.dart).
 final Map<String, Object?> _recorded =
     (_json('S13-live/expected.json')! as Map<String, Object?>)['value']! as Map<String, Object?>;
@@ -308,12 +316,19 @@ void main() {
         'color': '#ffffff',
         'messageId': '',
         'sentAt': null,
-        'userLevel': '',
-        'fansLevel': '',
-        'fansName': '',
+        // D07.3: the sender's level and fan medal (`level`, `bnn`, `bl`).
+        'userLevel': '39',
+        'fansLevel': '22',
+        'fansName': '集团军',
         'isLocal': false,
         'data': {'id': '824', 'name': '粉丝荧光棒', 'count': 10, 'combo': 10, 'receiver': 'yyfyyf'},
       });
+      // Every one of them came from the backpack (`gpf` 1): free, no value.
+      final presents = [for (final gift in gifts) gift.data! as DouyuGift];
+      expect(presents.every((gift) => gift.backpack && gift.free && gift.totalValue == null), isTrue);
+      expect(presents.where((gift) => gift.id == '824'), hasLength(119));
+      // A medal-less sender has no fan level either.
+      expect(gifts.where((m) => m.fansName.isEmpty).every((m) => m.fansLevel.isEmpty), isTrue);
     });
   });
 
@@ -342,16 +357,17 @@ void main() {
         ),
       );
       expect(gifts.first.message, '精英宝典 ×1');
-      // E05.5: the shared gift; no price in the packet.
+      // E05.5: the shared gift; no price in the packet, and no catalogue.
       expect(
-        (first.comboTotal, first.unitPrice, first.totalValue, first.unit, first.tier),
-        (1, null, null, LiveGiftUnit.other, LiveGiftTier.normal),
+        (first.comboTotal, first.unitPrice, first.totalValue, first.unit, first.tier, first.free, first.iconUrl),
+        (1, null, null, LiveGiftUnit.other, LiveGiftTier.normal, false, null),
       );
       expect(gifts.first.gift, same(first));
-      // A backpack prop has gfid 0: no gift id.
+      expect(gifts.first.userLevel, '2');
+      // A backpack prop has gfid 0: its id is the pid (D07.3), and it is free.
       final prop = gifts.map((m) => m.data! as DouyuGift).firstWhere((gift) => gift.name == '陪伴印章');
-      expect(prop.id, isEmpty);
-      expect(prop.comboKey, endsWith(':陪伴印章'), reason: 'named by gfn without a gfid');
+      expect((prop.id, prop.backpack, prop.free), ('3410', true, true));
+      expect(prop.comboKey, endsWith(':3410'));
       final names = {for (final m in gifts) (m.data! as DouyuGift).name};
       expect(names, containsAll(['陪伴印章', '粉丝荧光棒', '精英宝典', '精英令', '国庆快乐']));
     });
@@ -363,6 +379,114 @@ void main() {
         type: DouyuDanmakuProtocol.serverPacketType,
       );
       expect(DouyuDanmakuProtocol.decode(unnamed, roomId: roomId), isEmpty);
+    });
+  });
+
+  group('gift catalogue (D07.3: S05 betard, S17 gift list, S18 prop table)', () {
+    final sample = _json('S15-gifts/packets.json')! as Map<String, Object?>;
+    final roomId = sample['roomId']! as String;
+    final frame = [
+      for (final body in sample['packets']! as List<Object?>)
+        ...DouyuDanmakuProtocol.packet(body! as String, type: DouyuDanmakuProtocol.serverPacketType),
+    ];
+    final catalogue = _catalogue();
+
+    LiveMessage dgb(String fields, {DouyuGiftCatalog? gifts}) => DouyuDanmakuProtocol.decode(
+      DouyuDanmakuProtocol.packet(
+        'type@=dgb/rid@=$roomId/uid@=7/nn@=观众/level@=12/$fields',
+        type: DouyuDanmakuProtocol.serverPacketType,
+      ),
+      roomId: roomId,
+      gifts: gifts ?? catalogue,
+    ).single;
+
+    test('a paid gift of the gift list: price in fen, value, picture, tier', () {
+      final rocket = dgb('gfid@=20004/gfn@=火箭/gfcnt@=1/hits@=1/').gift!;
+      expect(
+        (rocket.unitPrice, rocket.totalValue, rocket.unit, rocket.free, rocket.tier),
+        (50000, 50000, LiveGiftUnit.fen, false, LiveGiftTier.precious),
+      );
+      expect(
+        rocket.iconUrl,
+        Uri.parse('https://gfs-op.douyucdn.cn/dygift/2019/02/18/8bab2f98ab4d3429ffe00472a1a817e5.png'),
+      );
+      // Ten 小心心 (0.1 yuan each): 1 yuan, normal.
+      final hearts = dgb('gfid@=24491/gfn@=小心心/gfcnt@=10/hits@=10/').gift!;
+      expect((hearts.unitPrice, hearts.totalValue, hearts.tier), (10, 100, LiveGiftTier.normal));
+      // 飞机 ×1: 100 yuan, precious; 赞 ×100: 10 yuan, valuable.
+      expect(dgb('gfid@=20003/gfn@=飞机/gfcnt@=1/').gift!.tier, LiveGiftTier.precious);
+      expect(dgb('gfid@=20006/gfn@=赞/gfcnt@=100/').gift!.tier, LiveGiftTier.valuable);
+    });
+
+    test("betard's room gifts: 火箭 by its old id, 100鱼丸 free", () {
+      final rocket = dgb('gfid@=196/gfn@=火箭/gfcnt@=2/').gift!;
+      expect((rocket.unitPrice, rocket.totalValue, rocket.tier), (50000, 100000, LiveGiftTier.precious));
+      expect(rocket.iconUrl, Uri.parse('https://gfs-op.douyucdn.cn/dygift/1609/8fdc7b6395b93729eed49429d2776a73.png'));
+      final balls = dgb('gfid@=191/gfn@=100鱼丸/gfcnt@=1/').gift!;
+      expect((balls.free, balls.unitPrice, balls.totalValue, balls.tier), (true, null, null, LiveGiftTier.normal));
+      expect(balls.iconUrl, isNotNull);
+    });
+
+    test('a 鱼丸 gift of the gift list is free', () {
+      final star = dgb('gfid@=20008/gfn@=超大丸星/gfcnt@=1/').gift!;
+      expect((star.free, star.totalValue, star.unit), (true, null, LiveGiftUnit.other));
+    });
+
+    test('S15-gifts: 国庆快乐 priced, 粉丝荧光棒 a free prop with its picture, 精英宝典 known by name only', () {
+      final gifts = DouyuDanmakuProtocol.decode(frame, roomId: roomId, gifts: catalogue);
+      expect(gifts, hasLength(57), reason: 'the catalogue drops nothing');
+      DouyuGift named(String name) => gifts.map((m) => m.data! as DouyuGift).firstWhere((g) => g.name == name);
+      final national = named('国庆快乐');
+      expect(
+        (national.count, national.unitPrice, national.totalValue, national.unit, national.free),
+        (9, 10, 90, LiveGiftUnit.fen, false),
+      );
+      expect(national.iconUrl?.host, 'gfs-op.douyucdn.cn');
+      final stick = named('粉丝荧光棒');
+      expect(
+        (stick.id, stick.backpack, stick.free, stick.totalValue, stick.tier),
+        ('824', true, true, null, LiveGiftTier.normal),
+      );
+      expect(stick.iconUrl, Uri.parse('https://gfs-op.douyucdn.cn/dygift/1705/7d724fb3d7e7d4a463a3e74e9929b919.png'));
+      // In no catalogue: the name and nothing else, not free (D-003).
+      final book = named('精英宝典');
+      expect(
+        (book.unitPrice, book.totalValue, book.unit, book.free, book.iconUrl),
+        (null, null, LiveGiftUnit.other, false, null),
+      );
+      // 陪伴印章 (gfid 0, pid 3410): no catalogue knows pids; free all the same.
+      final seal = named('陪伴印章');
+      expect((seal.id, seal.free, seal.iconUrl), ('3410', true, null));
+    });
+
+    test("the combo key and count are the packet's, catalogue or not", () {
+      final plain = DouyuDanmakuProtocol.decode(frame, roomId: roomId);
+      final priced = DouyuDanmakuProtocol.decode(frame, roomId: roomId, gifts: catalogue);
+      expect(
+        [for (final m in priced) (m.gift!.comboKey, m.gift!.comboTotal, m.gift!.count, m.message)],
+        [for (final m in plain) (m.gift!.comboKey, m.gift!.comboTotal, m.gift!.count, m.message)],
+      );
+    });
+
+    test('a blank gfn takes the catalogue name; unknown and blank gives nothing', () {
+      expect(dgb('gfid@=20004/gfn@=/gfcnt@=1/').message, '火箭 ×1');
+      expect(
+        DouyuDanmakuProtocol.decode(
+          DouyuDanmakuProtocol.packet(
+            'type@=dgb/rid@=$roomId/uid@=7/gfid@=99999/gfcnt@=1/',
+            type: DouyuDanmakuProtocol.serverPacketType,
+          ),
+          roomId: roomId,
+          gifts: catalogue,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('no catalogue: as before (name, count, combo; no price, no picture)', () {
+      final rocket = dgb('gfid@=20004/gfn@=火箭/gfcnt@=1/hits@=1/', gifts: DouyuGiftCatalog.empty).gift!;
+      expect(rocket, const DouyuGift(id: '20004', name: '火箭', count: 1, combo: 1, comboKey: '7:20004'));
+      expect(rocket.tier, LiveGiftTier.normal);
     });
   });
 
@@ -692,6 +816,55 @@ void main() {
       connector.channels.last.incoming.add(chat('from the second room'));
       await _until(() => _messages(events).isNotEmpty);
       expect(_messages(events).map((message) => message.message), ['from the second room']);
+      await connection.close();
+    });
+
+    test("prices gifts by betard's catalogue at once and by the fetched one once it arrives (D07.3)", () async {
+      final connector = _Connector();
+      final connection = DouyuDanmakuConnection(connector: connector.call);
+      final events = _record(connection);
+      final more = Completer<DouyuGiftCatalog>();
+      var fetches = 0;
+      final args = DouyuDanmakuArgs(
+        _roomId,
+        gifts: DouyuApi.roomGifts(File('../../fixtures/douyu/S05-offline/body.json').readAsStringSync()),
+        moreGifts: () {
+          fetches++;
+          return more.future;
+        },
+      );
+      await connection.connect(args);
+      final channel = connector.channels.single;
+      Uint8List dgb(String id) => DouyuDanmakuProtocol.packet(
+        'type@=dgb/rid@=$_roomId/uid@=1/nn@=A/gfid@=$id/gfn@=礼物/gfcnt@=1/',
+        type: DouyuDanmakuProtocol.serverPacketType,
+      );
+      List<LiveGift> gifts() => [
+        for (final event in events)
+          if (event case DanmakuReceived(:final message) when message.gift != null) message.gift!,
+      ];
+      channel.incoming
+        ..add(dgb('196'))
+        ..add(dgb('20004'));
+      await _until(() => gifts().length == 2);
+      expect([for (final gift in gifts()) gift.unitPrice], [50000, null], reason: 'only betard so far');
+      more.complete(_catalogue());
+      await _until(() => connection.gifts.length > 13);
+      channel.incoming.add(dgb('20004'));
+      await _until(() => gifts().length == 3);
+      expect(gifts().last.unitPrice, 50000);
+      expect(connection.gifts['196']?.price, 50000, reason: "betard's stay");
+      expect(fetches, 1);
+      await connection.close();
+    });
+
+    test('a failing catalogue fetch leaves the gifts as they are', () async {
+      final connector = _Connector();
+      final connection = DouyuDanmakuConnection(connector: connector.call);
+      await connection.connect(DouyuDanmakuArgs(_roomId, moreGifts: () async => throw StateError('offline')));
+      await _wait(const Duration(milliseconds: 20));
+      expect(connection.gifts.isEmpty, isTrue);
+      expect(connection.isConnected, isTrue);
       await connection.close();
     });
 

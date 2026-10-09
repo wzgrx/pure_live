@@ -311,6 +311,110 @@ void main() {
     });
   });
 
+  group('gift catalogue (D07.3)', () {
+    test('S05-offline betard: 13 room gifts with price in fen, picture under gfs-op, effect; 鱼丸 gifts free', () {
+      final gifts = DouyuApi.roomGifts(_sample('S05-offline').body);
+      expect(gifts, hasLength(13));
+      expect(
+        gifts['196'],
+        DouyuGiftInfo(
+          id: '196',
+          name: '火箭',
+          price: 50000,
+          iconUrl: Uri.parse('https://gfs-op.douyucdn.cn/dygift/1609/8fdc7b6395b93729eed49429d2776a73.png'),
+          effect: '143',
+        ),
+      );
+      expect(gifts['1005']?.price, 200000);
+      // unit 1 is 鱼丸: free, no price.
+      expect((gifts['191']?.free, gifts['191']?.price), (true, null));
+      expect((gifts['1571']?.name, gifts['1571']?.free), ('超大丸星', true));
+      expect(gifts.ids.where((id) => !gifts[id]!.free).every((id) => gifts[id]!.price! > 0), isTrue);
+      // The same answer through roomDetail.
+      final detail = DouyuApi.roomDetail(_sample('S05-offline').body, requestedId: '71415');
+      expect(detail.gifts.ids.toSet(), gifts.ids.toSet());
+      expect(DouyuApi.roomDetail(_sample('S05-live').body, requestedId: '5526219').gifts, hasLength(12));
+    });
+
+    test('betard without room_gift (S05-replay-videoloop) or with odd entries: what it can read', () {
+      expect(DouyuApi.roomGifts(_sample('S05-replay-videoloop').body).isEmpty, isTrue);
+      expect(DouyuApi.roomGifts('not json').isEmpty, isTrue);
+      final odd = DouyuApi.roomGifts(
+        jsonEncode({
+          'room_gift': {
+            'gift': {
+              'a': {'id': '1', 'name': '甲', 'price': '100', 'unit': '2', 'pc_icon': 'https://x.example/a.png'},
+              'b': {'id': '0', 'name': '乙'},
+              'c': {'id': '3', 'name': ''},
+              'd': {'id': '4', 'name': '丁', 'price': '0', 'unit': '2', 'pc_icon': 'javascript:alert(1)'},
+              'e': 'text',
+              'f': {'id': '6', 'name': '己', 'pc_icon': 'https://gfs-test-op.douyucdn.cn/dygift/x.png'},
+            },
+          },
+        }),
+      );
+      expect(odd.ids.toList(), ['1', '4', '6']);
+      expect(odd['1']?.iconUrl, Uri.parse('https://x.example/a.png'));
+      expect((odd['4']?.price, odd['4']?.iconUrl), (null, null));
+      expect(odd['6']?.iconUrl, isNull, reason: 'the test host answers 404');
+    });
+
+    test('S17 gift list: price in fen for 鱼翅, 鱼丸 free, picture from picUrlPrefix', () {
+      final gifts = DouyuApi.giftList(_sample('S17-gift-list').body);
+      expect(gifts, hasLength(10));
+      expect(
+        gifts['20004'],
+        DouyuGiftInfo(
+          id: '20004',
+          name: '火箭',
+          price: 50000,
+          iconUrl: Uri.parse('https://gfs-op.douyucdn.cn/dygift/2019/02/18/8bab2f98ab4d3429ffe00472a1a817e5.png'),
+        ),
+      );
+      expect((gifts['24644']?.name, gifts['24644']?.price), ('国庆快乐', 10));
+      expect((gifts['20000']?.free, gifts['20000']?.price), (true, null), reason: '100鱼丸 is paid in 鱼丸');
+      expect(gifts['20008']?.free, isTrue);
+    });
+
+    test('a gift list that is not one: ApiChanged; a refusal: RiskControl', () {
+      expect(() => DouyuApi.giftList('{"error":1,"msg":"x"}'), throwsA(isA<ApiChanged>()));
+      expect(() => DouyuApi.giftList('{"error":0,"data":{}}'), throwsA(isA<ApiChanged>()));
+      expect(() => DouyuApi.giftList('<html>', status: 403), throwsA(isA<RiskControl>()));
+      expect(DouyuApi.giftList('{"error":0,"data":{"giftList":[{"id":0},{"name":"x"}]}}').isEmpty, isTrue);
+    });
+
+    test('S18 prop table (JSONP): props by gift id, all free, static picture first', () {
+      final props = DouyuApi.propGifts(_sample('S18-prop-config').body);
+      expect(props, hasLength(4));
+      expect(
+        props['824'],
+        DouyuGiftInfo(
+          id: '824',
+          name: '粉丝荧光棒',
+          free: true,
+          iconUrl: Uri.parse('https://gfs-op.douyucdn.cn/dygift/1705/7d724fb3d7e7d4a463a3e74e9929b919.png'),
+        ),
+      );
+      expect(props['520']?.name, '稳');
+      // 22037's bimg is on the test host: the full picture instead.
+      expect(props['22037']?.iconUrl?.host, 'gfs-op.douyucdn.cn');
+      expect(props['22037']?.iconUrl?.path, isNot(contains('318ed7ac571edc441c74d8f57e0a4119')));
+      expect(() => DouyuApi.propGifts('DYConfigCallback({"error":0});'), throwsA(isA<ApiChanged>()));
+      expect(() => DouyuApi.propGifts('', status: 502), throwsA(isA<NetworkFailure>()));
+    });
+
+    test('merging: the later catalogue wins an id both have; empty merges are the same catalogue', () {
+      final room = DouyuApi.roomGifts(_sample('S05-offline').body);
+      final list = DouyuApi.giftList(_sample('S17-gift-list').body);
+      final merged = room.merge(list);
+      expect(merged, hasLength(room.length + list.length), reason: 'betard and the list share no id');
+      expect(identical(room.merge(DouyuGiftCatalog.empty), room), isTrue);
+      expect(identical(DouyuGiftCatalog.empty.merge(list), list), isTrue);
+      final renamed = DouyuGiftCatalog(const {'196': DouyuGiftInfo(id: '196', name: '新火箭')});
+      expect(room.merge(renamed)['196']?.name, '新火箭');
+    });
+  });
+
   group('S06/S07 signing', () {
     test('S06 descriptor: usable at capture and 31 s before expiry, not 30 s before; the form matches 3.x', () {
       final fixture = _sample('S06-encryption');

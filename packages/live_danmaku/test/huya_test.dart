@@ -616,7 +616,17 @@ void main() {
       expect(gifts.every((message) => RegExp(r'^huya:[1-9][0-9]+$').hasMatch(message.messageId)), isTrue);
       final first = gifts.first;
       expect((first.userName, first.userId, first.message), ('观众1', '9540329646482', '粉丝通行证 ×1'));
-      expect(first.data, const HuyaGift(id: '22225', name: '粉丝通行证', count: 1, combo: 1, payTotal: 10));
+      expect(
+        first.data,
+        const HuyaGift(
+          id: '22225',
+          name: '粉丝通行证',
+          count: 1,
+          combo: 1,
+          payTotal: 10,
+          comboKey: '9540329646482:1790800570981',
+        ),
+      );
       // E05.5: the shared gift; `lPayTotal`'s unit is not documented.
       expect(
         (first.gift?.comboTotal, first.gift?.totalValue, first.gift?.unit, first.gift?.tier),
@@ -629,6 +639,32 @@ void main() {
       expect(combo, [for (var hit = 1; hit <= 5; hit++) ('观众2', hit)]);
       expect((gifts[1].data! as HuyaGift).payTotal, 0, reason: '虎粮 is free');
       expect(gifts[1].gift?.totalValue, isNull);
+    });
+
+    test('D07.6: the combo key is the sender and lComboSeqId (tag 39), the same for every hit of a combo', () {
+      final gifts = [
+        for (final line in File('$_root/S18-gift/frames.jsonl').readAsLinesSync())
+          ...HuyaDanmakuProtocol.decode(base64Decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String))
+              .messages,
+      ];
+      final keys = [for (final message in gifts) message.gift!.comboKey];
+      // 观众2's 虎粮 combo: 18 packets (hit 18 was not received), one key.
+      expect(keys.sublist(1, 19).toSet(), {'7482778489185:1790800575070'});
+      expect(
+        [for (final message in gifts.sublist(1, 19)) message.gift!.comboTotal],
+        [
+          for (var hit = 1; hit <= 19; hit++)
+            if (hit != 18) hit,
+        ],
+      );
+      // A new send is a new combo, even of the same gift by the same viewer.
+      expect(keys[19], '9396536651700:1790800607093');
+      expect(keys[20], '9396536651700:1790800610286');
+      // 虎粮 ×10 without a sequence id: no key (D07.1 merges by sender and gift).
+      expect([keys[24], keys[26]], ['', '']);
+      expect(keys.where((key) => key.isNotEmpty).toSet(), hasLength(8));
+      expect(HuyaDanmakuProtocol.comboKey(7, 0), '');
+      expect(HuyaDanmakuProtocol.comboKey(0, 12), '0:12');
     });
 
     test('a gift without a name, or a body that is not Tars, gives no message; the frame goes on', () {

@@ -410,7 +410,7 @@ void main() {
   });
 
   group('recordings against v4', () {
-    test('S07-live: joins where v4 joined; chats and gifts as v4 decoded them, but no combo hit (B-10)', () {
+    test('S07-live: joins where v4 joined; chats and gifts as v4 decoded them, the combo hit too (D07.6)', () {
       final v4 = _v4Frames('S07-live');
       final roomId = _roomOf('S07-live');
       final received = _frames('S07-live').where((frame) => frame.dir == 'in').toList();
@@ -424,10 +424,9 @@ void main() {
           if (event['kind'] == 'gift') gifts.add(frame.index);
         }
         chats += v4Events.where((event) => (event! as Map<String, Object?>)['kind'] == 'chat').length;
-        // B-10: frame 15 is a combo hit (isDoubleHit true, count 1 so far):
-        // v4 reported it, the combo's line (not recorded) would.
-        final kept = frame.index == 15 ? const <Object?>[] : v4Events;
-        expect(_decoded(frame.text, roomId: roomId), {...expected, 'events': kept}, reason: 'frame ${frame.index}');
+        // Frame 15 is a combo hit (isDoubleHit true, count 1 so far): B-10
+        // left it out, D07.6 reports it as v4 did.
+        expect(_decoded(frame.text, roomId: roomId), expected, reason: 'frame ${frame.index}');
       }
       expect(chats, 5);
       expect(gifts, [15, 44, 54]);
@@ -590,12 +589,12 @@ void main() {
       ];
       expect(kinds, [
         [LiveMessageType.gift], // 220, not a combo: 7 gifts at once
-        <LiveMessageType>[], // 220, a combo hit
+        [LiveMessageType.gift], // 220, a combo hit (D07.6)
         [LiveMessageType.gift], // 10004: that combo's line
         [LiveMessageType.gift], // 220, not a combo: a free guard badge
         <LiveMessageType>[], // 241: a question asked (the page ignores it)
         <LiveMessageType>[], // 301, uiType 0: the board cleared
-        <LiveMessageType>[], // 220, a combo hit
+        [LiveMessageType.gift], // 220, a combo hit (D07.6)
         [LiveMessageType.gift], // 10004: that combo's line
         [LiveMessageType.superChat], // 240, uiType 2: the paid question
         [LiveMessageType.gift], // 220 without isDoubleHit
@@ -672,8 +671,33 @@ void main() {
           price: 700,
           icon: (decoded[0].single.data! as KilakilaGift).icon,
           receiverName: host,
+          unitPrice: 100,
+          comboKey: '2609302335130252593',
         ),
       );
+      // D07.6: a combo's hits and its line share `no`; both count the whole
+      // combo so far. The hit's price is the combo's so far (204 for 3).
+      final pigHit = decoded[6].single.gift!;
+      final pigLine = decoded[7].single.gift!;
+      expect(
+        (pigHit.comboKey, pigHit.count, pigHit.comboTotal, pigHit.unitPrice, pigHit.totalValue),
+        ('2609302340470215165', 3, 3, 68, 204),
+      );
+      expect(
+        (pigLine.comboKey, pigLine.count, pigLine.comboTotal, pigLine.unitPrice, pigLine.totalValue),
+        ('2609302340470215165', 3, 3, 68, 204),
+      );
+      final starHit = decoded[1].single.gift!;
+      expect((starHit.comboKey, starHit.count, starHit.comboTotal, starHit.free), ('2609302339190260361', 6, 6, true));
+      expect(decoded[2].single.gift!.comboKey, starHit.comboKey);
+      expect(decoded[0].single.gift!.comboTotal, isNull, reason: 'sent at once');
+      expect((decoded[3].single.gift!.comboKey, decoded[9].single.gift!.comboKey), ('', ''), reason: 'no `no`');
+      // The connection leaves out the two lines that repeat their hit.
+      final combos = KilakilaGiftCombos();
+      expect([for (final messages in decoded) ...messages.where(combos.report)].map((m) => m.messageId), [
+        for (final (index, messages) in decoded.indexed)
+          if (index != 2 && index != 7) ...messages.map((m) => m.messageId),
+      ]);
       expect((decoded[2].single.gift!.free, decoded[3].single.gift!.receiverName), (true, ''));
       final line = decoded[2].single;
       expect(
@@ -742,9 +766,15 @@ void main() {
           price: 200,
           receiverName: '主播',
           icon: Uri.parse('https://img.hongrenshuo.com.cn/gift.png'),
+          unitPrice: 100,
         ),
       );
-      expect(gift(giftContent(hit: true)), isNull, reason: 'a combo hit');
+      // D07.6: a combo hit: the combo so far, the price of one when it
+      // divides.
+      final hit = gift(giftContent(hit: true))!;
+      expect((hit.count, hit.comboTotal, hit.price, hit.unitPrice), (2, 2, 200, 100));
+      expect(gift(giftContent(hit: true, count: 3))!.unitPrice, isNull, reason: '200 / 3');
+      expect(gift(giftContent(hit: true, count: 3, price: 0))!.unitPrice, 0);
       expect(gift(giftContent(hit: 'true')), isNotNull, reason: 'only true is a hit');
       expect(gift(giftContent(hit: null))!.price, 200);
       expect(gift(giftContent(type: KilakilaDanmakuProtocol.giftLineType, hit: true))!.price, 400, reason: '2 × 200');
@@ -864,7 +894,48 @@ void main() {
         LiveMessageType.superChat,
         LiveMessageType.gift,
       ]);
+      // D07.6: the combo hits, not the lines that repeat their counts.
+      expect([for (final message in _messages(events)) message.gift?.comboTotal], [null, 6, null, 3, null, null]);
       await connection.close();
+    });
+
+    test('D07.6: a combo is reported while its count goes up; a line that says more, or alone, is reported', () {
+      LiveMessage combo(String no, int count, {bool line = false}) => read(
+        message(
+          giftContent(
+            type: line ? KilakilaDanmakuProtocol.giftLineType : KilakilaDanmakuProtocol.giftType,
+            hit: !line,
+            count: count,
+            price: line ? 10 : 10 * count,
+          )..update('c', (item) => {...item! as Map<String, Object?>, 'no': no}),
+        ),
+      ).single;
+      final combos = KilakilaGiftCombos();
+      expect(
+        [
+          for (final message in [
+            combo('a', 1),
+            combo('a', 2),
+            combo('a', 2), // a hit sent twice
+            combo('b', 1),
+            combo('a', 4), // hit 3 skipped
+            combo('a', 5, line: true), // the last hit skipped: the line says more
+            combo('b', 1, line: true), // repeats the hit
+            combo('c', 3, line: true), // no hit seen
+          ])
+            combos.report(message),
+        ],
+        [true, true, false, true, true, true, false, true],
+      );
+      // Not a combo: always reported.
+      expect(combos.report(read(message(giftContent())).single), isTrue);
+      expect(combos.report(read(message(giftContent())).single), isTrue);
+      // The oldest combo is forgotten past the capacity.
+      for (var index = 0; index < KilakilaGiftCombos.capacity; index++) {
+        combos.report(combo('n$index', 1));
+      }
+      expect(combos.report(combo('a', 5, line: true)), isTrue, reason: 'forgotten');
+      expect(combos.report(combo('n${KilakilaGiftCombos.capacity - 1}', 1, line: true)), isFalse);
     });
   });
 

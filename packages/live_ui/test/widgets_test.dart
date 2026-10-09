@@ -24,6 +24,15 @@ void main() {
       expect(File(PlatformLogos.fallback).existsSync(), isTrue);
     });
 
+    test('D08.6: every logo has its colour, opaque; other ids have none', () {
+      expect(PlatformLogos.colors.keys.toSet(), PlatformLogos.ids);
+      for (final MapEntry(key: id, value: argb) in PlatformLogos.colors.entries) {
+        expect(argb >> 24, 0xFF, reason: id);
+      }
+      expect(PlatformLogos.colorOf(' Kick '), 0xFF53FC18);
+      expect(PlatformLogos.colorOf('huajiao'), isNull);
+    });
+
     test('the icon font is bundled with this package', () {
       expect(CustomIcons.search.fontPackage, 'live_ui');
       expect(File('assets/fonts/CustomIcons.ttf').existsSync(), isTrue);

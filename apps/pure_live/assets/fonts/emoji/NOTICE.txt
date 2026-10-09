@@ -1,5 +1,7 @@
 NotoColorEmoji-Subset.ttf is a subset of Noto Color Emoji 2.057
 (https://github.com/googlefonts/noto-emoji, the COLRv1 build served by
-Google Fonts) holding only the 40 emoji of the local interaction's gifts and
-platform badges (docs/ui/compare/U.2k/src/emoji.woff2 converted to TrueType).
+Google Fonts) holding only the 74 emoji of the local interaction's gifts and
+platform badges: the 40 of docs/ui/compare/U.2k/src/emoji.woff2 and the 34
+the platform gifts of D08.6 added (fetched from the Google Fonts API with
+text=, the SVG table dropped, subset with fontTools).
 Licensed under the SIL Open Font License 1.1, see OFL.txt.

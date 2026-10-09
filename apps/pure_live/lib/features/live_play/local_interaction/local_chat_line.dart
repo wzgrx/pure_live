@@ -4,6 +4,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
 import 'package:pure_live/features/live_play/danmaku/gift_count_pulse.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_pack_badge.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// A local danmaku or gift in the chat list (U.2k-f, c10): a "本地" chip,
@@ -49,6 +50,9 @@ class LocalChatLine extends StatelessWidget {
     final gift = LocalGiftData.of(message);
     final chip = ChatChip.styleOf(theme, sizing);
     final badge = showName ? profile?.badgeLabel ?? '' : '';
+    // D08.6: the platform's logo before the badge's name; the emoji of a
+    // message from before D08.6 (it names no platform) stays as words.
+    final logo = profile?.badge != null && LocalPackBadge.hasLogo(profile?.platform) ? profile?.platform : null;
     return Padding(
       key: const ValueKey('live-play-local-line'),
       padding: EdgeInsets.symmetric(vertical: sizing.gap(4)),
@@ -79,9 +83,12 @@ class LocalChatLine extends StatelessWidget {
               chatInline(
                 ChatChip(
                   key: const ValueKey('live-play-local-badge'),
-                  text: localEmojiText(badge),
+                  text: logo == null ? localEmojiText(badge) : profile!.badgeWords,
                   background: Color(profile!.accent).withValues(alpha: 0.14),
                   style: localEmojiStyle(chip?.copyWith(color: localAccentInk(profile.accent, theme.brightness))),
+                  leading: logo == null
+                      ? null
+                      : LocalPackBadge(logo, fallback: '', size: (chip?.fontSize ?? 12) * 1.25, radius: 3),
                 ),
               ),
             if (showName)
@@ -124,10 +131,13 @@ class LocalChatLine extends StatelessWidget {
 /// and the PK partner's "对方" (E06.2 c3, the same block as "本地").
 class ChatChip extends StatelessWidget {
   /// Creates the mark.
-  const new({required this.text, required this.background, required this.style, super.key});
+  const new({required this.text, required this.background, required this.style, this.leading, super.key});
 
   /// The words.
   final String text;
+
+  /// A picture before the words (the local badge's platform logo, D08.6).
+  final Widget? leading;
 
   /// The block's colour.
   final Color background;
@@ -150,8 +160,19 @@ class ChatChip extends StatelessWidget {
         borderRadius: BorderRadius.circular((style?.fontSize ?? 12) * (style?.height ?? 18 / 12) / 2),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Text(text, style: style),
+        padding: EdgeInsets.only(left: leading == null ? 6 : 3, right: 6),
+        child: switch (leading) {
+          null => Text(text, style: style),
+          final leading => Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              leading,
+              // Flexible: a narrow list wraps the words as it wraps a chip
+              // without a picture.
+              if (text.isNotEmpty) ...[const SizedBox(width: 3), Flexible(child: Text(text, style: style))],
+            ],
+          ),
+        },
       ),
     ),
   );

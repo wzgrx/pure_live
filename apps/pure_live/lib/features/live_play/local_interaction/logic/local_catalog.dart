@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:live_core/live_core.dart';
+import 'package:live_ui/live_ui.dart' show PlatformLogos;
 
 /// How far an amount of experience is into its level (D08.3): the `level`,
 /// the experience gathered in it (`into`) and still `missing` to the next.
@@ -51,6 +52,7 @@ final class LocalPlatformPack {
     required this.levelKey,
     required this.accent,
     required this.badge,
+    this.badgeKey = 'local_badge_generic',
   });
 
   /// The platform id ([SiteIds]), or `generic`.
@@ -65,10 +67,18 @@ final class LocalPlatformPack {
   /// The level's name key ("用户等级").
   final String levelKey;
 
-  /// The theme colour, ARGB.
+  /// The badge's name key ("舰队等级").
+  final String badgeKey;
+
+  /// The theme colour, ARGB: the platform's colour
+  /// (`PlatformLogos.colors`, D08.6).
   final int accent;
 
-  /// The badge: an emoji, or two letters.
+  /// The badge as text: an emoji, or two letters. The platform's logo
+  /// (`PlatformLogos`) shows instead wherever a picture fits (D08.6); the
+  /// text stays where only words go (3.x's history line, a message's
+  /// sender name) and for a message from before D08.6, which names no
+  /// platform.
   final String badge;
 }
 
@@ -155,7 +165,8 @@ final class LocalDanmakuPreset {
 
 /// The local interaction's data, as 3.x had it
 /// (`local_interaction_controller.dart:116-724`): templates, colours, fonts,
-/// places, titles, the 34 platform packs and the gifts.
+/// places, titles, the platform packs (3.x's 34 and Kick, D08.6) and the
+/// gifts.
 abstract final class LocalCatalog {
   /// The templates, "清爽" (the default) first.
   static const presets = <LocalDanmakuPreset>[
@@ -353,56 +364,88 @@ abstract final class LocalCatalog {
     badge: '✨',
   );
 
-  static LocalPlatformPack _pack(String id, String nameKey, int accent, String badge, [String? own]) =>
-      LocalPlatformPack(
-        id: id,
-        nameKey: nameKey,
-        currencyKey: own == null ? 'local_currency_generic' : 'local_currency_$own',
-        levelKey: own == null ? 'local_level_generic' : 'local_level_$own',
-        accent: accent,
-        badge: badge,
-      );
+  /// A pack of the platform [id]: its colour is the platform's
+  /// ([PlatformLogos.colors]); [currency], [level] and [badgeName] name its
+  /// own words (`local_currency_<currency>`, `local_level_<level>`,
+  /// `local_badge_<badgeName>`), the generic ones when null.
+  static LocalPlatformPack _pack(
+    String id,
+    String nameKey,
+    String badge, {
+    String? currency,
+    String? level,
+    String? badgeName,
+  }) => LocalPlatformPack(
+    id: id,
+    nameKey: nameKey,
+    currencyKey: currency == null ? genericPack.currencyKey : 'local_currency_$currency',
+    levelKey: level == null ? genericPack.levelKey : 'local_level_$level',
+    badgeKey: badgeName == null ? genericPack.badgeKey : 'local_badge_$badgeName',
+    accent: PlatformLogos.colorOf(id) ?? genericPack.accent,
+    badge: badge,
+  );
 
-  /// The 34 platform packs in 3.x's order.
+  /// A pack of every platform ([SiteIds.supported], in its order: 3.x's 34
+  /// and Kick, D08.6). The eight of 3.x with their own words keep them; the
+  /// others name the coin, level and badge the platform has where V03.5 §2
+  /// found them (AC币, 钻石, 红豆, 奶酪, Kicks, 星币, 六币, 音符…). A
+  /// platform without a gift system of its own (Steam, JD, IPTV) and one
+  /// whose gifts are not known (blocked: YY, LiveMe, CC's own are 3.x's)
+  /// keeps the generic words.
   static final List<LocalPlatformPack> packs = List.unmodifiable([
-    _pack(SiteIds.bilibili, 'site_bilibili', 0xFF00AEEC, '📺', 'bili'),
-    _pack(SiteIds.douyu, 'site_douyu', 0xFFFF6A00, '🐟', 'douyu'),
-    _pack(SiteIds.huya, 'site_huya', 0xFFFF9800, '🐯', 'huya'),
-    _pack(SiteIds.douyin, 'site_douyin', 0xFFFE2C55, '🎵', 'douyin'),
-    _pack(SiteIds.kuaishou, 'site_kuaishou', 0xFFFF4906, '🎬', 'kuaishou'),
-    _pack(SiteIds.cc, 'site_cc', 0xFFFF4D7D, '🎮', 'cc'),
-    _pack(SiteIds.twitch, 'site_twitch', 0xFF9146FF, '💜', 'twitch'),
-    _pack(SiteIds.soop, 'site_soop', 0xFF0675E8, '🎈', 'soop'),
-    _pack(SiteIds.yy, 'site_yy', 0xFFFF6B35, '🎤'),
-    _pack(SiteIds.acfun, 'site_acfun', 0xFFFD4C5D, '🅰️'),
-    _pack(SiteIds.picarto, 'site_picarto', 0xFF25BFA4, '🎨'),
-    _pack(SiteIds.twitcasting, 'site_twitcasting', 0xFF294DDB, '📡'),
-    _pack(SiteIds.missevan, 'site_missevan', 0xFFF38AAE, '🎧'),
-    _pack(SiteIds.inke, 'site_inke', 0xFFFF4F9A, '✨'),
-    _pack(SiteIds.kilakila, 'site_kilakila', 0xFF7C5CFC, '💫'),
-    _pack(SiteIds.xiaohongshu, 'site_xiaohongshu', 0xFFFF2442, '📕'),
-    _pack(SiteIds.niconico, 'site_niconico', 0xFF252525, '📹'),
-    _pack(SiteIds.weibo, 'site_weibo', 0xFFFF8200, '🟠'),
-    _pack(SiteIds.showroom, 'site_showroom', 0xFFFF2B67, '🎟️'),
-    _pack(SiteIds.chzzk, 'site_chzzk', 0xFF00FFA3, '🎮'),
-    _pack(SiteIds.seventeenLive, 'site_17live', 0xFFFF2D55, '17'),
-    _pack(SiteIds.liveMe, 'site_liveme', 0xFF7C4DFF, 'LM'),
-    _pack(SiteIds.tiktok, 'site_tiktok', 0xFFFE2C55, 'TT'),
-    _pack(SiteIds.youtube, 'site_youtube', 0xFFFF0000, 'YT'),
-    _pack(SiteIds.bigo, 'site_bigo', 0xFF6A5CFF, 'BG'),
-    _pack(SiteIds.pandaLive, 'site_pandalive', 0xFFFE4D6A, 'PD'),
-    _pack(SiteIds.fc2Live, 'site_fc2live', 0xFFEA4C89, 'FC'),
-    _pack(SiteIds.steamBroadcast, 'site_steambroadcast', 0xFF1B2838, 'ST'),
-    _pack(SiteIds.jdLive, 'site_jdlive', 0xFFE1251B, 'JD'),
-    _pack(SiteIds.kugouLive, 'site_kugoulive', 0xFF19A7FF, 'KG'),
-    _pack(SiteIds.baiduLive, 'site_baidulive', 0xFF2932E1, 'BD'),
-    _pack(SiteIds.sixRoom, 'site_sixroom', 0xFFFF5A5F, '6R'),
-    _pack(SiteIds.lookLive, 'site_looklive', 0xFFFF2C55, 'LK'),
-    _pack(SiteIds.iptv, 'site_iptv', 0xFF00A2FF, '🌐'),
+    _pack(SiteIds.bilibili, 'site_bilibili', '📺', currency: 'bili', level: 'bili', badgeName: 'bilibili'),
+    _pack(SiteIds.douyu, 'site_douyu', '🐟', currency: 'douyu', level: 'douyu', badgeName: 'douyu'),
+    _pack(SiteIds.huya, 'site_huya', '🐯', currency: 'huya', level: 'huya', badgeName: 'huya'),
+    _pack(SiteIds.douyin, 'site_douyin', '🎵', currency: 'douyin', level: 'douyin', badgeName: 'douyin'),
+    _pack(SiteIds.kuaishou, 'site_kuaishou', '🎬', currency: 'kuaishou', level: 'kuaishou', badgeName: 'kuaishou'),
+    _pack(SiteIds.cc, 'site_cc', '🎮', currency: 'cc', level: 'cc', badgeName: 'cc'),
+    _pack(SiteIds.twitch, 'site_twitch', '💜', currency: 'twitch', level: 'twitch', badgeName: 'twitch'),
+    _pack(SiteIds.soop, 'site_soop', '🎈', currency: 'soop', level: 'soop', badgeName: 'soop'),
+    _pack(SiteIds.yy, 'site_yy', '🎤'),
+    _pack(SiteIds.acfun, 'site_acfun', '🅰️', currency: 'ac_coin', level: 'user', badgeName: 'guard'),
+    _pack(SiteIds.picarto, 'site_picarto', '🎨', currency: 'kudos', level: 'sub', badgeName: 'sub'),
+    _pack(SiteIds.twitcasting, 'site_twitcasting', '📡', currency: 'coin', level: 'user', badgeName: 'member'),
+    _pack(SiteIds.missevan, 'site_missevan', '🎧', currency: 'diamond', level: 'noble', badgeName: 'medal'),
+    _pack(SiteIds.inke, 'site_inke', '✨'),
+    _pack(SiteIds.kilakila, 'site_kilakila', '💫', currency: 'red_bean', level: 'wealth', badgeName: 'fan_club'),
+    _pack(SiteIds.xiaohongshu, 'site_xiaohongshu', '📕'),
+    _pack(SiteIds.niconico, 'site_niconico', '📹', currency: 'point', level: 'user', badgeName: 'premium'),
+    _pack(SiteIds.weibo, 'site_weibo', '🟠'),
+    _pack(SiteIds.showroom, 'site_showroom', '🎟️', currency: 'points', level: 'fans', badgeName: 'fans'),
+    _pack(SiteIds.chzzk, 'site_chzzk', '🎮', currency: 'cheese', level: 'sub', badgeName: 'sub'),
+    _pack(SiteIds.kick, 'site_kick', '💚', currency: 'kicks', level: 'sub', badgeName: 'sub'),
+    _pack(SiteIds.liveMe, 'site_liveme', 'LM'),
+    _pack(SiteIds.tiktok, 'site_tiktok', 'TT', currency: 'coin', level: 'gifter', badgeName: 'fan_club'),
+    _pack(SiteIds.youtube, 'site_youtube', 'YT', level: 'member', badgeName: 'member'),
+    _pack(SiteIds.bigo, 'site_bigo', 'BG', currency: 'diamond', level: 'user', badgeName: 'family'),
+    _pack(SiteIds.pandaLive, 'site_pandalive', 'PD', currency: 'heart', level: 'fans', badgeName: 'fans'),
+    _pack(SiteIds.fc2Live, 'site_fc2live', 'FC', currency: 'point', level: 'user', badgeName: 'member'),
+    _pack(SiteIds.steamBroadcast, 'site_steambroadcast', 'ST'),
+    _pack(SiteIds.jdLive, 'site_jdlive', 'JD'),
+    _pack(SiteIds.kugouLive, 'site_kugoulive', 'KG', currency: 'star_coin', level: 'wealth', badgeName: 'guard'),
+    _pack(SiteIds.baiduLive, 'site_baidulive', 'BD', level: 'user', badgeName: 'fans'),
+    _pack(SiteIds.sixRoom, 'site_sixroom', '6R', currency: 'six_coin', level: 'wealth', badgeName: 'guard'),
+    _pack(SiteIds.lookLive, 'site_looklive', 'LK', currency: 'note', level: 'noble', badgeName: 'guard'),
+    _pack(SiteIds.seventeenLive, 'site_17live', '17', currency: 'baby_coin', level: 'user', badgeName: 'guard'),
+    _pack(SiteIds.iptv, 'site_iptv', '🌐'),
   ]);
 
-  /// The gifts of the eight platforms that have their own; each has one
-  /// high-value gift with the big banner.
+  /// The gifts of the platforms that have their own; each has one
+  /// high-value gift with the big banner ([LocalGift.big]) and a vehicle of
+  /// its own (`LocalGiftVehicle.named`).
+  ///
+  /// The ids are stored (a history entry's `gift_id`, D08.1) and never
+  /// change; the first eight platforms' are 3.x's. The others (D08.6) are
+  /// the platform's own gifts and paid messages where V03.5 §2 names them
+  /// (AcFun's bananas, Missevan's lucky bag and nobles, KilaKila's 豆咖,
+  /// niconico's ニコニ広告, Picarto's Kudos, CHZZK's cheese, video and
+  /// mission donations, Kick's Kicks and gifted subs, YouTube's Super
+  /// Sticker, Super Chat and gifted memberships, 17LIVE's paid barrage,
+  /// lucky bag and guard, BIGO's Flower, PandaTV's signature heart,
+  /// Six Rooms' fly-screen at its 1000 six coins, LOOK's song request,
+  /// Baidu's free 拍拍), else ones like them; each is a small one (< 100,
+  /// it flies over the top), a medium one (the banner) and the big one,
+  /// priced in the pack's local coin.
   static const _platformGifts = <String, List<LocalGift>>{
     SiteIds.bilibili: [
       LocalGift(
@@ -596,10 +639,470 @@ abstract final class LocalCatalog {
         big: true,
       ),
     ],
+    // ---- D08.6 ----
+    SiteIds.acfun: [
+      LocalGift(
+        id: 'acfun_banana',
+        nameKey: 'local_gift_acfun_banana',
+        emoji: '🍌',
+        price: 10,
+        color: LiveMessageColor(255, 200, 0),
+      ),
+      LocalGift(
+        id: 'acfun_good_card',
+        nameKey: 'local_gift_acfun_good_card',
+        emoji: '🃏',
+        price: 100,
+        color: LiveMessageColor(253, 76, 93),
+      ),
+      LocalGift(
+        id: 'acfun_guard',
+        nameKey: 'local_gift_acfun_guard',
+        emoji: '🛡️',
+        price: 1200,
+        color: LiveMessageColor(222, 40, 60),
+        big: true,
+      ),
+    ],
+    SiteIds.picarto: [
+      LocalGift(
+        id: 'picarto_kudos',
+        nameKey: 'local_gift_picarto_kudos',
+        emoji: '🎨',
+        price: 10,
+        color: LiveMessageColor(52, 166, 116),
+      ),
+      LocalGift(
+        id: 'picarto_sub',
+        nameKey: 'local_gift_picarto_sub',
+        emoji: '⭐',
+        price: 500,
+        color: LiveMessageColor(36, 140, 96),
+      ),
+      LocalGift(
+        id: 'picarto_big_tip',
+        nameKey: 'local_gift_picarto_big_tip',
+        emoji: '💰',
+        price: 2000,
+        color: LiveMessageColor(20, 120, 80),
+        big: true,
+      ),
+    ],
+    SiteIds.twitcasting: [
+      LocalGift(
+        id: 'tc_tea',
+        nameKey: 'local_gift_tc_tea',
+        emoji: '🍵',
+        price: 10,
+        color: LiveMessageColor(96, 170, 70),
+      ),
+      LocalGift(
+        id: 'tc_cake',
+        nameKey: 'local_gift_tc_cake',
+        emoji: '🍰',
+        price: 100,
+        color: LiveMessageColor(30, 159, 234),
+      ),
+      LocalGift(
+        id: 'tc_fireworks',
+        nameKey: 'local_gift_tc_fireworks',
+        emoji: '🎇',
+        price: 1500,
+        color: LiveMessageColor(41, 77, 219),
+        big: true,
+      ),
+    ],
+    SiteIds.missevan: [
+      LocalGift(
+        id: 'missevan_fish',
+        nameKey: 'local_gift_missevan_fish',
+        emoji: '🐟',
+        price: 10,
+        color: LiveMessageColor(243, 138, 174),
+      ),
+      LocalGift(
+        id: 'missevan_lucky_bag',
+        nameKey: 'local_gift_missevan_lucky_bag',
+        emoji: '🧧',
+        price: 100,
+        color: LiveMessageColor(230, 57, 70),
+      ),
+      LocalGift(
+        id: 'missevan_noble',
+        nameKey: 'local_gift_missevan_noble',
+        emoji: '👑',
+        price: 1500,
+        color: LiveMessageColor(180, 100, 240),
+        big: true,
+      ),
+    ],
+    SiteIds.kilakila: [
+      LocalGift(
+        id: 'kila_douka',
+        nameKey: 'local_gift_kila_douka',
+        emoji: '☕',
+        price: 10,
+        color: LiveMessageColor(196, 120, 70),
+      ),
+      LocalGift(
+        id: 'kila_heartbeat',
+        nameKey: 'local_gift_kila_heartbeat',
+        emoji: '💓',
+        price: 200,
+        color: LiveMessageColor(254, 105, 106),
+      ),
+      LocalGift(
+        id: 'kila_castle',
+        nameKey: 'local_gift_kila_castle',
+        emoji: '🏰',
+        price: 1500,
+        color: LiveMessageColor(124, 92, 252),
+        big: true,
+      ),
+    ],
+    SiteIds.niconico: [
+      LocalGift(
+        id: 'nico_bouquet',
+        nameKey: 'local_gift_nico_bouquet',
+        emoji: '💐',
+        price: 10,
+        color: LiveMessageColor(255, 128, 171),
+      ),
+      LocalGift(
+        id: 'nico_ad',
+        nameKey: 'local_gift_nico_ad',
+        emoji: '📢',
+        price: 300,
+        color: LiveMessageColor(255, 160, 0),
+      ),
+      LocalGift(
+        id: 'nico_fireworks',
+        nameKey: 'local_gift_nico_fireworks',
+        emoji: '🎆',
+        price: 1500,
+        color: LiveMessageColor(90, 90, 230),
+        big: true,
+      ),
+    ],
+    SiteIds.showroom: [
+      LocalGift(
+        id: 'showroom_star',
+        nameKey: 'local_gift_showroom_star',
+        emoji: '⭐',
+        price: 10,
+        color: LiveMessageColor(255, 196, 0),
+      ),
+      LocalGift(
+        id: 'showroom_rainbow_star',
+        nameKey: 'local_gift_showroom_rainbow_star',
+        emoji: '🌈',
+        price: 100,
+        color: LiveMessageColor(255, 43, 103),
+      ),
+      LocalGift(
+        id: 'showroom_tower',
+        nameKey: 'local_gift_showroom_tower',
+        emoji: '🗼',
+        price: 2000,
+        color: LiveMessageColor(222, 52, 114),
+        big: true,
+      ),
+    ],
+    SiteIds.chzzk: [
+      LocalGift(
+        id: 'chzzk_cheese',
+        nameKey: 'local_gift_chzzk_cheese',
+        emoji: '🧀',
+        price: 10,
+        color: LiveMessageColor(255, 190, 40),
+      ),
+      LocalGift(
+        id: 'chzzk_video',
+        nameKey: 'local_gift_chzzk_video',
+        emoji: '📹',
+        price: 500,
+        color: LiveMessageColor(0, 200, 160),
+      ),
+      LocalGift(
+        id: 'chzzk_mission',
+        nameKey: 'local_gift_chzzk_mission',
+        emoji: '🎯',
+        price: 1000,
+        color: LiveMessageColor(0, 160, 128),
+        big: true,
+      ),
+    ],
+    SiteIds.kick: [
+      LocalGift(
+        id: 'kick_kicks',
+        nameKey: 'local_gift_kick_kicks',
+        emoji: '💚',
+        price: 10,
+        color: LiveMessageColor(83, 252, 24),
+      ),
+      LocalGift(
+        id: 'kick_sub',
+        nameKey: 'local_gift_kick_sub',
+        emoji: '⭐',
+        price: 500,
+        color: LiveMessageColor(60, 200, 20),
+      ),
+      LocalGift(
+        id: 'kick_gift_subs',
+        nameKey: 'local_gift_kick_gift_subs',
+        emoji: '🎁',
+        price: 2000,
+        color: LiveMessageColor(40, 170, 10),
+        big: true,
+      ),
+    ],
+    SiteIds.tiktok: [
+      LocalGift(
+        id: 'tiktok_rose',
+        nameKey: 'local_gift_tiktok_rose',
+        emoji: '🌹',
+        price: 10,
+        color: LiveMessageColor(254, 44, 85),
+      ),
+      LocalGift(
+        id: 'tiktok_doughnut',
+        nameKey: 'local_gift_tiktok_doughnut',
+        emoji: '🍩',
+        price: 300,
+        color: LiveMessageColor(255, 128, 171),
+      ),
+      LocalGift(
+        id: 'tiktok_lion',
+        nameKey: 'local_gift_tiktok_lion',
+        emoji: '🦁',
+        price: 3000,
+        color: LiveMessageColor(255, 170, 0),
+        big: true,
+      ),
+    ],
+    SiteIds.youtube: [
+      LocalGift(
+        id: 'yt_super_sticker',
+        nameKey: 'local_gift_yt_super_sticker',
+        emoji: '🏷️',
+        price: 50,
+        color: LiveMessageColor(30, 136, 229),
+      ),
+      LocalGift(
+        id: 'yt_super_chat',
+        nameKey: 'local_gift_yt_super_chat',
+        emoji: '💬',
+        price: 500,
+        color: LiveMessageColor(255, 160, 0),
+      ),
+      LocalGift(
+        id: 'yt_gift_memberships',
+        nameKey: 'local_gift_yt_gift_memberships',
+        emoji: '🎁',
+        price: 2000,
+        color: LiveMessageColor(15, 157, 88),
+        big: true,
+      ),
+    ],
+    SiteIds.bigo: [
+      LocalGift(
+        id: 'bigo_flower',
+        nameKey: 'local_gift_bigo_flower',
+        emoji: '🌷',
+        price: 10,
+        color: LiveMessageColor(255, 105, 180),
+      ),
+      LocalGift(
+        id: 'bigo_kiss',
+        nameKey: 'local_gift_bigo_kiss',
+        emoji: '💋',
+        price: 100,
+        color: LiveMessageColor(230, 30, 90),
+      ),
+      LocalGift(
+        id: 'bigo_supercar',
+        nameKey: 'local_gift_bigo_supercar',
+        emoji: '🏎️',
+        price: 2000,
+        color: LiveMessageColor(0, 160, 230),
+        big: true,
+      ),
+    ],
+    SiteIds.pandaLive: [
+      LocalGift(
+        id: 'panda_heart',
+        nameKey: 'local_gift_panda_heart',
+        emoji: '❤️',
+        price: 10,
+        color: LiveMessageColor(254, 77, 106),
+      ),
+      LocalGift(
+        id: 'panda_signature_heart',
+        nameKey: 'local_gift_panda_signature_heart',
+        emoji: '💝',
+        price: 500,
+        color: LiveMessageColor(240, 60, 120),
+      ),
+      LocalGift(
+        id: 'panda_big_spon',
+        nameKey: 'local_gift_panda_big_spon',
+        emoji: '💰',
+        price: 2000,
+        color: LiveMessageColor(210, 40, 80),
+        big: true,
+      ),
+    ],
+    SiteIds.fc2Live: [
+      LocalGift(
+        id: 'fc2_gift',
+        nameKey: 'local_gift_fc2_gift',
+        emoji: '🎁',
+        price: 10,
+        color: LiveMessageColor(254, 114, 0),
+      ),
+      LocalGift(
+        id: 'fc2_tip',
+        nameKey: 'local_gift_fc2_tip',
+        emoji: '💴',
+        price: 300,
+        color: LiveMessageColor(240, 100, 0),
+      ),
+      LocalGift(
+        id: 'fc2_big_tip',
+        nameKey: 'local_gift_fc2_big_tip',
+        emoji: '💰',
+        price: 2000,
+        color: LiveMessageColor(220, 80, 0),
+        big: true,
+      ),
+    ],
+    SiteIds.kugouLive: [
+      LocalGift(
+        id: 'kugou_flowers',
+        nameKey: 'local_gift_kugou_flowers',
+        emoji: '💐',
+        price: 10,
+        color: LiveMessageColor(255, 105, 180),
+      ),
+      LocalGift(
+        id: 'kugou_mic',
+        nameKey: 'local_gift_kugou_mic',
+        emoji: '🎤',
+        price: 300,
+        color: LiveMessageColor(0, 99, 254),
+      ),
+      LocalGift(
+        id: 'kugou_yacht',
+        nameKey: 'local_gift_kugou_yacht',
+        emoji: '🛥️',
+        price: 3000,
+        color: LiveMessageColor(0, 70, 200),
+        big: true,
+      ),
+    ],
+    SiteIds.baiduLive: [
+      LocalGift(
+        id: 'baidu_pat',
+        nameKey: 'local_gift_baidu_pat',
+        emoji: '👏',
+        price: 10,
+        color: LiveMessageColor(255, 180, 60),
+      ),
+      LocalGift(
+        id: 'baidu_paw',
+        nameKey: 'local_gift_baidu_paw',
+        emoji: '🐾',
+        price: 300,
+        color: LiveMessageColor(41, 50, 225),
+      ),
+      LocalGift(
+        id: 'baidu_rocket',
+        nameKey: 'local_gift_baidu_rocket',
+        emoji: '🚀',
+        price: 1000,
+        color: LiveMessageColor(30, 40, 200),
+        big: true,
+      ),
+    ],
+    SiteIds.sixRoom: [
+      LocalGift(
+        id: 'six_rose',
+        nameKey: 'local_gift_six_rose',
+        emoji: '🌹',
+        price: 10,
+        color: LiveMessageColor(254, 4, 105),
+      ),
+      LocalGift(
+        id: 'six_crown',
+        nameKey: 'local_gift_six_crown',
+        emoji: '👑',
+        price: 300,
+        color: LiveMessageColor(255, 170, 0),
+      ),
+      LocalGift(
+        id: 'six_fly_screen',
+        nameKey: 'local_gift_six_fly_screen',
+        emoji: '✈️',
+        price: 1000,
+        color: LiveMessageColor(230, 0, 90),
+        big: true,
+      ),
+    ],
+    SiteIds.lookLive: [
+      LocalGift(
+        id: 'look_note',
+        nameKey: 'local_gift_look_note',
+        emoji: '🎵',
+        price: 10,
+        color: LiveMessageColor(255, 44, 85),
+      ),
+      LocalGift(
+        id: 'look_song',
+        nameKey: 'local_gift_look_song',
+        emoji: '🎶',
+        price: 300,
+        color: LiveMessageColor(240, 30, 70),
+      ),
+      LocalGift(
+        id: 'look_star',
+        nameKey: 'local_gift_look_star',
+        emoji: '🌟',
+        price: 1500,
+        color: LiveMessageColor(255, 180, 0),
+        big: true,
+      ),
+    ],
+    SiteIds.seventeenLive: [
+      LocalGift(
+        id: 'live17_barrage',
+        nameKey: 'local_gift_live17_barrage',
+        emoji: '💬',
+        price: 80,
+        color: LiveMessageColor(255, 45, 85),
+      ),
+      LocalGift(
+        id: 'live17_lucky_bag',
+        nameKey: 'local_gift_live17_lucky_bag',
+        emoji: '🧧',
+        price: 300,
+        color: LiveMessageColor(230, 40, 60),
+      ),
+      LocalGift(
+        id: 'live17_guard',
+        nameKey: 'local_gift_live17_guard',
+        emoji: '🛡️',
+        price: 1500,
+        color: LiveMessageColor(200, 20, 60),
+        big: true,
+      ),
+    ],
   };
 
-  /// The gifts of [platform] (the generic four for most).
+  /// The gifts of [platform] (the generic four for one without its own).
   static List<LocalGift> giftsFor(String platform) => _platformGifts[platform.trim().toLowerCase()] ?? genericGifts;
+
+  /// The platforms with gifts of their own.
+  static Iterable<String> get platformsWithGifts => _platformGifts.keys;
 
   /// The gift [id] of any pack (a history entry names it, D08.1), or null.
   static LocalGift? giftById(String id) {
@@ -624,17 +1127,7 @@ abstract final class LocalCatalog {
   }
 
   /// The badge's name key of [platform] ("舰队等级").
-  static String badgeKeyFor(String platform) => switch (platform.trim().toLowerCase()) {
-    SiteIds.bilibili => 'local_badge_bilibili',
-    SiteIds.douyu => 'local_badge_douyu',
-    SiteIds.huya => 'local_badge_huya',
-    SiteIds.douyin => 'local_badge_douyin',
-    SiteIds.kuaishou => 'local_badge_kuaishou',
-    SiteIds.cc => 'local_badge_cc',
-    SiteIds.twitch => 'local_badge_twitch',
-    SiteIds.soop => 'local_badge_soop',
-    _ => 'local_badge_generic',
-  };
+  static String badgeKeyFor(String platform) => packFor(platform).badgeKey;
 
   /// The weight "粗体" turns [weight] into (A08.13): 200 heavier, at
   /// least 700, so turning it off again with [regularWeight] gives back the

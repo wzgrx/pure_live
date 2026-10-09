@@ -8,6 +8,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_composer.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_pack_badge.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_style_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -191,16 +192,21 @@ class LocalIdentityCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(color: scheme.surfaceContainerLowest, shape: BoxShape.circle),
-                  child: Text(
-                    localEmojiText(pack.badge),
-                    style: localEmojiStyle(theme.textTheme.titleLarge?.copyWith(fontSize: 22, color: ink)),
+                // D08.6: the platform's logo; the generic pack keeps its
+                // emoji in the round.
+                if (LocalPackBadge.hasLogo(pack.id))
+                  LocalPackBadge(pack.id, fallback: pack.badge, size: 40, radius: 10)
+                else
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: scheme.surfaceContainerLowest, shape: BoxShape.circle),
+                    child: Text(
+                      localEmojiText(pack.badge),
+                      style: localEmojiStyle(theme.textTheme.titleLarge?.copyWith(fontSize: 22, color: ink)),
+                    ),
                   ),
-                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -835,6 +841,7 @@ class _LocalHistoryState extends State<LocalHistory> {
               index: index,
               text: _local.describe(event),
               detail: localHistoryDetail(event, DateTime.now()),
+              platform: event.platform,
               padding: side,
               onAgain: again && _canAgain(event) ? () => _again(session, event) : null,
             ),
@@ -876,13 +883,14 @@ class _LocalHistoryState extends State<LocalHistory> {
   }
 }
 
-/// One entry: what happened, then when and where; "再发一次" at the end
-/// when [onAgain] is given.
+/// One entry: what happened, then when and where (after the platform's
+/// logo, D08.6); "再发一次" at the end when [onAgain] is given.
 class _HistoryRow extends StatelessWidget {
   const new({
     required this.index,
     required this.text,
     required this.detail,
+    required this.platform,
     required this.padding,
     required this.onAgain,
     super.key,
@@ -891,6 +899,10 @@ class _HistoryRow extends StatelessWidget {
   final int index;
   final String text;
   final String detail;
+
+  /// The platform it happened on (empty for 3.x's lines and a recharge
+  /// outside a room).
+  final String platform;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onAgain;
 
@@ -916,12 +928,22 @@ class _HistoryRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: localEmojiStyle(theme.textTheme.bodyMedium),
                 ),
-                Text(
-                  detail,
-                  key: ValueKey('local-history-detail-$index'),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.tabular.copyWith(color: scheme.onSurfaceVariant),
+                Row(
+                  children: [
+                    if (LocalPackBadge.hasLogo(platform)) ...[
+                      LocalPackBadge(platform, fallback: '', size: 14, radius: 3),
+                      const SizedBox(width: 4),
+                    ],
+                    Flexible(
+                      child: Text(
+                        detail,
+                        key: ValueKey('local-history-detail-$index'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.tabular.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

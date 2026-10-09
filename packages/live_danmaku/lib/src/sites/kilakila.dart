@@ -7,7 +7,7 @@ import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`): a gift
-/// line (10004), or a gift animation (220) that is not a combo hit
+/// line (10004) or a gift animation (220), a combo hit among them
 /// ([KilakilaDanmakuProtocol.gift]), as a [LiveGift] (E05.5): [price] is its
 /// value in red beans, free at 0, [icon] its picture.
 @immutable
@@ -17,7 +17,9 @@ final class KilakilaGift extends LiveGift {
   /// [id] is `c.id`, or empty; [name] `c.name` (`念念相守`); [count]
   /// `c.doubleCount`, at least 1; [receiverName] `c.giftReceiverName`, the
   /// broadcaster or a guest on the microphone, empty when missing;
-  /// [unitPrice] the price of one when it is known.
+  /// [unitPrice] the price of one when it is known; [comboKey] `c.no`, the
+  /// send's number, which every hit of a combo and its line share, and
+  /// [comboTotal] the combo's count so far on a combo hit or line (D07.6).
   const new({
     required super.id,
     required super.name,
@@ -26,6 +28,8 @@ final class KilakilaGift extends LiveGift {
     super.receiverName,
     this.icon,
     super.unitPrice,
+    super.comboKey,
+    super.comboTotal,
   }) : super(totalValue: price, unit: LiveGiftUnit.redBean, free: price == 0, iconUrl: icon);
 
   /// Red beans (红豆) for all [count] gifts; 0 for a gift that costs
@@ -274,32 +278,37 @@ abstract final class KilakilaDanmakuProtocol {
     return null;
   }
 
-  /// A gift (M5.F B-10), reported once per gift sent:
+  /// A gift (M5.F B-10; the hits D07.6):
   ///
   /// - a gift line (10004): the page's chat line for a combo that ended,
   ///   with its total count (`c.doubleCount`) and the price of one gift
   ///   (`c.price`);
-  /// - a gift animation (220) that is not a combo hit (`c.isDoubleHit` not
-  ///   true): a gift sent at once, `c.price` for all of it; nothing else
-  ///   follows it.
+  /// - a combo hit (220 with `c.isDoubleHit` true): the combo's count so far
+  ///   (`c.doubleCount`, running up 1, 2, 3…, some skipped when hits come
+  ///   fast) and `c.price` for all of them so far (飞天小猪 hit 3: 204, its
+  ///   line: 68 each);
+  /// - another gift animation (220): a gift sent at once, `c.price` for all
+  ///   of it; nothing else follows it (2026-09-30: all 1,932 lines of 30
+  ///   broadcasts ended a combo, none followed a gift sent at once).
   ///
-  /// Combo hits (220 with `isDoubleHit` true) are not reported: their
-  /// counts run up (1, 2, 3…) and some are skipped when hits come fast; the
-  /// line that ends the combo has the total (2026-09-30: all 1,932 lines of
-  /// 30 broadcasts ended a combo, none followed a gift sent at once).
+  /// Every one carries `c.no` as its [LiveGift.comboKey], which a combo's
+  /// hits and its line share; a hit and a line count the whole combo so far
+  /// (count and [LiveGift.comboTotal] both `c.doubleCount`), so D07.1 shows
+  /// one line whose count goes up. The line that only repeats the last hit's
+  /// count is left out by the connection ([KilakilaGiftCombos]).
   ///
-  /// The price of one is known for a line (`c.price`) and for an animation
-  /// of one gift. The text is the shared `念念相守 ×3` (E05.5: was the
-  /// page's line `我送了{receiver}{count}个{gift}`, which the app could not
-  /// translate; the receiver stays in [LiveGift.receiverName]). The sender
-  /// is `n` and `u`, the level `l`, the id and time the response's `mid` and
-  /// `created_at`. Null without a `c` object or a gift
-  /// name.
+  /// The price of one is known for a line (`c.price`), for an animation of
+  /// one gift, and for a hit whose price divides by its count. The text is
+  /// the shared `念念相守 ×3` (E05.5: was the page's line
+  /// `我送了{receiver}{count}个{gift}`, which the app could not translate; the
+  /// receiver stays in [LiveGift.receiverName]). The sender is `n` and `u`,
+  /// the level `l`, the id and time the response's `mid` and `created_at`.
+  /// Null without a `c` object or a gift name.
   static LiveMessage? gift(Map<Object?, Object?> content, Map<Object?, Object?> response) {
     final item = content['c'];
     if (item is! Map<Object?, Object?>) return null;
     final line = content['t'] == giftLineType;
-    if (!line && item['isDoubleHit'] == true) return null;
+    final hit = !line && item['isDoubleHit'] == true;
     final name = item['name'];
     if (name is! String || name.trim().isEmpty) return null;
     final count = switch (jsonInt(item['doubleCount'])) {
@@ -320,7 +329,13 @@ abstract final class KilakilaDanmakuProtocol {
       price: line ? price * count : price,
       receiverName: receiverName,
       icon: icon != null && icon.scheme == 'https' ? icon : null,
-      unitPrice: line || count == 1 ? price : null,
+      unitPrice: line || count == 1
+          ? price
+          : price % count == 0
+          ? price ~/ count
+          : null,
+      comboKey: _id(item['no']),
+      comboTotal: line || hit ? count : null,
     );
     final sender = content['n'];
     return LiveMessage(
@@ -594,7 +609,7 @@ final class KilakilaDanmakuConnection extends DanmakuSocketConnection<KilakilaDa
     final frame = KilakilaDanmakuProtocol.decode(data, roomId: room.roomId);
     for (final message in frame.messages) {
       if (!session.isActive) return;
-      session.message(message);
+      if (room.combos.report(message)) session.message(message);
     }
     final refusal = frame.refusal;
     if (refusal != null) {
@@ -669,4 +684,34 @@ final class _Room {
 
   /// Refused joins since the last confirmed one.
   int refusals = 0;
+
+  /// The combos whose hits were reported (D07.6).
+  final KilakilaGiftCombos combos = KilakilaGiftCombos();
+}
+
+/// The combos of one broadcast whose hits were reported (D07.6): a combo
+/// hit or line (10004) that only repeats a count already reported for its
+/// combo (`c.no`) is left out, so D07.1 does not take the same count for a
+/// new combo (its line shows one combo once). A line that says more (the
+/// last hits were skipped), and the line of a combo whose hits were not
+/// seen, are reported.
+final class KilakilaGiftCombos {
+  /// Combos remembered; the oldest goes first.
+  static const int capacity = 256;
+
+  final Map<String, int> _counts = {};
+
+  /// Whether [message] is reported: everything but a combo's hit or line
+  /// whose count is not above the count reported for its combo so far.
+  bool report(LiveMessage message) {
+    final gift = message.gift;
+    final total = gift?.comboTotal;
+    if (gift is! KilakilaGift || gift.comboKey.isEmpty || total == null) return true;
+    final key = gift.comboKey;
+    final shown = _counts.remove(key);
+    final reported = shown == null || total > shown;
+    _counts[key] = reported ? total : shown;
+    if (_counts.length > capacity) _counts.remove(_counts.keys.first);
+    return reported;
+  }
 }

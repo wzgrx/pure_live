@@ -292,4 +292,58 @@ void main() {
       expect(find.text('弹幕 › 显示范围'), findsOneWidget);
     });
   });
+
+  group('A08.15: the chat list text size and spacing', () {
+    Finder row(String key) => find.byKey(ValueKey('danmaku-setting-$key'));
+
+    testWidgets('the page has the two rows in "弹幕列表", under the style; the defaults change nothing', (tester) async {
+      final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+      final list = find.byType(ChatListSettings);
+      for (final key in ['listFontSize', 'listSpacing']) {
+        expect(
+          find.descendant(of: list, matching: row(key)),
+          findsOneWidget,
+          reason: key,
+        );
+      }
+      expectInOrder(tester, [
+        find.byKey(const ValueKey('danmaku-list-style')),
+        row('listFontSize'),
+        row('listSpacing'),
+        row('names'),
+      ]);
+      expect(find.descendant(of: row('listFontSize'), matching: find.text('默认')), findsOneWidget);
+      expect(h.settings.get(Settings.danmakuListFontSize), 0);
+      await tapSettings(
+        tester,
+        find.descendant(of: find.byKey(const ValueKey('danmaku-list-spacing')), matching: find.text('宽松')),
+      );
+      expect(h.settings.get(Settings.danmakuListLineSpacing), 'loose');
+    });
+
+    testWidgets('large text (2x) in a 360 wide page: the rows fit', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpSettings(tester, width: 360, height: 9000, arguments: 'danmaku');
+      for (final key in ['listFontSize', 'listSpacing']) {
+        expect(tester.getRect(row(key)).right, lessThanOrEqualTo(360), reason: key);
+      }
+      expect(tester.getRect(find.byKey(const ValueKey('danmaku-list-spacing'))).right, lessThanOrEqualTo(360));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('search: "字号" and "文字大小" find the size, "行距" and "间距" the spacing, under "弹幕 › 弹幕列表"', (tester) async {
+      await pumpSettings(tester);
+      for (final words in ['字号', '文字大小']) {
+        await searchSettingsFor(tester, words);
+        expect(settingsRow('danmaku_list_font_size'), findsOneWidget, reason: words);
+      }
+      expect(find.descendant(of: settingsRow('danmaku_list_font_size'), matching: find.text('默认')), findsOneWidget);
+      for (final words in ['行距', '间距']) {
+        await searchSettingsFor(tester, words);
+        expect(settingsRow('danmaku_list_spacing'), findsOneWidget, reason: words);
+        expect(find.text('弹幕 › 弹幕列表'), findsWidgets, reason: words);
+      }
+    });
+  });
 }

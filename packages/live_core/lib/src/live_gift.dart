@@ -80,6 +80,13 @@ enum LiveGiftUnit {
   /// ranked.
   sixCoin,
 
+  /// AcFun's AC coins (AC币), ten to a yuan (D07.6).
+  acCoin,
+
+  /// AcFun's bananas (香蕉), the platform's free currency: a gift paid in
+  /// them is free (D07.6).
+  banana,
+
   /// A unit the platform does not document (Huya's `lPayTotal`), or no
   /// value at all.
   other,
@@ -90,8 +97,8 @@ enum LiveGiftUnit {
 /// ones are rough (100 Bits or 100 Kicks about a US dollar, cheese one won,
 /// a star balloon about 110 won, a niconico point about a yen) and only
 /// rank gifts, never convert a value shown. A unit missing here (red beans,
-/// six coins, silver seeds, [LiveGiftUnit.other]) is never ranked above
-/// [LiveGiftTier.normal].
+/// six coins, silver seeds, bananas, [LiveGiftUnit.other]) is never ranked
+/// above [LiveGiftTier.normal].
 ///
 /// The table and the [giftValuableYuan], [giftPreciousYuan] thresholds were
 /// settled by A08.11 (D-003, the table and the reasons in
@@ -103,6 +110,7 @@ const Map<LiveGiftUnit, double> giftUnitsPerYuan = {
   LiveGiftUnit.goldSeed: 1000,
   LiveGiftUnit.diamond: 10,
   LiveGiftUnit.douyinCoin: 10,
+  LiveGiftUnit.acCoin: 10,
   LiveGiftUnit.bits: 14,
   LiveGiftUnit.kicks: 14,
   LiveGiftUnit.cheese: 190,

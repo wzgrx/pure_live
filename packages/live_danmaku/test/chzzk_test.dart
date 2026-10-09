@@ -283,10 +283,9 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
       {..._reading(v4[2]), 'events': const <Object?>[]},
     ];
   },
-  // Difference 5: a subscription is a notice with its months, its tier and
-  // the subscriber's message (D07.2; it was chat, which lost the months and
-  // the tier); v4 dropped it. B-12: the subscription gift is a notice (v4
-  // showed nothing).
+  // Difference 5: a subscription's message is chat; v4 dropped it. B-12:
+  // the subscription gift is a notice (v4 showed nothing). D07.6: a
+  // subscription is a notice with its tier and months, before its message.
   'subscriptions with and without a message, a subscription gift': (v4) {
     expect(_events(v4[0]), isEmpty);
     expect(_events(v4[1]), isEmpty);
@@ -296,21 +295,22 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
         ..._reading(v4[0]),
         'events': [
           _noticeOf(
-            '구독자 订阅了 32 个月「팬」：32개월 축하해 주세요',
-            id: '${_user(9)}:${_t + 9}',
+            '구독자 订阅了「팬」，已订阅 32 个月',
+            id: 'subscription:${_user(9)}:${_t + 9}',
             kind: LiveNoticeKind.subscription,
             sentAt: _t + 9,
             userId: _user(9),
             userName: '구독자',
           ),
+          _line('32개월 축하해 주세요', _user(9), _t + 9, name: '구독자'),
         ],
       },
       {
         ..._reading(v4[1]),
         'events': [
           _noticeOf(
-            '구독자2 订阅了频道「팬」',
-            id: '${_user(10)}:${_t + 10}',
+            '구독자2 订阅了「팬」，已订阅 1 个月',
+            id: 'subscription:${_user(10)}:${_t + 10}',
             kind: LiveNoticeKind.subscription,
             sentAt: _t + 10,
             userId: _user(10),
@@ -373,13 +373,14 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
         'events': [
           ...events,
           _noticeOf(
-            '구독 订阅了 3 个月「팬」：구독 메시지',
-            id: '${_user(23)}:${_t + 23}',
+            '구독 订阅了「팬」，已订阅 3 个月',
+            id: 'subscription:${_user(23)}:${_t + 23}',
             kind: LiveNoticeKind.subscription,
             sentAt: _t + 23,
             userId: _user(23),
             userName: '구독',
           ),
+          _line('구독 메시지', _user(23), _t + 23, name: '구독'),
         ],
       },
       {..._reading(v4[1]), 'events': const <Object?>[]},
@@ -929,8 +930,8 @@ void main() {
       expect(capability.hasPopularity, isFalse);
     });
 
-    test('S11: donations (named, anonymous, video) are super chats (B-12) in cheese, a subscription a notice (D07.2); '
-        'clean-bot lines are not shown', () {
+    test('S11: donations (named, anonymous, video) are super chats (B-12), a subscription chat; clean-bot lines are '
+        'not shown', () {
       final answers = [for (final frame in _received('S11-recent')) ChzzkDanmakuProtocol.decode(frame.data)];
       final all = [for (final answer in answers) ...answer.messages];
       // B-12: donations were chat lines without their amount.
@@ -954,17 +955,25 @@ void main() {
       );
       expect(anonymous.last.message, '싸이(PSY) - 예술이야 [가사/Lyrics]', reason: 'a video donation names its video');
       expect(anonymous.last.priceText, '1,820 치즈');
+      // D07.2: the unit of the platform table (superChatUnits).
       expect(donations.map((data) => data.unit), everyElement(LiveGiftUnit.cheese));
       final named = donations.singleWhere((data) => data.message.startsWith('이번주 토요일'));
       expect(named.userName, '观众115');
       expect(named.messageId, '97faaf557acce48371affa77236380eb:1790632655370');
-      // D07.2: the subscription is a notice, no longer chat.
-      final subscription = answers[2].messages.singleWhere((message) => message.message.endsWith('나이스한 아침이야'));
-      expect(subscription.type, LiveMessageType.notice);
-      expect(subscription.data, LiveNoticeKind.subscription);
-      expect(subscription.message, '观众132 订阅了 32 个月「나나양 좋아」：나이스한 아침이야');
+      final subscription = answers[2].messages.singleWhere((message) => message.message == '나이스한 아침이야');
       expect(subscription.userName, '观众132');
-      expect(subscription.userId, '27b600565084c7dfcf6e30b587f37ac7');
+      // D07.6: the subscription's notice comes before its message.
+      final notice = answers[2].messages[answers[2].messages.indexOf(subscription) - 1];
+      expect(
+        (notice.type, notice.data, notice.message, notice.userId, notice.messageId),
+        (
+          LiveMessageType.notice,
+          LiveNoticeKind.subscription,
+          '观众132 订阅了「나나양 좋아」，已订阅 32 个月',
+          subscription.userId,
+          'subscription:${subscription.messageId}',
+        ),
+      );
       final answer = jsonDecode(_received('S11-recent')[0].data as String) as Map<String, Object?>;
       final list = (answer['bdy']! as Map<String, Object?>)['messageList']! as List<Object?>;
       final hidden = [
@@ -973,7 +982,7 @@ void main() {
       ];
       expect(hidden, hasLength(2));
       expect(all.map((message) => message.message), isNot(anyElement(isIn(hidden))));
-      expect(answers.map((answer) => answer.messages.length), [48, 26, 50]);
+      expect(answers.map((answer) => answer.messages.length), [48, 26, 51]);
     });
 
     test('a frame is a JSON object named by cmd; the answers, the ping and the end are read', () {
@@ -1072,9 +1081,8 @@ void main() {
             if (!known.contains(jsonEncode(event))) event,
         ];
         if (chat == 'N2m13O') {
-          // D07.2: a notice of the months and the tier, with the words.
-          expect(extra.single, containsPair('text', '观众132 订阅了 32 个月「나나양 좋아」：나이스한 아침이야'));
-          expect(extra.single, containsPair('notice', 'subscription'));
+          // The subscription's notice (D07.6) and its message (difference 5).
+          expect(extra.map((event) => event['text']), ['观众132 订阅了「나나양 좋아」，已订阅 32 个月', '나이스한 아침이야']);
         } else {
           expect(extra, isEmpty, reason: chat);
         }

@@ -40,6 +40,40 @@ enum SeventeenLiveSignal {
   reauthorize,
 }
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from a
+/// gift (`type` 13, `giftMsg`; [SeventeenLiveDanmakuProtocol.gift], D07.6),
+/// as a [LiveGift]: the id, the points and the combo's count; the name and
+/// the picture are in a gift table no anonymous request was found for, so
+/// [name] is empty (the app writes "礼物 {编号}").
+@immutable
+final class SeventeenLiveGift extends LiveGift {
+  /// Creates the gift.
+  ///
+  /// [id] is `giftID` (`2609_jp_cp_akanya`); [comboTotal] `combo.count`,
+  /// the combo's sends so far; [point] `point`, its value in points (0 for
+  /// a free gift, which is [free]; null when the message has none);
+  /// [comboWindow] `combo.validDurationMs`, how long the website waits for
+  /// the next send.
+  const new({required super.id, super.comboTotal, this.point, this.comboWindow})
+    : super(name: '', unitPrice: point, totalValue: point, unit: LiveGiftUnit.point, free: point == 0);
+
+  /// `point`, the gift's value in 17LIVE points; null when not given.
+  final int? point;
+
+  /// `combo.validDurationMs`; null when not given.
+  final Duration? comboWindow;
+
+  @override
+  bool operator ==(Object other) =>
+      super == other && other is SeventeenLiveGift && other.point == point && other.comboWindow == comboWindow;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, point, comboWindow);
+
+  @override
+  String toString() => 'SeventeenLiveGift($id, combo $comboTotal)';
+}
+
 /// An Ably error (`{"code":40142,"statusCode":401,"message":…}`).
 @immutable
 final class SeventeenLiveAblyError {
@@ -286,6 +320,9 @@ abstract final class SeventeenLiveDanmakuProtocol {
 
   /// The live figures' type (`LIVE`): `liveinfo.liveViewerCount`.
   static const int liveType = 38;
+
+  /// A gift's type (`giftMsg`, D07.6): [gift].
+  static const int giftType = 13;
 
   /// The stream end's type (`LIVE_STREAM_END`): the website leaves the
   /// channel.
@@ -553,6 +590,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
   ///   no time of its own;
   /// - the live figures: the viewers now ([message]) and `liveinfo.mute`
   ///   when it is a boolean;
+  /// - a gift ([giftType]): its gift ([message], D07.6);
   /// - the stream end ([streamEndType]): [SeventeenLiveEntry.ended];
   /// - anything else: nothing.
   ///
@@ -587,6 +625,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
         },
       ),
       streamEndType => SeventeenLiveEntry(id: id, publishedAt: publishedAt, replayed: replayed, ended: true),
+      giftType => SeventeenLiveEntry(id: id, publishedAt: publishedAt, replayed: replayed, messages: [?shown]),
       _ => SeventeenLiveEntry(id: id, publishedAt: publishedAt, replayed: replayed),
     };
   }
@@ -684,7 +723,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
   }
 
   /// The message a decoded [payload] shows, with the Ably message [id]; null
-  /// for every other type (gifts, reactions, entries, rankings, missions…).
+  /// for every other type (reactions, entries, rankings, missions…).
   ///
   /// - A comment ([commentType], `commentMsg`) is chat, unless the website
   ///   hides it: `isDirty`, `isDirtyWord` or `isDirtyUser` is true. The text
@@ -700,6 +739,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
   ///   is chat as well; a paid one also has a super chat ([superChat]).
   /// - The live figures ([liveType]) carry `liveinfo.liveViewerCount`, the
   ///   viewers now, which the website shows: an audience update.
+  /// - A gift ([giftType]) is a gift ([gift], D07.6).
   ///
   /// [replayed] marks a message of a backlog (B-26).
   static LiveMessage? message(Map<Object?, Object?> payload, {String id = '', bool replayed = false}) {
@@ -730,6 +770,8 @@ abstract final class SeventeenLiveDanmakuProtocol {
           nameColor: nameColor(comment['name']),
           badges: badges(comment),
         );
+      case giftType:
+        return gift(payload, id: id, replayed: replayed);
       case liveType:
         final info = payload['liveinfo'];
         final viewers = info is Map ? info['liveViewerCount'] : null;
@@ -745,6 +787,53 @@ abstract final class SeventeenLiveDanmakuProtocol {
       default:
         return null;
     }
+  }
+
+  /// A gift (`type` 13, D07.6): `giftMsg` with `giftID`, `point` (its
+  /// value in points; 0 in every recorded one, the free daily gifts and
+  /// tickets), the sender `displayUser` (read as a comment's: the name
+  /// `displayName`, else `openID`; `userID`; `level`) and `giftMetas`, whose
+  /// entry for the gift (`targetGiftID`, else the first) has `combo.count`,
+  /// the combo's sends so far (1, 2, 3…), and `combo.validDurationMs`. One
+  /// message is one gift (count 1); D07.1 merges a combo by the sender and
+  /// the gift (there is no combo id) and shows `combo.count`. The text is
+  /// `{giftID} ×1`. Null without a gift id.
+  static LiveMessage? gift(Map<Object?, Object?> payload, {String id = '', bool replayed = false}) {
+    final message = payload['giftMsg'];
+    if (message is! Map) return null;
+    final giftId = _string(message['giftID']).trim();
+    if (giftId.isEmpty) return null;
+    final metas = message['giftMetas'];
+    final entries = [
+      if (metas is List)
+        for (final meta in metas)
+          if (meta is Map) meta,
+    ];
+    final meta = entries.where((meta) => meta['targetGiftID'] == giftId).firstOrNull ?? entries.firstOrNull;
+    final combo = meta?['combo'];
+    final count = combo is Map ? combo['count'] : null;
+    final window = combo is Map ? combo['validDurationMs'] : null;
+    final point = message['point'];
+    final data = SeventeenLiveGift(
+      id: giftId,
+      comboTotal: count is int && count > 0 ? count : null,
+      point: point is int && point >= 0 ? point : null,
+      comboWindow: window is int && window > 0 ? Duration(milliseconds: window) : null,
+    );
+    final user = message['displayUser'];
+    final name = user is Map ? _string(user['displayName']) : '';
+    final level = _level(user is Map ? user['level'] : null);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: name.isNotEmpty || user is! Map ? name : _string(user['openID']),
+      userId: user is Map ? _string(user['userID']) : '',
+      message: data.plainText,
+      color: LiveMessageColor.white,
+      userLevel: level == null ? '' : '$level',
+      messageId: id,
+      replayed: replayed,
+      data: data,
+    );
   }
 
   /// A comment colour: `#AARRGGBB` (the alpha first, as the website reads

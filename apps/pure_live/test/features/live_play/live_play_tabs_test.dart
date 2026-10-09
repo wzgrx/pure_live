@@ -17,6 +17,7 @@ import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/danmaku/block_manager.dart';
+import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 
 import '../../support.dart';
 import 'live_play_support.dart';
@@ -387,6 +388,35 @@ void main() {
       }
       final shown = find.descendant(of: panel, matching: find.byKey(const ValueKey('danmaku-switch-showGifts')));
       expect(tester.widget<Switch>(shown).value, isTrue, reason: 'one setting, both places');
+      await _close(tester, room);
+    });
+
+    testWidgets('A08.15: the tab and the picture panel have "列表文字大小" and "行间距" under the list style', (tester) async {
+      final room = await _pump(tester, height: 6000);
+      const expected = ['弹幕列表样式', '列表文字大小', '行间距', '显示用户名'];
+      await tester.tap(_in('live-play-tabs', find.text('弹幕设置')));
+      await tester.pumpAndSettle();
+      expect(_topDown(tester, expected), expected, reason: 'the tab');
+      await tester.tap(find.text('紧密'));
+      await _settle(tester);
+      expect(room.services.store.settings.get(Settings.danmakuListLineSpacing), 'compact');
+
+      await tester.tap(
+        find.byWidgetPredicate((w) => w.key == const ValueKey('live-play-danmaku-settings') && w is! ListView),
+      );
+      await tester.pumpAndSettle();
+      final panel = find.byKey(const ValueKey('panel-danmaku'));
+      for (final text in expected) {
+        expect(
+          find.descendant(of: panel, matching: find.text(text)),
+          findsOneWidget,
+          reason: text,
+        );
+      }
+      final spacing = find.descendant(of: panel, matching: find.byKey(const ValueKey('danmaku-list-spacing')));
+      expect(tester.widget<SegmentedButton<ChatSpacing>>(spacing).selected, {
+        ChatSpacing.compact,
+      }, reason: 'one setting, both places');
       await _close(tester, room);
     });
   });

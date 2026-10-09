@@ -12,7 +12,7 @@
 | 1 平台表 | 做了：`superChatUnits`（平台 → 单位，`packages/live_core/lib/src/live_site.dart`），`superChatPlatforms` 是它的键，11 个 | 任务书写 10 个；六间房的飞屏这次成了醒目留言，所以也算（第 5 条），共 11 个。`hasSuperChats` 只有聊天面板一处用（`features/live_play/danmaku/chat_panel.dart:147`），电视、多画面没有醒目留言页，不受影响 |
 | 2 价格文字 | 做了：`superChatPriceLabel`（`live_core`）+ 应用的 `superChatPrice`（`chat_list.dart`）用礼物行的单位翻译键（`giftUnitText`，`shared/danmaku/gift_words.dart`）；`LiveSuperChatMessage.unit` 新字段，11 个平台的适配器都填 | 新增单位 `LiveGiftUnit.yuan`、`sixCoin`；有平台文字的（猫耳、克拉克拉、Picarto、CHZZK、YouTube、17LIVE、Kick）照旧显示平台文字 |
 | 3 上舰、会员进醒目留言 | 做了：新设置 `superChatIncludesMembership`（默认开），`membershipCard`（`features/live_play/logic/membership_cards.dart`）+ 控制器的礼物、通知分支 | 设置行放在 A08.12 两行之后（不依赖“在聊天列表显示礼物”，放在它的两个附属行中间会让人以为它也跟着变灰）；Kick、Picarto 的订阅也算（同一类事） |
-| 4 CHZZK 11 是通知 | 做了：`_subscription`（`chzzk.dart`），带月数和档位名 | 没有留言的订阅以前什么都不显示，现在是一条通知 |
+| 4 CHZZK 11 是通知 | 做了，合并时用了 D07.6 同样的改动（`ChzzkDanmakuProtocol.subscription`：通知带档位名和月数，留言另是聊天） | 本任务原来的写法（通知里带留言）去掉，见设计选择 2 |
 | 5 六间房 108 是醒目留言 | 做了：`SixRoomDanmakuProtocol.fly`，1000 六币，1 分钟 | 没录到 108（见“样本”），按网页脚本的字段写的帧；“跟风飞屏”2000 六币是另一种消息（324），没做 |
 | 6 翻译 | 做了：zh、en 各 5 个键，按键名排序、4 空格缩进，没删键（D-024） | |
 
@@ -29,8 +29,12 @@
 README“定稿”一节的 9 条，补几点理由：
 
 1. **为什么不在列表里加醒目留言行**：任务书和 D-040 都写“列表里的行不变”；上舰本来就有礼物行（A08.11 的“很值钱”标记），再加一条醒目留言行就是同一件事两行。卡片只进醒目留言页（`_addSuperChats`），不进 `ChatFeed`。六间房飞屏是真的醒目留言，照其他平台的做法进页面也进列表一行（只一行，原来的聊天行没了）。
-2. **为什么用新的通知种类而不是在控制器里猜**：Twitch 的社区礼包是一条 `submysterygift` 加 N 条 `subgift`，只有标签 `msg-param-community-gift-id` 分得出来，控制器拿不到标签。把“分到的那份”标成 `giftedSubscription`，其余的 `subscription` 都是买的那一下，控制器只看种类。这样改动最小：Twitch 只改选种类的一处、YouTube 的“收到会员礼物”一处，录制样本里只有 3 条 Twitch 通知的种类变了。D07.6 第 4 阶段把 N 条 `subgift` 并进 `submysterygift` 时，并掉的本来就不出卡，不冲突。
-3. **YouTube Super Sticker 改成 `system`**：它是付费的，但不是会员；照原来的 `subscription` 会出一张写“会员”的卡。D07.6 要把它改成带图的醒目留言，这里只把种类改了，文字不变。
+2. **和 D07.6 合并（2026-10-09）**：D07.6 同时改了 Twitch、CHZZK、YouTube，合并时：
+   - Twitch：D07.6 的连接把社区礼包的 N 条 `subgift` 并进 `submysterygift` 一条，所以本任务原来给“分到的那份”加的 `giftedSubscription` 标记（`communityShares`）去掉了，`twitch.dart` 和 `twitch_test.dart` 用 D07.6 的；卡片测试照连接的做法去掉礼包里的 `subgift`。Bits 是 `tip` 礼物，不出卡（D07.6 选了不进醒目留言）。
+   - CHZZK：订阅（11）用 D07.6 的通知（档位名和月数，留言另是聊天），本任务的 `_subscription` 去掉；后援的 `unit: cheese` 留着。
+   - YouTube：Super Sticker 用 D07.6 的醒目留言（带 `image`），本任务原来把它改成 `system` 通知的那处去掉；它的 `price` 也照 Super Chat 用 `superChatAmount`。“收到会员礼物”仍是 `giftedSubscription`（YouTube 没有合并，送的人那一条已经出卡）。
+   - `LiveSuperChatMessage` 两边各加了一个字段（`unit`、`image`），`LiveGiftUnit` 两边各加了单位（`yuan`、`sixCoin`；`acCoin`、`banana`），都留着。
+3. **为什么用新的通知种类而不是在控制器里猜**：YouTube 一次送会员是一条公告加每个收到的人一条，控制器只看种类分得开；“收到的那条”标成 `giftedSubscription`，其余 `subscription` 都是买的那一下。
 4. **卡片的 id**：`membership:<平台>:<消息 id>`，没有 id 的用“用户 id、名字、平台时间、文字”拼；平台重发同一条时是同一张卡（醒目留言的集合按 id 去重），关掉开关时按前缀拿掉。
 5. **停留时间**：照 Kick、CHZZK 已经在用的哔哩哔哩醒目留言的档（按元）；没有价格的（会员、订阅通知）1 分钟，和最短的醒目留言一样。
 6. **YouTube 价格数字**：小数点按“最后一个 `.` 或 `,` 后面只有 1～2 位”认，其他分隔符都当千位；只用来比较（`LiveSuperChatMessage` 没有 id 时按名字、文字、价格判断是不是同一条），显示不用它。
@@ -42,9 +46,9 @@ README“定稿”一节的 9 条，补几点理由：
 
 | 文件 | 改了什么 |
 |---|---|
-| `packages/live_danmaku/lib/src/sites/twitch.dart` | 新常量 `communityShares`；`USERNOTICE` 选通知种类的三元式多一层：带 `msg-param-community-gift-id` 的 `subgift`/`anonsubgift` 是 `giftedSubscription` |
-| `packages/live_danmaku/lib/src/sites/chzzk.dart` | `subscriptionType` 从聊天分支拿出来，新 `_subscription`；`_donation` 加 `unit: cheese` |
-| `packages/live_danmaku/lib/src/sites/youtube.dart` | `_superChat` 的 `price` 用 `superChatAmount`；`_notice` 加 `kind` 参数；收到会员礼物是 `giftedSubscription`，Super Sticker 是 `system` |
+| `packages/live_danmaku/lib/src/sites/twitch.dart` | 合并后没有改动（用 D07.6 的） |
+| `packages/live_danmaku/lib/src/sites/chzzk.dart` | `_donation` 加 `unit: cheese`（订阅用 D07.6 的） |
+| `packages/live_danmaku/lib/src/sites/youtube.dart` | `_superChat`、`_sticker` 的 `price` 用 `superChatAmount`；`_notice` 加 `kind` 参数；收到会员礼物是 `giftedSubscription` |
 | `packages/live_danmaku/lib/src/sites/seventeenlive.dart`、`kick.dart`、`missevan.dart`、`kilakila.dart`、`douyu.dart`、`bilibili.dart` | 醒目留言加一行 `unit:` |
 | `packages/live_danmaku/lib/src/sites/sixroom.dart` | 108 改成醒目留言，`flyScreenPrice`、`flyScreenDuration` |
 | `packages/live_core/lib/src/sites/bilibili/bilibili_api.dart`、`huya/huya_api.dart` | 轮询的醒目留言加 `unit: yuan` |
@@ -72,9 +76,9 @@ README“定稿”一节的 9 条，补几点理由：
 ## 测试
 
 - `live_core`：`live_site_test.dart` 改 1 个（11 个平台和单位、不可改、Twitch 等没有）、新增 1 组 2 个（价格文字：平台文字优先、元、金瓜子、钻石、Bits、六币、只有文字、没有字的单位、没有价格；`superChatAmount` 15 种写法）；`models_test.dart` 改 1 个（通知种类的顺序）；`bilibili_api_test.dart`、`huya_api_test.dart` 各加单位的断言。
-- `live_danmaku`：`chzzk_test.dart` 改 4 处（S11 录制的订阅是通知、带月数和档位；合成样本的两条订阅和最近聊天里的一条；后援的单位）；`twitch_test.dart` 改 3 处（S09、S10 里社区礼包的 `subgift` 是 `giftedSubscription`）、新增 1 个（社区礼包的那份、单独送的、礼包本身）；`youtube_test.dart` 改 6 处（价格数字、Super Sticker 是 `system`、收到会员礼物是 `giftedSubscription`）；`sixroom_test.dart` 改 1 个（108 是醒目留言：1000 六币、1 分钟、没有时间时从现在起、在 1413 里也读）；`douyu_test.dart` 新增 1 个（两种醒目留言是元）；`picarto`、`seventeenlive`、`missevan`、`kilakila`、`kick`、`connection` 各加单位的断言。
+- `live_danmaku`：`chzzk_test.dart` 加后援的单位（订阅的测试是 D07.6 的）；`youtube_test.dart` 改 7 处（Super Chat 和 Super Sticker 的价格数字、收到会员礼物是 `giftedSubscription`）；`sixroom_test.dart` 改 1 个（108 是醒目留言：1000 六币、1 分钟、没有时间时从现在起、在 1413 里也读）；`douyu_test.dart` 新增 1 个（两种醒目留言是元）；`picarto`、`seventeenlive`、`missevan`、`kilakila`、`kick`、`connection` 各加单位的断言。
 - `live_store`：新增 `super_chat_membership_test.dart` 2 个（默认开、同步、备份往返、3.x 备份不带它时是开的）。
-- 应用：新增 `super_chat_membership_test.dart` 25 个：价格（录制的哔哩哔哩“30 元”、CHZZK“1,820 치즈”、六间房“1000 六币”，平台文字优先，没有文字时各单位，英文）；卡片（上舰的元、月数、停留时间、没价格写“舰长”、同一条同一张卡；Twitch S09 每个订阅和礼包一张、分到的那份没有；CHZZK S11、YouTube S10 的卡；聊天、礼物、醒目留言、其他通知没有）；直播间（默认开：一张卡、列表只有一行礼物、没有醒目留言行；关着：没有卡、列表一样；关掉时卡片立即拿掉、真的醒目留言留着、之后不再出卡；礼物行关着照样出卡、屏蔽的人没有；订阅通知一行加一张卡、分到的那份只有一行；六间房飞屏进醒目留言页和列表一行、不再是聊天）；醒目留言页 360、280、240 宽 × 1、2 倍字 × 浅色、深色、纯黑三种主题：三张卡都在、价格文字对、不溢出、280 以下和大字时头部叠起来。`live_play_tabs_test.dart` 新增 2 个（CHZZK、YouTube、Kick、六间房的空状态是“会显示在这里”；设置行在标签页和画面面板的位置、默认开、两处同一个设置）；`settings_danmaku_test.dart` 新增 1 个（弹幕列表组里的位置、默认开、不跟礼物开关变灰、搜索“上舰”“醒目留言 会员”找得到）；`gift_line_test.dart` 改 1 处（`giftUnitsPerYuan` 多了 `yuan`）；`chat_line_roles_test.dart` 改 1 处（醒目留言行的价格“30 元”，原来是“￥30”）。
+- 应用：新增 `super_chat_membership_test.dart` 25 个：价格（录制的哔哩哔哩“30 元”、CHZZK“1,820 치즈”、六间房“1000 六币”，平台文字优先，没有文字时各单位，英文）；卡片（上舰的元、月数、停留时间、没价格写“舰长”、同一条同一张卡；Twitch S09（照连接去掉礼包里的 `subgift`）每个订阅和礼包一张、分到的那份没有；CHZZK S11、YouTube S10 的卡；聊天、礼物、醒目留言、其他通知没有）；直播间（默认开：一张卡、列表只有一行礼物、没有醒目留言行；关着：没有卡、列表一样；关掉时卡片立即拿掉、真的醒目留言留着、之后不再出卡；礼物行关着照样出卡、屏蔽的人没有；订阅通知一行加一张卡、分到的那份只有一行；六间房飞屏进醒目留言页和列表一行、不再是聊天）；醒目留言页 360、280、240 宽 × 1、2 倍字 × 浅色、深色、纯黑三种主题：三张卡都在、价格文字对、不溢出、280 以下和大字时头部叠起来。`live_play_tabs_test.dart` 新增 2 个（CHZZK、YouTube、Kick、六间房的空状态是“会显示在这里”；设置行在标签页和画面面板的位置、默认开、两处同一个设置）；`settings_danmaku_test.dart` 新增 1 个（弹幕列表组里的位置、默认开、不跟礼物开关变灰、搜索“上舰”“醒目留言 会员”找得到）；`gift_line_test.dart` 改 1 处（`giftUnitsPerYuan` 多了 `yuan`）；`chat_line_roles_test.dart` 改 1 处（醒目留言行的价格“30 元”，原来是“￥30”）。
 - 全部测试在门禁里跑（结果见文末）。
 
 ## 真机上要看的

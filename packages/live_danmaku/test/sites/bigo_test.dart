@@ -711,13 +711,26 @@ void main() {
     test('every received frame reads as the website reads it', () {
       var chats = 0;
       var audience = 0;
+      var gifts = 0;
+      var senders = 0;
       for (final sample in [_live, _idle, _unsigned]) {
         final reading = sample.reading;
         for (final line in sample.socket.where((line) => line.incoming)) {
           final expected = reading[line.line]!;
           final frame = BigoDanmakuProtocol.decode(line.text, roomId: sample.args.roomId);
           final reason = '${sample.name}:${line.line}';
-          expect([for (final message in frame.messages) _project(message)], expected['events'], reason: reason);
+          // D07.6: the gift (line 63) and its line's sender (64) are this
+          // decoder's; the website's chat list reading has neither.
+          expect(
+            [
+              for (final message in frame.messages)
+                if (message.type != LiveMessageType.gift) _project(message),
+            ],
+            expected['events'],
+            reason: reason,
+          );
+          gifts += frame.messages.where((m) => m.type == LiveMessageType.gift).length;
+          if (frame.giftSender != null) senders += 1;
           final page = expected['page'] as Map<String, Object?>?;
           expect(frame.challenge != null, page?['answer'] == true, reason: reason);
           expect(frame.loggedIn, page?['login'] == '200', reason: reason);
@@ -731,7 +744,7 @@ void main() {
           }
         }
       }
-      expect((chats, audience), (6, 4));
+      expect((chats, audience, gifts, senders), (6, 4, 1, 1));
     });
 
     test('the caller address the login answer echoes is the scrubbed documentation address', () {
@@ -779,7 +792,17 @@ void main() {
         for (final frame in (_live.value['frames']! as List).cast<Map<String, Object?>>())
           ...(frame['events']! as List).cast<Map<String, Object?>>(),
       ];
-      expect([for (final message in _messages(replay.events)) _project(message)], expected);
+      final messages = _messages(replay.events);
+      expect([
+        for (final message in messages)
+          if (message.type != LiveMessageType.gift) _project(message),
+      ], expected);
+      // D07.6: the gift, named by the line that followed it.
+      final gift = messages.singleWhere((message) => message.type == LiveMessageType.gift);
+      expect(
+        (gift.userId, gift.userName, gift.userLevel, gift.message, gift.messageId),
+        ('9000000023', '观众3', '25', 'Flower ×1', '9000000023:1004177745'),
+      );
       expect(replay.connection.isConnected, isTrue);
       await replay.connection.close();
     });
@@ -806,6 +829,109 @@ void main() {
       expect((jsonDecode(second.sent[1].toString().substring(6)) as Map)['uid'], '1000000002');
       expect(replay.events.last, const DanmakuReady());
       await replay.connection.close();
+    });
+  });
+
+  group('D07.6: gifts (760969)', () {
+    String frame(Map<String, Object?> body) => '2584\t${jsonEncode(body)}';
+    const room = '6309489689319799326';
+
+    Map<String, Object?> animation({
+      String uid = '9000000023',
+      String seq = '1004177745',
+      Object? name = 'Flower',
+      Object? count = '1',
+      Object? sends = '1',
+      String payloadRoom = room,
+    }) => {
+      'from_uid': uid,
+      'seqId': seq,
+      'room_id': room,
+      'oriUri': '760969',
+      'payload': {
+        'from_uid': uid,
+        'to_uid': '1515772556',
+        'vgift_typeid': '1',
+        'vgift_count': ?count,
+        'room_id': payloadRoom,
+        'vgift_name': ?name,
+        'ticket_num': '13552131',
+        'send_times': ?sends,
+      },
+    };
+
+    Map<String, Object?> line(String uid, {String name = '观众3', String grade = '25'}) => {
+      'from_uid': uid,
+      'seqId': '1522705420',
+      'room_id': room,
+      'oriUri': '2060425',
+      'payload': {
+        'uid': uid,
+        'grade': grade,
+        'tag': '6',
+        'content': base64.encode(utf8.encode(jsonEncode({'c': '1', 'm': '1', 'n': name}))),
+      },
+    };
+
+    test('S05-live line 63: the gift; line 64: its sender', () {
+      final gift = BigoDanmakuProtocol.decode(_live.lines[62].text, roomId: room).messages.single;
+      expect(
+        (gift.type, gift.userId, gift.userName, gift.message, gift.messageId),
+        (LiveMessageType.gift, '9000000023', '', 'Flower ×1', '9000000023:1004177745'),
+      );
+      expect(gift.data, const BigoGift(id: '1', name: 'Flower', count: 1, comboTotal: 1, beans: 13552131));
+      expect((gift.gift!.unit, gift.gift!.totalValue, gift.gift!.free), (LiveGiftUnit.other, null, false));
+      expect('${gift.data}', 'BigoGift(Flower ×1)');
+      final sender = BigoDanmakuProtocol.decode(_live.lines[63].text, roomId: room);
+      expect(sender.giftSender, (userId: '9000000023', name: '观众3', level: '25'));
+      expect(sender.messages, isEmpty);
+    });
+
+    test('the fields: count × sends is the combo; bad data; another room', () {
+      BigoGift? read(Map<String, Object?> body) =>
+          BigoDanmakuProtocol.decode(frame(body), roomId: room).messages.singleOrNull?.data as BigoGift?;
+      final combo = read(animation(count: '10', sends: '3'))!;
+      expect((combo.count, combo.comboTotal), (10, 30));
+      expect(
+        read(animation(count: 'x', sends: '0')),
+        const BigoGift(id: '1', name: 'Flower', count: 1, beans: 13552131),
+      );
+      expect(read(animation(sends: null))!.comboTotal, isNull);
+      for (final name in [null, '', '  ']) {
+        expect(read(animation(name: name)), isNull, reason: '$name');
+      }
+      expect(read(animation(payloadRoom: '1')), isNull, reason: 'another room');
+      final noUid = BigoDanmakuProtocol.decode(frame(animation(uid: 'x')), roomId: room).messages.single;
+      expect((noUid.userId, noUid.messageId), ('', ''));
+      expect(BigoDanmakuProtocol.decode(frame(line('x')), roomId: room).giftSender, isNull);
+      final unnamed = {
+        ...line('7'),
+        'payload': {'uid': '7', 'tag': '6', 'content': '%%'},
+      };
+      expect(BigoDanmakuProtocol.decode(frame(unnamed), roomId: room).giftSender, (userId: '7', name: '', level: ''));
+    });
+
+    test('the connection names a gift by the line that follows; without one it comes after a second', () async {
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_visitor()]));
+      final events = _record(connection);
+      await connection.connect(_live.args);
+      final channel = connector.channels.single;
+      await channel.receive(frame(animation()));
+      await channel.receive(frame(animation(uid: '7', seq: '8')));
+      expect(_messages(events), isEmpty, reason: 'waiting for the lines');
+      await channel.receive(frame(line('9000000023')));
+      expect([for (final m in _messages(events)) (m.userName, m.userLevel)], [('观众3', '25')]);
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+      expect([for (final m in _messages(events)) (m.userId, m.userName)], [('9000000023', '观众3'), ('7', '')]);
+      // A line without a waiting gift does nothing.
+      await channel.receive(frame(line('7')));
+      expect(_messages(events), hasLength(2));
+      // Closed while a gift waits: nothing comes.
+      await channel.receive(frame(animation(uid: '5', seq: '6')));
+      await connection.close();
+      await Future<void>.delayed(const Duration(milliseconds: 1100));
+      expect(_messages(events), hasLength(2));
     });
   });
 

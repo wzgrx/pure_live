@@ -119,6 +119,17 @@ Map<String, Object?> _asV4(LiveMessage message) => switch (message.type) {
     'audience': 'online',
     'value': (message.data! as LiveAudienceUpdate).value,
   },
+  // D07.6: gifts are reported again, in v4's shape (v4 named a gift by its
+  // id, as this decoder's text does).
+  LiveMessageType.gift => {
+    'kind': 'gift',
+    'id': message.messageId.isEmpty ? null : '17live:${message.messageId}',
+    'userId': message.userId,
+    'userName': message.userName,
+    'giftId': message.gift!.id,
+    'giftName': message.gift!.displayName,
+    'count': message.gift!.count,
+  },
   // B-14: a paid barrage's super chat; v4 had none.
   LiveMessageType.superChat => {
     'kind': 'superChat',
@@ -137,17 +148,11 @@ Map<String, Object?> _readAsV4(Object data, {String roomId = _room}) {
   return {'joined': frame.signal == SeventeenLiveSignal.attached, 'events': frame.messages.map(_asV4).toList()};
 }
 
-/// v4's reading with the difference every frame shares: gifts are not
-/// reported (difference 3).
+/// v4's reading as every frame shares it: since D07.6 gifts are reported
+/// again (difference 3 until then).
 Map<String, Object?> _shared(Object? v4) {
   final reading = v4! as Map<String, Object?>;
-  return {
-    'joined': reading['joined'],
-    'events': [
-      for (final event in (reading['events']! as List<Object?>).cast<Map<String, Object?>>())
-        if (event['kind'] != 'gift') event,
-    ],
-  };
+  return {'joined': reading['joined'], 'events': reading['events']};
 }
 
 List<Map<String, Object?>> _events(Object? reading) =>
@@ -785,7 +790,7 @@ void main() {
       expect(messages.first.messageId, '6Do04M3cWw6i:0');
     });
 
-    test('S06-live: 26 comments and 9 viewer counts; gifts, entries, reactions and the rest show nothing', () {
+    test('S06-live: 26 comments, 9 viewer counts and 18 gifts; entries, reactions and the rest show nothing', () {
       final frames = [
         for (final frame in _received('S06-live')) SeventeenLiveDanmakuProtocol.decode(frame.data, roomId: _room),
       ];
@@ -802,7 +807,11 @@ void main() {
         for (final message in messages)
           if (message.type == LiveMessageType.online) message,
       ];
-      expect((chat.length, online.length, messages.length), (26, 9, 35));
+      final gifts = [
+        for (final message in messages)
+          if (message.type == LiveMessageType.gift) message,
+      ];
+      expect((chat.length, online.length, gifts.length, messages.length), (26, 9, 18, 53));
       expect(chat.every((message) => message.color == LiveMessageColor.white), isTrue);
       expect(chat.every((message) => message.userLevel.isNotEmpty && message.sentAt != null), isTrue);
       expect(chat.where((message) => message.userId == '20015b43-ab03-43d8-a37e-32250131d6bc'), hasLength(9));
@@ -810,9 +819,9 @@ void main() {
         online.map((message) => (message.data! as LiveAudienceUpdate).value).every((value) => value > 1000),
         isTrue,
       );
-      // v4 read 18 gifts (difference 3); the lucky bags (32), entries (18),
-      // reactions (28), rankings (54), rewards (79), missions (80), stream
-      // info (6) and 74 are read by neither.
+      // v4 read the same 18 gifts (difference 3 until D07.6); the lucky
+      // bags (32), entries (18), reactions (28), rankings (54), rewards
+      // (79), missions (80), stream info (6) and 74 are read by neither.
       final v4Events = [for (final reading in _v4Frames('S06-live').values) ..._events(reading)];
       expect(v4Events.where((event) => event['kind'] == 'gift'), hasLength(18));
       final types = <Object?>{
@@ -944,9 +953,7 @@ void main() {
         expect(channel.sent, _sent(name));
         expect(events.whereType<DanmakuReady>(), hasLength(1));
         expect(events.first, const DanmakuReady());
-        final v4 = [
-          for (final reading in _v4Frames(name).values) ..._events(reading).where((event) => event['kind'] != 'gift'),
-        ];
+        final v4 = [for (final reading in _v4Frames(name).values) ..._events(reading)];
         expect(_messages(events).map(_asV4), v4);
         await connection.close();
       });
@@ -1488,7 +1495,7 @@ void main() {
       );
       final events = _record(connection);
       await connection.connect(_args);
-      await _until(() => _messages(events).length == 35);
+      await _until(() => _messages(events).length == 53);
       final token = SeventeenLiveDanmakuProtocol.grant(_authAnswer('S06-live'));
       expect(requested, [SeventeenLiveDanmakuProtocol.withToken(SeventeenLiveDanmakuProtocol.endpoints.first, token)]);
       expect(handshakes, [
@@ -1507,6 +1514,139 @@ void main() {
       await _wait(const Duration(milliseconds: 20));
       expect(received, [_attach()], reason: 'the client sends no heartbeat');
       await connection.close();
+    });
+  });
+
+  group('D07.6: gifts (13)', () {
+    List<LiveMessage> gifts(String name) => [
+      for (final frame in _received(name))
+        for (final message in SeventeenLiveDanmakuProtocol.decode(frame.data, roomId: _roomOf(name)).messages)
+          if (message.type == LiveMessageType.gift) message,
+    ];
+
+    test('S06-live: the id, the combo count, the points (0: free), the sender and the level', () {
+      final all = gifts('S06-live');
+      expect(all, hasLength(18));
+      final first = all.first;
+      expect(
+        (first.userName, first.userId, first.userLevel, first.messageId, first.message, first.sentAt),
+        ('观众1', '00000001-0000-4000-8000-000000000001', '86', 'wT5HvK9EYA1S:0', '2609_jp_cp_akanya ×1', null),
+      );
+      expect(
+        first.data,
+        const SeventeenLiveGift(id: '2609_jp_cp_akanya', comboTotal: 3, point: 0, comboWindow: Duration(seconds: 3)),
+      );
+      final gift = first.gift!;
+      expect(
+        (gift.name, gift.count, gift.free, gift.unit, gift.totalValue, gift.tier),
+        ('', 1, true, LiveGiftUnit.point, 0, LiveGiftTier.normal),
+      );
+      expect(gift.comboKey, '', reason: 'no combo id: D07.1 merges by the sender and the gift');
+      // 观众21's combo: 1, 2, 3.
+      expect([for (final message in all.where((m) => m.userName == '观众21')) message.gift!.comboTotal], [1, 2, 3]);
+      expect(all.map((message) => message.gift!.id).toSet(), {
+        '2609_jp_cp_akanya',
+        '2305_jp_virtual_ticket',
+        'daily_signin_gift3',
+        '2011_jp_flash_diamond',
+        'gift_cat_2_ops',
+        'gift_rabbit_ops_1_pt',
+      });
+      expect('${first.data}', 'SeventeenLiveGift(2609_jp_cp_akanya, combo 3)');
+    });
+
+    test('S08-resume: the 17 gifts recorded without their giftMsg show nothing', () {
+      var recorded = 0;
+      for (final line in File('$_root/S08-resume/frames.jsonl').readAsLinesSync()) {
+        final text = (jsonDecode(line) as Map<String, Object?>)['text'];
+        if (text is! String) continue;
+        if (jsonDecode(text) case {'action': 15, 'messages': final List<Object?> items}) {
+          final frame = SeventeenLiveDanmakuProtocol.decode(text, roomId: _roomOf('S08-resume'));
+          expect(frame.messages.where((message) => message.type == LiveMessageType.gift), isEmpty);
+          recorded += [
+            for (final item in items)
+              if (SeventeenLiveDanmakuProtocol.payload((item! as Map<String, Object?>)['data'])?['type'] == 13) item,
+          ].length;
+        }
+      }
+      expect(recorded, 17);
+    });
+
+    test('the fields one by one: points, the meta of the gift, the name, bad data', () {
+      LiveMessage? read(Map<String, Object?> gift) =>
+          SeventeenLiveDanmakuProtocol.gift({'type': SeventeenLiveDanmakuProtocol.giftType, 'giftMsg': gift}, id: 'g1');
+      final paid = read({
+        'giftID': ' gift_a ',
+        'point': 79,
+        'displayUser': {'userID': 'u1', 'openID': 'open-1', 'level': 0},
+        'giftMetas': [
+          {
+            'targetGiftID': 'other',
+            'combo': {'count': 9},
+          },
+          {
+            'targetGiftID': 'gift_a',
+            'combo': {'count': 2, 'validDurationMs': 5000},
+          },
+        ],
+      })!;
+      expect((paid.userName, paid.userId, paid.userLevel, paid.messageId), ('open-1', 'u1', '', 'g1'));
+      expect(
+        paid.data,
+        const SeventeenLiveGift(id: 'gift_a', comboTotal: 2, point: 79, comboWindow: Duration(seconds: 5)),
+      );
+      expect((paid.gift!.unitPrice, paid.gift!.free, paid.gift!.tier), (79, false, LiveGiftTier.normal));
+      // No meta for the gift: the first one's.
+      expect(
+        read({
+          'giftID': 'b',
+          'giftMetas': [
+            {
+              'combo': {'count': 4},
+            },
+          ],
+        })!.gift!.comboTotal,
+        4,
+      );
+      final bare = read({'giftID': 'c'})!.data! as SeventeenLiveGift;
+      expect(
+        (bare.comboTotal, bare.point, bare.free, bare.totalValue, bare.comboWindow),
+        (null, null, false, null, null),
+      );
+      final odd =
+          read({
+                'giftID': 'd',
+                'point': -1,
+                'giftMetas': [
+                  'x',
+                  {
+                    'combo': {'count': 0, 'validDurationMs': -5},
+                  },
+                ],
+              })!.data!
+              as SeventeenLiveGift;
+      expect((odd.comboTotal, odd.point, odd.comboWindow), (null, null, null));
+      for (final gift in <Map<String, Object?>>[
+        {},
+        {'giftID': ''},
+        {'giftID': 7},
+      ]) {
+        expect(read(gift), isNull, reason: '$gift');
+      }
+      expect(
+        SeventeenLiveDanmakuProtocol.gift({'type': SeventeenLiveDanmakuProtocol.giftType, 'giftMsg': 'x'}),
+        isNull,
+      );
+      // A gift of a backlog is replayed, as its entry.
+      final entry = SeventeenLiveDanmakuProtocol.entry(
+        {
+          'type': 13,
+          'giftMsg': {'giftID': 'e'},
+        },
+        id: 'g2',
+        replayed: true,
+      );
+      expect((entry.messages.single.replayed, entry.messages.single.messageId), (true, 'g2'));
     });
   });
 

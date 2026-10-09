@@ -90,6 +90,7 @@ class GiftLine extends StatefulWidget {
     this.lead = const [],
     this.merged = false,
     this.valueInYuan = false,
+    this.sizing = ChatSizing.standard,
     super.key,
   });
 
@@ -122,7 +123,11 @@ class GiftLine extends StatefulWidget {
   /// ("礼物价值换算成元", A08.12; [giftValueText]).
   final bool valueInYuan;
 
-  /// The picture's size.
+  /// The list's text size and spacing (A08.15): the words, the value, the
+  /// picture and the gaps follow it.
+  final ChatSizing sizing;
+
+  /// The picture's size at the theme's text size.
   static const double iconSize = GiftIcon.size;
 
   /// The combo pulse (c4).
@@ -183,7 +188,8 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
     final tier = gift == null ? LiveGiftTier.normal : giftShownTier(gift);
     final platformInk = tier == LiveGiftTier.precious ? giftPlatformInk(widget.room.platform, ground) : null;
     final giftInk = platformInk ?? scheme.tertiary;
-    final body = ChatText.content(theme);
+    final sizing = widget.sizing;
+    final body = ChatText.content(theme, sizing: sizing);
     final secondary = body?.copyWith(color: scheme.onSurfaceVariant);
     final named = body?.emphasis.copyWith(color: giftInk);
     final name = widget.showName ? message.userName.trim() : '';
@@ -197,7 +203,7 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
         children: [
           ...widget.lead,
           if (name.isNotEmpty)
-            TextSpan(text: '$name ', style: ChatText.name(theme, chatNameInk(message, ground, scheme))),
+            TextSpan(text: '$name ', style: ChatText.name(theme, chatNameInk(message, ground, scheme), sizing)),
           if (gift == null)
             TextSpan(text: widget.text, style: named)
           else ...[
@@ -218,18 +224,24 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
                 child: Text(
                   notes.join(' · '),
                   key: const ValueKey('live-play-gift-value'),
-                  style: theme.textTheme.bodyMedium?.regular.tabular.copyWith(color: scheme.onSurfaceVariant),
+                  style: sizing
+                      .piece(theme.textTheme.bodyMedium, theme)
+                      ?.regular
+                      .tabular
+                      .copyWith(color: scheme.onSurfaceVariant),
                 ),
               ),
             ),
         ],
       ),
     );
-    // The picture sits on the first line at every text size.
+    // The picture sits on the first line at every text size; it grows with
+    // the list's text size (A08.15 c3), not with the system's, as before.
     final first = MediaQuery.textScalerOf(context).scale(body?.fontSize ?? 14) * (body?.height ?? 1.5);
+    final iconSize = GiftLine.iconSize * sizing.scaleIn(theme);
     final icon = Padding(
-      padding: EdgeInsetsDirectional.only(top: math.max(0, (first - GiftLine.iconSize) / 2), end: card ? 8 : 6),
-      child: GiftIcon(url: gift?.iconUrl, color: scheme.tertiary),
+      padding: EdgeInsetsDirectional.only(top: math.max(0, (first - iconSize) / 2), end: card ? 8 : 6),
+      child: GiftIcon(url: gift?.iconUrl, color: scheme.tertiary, size: iconSize),
     );
     final row = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,13 +277,14 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
           );
     if (!card) {
       return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: EdgeInsets.symmetric(vertical: sizing.gap(4)),
         child: marked(row, inset: 0, gap: mark + 6),
       );
     }
     // The chat card (A08.1), the picture in the dot's place.
+    final inner = sizing.gap(8);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: sizing.gap(4)),
       child: DecoratedBox(
         key: const ValueKey('live-play-gift-card'),
         decoration: BoxDecoration(
@@ -280,8 +293,11 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
           border: Border.all(color: scheme.outlineVariant, width: 0.5),
         ),
         child: marked(
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), child: row),
-          inset: 8,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: inner),
+            child: row,
+          ),
+          inset: inner,
           gap: 0,
         ),
       ),
@@ -304,8 +320,9 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
 /// [color] while it loads, when it fails and when the platform gives none,
 /// so the line never has a gap there.
 class GiftIcon extends StatelessWidget {
-  /// Creates the picture of [url].
-  const new({required this.url, required this.color, super.key});
+  /// Creates the picture of [url], [size] square (A08.15: the list's text
+  /// size makes it larger or smaller).
+  const new({required this.url, required this.color, double size = GiftIcon.size, super.key}) : side = size;
 
   /// The picture's address, or null.
   final Uri? url;
@@ -313,11 +330,15 @@ class GiftIcon extends StatelessWidget {
   /// The fallback icon's colour.
   final Color color;
 
-  /// The picture's size.
+  /// This picture's size.
+  final double side;
+
+  /// The picture's size at the theme's text size.
   static const double size = 16;
 
   @override
   Widget build(BuildContext context) {
+    final size = side;
     final fallback = Icon(AppIcons.chatGift, key: const ValueKey('live-play-gift-icon'), size: size, color: color);
     final address = url?.toString() ?? '';
     if (address.isEmpty) return fallback;
@@ -348,6 +369,7 @@ Widget giftLineOf(
   required GiftLineRoom room,
   required List<InlineSpan> lead,
   bool valueInYuan = false,
+  ChatSizing sizing = ChatSizing.standard,
   VoidCallback? onActions,
   VoidCallback? onCopy,
 }) => GestureDetector(
@@ -365,5 +387,6 @@ Widget giftLineOf(
     lead: lead,
     merged: line.revision > 0,
     valueInYuan: valueInYuan,
+    sizing: sizing,
   ),
 );

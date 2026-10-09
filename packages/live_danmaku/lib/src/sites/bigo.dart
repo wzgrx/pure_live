@@ -36,6 +36,38 @@ final class BigoChatVisitor {
   String toString() => 'BigoChatVisitor($userId)';
 }
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from a
+/// gift animation (`10|24` with `oriUri` 760969;
+/// [BigoDanmakuProtocol.gift], D07.6), as a [LiveGift]: the id, the name,
+/// the count and the combo; no price (the gift table `getOnlineGifts` is not
+/// asked for).
+@immutable
+final class BigoGift extends LiveGift {
+  /// Creates the gift.
+  ///
+  /// [id] is `vgift_typeid`, [name] `vgift_name` (`Flower`), [count]
+  /// `vgift_count`; [comboTotal] `vgift_count × send_times`, the gifts of
+  /// the combo so far; [beans] `ticket_num`, the streamer's bean total after
+  /// it (kept for checking; null when not given).
+  const new({required super.id, required super.name, required super.count, super.comboTotal, this.beans});
+
+  /// `ticket_num`; null when not given.
+  final int? beans;
+
+  @override
+  bool operator ==(Object other) => super == other && other is BigoGift && other.beans == beans;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, beans);
+
+  @override
+  String toString() => 'BigoGift($name ×$count)';
+}
+
+/// The sender of a gift as the chat list's gift line (`payload.tag` 6)
+/// names them: the account, the name and the level (D07.6).
+typedef BigoGiftSender = ({String userId, String name, String level});
+
 /// What one Bigo chat frame held ([BigoDanmakuProtocol.decode]).
 @immutable
 final class BigoDanmakuFrame {
@@ -47,6 +79,7 @@ final class BigoDanmakuFrame {
     this.entered = false,
     this.idle = false,
     this.refusal,
+    this.giftSender,
   });
 
   /// Chat and audience updates, in order.
@@ -71,6 +104,10 @@ final class BigoDanmakuFrame {
   /// resCode …`, or `unsigned: …` with the refused uri (a login sent before the challenge
   /// was answered, sample S07-unsigned); null otherwise.
   final String? refusal;
+
+  /// The sender a gift line (`payload.tag` 6) names; it follows the gift's
+  /// animation, which names nobody ([BigoDanmakuProtocol.giftLine]).
+  final BigoGiftSender? giftSender;
 }
 
 /// Bigo Live's web chat, as the website's scripts of 2026-09-30 speak it
@@ -161,6 +198,17 @@ abstract final class BigoDanmakuProtocol {
   /// `payload.tag` values that are chat: the page's `comments`
   /// (`NORMAL_TEXT` 1, `DAMMARKU_TEXT` 2).
   static const Set<int> chatTags = {1, 2};
+
+  /// The `oriUri` of a gift's animation in a `10|24` frame (D07.6).
+  static const String giftOriUri = '760969';
+
+  /// The `payload.tag` of the chat list's line for a gift (D07.6): it names
+  /// the sender ([giftLine]).
+  static const int giftLineTag = 6;
+
+  /// How long a gift waits for its line's sender name (D07.6): the line
+  /// came 75 ms after the animation in S05-live.
+  static const Duration giftSenderWait = Duration(seconds: 1);
 
   /// A 64-bit room id as written.
   static final RegExp _roomId = RegExp(r'^[1-9][0-9]{0,19}$');
@@ -294,10 +342,12 @@ abstract final class BigoDanmakuProtocol {
   ///   anything else is a refusal); 1560 the entry answer (`resCode` "200"
   ///   enters, or finds the room [BigoDanmakuFrame.idle] when `sid` is "0";
   ///   anything else is a refusal);
-  /// - 2584 of this room is chat when [chat] reads it; 10264 and 11032 of
-  ///   this room are the audience ([audience]);
-  /// - every other frame (pings, gifts, likes, entrance notices, the room's
-  ///   heat, seats) gives nothing.
+  /// - 2584 of this room is chat when [chat] reads it, a gift when its
+  ///   `oriUri` is [giftOriUri] ([gift]), a gift's sender when it is the
+  ///   gift line ([giftLine]); 10264 and 11032 of this room are the
+  ///   audience ([audience]);
+  /// - every other frame (pings, likes, entrance notices, the room's heat,
+  ///   seats) gives nothing.
   static BigoDanmakuFrame decode(Object? data, {required String roomId}) {
     final text = switch (data) {
       final String text => text,
@@ -335,6 +385,11 @@ abstract final class BigoDanmakuProtocol {
         final sid = _scalar(body['sid']);
         return sid.isEmpty || sid == '0' ? const BigoDanmakuFrame(idle: true) : const BigoDanmakuFrame(entered: true);
       case textUri:
+        if (_scalar(body['oriUri']) == giftOriUri) {
+          final present = gift(body, roomId: roomId);
+          return present == null ? const BigoDanmakuFrame() : BigoDanmakuFrame(messages: [present]);
+        }
+        if (giftLine(body, roomId: roomId) case final sender?) return BigoDanmakuFrame(giftSender: sender);
         final message = chat(body, roomId: roomId);
         return message == null ? const BigoDanmakuFrame() : BigoDanmakuFrame(messages: [message]);
       case audienceUri || usersReplyUri:
@@ -391,6 +446,76 @@ abstract final class BigoDanmakuProtocol {
     );
   }
 
+  /// A gift's animation in a `10|24` frame of room [roomId] (`oriUri`
+  /// [giftOriUri], D07.6): `payload.vgift_typeid` (the id),
+  /// `vgift_name`, `vgift_count`, `send_times` (the sends of the combo so
+  /// far: the combo's gifts are `vgift_count × send_times`) and
+  /// `ticket_num`; the sender's account `from_uid`, no name (the gift line
+  /// that follows names them, [giftLine]). The message id is `<account>:<seqId>`.
+  /// Null for another room, or without a gift name.
+  static LiveMessage? gift(Map<Object?, Object?> frame, {required String roomId}) {
+    final payload = frame['payload'];
+    if (payload is! Map) return null;
+    final room = _scalar(payload['room_id']);
+    if ((room.isEmpty ? _scalar(frame['room_id']) : room) != roomId) return null;
+    final name = _scalar(payload['vgift_name']).trim();
+    if (name.isEmpty) return null;
+    final count = _count(payload['vgift_count']) ?? 1;
+    final sends = _count(payload['send_times']);
+    final present = BigoGift(
+      id: _scalar(payload['vgift_typeid']).trim(),
+      name: name,
+      count: count,
+      comboTotal: sends == null ? null : count * sends,
+      beans: _count(payload['ticket_num']),
+    );
+    var userId = _scalar(payload['from_uid']);
+    if (!_digits.hasMatch(userId)) userId = _scalar(frame['from_uid']);
+    if (!_digits.hasMatch(userId)) userId = '';
+    final seq = _scalar(frame['seqId']);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: '',
+      userId: userId,
+      message: present.plainText,
+      messageId: userId.isNotEmpty && _digits.hasMatch(seq) ? '$userId:$seq' : '',
+      color: LiveMessageColor.white,
+      data: present,
+    );
+  }
+
+  /// The sender of the chat list's gift line (`payload.tag` [giftLineTag]
+  /// of a `10|24` frame of room [roomId], D07.6): the account `payload.uid`
+  /// (else `from_uid`), the name `n` of the Base64 JSON `content` and the
+  /// level `payload.grade`. Null for anything else, or without an account.
+  static BigoGiftSender? giftLine(Map<Object?, Object?> frame, {required String roomId}) {
+    if (_scalar(frame['room_id']) != roomId) return null;
+    final payload = frame['payload'];
+    if (payload is! Map || int.tryParse(_scalar(payload['tag'])) != giftLineTag) return null;
+    var userId = _scalar(payload['uid']);
+    if (!_digits.hasMatch(userId)) userId = _scalar(frame['from_uid']);
+    if (!_digits.hasMatch(userId)) return null;
+    final content = payload['content'];
+    var name = '';
+    if (content is String) {
+      try {
+        final decoded = jsonDecode(utf8.decode(base64.decode(base64.normalize(content.trim()))));
+        if (decoded is Map) name = _scalar(decoded['n']).trim();
+      } on FormatException {
+        // A line without a name that reads.
+      }
+    }
+    final level = _scalar(payload['grade']);
+    return (userId: userId, name: name, level: _digits.hasMatch(level) ? level : '');
+  }
+
+  /// A whole number of at least 1 written as digits, or null.
+  static int? _count(Object? value) {
+    final text = _scalar(value);
+    final count = _digits.hasMatch(text) ? int.tryParse(text) : null;
+    return count != null && count > 0 ? count : null;
+  }
+
   /// The concurrent audience of room [roomId] in a `40|24` frame
   /// (`totalUserCount`, when `gid` is the room) or the `43|24` answer
   /// (`total`, when `room_id` is the room), as the room page shows them
@@ -438,7 +563,10 @@ abstract final class BigoDanmakuProtocol {
 ///   fourth in a row ends the connection.
 /// - Pings every 10 s once logged in; the server answers each.
 /// - Chat (comments and paid bullet comments) and the concurrent audience
-///   are reported.
+///   are reported, and gifts (D07.6): a gift waits up to
+///   [BigoDanmakuProtocol.giftSenderWait] for the gift line that names its
+///   sender, and is reported with the name and level then, or without
+///   them once the wait is over.
 ///
 /// The app registers it as `SiteIds.bigo: () => BigoDanmakuConnection(http:
 /// …, proxy: …)`, with the `LiveHttp` it gives `BigoSite` and its proxy
@@ -558,9 +686,14 @@ final class BigoDanmakuConnection extends DanmakuSocketConnection<BigoDanmakuArg
       }
       session.send(BigoDanmakuProtocol.users(chat.args, _now()));
     }
+    if (frame.giftSender case final sender?) chat.named(sender);
     for (final message in frame.messages) {
       if (!session.isActive) return;
-      session.message(message);
+      if (message.type == LiveMessageType.gift && message.userId.isNotEmpty) {
+        chat.waitForSender(message, session.message);
+      } else {
+        session.message(message);
+      }
     }
   }
 
@@ -682,6 +815,46 @@ final class _Chat {
   /// Sends the login a second after the answer.
   Timer? loginTimer;
 
+  /// Gifts waiting for their line's sender name (D07.6), oldest first.
+  final List<({LiveMessage gift, Timer timer, void Function(LiveMessage) report})> _gifts = [];
+
+  /// Reports [gift] through [report] when its line names the sender, or
+  /// without the name after [BigoDanmakuProtocol.giftSenderWait].
+  void waitForSender(LiveMessage gift, void Function(LiveMessage) report) {
+    late final ({LiveMessage gift, Timer timer, void Function(LiveMessage) report}) entry;
+    entry = (
+      gift: gift,
+      report: report,
+      timer: Timer(BigoDanmakuProtocol.giftSenderWait, () {
+        if (_gifts.remove(entry) && run.isActive) report(gift);
+      }),
+    );
+    _gifts.add(entry);
+  }
+
+  /// The oldest gift waiting from [sender]'s account, reported with the
+  /// name and level the gift line gives.
+  void named(BigoGiftSender sender) {
+    final index = _gifts.indexWhere((entry) => entry.gift.userId == sender.userId);
+    if (index < 0) return;
+    final entry = _gifts.removeAt(index);
+    entry.timer.cancel();
+    if (!run.isActive) return;
+    final gift = entry.gift;
+    entry.report(
+      LiveMessage(
+        type: gift.type,
+        userName: sender.name,
+        userId: gift.userId,
+        message: gift.message,
+        color: gift.color,
+        userLevel: sender.level,
+        messageId: gift.messageId,
+        data: gift.data,
+      ),
+    );
+  }
+
   /// A new socket: nothing sent, nothing joined.
   void socketReset() {
     answered = false;
@@ -695,5 +868,9 @@ final class _Chat {
   void dispose() {
     socketReset();
     cancel.cancel();
+    for (final entry in _gifts) {
+      entry.timer.cancel();
+    }
+    _gifts.clear();
   }
 }

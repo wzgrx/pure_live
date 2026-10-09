@@ -10,16 +10,25 @@ import 'package:meta/meta.dart';
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from uri
 /// 6501 (`SendItemSubBroadcastPacket`, a gift sent in this room), as a
 /// [LiveGift] (E05.5): [combo] is its combo total, [payTotal] its value in
-/// [LiveGiftUnit.other] (the unit is not documented).
+/// [LiveGiftUnit.other] (the unit is not documented), and the combo key the
+/// sender and `lComboSeqId` (D07.6).
 @immutable
 final class HuyaGift extends LiveGift {
   /// Creates the gift.
   ///
   /// [id] is `iItemType`, the gift's id (`4` is 虎粮), empty when 0 (E05.5:
   /// was the number); [name] `sPropsName` (`虎粮`, `粉丝通行证`); [count]
-  /// `iItemCount`, at least 1: how many this send gave.
-  const new({required super.id, required super.name, required super.count, required this.combo, required this.payTotal})
-    : super(comboTotal: combo, totalValue: payTotal > 0 ? payTotal : null);
+  /// `iItemCount`, at least 1: how many this send gave; [comboKey] the
+  /// sender's uid and `lComboSeqId`, `uid:seq` ([HuyaDanmakuProtocol.comboKey]),
+  /// empty when the packet has no sequence id.
+  const new({
+    required super.id,
+    required super.name,
+    required super.count,
+    required this.combo,
+    required this.payTotal,
+    super.comboKey,
+  }) : super(comboTotal: combo, totalValue: payTotal > 0 ? payTotal : null);
 
   /// `iItemGroup`, at least 1: the combo counter. A combo sends one packet
   /// per hit with the same `lComboSeqId`, counting 1, 2, 3…
@@ -240,12 +249,20 @@ abstract final class HuyaDanmakuProtocol {
     );
   }
 
+  /// The combo key of a gift from sender [uid] with `lComboSeqId` [sequence]
+  /// (D07.6): every packet of one combo carries the same sequence id (the
+  /// time the combo began, in milliseconds), so the sender is part of the
+  /// key, as two viewers may start a combo in the same millisecond. Empty
+  /// without a sequence id (0: a gift sent at once, some 虎粮 batches).
+  static String comboKey(int uid, int sequence) => sequence > 0 ? '$uid:$sequence' : '';
+
   /// uri 6501 (`SendItemSubBroadcastPacket`, the web client's field names):
   /// tag 0 `iItemType`, 2 `iItemCount`, 4 `lSenderUid`, 6 `sSenderNick`, 9
-  /// `iItemGroup` (the combo counter), 20 `sPropsName`, 41 `lPayTotal`. A
-  /// gift without a name is not reported (the web client names it from a
-  /// gift table this client does not load). Reported as a gift holding a
-  /// [HuyaGift]; the text is `虎粮 ×1`.
+  /// `iItemGroup` (the combo counter), 20 `sPropsName`, 39 `lComboSeqId`
+  /// (the combo's id, D07.6: [comboKey]), 41 `lPayTotal`. A gift without a
+  /// name is not reported (the web client names it from a gift table this
+  /// client does not load). Reported as a gift holding a [HuyaGift]; the
+  /// text is `虎粮 ×1`.
   static LiveMessage? gift(Uint8List? body, int eventId) {
     final packet = TarsStruct.decode(body ?? const []);
     final name = (packet.string(20) ?? '').trim();
@@ -254,17 +271,19 @@ abstract final class HuyaDanmakuProtocol {
     final combo = packet.integer(9) ?? 0;
     final payTotal = packet.integer(41) ?? 0;
     final id = packet.integer(0) ?? 0;
+    final uid = packet.integer(4) ?? 0;
     final data = HuyaGift(
       id: id == 0 ? '' : '$id',
       name: name,
       count: count > 0 ? count : 1,
       combo: combo > 0 ? combo : 1,
       payTotal: payTotal > 0 ? payTotal : 0,
+      comboKey: comboKey(uid, packet.integer(39) ?? 0),
     );
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: packet.string(6) ?? '',
-      userId: '${packet.integer(4) ?? 0}',
+      userId: '$uid',
       message: data.plainText,
       color: LiveMessageColor.white,
       messageId: _messageId(eventId),

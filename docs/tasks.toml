@@ -1324,11 +1324,14 @@ note = "在 A08.13 之后做（同一个 message_panel.dart）；“复制”下
 id = "A08.15"
 title = "聊天列表字号和行距（接 A08.10）"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "小"
 tier = 2
+stages = ["两个设置（列表文字大小、行间距），列表的各种行、标签和间距跟它"]
+done = 1
 from = "V03.6 第 4 节 E4、第 5.2 节；用户 2026-10-09（D-040）"
-note = "依赖 A08.10（行样式和 ChatText）；两个新设置默认 = 现在的样子（D-040）"
+note = "依赖 A08.10（行样式和 ChatText）；新设置 danmakuListFontSize（默认 0 = 主题正文字号，12～22）、danmakuListLineSpacing（默认 standard）默认和以前像素一致（D-040）；设计选择（D-003，维护者定）S1～S10 写在任务 README；真机步骤见 verify.md"
 
 [[task]]
 id = "A09.1"
@@ -2276,7 +2279,7 @@ tier = 2
 stages = ["superChatPlatforms 补 7 个平台、价格按平台单位", "上舰、会员、订阅进醒目留言（新开关，默认开）；六间房飞屏改成醒目留言"]
 done = 2
 from = "V03.5 第 6.5、6.6 节（F-6、F-7）；用户 2026-10-09（D-040）"
-note = "依赖 E05.5（kind、unit）；“上舰和开会员进醒目留言”默认开，是任务书写明的例外（D-040）；平台表 superChatUnits 11 个（加了六间房）；卡片只进醒目留言页，列表照旧一行；Twitch 社区礼包里分到的那份是新的 giftedSubscription 通知；六间房 108 没录到样本（网页脚本为据）；设计选择（D-003）在 README“定稿”"
+note = "依赖 E05.5（kind、unit）；“上舰和开会员进醒目留言”默认开，是任务书写明的例外（D-040）；平台表 superChatUnits 11 个（加了六间房）；卡片只进醒目留言页，列表照旧一行；YouTube 收到的会员礼物是新的 giftedSubscription 通知（Twitch 社区礼包由 D07.6 并成一条）；六间房 108 没录到样本（网页脚本为据）；设计选择（D-003）在 README“定稿”"
 next = "K90 上按 verify.md 看（CHZZK 或 YouTube、哔哩哔哩登录后上舰、六间房飞屏）"
 
 [[task]]
@@ -2323,13 +2326,15 @@ note = "受阻：匿名网页端收不到 WebcastGiftMessage（E01.4 实测约 2
 id = "D07.6"
 title = "已有样本的平台补礼物：AcFun 目录、17LIVE、BIGO、连击键、Twitch Bits、CHZZK 订阅、YouTube 贴纸"
 type = "平台"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "大"
 tier = 2
 stages = ["连击键：虎牙 lComboSeqId、猫耳 combo、克拉克拉 no", "AcFun 礼物表 gift/list、礼物和香蕉", "17LIVE 礼物 13、BIGO 760969", "Twitch Bits 和送订阅合并、CHZZK 订阅、YouTube 贴纸"]
-done = 0
+done = 4
 from = "V03.5 第 2、3 节、第 7 节；用户 2026-10-09（D-040）"
-note = "依赖 E05.5；连击键要在 D07.1 之前或同时合并，合并才有平台的连击号可用；每个阶段一个平台组、一次合并"
+note = "依赖 E05.5；四个阶段都做了：虎牙、猫耳、克拉克拉的连击键（克拉克拉的连击中间帧也报）；AcFun 礼物表在 AcfunSite 里缓存、连弹幕时后台取，新单位 AC 币、香蕉；17LIVE 礼物 13 没有礼物表，显示“礼物 {编号}”；BIGO 760969 等后面的礼物行拿名字；Twitch Bits 是打赏、送订阅只出一条；CHZZK 订阅是通知；YouTube 贴纸是醒目留言、卡片带图（LiveSuperChatMessage.image）。AcFun 礼物信号、Twitch Bits 和送订阅合并没有真实样本，用按公开协议合成的帧测；设计选择（D-003）写在 record.md"
+next = "K90 上按 verify.md 看"
 
 [[task]]
 id = "D07.7"

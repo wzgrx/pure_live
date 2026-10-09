@@ -7,14 +7,62 @@ import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
+/// A cheer of a [LiveMessageType.gift] message (`LiveMessage.data`): Bits
+/// given with a chat line (`PRIVMSG` with a `bits` tag;
+/// [TwitchDanmakuProtocol.cheer], D07.6), as a [LiveGift] of kind
+/// [LiveGiftKind.tip]: [name] is the currency, the value [bits] in
+/// [LiveGiftUnit.bits]. Each cheer is its own line ([comboKey] is its
+/// message's), as its words are its own.
+@immutable
+final class TwitchCheer extends LiveGift {
+  /// Creates the cheer of [bits] (at least 1) with combo key [comboKey].
+  const new({required this.bits, required super.comboKey})
+    : super(
+        name: TwitchDanmakuProtocol.bitsName,
+        kind: LiveGiftKind.tip,
+        unitPrice: bits,
+        totalValue: bits,
+        unit: LiveGiftUnit.bits,
+      );
+
+  /// The `bits` tag.
+  final int bits;
+
+  @override
+  bool operator ==(Object other) => super == other && other is TwitchCheer && other.bits == bits;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, bits);
+
+  @override
+  String toString() => 'TwitchCheer($bits)';
+}
+
+/// The community gift a subscription notice belongs to (D07.6): the
+/// `msg-param-community-gift-id`, whether it is the gift's announcement
+/// (`submysterygift`: `count` subscriptions, `msg-param-mass-gift-count`)
+/// or one of the subscriptions it gives (`subgift`).
+typedef TwitchCommunityGift = ({String id, bool announcement, int count});
+
 /// What one Twitch frame held ([TwitchDanmakuProtocol.decode]).
 @immutable
 final class TwitchDanmakuFrame {
   /// Creates the result.
-  const new({this.messages = const [], this.replies = const [], this.loginRejected = false, this.reconnect = false});
+  const new({
+    this.messages = const [],
+    this.replies = const [],
+    this.loginRejected = false,
+    this.reconnect = false,
+    this.communityGifts = const {},
+  });
 
   /// Chat, notices and retractions, in order.
   final List<LiveMessage> messages;
+
+  /// The subscription notices of [messages] that belong to a community gift
+  /// (D07.6), by the notice itself (an identity map): the connection shows
+  /// a community gift as its announcement only.
+  final Map<LiveMessage, TwitchCommunityGift> communityGifts;
 
   /// Lines to send back at once: a `PONG` for every server `PING`.
   final List<String> replies;
@@ -182,11 +230,23 @@ abstract final class TwitchDanmakuProtocol {
     'standardpayforward',
   };
 
-  /// The [subscriptionNotices] that are one viewer's share of a community
-  /// gift when they carry `msg-param-community-gift-id`: the
-  /// `submysterygift` before them announces the whole gift, so they are
-  /// [LiveNoticeKind.giftedSubscription] (D07.2: no card of their own).
-  static const Set<String> communityShares = {'subgift', 'anonsubgift'};
+  /// The `msg-id`s that announce a community gift (D07.6).
+  static const Set<String> communityGiftAnnouncements = {'submysterygift', 'anonsubmysterygift'};
+
+  /// The `msg-id`s of the subscriptions a community gift gives (D07.6).
+  static const Set<String> communityGiftMembers = {'subgift', 'anonsubgift'};
+
+  /// How long a subscription of a community gift waits for the gift's
+  /// announcement (D07.6): the recordings have it 0.6 s before or after.
+  /// One whose announcement does not come in time is shown on its own.
+  static const Duration communityGiftWait = Duration(seconds: 2);
+
+  /// How long a community gift's announcement leaves out the subscriptions
+  /// it gives that are still to come.
+  static const Duration communityGiftLifetime = Duration(minutes: 1);
+
+  /// The currency a cheer gives (`TwitchCheer.name`): Twitch's own name.
+  static const String bitsName = 'Bits';
 
   /// The system notice reported once per `connect` when
   /// Twitch refused the stored chat login and chat went on anonymously (B-7).
@@ -200,13 +260,16 @@ abstract final class TwitchDanmakuProtocol {
 
   /// Reads one frame (3.x `decodeMessage`): every line that starts with
   /// `PING` is answered with the same line as `PONG`; every `PRIVMSG` line
-  /// is chat ([chat]); a `NOTICE *` sets [TwitchDanmakuFrame.loginRejected].
+  /// is chat ([chat]), after its cheer when it gives Bits ([cheer], D07.6);
+  /// a `NOTICE *` sets [TwitchDanmakuFrame.loginRejected].
   /// `CLEARMSG`, `CLEARCHAT` and `USERNOTICE` become retractions, notices
   /// and chat ([command]); `RECONNECT` sets [TwitchDanmakuFrame.reconnect]
-  /// (B-7; 3.x read none of them). A line that fails to decode is skipped
-  /// without losing the others.
+  /// (B-7; 3.x read none of them); a subscription notice of a community
+  /// gift is marked ([communityGift], D07.6). A line that fails to decode is
+  /// skipped without losing the others.
   static TwitchDanmakuFrame decode(String data) {
     final messages = <LiveMessage>[];
+    final community = Map<LiveMessage, TwitchCommunityGift>.identity();
     final replies = <String>[];
     var loginRejected = false;
     var reconnect = false;
@@ -220,16 +283,68 @@ abstract final class TwitchDanmakuProtocol {
           case 'RECONNECT':
             reconnect = true;
           case 'CLEARMSG' || 'CLEARCHAT' || 'USERNOTICE':
-            messages.addAll(command(irc!));
+            final read = command(irc!);
+            if (communityGift(irc) case final gift?) {
+              for (final message in read) {
+                if (message.type == LiveMessageType.notice) community[message] = gift;
+              }
+            }
+            messages.addAll(read);
           default:
             final message = chat(line);
-            if (message != null) messages.add(message);
+            if (message != null) {
+              if (irc != null) messages.addAll([?cheer(irc, message)]);
+              messages.add(message);
+            }
         }
       } on Object {
         // A timestamp out of DateTime's range: only this line is lost.
       }
     }
-    return TwitchDanmakuFrame(messages: messages, replies: replies, loginRejected: loginRejected, reconnect: reconnect);
+    return TwitchDanmakuFrame(
+      messages: messages,
+      replies: replies,
+      loginRejected: loginRejected,
+      reconnect: reconnect,
+      communityGifts: community,
+    );
+  }
+
+  /// The cheer of a `PRIVMSG` [line] whose chat is [chat] (D07.6): its
+  /// `bits` tag above 0, as a gift of [chat]'s sender, time and colour,
+  /// with the id `<chat's id>:bits` (the chat line keeps its own); the
+  /// words stay [chat]'s. Null without Bits.
+  static LiveMessage? cheer(TwitchIrcLine line, LiveMessage chat) {
+    final bits = int.tryParse(line.tags['bits']?.trim() ?? '');
+    if (line.command != 'PRIVMSG' || bits == null || bits <= 0) return null;
+    final id = chat.messageId;
+    final key = id.isNotEmpty ? 'bits:$id' : 'bits:${chat.userId}:${chat.sentAt?.millisecondsSinceEpoch ?? ''}';
+    final gift = TwitchCheer(bits: bits, comboKey: key);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: chat.userName,
+      userId: chat.userId,
+      message: gift.plainText,
+      color: chat.color,
+      messageId: id.isEmpty ? '' : '$id:bits',
+      sentAt: chat.sentAt,
+      data: gift,
+    );
+  }
+
+  /// The community gift of a `USERNOTICE` [line] (D07.6): a
+  /// [communityGiftAnnouncements] or [communityGiftMembers] notice with a
+  /// `msg-param-community-gift-id`; the announcement's count is
+  /// `msg-param-mass-gift-count` (1 when missing). Null otherwise.
+  static TwitchCommunityGift? communityGift(TwitchIrcLine line) {
+    if (line.command != 'USERNOTICE') return null;
+    final kind = line.tags['msg-id'] ?? '';
+    final announcement = communityGiftAnnouncements.contains(kind);
+    if (!announcement && !communityGiftMembers.contains(kind)) return null;
+    final id = line.tags['msg-param-community-gift-id']?.trim() ?? '';
+    if (id.isEmpty) return null;
+    final count = int.tryParse(line.tags['msg-param-mass-gift-count'] ?? '') ?? 1;
+    return (id: id, announcement: announcement, count: count > 0 ? count : 1);
   }
 
   /// The messages of a `CLEARMSG`, `CLEARCHAT` or `USERNOTICE` [line] (B-7),
@@ -242,9 +357,7 @@ abstract final class TwitchDanmakuProtocol {
   ///   a retraction of everything. A user named without an id cannot be
   ///   matched and is skipped, never taken for a clear;
   /// - `USERNOTICE`: the `system-msg` as a notice, a
-  ///   [LiveNoticeKind.subscription] for [subscriptionNotices] (a share of
-  ///   a community gift, [communityShares], is
-  ///   [LiveNoticeKind.giftedSubscription]), a
+  ///   [LiveNoticeKind.subscription] for [subscriptionNotices], a
   ///   [LiveNoticeKind.raid] for `raid`, [LiveNoticeKind.system] otherwise
   ///   (none when the text is empty); then the viewer's own words, when
   ///   there are any, as their chat carrying the notice's `id`. An
@@ -291,9 +404,7 @@ abstract final class TwitchDanmakuProtocol {
               message: text,
               color: LiveMessageColor.white,
               data: subscriptionNotices.contains(kind)
-                  ? (communityShares.contains(kind) && (tags['msg-param-community-gift-id'] ?? '').isNotEmpty
-                        ? LiveNoticeKind.giftedSubscription
-                        : LiveNoticeKind.subscription)
+                  ? LiveNoticeKind.subscription
                   : kind == 'raid'
                   ? LiveNoticeKind.raid
                   : LiveNoticeKind.system,
@@ -411,6 +522,12 @@ abstract final class TwitchDanmakuProtocol {
 ///   (B-7); 3.x waited for the server to drop it and showed a reconnect.
 /// - Deleted messages, timeouts, bans and cleared chats are reported as
 ///   retractions, subscriptions and raids as notices (B-7).
+/// - A community gift (`submysterygift` and the N `subgift`s it gives,
+///   one `msg-param-community-gift-id`) is one notice, its announcement
+///   (D07.6): a subscription of it waits up to
+///   [TwitchDanmakuProtocol.communityGiftWait] for the announcement and is
+///   left out once it comes; one whose announcement does not come is shown.
+///   Cheers (Bits) are gifts before their chat lines.
 ///
 /// The app registers it as `SiteIds.twitch: () =>
 /// TwitchDanmakuConnection(proxy: …)`.
@@ -476,7 +593,15 @@ final class TwitchDanmakuConnection extends DanmakuSocketConnection<TwitchDanmak
     if (text == null) return;
     final frame = TwitchDanmakuProtocol.decode(text);
     frame.replies.forEach(session.send);
-    frame.messages.forEach(session.message);
+    final join = _of(session);
+    for (final message in frame.messages) {
+      final gift = frame.communityGifts[message];
+      if (gift == null || join == null) {
+        session.message(message);
+      } else {
+        join.gifts.add(message, gift, session.message);
+      }
+    }
     if (frame.loginRejected && _loginRejected(session)) return;
     if (frame.reconnect) _switch(session);
   }
@@ -541,4 +666,69 @@ final class _Join {
 
   /// The next open belongs to a `RECONNECT` switch.
   bool switching = false;
+
+  /// The community gifts of this run (D07.6).
+  late final _CommunityGifts gifts = _CommunityGifts(run);
+}
+
+/// The community gifts of one run (D07.6): an announcement is shown at
+/// once and leaves out the subscriptions it gives, those held and those
+/// still to come (until [TwitchDanmakuProtocol.communityGiftLifetime]); a
+/// subscription without its announcement waits
+/// [TwitchDanmakuProtocol.communityGiftWait] for it, then is shown.
+final class _CommunityGifts {
+  new(this._run) {
+    unawaited(_run.ended.then((_) => _dispose()));
+  }
+
+  /// Gifts remembered; the oldest goes first.
+  static const int _capacity = 64;
+
+  final DanmakuRun _run;
+
+  /// Announced gifts: when, and how many subscriptions are still to come.
+  final Map<String, ({DateTime at, int left})> _announced = {};
+
+  /// Subscriptions waiting for their announcement.
+  final List<({String id, Timer timer})> _held = [];
+
+  void add(LiveMessage notice, TwitchCommunityGift gift, void Function(LiveMessage) report) {
+    final now = DateTime.now();
+    _announced.removeWhere(
+      (_, entry) => now.difference(entry.at) > TwitchDanmakuProtocol.communityGiftLifetime || entry.left <= 0,
+    );
+    if (gift.announcement) {
+      report(notice);
+      var left = gift.count;
+      for (final held in _held.where((held) => held.id == gift.id).toList()) {
+        held.timer.cancel();
+        _held.remove(held);
+        left--;
+      }
+      _announced[gift.id] = (at: now, left: left);
+      while (_announced.length > _capacity) {
+        _announced.remove(_announced.keys.first);
+      }
+      return;
+    }
+    if (_announced[gift.id] case final entry?) {
+      _announced[gift.id] = (at: entry.at, left: entry.left - 1);
+      return;
+    }
+    late final ({String id, Timer timer}) held;
+    held = (
+      id: gift.id,
+      timer: Timer(TwitchDanmakuProtocol.communityGiftWait, () {
+        if (_held.remove(held) && _run.isActive) report(notice);
+      }),
+    );
+    _held.add(held);
+  }
+
+  void _dispose() {
+    for (final held in _held) {
+      held.timer.cancel();
+    }
+    _held.clear();
+  }
 }

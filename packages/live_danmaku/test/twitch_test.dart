@@ -974,23 +974,6 @@ void main() {
       expect(TwitchDanmakuProtocol.subscriptionNotices, hasLength(12));
     });
 
-    test('D07.2: a subgift inside a community gift is its share; one of its own and the gift itself are '
-        'subscriptions', () {
-      LiveMessage notice(String msgId, {String community = ''}) => TwitchDanmakuProtocol.decode(
-        _command('USERNOTICE', {
-          ..._viewerNotice(msgId, 'Viewer_A did "$msgId".'),
-          if (community.isNotEmpty) 'msg-param-community-gift-id': community,
-        }),
-      ).messages.single;
-      expect(TwitchDanmakuProtocol.communityShares, {'subgift', 'anonsubgift'});
-      for (final msgId in TwitchDanmakuProtocol.communityShares) {
-        expect(notice(msgId, community: '3918641243089153208').data, LiveNoticeKind.giftedSubscription, reason: msgId);
-        expect(notice(msgId).data, LiveNoticeKind.subscription, reason: '$msgId of its own');
-      }
-      // The community gift announces itself with the same id: a subscription.
-      expect(notice('submysterygift', community: '3918641243089153208').data, LiveNoticeKind.subscription);
-    });
-
     test("a raid is a raid notice in the platform's words", () {
       final raid = _command('USERNOTICE', {
         ..._viewerNotice('raid', '1234 raiders from Raider_B have joined!'),
@@ -1190,9 +1173,8 @@ void main() {
           ],
           [
             (LiveNoticeKind.subscription, 'pfxqwzmw', '5696248051', 'pfxqwzmw subscribed at Tier 1.'),
-            // D07.2: one share of the community gift announced next.
             (
-              LiveNoticeKind.giftedSubscription,
+              LiveNoticeKind.subscription,
               'fyiimgxdzsmybw',
               '984515358',
               'fyiimgxdzsmybw gifted a Tier 1 sub to yjjgig81!',
@@ -1228,7 +1210,7 @@ void main() {
             // Twitch's placeholder for an anonymous gifter; its system-msg ends
             // with a space.
             (
-              LiveNoticeKind.giftedSubscription,
+              LiveNoticeKind.subscription,
               'AnAnonymousGifter',
               '274598607',
               'An anonymous user gifted a Tier 1 sub to SiiYctRkf!',
@@ -1431,7 +1413,7 @@ void main() {
           ),
           (
             'notice',
-            LiveNoticeKind.giftedSubscription,
+            LiveNoticeKind.subscription,
             'jguftmnrip3',
             '667743933',
             'jguftmnrip3 gifted a Tier 1 sub to sdo_skt!',
@@ -1465,12 +1447,139 @@ void main() {
         if (frame.dir == 'in') channel.incoming.add(frame.text);
       }
       final expected = decodeAll(recording).messages;
+      // D07.6: a subscription of a community gift waits for its
+      // announcement; the recording's ids were scrubbed one by one, so none
+      // matches and each comes after its wait.
+      final members = {
+        for (final frame in recording)
+          if (frame.dir == 'in')
+            for (final MapEntry(:key, :value) in TwitchDanmakuProtocol.decode(frame.text).communityGifts.entries)
+              if (!value.announcement) _project(key).toString(),
+      };
+      expect(members, hasLength(2));
       await _until(() => _messages(events).length == expected.length);
-      expect(_messages(events).map(_project), expected.map(_project));
+      final shown = _messages(events).map(_project).toList();
+      bool member(Map<String, Object?> projected) => members.contains(projected.toString());
+      expect(shown.where((message) => !member(message)), expected.map(_project).where((message) => !member(message)));
+      expect({for (final message in shown.where(member)) message.toString()}, members);
       expect(channel.sent.skip(4), List.filled(3, 'PONG :tmi.twitch.tv'));
       expect(connector.channels, hasLength(1));
       expect(events.whereType<DanmakuReady>(), hasLength(1));
       await connection.close();
+    });
+  });
+
+  group('D07.6: Bits and community gifts (frames synthesized after the public IRC tags)', () {
+    String cheer(String id, int bits, String text) =>
+        '@badge-info=;bits=$bits;color=#1E90FF;display-name=Cheerer;id=$id;tmi-sent-ts=1790781000000;user-id=42 '
+        ':cheerer!cheerer@cheerer.tmi.twitch.tv PRIVMSG #$_channel :$text\r\n';
+
+    String notice(String kind, String community, {int? count, String user = '7', String name = 'Gifter'}) =>
+        '@display-name=$name;id=n-$kind-$community-${count ?? 0};login=${name.toLowerCase()};'
+        'msg-id=$kind;msg-param-community-gift-id=$community;'
+        '${count == null ? '' : 'msg-param-mass-gift-count=$count;'}'
+        'system-msg=${kind == 'subgift' ? r'Gifter\sgifted\sa\sTier\s1\ssub!' : r'Gifter\sis\sgifting\sTier\s1\sSubs!'};'
+        'tmi-sent-ts=1790781000000;user-id=$user :tmi.twitch.tv USERNOTICE #$_channel\r\n';
+
+    test('a cheer is a tip of Bits before its chat line; the chat line is as it was', () {
+      final messages = TwitchDanmakuProtocol.decode(cheer('c1', 100, 'Cheer100 great stream')).messages;
+      expect([for (final message in messages) message.type], [LiveMessageType.gift, LiveMessageType.chat]);
+      final [gift, chat] = messages;
+      expect(chat.message, 'Cheer100 great stream');
+      expect(chat.messageId, 'c1');
+      final alone = TwitchDanmakuProtocol.chat(cheer('c1', 100, 'Cheer100 great stream').trim())!;
+      expect(
+        (chat.message, chat.userName, chat.userId, chat.color, chat.messageId, chat.sentAt),
+        (alone.message, alone.userName, alone.userId, alone.color, alone.messageId, alone.sentAt),
+      );
+      expect(
+        (gift.userName, gift.userId, gift.messageId, gift.sentAt, gift.color),
+        ('Cheerer', '42', 'c1:bits', chat.sentAt, chat.color),
+      );
+      expect(gift.data, const TwitchCheer(bits: 100, comboKey: 'bits:c1'));
+      final tip = gift.gift!;
+      expect(
+        (tip.kind, tip.name, tip.count, tip.unitPrice, tip.totalValue, tip.unit, tip.free),
+        (LiveGiftKind.tip, 'Bits', 1, 100, 100, LiveGiftUnit.bits, false),
+      );
+      expect(tip.tier, LiveGiftTier.normal, reason: 'about a dollar');
+      expect(
+        TwitchDanmakuProtocol.decode(cheer('c2', 1000, 'Cheer1000')).messages.first.gift!.tier,
+        LiveGiftTier.valuable,
+      );
+      expect('${gift.data}', 'TwitchCheer(100)');
+      for (final bits in ['0', '-5', 'x', '']) {
+        final line = cheer('c3', 1, 'hi').replaceFirst('bits=1', 'bits=$bits');
+        expect(TwitchDanmakuProtocol.decode(line).messages.single.type, LiveMessageType.chat, reason: bits);
+      }
+      // Without an id, the key is the sender and the time.
+      final bare = cheer('', 5, 'Cheer5').replaceFirst('id=;', '');
+      final unnamed = TwitchDanmakuProtocol.decode(bare).messages.first;
+      expect((unnamed.messageId, unnamed.gift!.comboKey), ('', 'bits:42:1790781000000'));
+    });
+
+    test('the recorded community gifts (S09, S10): announcements and their subscriptions are marked', () {
+      final marked = [
+        for (final name in ['S09-live', 'S10-live'])
+          for (final frame in _recording(name))
+            if (frame.dir == 'in') ...TwitchDanmakuProtocol.decode(frame.text).communityGifts.values,
+      ];
+      expect(marked.where((gift) => gift.announcement), hasLength(3));
+      expect(marked.where((gift) => !gift.announcement), hasLength(3));
+      expect(marked.where((gift) => gift.announcement).map((gift) => gift.count), everyElement(1));
+      final line = TwitchIrcLine.parse(notice('subgift', ' ').trim())!;
+      expect(TwitchDanmakuProtocol.communityGift(line), isNull, reason: 'no id');
+      expect(
+        TwitchDanmakuProtocol.communityGift(TwitchIrcLine.parse(notice('submysterygift', 'g', count: 0).trim())!),
+        (id: 'g', announcement: true, count: 1),
+      );
+      expect(TwitchDanmakuProtocol.communityGift(TwitchIrcLine.parse(notice('resub', 'g').trim())!), isNull);
+    });
+
+    test('the connection: an announcement and its N subscriptions are one notice, in either order', () async {
+      final connector = _Connector();
+      final connection = TwitchDanmakuConnection(connector: connector.call, now: () => _clock);
+      final events = _record(connection);
+      await connection.connect(TwitchDanmakuArgs(channel: _channel));
+      final channel = connector.channels.single;
+      // Announced first, then its three subscriptions.
+      channel.incoming.add(notice('submysterygift', 'g1', count: 3));
+      for (var n = 0; n < 3; n++) {
+        channel.incoming.add(notice('subgift', 'g1'));
+      }
+      // Two subscriptions first, then their announcement.
+      channel.incoming.add(notice('subgift', 'g2', user: '8'));
+      channel.incoming.add(notice('subgift', 'g2', user: '8'));
+      channel.incoming.add(notice('submysterygift', 'g2', count: 2, user: '8'));
+      channel.incoming.add(_line('after', 'after the gifts'));
+      await _until(() => _messages(events).length == 3);
+      await _wait(const Duration(milliseconds: 2100));
+      expect(
+        [for (final message in _messages(events)) message.message],
+        ['Gifter is gifting Tier 1 Subs!', 'Gifter is gifting Tier 1 Subs!', 'after the gifts'],
+      );
+      expect(_messages(events).take(2).map((message) => message.data), everyElement(LiveNoticeKind.subscription));
+      await connection.close();
+    });
+
+    test('a subscription whose announcement does not come is shown after the wait; none after close', () async {
+      final connector = _Connector();
+      final connection = TwitchDanmakuConnection(connector: connector.call, now: () => _clock);
+      final events = _record(connection);
+      await connection.connect(TwitchDanmakuArgs(channel: _channel));
+      final channel = connector.channels.single
+        ..incoming.add(notice('subgift', 'alone'))
+        ..incoming.add(_line('chat', 'meanwhile'));
+      await _until(() => _messages(events).isNotEmpty);
+      expect([for (final message in _messages(events)) message.message], ['meanwhile']);
+      await _until(() => _messages(events).length == 2);
+      expect(_messages(events).last.message, 'Gifter gifted a Tier 1 sub!');
+      expect(TwitchDanmakuProtocol.communityGiftWait, const Duration(seconds: 2));
+      channel.incoming.add(notice('subgift', 'late'));
+      await _wait(const Duration(milliseconds: 20));
+      await connection.close();
+      await _wait(const Duration(milliseconds: 2100));
+      expect(_messages(events), hasLength(2));
     });
   });
 

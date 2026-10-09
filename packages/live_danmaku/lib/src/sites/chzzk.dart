@@ -103,7 +103,7 @@ abstract final class ChzzkDanmakuProtocol {
   static const int donationType = 10;
 
   /// A subscription, whose text is the subscriber's message: a notice
-  /// (D07.2; it was chat, which lost the months and the tier).
+  /// ([subscription], D07.6), then the message as chat.
   static const int subscriptionType = 11;
 
   /// A subscription gift (`구독권 선물`): a notice composed from `extras`.
@@ -327,8 +327,45 @@ abstract final class ChzzkDanmakuProtocol {
 
   static List<LiveMessage> _lines(List<Object?> items, {required bool recent, required DateTime receivedAt}) => [
     for (final item in items)
-      if (item is Map) ?line(item, recent: recent, receivedAt: receivedAt),
+      if (item is Map) ...[?subscription(item, recent: recent), ?line(item, recent: recent, receivedAt: receivedAt)],
   ];
+
+  /// The notice of a subscription line ([subscriptionType], D07.6; it was
+  /// only its message as chat): a [LiveNoticeKind.subscription] notice of
+  /// the subscriber (`profile.nickname`, else `extras.nickname`) with the
+  /// tier's name (`extras.tierName`) and the months (`extras.month`), in
+  /// Chinese around the platform's names, as [_subscriptionGift] writes a
+  /// gift: `<name> 订阅了「나나양 좋아」，已订阅 32 个月`. Its id is
+  /// `subscription:<user>:<time>` (the message's chat line keeps
+  /// `<user>:<time>`). Null for any other line, and for one the site does
+  /// not show (a status other than `NORMAL`).
+  static LiveMessage? subscription(Map<Object?, Object?> item, {bool recent = false}) {
+    final type = _int(item[recent ? 'messageTypeCode' : 'msgTypeCode']);
+    if (type != subscriptionType) return null;
+    final status = item[recent ? 'messageStatusType' : 'msgStatusType'];
+    if (status != null && status != 'NORMAL') return null;
+    final time = _int(item[recent ? 'messageTime' : 'msgTime']);
+    final user = _scalar(item[recent ? 'userId' : 'uid']);
+    final extras = _object(item['extras']) ?? const <Object?, Object?>{};
+    final profile = _object(item['profile']);
+    var name = _scalar(profile?['nickname']).trim();
+    if (name.isEmpty) name = _scalar(extras['nickname']).trim();
+    final tier = _scalar(extras['tierName']).trim();
+    final months = _int(extras['month']);
+    final subscribed = tier.isEmpty ? '订阅了频道' : '订阅了「$tier」';
+    final text = months != null && months > 0 ? '$subscribed，已订阅 $months 个月' : subscribed;
+    final sentAt = time != null && time > 0 && time <= _maxMillis ? DateTime.fromMillisecondsSinceEpoch(time) : null;
+    return LiveMessage(
+      type: LiveMessageType.notice,
+      userName: name,
+      userId: user,
+      message: name.isEmpty ? text : '$name $text',
+      color: LiveMessageColor.white,
+      messageId: sentAt == null || user.isEmpty ? '' : 'subscription:$user:$time',
+      sentAt: sentAt,
+      data: LiveNoticeKind.subscription,
+    );
+  }
 
   /// One line of the chat, or null when the site does not show it.
   ///
@@ -340,13 +377,12 @@ abstract final class ChzzkDanmakuProtocol {
   /// (hidden by a manager or the clean bot) still carry their text, and the
   /// site does not show it.
   ///
-  /// - Text ([textType]; a line without a numeric type is text, as v4 read
-  ///   it) is chat when it is not blank.
-  /// - Donations ([donationType]) are super chats, subscriptions
-  ///   ([subscriptionType], D07.2), subscription gifts
+  /// - Text and subscriptions ([textType], [subscriptionType]; a line
+  ///   without a numeric type is text, as v4 read it) are chat when their
+  ///   text is not blank (a subscription's notice is [subscription]'s).
+  /// - Donations ([donationType]) are super chats, subscription gifts
   ///   ([subscriptionGiftType]) and system lines ([systemType]) notices
-  ///   (B-12; see [_donation], [_subscription], [_subscriptionGift],
-  ///   [_system]).
+  ///   (B-12; see [_donation], [_subscriptionGift], [_system]).
   /// - The name is `profile.nickname`, the user id `uid`; an anonymous
   ///   donation (`extras.isAnonymous`, or the user `anonymous`) is
   ///   [anonymousDonor] without a user id, as the site shows it.
@@ -374,7 +410,7 @@ abstract final class ChzzkDanmakuProtocol {
       extras: _object(item['extras']) ?? const <Object?, Object?>{},
     );
     switch (type) {
-      case textType:
+      case textType || subscriptionType:
         if (row.text.isEmpty) return null;
         return LiveMessage(
           type: LiveMessageType.chat,
@@ -388,8 +424,6 @@ abstract final class ChzzkDanmakuProtocol {
         );
       case donationType:
         return _donation(row, receivedAt ?? DateTime.now());
-      case subscriptionType:
-        return _subscription(row);
       case subscriptionGiftType:
         return _subscriptionGift(row);
       case systemType:
@@ -454,31 +488,6 @@ abstract final class ChzzkDanmakuProtocol {
         backgroundColor: '',
         backgroundBottomColor: '',
       ),
-    );
-  }
-
-  /// A subscription: a [LiveNoticeKind.subscription] notice of who
-  /// subscribed for how long, in Chinese as Kick's are, around the
-  /// platform's tier name and the subscriber's own text, which the site
-  /// shows in the same line: `<name> 订阅了 32 个月「나나양 좋아」：<text>`
-  /// (`extras.month`, `extras.tierName`; `订阅了频道` without months above
-  /// one). The name, user id, message id, time and emoji are a chat line's.
-  static LiveMessage _subscription(_Row row) {
-    final name = _scalar(row.profile?['nickname']).trim();
-    final months = _int(row.extras['month']) ?? 0;
-    final tier = _scalar(row.extras['tierName']).trim();
-    final what = '${months > 1 ? '订阅了 $months 个月' : '订阅了频道'}${tier.isEmpty ? '' : '「$tier」'}';
-    final head = name.isEmpty ? what : '$name $what';
-    return LiveMessage(
-      type: LiveMessageType.notice,
-      userName: name,
-      userId: row.user,
-      message: row.text.isEmpty ? head : '$head：${row.text}',
-      color: LiveMessageColor.white,
-      messageId: _id(row.user, row),
-      sentAt: row.sentAt,
-      data: LiveNoticeKind.subscription,
-      emotes: emojis(row.text, row.extras['emojis']),
     );
   }
 

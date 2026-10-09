@@ -3,6 +3,7 @@
 // samples, docs/E-直播平台/E02-其他国内平台/E02.3-AcFun直播/record.md). Every intended difference is listed
 // with its reason; everything else must match.
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_net/live_net.dart';
@@ -119,7 +120,89 @@ String _searchAnswer(List<String> cards, {required int total, bool blankZero = f
       'scripts': ['throw new Error("never execute")'],
     })}/*<!-- fetch-stream -->*/';
 
+/// The `gift/list` answer the S07 danmaku recording made (its third line).
+String _giftListAnswer() =>
+    (jsonDecode(File('../../fixtures/acfun/danmaku/S07-live/frames.jsonl').readAsLinesSync()[2])
+            as Map<String, dynamic>)['text']
+        as String;
+
 void main() {
+  group('gift/list (D07.6)', () {
+    test('the recorded table: 48 gifts, AC coins or bananas, the webp picture', () {
+      final gifts = AcfunApi.giftList(_giftListAnswer());
+      expect(gifts.length, 48);
+      expect(gifts.ids.take(3), ['1', '17', '35']);
+      expect(
+        gifts['1'],
+        AcfunGiftInfo(
+          id: '1',
+          name: '香蕉',
+          price: 1,
+          banana: true,
+          iconUrl: Uri.parse('https://static.yximgs.com/bs2/giftCenter/giftCenter-20200316101317UbXssBoH.webp'),
+        ),
+      );
+      expect((gifts['17']!.name, gifts['17']!.price, gifts['17']!.banana), ('快乐水', 1, false));
+      expect((gifts['16']!.name, gifts['16']!.price), ('猴岛', 2888));
+      expect(gifts.ids.where((id) => gifts[id]!.banana), ['1'], reason: 'only bananas are paid in bananas');
+      expect(gifts.ids.every((id) => gifts[id]!.iconUrl?.scheme == 'https'), isTrue);
+      expect('${gifts['1']}', 'AcfunGiftInfo(1 香蕉, 1 bananas)');
+      expect('$gifts', 'AcfunGiftCatalog(48)');
+    });
+
+    test('entries without an id or name are left out; a bad price is 0; the png when there is no webp', () {
+      final gifts = AcfunApi.giftList(
+        jsonEncode({
+          'result': 1,
+          'data': {
+            'giftList': [
+              {'giftId': 5, 'giftName': ' 手柄 ', 'giftPrice': 'x', 'payWalletType': 1},
+              {
+                'giftId': '6',
+                'giftName': '盒子',
+                'giftPrice': 3,
+                'pngPicList': [
+                  {'url': 'http://example.com/a.png'},
+                  {'url': 'https://example.com/b.png'},
+                ],
+              },
+              {'giftName': '没有编号'},
+              {'giftId': 7},
+              {'giftId': -1, 'giftName': '负数'},
+              'x',
+            ],
+          },
+        }),
+      );
+      expect(gifts.ids, ['5', '6']);
+      expect((gifts['5']!.name, gifts['5']!.price, gifts['5']!.iconUrl), ('手柄', 0, null));
+      expect(gifts['6']!.iconUrl, Uri.parse('https://example.com/b.png'));
+      expect(gifts['8'], isNull);
+      expect(AcfunGiftCatalog.empty.isEmpty, isTrue);
+    });
+
+    test('a refused or changed answer throws', () {
+      expect(() => AcfunApi.giftList('{"result":129001}'), throwsA(isA<RiskControl>()));
+      expect(() => AcfunApi.giftList('{"result":1,"data":{}}'), throwsA(isA<ApiChanged>()));
+      expect(() => AcfunApi.giftList('<html>'), throwsA(isA<ApiChanged>()));
+      expect(() => AcfunApi.giftList('{}', status: 500), throwsA(isA<NetworkFailure>()));
+    });
+
+    test('the request: the visitor session in the query, as startPlay is asked', () {
+      const visitor = AcfunVisitor(userId: '12345', deviceId: 'web_abc', token: 'tok');
+      final url = AcfunApi.giftListUrl(visitor);
+      expect(url.toString(), startsWith('https://api.kuaishouzt.com/rest/zt/live/web/gift/list?'));
+      expect(url.queryParameters, {
+        'subBiz': 'mainApp',
+        'kpn': 'ACFUN_APP',
+        'kpf': 'PC_WEB',
+        'userId': '12345',
+        'did': 'web_abc',
+        'acfun.api.visitor_st': 'tok',
+      });
+    });
+  });
+
   group('S01 catalog', () {
     test('the areas 3.x listed but 全部 (10-2), in answer order, under the site name', () {
       final fixture = _sample('S01-list-filters');

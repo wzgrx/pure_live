@@ -174,6 +174,16 @@ NOTES: dict[str, dict] = {
     'danmakuOpacity': _danmaku('122', '0', '1'),
     'danmakuListStyle': _new('A07.1，U.2a'),
     'showChatGifts': _new('A08.6 c3，B-21'),
+    'danmakuListFontSize': {
+        **_new('A08.15'),
+        'v3range': '3.x 没有这个设置，弹幕卡片写死 14 号（`modules/live_play/widgets/danmaku/danmaku_list_view.dart:468-509`）',
+        'verdict': 'v4 新加（A08.15，D-040）：默认 0 = 跟主题的正文字号，和以前一样；12～22，超出范围读成 0；粉丝牌、徽章、头像、礼物图按比例，系统字体放大照样乘上去；飞行弹幕不受影响',
+    },
+    'danmakuListLineSpacing': {
+        **_new('A08.15'),
+        'v3range': '3.x 没有这个设置，行距固定',
+        'verdict': 'v4 新加（A08.15，D-040）：默认“标准”和以前一样；“紧密”各处上下间距减半、文字行高 1.4，“宽松”间距 1.5 倍、行高 1.7；不认识的值读成“标准”',
+    },
     'chatGiftsAboveTier': {
         **_new('A08.12'),
         'v3range': '3.x 没有平台礼物',

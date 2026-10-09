@@ -115,8 +115,8 @@ final class YouTubeChatPoll {
 /// 3. `updated_metadata` gives the viewer count again (M5.F, B-13).
 ///
 /// Read from each answer (M5.F, B-13):
-/// text messages as chat lines; paid messages as super chats; Super
-/// Stickers, memberships and gifted memberships as notices; removals as
+/// text messages as chat lines; paid messages and Super Stickers (D07.6)
+/// as super chats; memberships and gifted memberships as notices; removals as
 /// retractions; gifts (`giftMessageViewModel`) as gifts (B-23).
 /// Placeholders, replacements, polls and banners are not read. A ticker item
 /// names how long the page pins a Super Chat and, in the first answer, the
@@ -545,17 +545,20 @@ abstract final class YouTubeDanmakuProtocol {
     data: target,
   );
 
-  /// One added item: a text message as a chat line; a paid message as a
-  /// super chat; a Super Sticker, a membership (joined, a milestone), gifted
-  /// memberships and a received gift membership as a notice (of its kind,
-  /// D07.2); a gift as a gift (B-23). Null for anything else and for items without text.
+  /// One added item: a text message as a chat line; a paid message and a
+  /// Super Sticker (D07.6) as a super chat; a membership (joined, a
+  /// milestone), gifted memberships and a received gift membership as a
+  /// notice; a gift as a gift (B-23). Null for anything else and for items
+  /// without text.
   static LiveMessage? _item(Map<Object?, Object?> item, Map<String, Duration> pinned, DateTime received) {
     if (item['liveChatTextMessageRenderer'] case final Map<Object?, Object?> text) return _chatLine(text);
     if (item['liveChatPaidMessageRenderer'] case final Map<Object?, Object?> paid) {
       return _superChat(paid, pinned, received);
     }
     if (item['giftMessageViewModel'] case final Map<Object?, Object?> gift) return _gift(gift);
-    if (item['liveChatPaidStickerRenderer'] case final Map<Object?, Object?> sticker) return _sticker(sticker);
+    if (item['liveChatPaidStickerRenderer'] case final Map<Object?, Object?> sticker) {
+      return _sticker(sticker, pinned, received);
+    }
     if (item['liveChatMembershipItemRenderer'] case final Map<Object?, Object?> member) return _membership(member);
     if (item['liveChatSponsorshipsGiftPurchaseAnnouncementRenderer'] case final Map<Object?, Object?> gift) {
       final header = _map(_map(gift['header'])['liveChatSponsorshipsHeaderRenderer']);
@@ -632,17 +635,50 @@ abstract final class YouTubeDanmakuProtocol {
     );
   }
 
-  /// A Super Sticker as a [LiveNoticeKind.system] notice (D07.2: it is no
-  /// membership, so no membership card; D07.6 makes it a super chat): the
-  /// page shows the name, the amount and the sticker, whose description
-  /// (`sticker.accessibility`) stands for it. The page has no sentence for
-  /// it, so the words joining them are the app's (Chinese); the amount and
-  /// description are the platform's.
-  static LiveMessage? _sticker(Map<Object?, Object?> sticker) {
+  /// A Super Sticker as a super chat (D07.6; was a notice): the page shows
+  /// the name, the amount and the sticker. The amount is the page's
+  /// (`purchaseAmountText`, in the buyer's currency) with as its price the whole number read from it ([superChatAmount], D07.2), as a
+  /// Super Chat's; the text is the sticker's description
+  /// (`sticker.accessibility`), the picture its largest thumbnail
+  /// ([LiveSuperChatMessage.image]); both colours the card's
+  /// `backgroundColor`; shown as long as the ticker pins it, else by the
+  /// colour's tier ([tierDisplay]), else [unpinnedDisplay]. Null without an
+  /// amount, a description or a picture.
+  static LiveMessage? _sticker(Map<Object?, Object?> sticker, Map<String, Duration> pinned, DateTime received) {
     final amount = _plain(sticker['purchaseAmountText']).trim();
-    final label = _accessibility(sticker['sticker']);
-    final text = ['送出 Super Sticker${amount.isEmpty ? '' : ' $amount'}', if (label.isNotEmpty) label].join('：');
-    return _notice(sticker, _plain(sticker['authorName']), text, kind: LiveNoticeKind.system);
+    final picture = _map(sticker['sticker']);
+    final label = _accessibility(picture);
+    final image = _largest(picture['thumbnails']);
+    if (amount.isEmpty && label.isEmpty && image.isEmpty) return null;
+    final id = _string(sticker['id']);
+    final name = _plain(sticker['authorName']);
+    final time = _time(sticker['timestampUsec']);
+    final start = time ?? received;
+    final tier = tierDisplay[sticker['backgroundColor']] ?? Duration.zero;
+    final display = pinned[id] ?? (tier > Duration.zero ? tier : unpinnedDisplay);
+    final colour = _color(sticker['backgroundColor']);
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: name,
+      userId: _string(sticker['authorExternalChannelId']),
+      message: label,
+      messageId: id,
+      sentAt: time,
+      color: LiveMessageColor.white,
+      data: LiveSuperChatMessage(
+        messageId: id,
+        userName: name,
+        face: _photo(sticker['authorPhoto']),
+        message: label,
+        price: superChatAmount(amount),
+        priceText: amount,
+        startTime: start,
+        endTime: start.add(display),
+        backgroundColor: colour,
+        backgroundBottomColor: colour,
+        image: image,
+      ),
+    );
   }
 
   /// A membership as a notice: a new member's `headerSubtext` ("Welcome to

@@ -149,7 +149,8 @@ class _ChatListState extends ConsumerState<ChatList> {
   /// Lines added since the list last showed the newest one.
   final ValueNotifier<int> _unseen = ValueNotifier(0);
 
-  /// Each line's widget, made once for the list's look and emoticons, with
+  /// Each line's widget, made once for the list's look (its style, names,
+  /// gift options and text size and spacing, A08.15) and emoticons, with
   /// the message it was made for: the same widget is not built again when
   /// the list rebuilds (B08), and a line whose message was replaced (D07.1's
   /// combo count, A08.11 c4) is.
@@ -375,6 +376,7 @@ class _ChatListState extends ConsumerState<ChatList> {
     required bool names,
     required GiftLineRoom room,
     required bool yuan,
+    required ChatSizing sizing,
   }) {
     if (_views[line] case (final made, final message)
         when identical(message, line.message) &&
@@ -382,6 +384,7 @@ class _ChatListState extends ConsumerState<ChatList> {
             made.showName == names &&
             made.giftRoom == room &&
             made.giftValueInYuan == yuan &&
+            made.sizing == sizing &&
             identical(made.emotes, _emotes)) {
       return made;
     }
@@ -394,6 +397,7 @@ class _ChatListState extends ConsumerState<ChatList> {
       emotes: _emotes,
       giftRoom: room,
       giftValueInYuan: yuan,
+      sizing: sizing,
       onActions: message == null ? null : () => unawaited(_actions(line)),
       onCopy: message == null ? null : () => unawaited(_copy(message)),
     );
@@ -448,6 +452,11 @@ class _ChatListState extends ConsumerState<ChatList> {
     final names = watchSetting(ref, Settings.showChatNames);
     // A08.12: "礼物价值换算成元".
     final yuan = watchSetting(ref, Settings.giftValueInYuan);
+    // A08.15: "列表文字大小" and "行间距" (0 and standard: as before).
+    final sizing = ChatSizing(
+      fontSize: watchSetting(ref, Settings.danmakuListFontSize),
+      spacing: ChatSpacing.of(watchSetting(ref, Settings.danmakuListLineSpacing)),
+    );
     final hint = _nameHint();
     // B06 c1: the hint stays above the lines (and the empty states); the
     // list keeps its place in the tree, so its scroll position, when the
@@ -460,14 +469,20 @@ class _ChatListState extends ConsumerState<ChatList> {
           key: const ValueKey('live-play-chat-body'),
           child: ValueListenableBuilder<List<ChatLine>>(
             valueListenable: _shown,
-            builder: (context, lines, _) => _content(style, lines, names: names, yuan: yuan),
+            builder: (context, lines, _) => _content(style, lines, names: names, yuan: yuan, sizing: sizing),
           ),
         ),
       ],
     );
   }
 
-  Widget _content(ChatListStyle style, List<ChatLine> lines, {required bool names, required bool yuan}) {
+  Widget _content(
+    ChatListStyle style,
+    List<ChatLine> lines, {
+    required bool names,
+    required bool yuan,
+    required ChatSizing sizing,
+  }) {
     if (!lines.any((line) => line.kind != ChatLineKind.system)) {
       // U.2e c2, U.2g c7: until the first message the list says where the
       // danmaku is (3.x: blank, or a few "系统消息" cards).
@@ -503,7 +518,7 @@ class _ChatListState extends ConsumerState<ChatList> {
                 return at < 0 ? null : count - 1 - at;
               },
               itemBuilder: (context, index) =>
-                  _view(lines[count - 1 - index], style, names: names, room: room, yuan: yuan),
+                  _view(lines[count - 1 - index], style, names: names, room: room, yuan: yuan, sizing: sizing),
             ),
           ),
           if (!_following)
@@ -655,6 +670,7 @@ class ChatLineView extends StatelessWidget {
     this.tag,
     this.giftRoom = GiftLineRoom.none,
     this.giftValueInYuan = false,
+    this.sizing = ChatSizing.standard,
     super.key,
   });
 
@@ -685,15 +701,20 @@ class ChatLineView extends StatelessWidget {
   /// A gift line writes its value in yuan ("礼物价值换算成元", A08.12).
   final bool giftValueInYuan;
 
+  /// The list's text size and spacing ("列表文字大小", "行间距", A08.15):
+  /// the text, the marks and the gaps of every kind of line but the system
+  /// label's words.
+  final ChatSizing sizing;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final body = theme.textTheme.bodyLarge?.regular;
+    final body = sizing.text(theme.textTheme.bodyLarge?.regular);
     // U.2k c10: a local danmaku or gift has its own line; both keep the
     // long press, right click and double tap (3.x; the gift's since A08.13).
     if (line.message case final message? when message.isLocal) {
-      final local = LocalChatLine(message: message, showName: showName);
+      final local = LocalChatLine(message: message, showName: showName, sizing: sizing);
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onLongPress: onActions,
@@ -704,10 +725,11 @@ class ChatLineView extends StatelessWidget {
     }
     switch (line.kind) {
       case ChatLineKind.system:
-        // U.2a change 10: a small grey label in the middle.
+        // U.2a change 10: a small grey label in the middle; it keeps its
+        // small size (a label, not a message), only its gap follows.
         return Padding(
           key: const ValueKey('live-play-system-line'),
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: EdgeInsets.symmetric(vertical: sizing.gap(4)),
           child: Center(
             child: DecoratedBox(
               decoration: BoxDecoration(color: scheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(12)),
@@ -724,12 +746,12 @@ class ChatLineView extends StatelessWidget {
         );
       case ChatLineKind.notice:
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          margin: EdgeInsets.symmetric(vertical: sizing.gap(3)),
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: sizing.gap(4)),
           decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(6)),
           child: Row(
             children: [
-              Icon(AppIcons.chatNotice, size: 16, color: scheme.onSecondaryContainer),
+              Icon(AppIcons.chatNotice, size: 16 * sizing.scaleIn(theme), color: scheme.onSecondaryContainer),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(line.text, style: body?.copyWith(color: scheme.onSecondaryContainer)),
@@ -746,6 +768,7 @@ class ChatLineView extends StatelessWidget {
           room: giftRoom,
           lead: _lead(Theme.of(context), line.message!),
           valueInYuan: giftValueInYuan,
+          sizing: sizing,
           onActions: onActions,
           onCopy: onCopy,
         );
@@ -756,15 +779,18 @@ class ChatLineView extends StatelessWidget {
         final name = showName ? superChat.userName.trim() : '';
         return Container(
           key: const ValueKey('live-play-super-chat-line'),
-          margin: const EdgeInsets.symmetric(vertical: 3),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          margin: EdgeInsets.symmetric(vertical: sizing.gap(3)),
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: sizing.gap(4)),
           decoration: BoxDecoration(color: background, borderRadius: BorderRadius.circular(6)),
           child: Text.rich(
             TextSpan(
               children: [
                 // The card's own ink: the name role's weight, not its colour.
-                if (name.isNotEmpty) TextSpan(text: '$name · ', style: ChatText.name(theme, ink)),
-                TextSpan(text: '${superChatPrice(superChat)}${ChatText.nameEnd}', style: ChatText.name(theme, ink)),
+                if (name.isNotEmpty) TextSpan(text: '$name · ', style: ChatText.name(theme, ink, sizing)),
+                TextSpan(
+                  text: '${superChatPrice(superChat)}${ChatText.nameEnd}',
+                  style: ChatText.name(theme, ink, sizing),
+                ),
                 TextSpan(
                   text: superChat.message,
                   style: body?.copyWith(color: ink),
@@ -796,17 +822,23 @@ class ChatLineView extends StatelessWidget {
           key: const ValueKey('live-play-chat-other-room'),
           text: i18n('danmaku_other_room'),
           background: theme.colorScheme.tertiaryContainer,
-          style: ChatChip.styleOf(theme)?.copyWith(color: theme.colorScheme.onTertiaryContainer),
+          style: ChatChip.styleOf(theme, sizing)?.copyWith(color: theme.colorScheme.onTertiaryContainer),
         ),
       ),
-    if (showName) ...[..._badges(message), ..._fans(theme, message)],
+    if (showName) ...[..._badges(theme, message), ..._fans(theme, message)],
   ];
 
   /// B-14 (E06.2 c2): the platform's badges before the name, in its order.
-  List<InlineSpan> _badges(LiveMessage message) => [
+  List<InlineSpan> _badges(ThemeData theme, LiveMessage message) => [
     for (final (index, badge) in message.badges.indexed)
       if (badge.url.trim().isNotEmpty)
-        chatInline(ChatBadge(key: ValueKey('live-play-chat-badge-$index'), url: badge.url.trim())),
+        chatInline(
+          ChatBadge(
+            key: ValueKey('live-play-chat-badge-$index'),
+            url: badge.url.trim(),
+            height: ChatBadge.height * sizing.scaleIn(theme),
+          ),
+        ),
   ];
 
   /// B06 c2: the fan medal ("粉丝牌 等级"), in the same block as the other
@@ -822,7 +854,7 @@ class ChatLineView extends StatelessWidget {
           key: const ValueKey('live-play-chat-fans'),
           text: level.isEmpty ? fans : '$fans $level',
           background: scheme.primary,
-          style: ChatChip.styleOf(theme)?.copyWith(color: scheme.onPrimary),
+          style: ChatChip.styleOf(theme, sizing)?.copyWith(color: scheme.onPrimary),
         ),
       ),
     ];
@@ -835,14 +867,14 @@ class ChatLineView extends StatelessWidget {
     return [
       TextSpan(
         text: '$name${ChatText.nameEnd}',
-        style: ChatText.name(theme, chatNameInk(message, background, theme.colorScheme)),
+        style: ChatText.name(theme, chatNameInk(message, background, theme.colorScheme), sizing),
       ),
     ];
   }
 
   /// What was said, with the platform's emoticons, in the content role.
   InlineSpan _words(ThemeData theme) => chatInline(
-    EmoteText(line.segments(emotes), style: ChatText.content(theme)),
+    EmoteText(line.segments(emotes), style: ChatText.content(theme, sizing: sizing)),
     alignment: PlaceholderAlignment.baseline,
     baseline: TextBaseline.alphabetic,
   );
@@ -853,7 +885,7 @@ class ChatLineView extends StatelessWidget {
     final theme = Theme.of(context);
     return Padding(
       key: const ValueKey('live-play-chat-line'),
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: sizing.gap(4)),
       child: Text.rich(
         TextSpan(
           children: [..._lead(theme, message), ..._name(theme, message, theme.colorScheme.surface), _words(theme)],
@@ -876,9 +908,16 @@ class ChatLineView extends StatelessWidget {
       DanmakuSender(:final avatar) when showName && avatar.isNotEmpty => avatar,
       _ => '',
     };
+    // A08.15 c3: the dot and the avatar grow with the list's text size, not
+    // with the system's (as before); the dot sits on a first line of that
+    // size and spacing (6 from the top at the theme's).
+    final scale = sizing.scaleIn(theme);
+    final dotSize = 8 * scale;
+    final words = ChatText.content(theme, sizing: sizing);
+    final first = (words?.fontSize ?? 14) * (words?.height ?? 1.5);
     return Padding(
       key: const ValueKey('live-play-chat-card'),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: sizing.gap(4)),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: ground,
@@ -886,22 +925,23 @@ class ChatLineView extends StatelessWidget {
           border: Border.all(color: scheme.outlineVariant, width: 0.5),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 12, vertical: sizing.gap(8)),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (avatar.isEmpty)
                 Container(
-                  width: 8,
-                  height: 8,
-                  margin: const EdgeInsets.only(top: 6, right: 10),
+                  key: const ValueKey('live-play-chat-dot'),
+                  width: dotSize,
+                  height: dotSize,
+                  margin: EdgeInsets.only(top: math.max(0, ((first - dotSize) / 2).floorToDouble()), right: 10),
                   decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
                 )
               else
                 Padding(
                   key: const ValueKey('live-play-chat-avatar'),
                   padding: const EdgeInsets.only(right: 8),
-                  child: CommonAvatar(avatarUrl: avatar, radius: 12, fallbackName: name),
+                  child: CommonAvatar(avatarUrl: avatar, radius: 12 * scale, fallbackName: name),
                 ),
               Expanded(
                 child: Text.rich(
@@ -921,13 +961,17 @@ class ChatLineView extends StatelessWidget {
 /// own width, through the app's image cache. Nothing, and no gap, while it
 /// loads or when it fails.
 class ChatBadge extends StatelessWidget {
-  /// Creates the badge of [url].
-  const new({required this.url, super.key});
+  /// Creates the badge of [url], [height] high (the list's text size makes
+  /// it larger or smaller, A08.15 c3).
+  const new({required this.url, double height = ChatBadge.height, super.key}) : size = height;
 
   /// The picture's address.
   final String url;
 
-  /// The badge's height.
+  /// This badge's height.
+  final double size;
+
+  /// The badge's height at the theme's text size.
   static const double height = 16;
 
   /// The gap after a badge that loaded.
@@ -935,10 +979,10 @@ class ChatBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final decoded = (height * MediaQuery.devicePixelRatioOf(context)).round();
+    final decoded = (size * MediaQuery.devicePixelRatioOf(context)).round();
     return Image(
       image: ResizeImage(chatBadgeImage(url), height: decoded),
-      height: height,
+      height: size,
       fit: BoxFit.contain,
       excludeFromSemantics: true,
       gaplessPlayback: true,

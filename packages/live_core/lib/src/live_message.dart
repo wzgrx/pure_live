@@ -403,6 +403,7 @@ final class LiveSuperChatMessage {
     this.messageId = '',
     this.priceText = '',
     this.unit = LiveGiftUnit.other,
+    this.image = '',
   });
 
   /// The platform's id for the event, when it has one. Some message-board
@@ -444,6 +445,10 @@ final class LiveSuperChatMessage {
 
   /// Bottom background colour.
   final String backgroundBottomColor;
+
+  /// The picture the message is, an https URL (YouTube's Super Sticker,
+  /// D07.6); empty for a message of text.
+  final String image;
 
   /// Same [messageId] when either has one; otherwise same sender, text and
   /// price.

@@ -807,6 +807,16 @@ void main() {
         expect(v4, {'events': <Object?>[], 'continuation': null, 'delayMs': null});
         expect(ours, {'throws': 'FormatException'});
       },
+      // D07.6: the Super Sticker is a super chat (v4 did not read it; B-13
+      // made it a notice).
+      'Super Stickers, memberships, gifted memberships, engagement messages and placeholders are not read': (v4, ours) {
+        const name =
+            'Super Stickers, memberships, gifted memberships, engagement messages and placeholders are not read';
+        final theirs = _v4Parsed(v4, _stepText(answers[name]!))! as Map<String, Object?>;
+        final messages = _list(ours['messages']);
+        expect([for (final message in messages.take(1)) (message['type'], message['text'])], [('superChat', '€2.00')]);
+        expect({...ours, 'messages': messages.skip(1).toList()}, theirs);
+      },
     };
 
     test('every answer has v4 output; every difference names a case', () {
@@ -1437,18 +1447,27 @@ void main() {
                 'addChatItemAction': {'item': renderer},
               },
       ];
+      // D07.6: a Super Sticker is a super chat: the amount, the description,
+      // the sticker's picture.
+      Map<String, Object?> sticker(String id, int micros, String user, String name, String text) => {
+        'event': 'chat',
+        'type': 'superChat',
+        'id': id,
+        'sentAtMicros': micros,
+        'userId': user,
+        'userName': name,
+        'text': text,
+        'color': '#ffffff',
+        'extras': ['', '', '', false],
+      };
       expect(_messages(_chatAnswer(items)), [
-        {
-          'event': 'notice',
-          'kind': 'system',
-          'id': 'ChwKGkNLV09sLURKbHBjREZhRFB3Z1FkbU5FYjJB',
-          'sentAtMicros': 1790780659954090,
-          'userId': 'UCXKrfBiorCZiMkmwjl2eltS',
-          'userName': '@zl0hsi',
-          'text':
-              '@zl0hsi 送出 Super Sticker ¥3,000：Pear character dancing under a rain of confetti and taking his hat off '
-              "to say 'You are amazing'",
-        },
+        sticker(
+          'ChwKGkNLV09sLURKbHBjREZhRFB3Z1FkbU5FYjJB',
+          1790780659954090,
+          'UCXKrfBiorCZiMkmwjl2eltS',
+          '@zl0hsi',
+          "¥3,000 Pear character dancing under a rain of confetti and taking his hat off to say 'You are amazing'",
+        ),
         // The ticker's copy of a gift purchase has no id or time of its own.
         {
           'event': 'notice',
@@ -1459,25 +1478,40 @@ void main() {
           'userName': '@oogk2uz8tmeobv',
           'text': '@oogk2uz8tmeobv Sent 50 Korone Ch. 戌神ころね gift memberships',
         },
-        {
-          'event': 'notice',
-          'kind': 'system',
-          'id': 'ChwKGkNNNll5SURKbHBjREZTWEV3Z1FkX0pvcDJR',
-          'sentAtMicros': 1790780457858217,
-          'userId': 'UC6ohVsPewG0uRNJ9IoPJi-o',
-          'userName': '@ejrtuybl',
-          'text': '@ejrtuybl 送出 Super Sticker ¥5,000：Shiba dog jumping in the air with fireworks around him',
-        },
-        {
-          'event': 'notice',
-          'kind': 'system',
-          'id': 'ChwKGkNKS0o3ZTdJbHBjREZjWGV3Z1FkeWlNS0x3',
-          'sentAtMicros': 1790780435460460,
-          'userId': 'UCqTl-CDxSXu7SAIrp5YZKT-',
-          'userName': '@4bvmu',
-          'text': '@4bvmu 送出 Super Sticker ¥5,000：Shiba dog jumping in the air with fireworks around him',
-        },
+        sticker(
+          'ChwKGkNNNll5SURKbHBjREZTWEV3Z1FkX0pvcDJR',
+          1790780457858217,
+          'UC6ohVsPewG0uRNJ9IoPJi-o',
+          '@ejrtuybl',
+          '¥5,000 Shiba dog jumping in the air with fireworks around him',
+        ),
+        sticker(
+          'ChwKGkNKS0o3ZTdJbHBjREZjWGV3Z1FkeWlNS0x3',
+          1790780435460460,
+          'UCqTl-CDxSXu7SAIrp5YZKT-',
+          '@4bvmu',
+          '¥5,000 Shiba dog jumping in the air with fireworks around him',
+        ),
       ]);
+      final first = YouTubeDanmakuProtocol.chat(_chatAnswer(items), now: _recordedAt).messages.first;
+      final paid = first.data! as LiveSuperChatMessage;
+      expect(
+        paid.image,
+        'https://lh3.googleusercontent.com/GIgOjJ-v3k5vQgXbjfTspXkroXtWnWPIVYe1zSBanlow0jpQbe48BTUZHjlkGiGiNqfZBLPhjr3yzYU8yfjn=s240-rwa',
+      );
+      expect(
+        (paid.priceText, paid.price, paid.userName, paid.messageId),
+        // D07.2: the whole amount of the text orders and compares.
+        ('¥3,000', 3000, '@zl0hsi', 'ChwKGkNLV09sLURKbHBjREZhRFB3Z1FkbU5FYjJB'),
+      );
+      expect(paid.message, startsWith('Pear character dancing'));
+      expect(
+        (paid.backgroundColor, paid.backgroundBottomColor),
+        ('${LiveMessageColor.numberToColor(4294278144)}', '${LiveMessageColor.numberToColor(4294278144)}'),
+      );
+      expect(paid.startTime, DateTime.fromMicrosecondsSinceEpoch(1790780659954090));
+      // The sticker colours are not the Super Chat tiers: unpinned here (no ticker item).
+      expect(paid.endTime.difference(paid.startTime), YouTubeDanmakuProtocol.unpinnedDisplay);
     });
 
     test('synthetic: a received gift, a gift purchase, and items without text', () {
@@ -1560,9 +1594,10 @@ void main() {
           ('G2', '@gifter Sent 5 Synthetic Channel gift memberships'),
           ('M2', '@member Member for 2 months'),
           ('M3', 'New member'),
-          ('S1', '@sticker 送出 Super Sticker'),
-          ('S2', '@sticker 送出 Super Sticker：A cat waving'),
-          ('S3', '送出 Super Sticker €2.00'),
+          // D07.6: stickers are super chats; one with neither amount, nor
+          // description, nor picture is nothing.
+          ('S2', 'A cat waving'),
+          ('S3', '€2.00'),
           // B-23: the gift item is read now, as a gift (was not read); E05.5:
           // its text is the shared `<name> ×<count>`.
           ('X2', 'Donut ×1'),
@@ -1571,41 +1606,42 @@ void main() {
       final messages = YouTubeDanmakuProtocol.chat(answer).messages;
       expect(messages.last.type, LiveMessageType.gift);
       // D07.2: the purchase and the memberships are subscriptions (a card
-      // each), the received gift its share, the stickers no membership.
+      // each), the received gift its share.
       expect(
-        [for (final message in messages.take(messages.length - 1)) message.data],
+        [for (final message in messages.take(messages.length - 3)) message.data],
         [
           LiveNoticeKind.giftedSubscription,
           LiveNoticeKind.subscription,
           LiveNoticeKind.subscription,
           LiveNoticeKind.subscription,
-          LiveNoticeKind.system,
-          LiveNoticeKind.system,
-          LiveNoticeKind.system,
         ],
       );
+      expect(
+        [for (final message in messages.skip(messages.length - 3).take(2)) message.type],
+        [LiveMessageType.superChat, LiveMessageType.superChat],
+      );
+      expect((messages[messages.length - 3].data! as LiveSuperChatMessage).image, '', reason: 'no thumbnails');
       expect(
         [messages[0].userId, messages[0].userName, messages[0].sentAt?.microsecondsSinceEpoch],
         ['UCsyntheticReceiver00001', '@receiver', 1790781300000000],
       );
     });
 
-    test('S09: a sticker and a membership are notices now; the gift purchase without a header is not', () {
-      final answer = jsonDecode(
-        _stepText(
-          _named('answers')['Super Stickers, memberships, gifted memberships, engagement messages and placeholders '
-              'are not read']!,
-        ),
-      );
-      expect(
-        [for (final entry in _messages(answer)) (entry['event'], entry['text'])],
-        [
-          ('notice', '@sticker10 送出 Super Sticker €2.00'),
-          ('notice', '@member11 Welcome to Members!'),
-          ('chat', 'after the others'),
-        ],
-      );
-    });
+    test(
+      'S09: a sticker is a super chat (D07.6), a membership a notice; the gift purchase without a header is not',
+      () {
+        final answer = jsonDecode(
+          _stepText(
+            _named('answers')['Super Stickers, memberships, gifted memberships, engagement messages and placeholders '
+                'are not read']!,
+          ),
+        );
+        expect(
+          [for (final entry in _messages(answer)) (entry['event'], entry['text'])],
+          [('chat', '€2.00'), ('notice', '@member11 Welcome to Members!'), ('chat', 'after the others')],
+        );
+      },
+    );
   });
 
   group('B-13: retractions', () {

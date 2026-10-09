@@ -5,6 +5,7 @@
 // links and error mapping.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:live_core/live_core.dart';
@@ -758,6 +759,81 @@ void main() {
       );
       await expectLater(site.danmakuArgs('42'), notPlayable);
       expect(http.paths.where((path) => path.endsWith('/startPlay')), hasLength(3));
+    });
+  });
+
+  group('gift table (D07.6)', () {
+    final table =
+        (jsonDecode(File('$_root/danmaku/S07-live/frames.jsonl').readAsLinesSync()[2]) as Map<String, dynamic>)['text']
+            as String;
+
+    /// A site whose room 42 is live; `gift/list` answers [gifts].
+    ({AcfunSite site, _Scripted http}) setup({Object Function()? gifts, DateTime Function()? now}) {
+      final http = _Scripted((request) {
+        if (request.url.path == '/api/live/info') return _info();
+        if (request.url.path.endsWith('/visitor/login')) return _visitorAnswer;
+        if (request.url.path.endsWith('/gift/list')) return gifts?.call() ?? table;
+        return _play('a');
+      });
+      return (site: AcfunSite(http, now: now, random: Random(7)), http: http);
+    }
+
+    List<String> paths(_Scripted http) => [for (final path in http.paths) path.split('/').last];
+
+    test('room entry asks nothing more; the danmaku asks once, with the session and the broadcast', () async {
+      final (:site, :http) = setup();
+      final room = await site.getRoomDetail(roomId: '42');
+      expect(paths(http), ['info', 'login', 'startPlay']);
+      final args = room.danmakuData! as AcfunDanmakuArgs;
+      final gifts = await args.gifts!();
+      expect(gifts.length, 48);
+      expect(gifts['17']!.name, '快乐水');
+      expect(paths(http), ['info', 'login', 'startPlay', 'list']);
+      final request = http.requests.last;
+      expect(Uri.splitQueryString(utf8.decode(request.body!)), {'visitorId': '12345', 'liveId': 'live-a'});
+      expect(request.url.queryParameters['acfun.api.visitor_st'], 'fixture-visitor-token');
+      expect(request.headers.keys, isNot(contains('cookie')));
+      expect(await args.gifts!(), same(gifts), reason: 'kept');
+      expect(paths(http), hasLength(4));
+    });
+
+    test('concurrent callers share one request; after 30 minutes it is asked again', () async {
+      var now = DateTime(2026, 10, 9, 20);
+      final (:site, :http) = setup(now: () => now);
+      final both = await Future.wait([
+        site.giftCatalog('42', liveId: 'live-a'),
+        site.giftCatalog(' 42 ', liveId: 'live-a'),
+      ]);
+      expect(identical(both[0], both[1]), isTrue);
+      expect(paths(http).where((path) => path == 'list'), hasLength(1));
+      now = now.add(const Duration(minutes: 29));
+      await site.giftCatalog('42', liveId: 'live-a');
+      expect(paths(http).where((path) => path == 'list'), hasLength(1));
+      now = now.add(const Duration(minutes: 2));
+      await site.giftCatalog('42', liveId: 'live-a');
+      expect(paths(http).where((path) => path == 'list'), hasLength(2));
+    });
+
+    test('a failure is an empty table, not asked again for 5 minutes; other rooms have their own', () async {
+      var now = DateTime(2026, 10, 9, 20);
+      Object answer = TransportReason.timeout;
+      final (:site, :http) = setup(now: () => now, gifts: () => answer);
+      int asked() => paths(http).where((path) => path == 'list').length;
+      expect((await site.giftCatalog('42', liveId: 'live-a')).isEmpty, isTrue);
+      expect((await site.giftCatalog('42', liveId: 'live-a')).isEmpty, isTrue);
+      expect(asked(), 1);
+      answer = '{"result":129001}';
+      now = now.add(const Duration(minutes: 6));
+      expect((await site.giftCatalog('42', liveId: 'live-a')).isEmpty, isTrue, reason: 'refused');
+      answer = table;
+      now = now.add(const Duration(minutes: 6));
+      expect((await site.giftCatalog('42', liveId: 'live-a')).length, 48);
+      for (var room = 100; room < 100 + AcfunSite.giftListRooms; room++) {
+        await site.giftCatalog('$room', liveId: 'live-$room');
+      }
+      final before = asked();
+      await site.giftCatalog('42', liveId: 'live-a');
+      expect(asked(), before + 1, reason: 'the oldest room went');
     });
   });
 

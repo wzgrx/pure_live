@@ -96,6 +96,76 @@ final class AcfunRoomData {
   AcfunQuality? quality(Object? id) => qualities.where((quality) => quality.id == '$id').firstOrNull;
 }
 
+/// One gift of AcFun's gift table (`gift/list`, D07.6): what the danmaku's
+/// gift signals, which carry only the id, are named and priced by.
+@immutable
+final class AcfunGiftInfo {
+  /// Creates the entry.
+  const new({required this.id, required this.name, required this.price, this.banana = false, this.iconUrl});
+
+  /// `giftId`, the id the gift signal sends.
+  final String id;
+
+  /// `giftName` (`香蕉`, `快乐水`).
+  final String name;
+
+  /// `giftPrice`: the price of one, in AC coins (`payWalletType` 1, ten to a
+  /// yuan), or in bananas for a [banana] gift; 0 or more.
+  final int price;
+
+  /// Paid in bananas (`payWalletType` 2): the platform's free currency, so
+  /// the gift is free.
+  final bool banana;
+
+  /// The first `webpPicList` URL, else the first of `pngPicList`.
+  final Uri? iconUrl;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AcfunGiftInfo &&
+      other.id == id &&
+      other.name == name &&
+      other.price == price &&
+      other.banana == banana &&
+      other.iconUrl == iconUrl;
+
+  @override
+  int get hashCode => Object.hash(id, name, price, banana, iconUrl);
+
+  @override
+  String toString() => 'AcfunGiftInfo($id $name, $price ${banana ? 'bananas' : 'AC coins'})';
+}
+
+/// The gifts of an AcFun room's danmaku by gift id ([AcfunApi.giftList],
+/// D07.6).
+@immutable
+final class AcfunGiftCatalog {
+  /// Creates the catalogue.
+  new(Map<String, AcfunGiftInfo> gifts) : _gifts = Map.unmodifiable(gifts);
+
+  const new _empty() : _gifts = const {};
+
+  /// No gifts.
+  static const AcfunGiftCatalog empty = AcfunGiftCatalog._empty();
+
+  final Map<String, AcfunGiftInfo> _gifts;
+
+  /// The gift of [id], or null.
+  AcfunGiftInfo? operator [](String id) => _gifts[id];
+
+  /// The gift ids, in the table's order.
+  Iterable<String> get ids => _gifts.keys;
+
+  /// How many gifts.
+  int get length => _gifts.length;
+
+  /// Whether it has no gifts.
+  bool get isEmpty => _gifts.isEmpty;
+
+  @override
+  String toString() => 'AcfunGiftCatalog($length)';
+}
+
 /// What the danmaku connection needs to join one broadcast. 3.x had no
 /// AcFun danmaku (`EmptyDanmaku`); these are the values the web client's
 /// link protocol uses (spec/sites/acfun.md §7), all from the requests
@@ -110,6 +180,7 @@ final class AcfunDanmakuArgs {
     required List<String> tickets,
     this.enterRoomAttach = '',
     this.refresh,
+    this.gifts,
   }) : tickets = List.unmodifiable(tickets);
 
   /// The room (author id).
@@ -134,6 +205,11 @@ final class AcfunDanmakuArgs {
   /// A new visitor session and broadcast (tickets expire; a new connection
   /// starts from a new session).
   final Future<AcfunDanmakuArgs> Function()? refresh;
+
+  /// The room's gift table (D07.6), which the connection asks for once in
+  /// the background when it starts; never throws (an empty catalogue when
+  /// it cannot be had). Null: no gift names or prices.
+  final Future<AcfunGiftCatalog> Function()? gifts;
 
   /// Diagnostics without the session secrets.
   @override
@@ -331,6 +407,57 @@ abstract final class AcfunApi {
   static bool _identity(Map<String, dynamic> item, String authorId) {
     final user = _object(item['user']);
     return _text(item['authorId']) == authorId && _text(user?['id']) == authorId && _text(user?['name']).isNotEmpty;
+  }
+
+  // Gifts (D07.6) ---------------------------------------------------------------
+
+  /// `gift/list` for [visitor]'s session; a form POST with `visitorId` and
+  /// `liveId` (the archived v4's request; the web client's too).
+  static Uri giftListUrl(AcfunVisitor visitor) => Uri.https('api.kuaishouzt.com', '/rest/zt/live/web/gift/list', {
+    'subBiz': 'mainApp',
+    'kpn': 'ACFUN_APP',
+    'kpf': 'PC_WEB',
+    'userId': visitor.userId,
+    'did': visitor.deviceId,
+    'acfun.api.visitor_st': visitor.token,
+  });
+
+  /// `gift/list`: `data.giftList`, each with `giftId`, `giftName`,
+  /// `giftPrice` and `payWalletType` (1 AC coins, 2 bananas) and the
+  /// pictures (`webpPicList`, `pngPicList`: `[{url}]`). An entry without an
+  /// id or a name is left out; a price that is not a count is 0. A `result`
+  /// other than 1 is `RiskControl`, no list `ApiChanged`.
+  static AcfunGiftCatalog giftList(String body, {int status = 200}) {
+    final root = _root(body, status: status, what: 'gift/list');
+    final result = jsonInt(root['result']);
+    if (result != 1) throw RiskControl(_site, detail: 'gift/list: result ${root['result']}');
+    final list = _object(root['data'])?['giftList'];
+    if (list is! List) throw const ApiChanged(_site, 'gift/list: no giftList');
+    final gifts = <String, AcfunGiftInfo>{};
+    for (final value in list) {
+      final item = _object(value);
+      final id = jsonCount(item?['giftId']);
+      final name = jsonString(item?['giftName']);
+      if (item == null || id == null || name == null) continue;
+      gifts['$id'] = AcfunGiftInfo(
+        id: '$id',
+        name: name,
+        price: jsonCount(item['giftPrice']) ?? 0,
+        banana: jsonInt(item['payWalletType']) == 2,
+        iconUrl: _picture(item['webpPicList']) ?? _picture(item['pngPicList']),
+      );
+    }
+    return AcfunGiftCatalog(gifts);
+  }
+
+  /// The first https `url` of a picture list.
+  static Uri? _picture(Object? list) {
+    if (list is! List) return null;
+    for (final entry in list) {
+      final url = jsonUrl(_object(entry)?['url']);
+      if (url != null && url.scheme == 'https') return url;
+    }
+    return null;
   }
 
   // Visitor session and streams -----------------------------------------------

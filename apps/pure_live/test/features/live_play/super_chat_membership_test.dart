@@ -102,10 +102,15 @@ List<LiveMessage> _chzzk() => [
     if (line['dir'] == 'in' && line['url'] == null) ...ChzzkDanmakuProtocol.decode(line['text']! as String).messages,
 ];
 
-/// Twitch's recorded notices (fixtures/twitch/danmaku/S09-live).
+/// Twitch's recorded messages (fixtures/twitch/danmaku/S09-live) as the
+/// connection reports them: a community gift is its announcement only
+/// (D07.6), the subscriptions it gives are left out.
 List<LiveMessage> _twitch() => [
   for (final line in _lines('twitch/danmaku/S09-live'))
-    if (line['dir'] == 'in') ...TwitchDanmakuProtocol.decode(line['text']! as String).messages,
+    if (line['dir'] == 'in')
+      if (TwitchDanmakuProtocol.decode(line['text']! as String) case final frame)
+        for (final message in frame.messages)
+          if (!(frame.communityGifts[message]?.announcement == false)) message,
 ];
 
 /// YouTube's recorded answer with a new member and a milestone
@@ -246,14 +251,14 @@ void main() {
       );
     });
 
-    test('Twitch (S09): a card for each subscription and gift, none for the shares of a community gift', () {
+    test('Twitch (S09): a card for each subscription and community gift; its subscriptions are folded (D07.6)', () {
       final notices = [
         for (final message in _twitch())
           if (message.type == LiveMessageType.notice) message,
       ];
       final cards = [for (final notice in notices) ?membershipCard(notice, platform: SiteIds.twitch, now: now)];
       expect(cards, hasLength(notices.where((notice) => notice.data == LiveNoticeKind.subscription).length));
-      expect(notices.where((notice) => notice.data == LiveNoticeKind.giftedSubscription), hasLength(2));
+      expect(cards, isNotEmpty);
       final first = cards.first;
       expect((first.userName, first.message, superChatPrice(first)), ('pfxqwzmw', 'subscribed at Tier 1.', '订阅'));
       expect(first.endTime.difference(first.startTime), const Duration(minutes: 1));
@@ -264,10 +269,11 @@ void main() {
       expect(cards.map((card) => card.message), isNot(contains('gifted a Tier 1 sub to yjjgig81!')));
     });
 
-    test('CHZZK (S11, a subscription notice since D07.2) and YouTube (S10, memberships)', () {
+    test('CHZZK (S11, a subscription notice since D07.6) and YouTube (S10, memberships)', () {
       final chzzk = [for (final message in _chzzk()) ?membershipCard(message, platform: SiteIds.chzzk, now: now)];
       expect(chzzk.single.userName, '观众132');
-      expect(chzzk.single.message, '订阅了 32 个月「나나양 좋아」：나이스한 아침이야');
+      // D07.6's notice; the subscriber's words stay a chat line of their own.
+      expect(chzzk.single.message, '订阅了「나나양 좋아」，已订阅 32 个月');
       expect(superChatPrice(chzzk.single), '订阅');
       final youtube = [for (final message in _youtube()) ?membershipCard(message, platform: SiteIds.youtube, now: now)];
       expect(
@@ -447,7 +453,7 @@ void main() {
         data: notice.data,
       );
       danmaku.emit(DanmakuReceived(fresh));
-      expect(lines(controller), ['notice ${notice.message}']);
+      expect(lines(controller), ['notice ${notice.message}'], reason: 'the notice only; no super chat line');
       expect([for (final card in controller.superChats) superChatPrice(card)], ['订阅']);
       // A share of a community gift is the notice line only.
       danmaku.emit(

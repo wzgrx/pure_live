@@ -12,6 +12,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/gift_count_pulse.dart';
+import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_gift_effect.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
@@ -357,6 +358,75 @@ void main() {
       expect(tester.widget<ScaleTransition>(_pulseOf('local-gift-banner-count')).scale.value, 1);
       expect(tester.widget<ScaleTransition>(_pulseOf('live-play-local-gift-count')).scale.value, 1);
       await tester.pump(const Duration(seconds: 3));
+      await closeLocalRoom(tester, room);
+    });
+
+    testWidgets('c3: the long press menu: four counts with their cost, greyed beyond the coins; ×10 at once', (
+      tester,
+    ) async {
+      final (room, session, clock) = await _room(tester, settings: {Settings.localInteractionCoins: 1000});
+      RoomPanelScope.maybeOf(tester.element(find.byType(DanmakuOverlay)))!.open(RoomPanelKind.localInteraction);
+      await tester.pumpAndSettle();
+      final coins = session.interaction.coins;
+      expect(coins, inInclusiveRange(1000, 1100), reason: "the day's check-in may add 100");
+      await tester.ensureVisible(_key('local-gift-bili_tv'));
+      await tester.pumpAndSettle();
+      await tester.longPress(_key('local-gift-bili_tv'));
+      await tester.pumpAndSettle();
+      expect(_key('app-menu-title'), findsOneWidget);
+      expect(tester.widget<Text>(_key('app-menu-title')).data, '小电视 · 选择数量');
+      final enabled = {
+        for (final count in LocalCatalog.giftCounts)
+          count: tester.widget<PopupMenuItem<int>>(_key('local-gift-count-$count')).enabled,
+      };
+      expect(enabled, {1: true, 10: true, 66: false, 520: false});
+      expect(find.text('共 6600 电池'), findsOneWidget);
+      final grey = tester.widget<Text>(find.text('×66'));
+      expect(grey.style!.color!.a, closeTo(0.38, 0.01), reason: 'greyed');
+      // A greyed count takes no tap.
+      await tester.tap(_key('local-gift-count-66'), warnIfMissed: false);
+      await tester.pumpAndSettle();
+      expect(session.interaction.coins, coins);
+      if (_key('local-gift-count-10').evaluate().isEmpty) {
+        await tester.longPress(_key('local-gift-bili_tv'));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(_key('local-gift-count-10'));
+      // Not pumpAndSettle: the banner's 3 s would pass.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(session.interaction.coins, coins - 1000);
+      expect(session.giftEffect.value!.count, 10);
+      expect(_giftLines(session), ['Pure Live 送出 小电视 ×10']);
+      final entry = session.interaction.events.firstWhere((event) => event.kind == LocalEventKind.gift);
+      expect((entry.count, entry.coins), (10, 1000));
+      // Too few for ten more: the usual words, nothing taken.
+      expect(await _give(tester, session, clock, _tv, count: 10), isFalse);
+      expect(room.toasts.last, '体验币余额不足');
+      expect(session.interaction.coins, coins - 1000);
+      await tester.pump(const Duration(seconds: 3));
+      await closeLocalRoom(tester, room);
+    });
+
+    testWidgets('"再发一次" sends as many as the entry says', (tester) async {
+      final (room, session, clock) = await _room(tester);
+      await _give(tester, session, clock, _snack, count: 66);
+      RoomPanelScope.maybeOf(tester.element(find.byType(DanmakuOverlay)))!.open(RoomPanelKind.localInteraction);
+      await tester.pumpAndSettle();
+      await tester.drag(_key('local-panel-list'), const Offset(0, -1500));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('local-history-filter-gift'));
+      await tester.pumpAndSettle();
+      expect(_in('local-history-row-0', find.textContaining('送出 辣条 ×66')), findsOneWidget);
+      final coins = session.interaction.coins;
+      clock.advance(const Duration(seconds: 10));
+      await tester.ensureVisible(_key('local-history-again-0'));
+      await tester.pumpAndSettle();
+      await tester.tap(_key('local-history-again-0'));
+      await tester.pumpAndSettle();
+      expect(session.interaction.coins, coins - 660);
+      expect(_in('local-history-row-0', find.textContaining('送出 辣条 ×66')), findsOneWidget);
+      expect(_in('local-history-row-1', find.textContaining('送出 辣条 ×66')), findsOneWidget);
       await closeLocalRoom(tester, room);
     });
 

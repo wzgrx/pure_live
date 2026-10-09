@@ -7,8 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/features/live_play/logic/background_keeper.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
@@ -234,10 +236,20 @@ abstract final class BackgroundKeepAlive {
   static const MethodChannel _channel = MethodChannel('pure_live/background_playback');
   static bool? _applied;
 
-  /// Holds or releases the locks.
+  /// Sees every change (also where there are no locks).
+  @visibleForTesting
+  static void Function({required bool enabled})? debugLog;
+
+  /// Forgets what was applied (tests).
+  @visibleForTesting
+  static void debugReset() => _applied = null;
+
+  /// Holds or releases the locks; repeats are not sent again.
   static Future<void> set({required bool enabled}) async {
-    if (kIsWeb || !Platform.isAndroid || _applied == enabled) return;
+    if (_applied == enabled) return;
     _applied = enabled;
+    debugLog?.call(enabled: enabled);
+    if (kIsWeb || !Platform.isAndroid) return;
     try {
       await _channel.invokeMethod<void>('setKeepAlive', {'enabled': enabled});
     } on Object catch (error) {
@@ -399,30 +411,71 @@ abstract final class RoomMediaNotification {
 /// leaving the app pauses after [hiddenPauseDelay] unless background play
 /// is on or a sleep session runs (`shouldContinueInBackground`), and
 /// coming back resumes what it paused. A picture nobody sees is not
-/// judged stalled (`setPresentationVisible`); while it may play in the
-/// background the wake/Wi-Fi locks are held and the media notification is
-/// shown (from the foreground: Android refuses to start it later).
+/// judged stalled (`setPresentationVisible`); the media notification is
+/// shown from the foreground (Android refuses to start it later).
+///
+/// O01.3 (docs/O-Android系统集成/O01-通知和前台服务/O01.3-后台播放增强): away from the app a
+/// [BackgroundKeeper] decides what is kept. While the room plays,
+/// reconnects, waits for its broadcast or for a call, the notification
+/// says it plays (its foreground service stays: Android 12 and later
+/// refuse to start it again from the background, and an app without one
+/// loses the network in Doze and is frozen by HyperOS) and the wake and
+/// Wi-Fi locks are held; a pause of the user's lets both go. A stream that
+/// failed is tried again ([BackgroundKeeper.retry]), at once when the
+/// network comes back ([online]). After [hiddenPauseDelay] away (not in
+/// picture-in-picture) "后台只播声音" turns the video off and "后台断开弹幕"
+/// closes the danmaku; coming back undoes both. "关闭画中画时暂停" pauses
+/// a room whose picture-in-picture window was closed.
 class RoomBackgroundPolicy with WidgetsBindingObserver {
   /// Creates the policy for [controller]; call [start].
-  new({required this.controller, required this.settings, this.hiddenPauseDelay = const Duration(milliseconds: 1500)});
+  new({
+    required this.controller,
+    required this.settings,
+    this.hiddenPauseDelay = const Duration(milliseconds: 1500),
+    this.online,
+    KeeperTimer? keeperTimer,
+    DateTime Function()? now,
+  }) {
+    _keeper = BackgroundKeeper(retry: controller.retry, onChanged: _syncNotification, timer: keeperTimer, now: now);
+  }
 
   /// The room.
   final LiveRoomController controller;
 
-  /// `enableBackgroundPlay`.
+  /// `enableBackgroundPlay` and the O01.3 switches.
   final SettingsStore settings;
 
   /// Android reports a short hidden/paused pair while rotating or entering
   /// picture-in-picture; only a longer stay counts (3.x 1.5 s).
   final Duration hiddenPauseDelay;
 
+  /// Whether there is a network, as it changes (O01.3 R6); null: not
+  /// followed.
+  final Stream<bool>? online;
+
+  /// Whether the audio focus paused the room and will resume it (G05.1);
+  /// the room page sets it once the focus exists.
+  bool Function()? interrupted;
+
+  /// The user paused or stopped from the notification or the lock screen
+  /// (the audio focus forgets a resume it planned).
+  void Function()? onUserPause;
+
+  late final BackgroundKeeper _keeper;
   Timer? _pauseTimer;
+  Timer? _awayTimer;
   bool _hidden = false;
   bool _playingWhenHidden = false;
   bool _pausedByUs = false;
   bool _started = false;
+  bool _disposed = false;
+  bool _videoOffByUs = false;
+  bool _danmakuOffByUs = false;
+  bool _hiddenInPip = false;
+  bool _pipJustClosed = false;
   StreamSubscription<PlaybackState>? _states;
   StreamSubscription<bool>? _backgroundSetting;
+  StreamSubscription<bool>? _network;
 
   PlaybackSession get _session => controller.session;
 
@@ -430,6 +483,14 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     backgroundPlaybackEnabled: settings.get(Settings.enableBackgroundPlay),
     sleepSessionActive: controller.sleepSessionActive,
   );
+
+  /// What is kept away from the app now (O01.3).
+  @visibleForTesting
+  BackgroundHold get hold => _keeper.hold;
+
+  /// The keeper's tries since the stream last played (O01.3).
+  @visibleForTesting
+  int get backgroundTries => _keeper.tries;
 
   /// Whether the room may start playing by itself now (C01.5;
   /// [LiveRoomController.mayAutoStart]): on screen or in picture-in-picture,
@@ -449,6 +510,8 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     _states = _session.states.listen((_) => _syncNotification());
     controller.addListener(_syncNotification);
     _backgroundSetting = settings.watch(Settings.enableBackgroundPlay).skip(1).listen((_) => _syncNotification());
+    _network = online?.listen((online) => _keeper.networkChanged(online: online));
+    PictureInPicture.active.addListener(_onPipChanged);
   }
 
   bool _notified = false;
@@ -456,12 +519,37 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
   /// What the notification shows now; repeats are not sent again.
   bool? _shownPlaying;
 
+  KeeperInput _keeperInput(PlaybackState state, {required bool continues}) {
+    final error = state.error;
+    final stage = controller.stage;
+    return KeeperInput(
+      away: _hidden && continues,
+      status: state.status,
+      failure: state.failure,
+      networkLost: error is PlayerException && error.code == networkLostCode,
+      roomStopped: stage == RoomStage.offline || stage == RoomStage.unplayable,
+      roomFailed: stage == RoomStage.failed,
+      interrupted: interrupted?.call() ?? false,
+    );
+  }
+
   void _syncNotification() {
-    final status = _session.state.status;
+    if (_disposed) return;
+    final state = _session.state;
+    final status = state.status;
     final active = status == PlaybackStatus.playing || status == PlaybackStatus.buffering;
     PictureInPicture.bindPlayback(owner: this, playing: active, play: _session.resume, pause: _session.pause);
     final continues = _continues;
-    final wanted = (active || status == PlaybackStatus.paused) && continues;
+    final hold = _keeper.update(_keeperInput(state, continues: continues));
+    final kept = _hidden && continues && hold != BackgroundHold.none;
+    // O01.3 R3: the locks only while something is kept, not while the
+    // user's pause waits.
+    unawaited(BackgroundKeepAlive.set(enabled: kept));
+    _keepVideoOff(state);
+    // O01.3 R1: an open, a reconnect, a stopped broadcast or a call away
+    // from the app show as playing, so the foreground service stays.
+    final playing = state.isActive || kept;
+    final wanted = (playing || status == PlaybackStatus.paused) && continues;
     if (wanted && !_notified) {
       // Only first shown from the foreground: Android 12 and later refuse
       // to start the media notification's foreground service from the
@@ -469,23 +557,23 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
       // not start there (C01.5).
       if (_hidden) return;
       _notified = true;
-      _shownPlaying = active;
+      _shownPlaying = playing;
       unawaited(
         RoomMediaNotification.show(
           owner: this,
           room: controller.room,
-          playing: active,
+          playing: playing,
           play: _session.resume,
-          pause: _session.pause,
-          stop: _session.pause,
+          pause: _userPause,
+          stop: _userPause,
         ),
       );
     } else if (wanted) {
-      _show(playing: active);
+      _show(playing: playing);
     } else if (_notified && _hidden && continues) {
-      // Reloading or between broadcasts while it plays in the background:
-      // kept, shown paused, so it is there when the room plays again and the
-      // service is never started anew from the background (C01.5).
+      // Paused by the user, or given up while it plays in the background:
+      // kept, shown paused, so it is there when the room plays again and
+      // the service is never started anew from the background (C01.5).
       _show(playing: false);
     } else if (_notified && status != PlaybackStatus.opening) {
       _notified = false;
@@ -499,6 +587,20 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     _shownPlaying = playing;
     RoomMediaNotification.update(owner: this, playing: playing);
   }
+
+  /// The notification's or the lock screen's pause and stop: nothing is
+  /// kept or tried until the room plays again (O01.3).
+  Future<void> _userPause() async {
+    _keeper.markUserPause();
+    onUserPause?.call();
+    await _session.pause();
+    // A failed stream stays "error" after a pause: look again.
+    _syncNotification();
+  }
+
+  /// The notification's pause (tests).
+  @visibleForTesting
+  Future<void> pauseFromNotification() => _userPause();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -515,14 +617,22 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
   /// The app left the screen.
   @visibleForTesting
   void onHidden() {
-    if (_hidden) return;
+    if (_hidden || _disposed) return;
     _hidden = true;
     final status = _session.state.status;
     _playingWhenHidden =
         status == PlaybackStatus.opening || status == PlaybackStatus.buffering || status == PlaybackStatus.playing;
     _session.setPresentationVisible(visible: false);
+    // O01.3 R9: the picture-in-picture window was closed (it went before
+    // the app stopped, or goes after).
+    _hiddenInPip = PictureInPicture.active.value;
+    if (_pipJustClosed) {
+      _pipJustClosed = false;
+      _onPipClosed();
+    }
+    _scheduleAway();
     if (_continues) {
-      unawaited(BackgroundKeepAlive.set(enabled: true));
+      _syncNotification();
       return;
     }
     _pauseTimer?.cancel();
@@ -541,10 +651,15 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
   void onResumed() {
     _pauseTimer?.cancel();
     _pauseTimer = null;
-    if (!_hidden) return;
+    _awayTimer?.cancel();
+    _awayTimer = null;
+    _pipJustClosed = false;
+    _hiddenInPip = false;
+    if (!_hidden || _disposed) return;
     _hidden = false;
     _session.setPresentationVisible(visible: true);
     unawaited(BackgroundKeepAlive.set(enabled: false));
+    _restoreAway();
     if (_pausedByUs) {
       _pausedByUs = false;
       unawaited(_session.resume());
@@ -554,14 +669,100 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     _syncNotification();
   }
 
+  void _onPipChanged() {
+    if (_disposed) return;
+    if (PictureInPicture.active.value) {
+      _pipJustClosed = false;
+      return;
+    }
+    if (!_hidden) {
+      // The window went first: closed if the app stops next, expanded if
+      // it resumes.
+      _pipJustClosed = true;
+      return;
+    }
+    if (!_hiddenInPip) return;
+    // The app stopped first, then the window went: it was closed.
+    _hiddenInPip = false;
+    _onPipClosed();
+    // The away switches waited while the window showed the room.
+    _scheduleAway();
+  }
+
+  /// "关闭画中画时暂停" (O01.3 R9): only where the room would play on.
+  void _onPipClosed() {
+    if (!settings.get(Settings.pauseOnPipClose) || !_continues || !_session.state.isActive) return;
+    _pausedByUs = true;
+    _keeper.markUserPause();
+    unawaited(_session.pause());
+  }
+
+  void _scheduleAway() {
+    _awayTimer?.cancel();
+    _awayTimer = Timer(hiddenPauseDelay, () {
+      _awayTimer = null;
+      _applyAway();
+    });
+  }
+
+  /// The away switches (O01.3 R7, R8), once the app stayed away and no
+  /// picture-in-picture window shows the room.
+  void _applyAway() {
+    if (!_hidden || _disposed || PictureInPicture.active.value) return;
+    if (!_danmakuOffByUs && settings.get(Settings.backgroundPauseDanmaku)) {
+      _danmakuOffByUs = true;
+      unawaited(controller.setDanmakuSuspended(suspended: true));
+    }
+    if (!_videoOffByUs && _continues && settings.get(Settings.backgroundAudioOnly) && !controller.audioOnly) {
+      _videoOffByUs = true;
+      _keepVideoOff(_session.state);
+    }
+  }
+
+  bool _videoOffQueued = false;
+
+  /// Turns the video off, again after a reopen brought it back. Never from
+  /// inside the session's own state event (its stream is synchronous).
+  void _keepVideoOff(PlaybackState state) {
+    if (!_videoOffByUs || !_hidden || state.audioOnly || controller.audioOnly || !state.isActive) return;
+    if (_videoOffQueued) return;
+    _videoOffQueued = true;
+    scheduleMicrotask(() {
+      _videoOffQueued = false;
+      final now = _session.state;
+      if (_disposed || !_videoOffByUs || !_hidden || now.audioOnly || controller.audioOnly || !now.isActive) return;
+      unawaited(_session.setAudioOnly(enabled: true));
+    });
+  }
+
+  void _restoreAway() {
+    if (_danmakuOffByUs) {
+      _danmakuOffByUs = false;
+      unawaited(controller.setDanmakuSuspended(suspended: false));
+    }
+    if (_videoOffByUs) {
+      _videoOffByUs = false;
+      // The user's own "纯音频" stays.
+      if (!controller.audioOnly && _session.state.audioOnly) unawaited(_session.setAudioOnly(enabled: false));
+    }
+  }
+
   /// Stops following; releases the locks and the notification.
   void dispose() {
+    if (_disposed) return;
     _pauseTimer?.cancel();
-    if (_started) WidgetsBinding.instance.removeObserver(this);
+    _awayTimer?.cancel();
+    _keeper.dispose();
+    _disposed = true;
+    if (_started) {
+      WidgetsBinding.instance.removeObserver(this);
+      PictureInPicture.active.removeListener(_onPipChanged);
+    }
     controller.removeListener(_syncNotification);
     if (controller.mayAutoStart == _mayStart) controller.mayAutoStart = null;
     unawaited(_backgroundSetting?.cancel());
     unawaited(_states?.cancel());
+    unawaited(_network?.cancel());
     unawaited(BackgroundKeepAlive.set(enabled: false));
     unawaited(RoomMediaNotification.hide(this));
     PictureInPicture.unbindPlayback(this);

@@ -152,7 +152,12 @@ enum SettingsSubpage {
 
   /// Audience counts and ranking (3.x `AudienceMetricSettingsPage`, opened
   /// from the video page; U.6c c15).
-  audience(SettingsSection.video, 'audience_metric_settings');
+  audience(SettingsSection.video, 'audience_metric_settings'),
+
+  /// Background play: this phone's checks and the vendor's pages, and what
+  /// happens away from the app (O01.3, opened from the video page;
+  /// Android).
+  backgroundPlay(SettingsSection.video, 'background_play_settings');
 
   new(this.section, this.titleKey);
 

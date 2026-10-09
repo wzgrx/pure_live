@@ -32,6 +32,7 @@ path = [
   { glob = "apps/pure_live/lib/tv/", sub = "A17" },
 
   # ---- apps/pure_live/lib/platform：原生通道的 Dart 一侧 ----
+  { glob = "apps/pure_live/lib/platform/background_guide.dart", sub = "O01" },
   { glob = "apps/pure_live/lib/platform/display_mode.dart", sub = "O05" },
   { glob = "apps/pure_live/lib/platform/live_alert_channel.dart", sub = "O01" },
   { glob = "apps/pure_live/lib/platform/screen_orientation.dart", sub = "O05" },
@@ -52,6 +53,7 @@ path = [
   { glob = "apps/pure_live/lib/features/live_play/logic/audio_focus.dart", sub = "G05" },
   { glob = "apps/pure_live/lib/features/live_play/logic/gift_combiner.dart", sub = "D07" },
   { glob = "apps/pure_live/lib/features/live_play/logic/background_playback.dart", sub = "C02" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/background_keeper.dart", sub = "O01" },
   { glob = "apps/pure_live/lib/features/live_play/logic/mini_window.dart", sub = "C02" },
   { glob = "apps/pure_live/lib/features/live_play/logic/iptv_guide_rows.dart", sub = "L02" },
   { glob = "apps/pure_live/lib/features/live_play/logic/predictive_back.dart", sub = "O06" },
@@ -155,6 +157,7 @@ path = [
   { glob = "apps/pure_live/android/**/AppChannelsPlugin.kt", sub = "Q03", note = "原生 HTTP、加密、GBK、组播锁，待定" },
   { glob = "apps/pure_live/android/**/Recorder*.kt", sub = "O01" },
   { glob = "apps/pure_live/android/**/LiveAlerts.kt", sub = "O01" },
+  { glob = "apps/pure_live/android/**/BackgroundGuidePlugin.kt", sub = "O01" },
   { glob = "apps/pure_live/android/**/ShareIntakePlugin.kt", sub = "O03" },
   { glob = "apps/pure_live/android/**/PermissionsPlugin.kt", sub = "O04" },
   { glob = "apps/pure_live/android/**/SystemAccessPlugin.kt", sub = "O04" },
@@ -280,6 +283,7 @@ site = [
 # 原生通道：Dart 和 Kotlin 里写的 `pure_live/...` 名字。
 channel = [
   { name = "pure_live/app", sub = "O06", note = "回到后台、电视判断、遥控器输入、启动画面主题，待定" },
+  { name = "pure_live/background_guide", sub = "O01" },
   { name = "pure_live/background_playback", sub = "C02" },
   { name = "pure_live/device_controls", sub = "G05" },
   { name = "pure_live/display_mode", sub = "O05" },
@@ -301,6 +305,9 @@ setting = [
   # app 分节（默认 J01）
   { key = "enableDenseFavorites", sub = "I04" },
   { key = "enableBackgroundPlay", sub = "C02" },
+  { key = "backgroundAudioOnly", sub = "O01" },
+  { key = "backgroundPauseDanmaku", sub = "O01" },
+  { key = "pauseOnPipClose", sub = "O01" },
   { key = "enableAsmrSleepMode", sub = "C03" },
   { key = "asmrSleepMinutes", sub = "C03" },
   { key = "enableRotateScreen", sub = "O05" },

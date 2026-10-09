@@ -6,6 +6,7 @@ import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/features/live_play/logic/background_keeper.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/platform/system_access.dart';
@@ -414,7 +415,7 @@ void main() {
     });
 
     test('playing when it left with background play on: it reloads, ends and comes back in the background; '
-        'the media notification stays, paused in between', () async {
+        'the media notification stays, still playing in between (O01.3: its service is kept)', () async {
       await store.settings.set(Settings.enableBackgroundPlay, true);
       final site = FakeSite(liveRoom());
       final controller = controllerFor(site);
@@ -430,15 +431,19 @@ void main() {
       await controller.load();
       await settle();
       expect(controller.stage, RoomStage.offline);
-      expect(notices, ['show true', 'update false'], reason: 'kept, paused');
+      // O01.3 R1: waiting for the broadcast keeps the foreground service
+      // (Android 12+ would refuse to start it again from the background).
+      expect(notices, ['show true'], reason: 'kept, as playing');
+      expect(policy.hold, BackgroundHold.waiting);
 
-      // On air again: it starts by itself (B-24) and shows playing.
+      // On air again: it starts by itself (B-24) and plays on.
       site.room = liveRoom();
       await controller.refreshDetail();
       await until(() => controller.stage == RoomStage.playing);
       await settle();
       expect(engine.opens, hasLength(2));
-      expect(notices, ['show true', 'update false', 'update true']);
+      expect(notices, ['show true']);
+      expect(policy.hold, BackgroundHold.playing);
 
       policy.dispose();
       await settle();
@@ -476,7 +481,9 @@ void main() {
       await settle();
       policy.onResumed();
       await settle();
-      expect(notices, ['show true', 'update false', 'hide']);
+      // O01.3: away it waited for the broadcast as playing; back in front
+      // a room that does not play loses it.
+      expect(notices, ['show true', 'hide']);
       policy.dispose();
       controller.dispose();
     });

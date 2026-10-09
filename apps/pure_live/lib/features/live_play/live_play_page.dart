@@ -291,27 +291,41 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
       network: ref.read(networkProbeProvider),
       emotes: ref.read(emoteLibraryProvider),
     );
-    final background = RoomBackgroundPolicy(controller: controller, settings: store.settings)..start();
+    final background = RoomBackgroundPolicy(
+      controller: controller,
+      settings: store.settings,
+      // O01.3: a stream that failed away from the app is tried again as
+      // soon as a network is back.
+      online: ref.read(networkChangesProvider).map((kind) => kind != NetworkKind.none),
+    )..start();
+    final audioFocus = SystemAudioFocus.available
+        ? (RoomAudioFocus(
+            session: session,
+            port: SystemAudioFocus.instance,
+            // Where the background policy would not let it play, the end
+            // of a call waits for the app to come back.
+            mayPlayNow: () =>
+                background.mayStartInBackground ||
+                shouldContinueInBackground(
+                  backgroundPlaybackEnabled: store.settings.get(Settings.enableBackgroundPlay),
+                  sleepSessionActive: controller.sleepSessionActive,
+                ),
+          )..start())
+        : null;
+    if (audioFocus != null) {
+      // O01.3: a call away from the app keeps the foreground service until
+      // the room resumes; a pause from the notification cancels the resume.
+      background
+        ..interrupted = (() => audioFocus.pausedUntilInterruptionEnds)
+        ..onUserPause = audioFocus.forgetResume;
+    }
     return RoomRuntime(
       controller: controller,
       session: session,
       orientation: RoomOrientationChoice(settings: store.settings, room: room),
       reconnect: ReconnectWatch(session.states),
       background: background,
-      audioFocus: SystemAudioFocus.available
-          ? (RoomAudioFocus(
-              session: session,
-              port: SystemAudioFocus.instance,
-              // Where the background policy would not let it play, the end
-              // of a call waits for the app to come back.
-              mayPlayNow: () =>
-                  background.mayStartInBackground ||
-                  shouldContinueInBackground(
-                    backgroundPlaybackEnabled: store.settings.get(Settings.enableBackgroundPlay),
-                    sleepSessionActive: controller.sleepSessionActive,
-                  ),
-            )..start())
-          : null,
+      audioFocus: audioFocus,
       playerConfig: playerConfig,
     );
   }

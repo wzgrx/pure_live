@@ -80,6 +80,8 @@ import java.util.concurrent.atomic.AtomicBoolean
  *   action, a tap is sent back as `togglePlay`;
  * - `pure_live/share_intake` ([ShareIntakePlugin]), `pure_live/permissions`
  *   ([PermissionsPlugin]): F.0a;
+ * - `pure_live/background_guide` ([BackgroundGuidePlugin]): the "后台播放检查"
+ *   state and the vendors' system pages (O01.3);
  * - `pure_live/app` `setSplashTheme {mode}`: Android 13's splash screen in
  *   the app's own light or dark (U.14 c9);
  * - `pure_live/app` `startupInfo`, `reportFullyDrawn`: the start-up's
@@ -101,6 +103,9 @@ class MainActivity : AudioServiceActivity() {
         private const val PIP_TOGGLE = "com.mystyle.purelive.PIP_TOGGLE"
         private var playbackWakeLock: PowerManager.WakeLock? = null
         private var playbackWifiLock: WifiManager.WifiLock? = null
+
+        // Android 10-13: the lock that works with the screen off (O01.3 R4).
+        private var playbackBackgroundWifiLock: WifiManager.WifiLock? = null
 
         // R04.1: taken by the first `startupInfo` of the process; a Dart
         // start after it (a recreated activity, a restart) is not cold.
@@ -225,6 +230,10 @@ class MainActivity : AudioServiceActivity() {
         // Notifications and battery optimisation (F.0a).
         if (!flutterEngine.plugins.has(PermissionsPlugin::class.java)) {
             flutterEngine.plugins.add(PermissionsPlugin())
+        }
+        // "后台播放检查": the vendor's background state and pages (O01.3).
+        if (!flutterEngine.plugins.has(BackgroundGuidePlugin::class.java)) {
+            flutterEngine.plugins.add(BackgroundGuidePlugin())
         }
         displayModeChannel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger,
@@ -704,6 +713,15 @@ class MainActivity : AudioServiceActivity() {
         scheduleDisplayModeRefresh(delayMillis = 0)
     }
 
+    /**
+     * The wake and Wi-Fi locks while a room plays away from the app (Dart
+     * holds them only while something is kept, O01.3). Wi-Fi: the
+     * low-latency lock works only while the app is in front with the screen
+     * on (picture-in-picture), so Android 10-13 also hold the high-performance
+     * lock, the one that keeps Wi-Fi out of power save in the background;
+     * from Android 14 the system turns that one into a low-latency lock, so
+     * it is not asked for twice; before 10 it is the only one.
+     */
     @Suppress("DEPRECATION")
     private fun setPlaybackKeepAlive(enabled: Boolean) {
         if (enabled) {
@@ -716,8 +734,8 @@ class MainActivity : AudioServiceActivity() {
             }
             if (playbackWakeLock?.isHeld != true) playbackWakeLock?.acquire()
 
+            val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
             if (playbackWifiLock == null) {
-                val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
                 val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     WifiManager.WIFI_MODE_FULL_LOW_LATENCY
                 } else {
@@ -728,7 +746,18 @@ class MainActivity : AudioServiceActivity() {
                 }
             }
             if (playbackWifiLock?.isHeld != true) playbackWifiLock?.acquire()
+            if (playbackBackgroundWifiLock == null &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+            ) {
+                playbackBackgroundWifiLock = wifiManager.createWifiLock(
+                    WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                    "$packageName:backgroundPlaybackScreenOff",
+                ).apply { setReferenceCounted(false) }
+            }
+            if (playbackBackgroundWifiLock?.isHeld == false) playbackBackgroundWifiLock?.acquire()
         } else {
+            if (playbackBackgroundWifiLock?.isHeld == true) playbackBackgroundWifiLock?.release()
             if (playbackWifiLock?.isHeld == true) playbackWifiLock?.release()
             if (playbackWakeLock?.isHeld == true) playbackWakeLock?.release()
         }

@@ -8,6 +8,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/settings/background_guide_tiles.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/features/settings/settings_dialogs.dart';
 import 'package:pure_live/features/settings/settings_editors.dart';
@@ -119,6 +120,7 @@ class _GatedToggleTileState extends ConsumerState<GatedToggleTile> {
     if (!on || gate == null) {
       setState(() => _problem = null);
       writeSetting(ref, widget.setting, on);
+      if (on) _offerGuide();
       return;
     }
     setState(() {
@@ -136,7 +138,15 @@ class _GatedToggleTileState extends ConsumerState<GatedToggleTile> {
       _asking = false;
       _problem = result == SwitchGateResult.granted || result == SwitchGateResult.cancelled ? null : result;
     });
-    if (result == SwitchGateResult.granted) writeSetting(ref, widget.setting, true);
+    if (result != SwitchGateResult.granted) return;
+    writeSetting(ref, widget.setting, true);
+    _offerGuide();
+  }
+
+  /// O01.3: a vendor build that clears apps away needs a few switches of
+  /// its own; said once, after background play turned on.
+  void _offerGuide() {
+    if (widget.setting == Settings.enableBackgroundPlay) unawaited(offerBackgroundGuide(context, ref));
   }
 
   @override

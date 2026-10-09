@@ -570,6 +570,7 @@ void main() {
           (LiveMessageType.gift, '123456', '观众1', '猴岛 ×2', LiveMessageColor.white),
         );
         expect(message.sentAt, DateTime.fromMillisecondsSinceEpoch(1790000000000));
+        expect(message.messageId, '123456:combo-1:3', reason: 'the sender, the combo and its send');
         expect(
           message.data,
           AcfunGift(

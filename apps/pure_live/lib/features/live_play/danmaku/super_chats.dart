@@ -142,7 +142,8 @@ class _SuperChatEmpty extends StatelessWidget {
 
 /// One super chat (3.x `SuperChatCard`, U.2e c6): the head in the platform's
 /// colour with the picture, name, price, "SC" and the time left; the
-/// message in the second colour, selectable, a double tap copies it. Ink is
+/// message in the second colour, selectable, a double tap copies it; a
+/// paid picture (YouTube's Super Sticker, D07.6) before the message. Ink is
 /// chosen by contrast, no shadow, a thin edge. Narrow (under 280) or with
 /// larger system text the head stacks (3.x).
 class SuperChatCard extends StatelessWidget {
@@ -154,6 +155,9 @@ class SuperChatCard extends StatelessWidget {
 
   /// The list's clock.
   final ValueListenable<DateTime> clock;
+
+  /// The side of a paid picture ([LiveSuperChatMessage.image]).
+  static const double stickerSize = 56;
 
   Future<void> _copy() async {
     await Clipboard.setData(ClipboardData(text: superChat.message));
@@ -284,11 +288,14 @@ class SuperChatCard extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(14, 10, 14, 13),
-                  child: GestureDetector(
-                    onDoubleTap: () => unawaited(_copy()),
-                    child: SelectableText(
-                      superChat.message,
-                      style: theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 14, height: 1.5, color: bodyInk),
+                  child: _withSticker(
+                    context,
+                    GestureDetector(
+                      onDoubleTap: () => unawaited(_copy()),
+                      child: SelectableText(
+                        superChat.message,
+                        style: theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 14, height: 1.5, color: bodyInk),
+                      ),
                     ),
                   ),
                 ),
@@ -297,6 +304,33 @@ class SuperChatCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  /// [text] after the paid picture, when the super chat is one; the
+  /// picture is decoded at the size drawn through the app's image cache,
+  /// and leaves no gap when it cannot be had.
+  Widget _withSticker(BuildContext context, Widget text) {
+    final address = superChat.image.trim();
+    if (address.isEmpty) return text;
+    final decoded = (stickerSize * MediaQuery.devicePixelRatioOf(context)).round();
+    final sticker = Image(
+      key: const ValueKey('super-chat-sticker'),
+      image: ResizeImage(chatBadgeImage(address), width: decoded, height: decoded, policy: ResizeImagePolicy.fit),
+      width: stickerSize,
+      height: stickerSize,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
+      gaplessPlayback: true,
+      errorBuilder: (_, _, _) => const SizedBox.shrink(),
+    );
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        sticker,
+        const SizedBox(width: 10),
+        Expanded(child: text),
+      ],
     );
   }
 }

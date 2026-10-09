@@ -676,15 +676,19 @@ abstract final class AcfunDanmakuProtocol {
       if (user == null || id == null || id <= 0) return null;
       final count = _positive(signal.integer(4)) ?? 1;
       final combo = _positive(signal.integer(5));
+      final comboId = (signal.string(7) ?? '').trim();
       final data = _gift(
         '$id',
         count,
         gifts: gifts,
-        comboKey: (signal.string(7) ?? '').trim(),
+        comboKey: comboId,
         comboTotal: combo == null ? null : count * combo,
         value: signal.integer(6) ?? 0,
       );
-      return _giftMessage(user, data, signal.integer(2));
+      // Each send of a combo is its own message: the gate (D07.1) must not
+      // take two equal sends of one viewer for one.
+      final sender = user.integer(1) ?? 0;
+      return _giftMessage(user, data, signal.integer(2), id: comboId.isEmpty ? '' : '$sender:$comboId:${combo ?? 0}');
     } on FormatException {
       return null;
     }
@@ -735,14 +739,15 @@ abstract final class AcfunDanmakuProtocol {
     );
   }
 
-  static LiveMessage _giftMessage(ProtoMessage user, AcfunGift gift, int? millis) {
-    final id = user.integer(1);
+  static LiveMessage _giftMessage(ProtoMessage user, AcfunGift gift, int? millis, {String id = ''}) {
+    final sender = user.integer(1);
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: user.string(2) ?? '',
-      userId: id == null || id <= 0 ? '' : '$id',
+      userId: sender == null || sender <= 0 ? '' : '$sender',
       message: gift.plainText,
       color: LiveMessageColor.white,
+      messageId: id,
       sentAt: millis == null || millis <= 0 || millis > _maxEpochMilliseconds
           ? null
           : DateTime.fromMillisecondsSinceEpoch(millis),

@@ -42,6 +42,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | `features/live_play/local_interaction/logic/local_room_session.dart`（112） | `LocalGiftShow`（`:13`）、`LocalRoomSession`（`:32`）：`sendChat`、`sendGift`、`_deliver`（`:97`）、`effectDuration` 3 秒 |
 | `features/live_play/logic/room_controller.dart` | `addLocal`（`:1159`） |
 | `packages/live_store/lib/src/settings/settings.dart` | `localInteraction.*` 29 个键（`localInteraction.enabled` `:1221` 起，记录 `localInteraction.history` `:1294`，样式 18 个 `:1301-1438`） |
+| `packages/live_store/lib/src/local_events.dart` | D08.1：`local_events` 表（`schemaVersion` 2）的 `LocalEvent`、`LocalEventStore`（最多 2000 条、旧记录只转一次、进房放回的查询、备份一节 `localEvents`）；新设置 `localInteraction.replayOnEnter`（默认开，D-040） |
 
 测试：`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个：资料库、3.x 键和默认值、送礼扣币、记录 30 条、样式、各处输入框、面板、横幅 3 秒）；`packages/live_store/test/migration_test.dart`、`backup_test.dart`、`settings_defaults_test.dart`（键和迁移）。
 
@@ -55,7 +56,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | 整个本地互动没有 K90 结果（P1） | CHECKLIST 第 2 节第 8 条 | 登记“完成”但没人用过一遍 | S02.6 阶段 4（V03.6 E1） |
-| 记录存拼好的句子、本地弹幕不进记录、离开直播间就没了（P2、P3） | `local_interaction.dart:223`、`:275-277`；`addLocal` 只进 `ChatFeed` | 换语言后旧记录还是旧语言；没有“我发过的话” | D08.1 |
+| 记录存拼好的句子、本地弹幕不进记录、离开直播间就没了（P2、P3） | `local_interaction.dart:223`、`:275-277`；`addLocal` 只进 `ChatFeed` | 换语言后旧记录还是旧语言；没有“我发过的话” | D08.1（2026-10-09 代码做完，待真机） |
 | 每次都要重打常说的话 | — | 手机上打字慢 | D08.2 |
 | 币和经验没有意义（P5） | `local_interaction.dart:218-225` | 没有养成感 | D08.3 |
 | 礼物一次 1 个、横幅互相顶掉（P6） | `local_interaction.dart` `count: 1`；`local_room_session.dart` 的 `sendGift` | 快速连点只看到最后一条横幅 | D08.4 |
@@ -90,12 +91,12 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 属于 [D 弹幕](../README.md)。
 
 - 代码：`features/live_play/local_interaction/logic/`
-- 进度：`░░░░░░░░░░░░░░░░░░░░` 0%
+- 进度：`████░░░░░░░░░░░░░░░░` 18%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| D08.1 | 结构化的本地历史：本地弹幕进记录、重进房间放回 | 功能 | 未开始 | — | — | [设计或说明](D08.1-结构化的本地历史/README.md)、[任务书](D08.1-结构化的本地历史/brief.md) |
+| D08.1 | 结构化的本地历史：本地弹幕进记录、重进房间放回 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.1-结构化的本地历史/README.md)、[任务书](D08.1-结构化的本地历史/brief.md)、[记录](D08.1-结构化的本地历史/record.md) |
 | D08.2 | 常用语和最近发送 | 功能 | 未开始 | — | — | [设计或说明](D08.2-常用语和最近发送/README.md)、[任务书](D08.2-常用语和最近发送/brief.md) |
 | D08.3 | 本地成长：观看时长、签到、等级进度 | 功能 | 未开始 | — | — | [设计或说明](D08.3-本地成长/README.md)、[任务书](D08.3-本地成长/brief.md) |
 | D08.4 | 本地礼物连击、数量和横幅队列 | 功能 | 未开始 | — | — | [设计或说明](D08.4-本地礼物连击和数量/README.md)、[任务书](D08.4-本地礼物连击和数量/brief.md) |
@@ -103,10 +104,6 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 
 ## 还没完成的
 
-- **D08.1 结构化的本地历史：本地弹幕进记录、重进房间放回**（未开始，第二档，规模 中）
-  - 阶段：local_events 表、写入、旧记录迁移、备份 → 面板和设置页的记录按类型分、再发一次 → 重进同一个直播间放回最近的本地弹幕（新设置，默认开）
-  - 说明：新表要升 live_store 的 schemaVersion；3.x 的 localInteraction.history 不删、只读迁移（D-018）；“进房放回”默认开是任务书写明的例外（D-040）
-  - 来源：V03.6 第 4 节 E5、第 5.3 节（P2、P3）；用户 2026-10-09（D-040）
 - **D08.2 常用语和最近发送**（未开始，第二档，规模 中）
   - 阶段：常用语设置和最近发过、输入框上方一排 → 长按本地弹幕“存为常用语”、设置页管理
   - 说明：依赖 D08.1（最近发过取自记录）；界面照 A08.2 的样子，加的是输入框上方一排标签

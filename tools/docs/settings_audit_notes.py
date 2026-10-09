@@ -400,6 +400,11 @@ NOTES: dict[str, dict] = {
         'v3range': f'2000～10000（`{_LOCAL}:760`）',
         'ui': f'滑块 2000～10000（{_LOCAL_PANEL}）',
     },
+    'localInteraction.replayOnEnter': {
+        **_new('D08.1 c6，V03.6 E5'),
+        'v3range': '3.x 没有这个设置，离开直播间本地弹幕就没了',
+        'verdict': 'v4 新加（D08.1，D-040 写明的例外）：默认开；重进同一个直播间时，24 小时内在这里发过的本地弹幕（最多 20 条）放在弹幕列表顶上、标“之前发的”、不飞过画面；关掉和 3.x 一样',
+    },
     # ---- backup, cache, log, accounts, meta ----
     'downloadDirectoryPath': {
         'v3': "''",

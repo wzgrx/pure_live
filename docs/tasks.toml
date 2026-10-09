@@ -2334,13 +2334,14 @@ note = "依赖 E05.5；每个平台先录真实样本（海外开代理，按 fi
 id = "D08.1"
 title = "结构化的本地历史：本地弹幕进记录、重进房间放回"
 type = "功能"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "中"
 tier = 2
 stages = ["local_events 表、写入、旧记录迁移、备份", "面板和设置页的记录按类型分、再发一次", "重进同一个直播间放回最近的本地弹幕（新设置，默认开）"]
-done = 0
+done = 3
 from = "V03.6 第 4 节 E5、第 5.3 节（P2、P3）；用户 2026-10-09（D-040）"
-note = "新表要升 live_store 的 schemaVersion；3.x 的 localInteraction.history 不删、只读迁移（D-018）；“进房放回”默认开是任务书写明的例外（D-040）"
+note = "live_store schemaVersion 2（local_events，最多 2000 条）；3.x 的 localInteraction.history 照旧写、第一次用到时只读转成 legacy 一次（D-018）；完整备份带 localEvents 一节，设备同步是默认不勾的一类；localInteraction.replayOnEnter 默认开（D-040 的例外）；设计选择 s1～s16 见任务 README"
 
 [[task]]
 id = "D08.2"

@@ -146,7 +146,10 @@ enum RestorePartKind {
   iptv('backup_part_iptv'),
 
   /// The rooms of the multi-view's last arrangement.
-  multiview('backup_part_multiview');
+  multiview('backup_part_multiview'),
+
+  /// The local interaction's history (D08.1).
+  localEvents('backup_part_local_events');
 
   new(this.labelKey);
 
@@ -328,6 +331,13 @@ Future<RestorePreview> previewRestore(
     parts.add(RestorePart.compare(RestorePartKind.iptv, current, incoming, (playlist) => playlist.id));
   } else {
     kept.add(RestorePartKind.iptv);
+  }
+  if (LocalEventStore.inBackup(json) case final events?) {
+    String key(LocalEvent event) =>
+        '${event.kind.name}|${event.at.millisecondsSinceEpoch}|${event.text}|${event.giftId}';
+    parts.add(RestorePart.compare(RestorePartKind.localEvents, await store.localEvents.all(), events, key));
+  } else {
+    kept.add(RestorePartKind.localEvents);
   }
   if (multiviewSessionIn(json) case final session?) {
     final current = _multiviewRooms(await readMultiviewSession(store.meta));

@@ -629,6 +629,34 @@ void _pageTests() {
     expect(service.sentParts, {SyncPart.follows});
   });
 
+  testWidgets('D08.1 c4: the local history is offered unticked; left so, the rest goes whole', (tester) async {
+    final service = await _pumpPage(tester, devices: [_windows])
+      ..partial = true;
+    await tester.runAsync(() async {
+      await service.store.follows.replaceAll([_room('1')]);
+      await service.store.localEvents.add(
+        LocalEvent(at: DateTime(2026, 10, 9, 20), kind: LocalEventKind.recharge, coins: 500),
+      );
+    });
+    await tester.tap(find.byKey(const ValueKey('remote-sync-send')).first);
+    await _until(tester, () => find.byKey(const ValueKey('remote-sync-part-all')).evaluate().isNotEmpty);
+    await _frames(tester);
+    Checkbox box(String part) => tester.widget<Checkbox>(
+      find.descendant(of: find.byKey(ValueKey('remote-sync-part-$part')), matching: find.byType(Checkbox)),
+    );
+    expect(find.text('本地互动记录（1）'), findsOneWidget);
+    expect(box('localEvents').value, isFalse, reason: "this device's own unless ticked");
+    expect(box('follows').value, isTrue);
+    await tester.tap(find.byKey(const ValueKey('remote-sync-confirm')));
+    await _frames(tester);
+    await tester.enterText(find.byKey(const ValueKey('remote-sync-code-field')), '482916');
+    await tester.tap(find.byKey(const ValueKey('remote-sync-code-ok')));
+    await _frames(tester);
+    expect(service.sentParts, isNotNull);
+    expect(service.sentParts, isNot(contains(SyncPart.localEvents)));
+    expect(service.sentParts, containsAll([SyncPart.settings, SyncPart.follows, SyncPart.history]));
+  });
+
   testWidgets('landscape phone with 1.3× text: the parts scroll, the buttons stay on screen (J05.1)', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 1.3;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

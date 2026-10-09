@@ -469,6 +469,9 @@ abstract final class AppIcons {
   /// Shadow or glow (3.x `blur_on_rounded`).
   static const IconData localShadow = Icons.blur_on_rounded;
 
+  /// "进房放回之前发的本地弹幕" (D08.1 c6; 3.x had no such switch).
+  static const IconData localReplay = Icons.history_toggle_off_rounded;
+
   // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
   // desktop mini window; 3.x player_manager.dart) ----
 

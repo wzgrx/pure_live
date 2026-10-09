@@ -924,13 +924,21 @@ class _SyncPartsDialog extends StatefulWidget {
 }
 
 class _SyncPartsDialogState extends State<_SyncPartsDialog> {
-  late final Set<SyncPart> _chosen = {for (final row in widget.rows) row.part};
+  // D08.1 c4: an opt-in part starts unticked (a locked dialog sends all).
+  late final Set<SyncPart> _chosen = {
+    for (final row in widget.rows)
+      if (widget.locked || !row.part.optIn) row.part,
+  };
 
   bool get _all => _chosen.length == widget.rows.length;
 
   void _set(SyncPart part, bool on) => setState(() => on ? _chosen.add(part) : _chosen.remove(part));
 
-  void _done() => Navigator.of(context).pop(<SyncPart>{..._chosen, if (_all) ...widget.always});
+  /// The parts without a box go when every other box is ticked; an opt-in
+  /// part left out does not hold them back.
+  bool get _withAlways => widget.rows.every((row) => row.part.optIn || _chosen.contains(row.part));
+
+  void _done() => Navigator.of(context).pop(<SyncPart>{..._chosen, if (_withAlways) ...widget.always});
 
   Widget _box({
     required Key key,

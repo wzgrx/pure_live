@@ -39,6 +39,10 @@ abstract final class StoreTables {
   /// 3.x values another module owns (recorder settings and tasks, local
   /// interaction), kept verbatim until that module reads them.
   static const legacyValues = 'legacy_values';
+
+  /// The local interaction's history (D08.1): local danmaku, gifts, coins
+  /// added, one row each. Schema 2.
+  static const localEvents = 'local_events';
 }
 
 const List<String> _schema = [
@@ -53,6 +57,21 @@ const List<String> _schema = [
   'CREATE TABLE webdav_profiles (name TEXT NOT NULL PRIMARY KEY, position INTEGER NOT NULL, address TEXT NOT NULL, username TEXT NOT NULL)',
   'CREATE TABLE meta (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)',
   'CREATE TABLE legacy_values (key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)',
+  ..._localEventsSchema,
+];
+
+/// Schema 2 (D08.1): the local interaction's history. `id` never comes back
+/// after a delete (AUTOINCREMENT), so an undone clear puts the rows back
+/// under their own ids.
+const String _localEventsTable =
+    'CREATE TABLE local_events (id INTEGER PRIMARY KEY AUTOINCREMENT, at INTEGER NOT NULL, kind TEXT NOT NULL, '
+    "platform TEXT NOT NULL DEFAULT '', room_id TEXT NOT NULL DEFAULT '', room_name TEXT NOT NULL DEFAULT '', "
+    "text TEXT NOT NULL DEFAULT '', gift_id TEXT NOT NULL DEFAULT '', count INTEGER NOT NULL DEFAULT 0, "
+    'coins INTEGER NOT NULL DEFAULT 0, style TEXT)';
+
+const List<String> _localEventsSchema = [
+  _localEventsTable,
+  'CREATE INDEX local_events_room ON local_events (platform, room_id, at)',
 ];
 
 /// The SQLite database behind `LiveStore`, written with drift's raw SQL API
@@ -81,8 +100,9 @@ final class StoreDatabase extends GeneratedDatabase {
   /// process's.
   static const Duration busyTimeout = Duration(seconds: 5);
 
+  /// 1: 4.0.0's tables; 2: `local_events` (D08.1).
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
@@ -92,6 +112,13 @@ final class StoreDatabase extends GeneratedDatabase {
     onCreate: (_) async {
       for (final statement in _schema) {
         await customStatement(statement);
+      }
+    },
+    onUpgrade: (_, from, to) async {
+      if (from < 2) {
+        for (final statement in _localEventsSchema) {
+          await customStatement(statement);
+        }
       }
     },
     beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),

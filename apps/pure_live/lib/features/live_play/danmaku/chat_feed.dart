@@ -148,6 +148,7 @@ final class ChatFeed extends ChangeNotifier {
   int _added = 0;
   int _gifts = 0;
   int _replacements = 0;
+  int _before = 0;
   int _removals = 0;
   final List<bool Function(ChatLine line)> _removalTests = [];
   static const int _keptRemovalTests = 64;
@@ -254,6 +255,29 @@ final class ChatFeed extends ChangeNotifier {
       }
     }
     return -1;
+  }
+
+  /// Puts [lines] (oldest first) before every line (D08.1: what was sent
+  /// before the room was entered). They are not counted in [added] (no "N
+  /// 条新弹幕") and take ids below every other line's; beyond [capacity]
+  /// the oldest go as usual.
+  void addOldest(List<ChatLine> lines) {
+    if (lines.isEmpty) return;
+    for (var i = lines.length - 1; i >= 0; i--) {
+      lines[i].id = --_before;
+    }
+    for (final line in lines) {
+      if (line.kind == ChatLineKind.gift) _gifts++;
+    }
+    _lines.insertAll(0, lines);
+    if (_lines.length > capacity) {
+      final over = _lines.length - capacity;
+      for (var i = 0; i < over; i++) {
+        if (_lines[i].kind == ChatLineKind.gift) _gifts--;
+      }
+      _lines.removeRange(0, over);
+    }
+    _changed();
   }
 
   /// Takes back what [retraction] names: one message by id, a user's

@@ -157,14 +157,17 @@ void main() {
       // A08.13 P4: a clear hands back what it took; the undo puts it under
       // what came since, still 30 at most.
       final cleared = local.clearHistory();
-      expect(cleared, hasLength(30));
+      expect(cleared.lines, hasLength(30));
+      expect(cleared.events, hasLength(42), reason: 'D08.1: the entries are not cut at 30');
       expect(local.history, isEmpty);
+      expect(local.events, isEmpty);
       local
         ..recharge(7)
         ..restoreHistory(cleared);
       expect(local.history, hasLength(30));
       expect(local.history.first, '增加本地体验币 +7');
-      expect(local.history[1], cleared.first);
+      expect(local.history[1], cleared.lines.first);
+      expect(local.events, hasLength(43));
       await Future<void>.delayed(const Duration(milliseconds: 50));
       expect(store.settings.get(Settings.localInteractionHistory), local.history);
     });
@@ -645,6 +648,8 @@ void main() {
       await tester.tap(_in('local-history-undo', find.text('撤销')));
       await tester.pumpAndSettle();
       expect(local.history, before);
+      // D08.1: the entries come back with the lines.
+      expect([for (final e in local.events) e.kind], [LocalEventKind.gift, LocalEventKind.recharge]);
       expect(_in('local-history', find.text('增加本地体验币 +500')), findsOneWidget);
       expect(toast, findsNothing);
       await closeLocalRoom(tester, room);

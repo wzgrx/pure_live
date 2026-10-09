@@ -1470,6 +1470,16 @@ abstract final class Settings {
     max: 10000,
   );
 
+  /// Entering a room puts the local danmaku sent there in the last 24 hours
+  /// (at most 20) back at the top of the chat list, marked "之前发的"
+  /// (D08.1 c6). New in v4: on by default, the exception D-040 names; off
+  /// is the room as before.
+  static const localInteractionReplayOnEnter = BoolSetting(
+    'localInteraction.replayOnEnter',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
   /// The local interaction's settings, in 3.x's order.
   static const List<Setting<Object>> localInteraction = [
     localInteractionEnabled,
@@ -1769,6 +1779,7 @@ abstract final class Settings {
     enableStartUp,
     ...recorder,
     ...localInteraction,
+    localInteractionReplayOnEnter,
     backupDirectory,
     downloadDirectoryPath,
     downloadDirectoryDecisionMade,

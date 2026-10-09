@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:live_store/src/block_lists.dart';
 import 'package:live_store/src/legacy/legacy_snapshot.dart';
 import 'package:live_store/src/live_store.dart';
+import 'package:live_store/src/local_events.dart';
 import 'package:live_store/src/secrets.dart';
 import 'package:live_store/src/settings/setting.dart';
 import 'package:live_store/src/settings/settings.dart';
@@ -14,7 +15,8 @@ import 'package:live_store/src/webdav.dart';
 ///
 /// - Written with `backupVersion: 4` and 3.x's sections; 3.x reads any
 ///   version above 3 as "latest compatible" and ignores the keys it does
-///   not know (v4's new settings, `startedAt`).
+///   not know (v4's new settings, `startedAt`, the local interaction's
+///   history in `localEvents`, D08.1).
 /// - Read: the flat format without a version, versions 2..4, and the
 ///   follows-only file (`backupScope: favorites`).
 /// - Accounts (`cookie`, `webdav` with passwords) only when asked, as in
@@ -55,6 +57,14 @@ final class BackupService {
       'tags': [for (var i = 0; i < tags.length; i++) tags[i].toJson(i)],
       'roomTagsMap': await _store.tags.assignments(),
     };
+    // D08.1: the local interaction's history, when there is any (3.x
+    // ignores the section; a file without it leaves the history as it is).
+    final events = await _store.localEvents.all();
+    if (events.isNotEmpty) {
+      sections[LocalEventStore.backupSection] = {
+        'events': [for (final event in events) event.toJson()],
+      };
+    }
     if (includeSensitiveData) {
       final current = await _store.webdav.current();
       sections['webdav'] = {
@@ -115,6 +125,7 @@ final class BackupService {
       );
     }
     if (snapshot.secrets case final secrets?) await store.secrets.writeAll(secrets);
+    if (LocalEventStore.inBackup(json) case final events?) await store.localEvents.replaceAll(events);
     // Added to the remembered sign-ins, never replacing them: the file's
     // current cookie is the current one, the others stay switchable.
     for (final MapEntry(key: site, value: accounts) in (snapshot.savedAccounts ?? const {}).entries) {

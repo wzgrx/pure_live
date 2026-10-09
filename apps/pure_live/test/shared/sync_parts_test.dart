@@ -3,6 +3,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/shared/backup/backup_data.dart';
 import 'package:pure_live/shared/backup/sync_parts.dart';
 
 import '../support.dart';
@@ -128,5 +129,41 @@ void main() {
     await BackupService(target).restoreAll(pickSyncParts(sensitive, {SyncPart.accounts}));
     expect(target.secrets.cookieFor(SiteIds.bilibili), 'SESSDATA=fake-7');
     expect({for (final account in target.accounts.of(SiteIds.bilibili)) account.uid}, {3, 7, 8});
+  });
+
+  test('D08.1 c4: the local history is its own part, offered unticked; picked or left out on its own', () async {
+    final source = await _filled(room: '2');
+    await source.localEvents.add(
+      LocalEvent(at: DateTime(2026, 10, 9, 20), kind: LocalEventKind.chat, platform: 'douyu', roomId: '2', text: '晚上好'),
+    );
+    final target = await _filled();
+    await target.localEvents.add(LocalEvent(at: DateTime(2026, 10, 9, 21), kind: LocalEventKind.recharge, coins: 500));
+    final file = await BackupService(source).exportAll();
+    expect(syncPartsIn(file).last, SyncPart.localEvents);
+    expect(syncPartCounts(file)[SyncPart.localEvents], 1);
+    expect(
+      [
+        for (final part in SyncPart.values)
+          if (part.optIn) part,
+      ],
+      [SyncPart.localEvents],
+    );
+    expect(SyncPart.of(RestorePartKind.localEvents), SyncPart.localEvents);
+
+    // What a restore preview says of it.
+    final preview = await previewRestore(target, file, BackupScope.all);
+    final part = preview.parts.singleWhere((part) => part.kind == RestorePartKind.localEvents);
+    expect((part.current, part.incoming, part.added, part.removed), (1, 1, 1, 1));
+
+    // Everything but the history: this device keeps its own.
+    final without = pickSyncParts(file, SyncPart.values.toSet()..remove(SyncPart.localEvents));
+    expect(without.containsKey(LocalEventStore.backupSection), isFalse);
+    await BackupService(target).restoreAll(without);
+    expect([for (final e in await target.localEvents.all()) e.kind], [LocalEventKind.recharge]);
+
+    // Ticked: it replaces this device's.
+    await BackupService(target).restoreAll(pickSyncParts(file, {SyncPart.localEvents}));
+    expect([for (final e in await target.localEvents.all()) e.text], ['晚上好']);
+    expect([for (final room in await target.follows.all()) room.roomId], ['2'], reason: 'from the first restore');
   });
 }

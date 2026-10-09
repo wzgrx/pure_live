@@ -714,7 +714,7 @@ class ChatLineView extends StatelessWidget {
     // U.2k c10: a local danmaku or gift has its own line; both keep the
     // long press, right click and double tap (3.x; the gift's since A08.13).
     if (line.message case final message? when message.isLocal) {
-      final local = LocalChatLine(message: message, showName: showName, sizing: sizing);
+      final local = LocalChatLine(message: message, showName: showName, sizing: sizing, merged: line.revision > 0);
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onLongPress: onActions,

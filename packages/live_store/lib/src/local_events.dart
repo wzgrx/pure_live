@@ -9,8 +9,9 @@ enum LocalEventKind {
   /// A local danmaku: [LocalEvent.text] is what it said.
   chat,
 
-  /// A local gift: [LocalEvent.giftId], [LocalEvent.count] and its price in
-  /// [LocalEvent.coins].
+  /// A local gift: [LocalEvent.giftId], [LocalEvent.count] and what they
+  /// cost in all in [LocalEvent.coins] (D08.4: one entry for a combo, its
+  /// count and coins growing with each send).
   gift,
 
   /// Coins added: [LocalEvent.coins].
@@ -103,7 +104,7 @@ final class LocalEvent {
   /// How many gifts; the level of a [LocalEventKind.level].
   final int count;
 
-  /// Coins added, or the gift's price.
+  /// Coins added, or what the gifts cost in all.
   final int coins;
 
   /// The local danmaku's style when it was sent (JSON of the
@@ -112,6 +113,21 @@ final class LocalEvent {
 
   /// Whether it happened in a room.
   bool get inRoom => platform.isNotEmpty && roomId.isNotEmpty;
+
+  /// A copy with [count] and [coins] (D08.4: a combo's entry grows).
+  LocalEvent withCount(int count, int coins) => LocalEvent(
+    id: id,
+    at: at,
+    kind: kind,
+    platform: platform,
+    roomId: roomId,
+    roomName: roomName,
+    text: text,
+    giftId: giftId,
+    count: count,
+    coins: coins,
+    style: style,
+  );
 
   /// A copy stored under [id].
   LocalEvent withId(int id) => LocalEvent(
@@ -273,6 +289,13 @@ final class LocalEventStore {
     }
     await _trim();
   });
+
+  /// Writes [count] and [coins] into the entry [id] (D08.4: a combo's entry
+  /// grows with each send); nothing when it is gone (cleared meanwhile).
+  Future<void> updateCount(int id, {required int count, required int coins}) => _db.write(
+    _tables,
+    () => _db.run('UPDATE local_events SET count = ?, coins = ? WHERE id = ?', [count, coins, id]),
+  );
 
   /// Removes every entry.
   Future<void> clear() => _db.write(_tables, () => _db.run('DELETE FROM local_events'));

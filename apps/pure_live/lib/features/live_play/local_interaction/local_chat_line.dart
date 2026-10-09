@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
+import 'package:pure_live/features/live_play/danmaku/gift_count_pulse.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
@@ -12,9 +13,19 @@ import 'package:pure_live/i18n/i18n.dart';
 /// the chat list's two roles (A08.10); with [showName] off the name and the
 /// badge chip are left out and "本地" stays. The text, the chips and the gap
 /// follow the list's [sizing] (A08.15).
+///
+/// D08.4 c1: a gift's "×N" is its combo's count so far; a combo's new count
+/// is a new line ([merged]), whose "×N" pulses as the platforms' gift lines
+/// do (A08.11 c4, [GiftCountPulse]).
 class LocalChatLine extends StatelessWidget {
   /// Creates the line of [message].
-  const new({required this.message, this.showName = true, this.sizing = ChatSizing.standard, super.key});
+  const new({
+    required this.message,
+    this.showName = true,
+    this.sizing = ChatSizing.standard,
+    this.merged = false,
+    super.key,
+  });
 
   /// The local message.
   final LiveMessage message;
@@ -24,6 +35,10 @@ class LocalChatLine extends StatelessWidget {
 
   /// The list's text size and spacing ("列表文字大小", "行间距").
   final ChatSizing sizing;
+
+  /// Whether the line is a combo's new count (`ChatLine.revision > 0`): its
+  /// "×N" pulses when first built.
+  final bool merged;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +98,20 @@ class LocalChatLine extends StatelessWidget {
                 text: gift.name,
                 style: body?.emphasis.copyWith(color: localGiftInk(gift.color, theme.brightness)),
               ),
-              TextSpan(text: ' ×1', style: body),
+              TextSpan(text: ' ', style: body),
+              chatInline(
+                GiftCountPulse(
+                  count: gift.count,
+                  jumpFirst: merged,
+                  child: Text(
+                    '×${gift.count}',
+                    key: const ValueKey('live-play-local-gift-count'),
+                    style: body?.tabular,
+                  ),
+                ),
+                alignment: PlaceholderAlignment.baseline,
+                baseline: TextBaseline.alphabetic,
+              ),
             ],
           ],
         ),

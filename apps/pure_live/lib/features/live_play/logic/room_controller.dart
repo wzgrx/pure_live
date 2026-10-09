@@ -1264,11 +1264,31 @@ class LiveRoomController extends ChangeNotifier {
   /// in the chat list at once, and over the picture when [fly]. It skips the
   /// platform filters and the gift switch, as 3.x's local messages did; the
   /// list shows it without waiting for the next frame.
-  void addLocal(LiveMessage message, {required bool fly}) {
-    if (_disposed || message.message.trim().isEmpty) return;
-    chat.add(message.type == LiveMessageType.gift ? ChatLine.gift(message) : ChatLine.chat(message));
+  /// Returns its line (null when nothing was added).
+  ChatLine? addLocal(LiveMessage message, {required bool fly}) {
+    if (_disposed || message.message.trim().isEmpty) return null;
+    final line = message.type == LiveMessageType.gift ? ChatLine.gift(message) : ChatLine.chat(message);
+    chat.add(line);
     if (fly) _flying.add(message);
     chat.flush();
+    return line;
+  }
+
+  /// A local gift's combo counted up (D08.4 c1): [message], its new count,
+  /// takes [line]'s place as the newest line ([ChatFeed.replace], as D07.1's
+  /// merged gifts: the line's "×N" pulses), at once and not over the
+  /// picture. A line no longer in the list (cleared, gone off its old end)
+  /// comes back as a new one. Returns the line now saying it.
+  ChatLine? replaceLocal(ChatLine line, LiveMessage message) {
+    if (_disposed) return null;
+    final current = line.latest;
+    var next = ChatLine.gift(message, revision: current.revision + 1);
+    if (!chat.replace(current, next)) {
+      next = ChatLine.gift(message);
+      chat.add(next);
+    }
+    chat.flush();
+    return next;
   }
 
   bool _localReplayed = false;

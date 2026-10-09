@@ -19,7 +19,7 @@
 ## 现状：做到哪、怎么工作的
 
 - 用户看得到的：
-  - 屏蔽关键词（最多 40 字）和屏蔽用户：加了以后立即生效，已经在列表里的匹配行也去掉（`room_controller.dart:997`、`:1008`）；画面上已经飞出去的不追。屏蔽是全局、持久的，所有平台、所有直播间共用一张表。
+  - 屏蔽关键词（最多 40 字；以 `/` 开头和结尾的按正则匹配，最多 200 字，写错的不加进去，D02.2）和屏蔽用户：加了以后立即生效，已经在列表里的匹配行也去掉（`room_controller.dart:997`、`:1008`）；画面上已经飞出去的不追。屏蔽是全局、持久的，所有平台、所有直播间共用一张表。
   - 合并重复弹幕（默认关，窗口 5 秒）、相似弹幕过滤（默认关，阈值 85、比较 3 秒内最多 100 条）：在弹幕设置和屏蔽管理里开关，改了下一条就生效，不用重连。
   - 斗鱼“疑似机器人弹幕”过滤（默认关）：没有 `dms` 且 `if` 不是 1 的聊天被丢。
   - 哔哩哔哩访客看到的打码昵称（“观***”）没有“屏蔽此用户”；升级前存的打码屏蔽在第一次启动时清掉，屏蔽管理顶上说一次（D02.1，待真机）。
@@ -29,10 +29,12 @@
 ```text
 DanmakuReceived(message)
   └─ 只有聊天过滤（醒目留言、人数、通知、礼物、撤回直接走）
-     DanmakuMessageFilter.accepts（message_filter.dart:104）
+     DanmakuMessageFilter.judge / accepts（message_filter.dart:150、:147）
        1 DanmakuMessageGate（总是开）：平台时间早于 45 s 或晚于本机 10 分钟丢；同 id 10 分钟一次；
          没有 id 按（类型、用户、文字）2.5 s 一次；replayed 放宽到 135 s；醒目留言到 endTime 前不按年龄丢
-       2 DanmakuBlockList（总是开）：整名相同（去空白、小写，打码昵称除外）或文字包含屏蔽词
+       2 DanmakuBlockList（总是开）：整名相同（去空白、小写，打码昵称除外）或文字包含屏蔽词；
+         /…/ 的按正则（不分大小写，只看前 200 字，D02.2）；
+         然后“只有表情”“超过 N 字”（开关，默认关，本地消息不拦，D02.2）；被这一步拦下的直播间计数
        3 RepeatedDanmakuFilter（开关）：同文字（空白合并、小写）在窗口内再出现就隐藏，每次出现重新计时
        4 DanmakuSimilarityFilter（开关，本地消息不比）：和缓存里完全相同，或和最新 96 条之一 partialRatio ≥ 阈值
      → 通过的进 ChatFeed 和飞行层
@@ -51,11 +53,13 @@ DanmakuReceived(message)
 | 文件 | 职责 |
 |---|---|
 | `packages/live_danmaku/lib/src/filters/message_gate.dart`（96 行） | `DanmakuMessageGate`（`:24`）：重复包和过期消息的闸门，最多记 4096 条 |
-| `packages/live_danmaku/lib/src/filters/block_list.dart`（42） | `DanmakuBlockList`（`:13`）：屏蔽用户和关键词；打码昵称不进集合（`:20-22`） |
+| `packages/live_danmaku/lib/src/filters/block_list.dart`（71） | `DanmakuBlockList`（`:18`）：屏蔽用户、关键词和正则（D02.2）；打码昵称不进集合；`matchesText` |
+| `packages/live_danmaku/lib/src/filters/block_pattern.dart`（230） | `DanmakuBlockPattern`：`/…/` 正则的判断、编译和添加时的检查（长度、嵌套重复、试跑），D02.2 |
+| `packages/live_danmaku/lib/src/filters/text_shape.dart`（50） | `DanmakuTextShape`：“只有表情”和字数的判断（D02.2；应用里用 `shared/danmaku/emotes.dart` 的 `chatTextShaper`） |
 | `packages/live_danmaku/lib/src/filters/repeated_filter.dart`（53） | `RepeatedDanmakuFilter`（`:18`）：合并重复文字，最多记 1024 条 |
 | `packages/live_danmaku/lib/src/filters/similarity_filter.dart`（121） | `DanmakuSimilarityFilter`（`:18`）：相似弹幕过滤（阈值、缓存时长、条数，每条最多比较最新 96 条） |
 | `packages/live_danmaku/lib/src/filters/partial_ratio.dart`（142） | `partialRatio`（`:30`）：和 fuzzywuzzy 1.2.0 同分的部分匹配打分（自己实现，许可证干净） |
-| `packages/live_danmaku/lib/src/filters/message_filter.dart`（119） | `DanmakuFilterSettings`（`:11`，对应 3.x 的 8 个设置）、`DanmakuMessageFilter`（`:61`，过滤链 `accepts` `:104`、`clear` `:114`） |
+| `packages/live_danmaku/lib/src/filters/message_filter.dart`（179） | `DanmakuFilterSettings`（`:13`，对应 3.x 的 8 个设置和 D02.2 的 3 个）、`DanmakuVerdict`、`DanmakuMessageFilter`（`:100`，过滤链 `judge` `:150`、`accepts` `:147`、`clear` `:174`） |
 | `packages/live_danmaku/lib/src/filters/notice_throttle.dart`（24） | `DanmakuNoticeThrottle`（`:4`）：同一句提示 3 秒内一次 |
 | `packages/live_danmaku/lib/src/sites/douyu.dart` | `isSuspectedAutomated`（`:216`）和读设置的回调（`:163`、`:225`） |
 | `packages/live_store/lib/src/block_lists.dart`（78） | `BlockKind`（`:4`，`keyword` = 3.x `shieldList`、`user` = 3.x `blockedDanmakuUsers`）、`BlockListStore`（`:15`：`list`、`watch`、`add`（不分大小写去重）、`remove`、`replaceAll`，关键词上限 40 `:26`） |
@@ -125,19 +129,12 @@ DanmakuReceived(message)
 属于 [D 弹幕](../README.md)。
 
 - 代码：`packages/live_danmaku/lib/src/filters/`、`shared/danmaku/`
-- 进度：`██████████░░░░░░░░░░` 50%
+- 进度：`███████████████████░` 95%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | D02.1 | 哔哩哔哩打码昵称不能“屏蔽此用户”，清理已存的打码屏蔽 | 功能 | 完成 | 2026-10-02 | 40dc22279 | [设计或说明](D02.1-打码昵称不能屏蔽/README.md)、[任务书](D02.1-打码昵称不能屏蔽/brief.md)、[记录](D02.1-打码昵称不能屏蔽/record.md)、[真机验证](D02.1-打码昵称不能屏蔽/verify.md) |
-| D02.2 | 正则屏蔽、屏蔽纯表情和超长弹幕、本场屏蔽计数 | 功能 | 未开始 | — | — | [设计或说明](D02.2-正则屏蔽和更多屏蔽/README.md)、[任务书](D02.2-正则屏蔽和更多屏蔽/brief.md) |
-
-## 还没完成的
-
-- **D02.2 正则屏蔽、屏蔽纯表情和超长弹幕、本场屏蔽计数**（未开始，第二档，规模 中）
-  - 阶段：正则屏蔽词（/…/ 写法、编译提示、长度和超时）和基准 → 屏蔽纯表情、屏蔽超长弹幕、本场屏蔽计数
-  - 说明：屏蔽表格式不变（正则是带斜杠的普通关键词，3.x 读到只当普通词）；两个新开关默认关；屏蔽管理界面的小改在任务里一起做
-  - 来源：V03.6 第 4 节 E11、第 5.6 节；用户 2026-10-09（D-040）
+| D02.2 | 正则屏蔽、屏蔽纯表情和超长弹幕、本场屏蔽计数 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D02.2-正则屏蔽和更多屏蔽/README.md)、[任务书](D02.2-正则屏蔽和更多屏蔽/brief.md)、[记录](D02.2-正则屏蔽和更多屏蔽/record.md) |
 
 <!-- docs:生成结束 -->

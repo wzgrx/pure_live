@@ -150,7 +150,7 @@ class _ChatPanelState extends State<ChatPanel> with SingleTickerProviderStateMix
             // U.2e c8: the U.2f component, "改动立即生效" by the first title.
             RoomDanmakuSettings(controller: widget.controller, inTab: true),
             // U.2e c11-c16; the same component as the settings page's (E4).
-            DanmakuBlockManager(addKeyword: widget.controller.blockKeyword),
+            DanmakuBlockManager(addKeyword: widget.controller.blockKeyword, blockedCount: widget.controller.blocked),
           ],
         ),
       ),

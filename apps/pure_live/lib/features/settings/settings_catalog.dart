@@ -939,15 +939,19 @@ List<SettingsEntry> _build() {
       AppIcons.settingsDanmakuBlock,
       route: RoutePath.kSettingsDanmuShield,
       // The block page also holds the platform's and the similarity filter
-      // (the danmaku page's rows until F02); the row carries them (J01.2).
+      // (the danmaku page's rows until F02) and the content blocks (D02.2);
+      // the row carries them (J01.2).
       settings: [
         Settings.filterDouyuSuspectedAutomatedMessages,
         Settings.enableDanmakuSimilarityFilter,
         Settings.danmakuSimilarityThreshold,
         Settings.danmakuSimilarityCacheDuration,
         Settings.danmakuSimilarityMaxCacheSize,
+        Settings.blockEmoteOnlyDanmaku,
+        Settings.blockLongDanmaku,
+        Settings.blockLongDanmakuLength,
       ],
-      keywords: ['屏蔽', '关键词', '过滤', 'block', '相似', '刷屏', '斗鱼', '机器人'],
+      keywords: ['屏蔽', '关键词', '过滤', 'block', '相似', '刷屏', '斗鱼', '机器人', '正则', 'regex', '只有表情', '纯表情', '超长', '字数'],
     )
     // ---- portrait streams (U.6c, a page of the video page) ----
     ..subpage = SettingsSubpage.portrait

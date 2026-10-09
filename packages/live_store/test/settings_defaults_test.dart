@@ -289,6 +289,9 @@ const Map<String, Object> newInV4 = {
   'holdDanmakuOnPress': true, // D03.4 (V01.3), on by default (D-039)
   'liveAlertEnabled': false, // O01.1 (V01.1; off: no notification as before)
   'liveAlertTagIds': <String>[], // O01.1 (every follow)
+  'blockEmoteOnlyDanmaku': false, // D02.2 (V03.6 E11; off as before, D-040)
+  'blockLongDanmaku': false, // D02.2
+  'blockLongDanmakuLength': 30, // D02.2
   'youtubeShowAllChat': false, // UPGRADES B-13
   'enableLocalLog': false, // I01.3
   'logLevel': 'info', // I01.3
@@ -337,6 +340,7 @@ const Map<String, (num?, num?)> ranges = {
   'danmakuSimilarityThreshold': (50, 100),
   'danmakuSimilarityCacheDuration': (1, 60),
   'danmakuSimilarityMaxCacheSize': (20, 1000),
+  'blockLongDanmakuLength': (10, 100), // D02.2
   'defaultMobileVolume': (0, 1),
   'defaultDesktopVolume': (0, 1),
   'page_default_size': (0, 100), // 0 = by width (J02.1); 3.x 1..100

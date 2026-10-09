@@ -130,6 +130,7 @@ class _MultiviewPageState extends ConsumerState<MultiviewPage> {
       mobile: _mobile,
       maxCells: multiviewMaxCells(mobile: _mobile, processors: MultiviewPage.processors()),
       toast: (message) => AppNavigator.toast(message),
+      emotes: ref.read(emoteLibraryProvider),
     )..addListener(_onControllerChanged);
     unawaited(_controller.start());
     HardwareKeyboard.instance.addHandler(_onKey);

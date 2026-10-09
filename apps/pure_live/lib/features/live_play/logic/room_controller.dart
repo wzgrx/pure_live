@@ -11,8 +11,10 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/features/live_play/logic/blocked_count.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
+import 'package:pure_live/shared/danmaku/emotes.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -96,11 +98,12 @@ class LiveRoomController extends ChangeNotifier {
     this.sleepSessionOnStart = false,
     this.minuteLength = const Duration(minutes: 1),
     this.network,
+    this.emotes,
     DateTime Function()? now,
     this.refreshInterval = const Duration(seconds: 60),
     this.danmakuStartTimeout = const Duration(seconds: 30),
   }) : _now = now ?? DateTime.now {
-    _filter = DanmakuMessageFilter(clock: _now);
+    _filter = DanmakuMessageFilter(clock: _now)..shapeOf = chatTextShaper(emotes, _room.platform);
     _statusLines = DanmakuNoticeThrottle(clock: _now);
   }
 
@@ -140,6 +143,11 @@ class LiveRoomController extends ChangeNotifier {
   /// How often the room detail is fetched again while the page is open.
   final Duration refreshInterval;
 
+  /// The bundled emoticon lists: "屏蔽只有表情的弹幕" and "屏蔽超长弹幕" read
+  /// a message as the chat list draws it (D02.2 c3); null knows only the
+  /// codes a message names and Unicode emoji.
+  final EmoteLibrary? emotes;
+
   /// Whether the periodic refresh may start playback by itself now (C01.5):
   /// the background policy answers false while the app is away and the room
   /// was not playing when it left, so a broadcast that begins then makes no
@@ -173,6 +181,10 @@ class LiveRoomController extends ChangeNotifier {
   /// The chat list; it tells its own listeners of new lines, at most once a
   /// frame (B08: the controller no longer notifies for each message).
   final ChatFeed chat = ChatFeed();
+
+  /// The messages of this room the user's blocks hid ("本场已屏蔽 N 条",
+  /// D02.2 c4).
+  final BlockedCount blocked = BlockedCount();
   final StreamController<LiveMessage> _flying = StreamController.broadcast(sync: true);
   final StreamController<LiveRetraction> _retractions = StreamController.broadcast(sync: true);
   final List<StreamSubscription<Object?>> _subscriptions = [];
@@ -448,6 +460,9 @@ class LiveRoomController extends ChangeNotifier {
     Settings.danmakuSimilarityThreshold,
     Settings.danmakuSimilarityCacheDuration,
     Settings.danmakuSimilarityMaxCacheSize,
+    Settings.blockEmoteOnlyDanmaku,
+    Settings.blockLongDanmaku,
+    Settings.blockLongDanmakuLength,
   ];
 
   Future<void> _reloadFilter() async {
@@ -464,6 +479,9 @@ class LiveRoomController extends ChangeNotifier {
       similarityMaxCacheSize: settings.get(Settings.danmakuSimilarityMaxCacheSize),
       blockedUsers: users,
       blockedKeywords: keywords,
+      blockEmoteOnly: settings.get(Settings.blockEmoteOnlyDanmaku),
+      blockLong: settings.get(Settings.blockLongDanmaku),
+      blockLongLength: settings.get(Settings.blockLongDanmakuLength),
     );
   }
 
@@ -1126,7 +1144,15 @@ class LiveRoomController extends ChangeNotifier {
             _notify();
           }
         }
-        if (!_filter.accepts(message)) return;
+        switch (_filter.judge(message)) {
+          case DanmakuVerdict.shown:
+            break;
+          case DanmakuVerdict.blocked:
+            blocked.add();
+            return;
+          case DanmakuVerdict.duplicate || DanmakuVerdict.repeated || DanmakuVerdict.similar:
+            return;
+        }
         chat.add(ChatLine.chat(message));
         _flying.add(message);
       case LiveMessageType.online:
@@ -1244,14 +1270,15 @@ class LiveRoomController extends ChangeNotifier {
   }
 
   /// Blocks messages containing [keyword] from now on and takes the matching
-  /// ones off the list (3.x `DanmakuMessageActions.showKeywordDialog`).
-  /// Returns whether the word was new.
+  /// ones off the list (3.x `DanmakuMessageActions.showKeywordDialog`); a
+  /// `/…/` word matches as a pattern ([DanmakuBlockPattern], D02.2), checked
+  /// by the field before. Returns whether the word was new.
   Future<bool> blockKeyword(String keyword) async {
     final word = keyword.trim();
     if (word.isEmpty) return false;
     final added = await store.blockLists.add(BlockKind.keyword, word);
-    final lower = word.toLowerCase();
-    chat.removeWhere((line) => line.kind == ChatLineKind.chat && line.text.toLowerCase().contains(lower));
+    final matcher = DanmakuBlockList(keywords: [word]);
+    chat.removeWhere((line) => line.kind == ChatLineKind.chat && matcher.matchesText(line.text));
     _notify();
     return added;
   }
@@ -1271,6 +1298,7 @@ class LiveRoomController extends ChangeNotifier {
     unawaited(_flying.close());
     unawaited(_retractions.close());
     chat.dispose();
+    blocked.dispose();
     super.dispose();
   }
 }

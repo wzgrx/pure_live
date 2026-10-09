@@ -213,3 +213,28 @@ List<ChatSegment> _parse(LiveMessage message, EmoteTable table) {
   if (start < text.length) segments.add(ChatTextSegment(text.substring(start)));
   return segments;
 }
+
+/// How the filter reads a message of [platform] for "屏蔽只有表情的弹幕" and
+/// "屏蔽超长弹幕" (D02.2 c3): as the chat list and the flying layer draw it
+/// ([chatSegments], one shared parse), so an emoticon is what shows as a
+/// picture there, each counting as one character; the rest is text, Unicode
+/// emoji counting as emoticons. Starts loading [platform]'s bundled list;
+/// until it is loaded, and without a [library], only the codes a message
+/// names itself and Unicode emoji are emoticons.
+DanmakuTextShaper chatTextShaper(EmoteLibrary? library, String platform) {
+  if (library == null) return danmakuMessageShape;
+  unawaited(library.load(platform));
+  return (message) {
+    var emotes = 0;
+    final text = StringBuffer();
+    for (final segment in chatSegments(message, library.tableOf(platform))) {
+      switch (segment) {
+        case ChatEmoteSegment():
+          emotes++;
+        case ChatTextSegment(text: final part):
+          text.write(part);
+      }
+    }
+    return danmakuTextShape(text.toString(), emotes: emotes);
+  };
+}

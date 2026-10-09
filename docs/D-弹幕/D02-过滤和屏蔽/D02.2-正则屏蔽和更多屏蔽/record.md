@@ -81,7 +81,7 @@
 - `apps/pure_live/test/features/live_play/keyword_page_pattern_test.dart`（1）：长按面板第二页：以 `/` 开头的上限 200；坏正则提示、面板不关、没加；改对了屏蔽并关闭。
 - `apps/pure_live/test/features/multiview/multiview_blocks_test.dart`（1）：多画面里正则和两个开关同样生效。
 - `apps/pure_live/test/features/settings/settings_block_search_test.dart`（1）：设置搜索“正则”“只有表情”“超长”“屏蔽 字数”找到“弹幕屏蔽”。
-- 原有的 `settings_defaults_test.dart` 补了三个键（`newInV4`、`ranges`）。屏蔽管理原有的 7 个、直播间标签 13 个、长按面板的用例照旧通过。
+- 原有的 `settings_defaults_test.dart` 补了三个键（`newInV4`、`ranges`）；`settings_page_test.dart` 里“弹幕屏蔽”一行带的设置照实补上三个新设置。屏蔽管理原有的 7 个、直播间标签 13 个、长按面板的用例照旧通过。
 
 ## 基准
 

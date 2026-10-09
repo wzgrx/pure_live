@@ -583,6 +583,10 @@ void main() {
       Settings.danmakuSimilarityThreshold,
       Settings.danmakuSimilarityCacheDuration,
       Settings.danmakuSimilarityMaxCacheSize,
+      // D02.2: the content blocks on the same page.
+      Settings.blockEmoteOnlyDanmaku,
+      Settings.blockLongDanmaku,
+      Settings.blockLongDanmakuLength,
     ]);
   });
 

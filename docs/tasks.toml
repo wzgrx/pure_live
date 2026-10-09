@@ -4190,6 +4190,20 @@ tier = 3
 old = ["T16a.4"]
 
 [[task]]
+id = "Y01.5"
+title = "4.1.0 发布（Android，构建号 5002）"
+type = "发布"
+status = "开发中"
+date = "2026-10-09"
+size = "中"
+tier = 1
+stages = ["版本号和发布说明", "构建和检查", "K90 冒烟", "标签、发布页和安装包", "更新文件 version.json/releases.json"]
+done = 1
+from = "用户 2026-10-09：开始测试，构建并发布新的 Android 版本 4.1.0，同步到 GitHub"
+next = "第 2 阶段：门禁不在跑时 flutter build apk --release --split-per-abi，按 Y01 的检查命令查包名、versionCode、证书、保留的资源、16 KB 对齐，结果写进 record.md"
+note = "版本号 4.1.0+5002（master 02f92af81），versionCode arm64 7002、v7a 6002、x86_64 9002；发布说明 Y03 releases/v4.1.0.md（SHA-256 留了占位）；应用内更新文字的草稿在 record.md，version.json、releases.json 最后改（PROCESS 第 11 节第 7 条）"
+
+[[task]]
 id = "Y02.1"
 title = "同版本换包时应用内收不到更新提示：以后发布一律改版本号，或让比较带上构建号"
 type = "发布"

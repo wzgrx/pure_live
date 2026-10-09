@@ -155,8 +155,10 @@ void main() {
       tester,
     ) async {
       final room = await pumpLocalRoom(tester);
+      final height = tester.getSize(_key('local-composer-bar')).height;
       await _focus(tester, 'local-composer-bar');
       expect(_key('local-composer-chips'), findsNothing, reason: 'nothing sent, no phrases');
+      expect(tester.getSize(_key('local-composer-bar')).height, height, reason: 'no gap either');
       _sendAll(tester, ['一', '二', '三', '二', '四', '五', '六']);
       await tester.pump();
       expect(_chips(tester), ['六', '五', '四', '二', '三']);

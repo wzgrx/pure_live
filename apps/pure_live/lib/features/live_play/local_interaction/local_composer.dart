@@ -200,10 +200,7 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
   Widget _withChips(LocalRoomSession session, Widget row) => Column(
     mainAxisSize: MainAxisSize.min,
     crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      if (_focus.hasFocus) Padding(padding: const EdgeInsets.only(bottom: 8), child: _chips(session, onVideo: false)),
-      row,
-    ],
+    children: [_chips(session, onVideo: false), row],
   );
 
   Widget _row(BuildContext context, LocalRoomSession session) {
@@ -715,6 +712,9 @@ class LocalComposerChips extends StatelessWidget {
       final row = TextFieldTapRegion(
         child: SingleChildScrollView(
           key: const ValueKey('local-composer-chips'),
+          // Under the chat list and in the panel, 8 above the field; on the
+          // picture the row floats 8 above it anyway.
+          padding: onVideo ? null : const EdgeInsets.only(bottom: 8),
           scrollDirection: Axis.horizontal,
           child: Row(
             spacing: 8,

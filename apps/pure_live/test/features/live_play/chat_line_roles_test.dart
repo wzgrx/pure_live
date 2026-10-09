@@ -17,6 +17,7 @@ import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
+import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_chat_line.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_interaction.dart';
@@ -150,10 +151,16 @@ List<InlineSpan> _spans(WidgetTester tester) {
   )) {
     var spans = (text.text as TextSpan).children ?? const <InlineSpan>[];
     if (spans case [TextSpan(text: null, :final children?)]) spans = children;
-    if (spans.any((span) => span is WidgetSpan && span.child is EmoteText)) return spans;
+    if (spans.any((span) => span is WidgetSpan && _inline(span) is EmoteText)) return spans;
   }
   return const [];
 }
+
+/// What a [WidgetSpan] of a line shows ([chatInline] wraps it to scale once).
+Widget _inline(WidgetSpan span) => switch (span.child) {
+  ChatInline(:final child) => child,
+  final child => child,
+};
 
 /// The span that says [text], or null.
 TextSpan? _span(WidgetTester tester, String text) {
@@ -177,10 +184,10 @@ TextStyle _words(WidgetTester tester) => tester.widget<EmoteText>(find.byType(Em
 List<String> _shape(WidgetTester tester) => [
   for (final span in _spans(tester))
     switch (span) {
-      WidgetSpan(:final child) when child.key == const ValueKey('live-play-chat-other-room') => 'other',
-      WidgetSpan(:final child) when child.key == const ValueKey('live-play-chat-fans') => 'fans',
-      WidgetSpan(:final child) when child is ChatBadge => 'badge',
-      WidgetSpan(:final child) when child is EmoteText => 'words',
+      final WidgetSpan span when _inline(span).key == const ValueKey('live-play-chat-other-room') => 'other',
+      final WidgetSpan span when _inline(span).key == const ValueKey('live-play-chat-fans') => 'fans',
+      final WidgetSpan span when _inline(span) is ChatBadge => 'badge',
+      final WidgetSpan span when _inline(span) is EmoteText => 'words',
       TextSpan(:final text) => text ?? '',
       _ => '?',
     },
@@ -360,6 +367,25 @@ void main() {
       }
       await _pumpLine(tester, ChatLine.chat(_local()), width: 280, textScale: 2);
       expect(tester.takeException(), isNull, reason: 'the local line');
+    });
+
+    testWidgets('A08.11: the words and the marks scale once with the system text, as the name does', (tester) async {
+      // A text inside a WidgetSpan was scaled by the span and again by its
+      // own MediaQuery: at 2x the words were 4x the name's base size.
+      for (final scale in [1.0, 1.3, 2.0]) {
+        await _pumpLine(tester, ChatLine.chat(_marked()), textScale: scale);
+        final body = const LiveTheme().light.textTheme.bodyLarge!;
+        final line = body.fontSize! * (body.height ?? 1.5) * scale;
+        final words = tester.getRect(find.byType(EmoteText));
+        expect(words.height, closeTo(line, line * 0.15), reason: '$scale: the words, one line');
+        final chip = tester.getRect(find.byKey(const ValueKey('live-play-chat-fans')));
+        expect(chip.height, closeTo(18 * scale, 2), reason: '$scale: the fan medal (18 high at 1x)');
+      }
+      for (final scale in [1.0, 2.0]) {
+        await _pumpLine(tester, ChatLine.chat(_local()), textScale: scale);
+        final tag = tester.getRect(find.byKey(const ValueKey('live-play-local-tag')));
+        expect(tag.height, closeTo(18 * scale, 2), reason: '$scale: 本地');
+      }
     });
   });
 

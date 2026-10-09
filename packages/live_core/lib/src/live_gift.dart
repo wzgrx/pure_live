@@ -83,9 +83,10 @@ enum LiveGiftUnit {
 /// silver seeds, [LiveGiftUnit.other]) is never ranked above
 /// [LiveGiftTier.normal].
 ///
-/// The table and the [giftValuableYuan], [giftPreciousYuan] thresholds are
-/// provisional: A08.11's review lists them for the maintainer to settle
-/// (D-003); a change here applies everywhere.
+/// The table and the [giftValuableYuan], [giftPreciousYuan] thresholds were
+/// settled by A08.11 (D-003, the table and the reasons in
+/// docs/A-界面设计/A08-弹幕界面/A08.11-礼物行的样子/README.md G1); a change here
+/// applies everywhere.
 const Map<LiveGiftUnit, double> giftUnitsPerYuan = {
   LiveGiftUnit.fen: 100,
   LiveGiftUnit.goldSeed: 1000,

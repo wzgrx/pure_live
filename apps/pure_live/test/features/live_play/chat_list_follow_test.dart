@@ -9,6 +9,7 @@ import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
+import 'package:pure_live/features/live_play/danmaku/gift_line.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
@@ -317,7 +318,10 @@ void main() {
       );
     }
 
-    Finder giftLine(int count) => find.text('送礼人 小心心 ×$count', findRichText: true);
+    // A08.11 draws the line in pieces; find it by the count it shows.
+    Finder giftLine(int count) => find.byWidgetPredicate(
+      (widget) => widget is GiftLine && widget.message.gift != null && giftShownCount(widget.message.gift!) == count,
+    );
 
     _chats(room, 0, 40);
     gift(1);

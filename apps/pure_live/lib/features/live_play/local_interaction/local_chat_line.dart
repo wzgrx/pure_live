@@ -36,9 +36,8 @@ class LocalChatLine extends StatelessWidget {
       child: Text.rich(
         TextSpan(
           children: [
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: ChatChip(
+            chatInline(
+              ChatChip(
                 key: const ValueKey('live-play-local-tag'),
                 text: i18n('local_tag'),
                 background: scheme.primaryContainer,
@@ -46,9 +45,8 @@ class LocalChatLine extends StatelessWidget {
               ),
             ),
             if (badge.isNotEmpty)
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: ChatChip(
+              chatInline(
+                ChatChip(
                   key: const ValueKey('live-play-local-badge'),
                   text: localEmojiText(badge),
                   background: Color(profile!.accent).withValues(alpha: 0.14),

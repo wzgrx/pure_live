@@ -284,7 +284,8 @@ void main() {
         _msg(_comment(), key: '${_key}0'),
         _msg(_comment(), key: _key.substring(1)),
         _msg(_comment(), key: ''),
-        _msg(const {'t': 2, 'g': 1601, 'n': 10, 'u': 1, 'ac': 'a'}),
+        // A gift without a gift id (D07.7 reads `t` 2 with one).
+        _msg(const {'t': 2, 'g': 0, 'n': 10, 'u': 1, 'ac': 'a'}),
         _msg(const {'t': 8, 'telop': 'caption', 'telops': <Object?>[], 'interval': 6000}),
         _msg(const {'t': 18, 'm': '来場しました', 'me': 'visited', 'u': 1, 'tt': 0, 'c': '#fff'}),
         _msg(const {'t': 101}),
@@ -390,6 +391,117 @@ void main() {
           for (final event in (frame['events']! as List).cast<Map<String, Object?>>()) _withoutId(event),
       ];
       expect([for (final message in _messages(events)) _project(message)], expected);
+      await connection.close();
+    });
+  });
+
+  group('gifts (D07.7, S07-gifts and the S06 gift table)', () {
+    final lines = [
+      for (final line in File('../../fixtures/showroom/danmaku/S07-gifts/frames.jsonl').readAsLinesSync())
+        (jsonDecode(line) as Map<String, Object?>)['text']! as String,
+    ];
+    final table = ShowroomApi.giftList(File('../../fixtures/showroom/S06-gift-list/body.json').readAsStringSync());
+    String keyOf(String line) => line.split('\t')[1];
+    List<LiveMessage> decode({ShowroomGiftCatalog gifts = ShowroomGiftCatalog.empty}) => [
+      for (final line in lines) ...ShowroomDanmakuProtocol.decode(line, key: keyOf(line), gifts: gifts),
+    ];
+
+    test('S07 with the table: names, free stars, paid gifts in points, the pictures', () {
+      final messages = decode(gifts: table);
+      expect(messages, hasLength(16));
+      final gifts = [for (final m in messages) m.data! as LiveGift];
+      expect(
+        [for (final (i, g) in gifts.indexed) (messages[i].userName, g.name, g.count, g.free, g.totalValue)],
+        [
+          ('視聴者1', 'Twinkle star', 10, true, null),
+          ('視聴者1', 'Twinkle star', 10, true, null),
+          ('視聴者2', 'Twinkle star', 100, true, null),
+          for (var i = 0; i < 3; i++) ('視聴者1', 'Twinkle star', 10, true, null),
+          ('視聴者3', 'You got this!', 10, false, 50),
+          ('視聴者4', 'Napolitan(anime)', 2, false, 200),
+          ('視聴者5', 'RainbowStar', 1, true, null),
+          ('視聴者6', 'Twinkle Star (anime)', 1, false, 2),
+          ('視聴者7', 'seed(purple)', 10, true, null),
+          ('視聴者7', 'seed(yellow)', 10, true, null),
+          ('視聴者8', 'Penlight(rainbow)', 10, true, null),
+          ('視聴者9', 'Twinkle star', 10, true, null),
+          ('視聴者9', 'Twinkle star', 10, true, null),
+          ('視聴者10', 'Cream soda(anime)', 1, false, 500),
+        ],
+      );
+      expect(gifts.map((g) => g.unit), everyElement(LiveGiftUnit.point));
+      final soda = messages.last;
+      expect(
+        (soda.userId, soda.userLevel, soda.message, soda.sentAt, soda.messageId),
+        ('5000010', '30', 'Cream soda(anime) ×1', DateTime.fromMillisecondsSinceEpoch(1791529203000), ''),
+      );
+      expect(
+        soda.data,
+        LiveGift(
+          id: '3001833',
+          name: 'Cream soda(anime)',
+          unitPrice: 500,
+          totalValue: 500,
+          unit: LiveGiftUnit.point,
+          iconUrl: Uri.parse('https://static.showroom-live.com/image/gift/3001833_m.png?v=21'),
+        ),
+      );
+      expect(gifts.last.tier, LiveGiftTier.valuable, reason: '500 points, about 24 yuan');
+    });
+
+    test('without the table: only the id ("礼物 {id}"), free by gt 2, the picture by id', () {
+      final gifts = [for (final m in decode()) m.data! as LiveGift];
+      expect(gifts.map((g) => g.name), everyElement(''));
+      expect(
+        gifts.first,
+        LiveGift(
+          id: '3000421',
+          count: 10,
+          name: '',
+          unit: LiveGiftUnit.point,
+          free: true,
+          iconUrl: ShowroomDanmakuProtocol.giftImage('3000421'),
+        ),
+      );
+      expect((gifts[6].free, gifts[6].totalValue), (false, null), reason: 'gt 1, no price without the table');
+      expect(
+        ShowroomDanmakuProtocol.giftImage('1601'),
+        Uri.parse('https://static.showroom-live.com/image/gift/1601_s.png'),
+      );
+      expect(
+        ShowroomDanmakuProtocol.gift({'t': '2', 'g': '5', 'u': 1, 'ac': 'a'})!.message,
+        '5 ×1',
+        reason: 't and g as text',
+      );
+      expect(ShowroomDanmakuProtocol.gift({'t': 2, 'u': 1, 'ac': 'a'}), isNull);
+      expect(ShowroomDanmakuProtocol.gift({'t': 1, 'g': 5}), isNull);
+    });
+
+    test('the connection asks for the table once in the background and names the gifts once it came', () async {
+      final connector = _Connector();
+      final pending = Completer<ShowroomGiftCatalog>();
+      var asked = 0;
+      final connection = ShowroomDanmakuConnection(connector: connector.call, policy: _quiet);
+      final events = _record(connection);
+      final key = keyOf(lines.first);
+      await connection.connect(
+        ShowroomDanmakuArgs(
+          roomId: '130997',
+          host: _host,
+          key: key,
+          gifts: () {
+            asked++;
+            return pending.future;
+          },
+        ),
+      );
+      final channel = connector.channels.single;
+      await channel.receive(lines.first);
+      pending.complete(table);
+      await Future<void>.delayed(Duration.zero);
+      await channel.receive(lines[1]);
+      expect([for (final m in _messages(events)) m.message], ['3000421 ×10', 'Twinkle star ×10']);
+      expect(asked, 1);
       await connection.close();
     });
   });

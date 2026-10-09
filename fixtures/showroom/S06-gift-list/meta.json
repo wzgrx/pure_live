@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "platform": "showroom",
+  "sample": "S06-gift-list",
+  "capturedAt": "2026-10-09T07:24:30Z",
+  "route": "proxy",
+  "request": {
+    "method": "GET",
+    "url": "https://www.showroom-live.com/api/live/gift_list?room_id=130997",
+    "headers": {
+      "User-Agent": "Mozilla/5.0"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    }
+  },
+  "raw": {
+    "sha256": "cf1f42ebed6d68ef0f712f085378e0e33fc60762a0c0ebb55e81cb1da152c4b4",
+    "length": 71620
+  },
+  "body": "body.json",
+  "scrubbed": [],
+  "tool": "curl through the PC's HTTP proxy, anonymous (D07.7)",
+  "note": "The gift table of room 130997 (the busiest of the recommended list at 16:24 Japan time) as answered, unchanged: 229 normal gifts and 25 enquete (vote) gifts, each with gift_id, gift_name (English without an Accept-Language), point, free, gift_type (1 paid, 2 free) and image. It names every gift of the danmaku sample danmaku/S07-gifts. The response headers are not kept; nothing personal is in the answer."
+}

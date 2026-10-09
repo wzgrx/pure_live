@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "showroom",
+  "case": "S07-gifts",
+  "capturedAt": "2026-10-09T06:59:00Z",
+  "route": "proxy",
+  "handshakes": [
+    {
+      "url": "wss://online.showroom-live.com/",
+      "headers": {
+        "origin": "https://www.showroom-live.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 16,
+  "sources": [
+    {
+      "room": "130997",
+      "key": "556d694235706534:23530935",
+      "sha256": "d7cfad46e5d6ebacc95d1a3f072cd245a67a46cd98e2b2c33ec76ca301ac0e79",
+      "length": 139106
+    },
+    {
+      "room": "570108",
+      "key": "35367058484c3454:23531240",
+      "sha256": "02041fb28c6ef089dcd9b33a59d15b90419eb05f1a1fe7fb60bc2d3d3bbc8e69",
+      "length": 41299
+    },
+    {
+      "room": "459908",
+      "key": "3230375274556371:23531292",
+      "sha256": "81856f0eb7c7de906c934dbb46eb654f8ef5100cbca70c29084a5ace7149480c",
+      "length": 61928
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "MSG t 2: u (the sender's user id), ac (the sender's name)",
+      "rule": "person"
+    },
+    {
+      "where": "MSG t 2: av (the sender's avatar), now 1",
+      "rule": "person"
+    },
+    {
+      "where": "every event but gifts (t 2): comments, support points, captions, system logs, votes; the client's SUB and PING and the server's ACK",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running ShowroomDanmakuConnection with a connector that tees the frames; anonymous and read-only: SUB of the broadcast key and the 60 s PING, through the PC's HTTP proxy)",
+  "note": "15 minutes in the five busiest rooms of the onlives list at 15:59 Japan time: 662 gifts (t 2), almost all free stars and seeds (gt 2) of 10 or 100. Kept: the first 6 plain gifts of room 130997 and the first 2 of rooms 570108 and 459908, and every paid gift (gt 1: 3001577 ×10, 3001832 ×2, 800094, 3001833) and every free gift of another kind (1601, 820002) of the three rooms, 16 in all, as received (the broadcast keys are the same for every viewer and kept). The gift table of these ids is ../../S06-gift-list. Senders became 5000001… and 視聴者N with the avatar 1 (one person keeps one set). t is milliseconds after the room's first kept gift (each next room after a 60 s gap). No IPv4 address, cookie or token was in these events."
+}

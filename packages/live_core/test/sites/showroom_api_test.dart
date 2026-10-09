@@ -768,6 +768,59 @@ void main() {
     });
   });
 
+  group('S06 gift table (D07.7)', () {
+    test('every gift of normal and enquete by id: name, point, free, picture', () {
+      final sample = _sample('S06-gift-list');
+      final catalog = ShowroomApi.giftList(sample.body);
+      expect(catalog.length, 254);
+      expect(
+        catalog['3000421'],
+        ShowroomGiftInfo(
+          name: 'Twinkle star',
+          point: 1,
+          free: true,
+          image: Uri.parse('https://static.showroom-live.com/image/gift/3000421_s.png?v=21'),
+        ),
+      );
+      expect(
+        [
+          for (final id in ['3001833', '3001832', '3001577', '800094', '1601'])
+            (catalog[id]!.name, catalog[id]!.point, catalog[id]!.free),
+        ],
+        [
+          ('Cream soda(anime)', 500, false),
+          ('Napolitan(anime)', 100, false),
+          ('You got this!', 5, false),
+          ('Twinkle Star (anime)', 2, false),
+          ('RainbowStar', 100, true),
+        ],
+      );
+      expect(catalog['10001']!.name, '1', reason: 'the vote gifts (enquete) are numbers');
+      expect(ShowroomApi.giftListUrl(130997), sample.url);
+    });
+
+    test('rows that cannot be read are skipped; refusals throw as every answer does', () {
+      final catalog = ShowroomApi.giftList(
+        jsonEncode({
+          'normal': [
+            {'gift_id': 0, 'gift_name': 'zero'},
+            {'gift_id': '7', 'gift_name': 'text id'},
+            {'gift_id': 8, 'gift_name': ' 名前 ', 'point': -3, 'image': 'http://static.showroom-live.com/a.png'},
+            {'gift_id': 9, 'image': 'https://example.com/a.png'},
+            'row',
+          ],
+          'enquete': 'none',
+        }),
+      );
+      expect(catalog.length, 2);
+      expect(catalog['8'], const ShowroomGiftInfo(name: '名前', point: 0, free: false));
+      expect(catalog['9'], const ShowroomGiftInfo(name: '', point: 0, free: false), reason: 'a picture off SHOWROOM');
+      expect(ShowroomApi.giftList('{}').length, 0);
+      expect(() => ShowroomApi.giftList('[]'), throwsA(isA<ApiChanged>()));
+      expect(() => ShowroomApi.giftList('{}', status: 429), throwsA(isA<RateLimited>()));
+    });
+  });
+
   group('links', () {
     test("3.x's ShowroomLink.parse, except the site pages 3.x took for room keys", () {
       final legacy = _legacy('S02-status-key')['ShowroomLink.parse'] as Map<String, dynamic>;

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:live_core/live_core.dart';
@@ -30,6 +31,13 @@ abstract final class ShowroomDanmakuProtocol {
   /// `t` of a comment.
   static const int commentType = 1;
 
+  /// `t` of a gift ([gift], D07.7).
+  static const int giftType = 2;
+
+  /// A gift's picture without the room's table: the address the table
+  /// writes (`image`), by gift id.
+  static Uri giftImage(String id) => Uri.https('static.showroom-live.com', '/image/gift/${id}_s.png');
+
   /// Handshake headers: the site's origin and the adapter's desktop UA
   /// (`ShowroomApi.userAgent`), as the archived v4 sent them.
   static const Map<String, String> socketHeaders = {'origin': ShowroomApi.origin, 'user-agent': ShowroomApi.userAgent};
@@ -49,14 +57,20 @@ abstract final class ShowroomDanmakuProtocol {
   /// host lower-cased), else null.
   static ShowroomDanmakuArgs? checked(ShowroomDanmakuArgs args) {
     final valid = ShowroomApi.danmakuArgs(roomId: 0, host: args.host, key: args.key);
-    return valid == null ? null : ShowroomDanmakuArgs(roomId: args.roomId, host: valid.host, key: valid.key);
+    return valid == null
+        ? null
+        : ShowroomDanmakuArgs(roomId: args.roomId, host: valid.host, key: valid.key, gifts: args.gifts);
   }
 
-  /// The chat of one frame (text, or UTF-8 bytes) of broadcast [key]: a
-  /// `MSG` of that key whose object is a comment ([comment]). Frames of
-  /// another key, `ACK`, JSON that is not an object and every other kind
-  /// give nothing.
-  static List<LiveMessage> decode(Object? data, {required String key}) {
+  /// The chat and gifts of one frame (text, or UTF-8 bytes) of broadcast
+  /// [key]: a `MSG` of that key whose object is a comment ([comment]) or a
+  /// gift ([gift], named by [gifts], D07.7). Frames of another key, `ACK`,
+  /// JSON that is not an object and every other kind give nothing.
+  static List<LiveMessage> decode(
+    Object? data, {
+    required String key,
+    ShowroomGiftCatalog gifts = ShowroomGiftCatalog.empty,
+  }) {
     final text = switch (data) {
       final String text => text,
       final List<int> bytes => utf8.decode(bytes, allowMalformed: true),
@@ -71,7 +85,54 @@ abstract final class ShowroomDanmakuProtocol {
     } on FormatException {
       return const [];
     }
-    return [?comment(event)];
+    return [?comment(event), ?gift(event, gifts: gifts)];
+  }
+
+  /// A gift event (`t` 2, D07.7) as a [LiveMessageType.gift] message with a
+  /// [LiveGift], or null for any other event or one without a gift id:
+  ///
+  /// - [LiveGift.id] `g`, [LiveGift.count] `n`;
+  /// - from the room's table ([gifts], by `g`): [LiveGift.name]
+  ///   `gift_name`, [LiveGift.free] `free`, and for a paid gift
+  ///   [LiveGift.unitPrice] `point` and [LiveGift.totalValue] `point × n` in
+  ///   [LiveGiftUnit.point] (SHOWROOM points, about a yen each); without the
+  ///   table the gift has only its id, and `gt` 2 (the free kind of the
+  ///   recorded stars) is free;
+  /// - [LiveGift.iconUrl] the table's `image`, else [giftImage];
+  /// - the sender as a [comment]'s (`ac`, `u`, the class level `cl`), the
+  ///   time `created_at`. The platform gives no message id and no combo.
+  static LiveMessage? gift(Object? event, {ShowroomGiftCatalog gifts = ShowroomGiftCatalog.empty}) {
+    if (event is! Map || !_isType(event['t'], giftType)) return null;
+    final id = _text(event['g']);
+    if (id.isEmpty || id == '0') return null;
+    final count = event['n'];
+    final info = gifts[id];
+    final free = info?.free ?? _text(event['gt']) == '2';
+    final price = free ? null : info?.point;
+    final data = LiveGift(
+      id: id,
+      name: info?.name ?? '',
+      count: count is int ? count : 1,
+      unitPrice: price,
+      totalValue: price == null ? null : price * (count is int && count > 1 ? count : 1),
+      unit: LiveGiftUnit.point,
+      free: free,
+      iconUrl: info?.image ?? giftImage(id),
+    );
+    final level = event['cl'];
+    final created = event['created_at'];
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: _text(event['ac']),
+      userId: _text(event['u']),
+      message: data.plainText,
+      userLevel: level is int && level > 0 ? '$level' : '',
+      sentAt: created is int && created > 0 && created <= _maxEpochSeconds
+          ? DateTime.fromMillisecondsSinceEpoch(created * 1000)
+          : null,
+      color: LiveMessageColor.white,
+      data: data,
+    );
   }
 
   /// A comment event (`t` 1) as white chat, or null for any other event:
@@ -107,7 +168,9 @@ abstract final class ShowroomDanmakuProtocol {
   }
 
   /// `t` is 1, as an integer or (as the archived v4 also read it) a string.
-  static bool _isComment(Object? type) => (type is int && type == commentType) || type == '$commentType';
+  static bool _isComment(Object? type) => _isType(type, commentType);
+
+  static bool _isType(Object? type, int expected) => (type is int && type == expected) || type == '$expected';
 
   static String _text(Object? value) => switch (value) {
     final String text => text.trim(),
@@ -125,7 +188,10 @@ abstract final class ShowroomDanmakuProtocol {
 /// - `PING\tshowroom` every 60 s; its `ACK` keeps a quiet room from looking
 ///   silent, so a socket without any frame for max(3 × 60 s, 90 s) = 180 s
 ///   is replaced.
-/// - Only comments are reported.
+/// - Comments and gifts (D07.7) are reported; the room's gift table
+///   (`ShowroomDanmakuArgs.gifts`) is asked for once per run in the
+///   background, and gifts before it comes, or without it, have their ids
+///   and pictures only.
 ///
 /// The app registers it as `SiteIds.showroom: () =>
 /// ShowroomDanmakuConnection(proxy: …)`.
@@ -149,11 +215,21 @@ final class ShowroomDanmakuConnection extends DanmakuSocketConnection<ShowroomDa
     if (checked == null) {
       throw const DanmakuStartFailure(DanmakuCloseReason.connectionFailed, detail: 'No usable comment server or key');
     }
-    _subscription = _Subscription(run, checked.key);
+    final subscription = _subscription = _Subscription(run, checked.key);
+    if (args.gifts case final gifts?) unawaited(_loadGifts(subscription, gifts));
     return DanmakuSocketTarget(
       endpoints: [ShowroomDanmakuProtocol.endpoint(checked.host)],
       headers: ShowroomDanmakuProtocol.socketHeaders,
     );
+  }
+
+  Future<void> _loadGifts(_Subscription subscription, Future<ShowroomGiftCatalog> Function() gifts) async {
+    try {
+      final catalog = await gifts();
+      if (identical(_subscription, subscription)) subscription.gifts = catalog;
+    } on Object {
+      // No table: gifts keep their ids.
+    }
   }
 
   _Subscription? _of(DanmakuSocketSession session) {
@@ -176,7 +252,7 @@ final class ShowroomDanmakuConnection extends DanmakuSocketConnection<ShowroomDa
   void onData(DanmakuSocketSession session, Object? data) {
     final subscription = _of(session);
     if (subscription == null) return;
-    ShowroomDanmakuProtocol.decode(data, key: subscription.key).forEach(session.message);
+    ShowroomDanmakuProtocol.decode(data, key: subscription.key, gifts: subscription.gifts).forEach(session.message);
   }
 
   @override
@@ -191,10 +267,11 @@ final class ShowroomDanmakuConnection extends DanmakuSocketConnection<ShowroomDa
   }
 }
 
-/// The broadcast one run subscribes to.
+/// The broadcast one run subscribes to, and its gift table once it came.
 final class _Subscription {
-  const new(this.run, this.key);
+  new(this.run, this.key);
 
   final DanmakuRun run;
   final String key;
+  ShowroomGiftCatalog gifts = ShowroomGiftCatalog.empty;
 }

@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:live_core/src/links.dart';
 import 'package:live_core/src/live_area.dart';
 import 'package:live_core/src/live_room.dart';
@@ -306,9 +308,61 @@ final class ShowroomSite extends LiveSite
     }
     return detail.copyWith(
       data: ShowroomRoomData(roomId: '$roomId', streams: streams),
-      danmakuData: state.danmaku,
+      danmakuData: state.danmaku?.withGifts(() => giftCatalog(roomId)),
     );
   }
+
+  // Gifts (D07.7) ---------------------------------------------------------------
+
+  /// How long a room's gift table is reused.
+  static const Duration giftListLifetime = Duration(minutes: 30);
+
+  /// How long a failed gift table is not asked for again.
+  static const Duration giftRetryAfter = Duration(minutes: 5);
+
+  /// Rooms whose gift tables are kept; the least recent goes first.
+  static const int giftListRooms = 16;
+
+  final Map<int, ({Future<ShowroomGiftCatalog> gifts, DateTime at, bool failed})> _giftLists = {};
+
+  /// Room [roomId]'s gift table (`live/gift_list`, D07.7), as D07.6 keeps
+  /// AcFun's: fetched once for concurrent callers and reused for
+  /// [giftListLifetime]; one that fails counts as empty and is asked for
+  /// again after [giftRetryAfter]; parsed off the calling isolate. Never
+  /// throws: without a table gifts keep their ids and pictures.
+  Future<ShowroomGiftCatalog> giftCatalog(int roomId) {
+    final cached = _giftLists.remove(roomId);
+    if (cached != null) {
+      final age = _now().difference(cached.at);
+      if (age >= Duration.zero && age < (cached.failed ? giftRetryAfter : giftListLifetime)) {
+        _giftLists[roomId] = cached;
+        return cached.gifts;
+      }
+    }
+    final at = _now();
+    late final Future<ShowroomGiftCatalog> gifts;
+    gifts = () async {
+      try {
+        final response = await _get('/api/live/gift_list', query: {'room_id': '$roomId'});
+        return await _parseGiftList((text: response.text, status: response.status));
+      } on Object {
+        if (identical(_giftLists[roomId]?.gifts, gifts)) {
+          _giftLists[roomId] = (gifts: Future.value(ShowroomGiftCatalog.empty), at: _now(), failed: true);
+        }
+        return ShowroomGiftCatalog.empty;
+      }
+    }();
+    _giftLists[roomId] = (gifts: gifts, at: at, failed: false);
+    while (_giftLists.length > giftListRooms) {
+      _giftLists.remove(_giftLists.keys.first);
+    }
+    return gifts;
+  }
+
+  /// [ShowroomApi.giftList] of [answer] in a new isolate; static, so the
+  /// closure it sends holds nothing else.
+  static Future<ShowroomGiftCatalog> _parseGiftList(({String text, int status}) answer) =>
+      Isolate.run(() => ShowroomApi.giftList(answer.text, status: answer.status));
 
   /// The room with its streams: 3.x's requests (three for a live room, two
   /// for an offline one, one more for a key).

@@ -42,7 +42,7 @@ final class ShowroomRoomData {
 @immutable
 final class ShowroomDanmakuArgs {
   /// Creates the arguments.
-  const new({required this.roomId, required this.host, required this.key});
+  const new({required this.roomId, required this.host, required this.key, this.gifts});
 
   /// The numeric room id.
   final String roomId;
@@ -56,8 +56,73 @@ final class ShowroomDanmakuArgs {
   /// tab-separated).
   final String key;
 
+  /// The room's gift table (`ShowroomSite.giftCatalog`, D07.7), asked for
+  /// once per run in the background; null when there is none to ask (gifts
+  /// then have their ids and pictures only).
+  final Future<ShowroomGiftCatalog> Function()? gifts;
+
+  /// These arguments with [gifts].
+  ShowroomDanmakuArgs withGifts(Future<ShowroomGiftCatalog> Function()? gifts) =>
+      ShowroomDanmakuArgs(roomId: roomId, host: host, key: key, gifts: gifts);
+
   @override
   String toString() => 'ShowroomDanmakuArgs($roomId, $host)';
+}
+
+/// One gift of a room's table (`live/gift_list`, D07.7).
+@immutable
+final class ShowroomGiftInfo {
+  /// Creates the gift.
+  const new({required this.name, required this.point, required this.free, this.image});
+
+  /// `gift_name`.
+  final String name;
+
+  /// `point`: what one costs in SHOWROOM points (a free gift's is its
+  /// weight in the ranking, not money).
+  final int point;
+
+  /// `free`: a free gift (stars, seeds).
+  final bool free;
+
+  /// `image`, an https picture on a SHOWROOM host, or null.
+  final Uri? image;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ShowroomGiftInfo &&
+      other.name == name &&
+      other.point == point &&
+      other.free == free &&
+      other.image == image;
+
+  @override
+  int get hashCode => Object.hash(name, point, free, image);
+
+  @override
+  String toString() => 'ShowroomGiftInfo($name, $point${free ? ', free' : ''})';
+}
+
+/// The gifts of a SHOWROOM room by gift id ([ShowroomApi.giftList]).
+final class ShowroomGiftCatalog {
+  /// Creates the catalog.
+  new(Map<String, ShowroomGiftInfo> gifts) : _gifts = Map.unmodifiable(gifts);
+
+  const new _empty() : _gifts = const {};
+
+  /// No gifts.
+  static const ShowroomGiftCatalog empty = ShowroomGiftCatalog._empty();
+
+  final Map<String, ShowroomGiftInfo> _gifts;
+
+  /// The gift [id], or null.
+  ShowroomGiftInfo? operator [](String id) => _gifts[id];
+
+  /// How many gifts.
+  int get length => _gifts.length;
+
+  @override
+  String toString() => 'ShowroomGiftCatalog($length)';
 }
 
 /// What `live/live_info` says about a room: whether it is live and, when it
@@ -467,6 +532,37 @@ abstract final class ShowroomApi {
       restriction: restrictionOf(data['premium_room_type']),
       danmaku: danmakuArgs(roomId: roomId, host: data['bcsvr_host'], key: data['bcsvr_key']),
     );
+  }
+
+  /// The address of room [roomId]'s gift table (`live/gift_list`, D07.7).
+  static Uri giftListUrl(int roomId) =>
+      Uri.https('www.showroom-live.com', '/api/live/gift_list', {'room_id': '$roomId'});
+
+  /// The gift table of a `live/gift_list` answer (D07.7): the gifts of
+  /// `normal` and `enquete` by `gift_id`, each with `gift_name`, `point`,
+  /// `free` and `image` (an https picture on a SHOWROOM host). Rows without
+  /// a positive id are skipped; a refused or unreadable answer throws as
+  /// every other answer does.
+  static ShowroomGiftCatalog giftList(String body, {int status = 200}) {
+    final data = _checked(body, status: status, what: 'gift_list');
+    final gifts = <String, ShowroomGiftInfo>{};
+    for (final list in [data['normal'], data['enquete']]) {
+      for (final row in list is List ? list : const <Object?>[]) {
+        if (row is! Map) continue;
+        final id = row['gift_id'];
+        if (id is! int || id <= 0) continue;
+        final name = row['gift_name'];
+        final point = row['point'];
+        final image = _image(row['image']);
+        gifts['$id'] = ShowroomGiftInfo(
+          name: name is String ? name.trim() : '',
+          point: point is int && point >= 0 ? point : 0,
+          free: row['free'] == true,
+          image: image.isEmpty ? null : Uri.parse(image),
+        );
+      }
+    }
+    return ShowroomGiftCatalog(gifts);
   }
 
   /// A host name: dot-separated labels of letters, digits and inner hyphens.

@@ -682,6 +682,59 @@ void main() {
     });
   });
 
+  group('gift table (D07.7)', () {
+    final table = Fixture.load('showroom', 'S06-gift-list').body;
+
+    test('room entry hands the comment arguments a gift table to ask for, without a request', () async {
+      final setup = _setup(_liveSamples);
+      final room = await setup.site.getRoomDetail(roomId: _live);
+      final before = setup.http.requests.length;
+      final args = room.danmakuData! as ShowroomDanmakuArgs;
+      expect(args.gifts, isNotNull);
+      expect(setup.http.requests, hasLength(before), reason: 'asked only when the comments connect');
+    });
+
+    test('asked once for concurrent callers, kept 30 minutes, a failure counts as empty for 5', () async {
+      var now = DateTime(2026, 10, 9, 16);
+      var fail = false;
+      final http = _Scripted(
+        (request) =>
+            fail ? throw const TransportFailure('showroom', TransportReason.timeout) : _response(request, table),
+      );
+      final site = ShowroomSite(http, now: () => now);
+      final both = await Future.wait([site.giftCatalog(130997), site.giftCatalog(130997)]);
+      expect(both.first.length, 254);
+      expect(identical(both.first, both.last), isTrue);
+      expect(http.requests.map((r) => '${r.url}'), ['$_api/live/gift_list?room_id=130997']);
+      expect(http.requests.single.headers, ShowroomApi.headers);
+      now = now.add(ShowroomSite.giftListLifetime - const Duration(seconds: 1));
+      await site.giftCatalog(130997);
+      expect(http.requests, hasLength(1));
+      now = now.add(const Duration(seconds: 1));
+      fail = true;
+      expect((await site.giftCatalog(130997)).length, 0, reason: 'never throws');
+      expect(http.requests, hasLength(2));
+      fail = false;
+      await site.giftCatalog(130997);
+      expect(http.requests, hasLength(2), reason: 'not again within 5 minutes');
+      now = now.add(ShowroomSite.giftRetryAfter);
+      expect((await site.giftCatalog(130997)).length, 254);
+      expect(http.requests, hasLength(3));
+    });
+
+    test('a refused answer is an empty table; at most 16 rooms are kept', () async {
+      final http = _Scripted((request) => _response(request, '{}', status: 404));
+      final site = ShowroomSite(http);
+      expect((await site.giftCatalog(1)).length, 0);
+      for (var room = 2; room <= ShowroomSite.giftListRooms + 1; room++) {
+        await site.giftCatalog(room);
+      }
+      final asked = http.requests.length;
+      await site.giftCatalog(1);
+      expect(http.requests, hasLength(asked + 1), reason: 'the oldest room was dropped');
+    });
+  });
+
   group('links', () {
     test('room keys and ids without a request (3.x); site pages are not rooms', () async {
       final http = ReplayHttp(const []);

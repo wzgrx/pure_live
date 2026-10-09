@@ -82,6 +82,11 @@ bool giftComboRestarted(int? running, LiveGift gift) {
   return next != null && running != null && next <= running;
 }
 
+/// Whether [gift] is a platform's summary of a combo: a combo key and a
+/// running count equal to its own count (Bilibili's `COMBO_SEND`, which
+/// comes about 5 s after the combo's last send, D07.4).
+bool giftIsComboSummary(LiveGift gift) => gift.comboKey.isNotEmpty && gift.comboTotal == gift.count;
+
 /// [message] holding [gift], its text the gift's.
 LiveMessage giftMessageWith(LiveMessage message, LiveGift gift, {String? text}) => LiveMessage(
   type: message.type,

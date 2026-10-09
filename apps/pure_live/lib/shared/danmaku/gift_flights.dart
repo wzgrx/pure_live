@@ -44,6 +44,11 @@ final class GiftFlights {
   /// Combos remembered; the least recent goes first.
   static const int _maxCombos = 256;
 
+  /// How long an ended combo is remembered, so a platform's summary that
+  /// comes after the end does not fly the same total again (Bilibili's
+  /// `COMBO_SEND`, D07.4; the same span as the list's summary window).
+  static const Duration summaryWindow = Duration(seconds: 15);
+
   static const Duration _second = Duration(seconds: 1);
 
   static String _nobody() => '';
@@ -53,6 +58,7 @@ final class GiftFlights {
   final String Function() _streamer;
   final LinkedHashMap<String, _Flight> _combos = LinkedHashMap();
   final ListQueue<DateTime> _flown = ListQueue();
+  final Map<String, ({DateTime at, int total})> _ended = {};
   Timer? _sweeper;
   int _flights = 0;
   int _dropped = 0;
@@ -73,6 +79,11 @@ final class GiftFlights {
     final now = _clock();
     _endBefore(now);
     final key = giftComboKey(message, gift);
+    _ended.removeWhere((_, ended) => now.difference(ended.at) > summaryWindow);
+    if (giftIsComboSummary(gift) && !_combos.containsKey(key)) {
+      // The summary of a combo that already ended (and flew its total).
+      if (_ended[key] case final ended? when giftComboStart(gift) <= ended.total) return;
+    }
     var combo = _combos.remove(key);
     if (combo != null && giftComboRestarted(combo.running, gift)) {
       _end(combo);
@@ -93,6 +104,7 @@ final class GiftFlights {
   /// the danmaku closed).
   void clear() {
     _combos.clear();
+    _ended.clear();
     _flown.clear();
     _sweeper?.cancel();
     _sweeper = null;
@@ -110,7 +122,9 @@ final class GiftFlights {
         if (now.difference(value.at) > comboWindow) key,
     ];
     for (final key in ended) {
-      _end(_combos.remove(key)!, now: now);
+      final combo = _combos.remove(key)!;
+      _end(combo, now: now);
+      _ended[key] = (at: now, total: combo.total);
     }
     if (_combos.isEmpty) {
       _sweeper?.cancel();

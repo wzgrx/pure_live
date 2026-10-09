@@ -110,6 +110,25 @@ void main() {
     expect((total.count, total.totalValue, total.tier), (30, 52000 * 30, LiveGiftTier.precious));
   });
 
+  test("D07.4: Bilibili's COMBO_SEND after the combo ended does not fly the same total again", () {
+    final picture = _Picture();
+    for (var i = 0; i < 5; i++) {
+      picture.flights.add(_gift('甲', '告白气球', value: 52000, comboKey: 'b1'));
+      picture.wait(0.3);
+    }
+    picture.wait(5.5);
+    picture.flights.add(_gift('乙', '小心心', value: 1000));
+    expect(picture.words, ['甲 送出 告白气球 ×1', '甲 送出 告白气球 ×5']);
+    // The summary comes about 5 s after the last send (field combo_stay_time).
+    picture.flights.add(_gift('甲', '告白气球', count: 5, value: 260000, comboKey: 'b1', comboTotal: 5));
+    picture.wait(6);
+    picture.flights.add(_gift('乙', '小心心', value: 1000));
+    expect(picture.words, ['甲 送出 告白气球 ×1', '甲 送出 告白气球 ×5'], reason: 'no third flight');
+    // A summary that is bigger than what flew (sends the room missed) flies.
+    picture.flights.add(_gift('甲', '告白气球', count: 8, value: 416000, comboKey: 'b1', comboTotal: 8));
+    expect(picture.words.last, '甲 送出 告白气球 ×8');
+  });
+
   test("a single gift flies once; the platform's running count is the total", () {
     final picture = _Picture();
     picture.flights.add(_gift('甲', '飞机', value: 100000));

@@ -130,3 +130,7 @@
 - `ed20c0209` [D07.4] Use a cascade in the combo summary test（第一次门禁只有 `apps/pure_live analyze` 的一条 `cascade_invocations` 提示没过，测试全过）
 - `bash tools/gate/gate.sh --all` 在 `ed20c0209` 上通过：`gate: passed (all, 14 members)`。
 - 和别的任务可能冲突的文件：`gift_combiner.dart`（D07.1 的文件，本任务只加 `summaryWindow`、`isSummary` 和 `add` 里的一行判断；A08.12 如果改合并会碰到）、`gift_line_test.dart`、`gift_combiner_test.dart`（只在中间加用例和一个 `_pb` 小函数）、`bilibili.dart`（D01 的哔哩哔哩任务）、`docs/tasks.toml` 和生成的文档（合并后重新运行 docs.py）。
+
+## 和 A08.12 合并（2026-10-09，维护者）
+
+- A08.12 的飞行礼物（`shared/danmaku/gift_flights.dart`）也按 5 秒判断连击结束、结束时飞一次总数。哔哩哔哩的 `COMBO_SEND` 在结束后约 5 秒才到，会被当成新连击、把同一个总数再飞一次。现在飞行礼物记住 15 秒内结束的连击（和列表的 `summaryWindow` 一样长），总数不比飞过的大的总结消息不再飞；比飞过的大（房间漏收了几次）照常飞。判断“总结消息”的规则挪到共用的 `giftIsComboSummary`（`shared/danmaku/gift_combo.dart`），`GiftCombiner.isSummary` 用它。测试：`test/shared/gift_flights_test.dart` 的“D07.4: Bilibili's COMBO_SEND after the combo ended …”（改之前会飞第三次）。

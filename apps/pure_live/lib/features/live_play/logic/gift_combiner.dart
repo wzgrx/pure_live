@@ -115,7 +115,7 @@ final class GiftCombiner {
 
   /// Whether [gift] sums up its combo: it has the platform's combo key and
   /// its running count is its own count (Bilibili's `COMBO_SEND`).
-  static bool isSummary(LiveGift gift) => gift.comboKey.isNotEmpty && gift.comboTotal == gift.count;
+  static bool isSummary(LiveGift gift) => giftIsComboSummary(gift);
 
   /// The count of a line that showed [shown] once [gift] counts on it: the
   /// platform's running count when it has one ([LiveGift.comboTotal];

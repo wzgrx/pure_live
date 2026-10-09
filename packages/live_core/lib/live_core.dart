@@ -15,6 +15,7 @@ export 'src/legacy_placeholders.dart';
 export 'src/links.dart';
 export 'src/live_area.dart';
 export 'src/live_gift.dart';
+export 'src/live_gift_combo.dart';
 export 'src/live_message.dart';
 export 'src/live_room.dart';
 export 'src/live_site.dart';

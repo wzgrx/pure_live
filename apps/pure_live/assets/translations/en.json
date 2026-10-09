@@ -1605,6 +1605,8 @@
     "record_clear_title": "Empty the recording folder?",
     "record_danmaku": "Record chat",
     "record_danmaku_desc": "Save live chat beside each video as a same-name .xml file (Bilibili format); needs a platform with remote chat",
+    "record_danmaku_gifts": "Include gifts in recorded chat",
+    "record_danmaku_gifts_desc": "The chat file also keeps gifts and super chats, a combo once; players that do not know gifts skip them",
     "record_files": "Recordings",
     "record_files_cleared": "Recordings deleted",
     "record_folder_unwritable": "This folder cannot be written to (it does not exist, has invalid characters or there is no storage permission); choose another one",

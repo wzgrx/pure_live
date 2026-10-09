@@ -31,6 +31,7 @@ final class RecordSettings {
     int threadQueueSize = 2048,
     this.usePinyinForFolder = false,
     this.recordDanmaku = false,
+    this.recordDanmakuGifts = false,
     this.preferH264 = true,
   }) : segmentTime = segmentTime.clamp(60, 3600),
        maxTaskCount = maxTaskCount.clamp(1, 10),
@@ -107,6 +108,12 @@ final class RecordSettings {
 
   /// Save the chat beside each attempt (left to the app, see the M8 record).
   final bool recordDanmaku;
+
+  /// The saved chat also has the room's gifts and super chats ("录制弹幕时包含
+  /// 礼物", live_store `Settings.recordDanmakuGifts`, off by default; H01.8):
+  /// the app's chat connector delivers them, `RecordChatWriter` writes
+  /// them.
+  final bool recordDanmakuGifts;
 
   /// The player's "优先 H.264" (live_store `Settings.preferH264`, on by
   /// default): a task that does not name its quality is not started on an

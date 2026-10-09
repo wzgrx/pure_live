@@ -277,6 +277,24 @@ void main() {
     expect(_greyed(tester, '重连间隔时间'), isTrue, reason: '3.x left this one active although it did nothing');
   });
 
+  testWidgets('H01.8: "录制弹幕时包含礼物" under "同时录制弹幕", off, saved at once, usable while the default is off', (tester) async {
+    tester.view.physicalSize = const Size(393, 3600);
+    final harness = await _pump(tester, size: const Size(393, 3600));
+    const title = '录制弹幕时包含礼物';
+    expect(find.text(title), findsOneWidget);
+    expect(_top(tester, title), greaterThan(_top(tester, '同时录制弹幕')));
+    expect(_top(tester, title), lessThan(_top(tester, '录制文件')), reason: 'in the basic group');
+    expect(find.descendant(of: _row(title), matching: find.byIcon(AppIcons.chatGift)), findsOneWidget);
+    expect(find.text(withoutOrphan('弹幕文件里也记下礼物和醒目留言，连击只记一条；有的播放器不认礼物，会忽略它们')), findsOneWidget);
+    expect(harness.settings.recordDanmakuGifts, isFalse);
+    expect(_greyed(tester, title), isFalse, reason: "a task's own choice can record the chat");
+
+    await _tap(tester, find.text(title));
+    expect(harness.settings.recordDanmakuGifts, isTrue);
+    expect(harness.services.store.settings.get(Settings.recordDanmakuGifts), isTrue);
+    expect(harness.settings.recordDanmaku, isFalse, reason: 'the chat switch is its own');
+  });
+
   testWidgets('the most recordings at once: − and + on the row, 1 to 10, saved at once (c9)', (tester) async {
     final harness = await _pump(tester);
     final plus = find.byKey(const ValueKey('record-max-tasks-increase'));

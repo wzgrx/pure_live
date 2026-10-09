@@ -40,6 +40,12 @@ List<RecipeOpener> recipeOpeners(SiteRegistry sites) => [
 /// platform's connection, the duplicate and backlog gate and the user's
 /// block lists. The display-only filters (repeated text, similarity) stay
 /// off: the file keeps what was said.
+///
+/// With "录制弹幕时包含礼物" on (`Settings.recordDanmakuGifts`, read for each
+/// message, H01.8) the platform's gifts go to the file too, through the
+/// same gate and block lists as in the room (D07.1: a blocked viewer's
+/// gifts are not written), and the super chats, unfiltered as in the room.
+/// Off, nothing but the chat reaches the filter or the file, as before.
 RecordChatConnector recordChatConnector({
   required SiteRegistry sites,
   required DanmakuRegistry danmaku,
@@ -58,9 +64,19 @@ RecordChatConnector recordChatConnector({
   );
   final connection = danmaku.connectionFor(task.platform);
   var joined = false;
+  bool gifts() => store.settings.get(Settings.recordDanmakuGifts);
   final events = connection.events.listen((event) {
     switch (event) {
       case DanmakuReceived(:final message) when message.type == LiveMessageType.chat && filter.accepts(message):
+        onMessage(message);
+      case DanmakuReceived(:final message)
+          when message.type == LiveMessageType.gift &&
+              message.gift != null &&
+              !message.isLocal &&
+              gifts() &&
+              filter.accepts(message):
+        onMessage(message);
+      case DanmakuReceived(:final message) when message.type == LiveMessageType.superChat && gifts():
         onMessage(message);
       case DanmakuClosed() when joined:
         onEnded();
@@ -278,6 +294,7 @@ final class RecordSettingsStore {
     threadQueueSize: settings.get(Settings.recordThreadQueueSize),
     usePinyinForFolder: settings.get(Settings.recordPinyinFolders),
     recordDanmaku: settings.get(Settings.recordDanmaku),
+    recordDanmakuGifts: settings.get(Settings.recordDanmakuGifts),
     preferH264: settings.get(Settings.preferH264),
   );
 
@@ -324,6 +341,7 @@ final class RecordSettingsStore {
       threadQueueSize: integer(Settings.recordThreadQueueSize, defaults.threadQueueSize),
       usePinyinForFolder: flag(Settings.recordPinyinFolders, fallback: defaults.usePinyinForFolder),
       recordDanmaku: flag(Settings.recordDanmaku, fallback: defaults.recordDanmaku),
+      recordDanmakuGifts: flag(Settings.recordDanmakuGifts, fallback: defaults.recordDanmakuGifts),
     );
   }
 
@@ -348,6 +366,9 @@ final class RecordSettingsStore {
     Settings.recordThreadQueueSize.key: settings.threadQueueSize,
     Settings.recordPinyinFolders.key: settings.usePinyinForFolder,
     Settings.recordDanmaku.key: settings.recordDanmaku,
+    // v4's (H01.8): never in the pre-M8.1 object, kept so every one of
+    // `Settings.recorder` has a value here.
+    Settings.recordDanmakuGifts.key: settings.recordDanmakuGifts,
   };
 }
 

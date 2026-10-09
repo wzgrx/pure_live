@@ -422,6 +422,12 @@ NOTES: dict[str, dict] = {
         'ui': f'选项（{_RECORD_PAGE}）',
         'verdict': '同上，`RecordSettings` 按 3.x 只认这 5 个（`settings.dart:46`）',
     },
+    'recordDanmakuGifts': {
+        **_new('H01.8'),
+        'v3range': '3.x 录制的弹幕只写聊天',
+        'ui': f'开关（{_RECORD_PAGE}，“同时录制弹幕”下面）',
+        'verdict': 'v4 新加（H01.8，D-040）：默认关，弹幕 XML 和以前逐字一样；开着时同一个文件里也写礼物 `<gift>`（连击一条）和醒目留言 `<sc>`，格式照录播姬，DanmakuFactory 能读；只在录弹幕时起作用',
+    },
     # ---- local interaction ----
     'localInteraction.userName': {'v3range': f'最多 20 个字（`{_LOCAL}:821-824`）', 'verdict': 'v4 保存时同样截到 20 个字'},
     'localInteraction.previewPlatform': {'v3': "'bilibili'", 'v3src': f'{_LOCAL}:93'},

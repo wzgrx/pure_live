@@ -185,6 +185,7 @@ path = [
   { glob = "packages/live_core/lib/src/sites/seventeenlive/", sub = "E03" },
   { glob = "packages/live_core/lib/src/sites/", sub = "E02", note = "其余都是国内平台" },
   { glob = "packages/live_core/lib/src/links.dart", sub = "E04" },
+  { glob = "packages/live_core/lib/src/live_gift_combo.dart", sub = "D07", note = "连击规则，聊天列表、飞行礼物、录制共用" },
   { glob = "packages/live_core/", sub = "E05" },
   { glob = "packages/live_danmaku/lib/src/filters/", sub = "D02" },
   { glob = "packages/live_danmaku/", sub = "D01" },
@@ -389,6 +390,7 @@ setting = [
   { key = "enable_backoff", sub = "H04" },
   { key = "max_check_interval", sub = "H04" },
   { key = "auto_start_on_boot", sub = "H04" },
+  { key = "recordDanmakuGifts", sub = "H01", note = "弹幕 XML 写礼物（H01.8）" },
 ]
 
 # 每个分节（Setting 的 section）的默认子分类。新加分节要在这里加一行。

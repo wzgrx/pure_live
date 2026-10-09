@@ -1258,7 +1258,15 @@ abstract final class Settings {
   /// Save the chat beside each recording.
   static const recordDanmaku = BoolSetting('recorder_record_danmaku', section: 'recorder', defaultValue: false);
 
-  /// The recorder's settings, in 3.x's key order.
+  /// New (docs/H-录制/H01-录制核心/H01.8-弹幕XML带礼物; 3.x saved only the
+  /// chat): the saved chat file also has the room's gifts and super chats
+  /// ("录制弹幕时包含礼物": `<gift>` and `<sc>` as BililiveRecorder writes
+  /// them, a combo once). Off by default (D-040: the file stays as it was);
+  /// it acts only while [recordDanmaku] (or the task's own choice) saves the
+  /// chat.
+  static const recordDanmakuGifts = BoolSetting('recordDanmakuGifts', section: 'recorder', defaultValue: false);
+
+  /// The recorder's settings, in 3.x's key order, then v4's.
   static const List<Setting<Object>> recorder = [
     recordSegmentTime,
     recordMaxTaskCount,
@@ -1279,6 +1287,7 @@ abstract final class Settings {
     recordThreadQueueSize,
     recordPinyinFolders,
     recordDanmaku,
+    recordDanmakuGifts,
   ];
 
   // ---- local interaction (modules/live_play/widgets/local_interaction/

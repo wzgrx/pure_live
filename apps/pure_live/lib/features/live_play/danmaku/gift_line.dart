@@ -7,7 +7,6 @@ import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
 import 'package:pure_live/features/live_play/danmaku/gift_count_pulse.dart';
-import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
 import 'package:pure_live/shared/danmaku/gift_words.dart';
@@ -46,13 +45,14 @@ final class GiftLineRoom {
 }
 
 /// The colour of a precious gift's name and mark on [ground] (G3): the
-/// platform's colour (the local interaction's platform packs, one table for
-/// the 34 platforms) made readable at [chatNameContrast]; null for a
-/// platform without one (the tertiary ink then).
+/// platform's colour ([PlatformLogos.colors], the one table the local
+/// interaction's platform packs use too, D08.6) made readable at
+/// [chatNameContrast]; null for a platform without one (the tertiary ink
+/// then).
 Color? giftPlatformInk(String platform, Color ground) {
-  final pack = LocalCatalog.packFor(platform);
-  if (pack.id == LocalCatalog.genericPack.id) return null;
-  return chatNameColor(LiveMessageColor.numberToColor(pack.accent), ground);
+  final argb = PlatformLogos.colorOf(platform);
+  if (argb == null) return null;
+  return chatNameColor(LiveMessageColor.numberToColor(argb), ground);
 }
 
 /// The width of the tier mark at the line's left edge: none, 2 for a

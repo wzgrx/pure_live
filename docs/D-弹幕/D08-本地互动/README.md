@@ -5,7 +5,7 @@
 ## 范围
 
 - 包括：
-  - `apps/pure_live/lib/features/live_play/local_interaction/logic/`：`local_interaction.dart`（`LocalInteraction`，29 个 3.x `localInteraction.*` 设置上的一层：资料、币、经验、记录、样式）、`local_catalog.dart`（`LocalCatalog`：6 个样式模板、颜色、34 个平台资源包、8 个平台各 3 个礼物和通用 4 个、等级规则）、`local_room_session.dart`（每个直播间一个 `LocalRoomSession`：发弹幕、送礼、礼物横幅的计时）。
+  - `apps/pure_live/lib/features/live_play/local_interaction/logic/`：`local_interaction.dart`（`LocalInteraction`，29 个 3.x `localInteraction.*` 设置上的一层：资料、币、经验、记录、样式）、`local_catalog.dart`（`LocalCatalog`：6 个样式模板、颜色、平台资源包（每个平台一个，35 个，D08.6）、27 个平台各 3 个礼物和通用 4 个、等级规则）、`local_room_session.dart`（每个直播间一个 `LocalRoomSession`：发弹幕、送礼、礼物横幅的计时）。
   - 本地消息进直播间的入口：`features/live_play/logic/room_controller.dart` 的 `addLocal`（`:1159`，和 D04 共用这个文件）。
   - `localInteraction.*` 一组设置的含义、默认值、迁移（`packages/live_store/lib/src/settings/settings.dart` 的 `localInteraction` 一节，键名不变，D-018），以及以后新加的本地记录表（D08.1）。
 - 不包括（归哪里）：
@@ -38,7 +38,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | 文件 | 职责 |
 |---|---|
 | `features/live_play/local_interaction/logic/local_interaction.dart`（419） | `LocalProfile`（`:12`）、`LocalGiftData`（`:73`）、`LocalInteraction`（`:113`）：`recharge`（`:219`）、`clearHistory`（`:228`）、`createChat`、`sendGift`（扣币、加经验、记录）、`setStyle`（`:365`）、`applyPreset`（`:369`，整套覆盖自定义） |
-| `features/live_play/local_interaction/logic/local_catalog.dart`（606） | 样式模板（`:156-225`）、颜色（`:239-252`）、资源包和礼物（`:276-557`）、等级（`:582`）、字体映射（`:593-598`）、`historyLimit` 30 |
+| `features/live_play/local_interaction/logic/local_catalog.dart` | 样式模板、颜色、资源包和礼物（D08.6：`packs` 每个 `SiteIds` 一个，颜色读 `PlatformLogos.colors`，`badgeKey`；`_platformGifts` 27 个平台，3.x 的 28 个礼物 id 不变）、等级、字体映射、`historyLimit` 30 |
 | `features/live_play/local_interaction/logic/local_room_session.dart`（112） | `LocalGiftShow`（`:13`）、`LocalRoomSession`（`:32`）：`sendChat`、`sendGift`、`_deliver`（`:97`）、`effectDuration` 3 秒 |
 | `features/live_play/logic/room_controller.dart` | `addLocal`（`:1159`） |
 | `packages/live_store/lib/src/settings/settings.dart` | `localInteraction.*` 29 个键（`localInteraction.enabled` `:1221` 起，记录 `localInteraction.history` `:1294`，样式 18 个 `:1301-1438`） |
@@ -46,9 +46,10 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | `features/live_play/local_interaction/logic/local_growth.dart` | D08.3：`LocalGrowthDay`（当天的计数，存在设置 `localInteraction.growthDay`，按本机日期读）、`LocalWatchTime`（观看计时：只在计时时每分钟一次，时间先放内存，满 10 分钟或停下才写盘）；规则常量在 `LocalCatalog`（`watchStep`…`chatExperienceDailyLimit`、`progressFor`、段名 `tierKeys`）；`LocalInteraction` 的 `checkIn`、`watched`、`settleWatch`、`rewardChat`，升级记 `level`；`local_room_session.dart` 的 `LocalRoomWatch`（一个播放器一个，应用内小窗接着计）；新设置 `localInteraction.growthEnabled`（默认开，D-040） |
 | `features/live_play/local_interaction/logic/local_gift_queue.dart` | D08.4：`LocalGiftShow`（一个横幅，`serial` 认它、`revision` 数量涨了几次）、`LocalGiftQueue`（一次一个、最多 5 个、连击在原位改数量，`durationOf` 给 D08.5）；连击 `LocalGiftCombo` 在 `local_interaction.dart`（`sendGift` 的 `count`、`combo`：扣币、经验、记录合成一条），判断连击在 `LocalRoomSession.sendGift`（3 秒、同一个礼物、连着），列表那一行用 `room_controller.dart` 的 `replaceLocal`（`ChatFeed.replace`）；规则常量 `LocalCatalog.giftCounts`、`giftComboWindow`、`giftBannerLimit` |
 | `features/live_play/local_interaction/logic/local_gift_tier.dart` | D08.5：`LocalGiftTier`（按一个的价格三档：小 < 100 飘屏 4 秒、中 100～999 横幅 3 秒、大 ≥ 1000 或 `big` 大横幅 + 座驾 4 秒，门槛是 `LocalCatalog.giftTierMedium`、`giftTierBig`）、`LocalGiftEffectLevel`（“显示本地礼物特效”的全部 / 只要大礼物 / 关）；新设置 `localInteraction.giftEffectLevel`（默认 `all`），旧开关 `enableGiftEffects` 关着就是关、改时两个一起写（`LocalInteraction.giftEffectLevel`）；队列的 `durationOf` 按档（`local_room_session.dart`）。画法在 A08 那边：`local_interaction/effects/`（`LocalGiftFlyer`、`LocalGiftVehicle*`，借 flame_barrage 的座驾，MIT）和 `LocalGiftLayer.tiered` |
+| `features/live_play/local_interaction/local_pack_badge.dart`、`packages/live_ui/lib/src/icons/platform_logo.dart` 的 `PlatformLogos.colors` | D08.6：`LocalPackBadge`（平台图标，没有平台的旧消息用 emoji），设置页选择片和预览、身份卡、列表徽章胶囊、礼物横幅、记录都用它；平台颜色只有 `PlatformLogos.colors` 一张表（资源包的 `accent`、礼物行的 `giftPlatformInk`）；本地消息数据多存 `platform`（`LocalProfile.platform`） |
 | `packages/live_store/lib/src/settings/settings.dart` 的 `localInteractionPhrases` | D08.2：常用语，一个列表设置（最多 20 条，`StringListSetting` 的 `maxItems`、`tidy`），默认空，随设置进备份和设备同步；`LocalInteraction` 的 `phrases`、`addPhrase`…`movePhrase`、`recentChats`（最近 5 条取自 `local_events`），每条 40 字（`LocalCatalog.clipDanmaku`） |
 
-测试：`local_history_test.dart`（D08.1）、`local_plus_one_test.dart`（A08.14）、`local_phrases_test.dart`（D08.2，21 个）和 `packages/live_store/test/local_phrases_test.dart`；`local_growth_test.dart`（D08.3，28 个：规则、计时、跨日、上限、等级、界面）和 `packages/live_store/test/local_growth_test.dart`；`local_gift_combo_test.dart`（D08.4，11 个：队列、连击窗口、数量和币、记录、横屏躲开控制层、减少动态、2 倍字）；`local_gift_effects_test.dart`（D08.5，20 个：分档、三选一和旧开关、座驾每一帧、三档在直播间里的样子和时间、连击保住动效、排队、减少动态、只要大礼物和关、右边面板、2 倍字、面板和设置页）和 `local_gift_effects_benchmark_test.dart`（帧时间）、`packages/live_store/test/local_gift_effects_test.dart`；`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个：资料库、3.x 键和默认值、送礼扣币、记录 30 条、样式、各处输入框、面板、横幅 3 秒）；`packages/live_store/test/migration_test.dart`、`backup_test.dart`、`settings_defaults_test.dart`（键和迁移）。
+测试：`local_history_test.dart`（D08.1）、`local_plus_one_test.dart`（A08.14）、`local_phrases_test.dart`（D08.2，21 个）和 `packages/live_store/test/local_phrases_test.dart`；`local_growth_test.dart`（D08.3，28 个：规则、计时、跨日、上限、等级、界面）和 `packages/live_store/test/local_growth_test.dart`；`local_gift_combo_test.dart`（D08.4，11 个：队列、连击窗口、数量和币、记录、横屏躲开控制层、减少动态、2 倍字）；`local_gift_effects_test.dart`（D08.5，20 个：分档、三选一和旧开关、座驾每一帧、三档在直播间里的样子和时间、连击保住动效、排队、减少动态、只要大礼物和关、右边面板、2 倍字、面板和设置页）和 `local_gift_effects_benchmark_test.dart`（帧时间）、`packages/live_store/test/local_gift_effects_test.dart`；`local_platform_packs_test.dart`（D08.6，11 个：每个平台的包和颜色、3.x 礼物 id、档位和座驾、字体里的 emoji、图标徽章和旧消息、设置页 1 倍和 2 倍字、Kick 直播间竖屏和横屏、旧 id 的记录）；`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个：资料库、3.x 键和默认值、送礼扣币、记录 30 条、样式、各处输入框、面板、横幅 3 秒）；`packages/live_store/test/migration_test.dart`、`backup_test.dart`、`settings_defaults_test.dart`（键和迁移）。
 
 ## 3.x 基线
 
@@ -67,7 +68,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | 特效只有一种横幅（P7） | `local_gift_effect.dart:54-123` | 用户点名要加强 | D08.5（2026-10-09 代码做完，待真机：小礼物顶部飘屏、中礼物横幅、大礼物横幅加座驾，设置三选一，K90 帧时间） |
 | 清空记录没有撤销、星形两种意思、输入框不限长、粗体丢字重、本地弹幕的“屏蔽关键词”不起作用（P4、P8、P9、P12、P16、P17） | 见 V03.6 第 2.2 节 | 小毛病 | A08.13（V03.6 E2，另一个任务） |
 | 自定义样式存不下、本地弹幕用不了下载的字体、画面上认不出自己的（P10、P11、P18） | `local_interaction.dart:365-388`、`local_catalog.dart:593-598` | — | 没登记（V03.6 E10，留在报告里，D-040） |
-| 只有 8 个平台有自己的本地礼物（P13） | `local_catalog.dart:361-557` | — | 没登记（V03.6 E14，等 D07 的平台礼物做完再看） |
+| 只有 8 个平台有自己的本地礼物（P13）；资源包的徽章是 emoji、没有 Kick、颜色和平台图标不一致 | `local_catalog.dart` 的 `packs`、`_platformGifts` | 用户 2026-10-09：“平台资源体验包，没有同步更新图标和资源” | D08.6（2026-10-09 代码做完，待真机：35 个包、各处画平台图标、颜色一张表 `PlatformLogos.colors`、27 个平台有自己的币和礼物） |
 
 ## 相关决定和规范
 
@@ -85,7 +86,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 
 1. 第一档：S02.6 阶段 4 的本地互动真机（V03.6 E1）；A08.13 的小修（另一个任务）。
 2. 第二档，按顺序：**D08.1**（结构化记录，后面三个都用它）→ **D08.2**（常用语）→ **D08.3**（本地成长）→ **D08.4**（连击和数量）→ **D08.5**（三档特效）。A08.14（“+1（本地）”）不依赖它们，可以先做。
-3. 留在 V03.6 的（D-040 不登记）：E10 本地弹幕样式、E14 资源包补全、E15 本地粉丝牌、E16 进房欢迎；要做时先在这里登记。
+3. 留在 V03.6 的（D-040 不登记）：E10 本地弹幕样式、E15 本地粉丝牌、E16 进房欢迎；要做时先在这里登记。E14 资源包补全按用户 2026-10-09 的反馈登记成 **D08.6**（第一档，4.1.0 等它）。
 4. 同一组同时只开一个开发（PROCESS 第 5.1 节）：D07、D08、D02 都在 D 组，排队做。
 
 <!-- docs:生成开始（下面由 tools/docs/docs.py 根据 docs/tasks.toml 生成，不要手改） -->
@@ -105,5 +106,6 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | D08.3 | 本地成长：观看时长、签到、等级进度 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.3-本地成长/README.md)、[任务书](D08.3-本地成长/brief.md)、[记录](D08.3-本地成长/record.md) |
 | D08.4 | 本地礼物连击、数量和横幅队列 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.4-本地礼物连击和数量/README.md)、[任务书](D08.4-本地礼物连击和数量/brief.md)、[记录](D08.4-本地礼物连击和数量/record.md) |
 | D08.5 | 三档礼物特效：小飘屏、横幅、大礼物座驾动效（参考 flame_barrage） | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.5-三档礼物特效/README.md)、[任务书](D08.5-三档礼物特效/brief.md)、[记录](D08.5-三档礼物特效/record.md) |
+| D08.6 | 平台体验资源包的图标和资源跟上现在的平台 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.6-平台体验资源包的图标和资源/README.md)、[任务书](D08.6-平台体验资源包的图标和资源/brief.md)、[记录](D08.6-平台体验资源包的图标和资源/record.md) |
 
 <!-- docs:生成结束 -->

@@ -60,9 +60,13 @@ enum LocalGiftVehicle {
   /// big gifts each have their own, the same every time (named here, or by
   /// the letters of the id for a gift added later).
   static LocalGiftVehicle of(String id) =>
-      _byGift[id] ?? values[id.codeUnits.fold<int>(0, (sum, unit) => sum + unit) % values.length];
+      named[id] ?? values[id.codeUnits.fold<int>(0, (sum, unit) => sum + unit) % values.length];
 
-  static const Map<String, LocalGiftVehicle> _byGift = {
+  /// The big gifts' vehicles, by gift id: rockets and towers lift off,
+  /// what travels (a train, a car, a yacht, a fly-screen) or comes as a
+  /// present crosses, a guard, a crown, money or fireworks streak and
+  /// burst. Every big gift of the catalog is named here (D08.6).
+  static const Map<String, LocalGiftVehicle> named = {
     'douyu_super_rocket': rocket,
     'huya_one': rocket,
     'bili_voyage': airplane,
@@ -72,6 +76,26 @@ enum LocalGiftVehicle {
     'ks_guard': meteor,
     'cc_guard': meteor,
     'soop_signature_balloon': meteor,
+    // D08.6
+    'acfun_guard': meteor,
+    'picarto_big_tip': meteor,
+    'tc_fireworks': meteor,
+    'missevan_noble': meteor,
+    'kila_castle': airplane,
+    'nico_fireworks': meteor,
+    'showroom_tower': rocket,
+    'chzzk_mission': rocket,
+    'kick_gift_subs': airplane,
+    'tiktok_lion': meteor,
+    'yt_gift_memberships': airplane,
+    'bigo_supercar': airplane,
+    'panda_big_spon': meteor,
+    'fc2_big_tip': meteor,
+    'kugou_yacht': airplane,
+    'baidu_rocket': rocket,
+    'six_fly_screen': airplane,
+    'look_star': meteor,
+    'live17_guard': meteor,
   };
 }
 

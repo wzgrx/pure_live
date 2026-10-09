@@ -14,7 +14,15 @@ import 'package:pure_live/i18n/i18n.dart';
 @immutable
 final class LocalProfile {
   /// Creates a profile.
-  const new({required this.title, required this.name, required this.accent, this.badge, this.badgeName, this.level});
+  const new({
+    required this.title,
+    required this.name,
+    required this.accent,
+    this.badge,
+    this.badgeName,
+    this.level,
+    this.platform,
+  });
 
   /// [message]'s profile, or null when it is not a local message.
   static LocalProfile? of(LiveMessage message) {
@@ -27,6 +35,7 @@ final class LocalProfile {
       badge: data['badge'] as String?,
       badgeName: data['badgeName'] as String?,
       level: data['level'] as int?,
+      platform: data['platform'] is String ? data['platform'] as String : null,
     );
   }
 
@@ -49,6 +58,11 @@ final class LocalProfile {
   /// The level; null while "显示本地体验等级" is off.
   final int? level;
 
+  /// The platform of the room it was sent in, whose logo the badge shows
+  /// (D08.6); null for a message from before D08.6, whose badge is its
+  /// [badge] text.
+  final String? platform;
+
   /// Whether [message] is a local danmaku sent before the room was entered,
   /// shown again (D08.1 c6: "之前发的").
   static bool replayedIn(LiveMessage message) {
@@ -58,6 +72,10 @@ final class LocalProfile {
 
   /// The badge chip's words: "📺 舰队等级 Lv.1", or empty when both are off.
   String get badgeLabel => [if (badge != null) '$badge $badgeName', if (level != null) 'Lv.$level'].join(' ');
+
+  /// The badge chip's words after the platform's logo (D08.6): "舰队等级
+  /// Lv.1", without the [badge] text.
+  String get badgeWords => [if (badge != null) ?badgeName, if (level != null) 'Lv.$level'].join(' ');
 
   /// "听众 · Pure Live".
   String get displayName => '$title · $name';
@@ -75,6 +93,7 @@ final class LocalProfile {
     'badge': badge,
     'badgeName': badgeName,
     'level': level,
+    'platform': platform,
   };
 }
 
@@ -826,6 +845,7 @@ final class LocalInteraction extends ChangeNotifier {
       badge: showPlatformBadge ? pack.badge : null,
       badgeName: showPlatformBadge ? i18n(LocalCatalog.badgeKeyFor(platform)) : null,
       level: showLevelBadge ? level : null,
+      platform: platform.trim().toLowerCase(),
     );
   }
 

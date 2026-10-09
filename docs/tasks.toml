@@ -2441,6 +2441,19 @@ from = "V03.6 第 4 节 E9、第 5.5 节第二、三段（P7）；用户 2026-10
 note = "按一个的价格分档（LocalGiftTier）：小 < 100 一行字从画面上方飞过 4 秒，中 100～999 原来的横幅 3 秒，大 ≥ 1000 或标了 big 大横幅 + 座驾 2.8 秒（火箭、飞机、流星，借 flame_barrage effect/motion 的画法，MIT，CustomPainter 重写、身体录成 Picture、粒子是时间的公式、每个最多几十个），横幅 4 秒；三档在同一个 LocalGiftQueue 里排队、连击保住动效（ValueKey(serial)）；新设置 localInteraction.giftEffectLevel（all、bigOnly、off，默认 all），旧开关 enableGiftEffects 照读照写、关着就是关；减少动态时三档都是静止横幅；小窗和画中画没有特效；主机上的帧时间见 record.md，K90 profile 帧时间待真机；设计选择 h1～h14 见任务 README"
 
 [[task]]
+id = "D08.6"
+title = "平台体验资源包的图标和资源跟上现在的平台"
+type = "功能"
+status = "待真机"
+date = "2026-10-09"
+size = "中"
+tier = 1
+stages = ["每个平台一个资源包（补 Kick）、各处徽章换成平台图标、颜色一张表", "各平台自己的币、等级、徽章和礼物（新礼物的档位、座驾、emoji 字体）"]
+done = 2
+from = "用户 2026-10-09：“3.设置-本地用户与互动 平台资源体验包，没有同步更新图标和资源”（4.1.0 等这个修复）"
+note = "根因：资源包是 3.x 的表（34 个、emoji 或两个字母当徽章、8 个平台有自己的币和礼物），4.x 加 Kick、平台图标和平台礼物（D07、V03.5）时没跟着改；3.x 的主题色有 8 个和应用里的平台图标不是一个颜色（哔哩哔哩蓝色、图标粉色等），平台颜色就是这张表（gift_line 也读它）。现在：每个 SiteIds 一个包（35 个，补 Kick）；设置页的选择片和预览、互动面板的身份卡、列表里本地弹幕和礼物的徽章、礼物横幅、记录都画平台图标（LocalPackBadge，emoji 只给没有平台的旧消息和 3.x 的记录句子）；平台颜色只有 live_ui 的 PlatformLogos.colors 一张表（和图标同色）；27 个平台有自己的礼物（8 个 3.x 的不变，19 个按 V03.5 第 2 节加），币名照平台单位（AC币、钻石、红豆、点、Kudos、金币、积分、奶酪、Kicks、宝宝币、爱心、星币、六币、音符）；3.x 的 28 个礼物 id 和价格不变；新的大礼物都指定了座驾；emoji 子集字体从 40 个加到 74 个"
+
+[[task]]
 id = "E01.1"
 title = "哔哩哔哩"
 type = "平台"

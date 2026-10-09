@@ -5,6 +5,7 @@ import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/effects/local_gift_flyer.dart';
 import 'package:pure_live/features/live_play/local_interaction/effects/local_gift_vehicle.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_pack_badge.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// Draws the banner [show] in the part of the picture the gift layer leaves
@@ -137,7 +138,14 @@ class LocalGiftBanner extends StatelessWidget {
     final big = gift.tier == LocalGiftTier.big;
     final color = Color.fromARGB(255, gift.color.r, gift.color.g, gift.color.b);
     final theme = Theme.of(context);
-    final second = [if (profile.badgeLabel.isNotEmpty) profile.badgeLabel, profile.title].join(' · ');
+    // D08.6: the platform's logo before the badge's words; the emoji text
+    // for a message from before D08.6.
+    final logo = profile.badge != null && LocalPackBadge.hasLogo(profile.platform) ? profile.platform : null;
+    final badge = logo == null ? profile.badgeLabel : profile.badgeWords;
+    final second = [if (badge.isNotEmpty) badge, profile.title].join(' · ');
+    final secondStyle = localEmojiStyle(
+      theme.textTheme.bodySmall?.emphasis.copyWith(fontSize: 12, color: OnVideoColors.secondary),
+    );
     final banner = Container(
       key: const ValueKey('local-gift-banner'),
       constraints: BoxConstraints(maxWidth: big ? 440 : 320),
@@ -171,13 +179,23 @@ class LocalGiftBanner extends StatelessWidget {
                     shadows: OnVideoColors.shadows,
                   ),
                 ),
-                Text(
-                  localEmojiText(second),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: localEmojiStyle(
-                    theme.textTheme.bodySmall?.emphasis.copyWith(fontSize: 12, color: OnVideoColors.secondary),
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (logo != null) ...[
+                      LocalPackBadge(logo, fallback: '', size: 14, radius: 3),
+                      const SizedBox(width: 4),
+                    ],
+                    Flexible(
+                      child: Text(
+                        localEmojiText(second),
+                        key: const ValueKey('local-gift-banner-second'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: secondStyle,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

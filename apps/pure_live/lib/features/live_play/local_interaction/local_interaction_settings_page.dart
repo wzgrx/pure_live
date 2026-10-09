@@ -6,6 +6,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_pack_badge.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_style_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -159,9 +160,11 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
               for (final pack in LocalCatalog.packs)
                 ChoiceChip(
                   key: ValueKey('local-pack-${pack.id}'),
+                  // D08.6: the platform's logo (a tick replaces it when
+                  // chosen, A08.2 M3).
                   avatar: local.previewPlatform == pack.id
                       ? null
-                      : Text(localEmojiText(pack.badge), style: localEmojiStyle(theme.textTheme.labelSmall)),
+                      : LocalPackBadge(pack.id, fallback: pack.badge, size: 18, textStyle: theme.textTheme.labelSmall),
                   label: Text(i18n(pack.nameKey)),
                   selected: local.previewPlatform == pack.id,
                   selectedColor: Color(pack.accent).withValues(alpha: 0.18),
@@ -508,7 +511,7 @@ class _Tile extends StatelessWidget {
   }
 }
 
-/// The chosen pack: badge and name, "用户等级 Lv.1 · 1390 电池" and its gifts
+/// The chosen pack: badge (the logo, D08.6) and name, "用户等级 Lv.1 · 1390 电池" and its gifts
 /// (3.x `_buildPackPreview`).
 class _PackPreview extends StatelessWidget {
   const new({required this.interaction, required this.pack});
@@ -533,9 +536,24 @@ class _PackPreview extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            localEmojiText('${pack.badge} ${i18n(pack.nameKey)}'),
-            style: localEmojiStyle(theme.textTheme.titleMedium?.emphasis.copyWith(fontSize: 15)),
+          Row(
+            children: [
+              LocalPackBadge(
+                pack.id,
+                fallback: pack.badge,
+                size: 24,
+                radius: 6,
+                textStyle: theme.textTheme.titleMedium?.copyWith(fontSize: 18),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  i18n(pack.nameKey),
+                  key: const ValueKey('local-pack-preview-name'),
+                  style: theme.textTheme.titleMedium?.emphasis.copyWith(fontSize: 15),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(

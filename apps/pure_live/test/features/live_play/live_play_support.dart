@@ -266,9 +266,10 @@ LiveRoom liveRoom({
   DateTime? startedAt,
   String? link,
   Object? danmakuData = 'args-6',
+  String platform = SiteIds.bilibili,
 }) => LiveRoom(
   link: link,
-  platform: SiteIds.bilibili,
+  platform: platform,
   roomId: '6',
   nick: '主播',
   title: '今晚开黑',

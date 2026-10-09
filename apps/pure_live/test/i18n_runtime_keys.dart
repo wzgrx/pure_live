@@ -38,10 +38,11 @@ List<String> get _fontSizes => [
 /// Every interpolated key literal in `lib/`, with what it can build.
 List<RuntimeKeyRule> runtimeKeyRules() {
   final notes = {for (final id in SiteIds.supported) ?SearchCapabilities.of(id).noteKey};
-  final ownPacks = {
+  // D08.6: a pack's own words are built from its names
+  // (local_catalog.dart `_pack`).
+  Set<String> own(String Function(LocalPlatformPack pack) key, String generic) => {
     for (final pack in LocalCatalog.packs)
-      if (pack.currencyKey != LocalCatalog.genericPack.currencyKey)
-        pack.currencyKey.substring('local_currency_'.length),
+      if (key(pack) != generic) key(pack),
   };
   return [
     // features/backup/log_page.dart
@@ -95,8 +96,21 @@ List<RuntimeKeyRule> runtimeKeyRules() {
       keys: [for (final id in LocalCatalog.fontFamilyIds) 'local_danmaku_font_$id'],
       optional: false,
     ),
-    (template: 'local_currency_*', keys: [for (final own in ownPacks) 'local_currency_$own'], optional: false),
-    (template: 'local_level_*', keys: [for (final own in ownPacks) 'local_level_$own'], optional: false),
+    (
+      template: 'local_currency_*',
+      keys: [...own((pack) => pack.currencyKey, LocalCatalog.genericPack.currencyKey)],
+      optional: false,
+    ),
+    (
+      template: 'local_level_*',
+      keys: [...own((pack) => pack.levelKey, LocalCatalog.genericPack.levelKey)],
+      optional: false,
+    ),
+    (
+      template: 'local_badge_*',
+      keys: [...own((pack) => pack.badgeKey, LocalCatalog.genericPack.badgeKey)],
+      optional: false,
+    ),
     // features/live_play/player/bar_parts.dart
     (
       template: 'portrait_fullscreen_display_*',
@@ -146,6 +160,7 @@ Map<String, Iterable<String>> variableKeyTables() => {
       pack.nameKey,
       pack.currencyKey,
       pack.levelKey,
+      pack.badgeKey,
       for (final gift in LocalCatalog.giftsFor(pack.id)) gift.nameKey,
     ],
   ],

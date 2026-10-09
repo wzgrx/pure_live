@@ -43,9 +43,11 @@ final class LocalRoom {
 /// stored first and [prepare] run on the store (D08.1: what was sent
 /// before). [reuse] enters again with the services of an earlier room
 /// (left with [leaveLocalRoom]). [interaction] makes the app's local
-/// interaction (D08.3: one with a fake clock).
+/// interaction (D08.3: one with a fake clock). The room is on [platform]
+/// (D08.6: its pack).
 Future<LocalRoom> pumpLocalRoom(
   WidgetTester tester, {
+  String platform = SiteIds.bilibili,
   double width = 400,
   double height = 900,
   Map<Setting<Object>, Object> settings = const {},
@@ -73,19 +75,20 @@ Future<LocalRoom> pumpLocalRoom(
   final previous = AppNavigator.toast;
   AppNavigator.toast = toasts.add;
   addTearDown(() => AppNavigator.toast = previous);
-  final platform = FakeSite(liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30))));
+  final site = FakeSite(liveRoom(startedAt: DateTime.now().subtract(const Duration(minutes: 30)), platform: platform))
+    ..siteId = platform;
   final page = LivePlayPage(
     route: RouteArgs(
       RoutePath.kLivePlay,
-      arguments: LiveRoom(platform: SiteIds.bilibili, roomId: '6', nick: '主播'),
+      arguments: LiveRoom(platform: platform, roomId: '6', nick: '主播'),
     ),
   );
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
         appServicesProvider.overrideWithValue(services),
-        sitesProvider.overrideWithValue(SiteRegistry({SiteIds.bilibili: () => platform})),
-        danmakuProvider.overrideWithValue(DanmakuRegistry({SiteIds.bilibili: () => danmaku})),
+        sitesProvider.overrideWithValue(SiteRegistry({platform: () => site})),
+        danmakuProvider.overrideWithValue(DanmakuRegistry({platform: () => danmaku})),
         playbackSessionFactoryProvider.overrideWithValue(({config}) => fakeSession(engine)),
         if (interaction != null)
           localInteractionProvider.overrideWith((ref) {

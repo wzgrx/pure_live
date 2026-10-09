@@ -68,9 +68,11 @@ void main() {
       expect(LocalCatalog.fontFamilyIds, ['system', 'rounded', 'serif', 'mono']);
       expect(LocalCatalog.placementIds, ['scroll', 'top', 'bottom']);
       expect(LocalCatalog.titles, ['listener', 'night_owl', 'supporter', 'guardian']);
-      expect(LocalCatalog.packs, hasLength(34));
+      // D08.6: 3.x's 34 and Kick, each platform its own.
+      expect(LocalCatalog.packs, hasLength(SiteIds.supported.length));
       expect(LocalCatalog.packFor('BILIBILI').badge, '📺');
-      expect(LocalCatalog.packFor('kick'), LocalCatalog.genericPack);
+      expect(LocalCatalog.packFor('kick').id, 'kick');
+      expect(LocalCatalog.packFor('huajiao'), LocalCatalog.genericPack);
       for (final platform in ['bilibili', 'douyu', 'huya', 'douyin', 'kuaishou', 'cc', 'twitch', 'soop']) {
         final gifts = LocalCatalog.giftsFor(platform);
         expect(gifts, hasLength(3), reason: platform);
@@ -196,7 +198,9 @@ void main() {
       final line = _key('live-play-local-line');
       expect(line, findsOneWidget);
       expect(_in('live-play-local-line', find.text('本地')), findsOneWidget);
-      expect(_in('live-play-local-line', find.text('📺 舰队等级 Lv.1')), findsOneWidget);
+      // D08.6: the platform's logo before the badge's name.
+      expect(_in('live-play-local-line', find.text('舰队等级 Lv.1')), findsOneWidget);
+      expect(_in('live-play-local-badge', _key('local-pack-logo-bilibili')), findsOneWidget);
       expect(find.textContaining('听众 · Pure Live：', findRichText: true), findsWidgets);
       expect(room.toasts, isEmpty);
       final flying = tester.state<DanmakuOverlayState>(find.byType(DanmakuOverlay));
@@ -327,7 +331,8 @@ void main() {
       expect(_in('local-gift-banner', find.text('Pure Live 送出 辣条')), findsOneWidget);
       // D08.4: the count on its own, so a combo's can jump.
       expect(_in('local-gift-banner', find.text('×1')), findsOneWidget);
-      expect(_in('local-gift-banner', find.text('📺 舰队等级 Lv.1 · 听众')), findsOneWidget);
+      expect(_in('local-gift-banner', find.text('舰队等级 Lv.1 · 听众')), findsOneWidget);
+      expect(_in('local-gift-banner', _key('local-pack-logo-bilibili')), findsOneWidget, reason: 'D08.6');
       expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1090 电池')), findsOneWidget);
       expect(room.settings.get(Settings.localInteractionCoins), anyOf(1090, 1100), reason: 'written behind');
       // D08.5: a small gift's time (3.x's 3 s is a medium gift's).

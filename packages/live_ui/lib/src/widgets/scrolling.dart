@@ -149,6 +149,28 @@ class PureLiveRouteScrollScope extends StatelessWidget {
   }
 }
 
+/// Remembers where the list under [child] was scrolled to, so the list
+/// comes back there when it is taken out of the tree and built again while
+/// its route stays: a page shown in its place and closed (the settings
+/// overview on phones), a layout that crosses a breakpoint (A11.6).
+///
+/// The position goes to the route's [PageStorage] under `id` (a
+/// [PageStorageKey]); lists under one route need different ids, and a list
+/// that should start at the top again (another search) gets a new one. A
+/// page pushed over the list does not need this: the list stays in the tree
+/// under it. Lists whose controller has `keepScrollOffset: false` are not
+/// remembered.
+class KeepScrollPosition extends StatelessWidget {
+  /// Remembers the position of the list in [child] as [id].
+  new({required String id, required this.child}) : super(key: PageStorageKey<String>('scroll:$id'));
+
+  /// The list (or the page holding it).
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
+}
+
 /// Keeps a tab's page alive when it scrolls out of a [PageView] or
 /// `TabBarView` (3.x `KeepAliveWrapper`).
 class KeepAliveWrapper extends StatefulWidget {

@@ -21,6 +21,7 @@ import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 import 'package:pure_live/shared/rooms/share_code.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 LiveRoom _room(String platform, int n, {int heat = 0, LiveRestriction? restriction, LiveStatus? status}) => LiveRoom(
@@ -109,9 +110,14 @@ final class _FakeDirectory extends LiveSite implements LiveSiteCursorDirectoryPa
   }
 }
 
-Future<AppServices> _services(Map<String, LiveSite> sites, {List<String>? platforms, String? prefer}) async {
+Future<AppServices> _services(
+  Map<String, LiveSite> sites, {
+  List<String>? platforms,
+  String? prefer,
+  List<String> menus = const ['popular'],
+}) async {
   final base = await testServices();
-  await base.store.settings.set(Settings.savedMenuIds, ['popular']);
+  await base.store.settings.set(Settings.savedMenuIds, menus);
   await base.store.settings.set(Settings.showSplashPage, false);
   await base.store.settings.set(Settings.hotAreasList, platforms ?? sites.keys.toList());
   if (prefer != null) await base.store.settings.set(Settings.preferPlatform, prefer);
@@ -137,12 +143,13 @@ Future<AppServices> _pump(
   double height = 900,
   List<String>? platforms,
   String? prefer,
+  List<String> menus = const ['popular'],
 }) async {
   tester.view
     ..physicalSize = Size(width, height)
     ..devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final services = (await tester.runAsync(() => _services(sites, platforms: platforms, prefer: prefer)))!;
+  final services = (await tester.runAsync(() => _services(sites, platforms: platforms, prefer: prefer, menus: menus)))!;
   final strings = (await tester.runAsync(loadStrings))!;
   await tester.pumpWidget(
     ProviderScope(
@@ -373,6 +380,37 @@ void main() {
     AppNavigator.back();
     await tester.pumpAndSettle();
     await tester.pump(AppNavigator.openGuard);
+    await tester.runAsync(services.close);
+  });
+
+  testWidgets('A11.6: back from a room, and back on the tab after another one, the rooms are where they were', (
+    tester,
+  ) async {
+    final bilibili = _FakeSite(SiteIds.bilibili, [
+      [for (var i = 0; i < 30; i++) _room('bilibili', i, heat: 100 - i)],
+    ]);
+    final services = await _pump(tester, {SiteIds.bilibili: bilibili}, menus: ['popular', 'favorites']);
+    final grid = find.byKey(const ValueKey('popular-grid'));
+    final before = await scrollDown(tester, grid, 700);
+
+    await tester.tap(find.byType(LiveRoomCard).hitTestable().first);
+    await tester.pumpAndSettle();
+    expect(find.byType(LivePlayPage), findsOneWidget);
+    AppNavigator.back();
+    await tester.pumpAndSettle();
+    await tester.pump(AppNavigator.openGuard);
+    expect(scrollPositionOf(tester, grid).pixels, before);
+
+    // The page is built anew when its tab comes back (before A11.6 it was at
+    // the top).
+    await tester.tap(find.widgetWithText(NavigationDestination, '关注'));
+    await tester.pumpAndSettle();
+    expect(grid, findsNothing);
+    await tester.tap(find.widgetWithText(NavigationDestination, '热门'));
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
+    expect(scrollPositionOf(tester, grid).pixels, before);
     await tester.runAsync(services.close);
   });
 

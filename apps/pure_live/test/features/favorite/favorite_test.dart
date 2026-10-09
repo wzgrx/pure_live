@@ -21,6 +21,7 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_grid.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 /// A platform that answers from [details] (a missing room fails) and
@@ -743,6 +744,26 @@ void main() {
       AppNavigator.back();
       await tester.pumpAndSettle();
       await tester.pump(AppNavigator.openGuard);
+      await tester.runAsync(services.close);
+    });
+
+    testWidgets('A11.6: back from a room the follows are where they were', (tester) async {
+      final opened = <Object?>[];
+      final (services, _, _) = await pumpPage(
+        tester,
+        opened: opened,
+        follows: [for (var i = 0; i < 30; i++) room('douyu', '$i', nick: '主播$i', status: LiveStatus.live)],
+        details: {for (var i = 0; i < 30; i++) '$i': room('douyu', '$i', nick: '主播$i', status: LiveStatus.live)},
+      );
+      final grid = find.ancestor(of: find.byType(RoomGridCard).first, matching: find.byType(GridView));
+      final before = await scrollDown(tester, grid, 700);
+      await tester.tap(find.byType(RoomGridCard).hitTestable().first);
+      await tester.pumpAndSettle();
+      expect(opened, hasLength(1));
+      AppNavigator.back();
+      await tester.pumpAndSettle();
+      await tester.pump(AppNavigator.openGuard);
+      expect(scrollPositionOf(tester, grid).pixels, before);
       await tester.runAsync(services.close);
     });
 

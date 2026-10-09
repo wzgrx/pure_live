@@ -643,35 +643,40 @@ class _TaskGrid extends StatelessWidget {
       }
       final banner = view.$2;
       final rows = (tasks.length + columns - 1) ~/ columns;
-      return ListView.builder(
-        key: const ValueKey('recorder-list'),
-        controller: controller,
-        physics: const PureLiveBoundedScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(gutter, top, gutter, 24),
-        itemCount: rows + (banner ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (banner && index == 0) return _PollingOffBanner(onEnable: onEnablePolling);
-          final row = index - (banner ? 1 : 0);
-          final start = row * columns;
-          final cells = [
-            for (var column = 0; column < columns; column++)
-              if (start + column < tasks.length) card(tasks[start + column]) else null,
-          ];
-          return Padding(
-            padding: EdgeInsets.only(bottom: row == rows - 1 ? 0 : recorderCardGap),
-            child: columns == 1
-                ? cells.single
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final (column, cell) in cells.indexed) ...[
-                        if (column > 0) const SizedBox(width: recorderCardGap),
-                        Expanded(child: cell ?? const SizedBox.shrink()),
+      // Back on the recording tab after another one, the tasks are where
+      // they were (A11.6).
+      return KeepScrollPosition(
+        id: 'recorder-list',
+        child: ListView.builder(
+          key: const ValueKey('recorder-list'),
+          controller: controller,
+          physics: const PureLiveBoundedScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(gutter, top, gutter, 24),
+          itemCount: rows + (banner ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (banner && index == 0) return _PollingOffBanner(onEnable: onEnablePolling);
+            final row = index - (banner ? 1 : 0);
+            final start = row * columns;
+            final cells = [
+              for (var column = 0; column < columns; column++)
+                if (start + column < tasks.length) card(tasks[start + column]) else null,
+            ];
+            return Padding(
+              padding: EdgeInsets.only(bottom: row == rows - 1 ? 0 : recorderCardGap),
+              child: columns == 1
+                  ? cells.single
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final (column, cell) in cells.indexed) ...[
+                          if (column > 0) const SizedBox(width: recorderCardGap),
+                          Expanded(child: cell ?? const SizedBox.shrink()),
+                        ],
                       ],
-                    ],
-                  ),
-          );
-        },
+                    ),
+            );
+          },
+        ),
       );
     },
   );

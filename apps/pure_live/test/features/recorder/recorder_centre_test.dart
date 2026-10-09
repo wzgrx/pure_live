@@ -25,6 +25,7 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/record/record_state.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 /// FFmpeg is never started by these tests.
@@ -141,6 +142,7 @@ Future<(AppRecording, _Outside)> _pump(
   WidgetTester tester, {
   Size size = const Size(393, 852),
   bool inHome = false,
+  bool tabs = false,
   Object? arguments,
   List<RecordTask> tasks = const [],
   void Function(AppRecording recording)? prepare,
@@ -207,10 +209,13 @@ Future<(AppRecording, _Outside)> _pump(
             onGenerateInitialRoutes: (navigator, _) => [
               MaterialPageRoute<void>(builder: (_) => const Scaffold()),
               MaterialPageRoute<void>(
-                builder: (_) => RecorderPage(
-                  route: RouteArgs(RoutePath.kRecordPage, arguments: arguments, inHome: inHome),
-                  now: () => _now,
-                ),
+                builder: (_) {
+                  final page = RecorderPage(
+                    route: RouteArgs(RoutePath.kRecordPage, arguments: arguments, inHome: inHome),
+                    now: () => _now,
+                  );
+                  return tabs ? _Tabs(page: page) : page;
+                },
               ),
             ],
           ),
@@ -220,6 +225,33 @@ Future<(AppRecording, _Outside)> _pump(
   );
   await _settle(tester);
   return (recording, outside);
+}
+
+/// The home's bottom tabs in short: [page] or another tab, one at a time
+/// (the page is built anew when its tab comes back).
+class _Tabs extends StatefulWidget {
+  const new({required this.page});
+
+  final Widget page;
+
+  @override
+  State<_Tabs> createState() => _TabsState();
+}
+
+class _TabsState extends State<_Tabs> {
+  bool _shown = true;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      Expanded(child: _shown ? widget.page : const SizedBox()),
+      TextButton(
+        key: const ValueKey('other-tab'),
+        onPressed: () => setState(() => _shown = !_shown),
+        child: const Text('tab'),
+      ),
+    ],
+  );
 }
 
 /// Lets real async work (the store, the file system) finish, then the frames.
@@ -659,6 +691,34 @@ void main() {
     expect(recording.recorder!.tasks, hasLength(8));
     expect(_card('i'), findsNothing);
     expect(tester.widget<Text>(_key('recorder-filter-all-label')).textSpan!.toPlainText(), '全部 8');
+    await _drain(tester);
+  });
+
+  testWidgets('A11.6: back from a page over the centre, and back on its home tab, the tasks are where they were', (
+    tester,
+  ) async {
+    await _pump(tester, inHome: true, tabs: true, tasks: [for (var i = 0; i < 12; i++) _task('$i', minutesAgo: i)]);
+    final list = _key('recorder-list');
+    await tester.drag(list, const Offset(0, -600));
+    await _frames(tester);
+    final before = scrollPositionOf(tester, list).pixels;
+    expect(before, greaterThan(0));
+
+    Navigator.of(tester.element(list)).push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('sub'))));
+    await _frames(tester);
+    expect(find.text('sub'), findsOneWidget);
+    Navigator.of(tester.element(find.text('sub'))).pop();
+    await tester.pump(const Duration(seconds: 1));
+    await _frames(tester);
+    expect(scrollPositionOf(tester, list).pixels, before);
+
+    // Before A11.6 at the top.
+    await tester.tap(_key('other-tab'));
+    await _frames(tester);
+    expect(list, findsNothing);
+    await tester.tap(_key('other-tab'));
+    await _settle(tester);
+    expect(scrollPositionOf(tester, list).pixels, before);
     await _drain(tester);
   });
 

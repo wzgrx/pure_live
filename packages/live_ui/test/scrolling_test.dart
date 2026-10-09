@@ -45,4 +45,45 @@ void main() {
     await tester.pumpAndSettle();
     expect(controller.offset, controller.position.maxScrollExtent);
   });
+  testWidgets('A11.6: a list built again comes back where it was; another id starts at the top', (tester) async {
+    var shown = true;
+    var id = 'a';
+    late StateSetter setOuter;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        // A route gives its pages a PageStorage; here one of its own.
+        child: PageStorage(
+          bucket: PageStorageBucket(),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              setOuter = setState;
+              return shown
+                  ? KeepScrollPosition(
+                      id: id,
+                      child: ListView(children: [for (var i = 0; i < 50; i++) SizedBox(height: 50, child: Text('$i'))]),
+                    )
+                  : const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+    double offset() => tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
+    final before = offset();
+    expect(before, greaterThan(0));
+
+    setOuter(() => shown = false);
+    await tester.pump();
+    expect(find.byType(ListView), findsNothing);
+    setOuter(() => shown = true);
+    await tester.pump();
+    expect(offset(), before);
+
+    setOuter(() => id = 'b');
+    await tester.pump();
+    expect(offset(), 0);
+  });
 }

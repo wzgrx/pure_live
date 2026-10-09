@@ -257,6 +257,22 @@ void main() {
     });
   });
 
+  test('D07.2: both super chats are in yuan (cprice and realPrice in fen), as the platform table says', () {
+    final paid = [
+      for (final body in [
+        'type@=comm_chatmsg/now@=1790519453000/cet@=60/cprice@=3000/chatmsg@=nn@A=付费观众@Stxt@A=加油@S/',
+        'type@=voice_trlt/list@=acptime@AA=1790519453@ASetime@AA=1790519513@ASrealPrice@AA=5000@AScontent@AA=唱歌@ASun@AA=听众@AS@S/',
+      ])
+        for (final message in DouyuDanmakuProtocol.decode(
+          DouyuDanmakuProtocol.packet(body, type: DouyuDanmakuProtocol.serverPacketType),
+          roomId: '1',
+        ))
+          if (message.data case final LiveSuperChatMessage data) data,
+    ];
+    expect([for (final data in paid) (data.price, data.unit)], [(30, LiveGiftUnit.yuan), (50, LiveGiftUnit.yuan)]);
+    expect(superChatUnits[SiteIds.douyu], LiveGiftUnit.yuan);
+  });
+
   group('recorded frames (S13-live) against 3.x', () {
     test('every incoming frame decodes to what 3.x decoded', () {
       var filterCalls = 0;

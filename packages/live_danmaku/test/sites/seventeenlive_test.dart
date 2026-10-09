@@ -1603,6 +1603,9 @@ void main() {
       expect(data.face, 'https://cdn.17app.co/THUMBNAIL_00000001-0000-4000-8000-000000000001.jpg');
       expect(data.message, text);
       expect((data.price, data.priceText), (79, '79 coins'));
+      // D07.2: the unit of the platform table (superChatUnits).
+      expect(data.unit, LiveGiftUnit.point);
+      expect(superChatUnits[SiteIds.seventeenLive], data.unit);
       expect(data.startTime, DateTime.fromMillisecondsSinceEpoch(1790782366575));
       expect(data.endTime, DateTime.fromMillisecondsSinceEpoch(1790782366575 + 20000));
       expect((data.backgroundColor, data.backgroundBottomColor), ('#F518CC', '#F518CC'));

@@ -182,6 +182,12 @@ abstract final class TwitchDanmakuProtocol {
     'standardpayforward',
   };
 
+  /// The [subscriptionNotices] that are one viewer's share of a community
+  /// gift when they carry `msg-param-community-gift-id`: the
+  /// `submysterygift` before them announces the whole gift, so they are
+  /// [LiveNoticeKind.giftedSubscription] (D07.2: no card of their own).
+  static const Set<String> communityShares = {'subgift', 'anonsubgift'};
+
   /// The system notice reported once per `connect` when
   /// Twitch refused the stored chat login and chat went on anonymously (B-7).
   static const LiveMessage cookieExpiredNotice = LiveMessage(
@@ -236,7 +242,9 @@ abstract final class TwitchDanmakuProtocol {
   ///   a retraction of everything. A user named without an id cannot be
   ///   matched and is skipped, never taken for a clear;
   /// - `USERNOTICE`: the `system-msg` as a notice, a
-  ///   [LiveNoticeKind.subscription] for [subscriptionNotices], a
+  ///   [LiveNoticeKind.subscription] for [subscriptionNotices] (a share of
+  ///   a community gift, [communityShares], is
+  ///   [LiveNoticeKind.giftedSubscription]), a
   ///   [LiveNoticeKind.raid] for `raid`, [LiveNoticeKind.system] otherwise
   ///   (none when the text is empty); then the viewer's own words, when
   ///   there are any, as their chat carrying the notice's `id`. An
@@ -283,7 +291,9 @@ abstract final class TwitchDanmakuProtocol {
               message: text,
               color: LiveMessageColor.white,
               data: subscriptionNotices.contains(kind)
-                  ? LiveNoticeKind.subscription
+                  ? (communityShares.contains(kind) && (tags['msg-param-community-gift-id'] ?? '').isNotEmpty
+                        ? LiveNoticeKind.giftedSubscription
+                        : LiveNoticeKind.subscription)
                   : kind == 'raid'
                   ? LiveNoticeKind.raid
                   : LiveNoticeKind.system,

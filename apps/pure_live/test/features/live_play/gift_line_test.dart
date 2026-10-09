@@ -531,6 +531,8 @@ void main() {
       expect((giftValuableYuan, giftPreciousYuan), (10, 100));
       expect(giftUnitsPerYuan, {
         LiveGiftUnit.fen: 100,
+        // D07.2: whole yuan (super chats, a guard's card).
+        LiveGiftUnit.yuan: 1,
         LiveGiftUnit.goldSeed: 1000,
         LiveGiftUnit.diamond: 10,
         LiveGiftUnit.douyinCoin: 10,

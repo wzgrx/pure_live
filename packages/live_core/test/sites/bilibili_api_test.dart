@@ -603,6 +603,9 @@ void main() {
     );
     expect(chats, hasLength(1));
     expect(chats.single.messageId, '9');
+    // D07.2: yuan, the unit of the platform table (superChatUnits).
+    expect((chats.single.price, chats.single.unit), (30, LiveGiftUnit.yuan));
+    expect(superChatUnits[SiteIds.bilibili], LiveGiftUnit.yuan);
     expect(chats.single.face, 'https://i0.hdslb.com/f.jpg@200w.jpg');
     expect(chats.single.endTime.difference(chats.single.startTime), const Duration(minutes: 1));
   });

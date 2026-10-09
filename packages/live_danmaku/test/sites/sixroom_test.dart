@@ -531,7 +531,8 @@ void main() {
       expect(of(_chat(tm: 8640000000000))!.sentAt, DateTime.fromMillisecondsSinceEpoch(8640000000000000));
     });
 
-    test('messages: 101 alone, 110 and 1413 lists, 108 fly-screen, other types, nesting and guest filters', () {
+    test('messages: 101 alone, 110 and 1413 lists, 108 fly-screen (a super chat, D07.2), other types, nesting and '
+        'guest filters', () {
       List<String> texts(Object? message) => [for (final m in SixRoomDanmakuProtocol.messages(message)) m.message];
       expect(texts(_chat(content: 'one')), ['one']);
       expect(texts({..._chat(content: 'one'), 'typeID': '101'}), ['one']);
@@ -591,6 +592,31 @@ void main() {
       }).single;
       expect((fly.userName, fly.userId, fly.message), ('观众3', '10000003', '主播生日快乐 & 天天开心'));
       expect(fly.sentAt, DateTime.fromMillisecondsSinceEpoch(1790771600000));
+      // D07.2: a super chat of 1000 six coins (the room page's price), a
+      // minute from its time; no avatar or colours (the page has its own).
+      expect(fly.type, LiveMessageType.superChat);
+      final paid = fly.data! as LiveSuperChatMessage;
+      expect(
+        (paid.userName, paid.message, paid.price, paid.unit, paid.priceText, paid.face),
+        ('观众3', '主播生日快乐 & 天天开心', 1000, LiveGiftUnit.sixCoin, '', ''),
+      );
+      expect(SixRoomDanmakuProtocol.flyScreenPrice, 1000);
+      expect(paid.startTime, DateTime.fromMillisecondsSinceEpoch(1790771600000));
+      expect(paid.endTime.difference(paid.startTime), const Duration(minutes: 1));
+      expect((paid.backgroundColor, paid.backgroundBottomColor), ('', ''));
+      // Without a time it starts when it came; in a batch it is read too.
+      final now = DateTime(2026, 10, 9, 20);
+      final untimed = SixRoomDanmakuProtocol.fly({'typeID': 108, 'from': '观众4', 'content': '晚上好'}, now: now)!;
+      expect((untimed.data! as LiveSuperChatMessage).startTime, now);
+      expect(
+        SixRoomDanmakuProtocol.messages({
+          'typeID': 1413,
+          'content': [
+            {'typeID': 108, 'from': '观众5', 'content': '飞'},
+          ],
+        }).single.type,
+        LiveMessageType.superChat,
+      );
       expect(texts({'typeID': 108, 'content': '无名'}), ['无名']);
       expect(texts({'typeID': 108, 'from': '观众3', 'content': ' '}), isEmpty);
       for (final type in [102, 107, 111, 123, 153, 201, 413, 1570, 4185, 865, 5100, '', null]) {

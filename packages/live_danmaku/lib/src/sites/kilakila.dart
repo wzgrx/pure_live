@@ -383,6 +383,7 @@ abstract final class KilakilaDanmakuProtocol {
       message: text,
       price: price,
       priceText: '${amount(price)}红豆',
+      unit: LiveGiftUnit.redBean,
       startTime: start,
       endTime: start.add(questionDisplay),
       backgroundColor: '',

@@ -277,6 +277,20 @@ void main() {
       await _close(tester, room);
     });
 
+    testWidgets('D07.2: CHZZK, YouTube and the other new ones have super chats; empty, they say "会显示在这里"', (
+      tester,
+    ) async {
+      for (final id in [SiteIds.chzzk, SiteIds.youtube, SiteIds.kick, SiteIds.sixRoom]) {
+        final room = await _pump(tester, site: FakeSite(liveRoom())..siteId = id);
+        await tester.tap(_in('live-play-tabs', find.text('醒目留言')));
+        await tester.pumpAndSettle();
+        expect(find.text('暂无醒目留言'), findsOneWidget, reason: id);
+        expect(find.text('当前直播间的付费留言会显示在这里。'), findsOneWidget, reason: id);
+        expect(find.textContaining('没有醒目留言'), findsNothing, reason: id);
+        await _close(tester, room);
+      }
+    });
+
     testWidgets('a narrow column stacks the head (3.x, under 280)', (tester) async {
       final now = DateTime(2026, 10, 1, 21);
       final superChat = _superChat('夜猫子', 100, '#FFF1C5', '#E2B52B', now, const Duration(minutes: 4, seconds: 36));
@@ -375,6 +389,28 @@ void main() {
       expect(tester.widget<Switch>(shown).value, isTrue, reason: 'one setting, both places');
       await _close(tester, room);
     });
+  });
+
+  testWidgets('D07.2: "上舰和开会员进醒目留言" is on, after the gift rows, in the tab and the picture panel', (tester) async {
+    final room = await _pump(tester, height: 6000);
+    const expected = ['在聊天列表显示礼物', '只显示值钱的礼物', '礼物价值换算成元', '上舰和开会员进醒目留言'];
+    await tester.tap(_in('live-play-tabs', find.text('弹幕设置')));
+    await tester.pumpAndSettle();
+    expect(_topDown(tester, expected), expected, reason: 'the tab');
+    final tab = find.byKey(const ValueKey('danmaku-switch-membershipCards'));
+    expect(tester.widget<Switch>(tab).value, isTrue, reason: 'on by default (D-040)');
+    await tester.tap(tab);
+    await _settle(tester);
+    expect(room.services.store.settings.get(Settings.superChatIncludesMembership), isFalse);
+    await tester.tap(
+      find.byWidgetPredicate((w) => w.key == const ValueKey('live-play-danmaku-settings') && w is! ListView),
+    );
+    await tester.pumpAndSettle();
+    final panel = find.byKey(const ValueKey('panel-danmaku'));
+    expect(find.descendant(of: panel, matching: find.text('上舰和开会员进醒目留言')), findsOneWidget);
+    final shown = find.descendant(of: panel, matching: find.byKey(const ValueKey('danmaku-switch-membershipCards')));
+    expect(tester.widget<Switch>(shown).value, isFalse, reason: 'one setting, both places');
+    await _close(tester, room);
   });
 
   group('block list (c11-c16, E3, E4)', () {

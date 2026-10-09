@@ -1205,6 +1205,9 @@ void main() {
       expect(chats.map((chat) => chat.messageId), ['huya:2', 'huya:1']);
       final first = chats.first;
       expect((first.userName, first.face, first.price), ('nick', 'https://a.msstatic.com/f.jpg', 12));
+      // D07.2: the unit of the platform table (superChatUnits).
+      expect(first.unit, LiveGiftUnit.yuan);
+      expect(superChatUnits[SiteIds.huya], first.unit);
       expect(first.endTime, now.add(const Duration(seconds: 50)));
       expect(first.startTime, now.subtract(const Duration(seconds: 10)));
       expect((first.backgroundColor, first.backgroundBottomColor), ('#ffffff', '#246488'));

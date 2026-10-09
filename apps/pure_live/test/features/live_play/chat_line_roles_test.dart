@@ -307,16 +307,18 @@ void main() {
         face: '',
         message: '加油',
         price: 30,
+        unit: LiveGiftUnit.yuan,
         startTime: start,
         endTime: start.add(const Duration(minutes: 1)),
         backgroundColor: '#2A60B2',
         backgroundBottomColor: '#427D9E',
       );
       await _pumpLine(tester, ChatLine.superChat(superChat));
-      expect(find.textContaining('老板 · ￥30：加油', findRichText: true), findsOneWidget);
+      // D07.2: the platform's unit (3.x wrote ￥30).
+      expect(find.textContaining('老板 · 30 元：加油', findRichText: true), findsOneWidget);
       await _pumpLine(tester, ChatLine.superChat(superChat), showName: false);
       expect(find.textContaining('老板', findRichText: true), findsNothing);
-      expect(find.textContaining('￥30：加油', findRichText: true), findsOneWidget);
+      expect(find.textContaining('30 元：加油', findRichText: true), findsOneWidget);
 
       final theme = const LiveTheme().light;
       await _pumpLine(tester, ChatLine.chat(_local()));

@@ -368,6 +368,7 @@ abstract final class MissevanDanmakuProtocol {
         message: text,
         price: price,
         priceText: '$price 钻',
+        unit: LiveGiftUnit.diamond,
         startTime: start,
         endTime: start.add(questionDuration),
         backgroundColor: '',

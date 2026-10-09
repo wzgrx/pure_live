@@ -974,6 +974,23 @@ void main() {
       expect(TwitchDanmakuProtocol.subscriptionNotices, hasLength(12));
     });
 
+    test('D07.2: a subgift inside a community gift is its share; one of its own and the gift itself are '
+        'subscriptions', () {
+      LiveMessage notice(String msgId, {String community = ''}) => TwitchDanmakuProtocol.decode(
+        _command('USERNOTICE', {
+          ..._viewerNotice(msgId, 'Viewer_A did "$msgId".'),
+          if (community.isNotEmpty) 'msg-param-community-gift-id': community,
+        }),
+      ).messages.single;
+      expect(TwitchDanmakuProtocol.communityShares, {'subgift', 'anonsubgift'});
+      for (final msgId in TwitchDanmakuProtocol.communityShares) {
+        expect(notice(msgId, community: '3918641243089153208').data, LiveNoticeKind.giftedSubscription, reason: msgId);
+        expect(notice(msgId).data, LiveNoticeKind.subscription, reason: '$msgId of its own');
+      }
+      // The community gift announces itself with the same id: a subscription.
+      expect(notice('submysterygift', community: '3918641243089153208').data, LiveNoticeKind.subscription);
+    });
+
     test("a raid is a raid notice in the platform's words", () {
       final raid = _command('USERNOTICE', {
         ..._viewerNotice('raid', '1234 raiders from Raider_B have joined!'),
@@ -1173,8 +1190,9 @@ void main() {
           ],
           [
             (LiveNoticeKind.subscription, 'pfxqwzmw', '5696248051', 'pfxqwzmw subscribed at Tier 1.'),
+            // D07.2: one share of the community gift announced next.
             (
-              LiveNoticeKind.subscription,
+              LiveNoticeKind.giftedSubscription,
               'fyiimgxdzsmybw',
               '984515358',
               'fyiimgxdzsmybw gifted a Tier 1 sub to yjjgig81!',
@@ -1210,7 +1228,7 @@ void main() {
             // Twitch's placeholder for an anonymous gifter; its system-msg ends
             // with a space.
             (
-              LiveNoticeKind.subscription,
+              LiveNoticeKind.giftedSubscription,
               'AnAnonymousGifter',
               '274598607',
               'An anonymous user gifted a Tier 1 sub to SiiYctRkf!',
@@ -1413,7 +1431,7 @@ void main() {
           ),
           (
             'notice',
-            LiveNoticeKind.subscription,
+            LiveNoticeKind.giftedSubscription,
             'jguftmnrip3',
             '667743933',
             'jguftmnrip3 gifted a Tier 1 sub to sdo_skt!',

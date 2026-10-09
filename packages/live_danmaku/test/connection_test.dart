@@ -101,6 +101,7 @@ void main() {
               face: 'f',
               message: '谢谢\uFFFC',
               price: 30,
+              unit: LiveGiftUnit.yuan,
               startTime: start,
               endTime: start,
               backgroundColor: '#fff',
@@ -119,6 +120,7 @@ void main() {
       );
       final paid = messages[2].data! as LiveSuperChatMessage;
       expect((paid.userName, paid.message, paid.price, paid.messageId), ('老板', '谢谢', 30, 's1'));
+      expect(paid.unit, LiveGiftUnit.yuan, reason: 'D07.2: the cleaned copy keeps the unit');
     });
 
     test('events arrive synchronously, while the platform reports them', () async {

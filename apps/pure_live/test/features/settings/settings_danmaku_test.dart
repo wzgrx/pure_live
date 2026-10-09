@@ -259,6 +259,27 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('D07.2: "上舰和开会员进醒目留言" after the gift rows, on by default, not greyed by the gift switch; '
+        'search finds it', (tester) async {
+      final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+      final list = find.byType(ChatListSettings);
+      expect(find.descendant(of: list, matching: row('membershipCards')), findsOneWidget);
+      expectInOrder(tester, [row('gifts'), row('valuableGifts'), row('giftYuan'), row('membershipCards')]);
+      expect(find.text('上舰和开会员进醒目留言'), findsOneWidget);
+      expect(tester.widget<Switch>(_switch('membershipCards')).value, isTrue, reason: 'on by default (D-040)');
+      await tapSettings(tester, _switch('gifts'));
+      expect(tester.widget<Switch>(_switch('membershipCards')).onChanged, isNotNull, reason: 'its own switch');
+      await tapSettings(tester, _switch('membershipCards'));
+      expect(h.settings.get(Settings.superChatIncludesMembership), isFalse);
+
+      await pumpSettings(tester);
+      for (final words in ['上舰', '醒目留言 会员']) {
+        await searchSettingsFor(tester, words);
+        expect(settingsRow('danmaku_membership_cards'), findsOneWidget, reason: words);
+      }
+      expect(find.text('弹幕 › 弹幕列表'), findsWidgets);
+    });
+
     testWidgets('search finds the three: two under "弹幕 › 弹幕列表", one under "弹幕 › 显示范围"', (tester) async {
       await pumpSettings(tester);
       await searchSettingsFor(tester, '值钱');

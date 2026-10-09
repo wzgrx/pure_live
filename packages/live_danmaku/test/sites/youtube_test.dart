@@ -1105,16 +1105,21 @@ void main() {
       // The recording's ticker items were scrubbed to {}, so the time is the
       // tier's, told by the header colour.
       expect(
-        [for (final message in paid) (_superChat(message)['priceText'], _superChat(message)['seconds'])],
         [
-          ('₫1,000,000', 3600),
-          ('TRY 55.00', 120),
-          ('TRY 550.00', 1800),
-          ('TRY 109.99', 120),
-          ('TRY 1,100.00', 3600),
-          ('TRY 22.00', 60),
+          for (final message in paid)
+            (_superChat(message)['priceText'], _superChat(message)['price'], _superChat(message)['seconds']),
+        ],
+        [
+          ('₫1,000,000', 1000000, 3600),
+          ('TRY 55.00', 55, 120),
+          ('TRY 550.00', 550, 1800),
+          ('TRY 109.99', 109, 120),
+          ('TRY 1,100.00', 1100, 3600),
+          ('TRY 22.00', 22, 60),
         ],
       );
+      // D07.2: YouTube has no unit of its own; the text says the currency.
+      expect(paid.map((message) => (message.data! as LiveSuperChatMessage).unit), everyElement(LiveGiftUnit.other));
       final one = paid[2];
       expect(_superChat(one), {
         'id': 'ChwKGkNQbWNpY2Vra3BjREZiekdQd1FkcjlBdGln',
@@ -1122,7 +1127,8 @@ void main() {
         'userId': 'UC_b8aCJb3slYrZuLjea38Sr',
         'face': '',
         'message': startsWith('Nihat abi bu adamı 3 cümlenle'),
-        'price': 0,
+        // D07.2: the whole amount of the text orders and compares.
+        'price': 550,
         'priceText': 'TRY 550.00',
         'startMicros': 1790633230349018,
         'seconds': 1800,
@@ -1263,7 +1269,7 @@ void main() {
           'userId': 'UCsyntheticPayer00000001',
           'face': 'https://yt4.ggpht.com/synthetic-photo=s64-c-k-c0x00ffffff-no-rj',
           'message': 'thanks',
-          'price': 0,
+          'price': 5,
           'priceText': r'$5.00',
           'startMicros': now.microsecondsSinceEpoch,
           'seconds': 3600,
@@ -1275,7 +1281,7 @@ void main() {
           'userId': 'UCsyntheticPayer00000002',
           'face': '',
           'message': 'thanks',
-          'price': 0,
+          'price': 5,
           'priceText': r'$5.00',
           'startMicros': now.microsecondsSinceEpoch,
           'seconds': 60,
@@ -1287,7 +1293,7 @@ void main() {
           'userId': 'UCsyntheticPayer00000003',
           'face': 'https://yt4.ggpht.com/synthetic-photo=s64',
           'message': '',
-          'price': 0,
+          'price': 2,
           'priceText': r'$2.00',
           'startMicros': 1790781200000003,
           'seconds': 3600,
@@ -1336,7 +1342,7 @@ void main() {
         'userId': 'UCsyntheticViewer0001001',
         'face': '',
         'message': 'great show 👏',
-        'price': 0,
+        'price': 55,
         'priceText': 'TRY 55.00',
         'startMicros': 1790633001000000,
         'seconds': 3600,
@@ -1434,7 +1440,7 @@ void main() {
       expect(_messages(_chatAnswer(items)), [
         {
           'event': 'notice',
-          'kind': 'subscription',
+          'kind': 'system',
           'id': 'ChwKGkNLV09sLURKbHBjREZhRFB3Z1FkbU5FYjJB',
           'sentAtMicros': 1790780659954090,
           'userId': 'UCXKrfBiorCZiMkmwjl2eltS',
@@ -1455,7 +1461,7 @@ void main() {
         },
         {
           'event': 'notice',
-          'kind': 'subscription',
+          'kind': 'system',
           'id': 'ChwKGkNNNll5SURKbHBjREZTWEV3Z1FkX0pvcDJR',
           'sentAtMicros': 1790780457858217,
           'userId': 'UC6ohVsPewG0uRNJ9IoPJi-o',
@@ -1464,7 +1470,7 @@ void main() {
         },
         {
           'event': 'notice',
-          'kind': 'subscription',
+          'kind': 'system',
           'id': 'ChwKGkNKS0o3ZTdJbHBjREZjWGV3Z1FkeWlNS0x3',
           'sentAtMicros': 1790780435460460,
           'userId': 'UCqTl-CDxSXu7SAIrp5YZKT-',
@@ -1564,9 +1570,19 @@ void main() {
       );
       final messages = YouTubeDanmakuProtocol.chat(answer).messages;
       expect(messages.last.type, LiveMessageType.gift);
+      // D07.2: the purchase and the memberships are subscriptions (a card
+      // each), the received gift its share, the stickers no membership.
       expect(
-        messages.take(messages.length - 1).every((message) => message.data == LiveNoticeKind.subscription),
-        isTrue,
+        [for (final message in messages.take(messages.length - 1)) message.data],
+        [
+          LiveNoticeKind.giftedSubscription,
+          LiveNoticeKind.subscription,
+          LiveNoticeKind.subscription,
+          LiveNoticeKind.subscription,
+          LiveNoticeKind.system,
+          LiveNoticeKind.system,
+          LiveNoticeKind.system,
+        ],
       );
       expect(
         [messages[0].userId, messages[0].userName, messages[0].sentAt?.microsecondsSinceEpoch],
@@ -2382,7 +2398,7 @@ void main() {
         'userId': 'UCcX9fFIssJoxHJaO5W_Uhqy',
         'face': '',
         'message': startsWith('ころさんお誕生日おめでとう～～～！'),
-        'price': 0,
+        'price': 5633,
         'priceText': r'NT$5,633.00',
         'startMicros': 1790780459957613,
         'colors': ['#d00000', '#e62117'],

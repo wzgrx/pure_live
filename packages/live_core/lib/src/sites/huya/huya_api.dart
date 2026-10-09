@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:live_core/src/audience.dart';
 import 'package:live_core/src/json.dart';
 import 'package:live_core/src/live_area.dart';
+import 'package:live_core/src/live_gift.dart';
 import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
@@ -1167,6 +1168,7 @@ abstract final class HuyaApi {
           face: normalizeImageUrl(user?.string(2)),
           message: content,
           price: cost > 0 ? cost : (paid > 0 ? max(1, (paid / 100).round()) : cost),
+          unit: LiveGiftUnit.yuan,
           startTime: end.subtract(Duration(seconds: total > 0 ? total : remaining)),
           endTime: end,
           backgroundColor: '#ffffff',

@@ -175,10 +175,14 @@ class SuperChatCard extends StatelessWidget {
       children: [
         const Icon(AppIcons.superChatPrice, size: 16, color: LiveSemanticColors.superChatGold),
         const SizedBox(width: 3),
-        Text(
-          superChatPrice(superChat),
-          key: const ValueKey('super-chat-price'),
-          style: theme.textTheme.titleSmall?.emphasis.tabular.copyWith(fontSize: 15, color: ink),
+        // D07.2: a price in the platform's words ("1000 六币", "₫1,000,000")
+        // wraps in a narrow column with large text instead of overflowing.
+        Flexible(
+          child: Text(
+            superChatPrice(superChat),
+            key: const ValueKey('super-chat-price'),
+            style: theme.textTheme.titleSmall?.emphasis.tabular.copyWith(fontSize: 15, color: ink),
+          ),
         ),
       ],
     );

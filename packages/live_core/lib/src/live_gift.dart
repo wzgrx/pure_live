@@ -40,6 +40,11 @@ enum LiveGiftUnit {
   /// Fen, a hundredth of a yuan (Douyu's gift table prices).
   fen,
 
+  /// Whole yuan: the super chats of Bilibili (`SUPER_CHAT_MESSAGE.price`),
+  /// Douyu (`cprice` in fen, read as yuan) and Huya (D07.2), and a
+  /// Bilibili guard's card (198 yuan a month of 舰长).
+  yuan,
+
   /// Bilibili gold seeds (金瓜子).
   goldSeed,
 
@@ -70,6 +75,11 @@ enum LiveGiftUnit {
   /// Douyin coins (抖币).
   douyinCoin,
 
+  /// Six Rooms coins (六币): a fly-screen costs 1000 (D07.2, the room
+  /// page's `data-sug`). Its rate in yuan is not checked, so it is not
+  /// ranked.
+  sixCoin,
+
   /// A unit the platform does not document (Huya's `lPayTotal`), or no
   /// value at all.
   other,
@@ -80,7 +90,7 @@ enum LiveGiftUnit {
 /// ones are rough (100 Bits or 100 Kicks about a US dollar, cheese one won,
 /// a star balloon about 110 won, a niconico point about a yen) and only
 /// rank gifts, never convert a value shown. A unit missing here (red beans,
-/// silver seeds, [LiveGiftUnit.other]) is never ranked above
+/// six coins, silver seeds, [LiveGiftUnit.other]) is never ranked above
 /// [LiveGiftTier.normal].
 ///
 /// The table and the [giftValuableYuan], [giftPreciousYuan] thresholds were
@@ -89,6 +99,7 @@ enum LiveGiftUnit {
 /// applies everywhere.
 const Map<LiveGiftUnit, double> giftUnitsPerYuan = {
   LiveGiftUnit.fen: 100,
+  LiveGiftUnit.yuan: 1,
   LiveGiftUnit.goldSeed: 1000,
   LiveGiftUnit.diamond: 10,
   LiveGiftUnit.douyinCoin: 10,

@@ -547,8 +547,8 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// One added item: a text message as a chat line; a paid message as a
   /// super chat; a Super Sticker, a membership (joined, a milestone), gifted
-  /// memberships and a received gift membership as a notice; a gift as a
-  /// gift (B-23). Null for anything else and for items without text.
+  /// memberships and a received gift membership as a notice (of its kind,
+  /// D07.2); a gift as a gift (B-23). Null for anything else and for items without text.
   static LiveMessage? _item(Map<Object?, Object?> item, Map<String, Duration> pinned, DateTime received) {
     if (item['liveChatTextMessageRenderer'] case final Map<Object?, Object?> text) return _chatLine(text);
     if (item['liveChatPaidMessageRenderer'] case final Map<Object?, Object?> paid) {
@@ -562,7 +562,7 @@ abstract final class YouTubeDanmakuProtocol {
       return _notice(gift, _plain(header['authorName']), _plain(header['primaryText']).trim());
     }
     if (item['liveChatSponsorshipsGiftRedemptionAnnouncementRenderer'] case final Map<Object?, Object?> gift) {
-      return _notice(gift, _plain(gift['authorName']), _runs(gift['message']));
+      return _notice(gift, _plain(gift['authorName']), _runs(gift['message']), kind: LiveNoticeKind.giftedSubscription);
     }
     return null;
   }
@@ -584,8 +584,9 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// A paid message (Super Chat) as a super chat: the amount as the page
   /// shows it (`purchaseAmountText`, in the buyer's currency, not
-  /// converted) and a price of 0 (the answer has no number for it, only
-  /// that text); the header and body colours; shown from the platform time
+  /// converted) and as the price the whole number in that text
+  /// ([superChatAmount], D07.2: the answer has no number of its own; it
+  /// only orders and compares); the header and body colours; shown from the platform time
   /// (or [received]) for as long as the page pins it: the ticker item's
   /// `fullDurationSec`, else [tierDisplay] by the header colour, else
   /// [unpinnedDisplay]; or until [end] when given (a Super Chat still pinned
@@ -621,7 +622,7 @@ abstract final class YouTubeDanmakuProtocol {
         userName: name,
         face: _photo(paid['authorPhoto']),
         message: text,
-        price: 0,
+        price: superChatAmount(amount),
         priceText: amount,
         startTime: start,
         endTime: end ?? start.add(display),
@@ -631,15 +632,17 @@ abstract final class YouTubeDanmakuProtocol {
     );
   }
 
-  /// A Super Sticker as a notice: the page shows the name, the amount and
-  /// the sticker, whose description (`sticker.accessibility`) stands for it.
-  /// The page has no sentence for it, so the words joining them are the
-  /// app's (Chinese); the amount and description are the platform's.
+  /// A Super Sticker as a [LiveNoticeKind.system] notice (D07.2: it is no
+  /// membership, so no membership card; D07.6 makes it a super chat): the
+  /// page shows the name, the amount and the sticker, whose description
+  /// (`sticker.accessibility`) stands for it. The page has no sentence for
+  /// it, so the words joining them are the app's (Chinese); the amount and
+  /// description are the platform's.
   static LiveMessage? _sticker(Map<Object?, Object?> sticker) {
     final amount = _plain(sticker['purchaseAmountText']).trim();
     final label = _accessibility(sticker['sticker']);
     final text = ['送出 Super Sticker${amount.isEmpty ? '' : ' $amount'}', if (label.isNotEmpty) label].join('：');
-    return _notice(sticker, _plain(sticker['authorName']), text);
+    return _notice(sticker, _plain(sticker['authorName']), text, kind: LiveNoticeKind.system);
   }
 
   /// A membership as a notice: a new member's `headerSubtext` ("Welcome to
@@ -698,13 +701,15 @@ abstract final class YouTubeDanmakuProtocol {
     _ => '',
   };
 
-  /// A notice of kind [LiveNoticeKind.subscription]: [name] and [text] as
-  /// one line, the item's id, time and sender. Null without [text].
+  /// A notice of [kind] ([LiveNoticeKind.subscription] by default): [name]
+  /// and [text] as one line, the item's id, time and sender. Null without
+  /// [text].
   static LiveMessage? _notice(
     Map<Object?, Object?> renderer,
     String name,
     String text, {
     List<LiveEmote> emotes = const [],
+    LiveNoticeKind kind = LiveNoticeKind.subscription,
   }) {
     if (text.isEmpty) return null;
     return LiveMessage(
@@ -715,7 +720,7 @@ abstract final class YouTubeDanmakuProtocol {
       messageId: _string(renderer['id']),
       sentAt: _time(renderer['timestampUsec']),
       color: LiveMessageColor.white,
-      data: LiveNoticeKind.subscription,
+      data: kind,
       emotes: emotes,
     );
   }

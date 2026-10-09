@@ -67,11 +67,20 @@ enum LiveNoticeKind {
   /// A message from the platform or the room (rules, announcements).
   system,
 
-  /// A viewer subscribed, renewed or gifted subscriptions.
+  /// A viewer subscribed, renewed or gifted subscriptions or memberships
+  /// (Twitch subscriptions, YouTube memberships, CHZZK, Kick and Picarto
+  /// subscriptions): the purchase itself, once. With "上舰和开会员进醒目留言"
+  /// (D07.2) it is also a card among the super chats.
   subscription,
 
   /// Another channel brought its viewers over.
   raid,
+
+  /// A viewer received one of the subscriptions or memberships another
+  /// gifted to the community (Twitch's `subgift` of a community gift,
+  /// YouTube's gift redemption): the giver's own [subscription] notice
+  /// counts the gift, so this one is never a super chat card (D07.2).
+  giftedSubscription,
 }
 
 /// Which audience number an update carries.
@@ -393,6 +402,7 @@ final class LiveSuperChatMessage {
     required this.backgroundBottomColor,
     this.messageId = '',
     this.priceText = '',
+    this.unit = LiveGiftUnit.other,
   });
 
   /// The platform's id for the event, when it has one. Some message-board
@@ -409,12 +419,19 @@ final class LiveSuperChatMessage {
   /// Text.
   final String message;
 
-  /// Price in the platform's unit.
+  /// Price in [unit]; for a platform that only writes its price
+  /// ([priceText] in the buyer's currency: YouTube) the number read from
+  /// that text ([superChatAmount]), which only orders and compares.
   final int price;
 
   /// The price as the platform shows it (`$5.00`, `1,000 치즈`), when
   /// [price] alone cannot say it (several currencies); empty otherwise.
   final String priceText;
+
+  /// The unit of [price] (the platform's, `superChatUnits`, D07.2):
+  /// [LiveGiftUnit.yuan] for Bilibili, Douyu and Huya,
+  /// [LiveGiftUnit.other] when only [priceText] says it.
+  final LiveGiftUnit unit;
 
   /// Start of display.
   final DateTime startTime;
@@ -442,3 +459,38 @@ final class LiveSuperChatMessage {
   @override
   int get hashCode => messageId.isNotEmpty ? messageId.hashCode : Object.hash(userName, message, price);
 }
+
+/// The words of a super chat's price (D07.2, V03.5 §6.5): the platform's
+/// [priceText] when it gives one (`$5.00`, `1,000 치즈`, `50 钻`); else
+/// [price] in [unit] as [unitText] writes it (the app's words: `30 元`,
+/// `1000 金瓜子`), or the bare number when it has no words for [unit]
+/// (never `￥`, which 3.x wrote for every platform); empty without a price.
+String superChatPriceLabel(
+  int price,
+  LiveGiftUnit unit,
+  String priceText, {
+  String? Function(LiveGiftUnit unit, int price)? unitText,
+}) {
+  final text = priceText.trim();
+  if (text.isNotEmpty) return text;
+  if (price <= 0) return '';
+  return unitText?.call(unit, price) ?? '$price';
+}
+
+/// The whole amount in a price the platform only writes (YouTube's
+/// `purchaseAmountText`: `$5.00`, `₫1,000,000`, `TRY 550.00`, `2,50 €`),
+/// for ordering and comparing ([LiveSuperChatMessage.price]); 0 when it
+/// has no number. The first run of digits and separators counts: a last
+/// `.` or `,` followed by one or two digits starts the decimals, which are
+/// dropped; every other separator groups thousands. The words shown stay
+/// the platform's ([LiveSuperChatMessage.priceText]).
+int superChatAmount(String priceText) {
+  final match = _amountRun.firstMatch(priceText);
+  if (match == null) return 0;
+  var digits = match.group(0)!.replaceAll(RegExp(r"[\s'\u00a0\u202f]"), '');
+  final decimals = RegExp(r'[.,]\d{1,2}$').firstMatch(digits);
+  if (decimals != null) digits = digits.substring(0, decimals.start);
+  return int.tryParse(digits.replaceAll(RegExp('[.,]'), '')) ?? 0;
+}
+
+final RegExp _amountRun = RegExp(r"\d(?:[\d.,'\u00a0\u202f]|\s(?=\d))*");

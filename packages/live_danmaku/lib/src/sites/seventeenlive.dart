@@ -649,6 +649,7 @@ abstract final class SeventeenLiveDanmakuProtocol {
         message: text,
         price: point,
         priceText: '$point coins',
+        unit: LiveGiftUnit.point,
         startTime: start,
         endTime: start.add(superChatDuration),
         backgroundColor: fill,

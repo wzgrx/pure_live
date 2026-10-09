@@ -1833,6 +1833,15 @@ List<SettingsEntry> _build() {
       requires: () => [needsOn(Settings.showChatGifts, 'live_play_show_gifts')],
       keywords: ['礼物', '价值', '元', '人民币', '金瓜子', '钻石', '抖币', 'gift'],
     )
+    // D07.2.
+    ..toggle(
+      'danmaku_membership_cards',
+      'super_chat_include_membership',
+      Settings.superChatIncludesMembership,
+      null,
+      desc: 'super_chat_include_membership_desc',
+      keywords: ['醒目留言', 'SC', '上舰', '舰长', '会员', '订阅', 'membership', 'subscription'],
+    )
     ..group = 'more'
     ..toggle(
       'danmaku_show',

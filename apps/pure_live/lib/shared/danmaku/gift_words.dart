@@ -38,6 +38,7 @@ LiveGiftTier giftShownTier(LiveGift gift) => giftTierOf(gift.unit, giftShownValu
 /// are.
 const Set<LiveGiftUnit> giftYuanUnits = {
   LiveGiftUnit.fen,
+  LiveGiftUnit.yuan,
   LiveGiftUnit.goldSeed,
   LiveGiftUnit.diamond,
   LiveGiftUnit.douyinCoin,
@@ -58,8 +59,17 @@ String? giftValueText(LiveGift gift, {bool inYuan = false}) {
     final fen = math.max(1, (value * 100 / rate).round());
     return i18n('gift_value_yuan', args: {'value': _yuan(fen)});
   }
-  final key = switch (gift.unit) {
-    LiveGiftUnit.fen => 'gift_value_yuan',
+  return giftUnitText(gift.unit, value);
+}
+
+/// [value] in [unit] as the app writes it ("100 元" for 10000 fen or 100
+/// yuan, "2000 金瓜子", "79 Kicks", "1000 六币"): the gift line's value and a
+/// super chat's price (D07.2, `superChatPriceLabel`); null for a unit
+/// nobody has checked ([LiveGiftUnit.other], Huya's `lPayTotal`) and for
+/// silver seeds (free).
+String? giftUnitText(LiveGiftUnit unit, int value) {
+  final key = switch (unit) {
+    LiveGiftUnit.fen || LiveGiftUnit.yuan => 'gift_value_yuan',
     LiveGiftUnit.goldSeed => 'gift_value_gold_seed',
     LiveGiftUnit.diamond => 'gift_value_diamond',
     LiveGiftUnit.redBean => 'gift_value_red_bean',
@@ -69,10 +79,11 @@ String? giftValueText(LiveGift gift, {bool inYuan = false}) {
     LiveGiftUnit.cheese => 'gift_value_cheese',
     LiveGiftUnit.starBalloon => 'gift_value_star_balloon',
     LiveGiftUnit.douyinCoin => 'gift_value_douyin_coin',
+    LiveGiftUnit.sixCoin => 'gift_value_six_coin',
     LiveGiftUnit.silverSeed || LiveGiftUnit.other => null,
   };
   if (key == null) return null;
-  final amount = gift.unit == LiveGiftUnit.fen ? _yuan(value) : _amount(value);
+  final amount = unit == LiveGiftUnit.fen ? _yuan(value) : _amount(value);
   return i18n(key, args: {'value': amount});
 }
 

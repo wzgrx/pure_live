@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:live_core/src/audience.dart';
 import 'package:live_core/src/json.dart';
 import 'package:live_core/src/live_area.dart';
+import 'package:live_core/src/live_gift.dart';
 import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/live_site.dart';
@@ -404,6 +405,7 @@ abstract final class BilibiliApi {
               face: _image(_object(chat['user_info'])?['face'], '@200w.jpg'),
               message: jsonString(chat['message']) ?? '',
               price: jsonInt(chat['price']) ?? 0,
+              unit: LiveGiftUnit.yuan,
               startTime: start,
               endTime: end,
               backgroundColor: jsonString(chat['background_color']) ?? '',

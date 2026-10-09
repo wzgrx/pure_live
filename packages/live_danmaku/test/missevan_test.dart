@@ -1406,6 +1406,9 @@ void main() {
       expect(paid.message, '那我要听【告白气球】');
       expect(paid.price, 50);
       expect(paid.priceText, '50 钻');
+      // D07.2: the unit of the platform table (superChatUnits).
+      expect(paid.unit, LiveGiftUnit.diamond);
+      expect(superChatUnits[SiteIds.missevan], paid.unit);
       expect(paid.startTime, created);
       expect(paid.endTime, created.add(const Duration(seconds: 60)));
       expect(MissevanDanmakuProtocol.questionDuration, const Duration(seconds: 60));

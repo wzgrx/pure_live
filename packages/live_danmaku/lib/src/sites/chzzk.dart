@@ -102,7 +102,8 @@ abstract final class ChzzkDanmakuProtocol {
   /// the title of the video it pays for or the mission it pledges.
   static const int donationType = 10;
 
-  /// A subscription, whose text is the subscriber's message: chat.
+  /// A subscription, whose text is the subscriber's message: a notice
+  /// (D07.2; it was chat, which lost the months and the tier).
   static const int subscriptionType = 11;
 
   /// A subscription gift (`구독권 선물`): a notice composed from `extras`.
@@ -339,12 +340,13 @@ abstract final class ChzzkDanmakuProtocol {
   /// (hidden by a manager or the clean bot) still carry their text, and the
   /// site does not show it.
   ///
-  /// - Text and subscriptions ([textType], [subscriptionType]; a line
-  ///   without a numeric type is text, as v4 read it) are chat when their
-  ///   text is not blank.
-  /// - Donations ([donationType]) are super chats, subscription gifts
+  /// - Text ([textType]; a line without a numeric type is text, as v4 read
+  ///   it) is chat when it is not blank.
+  /// - Donations ([donationType]) are super chats, subscriptions
+  ///   ([subscriptionType], D07.2), subscription gifts
   ///   ([subscriptionGiftType]) and system lines ([systemType]) notices
-  ///   (B-12; see [_donation], [_subscriptionGift], [_system]).
+  ///   (B-12; see [_donation], [_subscription], [_subscriptionGift],
+  ///   [_system]).
   /// - The name is `profile.nickname`, the user id `uid`; an anonymous
   ///   donation (`extras.isAnonymous`, or the user `anonymous`) is
   ///   [anonymousDonor] without a user id, as the site shows it.
@@ -372,7 +374,7 @@ abstract final class ChzzkDanmakuProtocol {
       extras: _object(item['extras']) ?? const <Object?, Object?>{},
     );
     switch (type) {
-      case textType || subscriptionType:
+      case textType:
         if (row.text.isEmpty) return null;
         return LiveMessage(
           type: LiveMessageType.chat,
@@ -386,6 +388,8 @@ abstract final class ChzzkDanmakuProtocol {
         );
       case donationType:
         return _donation(row, receivedAt ?? DateTime.now());
+      case subscriptionType:
+        return _subscription(row);
       case subscriptionGiftType:
         return _subscriptionGift(row);
       case systemType:
@@ -444,11 +448,37 @@ abstract final class ChzzkDanmakuProtocol {
         message: row.text,
         price: amount,
         priceText: amount > 0 ? cheeseText(amount) : '',
+        unit: LiveGiftUnit.cheese,
         startTime: start,
         endTime: start.add(superChatDuration(amount)),
         backgroundColor: '',
         backgroundBottomColor: '',
       ),
+    );
+  }
+
+  /// A subscription: a [LiveNoticeKind.subscription] notice of who
+  /// subscribed for how long, in Chinese as Kick's are, around the
+  /// platform's tier name and the subscriber's own text, which the site
+  /// shows in the same line: `<name> 订阅了 32 个月「나나양 좋아」：<text>`
+  /// (`extras.month`, `extras.tierName`; `订阅了频道` without months above
+  /// one). The name, user id, message id, time and emoji are a chat line's.
+  static LiveMessage _subscription(_Row row) {
+    final name = _scalar(row.profile?['nickname']).trim();
+    final months = _int(row.extras['month']) ?? 0;
+    final tier = _scalar(row.extras['tierName']).trim();
+    final what = '${months > 1 ? '订阅了 $months 个月' : '订阅了频道'}${tier.isEmpty ? '' : '「$tier」'}';
+    final head = name.isEmpty ? what : '$name $what';
+    return LiveMessage(
+      type: LiveMessageType.notice,
+      userName: name,
+      userId: row.user,
+      message: row.text.isEmpty ? head : '$head：${row.text}',
+      color: LiveMessageColor.white,
+      messageId: _id(row.user, row),
+      sentAt: row.sentAt,
+      data: LiveNoticeKind.subscription,
+      emotes: emojis(row.text, row.extras['emojis']),
     );
   }
 

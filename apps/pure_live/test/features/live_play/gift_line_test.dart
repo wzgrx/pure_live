@@ -543,6 +543,8 @@ void main() {
         LiveGiftUnit.kicks: 14,
         LiveGiftUnit.cheese: 190,
         LiveGiftUnit.starBalloon: 1.7,
+        // D07.7: PandaTV's hearts, about 110 won like a star balloon.
+        LiveGiftUnit.heart: 1.7,
         LiveGiftUnit.point: 21,
       });
       // A combo climbs: the shown count's value decides.

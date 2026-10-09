@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "platform": "pandalive",
+  "case": "S08-hearts",
+  "capturedAt": "2026-10-09T07:18:00Z",
+  "route": "proxy",
+  "handshakes": [
+    {
+      "url": "wss://chat-ws.neolive.kr/connection/websocket",
+      "headers": {
+        "origin": "https://www.pandalive.co.kr",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 15,
+  "sources": [
+    {
+      "room": "gaoninc",
+      "channel": "29619030",
+      "sha256": "d4db701b8344a594f846c069f58deb8ff9b9ba136b154a115d48a0b5c3bc139a",
+      "length": 497260
+    },
+    {
+      "room": "heaveninc",
+      "channel": "27583134",
+      "sha256": "e966435fa4d5eb634de61ead71094275373350ad267c9370488a439265cd0e2a",
+      "length": 220140
+    },
+    {
+      "room": "nobleinc",
+      "channel": "25359951",
+      "sha256": "dca6cd6bb0e1778c7e7983ae7d70bf7ec949f6ae9482359f641f3346f594a2f4",
+      "length": 353591
+    },
+    {
+      "room": "jjunassun",
+      "channel": "27472604",
+      "sha256": "2f3dcb578ef66b99054c04b16cab2bb7e6bcfec30d3b513879a0f8bc8e31975b",
+      "length": 1359147
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "SponCoin message: nick, id, idx (the sender); heartMessage.nk, id, idx (the same sender)",
+      "rule": "person"
+    },
+    {
+      "where": "every publication but SponCoin (chat, entries, recommendations, media updates, alerts, VIP entries), the connect and subscribe replies with their tokens, the pings and their replies, and the client's commands",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running PandaLiveDanmakuConnection with a connector that tees the frames; anonymous and read-only: live/play's guest token, connect, subscribe and the 25 s ping, through the PC's HTTP proxy)",
+  "note": "15 minutes in the five rooms of the recommended list at 16:18 Korean time (multi-broadcaster shows, 엑셀방송): 42 SponCoin (hearts) publications in four of them, no ItemCoin. Kept, each publication its own frame as received (one push a frame): the first 4 of gaoninc, heaveninc and nobleinc and the first 3 of jjunassun, two of them with the sender's words (heartMessage). excelNick names the show's member who receives the hearts (broadcasters, public, kept). Senders became viewerNN, 9000000N and 시청자N (one person keeps one set, also inside heartMessage). t is milliseconds after the room's first kept publication (each next room after a 60 s gap). No IPv4 address, cookie or token is left."
+}

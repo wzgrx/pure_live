@@ -84,6 +84,7 @@ String? giftUnitText(LiveGiftUnit unit, int value) {
     LiveGiftUnit.sixCoin => 'gift_value_six_coin',
     LiveGiftUnit.acCoin => 'gift_value_ac_coin',
     LiveGiftUnit.starCoin => 'gift_value_star_coin',
+    LiveGiftUnit.heart => 'gift_value_heart',
     LiveGiftUnit.silverSeed || LiveGiftUnit.banana || LiveGiftUnit.other => null,
   };
   if (key == null) return null;

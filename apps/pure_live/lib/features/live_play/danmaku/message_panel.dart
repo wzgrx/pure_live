@@ -6,6 +6,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
+import 'package:pure_live/features/live_play/danmaku/gift_line.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -103,7 +104,11 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
     child: _keyword
         ? _KeywordPage(
             key: const ValueKey('live-play-keyword-page'),
-            initial: _message.message,
+            // A08.11: a gift's name, the word that blocks it (D07.1).
+            initial: switch (_message.gift?.displayName.trim()) {
+              final name? when name.isNotEmpty => name,
+              _ => _message.message,
+            },
             onBlock: (keyword) async {
               widget.onClose();
               await widget.controller.blockKeyword(keyword);
@@ -131,7 +136,8 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
               text: '$shownName${ChatText.nameEnd}',
               style: ChatText.name(theme, chatNameInk(message, scheme.surfaceContainerLowest, scheme)),
             ),
-          TextSpan(text: message.message, style: ChatText.content(theme)),
+          // A08.11 c7: a platform's gift as its line says it, with the value.
+          TextSpan(text: _words(message), style: ChatText.content(theme)),
         ],
       ),
       maxLines: 6,
@@ -216,6 +222,15 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
       ],
     );
   }
+}
+
+/// What the card says after the name: [chatMessageWords], and a gift's
+/// value ("送出 小心心 ×3 · 3 元").
+String _words(LiveMessage message) {
+  final gift = message.gift;
+  final value = gift == null || message.isLocal ? null : giftValueText(gift);
+  final words = chatMessageWords(message);
+  return value == null ? words : '$words · $value';
 }
 
 /// The keyword page: the field, filled with the message and selected, and

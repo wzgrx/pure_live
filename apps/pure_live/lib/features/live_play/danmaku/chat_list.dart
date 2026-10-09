@@ -13,6 +13,7 @@ import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
+import 'package:pure_live/features/live_play/danmaku/gift_line.dart';
 import 'package:pure_live/features/live_play/danmaku/message_panel.dart';
 import 'package:pure_live/features/live_play/layout/room_view_memory.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_chat_line.dart';
@@ -77,11 +78,21 @@ Color chatNameInk(LiveMessage message, Color background, ColorScheme scheme) =>
     chatNameColor(message.nameColor ?? message.color, background) ?? scheme.onSurfaceVariant;
 
 /// The text a double tap copies (3.x: "用户名: 内容"). A local gift's words
-/// already start with the name ("Pure Live 送出 辣条 ×1", A08.13).
+/// already start with the name ("Pure Live 送出 辣条 ×1", A08.13); a
+/// platform's gift is copied as its line says it, "名字: 送出 小心心 ×3"
+/// (A08.11 c7).
 String chatCopyText(LiveMessage message) {
   final name = chatSenderName(message);
-  return name.isEmpty ? message.message : '$name: ${message.message}';
+  final words = chatMessageWords(message);
+  return name.isEmpty ? words : '$name: $words';
 }
+
+/// What [message] says without its sender: a platform's gift in the gift
+/// line's words ("送出 小心心 ×3", A08.11), anything else its text.
+String chatMessageWords(LiveMessage message) => switch (message.gift) {
+  final gift? when !message.isLocal => giftSentence(gift),
+  _ => message.message,
+};
 
 /// The name shown before [message]'s words in its panel and copied with
 /// them: none for a local gift, whose words name the sender (U.2k c10).
@@ -89,10 +100,10 @@ String chatSenderName(LiveMessage message) =>
     message.isLocal && message.type == LiveMessageType.gift ? '' : message.userName.trim();
 
 /// Whether [line] has the long press, right click and double tap: a chat
-/// line, and a local gift's (A08.13; 3.x's local gift was a danmaku card).
+/// line, a local gift's (A08.13; 3.x's local gift was a danmaku card) and a
+/// platform's gift (A08.11 c7: copy, block the sender or the gift's name).
 bool chatLineActionable(ChatLine line) =>
-    line.message != null &&
-    (line.kind == ChatLineKind.chat || (line.kind == ChatLineKind.gift && line.message!.isLocal));
+    line.message != null && (line.kind == ChatLineKind.chat || line.kind == ChatLineKind.gift);
 
 /// The chat list (3.x `DanmakuListView`): follows new lines while at the
 /// bottom; scrolled up it stays put and offers "N 条新弹幕" (3.x's button).
@@ -138,9 +149,11 @@ class _ChatListState extends ConsumerState<ChatList> {
   /// Lines added since the list last showed the newest one.
   final ValueNotifier<int> _unseen = ValueNotifier(0);
 
-  /// Each line's widget, made once for the list's look and emoticons: the
-  /// same widget is not built again when the list rebuilds (B08).
-  final Expando<ChatLineView> _views = Expando('chat line views');
+  /// Each line's widget, made once for the list's look and emoticons, with
+  /// the message it was made for: the same widget is not built again when
+  /// the list rebuilds (B08), and a line whose message was replaced (D07.1's
+  /// combo count, A08.11 c4) is.
+  final Expando<(ChatLineView, LiveMessage?)> _views = Expando('chat line views');
 
   /// The lines shown, oldest first: the feed's while following, else the
   /// ones that were shown when the list stopped following. A new batch
@@ -352,19 +365,28 @@ class _ChatListState extends ConsumerState<ChatList> {
     if (_scroll.hasClients) _scroll.jumpTo(0);
   }
 
-  ChatLineView _view(ChatLine line, ChatListStyle style, {required bool names}) {
-    final made = _views[line];
-    if (made != null && made.style == style && made.showName == names && identical(made.emotes, _emotes)) return made;
+  ChatLineView _view(ChatLine line, ChatListStyle style, {required bool names, required GiftLineRoom room}) {
+    if (_views[line] case (final made, final message)
+        when identical(message, line.message) &&
+            made.style == style &&
+            made.showName == names &&
+            made.giftRoom == room &&
+            identical(made.emotes, _emotes)) {
+      return made;
+    }
     final message = chatLineActionable(line) ? line.message : null;
-    return _views[line] = ChatLineView(
+    final view = ChatLineView(
       key: ValueKey(line.id),
       line: line,
       style: style,
       showName: names,
       emotes: _emotes,
+      giftRoom: room,
       onActions: message == null ? null : () => unawaited(_actions(line)),
       onCopy: message == null ? null : () => unawaited(_copy(message)),
     );
+    _views[line] = (view, line.message);
+    return view;
   }
 
   Future<void> _copy(LiveMessage message) async {
@@ -440,6 +462,8 @@ class _ChatListState extends ConsumerState<ChatList> {
     }
     final count = lines.length;
     final scheme = Theme.of(context).colorScheme;
+    final controller = widget.controller;
+    final room = GiftLineRoom(platform: controller.site.id, streamer: controller.room.nick);
     return Listener(
       onPointerDown: (_) => widget.onTouched?.call(),
       child: Stack(
@@ -464,7 +488,7 @@ class _ChatListState extends ConsumerState<ChatList> {
                 final at = _indexOfId(lines, key.value);
                 return at < 0 ? null : count - 1 - at;
               },
-              itemBuilder: (context, index) => _view(lines[count - 1 - index], style, names: names),
+              itemBuilder: (context, index) => _view(lines[count - 1 - index], style, names: names, room: room),
             ),
           ),
           if (!_following)
@@ -614,6 +638,7 @@ class ChatLineView extends StatelessWidget {
     this.onActions,
     this.onCopy,
     this.tag,
+    this.giftRoom = GiftLineRoom.none,
     super.key,
   });
 
@@ -637,6 +662,9 @@ class ChatLineView extends StatelessWidget {
 
   /// Copies the message (double tap).
   final VoidCallback? onCopy;
+
+  /// The room's platform and streamer, for a gift line (A08.11).
+  final GiftLineRoom giftRoom;
 
   @override
   Widget build(BuildContext context) {
@@ -691,35 +719,15 @@ class ChatLineView extends StatelessWidget {
           ),
         );
       case ChatLineKind.gift:
-        // Kept as it was (its redesign follows V03.5); the name takes the
-        // name role, without the colon: "名字 送出 …".
-        final message = line.message!;
-        final name = showName ? message.userName.trim() : '';
-        return Padding(
-          key: const ValueKey('live-play-gift-line'),
-          padding: const EdgeInsets.symmetric(vertical: 3),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 2, right: 6),
-                child: Icon(AppIcons.chatGift, size: 15, color: scheme.tertiary),
-              ),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      if (name.isNotEmpty) TextSpan(text: '$name ', style: ChatText.name(theme)),
-                      TextSpan(
-                        text: line.text,
-                        style: body?.copyWith(color: scheme.tertiary),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+        // A08.11: one gift line for every platform (gift_line.dart).
+        return giftLineOf(
+          line,
+          style: style,
+          showName: showName,
+          room: giftRoom,
+          lead: _lead(Theme.of(context), line.message!),
+          onActions: onActions,
+          onCopy: onCopy,
         );
       case ChatLineKind.superChat:
         final superChat = line.superChat!;

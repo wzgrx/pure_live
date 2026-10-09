@@ -197,12 +197,45 @@ final class StringSetting extends Setting<String> {
 }
 
 /// An ordered list of texts (platform ids, menu ids).
+///
+/// With [tidy] the texts are trimmed, and empty ones and repeats (after the
+/// first) dropped; with [maxItems] only the first so many are kept (D08.2's
+/// phrases). Without them a list is kept as it is.
 final class StringListSetting extends Setting<List<String>> {
   /// Creates a list setting.
-  const new(super.key, {required super.section, required super.defaultValue, super.backupKey, super.scope});
+  const new(
+    super.key, {
+    required super.section,
+    required super.defaultValue,
+    super.backupKey,
+    super.scope,
+    this.tidy = false,
+    this.maxItems,
+  });
+
+  /// Whether the texts are trimmed and empty ones and repeats dropped.
+  final bool tidy;
+
+  /// The most texts kept, or null for no bound.
+  final int? maxItems;
 
   @override
   List<String>? decode(Object? raw) => raw is List ? List.unmodifiable([for (final item in raw) '$item']) : null;
+
+  @override
+  List<String> normalize(List<String> value) {
+    final most = maxItems;
+    if (!tidy && (most == null || value.length <= most)) return value;
+    final kept = <String>[];
+    final seen = <String>{};
+    for (final item in value) {
+      if (most != null && kept.length >= most) break;
+      final text = tidy ? item.trim() : item;
+      if (tidy && (text.isEmpty || !seen.add(text))) continue;
+      kept.add(text);
+    }
+    return List.unmodifiable(kept);
+  }
 
   @override
   Object encode(List<String> value) => List<String>.of(value);

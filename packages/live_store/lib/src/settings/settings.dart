@@ -1480,6 +1480,23 @@ abstract final class Settings {
     defaultValue: true,
   );
 
+  /// The user's phrases (D08.2), in their order: chips over the local
+  /// danmaku composer, a tap sends one. At most [localPhraseLimit], trimmed,
+  /// no empty ones or repeats; each at most a local danmaku's length (40
+  /// characters, the app's `LocalCatalog.danmakuLimit`, kept by the app,
+  /// which counts characters as the composer does). New in v4: empty, so
+  /// nothing shows until one is saved (D-040).
+  static const localInteractionPhrases = StringListSetting(
+    'localInteraction.phrases',
+    section: 'localInteraction',
+    defaultValue: [],
+    tidy: true,
+    maxItems: localPhraseLimit,
+  );
+
+  /// The most phrases kept (D08.2).
+  static const int localPhraseLimit = 20;
+
   /// The local interaction's settings, in 3.x's order.
   static const List<Setting<Object>> localInteraction = [
     localInteractionEnabled,
@@ -1780,6 +1797,7 @@ abstract final class Settings {
     ...recorder,
     ...localInteraction,
     localInteractionReplayOnEnter,
+    localInteractionPhrases,
     backupDirectory,
     downloadDirectoryPath,
     downloadDirectoryDecisionMade,

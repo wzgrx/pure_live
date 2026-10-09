@@ -2,13 +2,13 @@
 
 <!-- 由 tools/docs/settings_audit.py 生成（手写的部分在 tools/docs/settings_audit_notes.py），不要手改 -->
 
-v4 的 234 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）比默认值、取值范围、设置页的范围、读取位置和生效时机。返回 [README](README.md)。
+v4 的 236 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）比默认值、取值范围、设置页的范围、读取位置和生效时机。返回 [README](README.md)。
 
 ## 结论
 
 | 结论 | 个数 |
 |---|---:|
-| 一样 | 213 |
+| 一样 | 215 |
 | 确认改动 | 3 |
 | 不一样，已改 | 18 |
 | 不一样，待处理 | 0 |
@@ -146,14 +146,16 @@ v4 的 234 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `danmakuFontWeight` | Int | `500` | `500`（`danmaku_settings_controller.dart:65`） | 100～900 | 100～900（`danmaku_settings_controller.dart:41-44、:120`） | 滑块 100～900，步长 100 | `shared/danmaku/danmaku_settings.dart:24`、`shared/danmaku/danmaku_templates.dart:33`、`shared/danmaku/danmaku_templates.dart:156` 等 4 处 | 立即 | `danmaku_font_weight` | 不一样，已改：注册表原来不限，3.x 存的值和导入的备份都夹到这个范围；改成同样的 `min`/`max`；3.x 还取整到整百（550 → 600），J01.3 加了同样的取整（`IntSetting` 的 `step: 100`） |
 | `danmakuFontBorder` | Double | `1.5` | `1.5`（`danmaku_settings_controller.dart:66`） | 0～4 | 0～4（`danmaku_settings_controller.dart:121`） | 滑块 0～4，步长 0.1 | `features/live_play/mini/compact_danmaku.dart:157`、`shared/danmaku/danmaku_settings.dart:32`、`shared/danmaku/danmaku_templates.dart:34` 等 5 处 | 立即 | `danmaku_stroke_width` | 一样 |
 | `danmakuOpacity` | Double | `1` | `1`（`danmaku_settings_controller.dart:67`） | 0～1 | 0～1（`danmaku_settings_controller.dart:122`） | 滑块 0～1，步长 0.01 | `shared/danmaku/danmaku_settings.dart:26`、`shared/danmaku/danmaku_templates.dart:35`、`shared/danmaku/danmaku_templates.dart:158` 等 6 处 | 立即 | `danmaku_opacity` | 一样 |
-| `enableDanmakuDisplay` | Bool | `true` | `true`（`danmaku_settings_controller.dart:68`） |  |  |  | `features/live_play/danmaku/chat_list.dart:433`、`features/live_play/danmaku/chat_list.dart:442`、`features/live_play/local_interaction/local_composer.dart:578` 等 14 处 | 立即 | `video_danmaku_show` | 一样 |
+| `enableDanmakuDisplay` | Bool | `true` | `true`（`danmaku_settings_controller.dart:68`） |  |  |  | `features/live_play/danmaku/chat_list.dart:437`、`features/live_play/danmaku/chat_list.dart:446`、`features/live_play/local_interaction/local_composer.dart:578` 等 14 处 | 立即 | `video_danmaku_show` | 一样 |
 | `enableDanmakuStroke` | Bool | `true` | `true`（`danmaku_settings_controller.dart:69`） |  |  |  | `features/live_play/mini/compact_danmaku.dart:156`、`shared/danmaku/danmaku_settings.dart:31`、`shared/danmaku/danmaku_templates.dart:36` 等 5 处 | 立即 | `danmaku_stroke` | 一样 |
-| `danmakuListStyle` | String | `'compact'` | —（新加） | `compact` / `card` |  |  | `features/live_play/danmaku/chat_list.dart:445` | 立即 | `danmaku_list_style` | 一样：v4 新加（A07.1，U.2a），默认值照来源任务 |
+| `danmakuListStyle` | String | `'compact'` | —（新加） | `compact` / `card` |  |  | `features/live_play/danmaku/chat_list.dart:449` | 立即 | `danmaku_list_style` | 一样：v4 新加（A07.1，U.2a），默认值照来源任务 |
+| `danmakuListFontSize` | Int | `0` | —（新加） | 12～22 | 3.x 没有这个设置，弹幕卡片写死 14 号（`modules/live_play/widgets/danmaku/danmaku_list_view.dart:468-509`） | 滑块 chatListFontSizeDefaultStop.toDouble()～22，步长 1 | `features/live_play/danmaku/chat_list.dart:457` | 立即 | `danmaku_list_font_size` | 一样：v4 新加（A08.15，D-040）：默认 0 = 跟主题的正文字号，和以前一样；12～22，超出范围读成 0；粉丝牌、徽章、头像、礼物图按比例，系统字体放大照样乘上去；飞行弹幕不受影响 |
+| `danmakuListLineSpacing` | String | `'standard'` | —（新加） | `compact` / `standard` / `loose` | 3.x 没有这个设置，行距固定 |  | `features/live_play/danmaku/chat_list.dart:458` | 立即 | `danmaku_list_spacing` | 一样：v4 新加（A08.15，D-040）：默认“标准”和以前一样；“紧密”各处上下间距减半、文字行高 1.4，“宽松”间距 1.5 倍、行高 1.7；不认识的值读成“标准” |
 | `showChatGifts` | Bool | `true` | —（新加） |  |  |  | `features/live_play/logic/room_controller.dart:295`、`features/live_play/logic/room_controller.dart:451`、`features/live_play/logic/room_controller.dart:849` 等 6 处 | 立即 | `danmaku_show_gifts` | 一样：v4 新加（A08.6 c3，B-21），默认值照来源任务 |
 | `chatGiftsAboveTier` | Bool | `false` | —（新加） |  | 3.x 没有平台礼物 |  | `features/live_play/logic/room_controller.dart:453`、`features/live_play/logic/room_controller.dart:1230` | 立即 | `danmaku_valuable_gifts` | 一样：v4 新加（A08.12，D-040）：默认关，和以前一样显示所有礼物；开着时聊天列表只留值钱以上（约 10 元起）的平台礼物，连击加起来够了再显示；只在“在聊天列表显示礼物”开着时起作用 |
-| `giftValueInYuan` | Bool | `false` | —（新加） |  | 3.x 没有平台礼物 |  | `features/live_play/danmaku/chat_list.dart:450`、`features/live_play/danmaku/message_panel.dart:143` | 立即 | `danmaku_gift_yuan` | 一样：v4 新加（A08.12，D-040）：默认关，礼物价值照平台单位写；开着时金瓜子、钻石、抖币、分按平台固定比例写成元，海外币种不换算 |
+| `giftValueInYuan` | Bool | `false` | —（新加） |  | 3.x 没有平台礼物 |  | `features/live_play/danmaku/chat_list.dart:454`、`features/live_play/danmaku/message_panel.dart:143` | 立即 | `danmaku_gift_yuan` | 一样：v4 新加（A08.12，D-040）：默认关，礼物价值照平台单位写；开着时金瓜子、钻石、抖币、分按平台固定比例写成元，海外币种不换算 |
 | `danmakuShowGifts` | Bool | `false` | —（新加） |  | 3.x 没有平台礼物，飞行弹幕只有聊天 |  | `features/live_play/logic/room_controller.dart:299`、`features/multiview/logic/multiview_controller.dart:225`、`features/multiview/logic/multiview_controller.dart:1030` | 读取时 | `danmaku_fly_gifts` | 一样：v4 新加（A08.12，D-040）：默认关，和以前一样礼物不飞；开着时值钱以上的平台礼物飞过直播间画面、全屏、小窗和画中画、多画面、电视，很值钱的在顶部停 4 秒，连击只飞开头和总数，每秒最多 3 条 |
-| `showChatNames` | Bool | `true` | —（新加） |  | 3.x 没有这个设置，弹幕列表总显示用户名 |  | `features/live_play/danmaku/chat_list.dart:448` | 立即 | `danmaku_show_names` | 一样：v4 新加（A08.10，用户 2026-10-09）：默认开，和 3.x 一样显示用户名；关掉后直播间的弹幕列表只显示内容，长按面板仍显示用户名 |
+| `showChatNames` | Bool | `true` | —（新加） |  | 3.x 没有这个设置，弹幕列表总显示用户名 |  | `features/live_play/danmaku/chat_list.dart:452` | 立即 | `danmaku_show_names` | 一样：v4 新加（A08.10，用户 2026-10-09）：默认开，和 3.x 一样显示用户名；关掉后直播间的弹幕列表只显示内容，长按面板仍显示用户名 |
 | `danmakuPausedBehavior` | String | `'pause'` | —（新加） | `pause` / `continue` |  |  | `features/live_play/mini/compact_danmaku.dart:165`、`features/live_play/player/player_view.dart:671`、`features/multiview/multiview_page.dart:883` 等 4 处 | 立即 | `danmaku_paused` | 一样：v4 新加（A07.10 c3），默认值照来源任务 |
 | `danmakuFps` | Int | `60` | `60`（`danmaku_settings_controller.dart:70`） | 30～240 | 30～240（`danmaku_settings_controller.dart:123`） | 滑块 30～240，步长 1 | `features/live_play/player/player_view.dart:666`、`shared/danmaku/danmaku_settings.dart:53`、`shared/danmaku/danmaku_templates.dart:38` 等 4 处 | 立即 | `danmaku_fps` | 一样 |
 | `danmakuAutoFps` | Bool | `true` | `true`（`danmaku_settings_controller.dart:71`） |  |  |  | `features/live_play/player/player_view.dart:665`、`shared/danmaku/danmaku_settings.dart:52`、`shared/danmaku/danmaku_templates.dart:39` 等 5 处 | 立即 | `danmaku_auto_fps` | 一样 |

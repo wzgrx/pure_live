@@ -22,6 +22,53 @@ enum ChatListStyle {
   static ChatListStyle of(String name) => name == card.name ? card : compact;
 }
 
+/// How far apart the chat list's lines sit (the `danmakuListLineSpacing`
+/// setting, "行间距", docs/A-界面设计/A08-弹幕界面/A08.15-聊天列表字号和行距 c1): every vertical gap of a
+/// line (between lines, a card's padding) and the height of its wrapped
+/// text.
+enum ChatSpacing {
+  /// Half the gaps; the text 1.4 high (the least UI.md §8.2 allows).
+  compact,
+
+  /// The gaps and text height as before A08.15.
+  standard,
+
+  /// One and a half times the gaps; the text 1.7 high.
+  loose;
+
+  /// The spacing stored as [name], standard for anything else.
+  static ChatSpacing of(String name) => values.firstWhere((value) => value.name == name, orElse: () => standard);
+
+  /// A gap that is [base] at the standard spacing.
+  double gap(double base) => switch (this) {
+    compact => base / 2,
+    standard => base,
+    loose => base * 1.5,
+  };
+
+  /// The height of the text's lines, or null for the theme's.
+  double? get textHeight => switch (this) {
+    compact => 1.4,
+    standard => null,
+    loose => 1.7,
+  };
+}
+
+/// The stop at the left end of the "列表文字大小" slider: the theme's size
+/// (the setting's 0), one step under the smallest size, 12 (A08.15).
+const int chatListFontSizeDefaultStop = 11;
+
+/// The "列表文字大小" value as shown: "默认" for the theme's size (0, or the
+/// slider's [chatListFontSizeDefaultStop]), else "16 px".
+String chatListFontSizeText(int size) =>
+    size <= chatListFontSizeDefaultStop ? i18n('danmaku_list_font_size_default') : '$size px';
+
+/// The setting's value for the slider's [value]: 0 at the left end.
+int chatListFontSizeOf(double value) {
+  final size = value.round();
+  return size <= chatListFontSizeDefaultStop ? 0 : size;
+}
+
 /// The groups the danmaku settings end with wherever they show (U.2e c9,
 /// E1; A08.6 c1, c2): "弹幕列表" ([ChatListSettings]) and "小窗弹幕"
 /// ([PipDanmakuSettings]). The room's tab and panel and 设置 → 弹幕 put
@@ -33,9 +80,9 @@ List<Widget> danmakuListAndPipGroups() => [
   const PipDanmakuSettings(),
 ];
 
-/// "弹幕列表": the room's chat list look (U.2a, v4), whether it names the
-/// senders (A08.10), whether gifts show in it (B-21) and which ones and
-/// with what value (A08.12). All are settings of every room (A08.6 c3), so
+/// "弹幕列表": the room's chat list look (U.2a, v4), its text size and line
+/// spacing (A08.15), whether it names the senders (A08.10), whether gifts
+/// show in it (B-21) and which ones and with what value (A08.12). All are settings of every room (A08.6 c3), so
 /// a change here applies to the rooms already open.
 class ChatListSettings extends ConsumerWidget {
   /// Creates the group.
@@ -46,6 +93,8 @@ class ChatListSettings extends ConsumerWidget {
     final settings = ref.read(storeProvider).settings;
     void set<T extends Object>(Setting<T> setting, T value) => unawaited(settings.set(setting, value));
     final listStyle = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
+    final fontSize = watchSetting(ref, Settings.danmakuListFontSize);
+    final spacing = ChatSpacing.of(watchSetting(ref, Settings.danmakuListLineSpacing));
     final gifts = watchSetting(ref, Settings.showChatGifts);
     return PanelCard(
       children: [
@@ -65,6 +114,38 @@ class ChatListSettings extends ConsumerWidget {
             ],
             selected: {listStyle},
             onSelectionChanged: (selection) => set(Settings.danmakuListStyle, selection.first.name),
+          ),
+        ),
+        // A08.15: the text size and the spacing, under the look they change.
+        SettingSliderRow(
+          settingKey: 'listFontSize',
+          title: i18n('danmaku_list_font_size'),
+          value: (fontSize == 0 ? chatListFontSizeDefaultStop : fontSize).toDouble(),
+          min: chatListFontSizeDefaultStop.toDouble(),
+          max: Settings.danmakuListFontSize.max!.toDouble(),
+          divisions: Settings.danmakuListFontSize.max! - chatListFontSizeDefaultStop,
+          display: chatListFontSizeText(fontSize),
+          onChanged: (value) {
+            final next = chatListFontSizeOf(value);
+            if (next != fontSize) set(Settings.danmakuListFontSize, next);
+          },
+        ),
+        SettingRow(
+          settingKey: 'listSpacing',
+          title: i18n('danmaku_list_spacing'),
+          subtitle: i18n('danmaku_list_spacing_desc'),
+          trailing: const SizedBox.shrink(),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: SegmentedButton<ChatSpacing>(
+            key: const ValueKey('danmaku-list-spacing'),
+            segments: [
+              for (final value in ChatSpacing.values)
+                ButtonSegment(value: value, label: Text(i18n('danmaku_list_spacing_${value.name}'))),
+            ],
+            selected: {spacing},
+            onSelectionChanged: (selection) => set(Settings.danmakuListLineSpacing, selection.first.name),
           ),
         ),
         // A08.10: names on or off, right under the look they change.

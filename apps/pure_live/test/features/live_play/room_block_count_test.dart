@@ -77,7 +77,7 @@ void main() {
     controller.dispose();
   });
 
-  test("a blocked platform gift counts too (D07.1 gifts go through the block list)", () async {
+  test('a blocked platform gift counts too (D07.1 gifts go through the block list)', () async {
     await store.blockLists.add(BlockKind.keyword, '/^荧光棒/');
     final controller = controllerFor();
     await controller.start();

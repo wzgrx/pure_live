@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "case": "S13-guest-gifts",
+  "room": "bilibili:26966466",
+  "danmakuKeys": {
+    "roomId": "26966466"
+  },
+  "capturedAt": "2026-10-09T02:15:50Z",
+  "route": "direct",
+  "guest": "no account, no stored cookie: the guest buvid and token from getDanmuInfo, auth uid 0, protover 2 (zlib) so the frames could be scrubbed and packed again",
+  "handshakes": [
+    {
+      "url": "wss://broadcastlv.chat.bilibili.com/sub",
+      "headers": {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+        "origin": "https://live.bilibili.com",
+        "referer": "https://live.bilibili.com/26966466",
+        "cookie": "<redacted>"
+      }
+    }
+  ],
+  "frames": 47,
+  "kept": {
+    "of": 701,
+    "what": "the received messages holding a gift notice (SEND_GIFT_V2 50, COMBO_SEND 1; no SEND_GIFT or GUARD_BUY reached the guest in 240 s), only those notices, each message packed again as one protover-2 packet (zlib of version-0 notice packets) at its recorded time; the sent frames (auth with token and buvid, heartbeats) are left out"
+  },
+  "raw": {
+    "sha256": "974debc02b22961f08d978cca460ca7ff0775d777f9b6ee60c30acf0c4032147",
+    "length": 742949
+  },
+  "scrubbed": [
+    {
+      "where": "SEND_GIFT_V2 data.pb field 3 (face), 15.2.2 and 15.2.6.2 (sender faces); COMBO_SEND data.**.face",
+      "rule": "secret: https://i0.hdslb.com/bfs/face/member/noface.jpg"
+    },
+    {
+      "where": "SEND_GIFT_V2 data.pb 8.1 (medal target_id), 10.29.2 (receiver uid), 15.3.10 (medal ruid); COMBO_SEND ruid, target_id, receive_user_info.uid, receiver_uinfo.uid, sender_uinfo.medal.ruid",
+      "rule": "person: 1000001"
+    },
+    {
+      "where": "SEND_GIFT_V2 data.pb 10.29.1 (receiver name); COMBO_SEND r_uname, receive_user_info.uname, receiver_uinfo.base.name, origin_info.name",
+      "rule": "person: 主播"
+    },
+    {
+      "where": "SEND_GIFT_V2 data.pb 10.33 (receiver_uinfo), 10.34, 10.37 (unknown ids)",
+      "rule": "dropped"
+    },
+    {
+      "where": "batch_combo_id, combo_id (SEND_GIFT_V2 data.pb 10.12, COMBO_SEND): the 32-digit hash and the streamer uid",
+      "rule": "synthetic, same shape (00…01, 00…02 in order of first use; 1000001)"
+    }
+  ],
+  "note": "Guests see the sender's name masked (D-013) and no sender uid (field 1 absent). Fan medal names and levels are not masked and are kept. The SEND_GIFT_V2 field table is in docs/D-弹幕/D07-礼物和付费消息/D07.4-哔哩哔哩礼物补全/record.md.",
+  "tool": "scratch recorder on BilibiliSite + dart:io WebSocket (D07.4), scrubbed by hand"
+}

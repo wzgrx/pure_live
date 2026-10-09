@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/src/binary.dart';
+import 'package:live_danmaku/src/codec/protobuf.dart';
 import 'package:live_danmaku/src/connection.dart';
 import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/sender.dart';
@@ -14,10 +15,12 @@ import 'package:live_net/live_net.dart' show brotliDecode;
 import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
-/// `SEND_GIFT`, `COMBO_SEND` or `GUARD_BUY` (M4.D2, appendix C-2), as a
-/// [LiveGift] (E05.5): [goldCoins] is its value in gold seeds, [comboId] its
-/// combo key; a guard is a [LiveGiftKind.membership] of [count] months at
-/// [unitPrice] each; a silver `SEND_GIFT` is [free].
+/// `SEND_GIFT`, `SEND_GIFT_V2` (what guests get, D07.4), `COMBO_SEND` or
+/// `GUARD_BUY` (M4.D2, appendix C-2), as a [LiveGift] (E05.5): [goldCoins]
+/// is its value in gold seeds ([LiveGiftUnit.goldSeed]), [comboId] its combo
+/// key; a silver gift is [free], its value [silverCoins] in
+/// [LiveGiftUnit.silverSeed]; a guard is a [LiveGiftKind.membership] of
+/// [count] months at [unitPrice] each, of [guardLevel].
 @immutable
 final class BilibiliGift extends LiveGift {
   /// Creates the gift.
@@ -26,38 +29,61 @@ final class BilibiliGift extends LiveGift {
   /// [name] `giftName` or `gift_name` (`小心心`, `舰长`); [count] how many
   /// this message gave, at least 1: `num`, a combo's `total_num`, the months
   /// of a `GUARD_BUY`; [comboTotal] a `COMBO_SEND`'s `total_num`, the combo
-  /// so far (D07.1).
+  /// so far (D07.1); [unitPrice] the price of one in the gift's seeds;
+  /// [free] a silver gift; [iconUrl] its picture (`gift_info.img_basic` or
+  /// the gift table's, D07.4); [receiverName] `receive_user_info.uname`.
   const new({
     required super.id,
     required super.name,
     required super.count,
     this.goldCoins = 0,
+    this.silverCoins = 0,
     this.comboId = '',
+    this.guardLevel = 0,
     super.kind,
     super.comboTotal,
     super.unitPrice,
     super.free,
-  }) : super(comboKey: comboId, totalValue: goldCoins > 0 ? goldCoins : null, unit: LiveGiftUnit.goldSeed);
+    super.iconUrl,
+    super.receiverName,
+  }) : super(
+         comboKey: comboId,
+         totalValue: free ? (silverCoins > 0 ? silverCoins : null) : (goldCoins > 0 ? goldCoins : null),
+         unit: free ? LiveGiftUnit.silverSeed : LiveGiftUnit.goldSeed,
+       );
 
   /// What it cost in gold coins (1000 = 1 yuan): `total_coin` of a gold
   /// `SEND_GIFT`, a combo's `combo_total_coin`, `price × num` of a
   /// `GUARD_BUY`. 0 for a free (silver) gift or when missing.
   final int goldCoins;
 
+  /// What a silver (free) gift cost in silver seeds; 0 for a gold one or
+  /// when missing.
+  final int silverCoins;
+
   /// `batch_combo_id`, shared by every message of one combo; empty when
   /// missing. Every message of a combo is reported; the app counts them on
   /// one line (D07.1).
   final String comboId;
 
+  /// The guard a `GUARD_BUY` bought (`guard_level`: 1 总督, 2 提督, 3 舰长);
+  /// 0 for a gift.
+  final int guardLevel;
+
   @override
   bool operator ==(Object other) =>
-      super == other && other is BilibiliGift && other.goldCoins == goldCoins && other.comboId == comboId;
+      super == other &&
+      other is BilibiliGift &&
+      other.goldCoins == goldCoins &&
+      other.silverCoins == silverCoins &&
+      other.comboId == comboId &&
+      other.guardLevel == guardLevel;
 
   @override
-  int get hashCode => Object.hash(super.hashCode, goldCoins, comboId);
+  int get hashCode => Object.hash(super.hashCode, goldCoins, silverCoins, comboId, guardLevel);
 
   @override
-  String toString() => 'BilibiliGift($name ×$count, $goldCoins gold)';
+  String toString() => 'BilibiliGift($name ×$count, ${free ? '$silverCoins silver' : '$goldCoins gold'})';
 }
 
 /// Bilibili's danmaku connection (3.x `BiliBiliDanmaku`,
@@ -77,6 +103,9 @@ final class BilibiliGift extends LiveGift {
 /// - Every gift of a combo is reported (D07.1: the app counts them on one
 ///   line; it used to report only the first, so the count stayed at the
 ///   first send's).
+/// - Asks for the gift table ([BilibiliDanmakuArgs.giftCatalog]) once per
+///   [connect], without waiting for it, and fills in from it what a gift's
+///   packet leaves out (D07.4).
 final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDanmakuArgs> {
   /// Creates the connection. [proxy] routes the socket; `connector` replaces
   /// `dart:io`'s handshake. [policy], `credentialRetryDelay` (the step
@@ -134,8 +163,24 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
         throw const DanmakuStartFailure(DanmakuCloseReason.credentialsUnavailable, detail: 'No token');
       }
     }
-    _credentials = _Credentials(run, current);
+    final credentials = _credentials = _Credentials(run, current);
+    unawaited(_loadGifts(credentials));
     return _target(current);
+  }
+
+  /// The gift table (D07.4) for [credentials]' run, asked for once as it
+  /// starts; until it comes, and when it fails, gifts go without what only
+  /// the table has (the guard pictures, a picture or price the packet
+  /// leaves out).
+  Future<void> _loadGifts(_Credentials credentials) async {
+    final load = credentials.args.giftCatalog;
+    if (load == null) return;
+    try {
+      final gifts = await load();
+      if (credentials.run.isActive) credentials.gifts = gifts;
+    } on Object {
+      // Soft: the gifts are still reported.
+    }
   }
 
   static DanmakuSocketTarget _target(BilibiliDanmakuArgs args) => DanmakuSocketTarget(
@@ -160,7 +205,8 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
   @protected
   void onData(DanmakuSocketSession session, Object? data) {
     if (data is! List<int>) return;
-    for (final item in BilibiliDanmakuProtocol.decode(data).items) {
+    final gifts = _of(session)?.gifts ?? BilibiliGiftCatalog.empty;
+    for (final item in BilibiliDanmakuProtocol.decode(data, gifts: gifts).items) {
       if (!session.isActive) return;
       switch (item) {
         case BilibiliDanmakuMessage(:final message):
@@ -239,6 +285,9 @@ final class _Credentials {
   BilibiliDanmakuArgs args;
   int refreshes = 0;
   bool refreshing = false;
+
+  /// The gift table, once [BilibiliDanmakuArgs.giftCatalog] gave it.
+  BilibiliGiftCatalog gifts = BilibiliGiftCatalog.empty;
 }
 
 /// Something one received Bilibili message held, in order
@@ -386,20 +435,26 @@ abstract final class BilibiliDanmakuProtocol {
   /// corrupt or oversized zlib or brotli, an auth reply that is not JSON. A
   /// notice that is not JSON, or not a message this decoder knows, is skipped
   /// on its own.
-  static ({List<BilibiliDanmakuItem> items, FormatException? error}) decode(List<int> message) {
+  ///
+  /// [gifts] fills in the gifts' pictures and prices their packets leave
+  /// out (D07.4).
+  static ({List<BilibiliDanmakuItem> items, FormatException? error}) decode(
+    List<int> message, {
+    BilibiliGiftCatalog gifts = BilibiliGiftCatalog.empty,
+  }) {
     final items = <BilibiliDanmakuItem>[];
     try {
       if (message.length > maxMessageBytes) {
         throw FormatException('Bilibili danmaku message is too large: ${message.length} bytes');
       }
-      _stream(message is Uint8List ? message : Uint8List.fromList(message), 0, items);
+      _stream(message is Uint8List ? message : Uint8List.fromList(message), 0, items, gifts);
     } on FormatException catch (error) {
       return (items: items, error: error);
     }
     return (items: items, error: null);
   }
 
-  static void _stream(Uint8List data, int depth, List<BilibiliDanmakuItem> items) {
+  static void _stream(Uint8List data, int depth, List<BilibiliDanmakuItem> items, BilibiliGiftCatalog gifts) {
     if (depth > maxNesting) throw const FormatException('Bilibili danmaku packet nesting is too deep');
     final view = ByteData.sublistView(data);
     var offset = 0;
@@ -416,7 +471,7 @@ abstract final class BilibiliDanmakuProtocol {
           'Invalid Bilibili danmaku frame: offset=$offset, packet=$length, header=$header, total=${data.length}',
         );
       }
-      _packet(version, operation, Uint8List.sublistView(data, offset + header, offset + length), depth, items);
+      _packet(version, operation, Uint8List.sublistView(data, offset + header, offset + length), depth, items, gifts);
       offset += length;
     }
     if (offset != data.length) {
@@ -424,7 +479,14 @@ abstract final class BilibiliDanmakuProtocol {
     }
   }
 
-  static void _packet(int version, int operation, Uint8List body, int depth, List<BilibiliDanmakuItem> items) {
+  static void _packet(
+    int version,
+    int operation,
+    Uint8List body,
+    int depth,
+    List<BilibiliDanmakuItem> items,
+    BilibiliGiftCatalog gifts,
+  ) {
     switch (operation) {
       case opHeartbeatReply:
         if (body.length < 4) return;
@@ -433,12 +495,12 @@ abstract final class BilibiliDanmakuProtocol {
       case opNotice:
         switch (version) {
           case 2:
-            _stream(_inflate(body), depth + 1, items);
+            _stream(_inflate(body), depth + 1, items, gifts);
           case 3:
-            _stream(brotliDecode(body, maxOutput: maxInflatedBytes), depth + 1, items);
+            _stream(brotliDecode(body, maxOutput: maxInflatedBytes), depth + 1, items, gifts);
           default:
             final text = utf8.decode(body, allowMalformed: true).trim();
-            if (text.isNotEmpty) _notice(text, items);
+            if (text.isNotEmpty) _notice(text, items, gifts);
         }
       case opAuthReply:
         final text = utf8.decode(body, allowMalformed: true).trim();
@@ -456,7 +518,7 @@ abstract final class BilibiliDanmakuProtocol {
     return sink.bytes.takeBytes();
   }
 
-  static void _notice(String text, List<BilibiliDanmakuItem> items) {
+  static void _notice(String text, List<BilibiliDanmakuItem> items, BilibiliGiftCatalog gifts) {
     final Object? notice;
     try {
       notice = jsonDecode(text);
@@ -473,8 +535,9 @@ abstract final class BilibiliDanmakuProtocol {
       _ when cmd.contains('DANMU_MSG') => [?_chat(notice)],
       'WATCHED_CHANGE' => [?_watched(notice)],
       'ONLINE_RANK_COUNT' => [?_onlineRank(notice)],
-      'SEND_GIFT' || 'COMBO_SEND' => [?_gift(notice, combo: cmd == 'COMBO_SEND')],
-      'GUARD_BUY' => [?_guard(notice)],
+      'SEND_GIFT' || 'COMBO_SEND' => [?_gift(notice, gifts, combo: cmd == 'COMBO_SEND')],
+      'SEND_GIFT_V2' => [?_giftV2(notice, gifts)],
+      'GUARD_BUY' => [?_guard(notice, gifts)],
       'SUPER_CHAT_MESSAGE' => [?_superChat(notice)],
       'SUPER_CHAT_MESSAGE_DELETE' => _superChatDeleted(notice),
       'WARNING' => [_notify(notice, warningNotice)],
@@ -735,53 +798,189 @@ abstract final class BilibiliDanmakuProtocol {
     return value == null ? null : _audience(LiveAudienceMetricKind.onlineViewers, value);
   }
 
-  /// `SEND_GIFT` (`giftName`, `giftId`, `num`, gold `total_coin`) and
-  /// `COMBO_SEND` (a combo's `gift_name`, `gift_id`, `total_num`,
-  /// `combo_total_coin`), both with `uid`, `uname` and `batch_combo_id`: a
-  /// [LiveMessageType.gift] holding a [BilibiliGift] (a silver `SEND_GIFT`
-  /// is free; a `COMBO_SEND`'s count, the combo so far, is also its
-  /// [LiveGift.comboTotal]), text [LiveGift.plainText]. Without a name,
-  /// nothing.
-  static LiveMessage? _gift(Map<String, dynamic> notice, {required bool combo}) {
+  /// `SEND_GIFT` (logged in: `giftName`, `giftId`, `num`, `price`,
+  /// `total_coin`, `coin_type`, `tid`, `timestamp`) and `COMBO_SEND` (a
+  /// combo so far: `gift_name`, `gift_id`, `total_num`, `combo_total_coin`),
+  /// both with `uid`, `uname`, `batch_combo_id`, `gift_info.img_basic`, the
+  /// fan medal (`sender_uinfo.medal`, else `medal_info`) and the receiver
+  /// (`receive_user_info.uname`): a [LiveMessageType.gift] holding a
+  /// [BilibiliGift] ([_giftOf]); a `COMBO_SEND`'s count is also its
+  /// [LiveGift.comboTotal]. Without a name, nothing.
+  static LiveMessage? _gift(Map<String, dynamic> notice, BilibiliGiftCatalog gifts, {required bool combo}) {
     final data = notice['data'];
     if (data is! Map) return null;
-    final name = jsonString(data[combo ? 'gift_name' : 'giftName']) ?? '';
-    if (name.isEmpty) return null;
     final count = jsonInt(data[combo ? 'total_num' : 'num']) ?? 0;
-    final coins = combo
-        ? jsonInt(data['combo_total_coin'])
-        : (data['coin_type'] == 'gold' ? jsonInt(data['total_coin']) : null);
+    final info = data['gift_info'];
+    final receiver = data['receive_user_info'];
     final tid = combo ? '' : jsonString(data['tid']) ?? '';
-    return _giftMessage(
-      data,
-      userName: jsonString(data['uname']) ?? '',
+    final sender = data['sender_uinfo'];
+    var userName = jsonString(data['uname'])?.trim() ?? '';
+    if (userName.isEmpty) userName = _richName(sender);
+    return _giftOf(
+      gifts,
+      id: _giftId(data[combo ? 'gift_id' : 'giftId']),
+      name: jsonString(data[combo ? 'gift_name' : 'giftName']) ?? '',
+      count: count,
+      coinType: jsonString(data['coin_type']) ?? '',
+      price: combo ? null : jsonInt(data['price']),
+      total: jsonInt(data[combo ? 'combo_total_coin' : 'total_coin']),
+      comboId: jsonString(data['batch_combo_id']) ?? '',
+      comboTotal: combo && count > 0 ? count : null,
+      icon: BilibiliApi.giftIcon(info is Map ? info['img_basic'] : null),
+      receiver: receiver is Map ? jsonString(receiver['uname'])?.trim() ?? '' : '',
+      userName: userName,
+      userId: jsonString(data['uid']) ?? '',
+      medal: _giftMedal(sender, data['medal_info']),
       messageId: tid.isEmpty ? '' : 'bilibili:gift:$tid',
       sentAt: combo ? null : jsonInt(data['timestamp']),
+    );
+  }
+
+  /// `SEND_GIFT_V2`, what a guest gets instead of `SEND_GIFT` (D07.4,
+  /// fixtures/bilibili/danmaku/S13-guest-gifts): `data.pb` is the same gift
+  /// as protobuf. Fields read (the table is in
+  /// docs/D-弹幕/D07-礼物和付费消息/D07.4-哔哩哔哩礼物补全/record.md): 1 `uid` (none for
+  /// a guest), 2 `uname` (masked for a guest, D-013), 8 `medal_info`
+  /// (5 level, 6 name), 15 `sender_uinfo` (2.1 name, 3 medal: 1 name,
+  /// 2 level) and 10 the gift: 1 id, 2 name, 3 num, 5 price, 7 total, 8
+  /// `coin_type`, 9 `tid`, 10 time (seconds), 12 `batch_combo_id`, 29.1 the
+  /// receiver's name, 35.1 the picture. A packet that is not protobuf, or a
+  /// gift without a name, gives nothing.
+  static LiveMessage? _giftV2(Map<String, dynamic> notice, BilibiliGiftCatalog gifts) {
+    final data = notice['data'];
+    final encoded = data is Map ? data['pb'] : null;
+    if (encoded is! String || encoded.isEmpty) return null;
+    final ProtoMessage root;
+    final ProtoMessage? gift;
+    try {
+      root = ProtoMessage.decode(base64.decode(encoded));
+      gift = root.message(10);
+    } on FormatException {
+      return null;
+    }
+    if (gift == null) return null;
+    final sender = root.message(15);
+    var userName = root.string(2)?.trim() ?? '';
+    if (userName.isEmpty) userName = sender?.message(2)?.string(1)?.trim() ?? '';
+    String level(int? value) => value != null && value > 0 ? '$value' : '';
+    final medal = root.message(8);
+    final rich = sender?.message(3);
+    final medalName = medal?.string(6)?.trim() ?? '';
+    final richName = rich?.string(1)?.trim() ?? '';
+    final uid = root.integer(1) ?? 0;
+    final tid = gift.string(9)?.trim() ?? '';
+    return _giftOf(
+      gifts,
+      id: _giftId(gift.integer(1)),
+      name: gift.string(2) ?? '',
+      count: gift.integer(3) ?? 0,
+      coinType: gift.string(8) ?? '',
+      price: gift.integer(5),
+      total: gift.integer(7),
+      comboId: gift.string(12)?.trim() ?? '',
+      icon: BilibiliApi.giftIcon(gift.message(35)?.string(1)),
+      receiver: gift.message(29)?.string(1)?.trim() ?? '',
+      userName: userName,
+      userId: ProtoMessage.unsigned(uid),
+      medal: medalName.isNotEmpty
+          ? (name: medalName, level: level(medal?.integer(5)))
+          : richName.isNotEmpty
+          ? (name: richName, level: level(rich?.integer(2)))
+          : (name: '', level: ''),
+      messageId: tid.isEmpty ? '' : 'bilibili:gift:$tid',
+      sentAt: gift.integer(10),
+    );
+  }
+
+  /// A gift message from what [_gift] and [_giftV2] read, with the gift
+  /// table [gifts] for what the packet leaves out:
+  ///
+  /// - the name, else the table's;
+  /// - silver (`coin_type` `silver`, or the table's when the packet says
+  ///   nothing) is free, its value in silver seeds;
+  /// - the price of one: `total ÷ count` when the total is given, else
+  ///   `price`, else the table's (for the same coin); the value: `total`,
+  ///   else the price times the count;
+  /// - the picture: the packet's, else the table's.
+  static LiveMessage? _giftOf(
+    BilibiliGiftCatalog gifts, {
+    required String id,
+    required String name,
+    required int count,
+    required String coinType,
+    required int? price,
+    required int? total,
+    required String comboId,
+    required Uri? icon,
+    required String receiver,
+    required String userName,
+    required String userId,
+    required ({String name, String level}) medal,
+    required String messageId,
+    required int? sentAt,
+    int? comboTotal,
+  }) {
+    final entry = id.isEmpty ? null : gifts[id];
+    final title = name.trim().isNotEmpty ? name.trim() : entry?.name ?? '';
+    if (title.isEmpty) return null;
+    final number = count > 0 ? count : 1;
+    final silver = coinType == 'silver' || (coinType.isEmpty && (entry?.silver ?? false));
+    final paid = total != null && total > 0 ? total : null;
+    var unit = price != null && price > 0 ? price : null;
+    if (paid != null && (unit == null || unit * number != paid)) unit = paid % number == 0 ? paid ~/ number : null;
+    if (unit == null && entry != null && entry.silver == silver && entry.price > 0) unit = entry.price;
+    final value = paid ?? (unit == null ? null : unit * number);
+    return _giftMessage(
+      userName: userName,
+      userId: userId,
+      medal: medal,
+      messageId: messageId,
+      sentAt: sentAt,
       gift: BilibiliGift(
-        id: _giftId(data[combo ? 'gift_id' : 'giftId']),
-        name: name,
-        count: count > 0 ? count : 1,
-        goldCoins: coins != null && coins > 0 ? coins : 0,
-        comboId: jsonString(data['batch_combo_id']) ?? '',
-        comboTotal: combo && count > 0 ? count : null,
-        free: !combo && data['coin_type'] == 'silver',
+        id: id,
+        name: title,
+        count: number,
+        goldCoins: silver ? 0 : value ?? 0,
+        silverCoins: silver ? value ?? 0 : 0,
+        comboId: comboId,
+        comboTotal: comboTotal,
+        unitPrice: unit,
+        free: silver,
+        iconUrl: icon ?? entry?.icon,
+        receiverName: receiver,
       ),
     );
   }
 
-  /// `GUARD_BUY`: `username` bought `num` months of `gift_name` (舰长,
-  /// 提督, 总督) at `price` gold coins each: a [LiveGiftKind.membership].
-  static LiveMessage? _guard(Map<String, dynamic> notice) {
+  /// The fan medal of a gift's sender: `sender_uinfo.medal{name, level}`
+  /// ([rich]), else `medal_info{medal_name, medal_level}` ([legacy]); guests
+  /// see it unmasked (as on a chat line, D01.32).
+  static ({String name, String level}) _giftMedal(Object? rich, Object? legacy) {
+    final medal = _medal(rich, null);
+    if (medal.name.isNotEmpty || legacy is! Map) return medal;
+    return _medal(null, [legacy['medal_level'], legacy['medal_name']]);
+  }
+
+  /// `GUARD_BUY`: `username` bought `num` months of guard `guard_level` (1
+  /// 总督, 2 提督, 3 舰长; `gift_name`, else the level's name) at `price`
+  /// gold coins each: a [LiveGiftKind.membership] holding the level
+  /// ([BilibiliGift.guardLevel]), its picture from the gift table's
+  /// `guard_resources`.
+  static LiveMessage? _guard(Map<String, dynamic> notice, BilibiliGiftCatalog gifts) {
     final data = notice['data'];
     if (data is! Map) return null;
-    final name = jsonString(data['gift_name']) ?? '';
+    final guard = jsonInt(data['guard_level']) ?? 0;
+    final level = guard >= 1 && guard <= 3 ? guard : 0;
+    var name = jsonString(data['gift_name'])?.trim() ?? '';
+    if (name.isEmpty) name = BilibiliApi.guardName(level);
     if (name.isEmpty) return null;
     final count = jsonInt(data['num']) ?? 0;
     final months = count > 0 ? count : 1;
     final price = jsonInt(data['price']) ?? 0;
     return _giftMessage(
-      data,
       userName: jsonString(data['username']) ?? '',
+      userId: jsonString(data['uid']) ?? '',
+      medal: (name: '', level: ''),
       messageId: '',
       sentAt: jsonInt(data['start_time']),
       gift: BilibiliGift(
@@ -791,6 +990,8 @@ abstract final class BilibiliDanmakuProtocol {
         goldCoins: price > 0 ? price * months : 0,
         kind: LiveGiftKind.membership,
         unitPrice: price > 0 ? price : null,
+        iconUrl: gifts.guards[level]?.icon,
+        guardLevel: level,
       ),
     );
   }
@@ -800,18 +1001,21 @@ abstract final class BilibiliDanmakuProtocol {
     return id == '0' ? '' : id;
   }
 
-  static LiveMessage _giftMessage(
-    Map<dynamic, dynamic> data, {
+  static LiveMessage _giftMessage({
     required String userName,
+    required String userId,
+    required ({String name, String level}) medal,
     required String messageId,
     required int? sentAt,
     required BilibiliGift gift,
   }) => LiveMessage(
     type: LiveMessageType.gift,
     userName: userName,
-    userId: jsonString(data['uid']) ?? '',
+    userId: userId,
     message: gift.plainText,
     color: LiveMessageColor.white,
+    fansName: medal.name,
+    fansLevel: medal.level,
     messageId: messageId,
     sentAt: sentAt != null && sentAt > 0 && sentAt < 100000000000
         ? DateTime.fromMillisecondsSinceEpoch(sentAt * 1000)

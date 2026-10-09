@@ -35,4 +35,5 @@
 
 ## 留下的问题
 
-- `SEND_GIFT_V2` 其余字段的含义（样本录到后补进 record.md）。
+- ~~`SEND_GIFT_V2` 其余字段的含义（样本录到后补进 record.md）~~：录到了（`S13-guest-gifts`），字段表和设计选择（D-003）见 [record.md](record.md)；4、6、11、13～17、24 等字段的含义是推测，没有用。
+- 登录态的 `SEND_GIFT` 没有录（没有账号）：解析按协议的字段名，和访客收到的 `COMBO_SEND`、`SEND_GIFT_V2` 对过；维护者登录后可以补录一份。

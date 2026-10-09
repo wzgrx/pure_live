@@ -1,0 +1,1012 @@
+{
+  "code": 0,
+  "message": "OK",
+  "ttl": 1,
+  "data": {
+    "list": [
+      {
+        "id": 31164,
+        "name": "粉丝团灯牌",
+        "price": 100,
+        "type": 0,
+        "coin_type": "gold",
+        "bag_gift": 0,
+        "effect": 3,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 17,
+        "desc": "投喂即可加入主播的粉丝团！",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/e051dfd4557678f8edcac4993ed00a0935cbd9cc.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/e051dfd4557678f8edcac4993ed00a0935cbd9cc.png",
+        "frame_animation": "https://i0.hdslb.com/bfs/live/342808d2780a53e66ea99539bee37c03dfa96572.png",
+        "gif": "https://i0.hdslb.com/bfs/live/816f8b7aa2132888fce928cdfb17b9cf21cc0823.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/32b799120e1614fa6275b6d15da7a52b21dd019d.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 0,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": null,
+        "diy_count_map": 0,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        }
+      },
+      {
+        "id": 1,
+        "name": "辣条",
+        "price": 100,
+        "type": 5,
+        "coin_type": "silver",
+        "bag_gift": 0,
+        "effect": 0,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 13,
+        "desc": "辣条是流行于哔哩哔哩的坊间美食，可以直接食用，也能用来打赌。",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/d57afb7c5596359970eb430655c6aef501a268ab.png",
+        "frame_animation": "https://i0.hdslb.com/bfs/live/85d4be8c3dea80e6de6c249dbd15d6e8090125f4.png",
+        "gif": "https://i0.hdslb.com/bfs/live/d40ff17d533047cbb9b2bed4feb927cb0e71901c.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/07d4dad91d7f68d92cb6a324ad9395ae2adefd47.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 5,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": null,
+        "diy_count_map": 1,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        }
+      },
+      {
+        "id": 31036,
+        "name": "小花花",
+        "price": 100,
+        "type": 0,
+        "coin_type": "gold",
+        "bag_gift": 0,
+        "effect": 0,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 24,
+        "desc": "一花一世界，一树一菩提",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/5126973892625f3a43a8290be6b625b5e54261a5.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/5126973892625f3a43a8290be6b625b5e54261a5.png",
+        "frame_animation": "https://i0.hdslb.com/bfs/live/13b4f246ca620063bfa27c8f21422af215c92d1a.png",
+        "gif": "https://i0.hdslb.com/bfs/live/c806ee29394aab4877fa3d535daca5c66c631306.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/28357ba4cd566418730ca29da2c552efa7e4a390.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 0,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": {
+          "app_pic": "",
+          "web_pic": "",
+          "left_text": "",
+          "left_color": "",
+          "button_text": "",
+          "button_color": "",
+          "button_pic_color": "",
+          "jump_url": "",
+          "jump_to": 0,
+          "web_pic_url": "http://i0.hdslb.com/bfs/live/86b357cba05700d287c10c0fa75a3b4249b8c8c4.png",
+          "web_jump_url": "https://www.bilibili.com/blackboard/era/PHa1UDkMKg4x1685.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100&app_common=open&pc_ui=375,626,17181a,2",
+          "app_banner_v2": {
+            "banner_type": 1001,
+            "schema": "https://www.bilibili.com/blackboard/era/PHa1UDkMKg4x1685.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100&app_common=open&pc_ui=375,626,17181a,2",
+            "icon": {
+              "img_url": "http://i0.hdslb.com/bfs/live/e33127b406d07acf4eb99eb0dc548b94d2caffb4.png",
+              "icon_shape": 0
+            },
+            "double_icon": null,
+            "main_title": {
+              "text": "礼物彩蛋玩法",
+              "color": "",
+              "highlight_font_color": ""
+            },
+            "sub_title": [
+              {
+                "text": "连续投喂20个小花花可解锁彩蛋",
+                "color": "",
+                "highlight_font_color": "",
+                "uri": ""
+              }
+            ],
+            "button": {
+              "text": "查看详情",
+              "background_color": "#C7659B99"
+            },
+            "background": {
+              "color": "#C7659B33"
+            },
+            "ext_gifts_1004": null
+          },
+          "web_banner": {
+            "banner_type": 1001,
+            "schema": "https://www.bilibili.com/blackboard/era/PHa1UDkMKg4x1685.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100&app_common=open&pc_ui=375,626,17181a,2",
+            "icon": {
+              "img_url": "http://i0.hdslb.com/bfs/live/e33127b406d07acf4eb99eb0dc548b94d2caffb4.png",
+              "icon_shape": 0
+            },
+            "double_icon": null,
+            "main_title": {
+              "text": "礼物彩蛋玩法",
+              "color": "",
+              "highlight_font_color": ""
+            },
+            "sub_title": [
+              {
+                "text": "连续投喂20个小花花可解锁彩蛋",
+                "color": "",
+                "highlight_font_color": "",
+                "uri": ""
+              }
+            ],
+            "button": null,
+            "background": {
+              "color": "#C7659B33"
+            },
+            "ext_gifts_1004": null
+          }
+        },
+        "diy_count_map": 1,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "#D16584",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": "#D16584"
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": "#D16584"
+        }
+      },
+      {
+        "id": 31039,
+        "name": "牛哇牛哇",
+        "price": 100,
+        "type": 0,
+        "coin_type": "gold",
+        "bag_gift": 0,
+        "effect": 0,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 24,
+        "desc": "是真的牛！！",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/91ac8e35dd93a7196325f1e2052356e71d135afb.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/91ac8e35dd93a7196325f1e2052356e71d135afb.png",
+        "frame_animation": "https://i0.hdslb.com/bfs/live/9e91883ebdfe6611809175495eeb7d7910721c27.png",
+        "gif": "https://i0.hdslb.com/bfs/live/179f42946c1f268071800aca17f7743654af7177.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/7571c8bdfcb65f9b00ab1307b2c86630f0d00859.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 0,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": null,
+        "diy_count_map": 1,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        }
+      },
+      {
+        "id": 35969,
+        "name": "薯条",
+        "price": 100,
+        "type": 0,
+        "coin_type": "gold",
+        "bag_gift": 0,
+        "effect": 0,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 0,
+        "desc": "",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/931e985f8637e5f190e54a832fca7889b4585b87.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/931e985f8637e5f190e54a832fca7889b4585b87.png",
+        "frame_animation": "",
+        "gif": "https://i0.hdslb.com/bfs/live/24611a055ba987b2a1c611d117093bfe6c8d651b.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/8a12f8d740dbd9ffdc9c358ba737007b7dde9aec.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 0,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": null,
+        "diy_count_map": 1,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        }
+      },
+      {
+        "id": 3,
+        "name": "B坷垃",
+        "price": 9900,
+        "type": 0,
+        "coin_type": "gold",
+        "bag_gift": 0,
+        "effect": 0,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 10,
+        "desc": "主播吃了B坷垃，吸收方圆百里人气值——American SHENGDIYAGE",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/cc8bfcbc24c8b65937f62ce0d16b31ab987dce47.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/cc8bfcbc24c8b65937f62ce0d16b31ab987dce47.png",
+        "frame_animation": "https://i0.hdslb.com/bfs/live/6345f0d6a138ad4b449a030e27d85650568915a2.png",
+        "gif": "https://i0.hdslb.com/bfs/live/ae2d28fabcd773869d954e780f5c1252ec07ea47.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/ad01f5b786fa6272adf0e985576b20a93ea11c6c.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 0,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": null,
+        "diy_count_map": 1,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        }
+      },
+      {
+        "id": 30607,
+        "name": "小心心",
+        "price": 0,
+        "type": 5,
+        "coin_type": "silver",
+        "bag_gift": 1,
+        "effect": 0,
+        "corner_mark": "",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 32,
+        "desc": "观看5分钟即可获得哦～",
+        "rule": "观看5分钟即可获得哦～",
+        "rights": "当前主播亲密度+50哦～",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 10,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 100,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          },
+          {
+            "num": 520,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/d4a0827cbb6b00e48f4d3e6c0f4fdd6e24c93a8f.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/d4a0827cbb6b00e48f4d3e6c0f4fdd6e24c93a8f.png",
+        "frame_animation": "https://i0.hdslb.com/bfs/live/c3d2434b27554ce1cd52a1b1ad40019f5ba3fc01.png",
+        "gif": "https://i0.hdslb.com/bfs/live/e52c67d092d490c58869c30f40fdbd613d5536ea.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/cce60fd908e4910a340a1a4a061a3d4d4a1a123d.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 5,
+        "max_send_limit": 0,
+        "weight": 0,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": null,
+        "diy_count_map": 1,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "",
+        "corner_color_bg": "",
+        "web_light": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        },
+        "web_dark": {
+          "corner_mark": "",
+          "corner_background": "",
+          "corner_mark_color": "",
+          "corner_color_bg": ""
+        }
+      },
+      {
+        "id": 34315,
+        "name": "喜欢你",
+        "price": 9900,
+        "type": 0,
+        "coin_type": "gold",
+        "bag_gift": 0,
+        "effect": 0,
+        "corner_mark": "互动",
+        "corner_background": "",
+        "broadcast": 0,
+        "draw": 0,
+        "stay_time": 3,
+        "animation_frame_num": 0,
+        "desc": "向全世界最好的你表白！",
+        "rule": "",
+        "rights": "",
+        "privilege_required": 0,
+        "count_map": [
+          {
+            "num": 1,
+            "text": "",
+            "desc": "",
+            "web_svga": "",
+            "vertical_svga": "",
+            "horizontal_svga": "",
+            "special_color": "",
+            "effect_id": 0
+          }
+        ],
+        "img_basic": "https://s1.hdslb.com/bfs/live/5d940270c22a17fa2ff17a0713b4383b6febd945.png",
+        "img_dynamic": "https://i0.hdslb.com/bfs/live/5d940270c22a17fa2ff17a0713b4383b6febd945.png",
+        "frame_animation": "",
+        "gif": "https://i0.hdslb.com/bfs/live/ccd776fe1557b60e09f7a78d31523e0233768592.gif",
+        "webp": "https://i0.hdslb.com/bfs/live/8bedf765322d218e363251a712d0853874847146.webp",
+        "full_sc_web": "",
+        "full_sc_horizontal": "",
+        "full_sc_vertical": "",
+        "full_sc_horizontal_svga": "",
+        "full_sc_vertical_svga": "",
+        "bullet_head": "",
+        "bullet_tail": "",
+        "limit_interval": 0,
+        "bind_ruid": 0,
+        "bind_roomid": 0,
+        "gift_type": 0,
+        "combo_resources_id": 0,
+        "max_send_limit": 5000,
+        "weight": 1,
+        "goods_id": 15,
+        "has_imaged_gift": 0,
+        "left_corner_text": "",
+        "left_corner_background": "",
+        "gift_banner": {
+          "app_pic": "http://i0.hdslb.com/bfs/live/ff84e9a808dcd6d8f9db8e6938a6925fe24f0ccf.png",
+          "web_pic": "",
+          "left_text": "",
+          "left_color": "",
+          "button_text": "",
+          "button_color": "",
+          "button_pic_color": "",
+          "jump_url": "https://www.bilibili.com/blackboard/era/0KzjdxPrFhvJo2Oz.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100",
+          "jump_to": 0,
+          "web_pic_url": "http://i0.hdslb.com/bfs/live/c977479526645596b62fcf8d29bbb863784e31f2.png",
+          "web_jump_url": "https://www.bilibili.com/blackboard/era/0KzjdxPrFhvJo2Oz.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100",
+          "app_banner_v2": {
+            "banner_type": 1002,
+            "schema": "https://www.bilibili.com/blackboard/era/0KzjdxPrFhvJo2Oz.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100",
+            "icon": {
+              "img_url": "http://i0.hdslb.com/bfs/live/79254d2c03613771b47b1ff34d745cc3f8c86ad6.png",
+              "icon_shape": 0
+            },
+            "double_icon": null,
+            "main_title": {
+              "text": "互动特效礼物",
+              "color": "",
+              "highlight_font_color": ""
+            },
+            "sub_title": [
+              {
+                "text": "查看玩法特效",
+                "color": "",
+                "highlight_font_color": "",
+                "uri": ""
+              }
+            ],
+            "button": {
+              "text": "查看详情",
+              "background_color": "#C449AA33"
+            },
+            "background": {
+              "color": "#C449AA33"
+            },
+            "ext_gifts_1004": null
+          },
+          "web_banner": {
+            "banner_type": 1001,
+            "schema": "https://www.bilibili.com/blackboard/era/0KzjdxPrFhvJo2Oz.html?-Abrowser=live&is_live_half_webview=1&hybrid_rotate_d=1&is_cling_player=1&hybrid_half_ui=1,3,100p,70p,0,1,30,100;2,2,375,100p,0,1,30,100;3,3,100p,70p,0,1,30,100;4,2,375,100p,0,1,30,100;5,3,100p,70p,0,1,30,100;6,3,100p,70p,0,1,30,100;7,3,100p,70p,0,1,30,100;8,3,100p,70p,0,1,30,100",
+            "icon": {
+              "img_url": "http://i0.hdslb.com/bfs/live/79254d2c03613771b47b1ff34d745cc3f8c86ad6.png",
+              "icon_shape": 0
+            },
+            "double_icon": null,
+            "main_title": {
+              "text": "互动特效礼物",
+              "color": "",
+              "highlight_font_color": ""
+            },
+            "sub_title": [
+              {
+                "text": "查看玩法特效",
+                "color": "",
+                "highlight_font_color": "",
+                "uri": ""
+              }
+            ],
+            "button": null,
+            "background": {
+              "color": "#C449AA33"
+            },
+            "ext_gifts_1004": null
+          }
+        },
+        "diy_count_map": 0,
+        "effect_id": 0,
+        "first_tips": "",
+        "gift_attrs": [
+          0
+        ],
+        "corner_mark_color": "#FFFFFF",
+        "corner_color_bg": "#D16584",
+        "web_light": {
+          "corner_mark": "互动",
+          "corner_background": "",
+          "corner_mark_color": "#FFFFFF",
+          "corner_color_bg": "#FD94B2"
+        },
+        "web_dark": {
+          "corner_mark": "互动",
+          "corner_background": "",
+          "corner_mark_color": "#FFFFFF",
+          "corner_color_bg": "#B7687F"
+        }
+      }
+    ],
+    "combo_resources": [
+      {
+        "combo_resources_id": 10,
+        "img_one": "",
+        "img_two": "",
+        "img_three": "",
+        "img_four": "",
+        "color_one": "#62A6FF66",
+        "color_two": "#6FADFE33"
+      },
+      {
+        "combo_resources_id": 11,
+        "img_one": "",
+        "img_two": "",
+        "img_three": "",
+        "img_four": "",
+        "color_one": "#9F66FFCC",
+        "color_two": "#6FACFE4D"
+      }
+    ],
+    "guard_resources": [
+      {
+        "level": 1,
+        "img": "https://i0.hdslb.com/bfs/live/39164ebfdd39db3d284b1221765e7e57f5a49958.png",
+        "name": "总督"
+      },
+      {
+        "level": 2,
+        "img": "https://i0.hdslb.com/bfs/live/09937c3beb0608e267a50ac3c7125c3f2d709098.png",
+        "name": "提督"
+      },
+      {
+        "level": 3,
+        "img": "https://i0.hdslb.com/bfs/live/80f732943cc3367029df65e267960d56736a82ee.png",
+        "name": "舰长"
+      }
+    ],
+    "naming_gift": {
+      "text": {
+        "app_user": "冠名",
+        "app_user_selected": "冠名",
+        "web_user": "冠名",
+        "web_user_selected": "冠名",
+        "combo_user": "冠名",
+        "combo_anchor": "冠名",
+        "vtr": "TA冠名的礼物"
+      }
+    },
+    "send_disable_msg": {
+      "gift_for_owner": "只能给房主投喂～",
+      "no_send_obj": "请选择投喂对象～",
+      "no_fans_incr": "投喂给房主和麦上用户均可增加房主亲密度",
+      "jump_fans_url": "https://live.bilibili.com/p/html/live-app-fanspanel/rules.html?isMultiVoiceRoom=1&nav=1&is_live_half_webview=1&hybrid_half_ui=1,3,100p,70p,0,0,30,100,12,0;2,2,375,100p,0,0,30,100,0,0;3,3,100p,70p,0,0,30,100,12,0;4,2,375,100p,0,0,30,100,0,0;5,3,100p,70p,0,0,30,100,12,0;6,3,100p,70p,0,0,30,100,12,0;7,3,100p,70p,0,0,30,100,12,0",
+      "web_no_fans_incr": "投喂给房主的礼物才可增加亲密度哦"
+    }
+  }
+}

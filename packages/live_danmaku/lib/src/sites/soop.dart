@@ -34,6 +34,123 @@ abstract final class SoopDanmakuProtocol {
   /// Service number of a chat line.
   static const int chatService = 5;
 
+  /// Service of a star balloon (`SVC_SENDBALLOON`, 별풍선) sent in this
+  /// room ([balloon], D07.7).
+  static const int balloonService = 18;
+
+  /// Service of a star balloon relayed from another room of the broadcast
+  /// (`SVC_SENDBALLOONSUB`; the web player reads its fields one further on).
+  static const int relayedBalloonService = 33;
+
+  /// Service of an ad balloon (`SVC_ADCON_EFFECT`, 애드벌룬).
+  static const int adBalloonService = 87;
+
+  /// Service of a subscription (`SVC_FOLLOW_ITEM`, 구독).
+  static const int subscriptionService = 91;
+
+  /// Service of a subscription's ceremony with its months
+  /// (`SVC_FOLLOW_ITEM_EFFECT`).
+  static const int subscriptionMonthsService = 93;
+
+  /// Service of a video balloon (`SVC_VIDEOBALLOON`, 영상풍선: star balloons
+  /// sent with a video).
+  static const int videoBalloonService = 105;
+
+  /// The platform's names of what [balloon] reports, as it writes them.
+  static const String starBalloonName = '별풍선';
+
+  /// See [starBalloonName].
+  static const String adBalloonName = '애드벌룬';
+
+  /// See [starBalloonName].
+  static const String videoBalloonName = '영상풍선';
+
+  /// The packet's fields as the web player's `readBody` gives them
+  /// (`t.packet`): the body split at form feeds, without the empty field
+  /// before the first one, each read as UTF-8.
+  static List<String> fieldsOf(List<int> body) =>
+      [for (final part in ListUtil.splitList(body, 0x0c)) utf8.decode(part, allowMalformed: true)].skip(1).toList();
+
+  /// A star balloon, relayed star balloon, ad balloon or video balloon
+  /// (D07.7) as a [LiveMessageType.gift] message with a [LiveGift] of kind
+  /// [LiveGiftKind.tip], as the web player reads the packet
+  /// (`LivePlayer.js`, `SVC_SENDBALLOON`, `SVC_SENDBALLOONSUB`,
+  /// `SVC_ADCON_EFFECT`, `SVC_VIDEOBALLOON`); null for another service, or
+  /// without a sender or a count above 0:
+  ///
+  /// - [LiveGift.name] the platform's name ([starBalloonName],
+  ///   [adBalloonName], [videoBalloonName]), [LiveGift.count] `cnt`
+  ///   (`adcon_cnt`);
+  /// - star and video balloons are their own value: [LiveGift.unitPrice] 1,
+  ///   [LiveGift.totalValue] the count, [LiveGiftUnit.starBalloon]; ad
+  ///   balloons have no value this app can place ([LiveGiftUnit.other]);
+  /// - an ad balloon's picture is its `urlImg`;
+  /// - the sender is `sender_nickname` and `sender_id` ([userId]); the id
+  ///   the packet's uuid when it has one (star and ad balloons).
+  static LiveMessage? balloon(SoopPacket packet) {
+    final fields = fieldsOf(packet.body);
+    String at(int index) => index < fields.length ? fields[index].trim() : '';
+    final (String sender, String name, String count, String kind, String id, String picture) = switch (packet.service) {
+      balloonService => (at(1), at(2), at(3), starBalloonName, at(11), ''),
+      relayedBalloonService => (at(3), at(4), at(5), starBalloonName, at(12), ''),
+      videoBalloonService => (at(2), at(3), at(4), videoBalloonName, '', ''),
+      adBalloonService => (at(2), at(3), at(9), adBalloonName, at(15), at(7)),
+      _ => ('', '', '', '', '', ''),
+    };
+    final amount = int.tryParse(count);
+    if (sender.isEmpty || name.isEmpty || amount == null || amount <= 0) return null;
+    final valued = kind != adBalloonName;
+    final image = Uri.tryParse(picture);
+    final gift = LiveGift(
+      name: kind,
+      count: amount,
+      kind: LiveGiftKind.tip,
+      unitPrice: valued ? 1 : null,
+      totalValue: valued ? amount : null,
+      unit: valued ? LiveGiftUnit.starBalloon : LiveGiftUnit.other,
+      iconUrl: image != null && image.isScheme('https') && image.host.isNotEmpty ? image : null,
+    );
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: name,
+      userId: userId(sender),
+      message: gift.plainText,
+      color: LiveMessageColor.white,
+      messageId: _uuid.hasMatch(id) ? id : '',
+      data: gift,
+    );
+  }
+
+  /// A subscription (`SVC_FOLLOW_ITEM`) or its ceremony with the months
+  /// (`SVC_FOLLOW_ITEM_EFFECT`) as a [LiveNoticeKind.subscription] notice
+  /// (D07.7), in Chinese around the platform's name as CHZZK's are:
+  /// `<name> 订阅了频道` and, with the months (`accMonth`, else `month`),
+  /// `，已订阅 N 个月`.
+  /// The sender is `sendNick` and `sendId`; the id `subscription:<uuid>`.
+  /// Null for another service or without a sender.
+  static LiveMessage? subscription(SoopPacket packet) {
+    final fields = fieldsOf(packet.body);
+    String at(int index) => index < fields.length ? fields[index].trim() : '';
+    final (String sender, String name, int? months, String id) = switch (packet.service) {
+      subscriptionService => (at(2), at(3), null, at(8)),
+      subscriptionMonthsService => (at(1), at(2), int.tryParse(at(6)) ?? int.tryParse(at(3)), at(8)),
+      _ => ('', '', null, ''),
+    };
+    if (sender.isEmpty || name.isEmpty) return null;
+    final text = months != null && months > 0 ? '订阅了频道，已订阅 $months 个月' : '订阅了频道';
+    return LiveMessage(
+      type: LiveMessageType.notice,
+      userName: name,
+      userId: userId(sender),
+      message: '$name $text',
+      color: LiveMessageColor.white,
+      messageId: _uuid.hasMatch(id) ? 'subscription:$id' : '',
+      data: LiveNoticeKind.subscription,
+    );
+  }
+
+  static final RegExp _uuid = RegExp(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+
   /// Header bytes before a packet's body.
   static const int headerLength = 14;
 
@@ -100,11 +217,17 @@ abstract final class SoopDanmakuProtocol {
     return packets;
   }
 
-  /// The chat lines of one server [frame] (3.x `decodeMessage`); other
-  /// services (viewer lists, flags, balloons, …) are ignored.
+  /// The chat lines of one server [frame] (3.x `decodeMessage`), its
+  /// balloons ([balloon]) and subscriptions ([subscription], D07.7); other
+  /// services (viewer lists, flags, …) are ignored.
   static List<LiveMessage> decode(List<int> frame) => [
     for (final packet in packets(frame))
-      if (packet.service == chatService) ?chat(packet.body),
+      ?switch (packet.service) {
+        chatService => chat(packet.body),
+        balloonService || relayedBalloonService || adBalloonService || videoBalloonService => balloon(packet),
+        subscriptionService || subscriptionMonthsService => subscription(packet),
+        _ => null,
+      },
   ];
 
   /// A chat line (3.x `_decodeChatPacket`): text in field 1, nick in field

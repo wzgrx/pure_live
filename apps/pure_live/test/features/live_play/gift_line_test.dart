@@ -112,6 +112,16 @@ LiveMessage _bilibiliSilver() => _bilibili({
   'data': {'giftName': '辣条', 'num': 5, 'uname': '观众', 'uid': 2, 'coin_type': 'silver', 'total_coin': 500},
 });
 
+/// A guest's recorded gifts (fixtures/bilibili/danmaku/S13-guest-gifts, D07.4):
+/// 50 SEND_GIFT_V2 and one COMBO_SEND.
+List<LiveMessage> _bilibiliGuests() => [
+  for (final line in File('../../fixtures/bilibili/danmaku/S13-guest-gifts/frames.jsonl').readAsLinesSync())
+    for (final item in BilibiliDanmakuProtocol.decode(
+      base64Decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String),
+    ).items)
+      if (item case BilibiliDanmakuMessage(:final message)) message,
+];
+
 /// Douyu's recorded gifts (fixtures/douyu/danmaku/S15-gifts).
 List<LiveMessage> _douyu() {
   final sample = jsonDecode(
@@ -286,6 +296,40 @@ void main() {
       await _pumpLine(tester, _bilibiliSilver());
       expect(_piece(tester, 'live-play-gift-count').data, '×5');
       expect(_value(tester), isNull, reason: 'a free gift shows no value');
+    });
+
+    testWidgets('Bilibili guests (D07.4, S13-guest-gifts through the parser): picture, value, fan medal, receiver', (
+      tester,
+    ) async {
+      final gifts = _bilibiliGuests();
+      const room = GiftLineRoom(platform: SiteIds.bilibili, streamer: '主播');
+      await _pumpLine(tester, gifts.first, room: room);
+      expect(_said(tester), contains('想*** 送出 牛哇牛哇 ×1100 金瓜子'));
+      expect(find.byKey(const ValueKey('live-play-gift-image')), findsOneWidget, reason: 'the packet has the picture');
+      expect(find.byKey(const ValueKey('live-play-chat-fans')), findsOneWidget, reason: 'the fan medal, as on chat');
+      expect(_value(tester), '100 金瓜子');
+      expect(find.byKey(const ValueKey('live-play-gift-tier-valuable')), findsNothing, reason: '0.1 yuan: normal');
+      // Another room's streamer: the receiver is named.
+      await _pumpLine(tester, gifts.first);
+      expect(_span(tester, '送给 主播 '), isNotNull);
+      // The combo's COMBO_SEND: ×2, 200 gold seeds.
+      await _pumpLine(tester, gifts.firstWhere((m) => m.gift!.comboTotal != null), room: room);
+      expect(_piece(tester, 'live-play-gift-count').data, '×2');
+      expect(_value(tester), '200 金瓜子');
+      // A guard bought, with the table's picture: precious.
+      final table = BilibiliApi.giftCatalog(
+        File('../../fixtures/bilibili/S18-gift-config/body.json').readAsStringSync(),
+      );
+      final guard = BilibiliDanmakuProtocol.decode(
+        _bilibiliPacket({
+          'cmd': 'GUARD_BUY',
+          'data': {'uid': 1, 'username': '观众', 'guard_level': 3, 'num': 1, 'price': 198000, 'gift_name': '舰长'},
+        }),
+        gifts: table,
+      ).items.whereType<BilibiliDanmakuMessage>().single.message;
+      await _pumpLine(tester, guard, room: room);
+      expect(find.byKey(const ValueKey('live-play-gift-image')), findsOneWidget);
+      expect(find.byKey(const ValueKey('live-play-gift-tier-precious')), findsOneWidget);
     });
 
     testWidgets('Douyu (S15-gifts): the combo count, the streamer not named as receiver', (tester) async {

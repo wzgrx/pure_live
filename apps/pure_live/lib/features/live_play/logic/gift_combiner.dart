@@ -71,7 +71,10 @@ final class CombinedGift extends LiveGift {
 ///   ([ChatFeed.replace]: it comes to the bottom of a following list, and
 ///   stays where it is in a held one). A platform count that went back
 ///   ([LiveGift.comboTotal] not above the line's) is a new combo, so a new
-///   line.
+///   line. A combo's summary (a message with the platform's combo key that
+///   counts the whole combo: Bilibili's `COMBO_SEND`, which comes after the
+///   combo's last send) counts on its line within [summaryWindow], wherever
+///   the line is (D07.4).
 /// - **Count** ([totalOf]): the platform's running count
 ///   ([LiveGift.comboTotal]) when it says more than adding up the messages
 ///   would, else the sum of their counts.
@@ -92,6 +95,13 @@ final class GiftCombiner {
   /// How long after a combo's last gift the next one still counts on its
   /// line (V03.5 §6.4).
   static const Duration comboWindow = Duration(seconds: 5);
+
+  /// How long after a combo's last gift its summary still counts on its
+  /// line: Bilibili's `COMBO_SEND` comes when the combo has ended, 5.15 s
+  /// after the last send in fixtures/bilibili/danmaku/S13-guest-gifts (its
+  /// `combo_stay_time` is 10 s), so within [comboWindow] it made a second
+  /// line (D07.4).
+  static const Duration summaryWindow = Duration(seconds: 15);
 
   /// How near the bottom a combo's line must still be to count on it.
   static const int comboLines = 20;
@@ -126,6 +136,10 @@ final class GiftCombiner {
       : 'sender:${gift.kind.name}:${message.userId}\u0000${message.userName}\u0000'
             '${gift.id.isNotEmpty ? gift.id : gift.name}';
 
+  /// Whether [gift] sums up its combo: it has the platform's combo key and
+  /// its running count is its own count (Bilibili's `COMBO_SEND`).
+  static bool isSummary(LiveGift gift) => gift.comboKey.isNotEmpty && gift.comboTotal == gift.count;
+
   /// The count of a line that showed [shown] once [gift] counts on it: the
   /// platform's running count when it has one ([LiveGift.comboTotal];
   /// Douyu's `hits` counts gifts, Huya's `iItemGroup` sends, Bilibili's
@@ -146,7 +160,9 @@ final class GiftCombiner {
     var combo = key == null ? null : _combos.remove(key);
     if (combo != null && feed.linesAfter(combo.line) < 0) combo = null;
     if (key != null && gift != null && combo != null) {
-      final near = feed.linesAfter(combo.line) < comboLines && now.difference(combo.at) <= comboWindow;
+      final near = isSummary(gift)
+          ? now.difference(combo.at) <= summaryWindow
+          : feed.linesAfter(combo.line) < comboLines && now.difference(combo.at) <= comboWindow;
       if (near && !combo.restartedBy(gift)) return _merge(key, combo, message, gift, now);
     }
     if (_mayAddLine(now) || (gift != null && gift.tier != LiveGiftTier.normal)) {

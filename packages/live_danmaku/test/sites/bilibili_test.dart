@@ -10,6 +10,7 @@ import 'package:live_net/live_net.dart';
 import 'package:test/test.dart';
 
 const _root = '../../fixtures/bilibili/danmaku';
+const _giftConfig = '../../fixtures/bilibili/S18-gift-config';
 
 final Uri _gateway = Uri.parse(BilibiliApi.danmakuGateway);
 final Uri _node = Uri.parse('wss://node.example:2245/sub');
@@ -131,6 +132,33 @@ Uint8List _packet(int operation, List<int> body, {int version = 0}) {
 Uint8List _auth(String body) => _packet(8, utf8.encode(body));
 
 Uint8List _notice(Object? json, {int version = 0}) => _packet(5, utf8.encode(jsonEncode(json)), version: version);
+
+/// A protobuf message of [fields] (D07.4's SEND_GIFT_V2 shapes): an `int` is
+/// a varint, a `String` UTF-8 and a `List<int>` a nested message or bytes.
+List<int> _pb(Map<int, Object> fields) {
+  final out = <int>[];
+  void varint(int value) {
+    var rest = value;
+    while (rest >= 0x80) {
+      out.add(rest & 0x7f | 0x80);
+      rest >>= 7;
+    }
+    out.add(rest);
+  }
+
+  for (final MapEntry(:key, :value) in fields.entries) {
+    if (value is int) {
+      varint(key << 3);
+      varint(value);
+      continue;
+    }
+    final bytes = value is String ? utf8.encode(value) : value as List<int>;
+    varint(key << 3 | 2);
+    varint(bytes.length);
+    out.addAll(bytes);
+  }
+  return out;
+}
 
 /// A brotli stream of [data] in uncompressed meta-blocks of at most [block]
 /// bytes (RFC 7932 section 9.2), as fixtures/bilibili/danmaku/legacy_expected.dart
@@ -804,7 +832,15 @@ void main() {
         expect(gift.sentAt, DateTime.fromMillisecondsSinceEpoch(1790814397000));
         expect(
           gift.data,
-          const BilibiliGift(id: '30607', name: '小心心', count: 3, goldCoins: 3000, comboId: 'batch:gift:combo_id:1'),
+          const BilibiliGift(
+            id: '30607',
+            name: '小心心',
+            count: 3,
+            goldCoins: 3000,
+            comboId: 'batch:gift:combo_id:1',
+            unitPrice: 1000,
+          ),
+          reason: 'D07.4: the price of one is the total over the count',
         );
         // E05.5: the shared gift.
         final shared = gift.gift!;
@@ -816,8 +852,15 @@ void main() {
           'cmd': 'SEND_GIFT',
           'data': {'giftName': '辣条', 'num': 0, 'coin_type': 'silver', 'total_coin': 100},
         }).single;
-        expect(silver.data, const BilibiliGift(id: '', name: '辣条', count: 1, free: true));
-        expect(silver.gift?.totalValue, isNull, reason: 'silver seeds are not kept');
+        expect(
+          silver.data,
+          const BilibiliGift(id: '', name: '辣条', count: 1, silverCoins: 100, unitPrice: 100, free: true),
+        );
+        expect(
+          (silver.gift?.totalValue, silver.gift?.unit, silver.gift?.tier),
+          (100, LiveGiftUnit.silverSeed, LiveGiftTier.normal),
+          reason: 'D07.4: silver seeds are kept as silver seeds, and free',
+        );
 
         final combo = messages({
           'cmd': 'COMBO_SEND',
@@ -861,6 +904,7 @@ void main() {
             goldCoins: 198000,
             kind: LiveGiftKind.membership,
             unitPrice: 198000,
+            guardLevel: 3,
           ),
         );
         expect(guard.gift?.tier, LiveGiftTier.precious, reason: '198 yuan');
@@ -904,6 +948,335 @@ void main() {
         expect((single.gift?.count, single.gift?.comboTotal), (1, null), reason: 'no running count in SEND_GIFT');
         await replay.connection.close();
       });
+    });
+  });
+
+  group('D07.4: gifts in full, for guests too', () {
+    final table = BilibiliApi.giftCatalog(File('$_giftConfig/body.json').readAsStringSync());
+
+    List<LiveMessage> messages(Object? notice, {BilibiliGiftCatalog gifts = BilibiliGiftCatalog.empty}) => [
+      for (final item in BilibiliDanmakuProtocol.decode(_notice(notice), gifts: gifts).items)
+        if (item case BilibiliDanmakuMessage(:final message)) message,
+    ];
+
+    /// The guest recording's gifts, in order.
+    List<LiveMessage> recorded({BilibiliGiftCatalog gifts = BilibiliGiftCatalog.empty}) => [
+      for (final line in _lines('S13-guest-gifts'))
+        for (final item in BilibiliDanmakuProtocol.decode(base64.decode(line['b64']! as String), gifts: gifts).items)
+          if (item case BilibiliDanmakuMessage(:final message)) message,
+    ];
+
+    Map<String, Object?> v2(List<int> pb) => {
+      'cmd': 'SEND_GIFT_V2',
+      'data': {'pb': base64.encode(pb)},
+    };
+
+    test('S13-guest-gifts: a guest gets its gifts as SEND_GIFT_V2 (50) and one COMBO_SEND, all of them shown', () {
+      final gifts = recorded();
+      expect(gifts, hasLength(51));
+      expect(gifts.every((m) => m.type == LiveMessageType.gift && m.gift is BilibiliGift), isTrue);
+      // D-013: every sender masked, no uid.
+      expect(gifts.every((m) => BilibiliDanmakuProtocol.isMaskedName(m.userName) && m.userId == '0'), isTrue);
+      // Every one with its picture, in gold seeds, at a known price.
+      expect(
+        gifts.every(
+          (m) =>
+              m.gift!.iconUrl!.scheme == 'https' &&
+              m.gift!.iconUrl!.host.endsWith('.hdslb.com') &&
+              m.gift!.unit == LiveGiftUnit.goldSeed &&
+              !m.gift!.free &&
+              m.gift!.unitPrice == 100 &&
+              m.gift!.comboKey.startsWith('batch:gift:combo_id:'),
+        ),
+        isTrue,
+      );
+      final v2 = gifts.where((m) => m.messageId.isNotEmpty).toList();
+      expect(v2, hasLength(50), reason: 'SEND_GIFT_V2 has its tid; COMBO_SEND none');
+      expect(v2.map((m) => m.messageId).toSet(), hasLength(50));
+      expect(v2.every((m) => m.sentAt != null), isTrue);
+      expect(
+        gifts.every((m) => m.fansName.isNotEmpty && m.fansLevel.isNotEmpty),
+        isTrue,
+        reason: 'fan medals are not masked: 48 in field 8, 2 only in sender_uinfo (15.3), COMBO_SEND in sender_uinfo',
+      );
+      expect({for (final m in gifts) m.gift!.name: m.gift!.id}, {'牛哇牛哇': '31039', '粉丝团灯牌': '31164', '薯条': '35969'});
+
+      // The first, field by field.
+      final first = gifts.first;
+      expect(
+        (first.userName, first.message, first.fansName, first.fansLevel, first.messageId, first.sentAt),
+        (
+          '想***',
+          '牛哇牛哇 ×1',
+          '獭獭栞',
+          '29',
+          'bilibili:gift:4825830807182606848',
+          DateTime.fromMillisecondsSinceEpoch(1791512155000),
+        ),
+      );
+      expect(
+        first.data,
+        BilibiliGift(
+          id: '31039',
+          name: '牛哇牛哇',
+          count: 1,
+          goldCoins: 100,
+          comboId: 'batch:gift:combo_id:00000000000000000000000000000001:1000001:31039:1791512155.0730',
+          unitPrice: 100,
+          iconUrl: Uri.parse('https://s1.hdslb.com/bfs/live/91ac8e35dd93a7196325f1e2052356e71d135afb.png'),
+          receiverName: '主播',
+        ),
+      );
+
+      // Ten at once.
+      final ten = gifts.firstWhere((m) => m.gift!.count == 10);
+      expect((ten.gift!.unitPrice, ten.gift!.totalValue, ten.message), (100, 1000, '${ten.gift!.name} ×10'));
+
+      // A combo: two sends of 薯条, then COMBO_SEND with the combo so far.
+      final key = gifts.singleWhere((m) => m.gift!.comboTotal != null).gift!.comboKey;
+      final combo = gifts.where((m) => m.gift!.comboKey == key).toList();
+      expect(combo.map((m) => m.gift!.name).toSet(), {'薯条'});
+      expect([for (final m in combo) (m.gift!.count, m.gift!.comboTotal)], [(1, null), (1, null), (2, 2)]);
+      final summary = combo.last;
+      expect(
+        (summary.userName, summary.fansName, summary.fansLevel, summary.gift!.totalValue, summary.gift!.receiverName),
+        ('白***', '獭獭栞', '25', 200, '主播'),
+        reason: 'COMBO_SEND: the medal of sender_uinfo (medal_info is empty)',
+      );
+    });
+
+    test("D-013: a masked sender's gift cannot be blocked by the name; a blocked word still blocks it", () {
+      final gift = recorded().first;
+      // D-017: "now" is the recording's time, so the duplicate gate's age
+      // check passes.
+      final recordedAt = gift.sentAt!.add(const Duration(seconds: 1));
+      expect(
+        DanmakuMessageFilter(
+          settings: const DanmakuFilterSettings(blockedUsers: ['想***']),
+          clock: () => recordedAt,
+        ).judge(gift),
+        DanmakuVerdict.shown,
+      );
+      expect(
+        DanmakuMessageFilter(
+          settings: const DanmakuFilterSettings(blockedKeywords: ['牛哇牛哇']),
+          clock: () => recordedAt,
+        ).judge(gift),
+        DanmakuVerdict.blocked,
+      );
+    });
+
+    test('SEND_GIFT_V2 shapes: what is read, what is left out, and what gives nothing', () {
+      List<int> gift({
+        int id = 31039,
+        String name = '牛哇牛哇',
+        int number = 2,
+        int? price = 100,
+        int? total = 200,
+        String coin = 'gold',
+        bool picture = true,
+      }) => _pb({
+        1: id,
+        2: name,
+        3: number,
+        5: ?price,
+        7: ?total,
+        8: coin,
+        9: '4825830807182606848',
+        10: 1791512155,
+        12: 'batch:gift:combo_id:1',
+        if (picture) 35: _pb({1: 'http://s1.hdslb.com/bfs/live/a.png'}),
+      });
+
+      // A logged-in shape: the uid, the name, the medal in sender_uinfo only.
+      final full = messages(
+        v2(
+          _pb({
+            1: 1000002,
+            15: _pb({
+              2: _pb({1: '观众'}),
+              3: _pb({1: '牌子', 2: 12}),
+            }),
+            10: gift(),
+          }),
+        ),
+      ).single;
+      expect(
+        (full.userName, full.userId, full.fansName, full.fansLevel, full.message),
+        ('观众', '1000002', '牌子', '12', '牛哇牛哇 ×2'),
+      );
+      expect(full.gift!.iconUrl, Uri.parse('https://s1.hdslb.com/bfs/live/a.png'), reason: 'made https');
+      expect((full.gift!.unitPrice, full.gift!.totalValue), (100, 200));
+
+      // Silver: free, in silver seeds.
+      final silver = messages(v2(_pb({2: '观***', 10: gift(coin: 'silver', price: 0, total: 0)}))).single.gift!;
+      expect(
+        (silver.free, silver.unit, silver.totalValue, silver.tier),
+        (true, LiveGiftUnit.silverSeed, null, LiveGiftTier.normal),
+      );
+
+      // No price but a total: the total over the count; no picture: the table's.
+      final bare = messages(v2(_pb({10: gift(price: null, picture: false)})), gifts: table).single.gift!;
+      expect((bare.unitPrice, bare.totalValue), (100, 200));
+      expect(bare.iconUrl, table['31039']!.icon);
+      // Not in the table: no picture.
+      expect(messages(v2(_pb({10: gift(id: 99999999, picture: false)})), gifts: table).single.gift!.iconUrl, isNull);
+      // No name: the table's.
+      expect(messages(v2(_pb({10: gift(name: '', picture: false)})), gifts: table).single.gift!.name, '牛哇牛哇');
+
+      // Nothing: no gift, no name anywhere, not protobuf, not Base64, no pb.
+      expect(messages(v2(_pb({2: '观***'}))), isEmpty);
+      expect(messages(v2(_pb({10: gift(id: 99999999, name: '')}))), isEmpty);
+      expect(messages(v2([0x0a, 0x05, 0x01])), isEmpty, reason: 'a truncated field');
+      expect(
+        messages({
+          'cmd': 'SEND_GIFT_V2',
+          'data': {'pb': '%%%'},
+        }),
+        isEmpty,
+      );
+      expect(messages({'cmd': 'SEND_GIFT_V2'}), isEmpty, reason: 'the old samples, content removed');
+      // A bad one does not take the next notice with it.
+      final stream = [
+        ..._notice({
+          'cmd': 'SEND_GIFT_V2',
+          'data': {'pb': '%%%'},
+        }),
+        ..._notice(_danmu('next')),
+      ];
+      expect(_decoded(stream), ['next']);
+    });
+
+    test('the gift table fills in what SEND_GIFT, COMBO_SEND and GUARD_BUY leave out; the packet wins', () {
+      // COMBO_SEND without gift_info and combo_total_coin: the table's picture and price.
+      final combo = messages({
+        'cmd': 'COMBO_SEND',
+        'data': {'gift_name': '薯条', 'gift_id': 35969, 'total_num': 3, 'uname': '观众', 'batch_combo_id': 'a'},
+      }, gifts: table).single.gift!;
+      expect((combo.iconUrl, combo.unitPrice, combo.totalValue), (table['35969']!.icon, 100, 300));
+      expect(
+        messages({
+          'cmd': 'COMBO_SEND',
+          'data': {'gift_name': '薯条', 'gift_id': 35969, 'total_num': 3, 'uname': '观众'},
+        }).single.gift!.iconUrl,
+        isNull,
+        reason: 'without the table',
+      );
+
+      // The packet's price and picture win over the table's.
+      final own = messages({
+        'cmd': 'SEND_GIFT',
+        'data': {
+          'giftName': '牛哇牛哇',
+          'giftId': 31039,
+          'num': 2,
+          'price': 150,
+          'total_coin': 300,
+          'coin_type': 'gold',
+          'uname': '观众',
+          'gift_info': {'img_basic': 'https://s1.hdslb.com/bfs/live/own.png'},
+          'medal_info': {'medal_name': '牌子', 'medal_level': 3},
+          'receive_user_info': {'uid': 1000001, 'uname': '主播'},
+        },
+      }, gifts: table).single;
+      expect(
+        (own.gift!.unitPrice, own.gift!.totalValue, own.gift!.iconUrl.toString(), own.fansName, own.fansLevel),
+        (150, 300, 'https://s1.hdslb.com/bfs/live/own.png', '牌子', '3'),
+      );
+      expect(own.gift!.receiverName, '主播');
+
+      // A blind box: what was paid (total_coin), not the price of what came out.
+      final box = messages({
+        'cmd': 'SEND_GIFT',
+        'data': {'giftName': '某礼物', 'num': 2, 'price': 1000, 'total_coin': 3000, 'coin_type': 'gold'},
+      }).single.gift!;
+      expect((box.unitPrice, box.totalValue), (1500, 3000));
+
+      // 小心心 without coin_type: silver by the table, so free.
+      final heart = messages({
+        'cmd': 'SEND_GIFT',
+        'data': {'giftName': '小心心', 'giftId': 30607, 'num': 1, 'uname': '观众'},
+      }, gifts: table).single.gift!;
+      expect((heart.free, heart.unit, heart.unitPrice), (true, LiveGiftUnit.silverSeed, null));
+
+      // GUARD_BUY: the guard's picture from guard_resources; the name from the level.
+      Map<String, Object?> guard(int level, {String name = ''}) => {
+        'cmd': 'GUARD_BUY',
+        'data': {'uid': 1, 'username': '观众', 'guard_level': level, 'num': 1, 'price': 198000, 'gift_name': name},
+      };
+      final captain = messages(guard(3), gifts: table).single;
+      expect(
+        (captain.message, (captain.data! as BilibiliGift).guardLevel, captain.gift!.kind, captain.gift!.iconUrl),
+        ('舰长 ×1', 3, LiveGiftKind.membership, table.guards[3]!.icon),
+      );
+      expect(messages(guard(2), gifts: table).single.gift!.name, '提督');
+      expect(messages(guard(1, name: '总督')).single.gift!.iconUrl, isNull, reason: 'without the table');
+      expect(messages(guard(4)), isEmpty, reason: 'no level, no name');
+      expect((messages(guard(4, name: '舰长')).single.data! as BilibiliGift).guardLevel, 0);
+    });
+
+    test('the connection asks for the table once per connect, without waiting for it; a failure is soft', () async {
+      final notice = _notice({
+        'cmd': 'COMBO_SEND',
+        'data': {'gift_name': '薯条', 'gift_id': 35969, 'total_num': 1, 'uname': '观众', 'batch_combo_id': 'a'},
+      });
+      Future<List<LiveGift>> run(Future<BilibiliGiftCatalog> Function() load, {required int frames}) async {
+        final connector = _Connector();
+        final connection = BilibiliDanmakuConnection(connector: connector.call, policy: _quiet);
+        final gifts = <LiveGift>[];
+        connection.events.listen((event) {
+          if (event case DanmakuReceived(message: LiveMessage(gift: final gift?))) gifts.add(gift);
+        });
+        await connection.connect(
+          BilibiliDanmakuArgs(
+            roomId: 5050,
+            uid: 0,
+            token: 'token',
+            servers: [_gateway],
+            buvid: 'buvid',
+            headers: _headers,
+            giftCatalog: load,
+          ),
+        );
+        for (var i = 0; i < frames; i++) {
+          await connector.channels.last.receive(notice);
+        }
+        await connection.close();
+        return gifts;
+      }
+
+      final pending = Completer<BilibiliGiftCatalog>();
+      var asked = 0;
+      final connector = _Connector();
+      final connection = BilibiliDanmakuConnection(connector: connector.call, policy: _quiet);
+      final icons = <Uri?>[];
+      connection.events.listen((event) {
+        if (event case DanmakuReceived(message: LiveMessage(gift: final gift?))) icons.add(gift.iconUrl);
+      });
+      await connection.connect(
+        BilibiliDanmakuArgs(
+          roomId: 5050,
+          uid: 0,
+          token: 'token',
+          servers: [_gateway],
+          buvid: 'buvid',
+          headers: _headers,
+          giftCatalog: () {
+            asked++;
+            return pending.future;
+          },
+        ),
+      );
+      await connector.channels.last.receive(notice);
+      pending.complete(table);
+      await Future<void>.delayed(Duration.zero);
+      await connector.channels.last.receive(notice);
+      await connection.close();
+      expect(asked, 1);
+      expect(icons, [null, table['35969']!.icon], reason: 'the first came before the table');
+
+      final failed = await run(() async => throw StateError('offline'), frames: 2);
+      expect(failed.map((gift) => gift.iconUrl), [null, null], reason: 'still reported, without the picture');
     });
   });
 

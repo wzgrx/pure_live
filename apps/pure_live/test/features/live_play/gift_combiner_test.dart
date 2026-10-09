@@ -96,6 +96,33 @@ List<({int t, Uint8List bytes})> _frames(String sample) => [
       (t: t, bytes: base64Decode(b64)),
 ];
 
+/// A protobuf message of [fields] (SEND_GIFT_V2's): an `int` is a varint, a
+/// `String` UTF-8 and a `List<int>` a nested message.
+List<int> _pb(Map<int, Object> fields) {
+  final out = <int>[];
+  void varint(int value) {
+    var rest = value;
+    while (rest >= 0x80) {
+      out.add(rest & 0x7f | 0x80);
+      rest >>= 7;
+    }
+    out.add(rest);
+  }
+
+  for (final MapEntry(:key, :value) in fields.entries) {
+    if (value is int) {
+      varint(key << 3);
+      varint(value);
+      continue;
+    }
+    final bytes = value is String ? utf8.encode(value) : value as List<int>;
+    varint(key << 3 | 2);
+    varint(bytes.length);
+    out.addAll(bytes);
+  }
+  return out;
+}
+
 /// A Bilibili notice packet (operation 5, uncompressed).
 Uint8List _bilibili(Map<String, Object?> notice) {
   final body = utf8.encode(jsonEncode(notice));
@@ -363,6 +390,87 @@ void main() {
       expect(lines, containsAllInOrder(['9396536651700 虎粮 ×10', '9396536651700 虎粮 ×5']));
       expect(room.giftLines, hasLength(27 - 18 + 1), reason: '27 gifts, 18 of them one combo');
     });
+
+    test(
+      'Bilibili guests S13-guest-gifts (D07.4) at its recorded times: SEND_GIFT_V2 sends and COMBO_SEND are one line',
+      () {
+        final room = _Room();
+        final start = room.now;
+        var gifts = 0;
+        for (final frame in _frames('bilibili/danmaku/S13-guest-gifts')) {
+          room.now = start.add(Duration(milliseconds: frame.t));
+          for (final item in BilibiliDanmakuProtocol.decode(frame.bytes).items) {
+            if (item case BilibiliDanmakuMessage(:final message) when message.type == LiveMessageType.gift) {
+              gifts++;
+              room.gifts.add(message);
+            }
+          }
+        }
+        expect(gifts, 51, reason: '50 SEND_GIFT_V2 and one COMBO_SEND');
+        final lines = room.giftLines;
+        expect(lines, hasLength(49), reason: 'two sends of one combo and its COMBO_SEND are one line');
+        expect(room.gifts.dropped, 0);
+        final fries = lines.where((line) => line.message!.gift!.name == '薯条').toList();
+        expect(fries.map((line) => line.text), [
+          '薯条 ×2',
+          '薯条 ×1',
+        ], reason: 'two sends, then COMBO_SEND (total_num 2) 5.15 s later on the same line; a later send apart');
+        expect(fries.first.message!.gift, isA<CombinedGift>().having((gift) => gift.sends, 'sends', 2));
+        expect(
+          (fries.first.message!.gift!.totalValue, fries.first.message!.gift!.iconUrl.toString()),
+          (200, 'https://s1.hdslb.com/bfs/live/931e985f8637e5f190e54a832fca7889b4585b87.png'),
+        );
+        expect(lines.every((line) => BilibiliDanmakuProtocol.isMaskedName(line.message!.userName)), isTrue);
+      },
+    );
+
+    test(
+      "D07.4: Bilibili's COMBO_SEND, which comes after the combo ended, counts on its line for 15 s, wherever it is",
+      () {
+        Map<String, Object?> send(String combo) => {
+          'cmd': 'SEND_GIFT_V2',
+          'data': {
+            'pb': base64Encode(
+              _pb({
+                2: '观***',
+                10: _pb({1: 35969, 2: '薯条', 3: 1, 5: 100, 7: 100, 8: 'gold', 12: combo}),
+              }),
+            ),
+          },
+        };
+        Map<String, Object?> summary(String combo, int total) => {
+          'cmd': 'COMBO_SEND',
+          'data': {
+            'gift_name': '薯条',
+            'gift_id': 35969,
+            'total_num': total,
+            'combo_total_coin': total * 100,
+            'uname': '观***',
+            'uid': 0,
+            'batch_combo_id': combo,
+          },
+        };
+        final room = _Room();
+        _bilibiliMessages(send('a')).forEach(room.gifts.add);
+        room.wait(4);
+        _bilibiliMessages(send('a')).forEach(room.gifts.add);
+        room.wait(6);
+        room.chat(30);
+        _bilibiliMessages(summary('a', 2)).forEach(room.gifts.add);
+        expect(room.giftLines.single.text, '薯条 ×2', reason: '6 s later and 30 lines up: still its line');
+        room.wait(9);
+        _bilibiliMessages(summary('a', 3)).forEach(room.gifts.add);
+        expect(room.giftLines.single.text, '薯条 ×3', reason: 'a send it missed');
+        room.wait(16);
+        _bilibiliMessages(summary('a', 3)).forEach(room.gifts.add);
+        expect(room.giftLines, hasLength(2), reason: 'after 15 s a line of its own');
+        // A send (not a summary) 6 s later is a new combo as before.
+        _bilibiliMessages(send('b')).forEach(room.gifts.add);
+        room.wait(6);
+        _bilibiliMessages(send('b')).forEach(room.gifts.add);
+        expect(room.giftLines, hasLength(4));
+      },
+    );
 
     test('Bilibili: every SEND_GIFT of a combo counts, COMBO_SEND sets the total', () {
       final room = _Room();

@@ -50,6 +50,7 @@ path = [
   { glob = "apps/pure_live/lib/features/live_play/local_interaction/logic/", sub = "D08", note = "本地互动的数据和规则（D-040）" },
   { glob = "apps/pure_live/lib/features/live_play/local_interaction/", sub = "A08" },
   { glob = "apps/pure_live/lib/features/live_play/logic/audio_focus.dart", sub = "G05" },
+  { glob = "apps/pure_live/lib/features/live_play/logic/gift_combiner.dart", sub = "D07" },
   { glob = "apps/pure_live/lib/features/live_play/logic/background_playback.dart", sub = "C02" },
   { glob = "apps/pure_live/lib/features/live_play/logic/mini_window.dart", sub = "C02" },
   { glob = "apps/pure_live/lib/features/live_play/logic/iptv_guide_rows.dart", sub = "L02" },

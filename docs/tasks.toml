@@ -4241,7 +4241,7 @@ old = ["T16a.4"]
 
 [[task]]
 id = "Y01.5"
-title = "4.1.0 发布（Android，构建号 5002）"
+title = "4.1.0 发布（Android，构建号 5003）"
 type = "发布"
 status = "开发中"
 date = "2026-10-09"
@@ -4250,8 +4250,8 @@ tier = 1
 stages = ["版本号和发布说明", "构建和检查", "K90 冒烟", "标签、发布页和安装包", "更新文件 version.json/releases.json"]
 done = 1
 from = "用户 2026-10-09：开始测试，构建并发布新的 Android 版本 4.1.0，同步到 GitHub"
-next = "第 2 阶段：门禁不在跑时 flutter build apk --release --split-per-abi，按 Y01 的检查命令查包名、versionCode、证书、保留的资源、16 KB 对齐，结果写进 record.md"
-note = "版本号 4.1.0+5002（master 02f92af81），versionCode arm64 7002、v7a 6002、x86_64 9002；发布说明 Y03 releases/v4.1.0.md（SHA-256 留了占位）；应用内更新文字的草稿在 record.md，version.json、releases.json 最后改（PROCESS 第 11 节第 7 条）"
+next = "第 2 阶段（5003）：四项修复（A07.23、A11.6、D08.6、O01.3）都合并、维护者把版本号改成 4.1.0+5003 以后，门禁不在跑时 flutter build apk --release --split-per-abi，按 Y01 的检查命令查包名、versionCode 7003/6003/9003、证书、保留的资源、16 KB 对齐，结果写进 record.md"
+note = "改发构建号 5003：用户 2026-10-09 说 5002 不发布，补 A07.23、A11.6、D08.6、O01.3 后发新包；第 2～5 阶段对 5003 重做，5002（02f92af81）的检查和冒烟结果留在 record.md“5002（没有发布）”。versionCode arm64 7003、v7a 6003、x86_64 9003；发布说明 Y03 releases/v4.1.0.md 已补四项（SHA-256 留了占位）；应用内更新文字的草稿在 record.md，version.json、releases.json 最后改（PROCESS 第 11 节第 7 条）"
 
 [[task]]
 id = "Y02.1"

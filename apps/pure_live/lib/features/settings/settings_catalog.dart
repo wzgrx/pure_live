@@ -1889,6 +1889,20 @@ List<SettingsEntry> _build() {
       null,
       desc: 'settings_youtube_all_chat_desc',
       keywords: ['YouTube', '聊天', '弹幕'],
+    )
+    // ---- recording (H01.8) ----
+    // The page is the recording settings (RecordSettingsPage, its own
+    // route); this row only lets search find the switch new in v4, in the
+    // page's group.
+    ..section = SettingsSection.recording
+    ..group = 'basic_config'
+    ..toggle(
+      'record_danmaku_gifts',
+      'record_danmaku_gifts',
+      Settings.recordDanmakuGifts,
+      AppIcons.chatGift,
+      desc: 'record_danmaku_gifts_desc',
+      keywords: ['录制', '录像', '弹幕', '礼物', '醒目留言', 'SC', 'XML', 'gift'],
     );
   return List.unmodifiable(c.entries);
 }

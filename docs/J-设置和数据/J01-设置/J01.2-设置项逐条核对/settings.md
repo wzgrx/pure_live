@@ -2,13 +2,13 @@
 
 <!-- 由 tools/docs/settings_audit.py 生成（手写的部分在 tools/docs/settings_audit_notes.py），不要手改 -->
 
-v4 的 240 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）比默认值、取值范围、设置页的范围、读取位置和生效时机。返回 [README](README.md)。
+v4 的 241 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）比默认值、取值范围、设置页的范围、读取位置和生效时机。返回 [README](README.md)。
 
 ## 结论
 
 | 结论 | 个数 |
 |---|---:|
-| 一样 | 219 |
+| 一样 | 220 |
 | 确认改动 | 3 |
 | 不一样，已改 | 18 |
 | 不一样，待处理 | 0 |
@@ -104,7 +104,7 @@ v4 的 240 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 | `preferResolution` | String | `'原画'` | `'原画'`（`player_settings_controller.dart:36`，`player/utils/player_consts.dart:25`） | `原画` / `流畅` / `蓝光4M` / `蓝光8M` / `超清` |  |  | `features/live_play/logic/room_controller.dart:143`、`features/live_play/logic/room_controller.dart:603`、`features/multiview/logic/multiview_controller.dart:605` 等 5 处 | 立即 | `prefer_resolution` | 一样 |
 | `preferResolutionCellular` | String | `'原画'` | `'原画'`（`player_settings_controller.dart:37`） | `原画` / `流畅` / `蓝光4M` / `蓝光8M` / `超清` |  |  | `features/live_play/logic/room_controller.dart:142`、`features/live_play/logic/room_controller.dart:603` | 读取时 | `prefer_resolution_cellular` | 一样 |
 | `enableCodec` | Bool | `true` | `true`（`player_settings_controller.dart:39`） |  |  |  | `features/live_play/live_play_page.dart:426`、`features/multiview/multiview_page.dart:145`、`tv/room/tv_live_play_page.dart:35` | 读取时 | `hardware_decoding` | 一样 |
-| `preferH264` | Bool | `true` | —（新加） |  |  |  | `app/platforms.dart:162`、`app/recording.dart:281`、`features/live_play/logic/room_controller.dart:631` 等 7 处 | 读取时 | `prefer_h264` | 一样：v4 新加（UPGRADES 统一原则、22-3），默认值照来源任务 |
+| `preferH264` | Bool | `true` | —（新加） |  |  |  | `app/platforms.dart:162`、`app/recording.dart:298`、`features/live_play/logic/room_controller.dart:631` 等 7 处 | 读取时 | `prefer_h264` | 一样：v4 新加（UPGRADES 统一原则、22-3），默认值照来源任务 |
 | `playerCompatMode` | Bool | `false` | `false`（`player_settings_controller.dart:40`） |  |  |  | `features/live_play/live_play_page.dart:431`、`features/multiview/multiview_page.dart:150`、`tv/room/tv_live_play_page.dart:40` | 读取时 | `compat_mode` | 一样 |
 | `customPlayerOutput` | Bool | `false` | `false`（`player_settings_controller.dart:41`） |  |  |  | `features/live_play/live_play_page.dart:427`、`features/multiview/multiview_page.dart:146`、`tv/room/tv_live_play_page.dart:36` | 读取时 | `custom_output` | 一样 |
 | `videoOutputDriver` | String | `'gpu'` | `'gpu'`（`player_settings_controller.dart:42`） |  |  |  | `features/live_play/live_play_page.dart:428`、`features/multiview/multiview_page.dart:147`、`tv/room/tv_live_play_page.dart:37` | 读取时 | `video_output` | 一样 |
@@ -287,25 +287,26 @@ v4 的 240 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 
 | 键 | 类型 | v4 默认 | 3.x 默认 | v4 范围 | 3.x 范围 | 设置页 | 读取 | 生效 | 目录 | 结论 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `segmentTime` | Int | `300` | `300`（`recorder/consts/recorder_config.dart:99`） | 60～3600 | 60～3600（`recorder/consts/recorder_config.dart:56-57`） | 滑块 1～60 分钟（录制设置页 `record_settings_page.dart`） | `app/recording.dart:262`、`app/recording.dart:308`、`app/recording.dart:332` | 读取时 |  | 一样 |
-| `maxTaskCount` | Int | `3` | `3`（`recorder/consts/recorder_config.dart:109`） | 1～10 | 1～10（`recorder/consts/recorder_config.dart:58-59`） | 加减 1～10（录制设置页 `record_settings_page.dart`） | `app/recording.dart:263`、`app/recording.dart:309`、`app/recording.dart:333` | 读取时 |  | 一样 |
-| `autoReconnect` | Bool | `true` | `true`（`recorder/pages/record_settings/record_settings_controller.dart:47`） |  |  |  | `app/recording.dart:264`、`app/recording.dart:310`、`app/recording.dart:334` | 读取时 |  | 一样 |
-| `maxCacheMB` | Int | `1024` | `1024`（`recorder/consts/recorder_config.dart:126`） | ≥ 1 | ≥ 1（`recorder/consts/recorder_config.dart:60`、:76） | 数字对话框（录制设置页 `record_settings_page.dart`） | `app/recording.dart:265`、`app/recording.dart:311`、`app/recording.dart:335` | 读取时 |  | 一样 |
-| `enableCacheLimit` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:66`） |  |  |  | `app/recording.dart:266`、`app/recording.dart:312`、`app/recording.dart:336` | 读取时 |  | 一样 |
-| `recordSavePath` | String，本机 | `''` | `''`（`recorder/consts/recorder_config.dart:142`） |  |  |  | `app/recording.dart:267`、`app/recording.dart:313`、`app/recording.dart:337` | 读取时 |  | 一样 |
-| `default_quality` | String | `'原画'` | `'原画'`（`recorder/consts/recorder_config.dart:151-152`） | `原画` / `蓝光8M` / `蓝光4M` / `超清` / `流畅` |  |  | `app/recording.dart:268`、`app/recording.dart:314`、`app/recording.dart:338` | 读取时 |  | 一样 |
-| `max_retry_count` | Int | `5` | `5`（`recorder/consts/recorder_config.dart:162`） | 1～20 | 1～20（`recorder/consts/recorder_config.dart:61-62`） | 滑块 1～20（录制设置页 `record_settings_page.dart`） | `app/recording.dart:269`、`app/recording.dart:315`、`app/recording.dart:339` | 读取时 |  | 一样 |
-| `retry_delay` | Int | `30` | `30`（`recorder/consts/recorder_config.dart:171`） | 5～120 | 5～120（`recorder/consts/recorder_config.dart:63-64`） | 滑块 5～120（录制设置页 `record_settings_page.dart`） | `app/recording.dart:270`、`app/recording.dart:316`、`app/recording.dart:340` | 读取时 |  | 一样 |
-| `enable_polling` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:54`） |  |  |  | `app/recording.dart:271`、`app/recording.dart:317`、`app/recording.dart:341` 等 4 处 | 读取时 |  | 一样 |
-| `live_check_interval` | Int | `30` | `30`（`recorder/consts/recorder_config.dart:189`） | 10～300 | 10～300（`recorder/consts/recorder_config.dart:65-66`） | 滑块 10～300（录制设置页 `record_settings_page.dart`） | `app/recording.dart:272`、`app/recording.dart:318`、`app/recording.dart:342` | 读取时 |  | 一样 |
-| `enable_backoff` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:56`） |  |  |  | `app/recording.dart:273`、`app/recording.dart:319`、`app/recording.dart:343` | 读取时 |  | 一样 |
-| `max_check_interval` | Int | `300` | `300`（`recorder/consts/recorder_config.dart:207`） | 300～3600 | 300～3600（`recorder/consts/recorder_config.dart:67-68`） | 滑块 5～60 分钟（录制设置页 `record_settings_page.dart`） | `app/recording.dart:274`、`app/recording.dart:320`、`app/recording.dart:344` | 读取时 |  | 一样 |
-| `auto_start_on_boot` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:59`） |  |  |  | `app/recording.dart:275`、`app/recording.dart:321`、`app/recording.dart:345` | 读取时 |  | 一样 |
-| `recorder_prefer_best_stream` | Bool | `true` | `true`（`recorder/pages/record_settings/record_settings_controller.dart:40`） |  |  |  | `app/recording.dart:276`、`app/recording.dart:322`、`app/recording.dart:346` | 读取时 |  | 一样 |
-| `recorder_rw_timeout` | Int | `15` | `15`（`recorder/consts/recorder_config.dart:248`） | 15～60 | 15 / 30 / 60，别的值回到 15（`recorder/consts/recorder_config.dart:69`、:86） | 选项 15 / 30 / 60（录制设置页 `record_settings_page.dart`） | `app/recording.dart:277`、`app/recording.dart:323`、`app/recording.dart:347` | 读取时 |  | 一样：注册表夹到 15～60，`live_record` 的 `RecordSettings` 再按 3.x 只认 15 / 30 / 60（`packages/live_record/lib/src/settings.dart:45`），结果一样 |
-| `recorder_thread_queue_size` | Int | `2048` | `2048`（`recorder/consts/recorder_config.dart:255`） | 512～8192 | 512 / 1024 / 2048 / 4096 / 8192，别的值回到 2048（`recorder/consts/recorder_config.dart:70`、:88-89） | 选项（录制设置页 `record_settings_page.dart`） | `app/recording.dart:278`、`app/recording.dart:324`、`app/recording.dart:348` | 读取时 |  | 一样：同上，`RecordSettings` 按 3.x 只认这 5 个（`settings.dart:46`） |
-| `recorder_folder_naming_strategy` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:60`） |  |  |  | `app/recording.dart:279`、`app/recording.dart:325`、`app/recording.dart:349` | 读取时 |  | 一样 |
-| `recorder_record_danmaku` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:63`） |  |  |  | `app/recording.dart:280`、`app/recording.dart:326`、`app/recording.dart:350` | 读取时 |  | 一样 |
+| `segmentTime` | Int | `300` | `300`（`recorder/consts/recorder_config.dart:99`） | 60～3600 | 60～3600（`recorder/consts/recorder_config.dart:56-57`） | 滑块 1～60 分钟（录制设置页 `record_settings_page.dart`） | `app/recording.dart:278`、`app/recording.dart:325`、`app/recording.dart:350` | 读取时 |  | 一样 |
+| `maxTaskCount` | Int | `3` | `3`（`recorder/consts/recorder_config.dart:109`） | 1～10 | 1～10（`recorder/consts/recorder_config.dart:58-59`） | 加减 1～10（录制设置页 `record_settings_page.dart`） | `app/recording.dart:279`、`app/recording.dart:326`、`app/recording.dart:351` | 读取时 |  | 一样 |
+| `autoReconnect` | Bool | `true` | `true`（`recorder/pages/record_settings/record_settings_controller.dart:47`） |  |  |  | `app/recording.dart:280`、`app/recording.dart:327`、`app/recording.dart:352` | 读取时 |  | 一样 |
+| `maxCacheMB` | Int | `1024` | `1024`（`recorder/consts/recorder_config.dart:126`） | ≥ 1 | ≥ 1（`recorder/consts/recorder_config.dart:60`、:76） | 数字对话框（录制设置页 `record_settings_page.dart`） | `app/recording.dart:281`、`app/recording.dart:328`、`app/recording.dart:353` | 读取时 |  | 一样 |
+| `enableCacheLimit` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:66`） |  |  |  | `app/recording.dart:282`、`app/recording.dart:329`、`app/recording.dart:354` | 读取时 |  | 一样 |
+| `recordSavePath` | String，本机 | `''` | `''`（`recorder/consts/recorder_config.dart:142`） |  |  |  | `app/recording.dart:283`、`app/recording.dart:330`、`app/recording.dart:355` | 读取时 |  | 一样 |
+| `default_quality` | String | `'原画'` | `'原画'`（`recorder/consts/recorder_config.dart:151-152`） | `原画` / `蓝光8M` / `蓝光4M` / `超清` / `流畅` |  |  | `app/recording.dart:284`、`app/recording.dart:331`、`app/recording.dart:356` | 读取时 |  | 一样 |
+| `max_retry_count` | Int | `5` | `5`（`recorder/consts/recorder_config.dart:162`） | 1～20 | 1～20（`recorder/consts/recorder_config.dart:61-62`） | 滑块 1～20（录制设置页 `record_settings_page.dart`） | `app/recording.dart:285`、`app/recording.dart:332`、`app/recording.dart:357` | 读取时 |  | 一样 |
+| `retry_delay` | Int | `30` | `30`（`recorder/consts/recorder_config.dart:171`） | 5～120 | 5～120（`recorder/consts/recorder_config.dart:63-64`） | 滑块 5～120（录制设置页 `record_settings_page.dart`） | `app/recording.dart:286`、`app/recording.dart:333`、`app/recording.dart:358` | 读取时 |  | 一样 |
+| `enable_polling` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:54`） |  |  |  | `app/recording.dart:287`、`app/recording.dart:334`、`app/recording.dart:359` 等 4 处 | 读取时 |  | 一样 |
+| `live_check_interval` | Int | `30` | `30`（`recorder/consts/recorder_config.dart:189`） | 10～300 | 10～300（`recorder/consts/recorder_config.dart:65-66`） | 滑块 10～300（录制设置页 `record_settings_page.dart`） | `app/recording.dart:288`、`app/recording.dart:335`、`app/recording.dart:360` | 读取时 |  | 一样 |
+| `enable_backoff` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:56`） |  |  |  | `app/recording.dart:289`、`app/recording.dart:336`、`app/recording.dart:361` | 读取时 |  | 一样 |
+| `max_check_interval` | Int | `300` | `300`（`recorder/consts/recorder_config.dart:207`） | 300～3600 | 300～3600（`recorder/consts/recorder_config.dart:67-68`） | 滑块 5～60 分钟（录制设置页 `record_settings_page.dart`） | `app/recording.dart:290`、`app/recording.dart:337`、`app/recording.dart:362` | 读取时 |  | 一样 |
+| `auto_start_on_boot` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:59`） |  |  |  | `app/recording.dart:291`、`app/recording.dart:338`、`app/recording.dart:363` | 读取时 |  | 一样 |
+| `recorder_prefer_best_stream` | Bool | `true` | `true`（`recorder/pages/record_settings/record_settings_controller.dart:40`） |  |  |  | `app/recording.dart:292`、`app/recording.dart:339`、`app/recording.dart:364` | 读取时 |  | 一样 |
+| `recorder_rw_timeout` | Int | `15` | `15`（`recorder/consts/recorder_config.dart:248`） | 15～60 | 15 / 30 / 60，别的值回到 15（`recorder/consts/recorder_config.dart:69`、:86） | 选项 15 / 30 / 60（录制设置页 `record_settings_page.dart`） | `app/recording.dart:293`、`app/recording.dart:340`、`app/recording.dart:365` | 读取时 |  | 一样：注册表夹到 15～60，`live_record` 的 `RecordSettings` 再按 3.x 只认 15 / 30 / 60（`packages/live_record/lib/src/settings.dart:45`），结果一样 |
+| `recorder_thread_queue_size` | Int | `2048` | `2048`（`recorder/consts/recorder_config.dart:255`） | 512～8192 | 512 / 1024 / 2048 / 4096 / 8192，别的值回到 2048（`recorder/consts/recorder_config.dart:70`、:88-89） | 选项（录制设置页 `record_settings_page.dart`） | `app/recording.dart:294`、`app/recording.dart:341`、`app/recording.dart:366` | 读取时 |  | 一样：同上，`RecordSettings` 按 3.x 只认这 5 个（`settings.dart:46`） |
+| `recorder_folder_naming_strategy` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:60`） |  |  |  | `app/recording.dart:295`、`app/recording.dart:342`、`app/recording.dart:367` | 读取时 |  | 一样 |
+| `recorder_record_danmaku` | Bool | `false` | `false`（`recorder/pages/record_settings/record_settings_controller.dart:63`） |  |  |  | `app/recording.dart:296`、`app/recording.dart:343`、`app/recording.dart:368` | 读取时 |  | 一样 |
+| `recordDanmakuGifts` | Bool | `false` | —（新加） |  | 3.x 录制的弹幕只写聊天 | 开关（录制设置页 `record_settings_page.dart`，“同时录制弹幕”下面） | `app/recording.dart:44`、`app/recording.dart:67`、`app/recording.dart:297` 等 6 处 | 读取时 | `record_danmaku_gifts` | 一样：v4 新加（H01.8，D-040）：默认关，弹幕 XML 和以前逐字一样；开着时同一个文件里也写礼物 `<gift>`（连击一条）和醒目留言 `<sc>`，格式照录播姬，DanmakuFactory 能读；只在录弹幕时起作用 |
 
 ## 本地互动（localInteraction）
 

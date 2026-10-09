@@ -41,7 +41,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 | `lib/src/metrics.dart`（110） | `SegmentMeter`（读分段文件算大小，只看当前和下一段）、`hasSegments`（有非空分段才记为待合并）、`BitrateWindow`（5 秒窗口码率）、`reconcileFinalizedBytes` |
 | `lib/src/naming.dart`（44） | `safePathComponent`、`safePinyinComponent`（拼音目录）、`attemptDirectory`（`<平台>/<主播>/<日期>/<时间>`） |
 | `lib/src/diagnostics.dart`（38） | `sanitizeRecordDiagnostic`、`sanitizeFfmpegLog`：去掉媒体地址、Cookie、签名参数 |
-| `lib/src/chat.dart`（368） | `RecordChatRecorder` 只看 `Recorder.changes`：录制中的任务保持一个弹幕连接，每次尝试写一个同名 B 站 XML（`RecordChatWriter`，每 2 秒写入并重写 `</i>`）；连接器是接口 `RecordChatConnector`，应用用 `live_danmaku` 实现 |
+| `lib/src/chat.dart`（646） | `RecordChatRecorder` 只看 `Recorder.changes`：录制中的任务保持一个弹幕连接，每次尝试写一个同名 B 站 XML（`RecordChatWriter`，每 2 秒写入并重写 `</i>`）；开了“录制弹幕时包含礼物”时同一个文件里也有录播姬格式的 `<gift>`（连击一条，规则是 `live_core` 的 `live_gift_combo.dart`）和 `<sc>`（H01.8）；连接器是接口 `RecordChatConnector`，应用用 `live_danmaku` 实现 |
 | `lib/src/recorder.dart`（1362） | `Recorder`：任务、一次尝试（`_run` :377-537）、事件处理（`_onCapture` :562-644）、结束和重连（`_doFinalize` :713-769、`_scheduleReconnect` :896-933）、合并（`_mergePending` :821-839、`_mergeAttempts` :841-885）、租期预取（:935-979）、停止和删除、持久化（2 秒合并写一次）；`RecordNotice` 四种提示 |
 
 测试（`packages/live_record/test/`，`dart test`，共 43 个）：
@@ -54,6 +54,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 | `applied_quality_test.dart`（6） | 清晰度标签和画质受限提示（H01.3） |
 | `merge_progress_test.dart`（3） | 合并进度公式、单调、到 100%、不进 JSON |
 | `chat_test.dart`（4） | XML 随时完整、一次尝试一个文件、重连间隙不写、关闭和重连 |
+| `chat_gifts_test.dart`（10） | H01.8：开关关时和以前逐字一样；`<gift>`、`<sc>` 的格式、转义、连击、`COMBO_SEND`、时间顺序、30 秒分段、20 分钟忙直播间的性能 |
 | `support/fakes.dart` | `FakeSite`、`FakeFfmpeg`（录制写一个 1000 字节分段和一行日志，合并写 `mp4`） |
 
 ## 3.x 基线
@@ -102,7 +103,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 属于 [H 录制](../README.md)。
 
 - 代码：`packages/live_record`
-- 进度：`███████████████░░░░░` 75%
+- 进度：`████████████████░░░░` 82%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -114,15 +115,12 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 | H01.5 | 主播下播后不再无限快速重试；正常下播后合并已录分段（开播自动录拿不到 MP4）；合并时跳过 0 字节分段，有一段有效就能合并 | 功能 | 待真机 | 2026-10-08 | b2b62a1f7 | [设计或说明](H01.5-主播下播后不再无限快速重试/README.md)、[任务书](H01.5-主播下播后不再无限快速重试/brief.md)、[记录](H01.5-主播下播后不再无限快速重试/record.md) |
 | H01.6 | YY 等 HLS 直播每两秒报一次音频“Packet corrupt”，录制被当成损坏、一直拿不到 MP4 | 功能 | 完成 | 2026-10-08 | — | [设计或说明](H01.6-HLS音频丢包被当成录制损坏/README.md)、[任务书](H01.6-HLS音频丢包被当成录制损坏/brief.md)、[记录](H01.6-HLS音频丢包被当成录制损坏/record.md) |
 | H01.7 | 录映客默认录的是 HEVC 的“原画”，不看“优先 H.264” | 功能 | 完成 | 2026-10-08 | — | [设计或说明](H01.7-映客录制默认录HEVC/README.md)、[任务书](H01.7-映客录制默认录HEVC/brief.md)、[记录](H01.7-映客录制默认录HEVC/record.md) |
-| H01.8 | 录制的弹幕 XML 带礼物（新开关，默认关） | 功能 | 未开始 | — | — | [设计或说明](H01.8-弹幕XML带礼物/README.md)、[任务书](H01.8-弹幕XML带礼物/brief.md) |
+| H01.8 | 录制的弹幕 XML 带礼物（新开关，默认关） | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](H01.8-弹幕XML带礼物/README.md)、[任务书](H01.8-弹幕XML带礼物/brief.md)、[记录](H01.8-弹幕XML带礼物/record.md)、[真机验证](H01.8-弹幕XML带礼物/verify.md) |
 
 ## 还没完成的
 
 - **H01.4 录制的 4 项真机验证：划掉应用后继续录、所有文件访问权限、同时录弹幕 XML、HLS 预取**（未开始，第二档，规模 中）
   - 阶段：划掉应用后继续录和所有文件访问权限 → 弹幕 XML 和 HLS 预取
   - 说明：原来的 1 项缺失（合并进度 F-REC-13）已由 H01.3 做完；剩下 F-REC-06、F-REC-07、F-REC-10、F-REC-11（CHECKLIST 3 第 2、3、6、7 条），顺带看合并进度的显示（V03.3 核对）
-- **H01.8 录制的弹幕 XML 带礼物（新开关，默认关）**（未开始，第三档，规模 小）
-  - 说明：依赖 E05.5；默认关，关着时录出来的 XML 和现在一模一样
-  - 来源：V03.5 第 6.7 节、第 7 节；用户 2026-10-09（D-040）
 
 <!-- docs:生成结束 -->

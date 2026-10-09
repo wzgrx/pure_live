@@ -309,6 +309,17 @@ class _RecordSettingsPageState extends ConsumerState<RecordSettingsPage> {
               value: settings.recordDanmaku,
               onChanged: (value) => _setNow(Settings.recordDanmaku, value),
             ),
+            // H01.8: always on hand, as a task's own "录制弹幕" choice can
+            // save the chat while the default above is off.
+            SettingsSwitchRow(
+              key: const ValueKey('record-danmaku-gifts'),
+              icon: AppIcons.chatGift,
+              title: i18n('record_danmaku_gifts'),
+              subtitle: i18n('record_danmaku_gifts_desc'),
+              subtitleMaxLines: null,
+              value: settings.recordDanmakuGifts,
+              onChanged: (value) => _setNow(Settings.recordDanmakuGifts, value),
+            ),
           ],
         ),
         SettingsGroup(

@@ -2,7 +2,7 @@
 
 - 日期：2026-10-09
 - 执行者：Claude（本机工作区，没有推送、没有合并）
-- 分支和提交：工作区分支 `worktree-agent-a9d1e713625198026`，起点 master `721813c51`（D08.4 合并）；提交见本任务的 `[D08.5]` 提交（阶段 1：分档、三选一设置；阶段 2～3：飘屏、座驾、帧时间；文档一次）
+- 分支和提交：工作区分支 `worktree-agent-a9d1e713625198026`，起点 master `721813c51`（D08.4 合并）；提交 `7d5ea51d8`（阶段 1：分档、三选一设置）、`60f369a54`（阶段 2～3：飘屏、座驾、帧时间测试）、`14e81c313`（文档）
 - 任务书：[brief.md](brief.md)；设计和每条选择的理由：[README.md](README.md)“方案”c1～c6、“定稿的选择”h1～h14（维护者按 D-003 定）；来源：V03.6 第 2.2 节 P7、第 4 节 E9、第 5.5 节第二、三段
 
 ## 逐条对照
@@ -64,6 +64,10 @@
 - `apps/pure_live/test/features/live_play/local_gift_effects_benchmark_test.dart`（2 个）：见下面“帧时间”。
 - `packages/live_store/test/local_gift_effects_test.dart`（3 个）：键、默认值、三个值、读错的值按 `all`、同步；备份带上新键和旧开关、恢复回来；D08.5 以前的备份只有旧开关，新键没存。
 - 跑过：`apps/pure_live` 的 `test/features/live_play/`、`test/features/settings/`、`test/shared/`、`test/i18n_test.dart`；`packages/live_store`、`packages/live_ui` 全部；`flutter analyze`（应用和两个包）没有问题。
+
+## 门禁
+
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `14e81c313`，D08.5 的全部代码和文档）：`gate: passed (all, 14 members)`，一次通过。
 
 ## 帧时间（主机，debug 模式，只能互相比，不能和手机的 profile 构建比）
 

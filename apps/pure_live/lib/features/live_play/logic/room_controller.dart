@@ -1146,8 +1146,11 @@ class LiveRoomController extends ChangeNotifier {
         if (message.message.trim().isEmpty || !_notices.accepts(message.message)) return;
         chat.add(ChatLine.notice(message));
       case LiveMessageType.gift:
-        // B-21: a line in the chat list, not on the video; the switch hides them.
+        // B-21: a line in the chat list, not on the video; the switch hides
+        // them, and then nothing is filtered (D07.1 c5). D07.1: blocked
+        // viewers and words and the duplicate gate apply.
         if (!showGifts || message.message.trim().isEmpty) return;
+        if (!_filter.accepts(message)) return;
         chat.add(ChatLine.gift(message));
     }
   }
@@ -1251,7 +1254,10 @@ class LiveRoomController extends ChangeNotifier {
     if (word.isEmpty) return false;
     final added = await store.blockLists.add(BlockKind.keyword, word);
     final lower = word.toLowerCase();
-    chat.removeWhere((line) => line.kind == ChatLineKind.chat && line.text.toLowerCase().contains(lower));
+    // D07.1: blocked words block the platform's gifts too.
+    bool blockable(ChatLine line) =>
+        line.kind == ChatLineKind.chat || (line.kind == ChatLineKind.gift && !(line.message?.isLocal ?? true));
+    chat.removeWhere((line) => blockable(line) && line.text.toLowerCase().contains(lower));
     _notify();
     return added;
   }

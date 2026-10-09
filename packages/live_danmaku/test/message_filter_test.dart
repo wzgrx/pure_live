@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:live_core/live_core.dart';
 import 'package:live_danmaku/live_danmaku.dart';
 import 'package:test/test.dart';
@@ -17,6 +20,29 @@ LiveMessage _message(
   color: LiveMessageColor.white,
   isLocal: local,
 );
+
+LiveMessage _gift(
+  String name, {
+  String user = 'viewer',
+  String id = '',
+  int count = 1,
+  int? comboTotal,
+  bool local = false,
+  DateTime? sentAt,
+}) {
+  final gift = LiveGift(name: name, count: count, comboTotal: comboTotal);
+  return LiveMessage(
+    type: LiveMessageType.gift,
+    userName: user,
+    userId: user,
+    message: gift.plainText,
+    messageId: id,
+    color: LiveMessageColor.white,
+    isLocal: local,
+    sentAt: sentAt,
+    data: gift,
+  );
+}
 
 void main() {
   group('DanmakuBlockList', () {
@@ -138,7 +164,7 @@ void main() {
 
     test('other message types pass untouched', () {
       final filter = DanmakuMessageFilter(settings: const DanmakuFilterSettings(blockedUsers: ['x']));
-      for (final type in [LiveMessageType.online, LiveMessageType.superChat, LiveMessageType.gift]) {
+      for (final type in [LiveMessageType.online, LiveMessageType.superChat]) {
         expect(filter.accepts(_message('', user: 'x', type: type)), isTrue);
         expect(filter.accepts(_message('', user: 'x', type: type)), isTrue);
       }
@@ -152,6 +178,83 @@ void main() {
       expect(filter.accepts(_message('hello world', id: 'x:1')), isFalse);
       filter.clear();
       expect(filter.accepts(_message('hello world', id: 'x:1')), isTrue);
+    });
+  });
+
+  group('D07.1: gifts', () {
+    test("a blocked viewer's gift and a gift named by a blocked word are dropped", () {
+      final filter = DanmakuMessageFilter(
+        settings: const DanmakuFilterSettings(blockedUsers: ['Troll'], blockedKeywords: ['荧光棒']),
+      );
+      expect(filter.accepts(_gift('小心心', user: 'troll')), isFalse);
+      expect(filter.accepts(_gift('粉丝荧光棒', user: 'fan')), isFalse, reason: 'the word is in its name');
+      expect(filter.accepts(_gift('小心心', user: 'fan')), isTrue);
+    });
+
+    test('the gate passes a gift once: the same id twice, a replay, a gift too old', () {
+      var now = DateTime(2026, 10, 9, 12);
+      final filter = DanmakuMessageFilter(clock: () => now);
+      expect(filter.accepts(_gift('小心心', id: 'bilibili:gift:1')), isTrue);
+      now = now.add(const Duration(seconds: 30));
+      expect(filter.accepts(_gift('小心心', id: 'bilibili:gift:1')), isFalse, reason: 'sent again after a reconnect');
+      expect(filter.accepts(_gift('小心心', id: 'bilibili:gift:2')), isTrue);
+      final old = now.subtract(const Duration(minutes: 1));
+      expect(
+        filter.accepts(_gift('辣条', id: 'bilibili:gift:3', sentAt: old)),
+        isFalse,
+        reason: 'older than 45 s',
+      );
+    });
+
+    test('without an id the same gift within 2.5 s is a duplicate, unless its combo count went on', () {
+      var now = DateTime(2026, 10, 9, 12);
+      final filter = DanmakuMessageFilter(clock: () => now);
+      expect(filter.accepts(_gift('粉丝荧光棒', count: 10, comboTotal: 10)), isTrue);
+      expect(filter.accepts(_gift('粉丝荧光棒', count: 10, comboTotal: 10)), isFalse, reason: 'the same packet twice');
+      expect(filter.accepts(_gift('粉丝荧光棒', count: 10, comboTotal: 20)), isTrue, reason: "the combo's next hit");
+      expect(filter.accepts(_gift('辣条')), isTrue);
+      expect(filter.accepts(_gift('辣条')), isFalse);
+      now = now.add(const Duration(seconds: 3));
+      expect(filter.accepts(_gift('辣条')), isTrue, reason: 'as for chat: a short window');
+    });
+
+    test('repeats and similarity do not apply to gifts; local gifts pass', () {
+      final filter = DanmakuMessageFilter(
+        settings: const DanmakuFilterSettings(collapseRepeated: true, similarityEnabled: true, blockedUsers: ['me']),
+      );
+      for (var hit = 1; hit <= 5; hit++) {
+        expect(filter.accepts(_gift('小心心', user: 'u$hit')), isTrue, reason: 'the same gift from five viewers');
+      }
+      expect(filter.accepts(_gift('辣条', user: 'me', local: true)), isTrue);
+      expect(filter.accepts(_gift('辣条', user: 'me', local: true)), isTrue);
+    });
+
+    test('super chats are not filtered (D-003 choice A)', () {
+      final filter = DanmakuMessageFilter(
+        settings: const DanmakuFilterSettings(blockedUsers: ['troll'], blockedKeywords: ['广告']),
+      );
+      final paid = _message('广告', user: 'troll', type: LiveMessageType.superChat);
+      expect(filter.accepts(paid), isTrue);
+      expect(filter.accepts(paid), isTrue);
+    });
+
+    test("S13-live: Douyu's 125 recorded dgb all pass (each hit of a combo has the same text)", () {
+      final frames = [
+        for (final line in File('../../fixtures/douyu/danmaku/S13-live/frames.jsonl').readAsLinesSync())
+          if (jsonDecode(line) case {'dir': 'in', 'b64': final String b64}) base64Decode(b64),
+      ];
+      final gifts = [
+        for (final frame in frames)
+          ...DouyuDanmakuProtocol.decode(frame, roomId: '9999').where((m) => m.type == LiveMessageType.gift),
+      ];
+      expect(gifts, hasLength(125));
+      final filter = DanmakuMessageFilter(clock: () => DateTime(2026, 10, 9, 12));
+      expect(
+        gifts.where(filter.accepts),
+        hasLength(125),
+        reason: 'all within one instant: only the hits tell them apart',
+      );
+      expect(gifts.where(filter.accepts), isEmpty, reason: 'and each again is a duplicate');
     });
   });
 

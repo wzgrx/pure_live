@@ -57,7 +57,10 @@ final class DanmakuFilterSettings {
 /// 4. the similarity filter ([DanmakuSimilarityFilter]) when enabled, for
 ///    platform messages only.
 ///
-/// Other message types (audience figures, super chats) are not filtered.
+/// A platform gift goes through steps 1 and 2 only (D07.1: a gift repeats
+/// on purpose, so neither collapsing nor similarity applies; a blocked word
+/// in its text, `粉丝荧光棒 ×10`, blocks it). Local gifts and other message
+/// types (audience figures, super chats) are not filtered.
 final class DanmakuMessageFilter {
   /// Creates the filter with [settings]; [clock] times every step.
   new({DanmakuFilterSettings settings = const DanmakuFilterSettings(), DateTime Function()? clock})
@@ -102,6 +105,7 @@ final class DanmakuMessageFilter {
 
   /// Whether [message] should be shown.
   bool accepts(LiveMessage message) {
+    if (message.type == LiveMessageType.gift) return _acceptsGift(message);
     if (message.type != LiveMessageType.chat) return true;
     final now = _clock();
     if (!gate.accepts(message, now: now) || _blockList.blocks(message)) return false;
@@ -109,6 +113,10 @@ final class DanmakuMessageFilter {
     if (!repeated.accepts(message, enabled: _settings.collapseRepeated, window: window, now: now)) return false;
     return message.isLocal || !_settings.similarityEnabled || similarity.shouldDisplay(message.message);
   }
+
+  /// Steps 1 and 2 for a platform gift (D07.1).
+  bool _acceptsGift(LiveMessage message) =>
+      message.isLocal || (gate.accepts(message, now: _clock()) && !_blockList.blocks(message));
 
   /// Forgets everything seen (another room).
   void clear() {

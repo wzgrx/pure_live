@@ -12,13 +12,16 @@ import 'package:meta/meta.dart';
 
 /// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from
 /// `gift`/`send` ([MissevanDanmakuProtocol.gift]), as a [LiveGift] (E05.5):
-/// [price] diamonds each, free at 0, [icon] its picture.
+/// [price] diamonds each, free at 0, [icon] its picture, and the combo the
+/// send belongs to (D07.6).
 @immutable
 final class MissevanGift extends LiveGift {
   /// Creates the gift.
   ///
   /// [id] is `gift_id`, or empty; [name] `name` (`幻彩礼炮`); [count] `num`,
-  /// at least 1.
+  /// at least 1; [comboKey] `combo.id` (the order id of the combo's first
+  /// send) and [comboTotal] `combo.num`, the combo's count so far, when the
+  /// send is part of a combo.
   const new({
     required super.id,
     required super.name,
@@ -26,6 +29,8 @@ final class MissevanGift extends LiveGift {
     required this.price,
     this.icon,
     this.luckyGift,
+    super.comboKey,
+    super.comboTotal,
   }) : super(unitPrice: price, totalValue: price * count, unit: LiveGiftUnit.diamond, free: price == 0, iconUrl: icon);
 
   /// `price` of one, in diamonds (钻石, ten to a yuan); 0 for a free gift.
@@ -506,10 +511,20 @@ abstract final class MissevanDanmakuProtocol {
   /// Fields: `gift` (`gift_id`, `name`, `num`, `price` in diamonds each,
   /// `icon_url`), the sender `user`, `time` in milliseconds, `oid` the
   /// order (all zeros for the later sends of a combo; then no message id),
-  /// and `lucky`, the lucky gift sent when `gift` was drawn from it. The
-  /// text is `幻彩礼炮 ×1`.
+  /// `lucky`, the lucky gift sent when `gift` was drawn from it, and
+  /// `combo` (`id`, the first send's order; `num`, the count so far;
+  /// `remain_time`, how long the page waits for the next send) when the
+  /// send is part of a combo (D07.6). The text is `幻彩礼炮 ×1`.
   static LiveMessage? gift(Map<Object?, Object?> item) {
-    final data = _gift(item['gift'], luckyGift: _gift(item['lucky']));
+    final combo = item['combo'] is Map ? item['combo']! as Map : const <Object?, Object?>{};
+    final comboKey = _scalar(combo['id']).trim();
+    final comboTotal = _int(combo['num']);
+    final data = _gift(
+      item['gift'],
+      luckyGift: _gift(item['lucky']),
+      comboKey: comboKey.contains(_nonZero) ? comboKey : '',
+      comboTotal: comboTotal != null && comboTotal > 0 ? comboTotal : null,
+    );
     if (data == null) return null;
     final user = item['user'] is Map ? item['user']! as Map : const <Object?, Object?>{};
     final order = _scalar(item['oid']).trim();
@@ -525,7 +540,7 @@ abstract final class MissevanDanmakuProtocol {
     );
   }
 
-  static MissevanGift? _gift(Object? gift, {MissevanGift? luckyGift}) {
+  static MissevanGift? _gift(Object? gift, {MissevanGift? luckyGift, String comboKey = '', int? comboTotal}) {
     if (gift is! Map) return null;
     final name = _scalar(gift['name']).trim();
     if (name.isEmpty) return null;
@@ -539,6 +554,8 @@ abstract final class MissevanDanmakuProtocol {
       price: price != null && price >= 0 ? price : 0,
       icon: icon == null ? null : Uri.parse(icon),
       luckyGift: luckyGift,
+      comboKey: comboKey,
+      comboTotal: comboTotal,
     );
   }
 

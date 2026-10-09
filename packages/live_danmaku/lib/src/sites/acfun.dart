@@ -11,6 +11,49 @@ import 'package:live_danmaku/src/connection_base.dart';
 import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:meta/meta.dart';
 
+/// A gift of a [LiveMessageType.gift] message (`LiveMessage.data`), from a
+/// `CommonActionSignalGift` or an `AcfunActionSignalThrowBanana`
+/// ([AcfunDanmakuProtocol.push], D07.6), as a [LiveGift]: named, priced and
+/// pictured by the room's gift table (`AcfunGiftCatalog`); without it only
+/// the id is known (the app writes "礼物 {编号}").
+@immutable
+final class AcfunGift extends LiveGift {
+  /// Creates the gift.
+  ///
+  /// [id] is `giftId` (`1` is the banana); [count] `count`, how many this
+  /// send gave; [comboKey] `comboId` and [comboTotal] `count × combo`, the
+  /// combo's gifts so far (both empty without them); a gift paid in AC
+  /// coins has [unitPrice], [totalValue] and [unit] [LiveGiftUnit.acCoin]
+  /// from the table, a banana is [free] in [LiveGiftUnit.banana].
+  const new({
+    required super.id,
+    required super.name,
+    required super.count,
+    super.comboKey,
+    super.comboTotal,
+    super.unitPrice,
+    super.totalValue,
+    super.unit,
+    super.free,
+    super.iconUrl,
+    this.value = 0,
+  });
+
+  /// The signal's `value`, as the platform sends it (the public client
+  /// libraries read it as AC coins × 1000 for a paid gift and the count for
+  /// bananas; not checked on a recording), kept for checking; 0 when none.
+  final int value;
+
+  @override
+  bool operator ==(Object other) => super == other && other is AcfunGift && other.value == value;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, value);
+
+  @override
+  String toString() => 'AcfunGift($displayName ×$count)';
+}
+
 /// AcFun's danmaku connection (docs/D-弹幕/D01-平台弹幕协议/D01.10-AcFun弹幕/record.md): the web live
 /// page's link (Kuaishou's live middle platform, `wss://link.xiatou.com/`)
 /// over the shared WebSocket runtime. 3.x had no AcFun danmaku.
@@ -33,6 +76,9 @@ import 'package:meta/meta.dart';
 ///   with [DanmakuCloseReason.connectionFailed]; a refresh that fails, or
 ///   [maxRefreshes] of them without a join, with
 ///   [DanmakuCloseReason.credentialsUnavailable].
+/// - The room's gift table (`AcfunDanmakuArgs.gifts`, D07.6) is asked for
+///   once per run in the background; gifts before it comes, or without it,
+///   have only their ids.
 final class AcfunDanmakuConnection extends DanmakuSocketConnection<AcfunDanmakuArgs> {
   /// Creates the connection. [proxy] routes the socket; `connector` replaces
   /// `dart:io`'s handshake. [policy], [now] (the heartbeat's timestamp) and
@@ -84,8 +130,19 @@ final class AcfunDanmakuConnection extends DanmakuSocketConnection<AcfunDanmakuA
         throw const DanmakuStartFailure(DanmakuCloseReason.credentialsUnavailable, detail: 'No acSecurity or tickets');
       }
     }
-    _state = _State(run, current, key);
+    final state = _state = _State(run, current, key);
+    if (current.gifts case final gifts?) unawaited(_loadGifts(state, gifts));
     return _target(current);
+  }
+
+  /// The gift table of [state]'s run, once; a failure leaves none.
+  Future<void> _loadGifts(_State state, Future<AcfunGiftCatalog> Function() gifts) async {
+    try {
+      final catalog = await gifts();
+      if (identical(_state, state)) state.gifts = catalog;
+    } on Object {
+      // No gift names or prices.
+    }
   }
 
   static DanmakuSocketTarget _target(AcfunDanmakuArgs args) =>
@@ -154,7 +211,7 @@ final class AcfunDanmakuConnection extends DanmakuSocketConnection<AcfunDanmakuA
         }
       case AcfunDanmakuProtocol.messageCommand:
         session.send(link.pushAck(packet));
-        final push = AcfunDanmakuProtocol.push(packet.payload);
+        final push = AcfunDanmakuProtocol.push(packet.payload, gifts: state.gifts);
         for (final message in push.messages) {
           if (!session.isActive) return;
           session.message(message);
@@ -321,6 +378,9 @@ final class _State {
 
   /// Sockets opened in this run.
   int opens = 0;
+
+  /// The room's gift table, once it came (D07.6).
+  AcfunGiftCatalog gifts = AcfunGiftCatalog.empty;
 
   /// The current socket's link.
   _Socket? socket;
@@ -502,17 +562,19 @@ abstract final class AcfunDanmakuProtocol {
   /// payload 3, liveId 4, ticket 5, serverTimestampMs 6`):
   ///
   /// - `ZtLiveScActionSignal` (`{1: [{1 signalType, 2: [payload]}]}`): each
-  ///   `CommonActionSignalComment` is a chat;
+  ///   `CommonActionSignalComment` is a chat, each
+  ///   `CommonActionSignalGift` and `AcfunActionSignalThrowBanana` a gift
+  ///   ([gift], [banana]; D07.6) named by [gifts];
   /// - `ZtLiveScStateSignal` (`{1: [{1 signalType, 2 payload}]}`): each
   ///   `CommonStateSignalDisplayInfo` is the concurrent audience;
   /// - `ZtLiveScTicketInvalid` and `ZtLiveScStatusChanged` are flagged.
   ///
-  /// Everything else (likes, entries, follows, gifts, the banana count, the
+  /// Everything else (likes, entries, follows, the banana count, the
   /// recent comments of room entry, notify signals) is not shown, as on
   /// every 3.x platform. A signal (or one of its payloads) that does not
   /// decode is skipped on its own; a message or signal list that does not
   /// decode (or gunzip) yields nothing.
-  static AcfunDanmakuPush push(List<int> payload) {
+  static AcfunDanmakuPush push(List<int> payload, {AcfunGiftCatalog gifts = AcfunGiftCatalog.empty}) {
     const none = (messages: <LiveMessage>[], ticketInvalid: false, statusChanged: null);
     final messages = <LiveMessage>[];
     try {
@@ -522,10 +584,16 @@ abstract final class AcfunDanmakuProtocol {
       switch (message.string(1)) {
         case 'ZtLiveScActionSignal':
           for (final item in _signals(body)) {
-            if (item.string(1) != 'CommonActionSignalComment') continue;
+            final read = switch (item.string(1)) {
+              'CommonActionSignalComment' => _comment,
+              'CommonActionSignalGift' => (Uint8List payload) => gift(payload, gifts: gifts),
+              'AcfunActionSignalThrowBanana' => (Uint8List payload) => banana(payload, gifts: gifts),
+              _ => null,
+            };
+            if (read == null) continue;
             for (final field in item.fields) {
               if (field.number != 2 || field.wireType != ProtoMessage.lengthDelimitedType) continue;
-              if (_comment(field.value as Uint8List) case final chat?) messages.add(chat);
+              if (read(field.value as Uint8List) case final message?) messages.add(message);
             }
           }
         case 'ZtLiveScStateSignal':
@@ -583,6 +651,111 @@ abstract final class AcfunDanmakuProtocol {
       return null;
     }
   }
+
+  /// The id of the banana in the gift table.
+  static const String bananaId = '1';
+
+  /// The banana's name when the gift table has not come: the platform's own
+  /// name for the item (it names every banana the same way), not a sentence
+  /// to translate.
+  static const String bananaName = '香蕉';
+
+  /// `CommonActionSignalGift` (D07.6; the field numbers of the public client
+  /// libraries, no gift signal was recorded, docs/D-弹幕/D07-礼物和付费消息/D07.6-已有样本的平台补礼物):
+  /// `user 1 {userId 1, nickname 2}, sendTimeMs 2, giftId 3, count 4 (the
+  /// batch: how many this send gave), combo 5 (the sends of the combo so
+  /// far), value 6, comboId 7`. The combo's gifts so far are `count ×
+  /// combo`; [gifts] names, prices and pictures it by `giftId` (AC coins, or
+  /// bananas, which are free). Null without a sender or a gift id, or when
+  /// it does not decode.
+  static LiveMessage? gift(Uint8List payload, {AcfunGiftCatalog gifts = AcfunGiftCatalog.empty}) {
+    try {
+      final signal = ProtoMessage.decode(payload);
+      final user = signal.message(1);
+      final id = signal.integer(3);
+      if (user == null || id == null || id <= 0) return null;
+      final count = _positive(signal.integer(4)) ?? 1;
+      final combo = _positive(signal.integer(5));
+      final comboId = (signal.string(7) ?? '').trim();
+      final data = _gift(
+        '$id',
+        count,
+        gifts: gifts,
+        comboKey: comboId,
+        comboTotal: combo == null ? null : count * combo,
+        value: signal.integer(6) ?? 0,
+      );
+      // Each send of a combo is its own message: the gate (D07.1) must not
+      // take two equal sends of one viewer for one.
+      final sender = user.integer(1) ?? 0;
+      return _giftMessage(user, data, signal.integer(2), id: comboId.isEmpty ? '' : '$sender:$comboId:${combo ?? 0}');
+    } on FormatException {
+      return null;
+    }
+  }
+
+  /// `AcfunActionSignalThrowBanana` (`visitor 1 {userId 1, nickname 2},
+  /// count 2, sendTimeMs 3`, the archived v4's reading): bananas, free.
+  /// Null without a sender, or when it does not decode.
+  static LiveMessage? banana(Uint8List payload, {AcfunGiftCatalog gifts = AcfunGiftCatalog.empty}) {
+    try {
+      final signal = ProtoMessage.decode(payload);
+      final user = signal.message(1);
+      if (user == null) return null;
+      final data = _gift(bananaId, _positive(signal.integer(2)) ?? 1, gifts: gifts);
+      return _giftMessage(user, data, signal.integer(3));
+    } on FormatException {
+      return null;
+    }
+  }
+
+  static AcfunGift _gift(
+    String id,
+    int count, {
+    required AcfunGiftCatalog gifts,
+    String comboKey = '',
+    int? comboTotal,
+    int value = 0,
+  }) {
+    final info = gifts[id];
+    final banana = info?.banana ?? id == bananaId;
+    final price = info?.price;
+    return AcfunGift(
+      id: id,
+      name: info?.name ?? (id == bananaId ? bananaName : ''),
+      count: count,
+      comboKey: comboKey,
+      comboTotal: comboTotal,
+      unitPrice: price,
+      totalValue: price == null ? null : price * count,
+      unit: banana
+          ? LiveGiftUnit.banana
+          : price == null
+          ? LiveGiftUnit.other
+          : LiveGiftUnit.acCoin,
+      free: banana || price == 0,
+      iconUrl: info?.iconUrl,
+      value: value,
+    );
+  }
+
+  static LiveMessage _giftMessage(ProtoMessage user, AcfunGift gift, int? millis, {String id = ''}) {
+    final sender = user.integer(1);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: user.string(2) ?? '',
+      userId: sender == null || sender <= 0 ? '' : '$sender',
+      message: gift.plainText,
+      color: LiveMessageColor.white,
+      messageId: id,
+      sentAt: millis == null || millis <= 0 || millis > _maxEpochMilliseconds
+          ? null
+          : DateTime.fromMillisecondsSinceEpoch(millis),
+      data: gift,
+    );
+  }
+
+  static int? _positive(int? value) => value != null && value > 0 ? value : null;
 
   /// `CommonStateSignalDisplayInfo.watchingCount` (text like `76` or `1.2万`;
   /// `live/info`'s `onlineCount` at the same moment): concurrent viewers.

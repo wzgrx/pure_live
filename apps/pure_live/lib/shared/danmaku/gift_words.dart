@@ -41,6 +41,7 @@ const Set<LiveGiftUnit> giftYuanUnits = {
   LiveGiftUnit.goldSeed,
   LiveGiftUnit.diamond,
   LiveGiftUnit.douyinCoin,
+  LiveGiftUnit.acCoin,
 };
 
 /// The value as the line writes it ("100 元", "2000 金瓜子", "79 Kicks"),
@@ -69,7 +70,8 @@ String? giftValueText(LiveGift gift, {bool inYuan = false}) {
     LiveGiftUnit.cheese => 'gift_value_cheese',
     LiveGiftUnit.starBalloon => 'gift_value_star_balloon',
     LiveGiftUnit.douyinCoin => 'gift_value_douyin_coin',
-    LiveGiftUnit.silverSeed || LiveGiftUnit.other => null,
+    LiveGiftUnit.acCoin => 'gift_value_ac_coin',
+    LiveGiftUnit.silverSeed || LiveGiftUnit.banana || LiveGiftUnit.other => null,
   };
   if (key == null) return null;
   final amount = gift.unit == LiveGiftUnit.fen ? _yuan(value) : _amount(value);
@@ -111,10 +113,14 @@ String giftVerb(LiveGift gift, {String streamer = ''}) {
   };
 }
 
-/// The gift's name, never empty.
+/// The gift's name, never empty: "礼物 {编号}" when the platform gave only
+/// the id (D07.6: 17LIVE, and AcFun before its gift table came), "礼物"
+/// without either.
 String giftName(LiveGift gift) {
-  final name = gift.displayName.trim();
-  return name.isEmpty ? i18n('gift_line_unnamed') : name;
+  final name = gift.name.trim();
+  if (name.isNotEmpty) return name;
+  final id = gift.id.trim();
+  return id.isEmpty ? i18n('gift_line_unnamed') : i18n('gift_line_numbered', args: {'id': id});
 }
 
 /// "×N" ("×1 个月" for a membership); empty for a tip of one, whose value

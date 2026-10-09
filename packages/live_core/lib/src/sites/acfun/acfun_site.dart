@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:isolate';
 import 'dart:math';
 
 import 'package:live_core/src/json.dart';
@@ -600,6 +601,7 @@ final class AcfunSite extends LiveSite
     tickets: play.tickets,
     enterRoomAttach: play.enterRoomAttach,
     refresh: () => danmakuArgs(authorId),
+    gifts: () => giftCatalog(authorId, liveId: data.liveId),
   );
 
   /// Danmaku arguments from a new visitor session and a new `startPlay`
@@ -610,6 +612,68 @@ final class AcfunSite extends LiveSite
     final play = await _startPlay(id, freshSession: true);
     return _danmakuArgs(id, play.data ?? (throw _restricted(id, play.restriction)), play);
   }
+
+  // Gifts (D07.6) ---------------------------------------------------------------
+
+  /// How long a room's gift table is reused.
+  static const Duration giftListLifetime = Duration(minutes: 30);
+
+  /// How long a failed gift table is not asked for again.
+  static const Duration giftRetryAfter = Duration(minutes: 5);
+
+  /// Rooms whose gift tables are kept; the least recent goes first.
+  static const int giftListRooms = 16;
+
+  final Map<String, ({Future<AcfunGiftCatalog> gifts, DateTime at, bool failed})> _giftLists = {};
+
+  /// Room [authorId]'s gift table (`gift/list`, asked with the visitor
+  /// session and broadcast [liveId]): fetched once for concurrent callers
+  /// and reused for [giftListLifetime]; one that fails counts as empty and
+  /// is asked for again after [giftRetryAfter]. Parsed off the calling
+  /// isolate. Never throws: no table is the danmaku without gift names and
+  /// prices.
+  Future<AcfunGiftCatalog> giftCatalog(String authorId, {required String liveId}) {
+    final id = authorId.trim();
+    final cached = _giftLists.remove(id);
+    if (cached != null) {
+      final age = _now().difference(cached.at);
+      if (age >= Duration.zero && age < (cached.failed ? giftRetryAfter : giftListLifetime)) {
+        _giftLists[id] = cached;
+        return cached.gifts;
+      }
+    }
+    final at = _now();
+    late final Future<AcfunGiftCatalog> gifts;
+    gifts = () async {
+      try {
+        final visitor = await _session();
+        final response = await _send(
+          LiveRequest.form(
+            site: _site,
+            url: AcfunApi.giftListUrl(visitor),
+            headers: AcfunApi.apiHeaders,
+            fields: {'visitorId': visitor.userId, 'liveId': liveId},
+          ),
+        );
+        return await _parseGiftList((text: response.text, status: response.status));
+      } on Object {
+        if (identical(_giftLists[id]?.gifts, gifts)) {
+          _giftLists[id] = (gifts: Future.value(AcfunGiftCatalog.empty), at: _now(), failed: true);
+        }
+        return AcfunGiftCatalog.empty;
+      }
+    }();
+    _giftLists[id] = (gifts: gifts, at: at, failed: false);
+    while (_giftLists.length > giftListRooms) {
+      _giftLists.remove(_giftLists.keys.first);
+    }
+    return gifts;
+  }
+
+  /// [AcfunApi.giftList] of [answer] in a new isolate; static, so the
+  /// closure it sends holds nothing else.
+  static Future<AcfunGiftCatalog> _parseGiftList(({String text, int status}) answer) =>
+      Isolate.run(() => AcfunApi.giftList(answer.text, status: answer.status));
 
   // Links ---------------------------------------------------------------------
 

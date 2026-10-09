@@ -534,6 +534,7 @@ void main() {
         LiveGiftUnit.goldSeed: 1000,
         LiveGiftUnit.diamond: 10,
         LiveGiftUnit.douyinCoin: 10,
+        LiveGiftUnit.acCoin: 10,
         LiveGiftUnit.bits: 14,
         LiveGiftUnit.kicks: 14,
         LiveGiftUnit.cheese: 190,

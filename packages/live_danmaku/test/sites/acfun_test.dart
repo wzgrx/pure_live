@@ -88,6 +88,7 @@ AcfunDanmakuArgs _args({
   List<String> tickets = const ['ticket-a', 'ticket-b'],
   String liveId = 'LIVE1',
   Future<AcfunDanmakuArgs> Function()? refresh,
+  Future<AcfunGiftCatalog> Function()? gifts,
 }) => AcfunDanmakuArgs(
   authorId: '41254970',
   liveId: liveId,
@@ -100,6 +101,7 @@ AcfunDanmakuArgs _args({
   tickets: tickets,
   enterRoomAttach: 'attach-1',
   refresh: refresh,
+  gifts: gifts,
 );
 
 /// The arguments a refresh gives: a new visitor keyed by [_security2].
@@ -231,6 +233,47 @@ Uint8List _displayInfo(String watching) =>
               .toBytes(),
         ))
         .toBytes();
+
+/// The recorded gift table (S07-live line 3, the `gift/list` answer).
+AcfunGiftCatalog _recordedGifts() => AcfunApi.giftList(
+  (jsonDecode(File('$_root/S07-live/frames.jsonl').readAsLinesSync()[2]) as Map<String, dynamic>)['text'] as String,
+);
+
+/// A `CommonActionSignalGift`, synthesized after the public protocol (the
+/// field numbers of the public client libraries; no gift signal was
+/// recorded, D07.6): sender, time, gift id, batch, combo, value, combo id.
+Uint8List _giftSignal(
+  int giftId, {
+  int? count = 1,
+  int? combo = 1,
+  int value = 0,
+  String? comboId = 'combo-1',
+  List<int>? user,
+  int time = 1790000000000,
+}) {
+  final out = ProtoWriter()
+    ..bytes(1, user ?? _user(123456, '观众1'))
+    ..integer(2, time)
+    ..integer(3, giftId);
+  if (count != null) out.integer(4, count);
+  if (combo != null) out.integer(5, combo);
+  out.integer(6, value);
+  if (comboId != null) out.string(7, comboId);
+  return out.toBytes();
+}
+
+/// An `AcfunActionSignalThrowBanana` (synthesized: visitor, count, time).
+Uint8List _bananaSignal(int count, {List<int>? user}) =>
+    (ProtoWriter()
+          ..bytes(1, user ?? _user(654321, '观众2'))
+          ..integer(2, count)
+          ..integer(3, 1790000000500))
+        .toBytes();
+
+Uint8List _giftPush(List<Uint8List> gifts, {List<Uint8List> bananas = const []}) => _scMessage(
+  'ZtLiveScActionSignal',
+  _signals([('CommonActionSignalGift', gifts), if (bananas.isNotEmpty) ('AcfunActionSignalThrowBanana', bananas)]),
+);
 
 /// A client frame opened with [key]: its header and upstream payload.
 ({ProtoMessage header, ProtoMessage up}) _up(List<int> frame, List<int> key) {
@@ -512,6 +555,157 @@ void main() {
 
       final notify = AcfunDanmakuProtocol.push(_scMessage('ZtLiveScNotifySignal', _displayInfo('9')));
       expect(notify.messages, isEmpty);
+    });
+
+    group('gifts (D07.6; signals synthesized after the public protocol)', () {
+      final table = _recordedGifts();
+
+      test('a gift named, priced and pictured by the recorded table: AC coins, ten to a yuan', () {
+        final message = AcfunDanmakuProtocol.push(
+          _giftPush([_giftSignal(16, count: 2, combo: 3, value: 2888000)]),
+          gifts: table,
+        ).messages.single;
+        expect(
+          (message.type, message.userId, message.userName, message.message, message.color),
+          (LiveMessageType.gift, '123456', '观众1', '猴岛 ×2', LiveMessageColor.white),
+        );
+        expect(message.sentAt, DateTime.fromMillisecondsSinceEpoch(1790000000000));
+        expect(message.messageId, '123456:combo-1:3', reason: 'the sender, the combo and its send');
+        expect(
+          message.data,
+          AcfunGift(
+            id: '16',
+            name: '猴岛',
+            count: 2,
+            comboKey: 'combo-1',
+            comboTotal: 6,
+            unitPrice: 2888,
+            totalValue: 5776,
+            unit: LiveGiftUnit.acCoin,
+            iconUrl: table['16']!.iconUrl,
+            value: 2888000,
+          ),
+        );
+        expect(message.gift!.tier, LiveGiftTier.precious, reason: '577.6 yuan');
+        expect('${message.data}', 'AcfunGift(猴岛 ×2)');
+      });
+
+      test('bananas: the gift with id 1 and the throw signal, free', () {
+        final messages = AcfunDanmakuProtocol.push(
+          _giftPush([_giftSignal(1, count: 5, comboId: null)], bananas: [_bananaSignal(3)]),
+          gifts: table,
+        ).messages;
+        expect([for (final message in messages) message.message], ['香蕉 ×5', '香蕉 ×3']);
+        for (final message in messages) {
+          final gift = message.gift!;
+          expect(
+            (gift.id, gift.unit, gift.free, gift.unitPrice, gift.iconUrl),
+            ('1', LiveGiftUnit.banana, true, 1, table['1']!.iconUrl),
+          );
+          expect(gift.tier, LiveGiftTier.normal);
+        }
+        expect((messages.first.gift!.comboKey, messages.first.gift!.comboTotal), ('', 5));
+        expect((messages.last.userName, messages.last.gift!.comboTotal), ('观众2', null));
+        expect(messages.last.sentAt, DateTime.fromMillisecondsSinceEpoch(1790000000500));
+      });
+
+      test('without the table: only the id (a banana keeps its name), no value', () {
+        final messages = AcfunDanmakuProtocol.push(
+          _giftPush([_giftSignal(17), _giftSignal(1)], bananas: [_bananaSignal(1)]),
+        ).messages;
+        expect(
+          [for (final message in messages) (message.gift!.name, message.gift!.displayName)],
+          [('', '17'), ('香蕉', '香蕉'), ('香蕉', '香蕉')],
+        );
+        final unknown = messages.first.gift!;
+        expect(
+          (unknown.unit, unknown.totalValue, unknown.free, unknown.iconUrl),
+          (LiveGiftUnit.other, null, false, null),
+        );
+        expect(messages[1].gift!.free, isTrue);
+        // A gift the table does not list: the id only.
+        expect(AcfunDanmakuProtocol.push(_giftPush([_giftSignal(99999)]), gifts: table).messages.single.gift!.name, '');
+      });
+
+      test('bad signals: no sender or gift id gives nothing; missing counts are 1; the others still come', () {
+        final messages = AcfunDanmakuProtocol.push(
+          _giftPush([
+            (ProtoWriter()..integer(3, 17)).toBytes(),
+            (ProtoWriter()..bytes(1, _user(1, 'a'))).toBytes(),
+            _giftSignal(0),
+            _giftSignal(17, count: null, combo: null),
+            _giftSignal(17, count: -2, combo: 0, comboId: '  '),
+            Uint8List.fromList([0x0A, 0x09]),
+            _giftSignal(35, combo: 2, user: _user(0, 'guest')),
+          ]),
+          gifts: table,
+        ).messages;
+        expect(
+          [for (final message in messages) (message.gift!.count, message.gift!.comboTotal)],
+          [(1, null), (1, null), (1, 2)],
+        );
+        expect(messages[1].gift!.comboKey, '');
+        expect((messages.last.userId, messages.last.userName), ('', 'guest'));
+        expect(
+          AcfunDanmakuProtocol.push(_giftPush(const [], bananas: [(ProtoWriter()..integer(2, 3)).toBytes()])).messages,
+          isEmpty,
+          reason: 'a banana without a sender',
+        );
+      });
+
+      test('the connection names gifts once the table came; before it, or when it fails, by id', () async {
+        final table = Completer<AcfunGiftCatalog>();
+        var asked = 0;
+        final connector = _Connector();
+        final (connection, events) = await _joined(
+          connector,
+          args: _args(
+            gifts: () {
+              asked++;
+              return table.future;
+            },
+          ),
+        );
+        final channel = connector.channels.single;
+        await channel.receive(
+          _push(
+            'ZtLiveScActionSignal',
+            _signals([
+              ('CommonActionSignalGift', [_giftSignal(17)]),
+            ]),
+          ),
+        );
+        table.complete(_recordedGifts());
+        await Future<void>.delayed(Duration.zero);
+        await channel.receive(
+          _push(
+            'ZtLiveScActionSignal',
+            _signals([
+              ('CommonActionSignalGift', [_giftSignal(17)]),
+            ]),
+          ),
+        );
+        final gifts = [for (final event in events.whereType<DanmakuReceived>()) ?event.message.gift];
+        expect([for (final gift in gifts) (gift.displayName, gift.unitPrice)], [('17', null), ('快乐水', 1)]);
+        // A reconnect keeps the table and does not ask again.
+        await channel.incoming.close();
+        await _until(() => connector.channels.length == 2);
+        expect(asked, 1);
+        await connection.close();
+
+        final failing = _Connector();
+        final (other, otherEvents) = await _joined(failing, args: _args(gifts: () => Future.error(StateError('x'))));
+        await failing.channels.single.receive(
+          _push(
+            'ZtLiveScActionSignal',
+            _signals([
+              ('CommonActionSignalGift', [_giftSignal(17)]),
+            ]),
+          ),
+        );
+        expect(otherEvents.whereType<DanmakuReceived>().single.message.gift!.displayName, '17');
+        await other.close();
+      });
     });
 
     test('pushes: a dead ticket and the broadcast status are flagged', () {

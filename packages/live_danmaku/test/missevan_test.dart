@@ -1698,10 +1698,16 @@ void main() {
           count: 1,
           price: 0,
           icon: Uri.parse('https://static.maoercdn.com/live/gifts/icons/30087.png'),
+          comboKey: '6abd2807a625be764d218212',
+          comboTotal: 1,
         ),
       );
       expect(read(17).messageId, '', reason: 'a later send of the combo');
-      expect(read(17).data, first.data);
+      // D07.6: the combo's id and its count so far.
+      final second = read(17).gift!;
+      expect((second.comboKey, second.comboTotal, second.count), ('6abd2807a625be764d218212', 2, 1));
+      expect(read(17).data, isNot(first.data));
+      expect((read(4).gift!.comboKey, read(4).gift!.comboTotal), ('', null), reason: 'no combo object');
       final lucky = read(18).data! as MissevanGift;
       expect(
         lucky,
@@ -1736,6 +1742,25 @@ void main() {
         'lucky': {'num': 1},
       })!;
       expect(odd.data, const MissevanGift(id: '', name: '花', count: 1, price: 0));
+      // A combo without an id, an id of zeros or a count that is not a
+      // positive number: no key, no count.
+      for (final combo in [
+        'x',
+        {'num': 3},
+        {'id': '000000000000000000000000', 'num': 0},
+        {'id': 7, 'num': '-2'},
+      ]) {
+        final gift = MissevanDanmakuProtocol.gift({
+          'gift': {'name': '花'},
+          'combo': combo,
+        })!.gift!;
+        expect(
+          (gift.comboKey, gift.comboTotal),
+          (combo is Map && combo['id'] == 7 ? '7' : '', combo is Map && combo['num'] == 3 ? 3 : null),
+          reason: '$combo',
+        );
+      }
+
       expect([odd.userName, odd.userId, odd.messageId, odd.message], ['', '', '7', '花 ×1']);
       final three = MissevanDanmakuProtocol.gift({
         'gift': {'name': '花', 'num': '3', 'price': '1000'},

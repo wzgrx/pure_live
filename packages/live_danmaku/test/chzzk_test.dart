@@ -284,16 +284,40 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
     ];
   },
   // Difference 5: a subscription's message is chat; v4 dropped it. B-12:
-  // the subscription gift is a notice (v4 showed nothing).
+  // the subscription gift is a notice (v4 showed nothing). D07.6: a
+  // subscription is a notice with its tier and months, before its message.
   'subscriptions with and without a message, a subscription gift': (v4) {
     expect(_events(v4[0]), isEmpty);
+    expect(_events(v4[1]), isEmpty);
     expect(_events(v4[2]), isEmpty);
     return [
       {
         ..._reading(v4[0]),
-        'events': [_line('32개월 축하해 주세요', _user(9), _t + 9, name: '구독자')],
+        'events': [
+          _noticeOf(
+            '구독자 订阅了「팬」，已订阅 32 个月',
+            id: 'subscription:${_user(9)}:${_t + 9}',
+            kind: LiveNoticeKind.subscription,
+            sentAt: _t + 9,
+            userId: _user(9),
+            userName: '구독자',
+          ),
+          _line('32개월 축하해 주세요', _user(9), _t + 9, name: '구독자'),
+        ],
       },
-      v4[1],
+      {
+        ..._reading(v4[1]),
+        'events': [
+          _noticeOf(
+            '구독자2 订阅了「팬」，已订阅 1 个月',
+            id: 'subscription:${_user(10)}:${_t + 10}',
+            kind: LiveNoticeKind.subscription,
+            sentAt: _t + 10,
+            userId: _user(10),
+            userName: '구독자2',
+          ),
+        ],
+      },
       {
         ..._reading(v4[2]),
         'events': [
@@ -346,7 +370,18 @@ final Map<String, List<Object?> Function(List<Object?> v4)> _differences = {
     return [
       {
         ..._reading(v4[0]),
-        'events': [...events, _line('구독 메시지', _user(23), _t + 23, name: '구독')],
+        'events': [
+          ...events,
+          _noticeOf(
+            '구독 订阅了「팬」，已订阅 3 个月',
+            id: 'subscription:${_user(23)}:${_t + 23}',
+            kind: LiveNoticeKind.subscription,
+            sentAt: _t + 23,
+            userId: _user(23),
+            userName: '구독',
+          ),
+          _line('구독 메시지', _user(23), _t + 23, name: '구독'),
+        ],
       },
       {..._reading(v4[1]), 'events': const <Object?>[]},
     ];
@@ -925,6 +960,18 @@ void main() {
       expect(named.messageId, '97faaf557acce48371affa77236380eb:1790632655370');
       final subscription = answers[2].messages.singleWhere((message) => message.message == '나이스한 아침이야');
       expect(subscription.userName, '观众132');
+      // D07.6: the subscription's notice comes before its message.
+      final notice = answers[2].messages[answers[2].messages.indexOf(subscription) - 1];
+      expect(
+        (notice.type, notice.data, notice.message, notice.userId, notice.messageId),
+        (
+          LiveMessageType.notice,
+          LiveNoticeKind.subscription,
+          '观众132 订阅了「나나양 좋아」，已订阅 32 个月',
+          subscription.userId,
+          'subscription:${subscription.messageId}',
+        ),
+      );
       final answer = jsonDecode(_received('S11-recent')[0].data as String) as Map<String, Object?>;
       final list = (answer['bdy']! as Map<String, Object?>)['messageList']! as List<Object?>;
       final hidden = [
@@ -933,7 +980,7 @@ void main() {
       ];
       expect(hidden, hasLength(2));
       expect(all.map((message) => message.message), isNot(anyElement(isIn(hidden))));
-      expect(answers.map((answer) => answer.messages.length), [48, 26, 50]);
+      expect(answers.map((answer) => answer.messages.length), [48, 26, 51]);
     });
 
     test('a frame is a JSON object named by cmd; the answers, the ping and the end are read', () {
@@ -1032,7 +1079,8 @@ void main() {
             if (!known.contains(jsonEncode(event))) event,
         ];
         if (chat == 'N2m13O') {
-          expect(extra.single, containsPair('text', '나이스한 아침이야'));
+          // The subscription's notice (D07.6) and its message (difference 5).
+          expect(extra.map((event) => event['text']), ['观众132 订阅了「나나양 좋아」，已订阅 32 个月', '나이스한 아침이야']);
         } else {
           expect(extra, isEmpty, reason: chat);
         }

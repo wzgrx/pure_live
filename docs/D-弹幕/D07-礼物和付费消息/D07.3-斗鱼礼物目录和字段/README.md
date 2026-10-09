@@ -31,6 +31,15 @@
 - 自动测试：用 `S05-offline/body.json` 和 `S13-live`、`S15-gifts` 的样本。
 - 真机：斗鱼热门直播间看到火箭这类付费礼物有图、荧光棒不显示价值。
 
+## 定稿（2026-10-09，D-003 由执行者定，理由见 [record.md](record.md)）
+
+- 礼物目录三处合并：`betard` 的 `room_gift`（随房间详情，不多发请求）、房间礼物列表 `gift.douyucdn.cn/api/gift/v3/web/list?rid=`（154 个）、平台道具表 `webconf.douyucdn.cn/resource/common/prop_gift_list/prop_gift_config.json`（1585 个背包道具，粉丝荧光棒在里面）。第 2 阶段的答案：完整礼物接口匿名能取到，`betard` 的表只有老编号（火箭 196），样本里收到的礼物都要靠后两个。
+- 后两个在弹幕连接开始时后台取，`DouyuSite` 内存缓存（房间 30 分钟、最多 16 个房间，道具表 6 小时，失败 5 分钟后再试），在另一个 isolate 解析；取不到就是以前的样子。
+- 图标前缀 `https://gfs-op.douyucdn.cn/dygift/`（核实过；`gfs-test-op` 的地址不用）。鱼翅价格单位是分；鱼丸礼物和背包道具算免费、不填价值；表里没有的礼物 `normal`、不标免费。
+- 样本：`fixtures/douyu/S17-gift-list`、`S18-prop-config`（匿名、无 Cookie，删减到测试要的礼物）。
+
 ## 留下的问题
 
-- 完整礼物接口能否匿名取到（第 2 阶段）。
+- `gfid` 0 的背包道具（陪伴印章 `pid` 3410、钻粉月饼）没有图：道具表按 `gfid` 编号，没找到按 `pid` 查的公开接口。它们都是免费的，不影响价值。
+- 活动礼物（精英宝典、精英令）活动过了就不在房间的列表里，只显示名称。
+- 斗鱼聊天（`chatmsg`）的等级和粉丝牌还没读（任务书不许改聊天解析），要的话开 D01 的任务。

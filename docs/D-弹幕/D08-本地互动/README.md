@@ -43,9 +43,10 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | `features/live_play/logic/room_controller.dart` | `addLocal`（`:1159`） |
 | `packages/live_store/lib/src/settings/settings.dart` | `localInteraction.*` 29 个键（`localInteraction.enabled` `:1221` 起，记录 `localInteraction.history` `:1294`，样式 18 个 `:1301-1438`） |
 | `packages/live_store/lib/src/local_events.dart` | D08.1：`local_events` 表（`schemaVersion` 2）的 `LocalEvent`、`LocalEventStore`（最多 2000 条、旧记录只转一次、进房放回的查询、备份一节 `localEvents`）；新设置 `localInteraction.replayOnEnter`（默认开，D-040） |
+| `features/live_play/local_interaction/logic/local_growth.dart` | D08.3：`LocalGrowthDay`（当天的计数，存在设置 `localInteraction.growthDay`，按本机日期读）、`LocalWatchTime`（观看计时：只在计时时每分钟一次，时间先放内存，满 10 分钟或停下才写盘）；规则常量在 `LocalCatalog`（`watchStep`…`chatExperienceDailyLimit`、`progressFor`、段名 `tierKeys`）；`LocalInteraction` 的 `checkIn`、`watched`、`settleWatch`、`rewardChat`，升级记 `level`；`local_room_session.dart` 的 `LocalRoomWatch`（一个播放器一个，应用内小窗接着计）；新设置 `localInteraction.growthEnabled`（默认开，D-040） |
 | `packages/live_store/lib/src/settings/settings.dart` 的 `localInteractionPhrases` | D08.2：常用语，一个列表设置（最多 20 条，`StringListSetting` 的 `maxItems`、`tidy`），默认空，随设置进备份和设备同步；`LocalInteraction` 的 `phrases`、`addPhrase`…`movePhrase`、`recentChats`（最近 5 条取自 `local_events`），每条 40 字（`LocalCatalog.clipDanmaku`） |
 
-测试：`local_history_test.dart`（D08.1）、`local_plus_one_test.dart`（A08.14）、`local_phrases_test.dart`（D08.2，21 个）和 `packages/live_store/test/local_phrases_test.dart`；`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个：资料库、3.x 键和默认值、送礼扣币、记录 30 条、样式、各处输入框、面板、横幅 3 秒）；`packages/live_store/test/migration_test.dart`、`backup_test.dart`、`settings_defaults_test.dart`（键和迁移）。
+测试：`local_history_test.dart`（D08.1）、`local_plus_one_test.dart`（A08.14）、`local_phrases_test.dart`（D08.2，21 个）和 `packages/live_store/test/local_phrases_test.dart`；`local_growth_test.dart`（D08.3，28 个：规则、计时、跨日、上限、等级、界面）和 `packages/live_store/test/local_growth_test.dart`；`apps/pure_live/test/features/live_play/local_interaction_test.dart`（15 个：资料库、3.x 键和默认值、送礼扣币、记录 30 条、样式、各处输入框、面板、横幅 3 秒）；`packages/live_store/test/migration_test.dart`、`backup_test.dart`、`settings_defaults_test.dart`（键和迁移）。
 
 ## 3.x 基线
 
@@ -59,7 +60,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 | 整个本地互动没有 K90 结果（P1） | CHECKLIST 第 2 节第 8 条 | 登记“完成”但没人用过一遍 | S02.6 阶段 4（V03.6 E1） |
 | 记录存拼好的句子、本地弹幕不进记录、离开直播间就没了（P2、P3） | `local_interaction.dart:223`、`:275-277`；`addLocal` 只进 `ChatFeed` | 换语言后旧记录还是旧语言；没有“我发过的话” | D08.1（2026-10-09 代码做完，待真机） |
 | 每次都要重打常说的话 | — | 手机上打字慢 | D08.2（2026-10-09 代码做完，待真机：输入框上方的最近发过和常用语、存为常用语、设置页管理） |
-| 币和经验没有意义（P5） | `local_interaction.dart:218-225` | 没有养成感 | D08.3 |
+| 币和经验没有意义（P5） | `local_interaction.dart:218-225` | 没有养成感 | D08.3（2026-10-09 代码做完，待真机：看直播、签到、发弹幕涨经验和币，身份卡的进度条和段名，加币按钮进“更多”） |
 | 礼物一次 1 个、横幅互相顶掉（P6） | `local_interaction.dart` `count: 1`；`local_room_session.dart` 的 `sendGift` | 快速连点只看到最后一条横幅 | D08.4 |
 | 特效只有一种横幅（P7） | `local_gift_effect.dart:54-123` | 用户点名要加强 | D08.5 |
 | 清空记录没有撤销、星形两种意思、输入框不限长、粗体丢字重、本地弹幕的“屏蔽关键词”不起作用（P4、P8、P9、P12、P16、P17） | 见 V03.6 第 2.2 节 | 小毛病 | A08.13（V03.6 E2，另一个任务） |
@@ -75,7 +76,7 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 
 ## 测试和验证
 
-- 自动：`cd apps/pure_live && flutter test test/features/live_play/local_interaction_test.dart`；存储改动跑 `packages/live_store` 的测试。缺：规则（币、经验、等级）和计时没有单独的单元测试，D08.3 补。
+- 自动：`cd apps/pure_live && flutter test test/features/live_play/local_interaction_test.dart`；存储改动跑 `packages/live_store` 的测试。规则（币、经验、等级）和计时的单元测试在 `local_growth_test.dart`（D08.3，假时钟）。
 - 真机：S02.6 阶段 4 先把现在的本地互动走一遍（V03.6 E1），D08 的每个任务再按自己的 `verify.md` 看。
 
 ## 路线
@@ -92,23 +93,19 @@ LiveRoomController.addLocal（room_controller.dart:1159）：进 ChatFeed，要�
 属于 [D 弹幕](../README.md)。
 
 - 代码：`features/live_play/local_interaction/logic/`
-- 进度：`███████░░░░░░░░░░░░░` 36%
+- 进度：`███████████░░░░░░░░░` 54%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
 | D08.1 | 结构化的本地历史：本地弹幕进记录、重进房间放回 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.1-结构化的本地历史/README.md)、[任务书](D08.1-结构化的本地历史/brief.md)、[记录](D08.1-结构化的本地历史/record.md) |
 | D08.2 | 常用语和最近发送 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.2-常用语和最近发送/README.md)、[任务书](D08.2-常用语和最近发送/brief.md)、[记录](D08.2-常用语和最近发送/record.md) |
-| D08.3 | 本地成长：观看时长、签到、等级进度 | 功能 | 未开始 | — | — | [设计或说明](D08.3-本地成长/README.md)、[任务书](D08.3-本地成长/brief.md) |
+| D08.3 | 本地成长：观看时长、签到、等级进度 | 功能 | 待真机 | 2026-10-09 | — | [设计或说明](D08.3-本地成长/README.md)、[任务书](D08.3-本地成长/brief.md)、[记录](D08.3-本地成长/record.md) |
 | D08.4 | 本地礼物连击、数量和横幅队列 | 功能 | 未开始 | — | — | [设计或说明](D08.4-本地礼物连击和数量/README.md)、[任务书](D08.4-本地礼物连击和数量/brief.md) |
 | D08.5 | 三档礼物特效：小飘屏、横幅、大礼物座驾动效（参考 flame_barrage） | 功能 | 未开始 | — | — | [设计或说明](D08.5-三档礼物特效/README.md)、[任务书](D08.5-三档礼物特效/brief.md) |
 
 ## 还没完成的
 
-- **D08.3 本地成长：观看时长、签到、等级进度**（未开始，第二档，规模 中）
-  - 阶段：规则常量和计时（观看、签到、发弹幕，每天上限）、开关“本地成长” → 身份卡进度条、等级段名、升级记进记录
-  - 说明：依赖 D08.1（记“升级”）；“本地成长”默认开是任务书写明的例外（D-040），关掉和 3.x 一样只有送礼加经验；定时器至少 1 秒
-  - 来源：V03.6 第 4 节 E7、第 5.4 节（P5）；用户 2026-10-09（D-040）
 - **D08.4 本地礼物连击、数量和横幅队列**（未开始，第二档，规模 中）
   - 阶段：3 秒内同一礼物连击：横幅 ×N 跳动、列表和记录合成一条 → 长按礼物选数量（1、10、66、520）、不同礼物排队（最多 5 个）
   - 说明：连击的数字动画照 flame_barrage ComboAnimation（MIT）；系统要求减少动态时不跳；记录合并依赖 D08.1（没做完时只合并列表）

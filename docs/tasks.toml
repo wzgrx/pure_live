@@ -2374,13 +2374,14 @@ note = "常用语是设置 localInteraction.phrases（列表，默认空，最�
 id = "D08.3"
 title = "本地成长：观看时长、签到、等级进度"
 type = "功能"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "中"
 tier = 2
 stages = ["规则常量和计时（观看、签到、发弹幕，每天上限）、开关“本地成长”", "身份卡进度条、等级段名、升级记进记录"]
-done = 0
+done = 2
 from = "V03.6 第 4 节 E7、第 5.4 节（P5）；用户 2026-10-09（D-040）"
-note = "依赖 D08.1（记“升级”）；“本地成长”默认开是任务书写明的例外（D-040），关掉和 3.x 一样只有送礼加经验；定时器至少 1 秒"
+note = "新设置 localInteraction.growthEnabled（默认开，D-040 写明的例外；关掉和 3.x 一样只有送礼加经验）和 localInteraction.growthDay（当天计数的 JSON，随设置进备份和设备同步）；规则是 LocalCatalog 的常量；观看时长跟着播放器走（LocalRoomWatch：在播、前台或画中画、应用内小窗都计，后台不计），每分钟计一次放内存，满 10 分钟或停下才写盘；本机自然日；签到在进直播间时；升级记 local_events 的 level 并短提示；加币按钮进身份卡“更多”；设计选择 g1～g15 见任务 README"
 
 [[task]]
 id = "D08.4"

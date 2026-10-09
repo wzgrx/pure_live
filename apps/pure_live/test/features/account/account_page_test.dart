@@ -19,6 +19,7 @@ import 'package:pure_live/routes/route_args.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/in_app_web.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 // Every cookie, name and id here is an obvious placeholder.
@@ -318,6 +319,21 @@ void main() {
       // No "请选择登陆方式" (K2 A).
       expect(find.text('请选择登陆方式'), findsNothing);
       expect(find.byKey(const ValueKey('bilibili-qr-card')), findsOneWidget);
+    });
+
+    testWidgets('A11.6: back from a platform page the list is where it was', (tester) async {
+      await _pump(tester, size: const Size(420, 600));
+      final list = find.byKey(const ValueKey('account-list'));
+      await tester.drag(list, const Offset(0, -2000));
+      await _settle(tester);
+      final before = scrollPositionOf(tester, list).pixels;
+      expect(before, greaterThan(0));
+      await tester.tap(find.byKey(const ValueKey('account-soop')));
+      await _settle(tester);
+      expect(find.text('SOOP账号'), findsOneWidget);
+      await tester.pageBack();
+      await _settle(tester);
+      expect(scrollPositionOf(tester, list).pixels, before);
     });
 
     testWidgets('signs out from the list after asking with 3.x words', (tester) async {

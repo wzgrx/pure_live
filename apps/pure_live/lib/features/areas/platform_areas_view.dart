@@ -138,6 +138,7 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
     if (tabs == null) {
       content = _AreaPages(
         key: ValueKey('area-page-${categories.single.id}'),
+        storageId: '${_catalog.site.id}:${categories.single.id}',
         areas: categories.single.children,
         onRefresh: _catalog.refresh,
         busy: _catalog.isLoading,
@@ -150,6 +151,7 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
           for (final category in categories)
             _AreaPages(
               key: ValueKey('area-page-${category.id}'),
+              storageId: '${_catalog.site.id}:${category.id}',
               areas: category.children,
               onRefresh: _catalog.refresh,
               busy: _catalog.isLoading,
@@ -178,7 +180,10 @@ class _PlatformAreasViewState extends ConsumerState<PlatformAreasView>
 /// The areas of one category: the whole grid with pull to refresh, or on
 /// desktops numbered pages (3.x `BasePageView`).
 class _AreaPages extends ConsumerStatefulWidget {
-  const new({required this.areas, required this.onRefresh, required this.busy, super.key});
+  const new({required this.storageId, required this.areas, required this.onRefresh, required this.busy, super.key});
+
+  /// The platform and category: the grid's remembered position (A11.6).
+  final String storageId;
 
   final List<LiveArea> areas;
   final Future<void> Function() onRefresh;
@@ -229,8 +234,12 @@ class _AreaPagesState extends ConsumerState<_AreaPages> {
       // 3.x's bounce and classic header (P02).
       return AppRefreshView(
         onRefresh: widget.onRefresh,
-        builder: (context, physics) =>
-            areas.isEmpty ? _empty(physics: physics) : AreaGrid(areas: areas, controller: _scroll, physics: physics),
+        builder: (context, physics) => areas.isEmpty
+            ? _empty(physics: physics)
+            : KeepScrollPosition(
+                id: 'areas:${widget.storageId}',
+                child: AreaGrid(areas: areas, controller: _scroll, physics: physics),
+              ),
       );
     }
     final showSizes = watchSetting(ref, Settings.pageShowSizeSelector);
@@ -256,7 +265,12 @@ class _AreaPagesState extends ConsumerState<_AreaPages> {
         child: Column(
           children: [
             Expanded(
-              child: shown.isEmpty ? _empty() : AreaGrid(areas: shown, controller: _scroll),
+              child: shown.isEmpty
+                  ? _empty()
+                  : KeepScrollPosition(
+                      id: 'areas:${widget.storageId}',
+                      child: AreaGrid(areas: shown, controller: _scroll),
+                    ),
             ),
             PaginationBar(
               page: page,

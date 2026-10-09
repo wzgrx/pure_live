@@ -23,6 +23,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_grid.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 /// A platform answering from fixed pages; links `https://<id>.test/<room>`
@@ -767,6 +768,25 @@ void main() {
         tester.getRect(find.byKey(const ValueKey('search-platform-strip'))).top,
         greaterThanOrEqualTo(field.bottom),
       );
+    });
+
+    testWidgets('A11.6: back from a room the results are where they were', (tester) async {
+      await pump(tester, [manyRooms('bilibili', 30)], size: const Size(393, 852));
+      await submit(tester, 'a');
+      final results = find.byKey(const ValueKey('search-content'));
+      final before = await scrollDown(tester, results, 600);
+      await tester.tap(find.byType(RoomGridCard).hitTestable().first);
+      await tester.pumpAndSettle();
+      expect(opened, hasLength(1));
+      // The room is a page over the results.
+      unawaited(
+        Navigator.of(tester.element(results))
+            .push(MaterialPageRoute<void>(builder: (_) => const Scaffold(body: Text('room')))),
+      );
+      await tester.pumpAndSettle();
+      Navigator.of(tester.element(find.text('room'))).pop();
+      await tester.pumpAndSettle();
+      expect(scrollPositionOf(tester, results).pixels, before);
     });
 
     testWidgets('U.5a c4: "综合 ⌄" opens the four orders, the current one in the primary colour with a tick', (

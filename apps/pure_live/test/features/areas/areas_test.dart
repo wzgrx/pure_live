@@ -10,6 +10,7 @@ import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/area_rooms/area_rooms_page.dart';
 import 'package:pure_live/features/areas/area_artwork.dart';
+import 'package:pure_live/features/areas/area_card.dart';
 import 'package:pure_live/features/areas/area_catalog.dart';
 import 'package:pure_live/features/areas/favorite_areas_view.dart';
 import 'package:pure_live/features/hot_areas/hot_areas_page.dart';
@@ -20,6 +21,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_feed.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 LiveArea _area(String platform, String id, String name, {String type = 't', String typeName = '分类'}) =>
@@ -233,6 +235,45 @@ void main() {
       final saved = (await store.meta.get(AreaPictures.metaKey))!;
       expect(saved, allOf(contains('原神'), contains('英雄联盟')));
       expect(pictures.borrow('原神'), 'https://a/ys.png');
+    });
+
+    testWidgets('A11.6: back from an area and from a room, and back on the tab, each list is where it was', (
+      tester,
+    ) async {
+      final huya = _FakeSite(
+        'huya',
+        '虎牙直播',
+        [
+          LiveCategory(id: 'net', name: '网游', children: [for (var i = 0; i < 60; i++) _area('huya', '$i', '分区$i')]),
+        ],
+        pages: {
+          1: [for (var i = 0; i < 40; i++) _room('huya', '${100 + i}')],
+        },
+      );
+      final services = await _pumpApp(tester, {'huya': huya}, menus: ['areas', 'popular']);
+      final areas = find.byKey(const ValueKey('area-grid'));
+      final before = await scrollDown(tester, areas, 400);
+
+      await tester.tap(find.byType(AreaCard).hitTestable().first);
+      await _settle(tester);
+      final rooms = find.byKey(const ValueKey('area-rooms-grid'));
+      final inArea = await scrollDown(tester, rooms, 500);
+      await tester.tap(find.byType(LiveRoomCard).hitTestable().first);
+      await _settle(tester);
+      expect(find.byType(LivePlayPage), findsOneWidget);
+      await back(tester);
+      expect(scrollPositionOf(tester, rooms).pixels, inArea);
+      await back(tester);
+      expect(scrollPositionOf(tester, areas).pixels, before);
+
+      // Built anew when its tab comes back (before A11.6 at the top).
+      await tester.tap(find.byKey(const ValueKey('home-nav-popular')));
+      await _settle(tester);
+      expect(areas, findsNothing);
+      await tester.tap(find.byKey(const ValueKey('home-nav-areas')));
+      await _settle(tester);
+      expect(scrollPositionOf(tester, areas).pixels, before);
+      await tester.runAsync(services.close);
     });
 
     testWidgets('c4: an open area page follows "显示不能播放的直播"', (tester) async {

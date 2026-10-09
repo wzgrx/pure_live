@@ -17,6 +17,7 @@ import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/rooms/room_cards.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
+import '../../scroll_support.dart';
 import '../../support.dart';
 
 /// "Now" of every test: 2026-10-01 20:00 local time.
@@ -125,6 +126,29 @@ void main() {
     expect(find.text('0 / 50 条'), findsOneWidget);
     expect(find.text('无观看历史记录'), findsOneWidget);
     expect(find.byKey(const ValueKey('history-clear')), findsNothing);
+  });
+
+  testWidgets('A11.6: back from a room (which moves to the top of the history) the list is where it was', (
+    tester,
+  ) async {
+    final h = await _pump(
+      tester,
+      rooms: [for (var i = 0; i < 30; i++) (_room('$i'), _now.subtract(Duration(minutes: i)))],
+    );
+    final grid = find.byKey(const ValueKey('history-grid'));
+    final before = await scrollDown(tester, grid, 700);
+    final card = find.byType(LiveRoomCard).hitTestable().first;
+    final id = tester.widget<LiveRoomCard>(card).data.title.replaceFirst('Title ', '');
+    await tester.tap(card);
+    await _settle(tester);
+    expect(find.text('room $id'), findsOneWidget);
+    // Watching it records it again, as the room does.
+    await tester.runAsync(() => h.history.record(_room(id), now: _now));
+    AppNavigator.back();
+    await _settle(tester);
+    await tester.pump(AppNavigator.openGuard);
+    expect((await _ids(tester, h.history)).first, id);
+    expect(scrollPositionOf(tester, grid).pixels, before);
   });
 
   testWidgets('shows the rooms by day with count and limit in the title', (tester) async {

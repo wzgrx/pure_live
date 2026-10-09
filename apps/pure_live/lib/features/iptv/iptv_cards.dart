@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -21,7 +23,7 @@ const double iptvCardOneRowWidth = 520;
 /// "网络 / 本地", the channel count and last update, the address; "更多"
 /// (open, copy; a right click opens it too); sync, delete and automatic
 /// sync for network sources, delete only for local ones.
-class IptvSourceCard extends StatelessWidget {
+class IptvSourceCard extends StatefulWidget {
   /// Creates the card.
   const new({
     required this.id,
@@ -87,47 +89,27 @@ class IptvSourceCard extends StatelessWidget {
   /// A more-menu action.
   final ValueChanged<IptvCardAction> onAction;
 
-  Future<void> _menu(BuildContext context, RelativeRect position) async {
-    final action = await showMenu<IptvCardAction>(
-      context: context,
-      position: position,
-      constraints: const BoxConstraints(minWidth: 200),
-      items: [
-        PopupMenuItem(
-          key: ValueKey('iptv-open-$id'),
-          value: IptvCardAction.open,
-          child: _MenuRow(icon: AppIcons.openExternal, text: i18n(isRemote ? 'iptv_open_url' : 'iptv_open_file')),
-        ),
-        PopupMenuItem(
-          key: ValueKey('iptv-copy-$id'),
-          value: IptvCardAction.copy,
-          child: _MenuRow(icon: AppIcons.copy, text: i18n('iptv_copy_address')),
-        ),
-      ],
-    );
-    if (action != null) onAction(action);
-  }
-
-  /// The menu under the more button.
-  void _menuAtButton(BuildContext buttonContext) {
-    final box = buttonContext.findRenderObject()! as RenderBox;
-    final overlay = Navigator.of(buttonContext).overlay!.context.findRenderObject()! as RenderBox;
-    final rect = Rect.fromPoints(
-      box.localToGlobal(Offset(0, box.size.height), ancestor: overlay),
-      box.localToGlobal(box.size.bottomRight(Offset.zero), ancestor: overlay),
-    );
-    _menu(buttonContext, RelativeRect.fromRect(rect, Offset.zero & overlay.size)).ignore();
-  }
-
-  /// The menu where the card was right-clicked (desktop).
-  void _menuAt(BuildContext context, Offset global) {
-    final overlay = Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
-    final at = overlay.globalToLocal(global);
-    _menu(context, RelativeRect.fromRect(at & const Size(1, 1), Offset.zero & overlay.size)).ignore();
-  }
-
   @override
-  Widget build(BuildContext context) {
+  State<IptvSourceCard> createState() => _IptvSourceCardState();
+
+  /// The more menu's rows (docs/A-界面设计/A07-直播间界面/A07.23-横屏右上角菜单升级: the app's
+  /// small menu, which Material's `showMenu` used to stand in for here).
+  List<AppMenuEntry<IptvCardAction>> _entries() => [
+    AppMenuEntry(
+      key: ValueKey('iptv-open-$id'),
+      value: IptvCardAction.open,
+      icon: AppIcons.openExternal,
+      label: i18n(isRemote ? 'iptv_open_url' : 'iptv_open_file'),
+    ),
+    AppMenuEntry(
+      key: ValueKey('iptv-copy-$id'),
+      value: IptvCardAction.copy,
+      icon: AppIcons.copy,
+      label: i18n('iptv_copy_address'),
+    ),
+  ];
+
+  Widget _build(BuildContext context, GlobalKey<AppMenuButtonState<IptvCardAction>> menu) {
     final scheme = Theme.of(context).colorScheme;
     final styles = context.textStyles;
     final muted = styles.t12.copyWith(color: scheme.onSurfaceVariant);
@@ -163,14 +145,13 @@ class IptvSourceCard extends StatelessWidget {
         ),
         Transform.translate(
           offset: const Offset(0, -6),
-          child: Builder(
-            builder: (buttonContext) => IconButton(
-              key: ValueKey('iptv-more-$id'),
-              tooltip: i18n('iptv_more'),
-              color: scheme.onSurfaceVariant,
-              onPressed: () => _menuAtButton(buttonContext),
-              icon: const Icon(AppIcons.more),
-            ),
+          child: AppMenuButton<IptvCardAction>(
+            key: menu,
+            buttonKey: ValueKey('iptv-more-$id'),
+            tooltip: i18n('iptv_more'),
+            icon: Icon(AppIcons.more, color: scheme.onSurfaceVariant),
+            entries: _entries,
+            onSelected: onAction,
           ),
         ),
       ],
@@ -191,7 +172,8 @@ class IptvSourceCard extends StatelessWidget {
     );
     final autoSync = _AutoSyncRow(id: id, value: autoUpdate, onChanged: blocked ? null : onAutoUpdate);
     return GestureDetector(
-      onSecondaryTapUp: (details) => _menuAt(context, details.globalPosition),
+      // A right click opens the same menu at the more button.
+      onSecondaryTap: () => unawaited(menu.currentState?.show()),
       child: Container(
         key: ValueKey('iptv-card-$id'),
         margin: const EdgeInsets.only(bottom: 12),
@@ -244,6 +226,13 @@ class IptvSourceCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _IptvSourceCardState extends State<IptvSourceCard> {
+  final _menu = GlobalKey<AppMenuButtonState<IptvCardAction>>();
+
+  @override
+  Widget build(BuildContext context) => widget._build(context, _menu);
 }
 
 /// The icon box with the format badge (3.x `_buildLeading`): playlists in
@@ -403,23 +392,6 @@ class _AutoSyncRow extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MenuRow extends StatelessWidget {
-  const new({required this.icon, required this.text});
-
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 20, color: Theme.of(context).colorScheme.onSurfaceVariant),
-      const SizedBox(width: 12),
-      Text(text, style: context.textStyles.t14),
-    ],
-  );
 }
 
 /// The counts at the top (docs/A-界面设计/A13-网络电视和多画面界面/A13.1-网络电视管理 c8): playlists, channels,

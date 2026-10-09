@@ -176,23 +176,32 @@ class _LogPageState extends ConsumerState<LogPage> {
                       value: writing,
                       onChanged: (value) => unawaited(settings.set(Settings.enableLocalLog, value)),
                     ),
-                    SettingsRow(
+                    // A choice row like every other one in the settings: the
+                    // value at the end, the app's option dialog (A07.23: it
+                    // was Material's drop-down with its own old menu).
+                    SettingsLinkRow(
+                      key: const ValueKey('log-level'),
                       icon: AppIcons.logLevel,
                       title: i18n('settings_log_level'),
                       subtitle: i18n('settings_log_level_desc'),
-                      stackTrailing: false,
-                      trailing: DropdownButton<LogLevel>(
-                        key: const ValueKey('log-level'),
-                        value: level,
-                        underline: const SizedBox.shrink(),
-                        items: [
-                          for (final value in LogLevel.values)
-                            DropdownMenuItem(value: value, child: Text(_levelLabel(value))),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) unawaited(settings.set(Settings.logLevel, value.name));
-                        },
-                      ),
+                      choice: true,
+                      value: _levelLabel(level),
+                      onTap: () async {
+                        final picked = await showAppOptionDialog<LogLevel>(
+                          context: context,
+                          title: i18n('settings_log_level'),
+                          selected: level,
+                          options: [
+                            for (final value in LogLevel.values)
+                              AppDialogOption(
+                                key: ValueKey('log-level-${value.name}'),
+                                value: value,
+                                label: _levelLabel(value),
+                              ),
+                          ],
+                        );
+                        if (picked != null) unawaited(settings.set(Settings.logLevel, picked.name));
+                      },
                     ),
                     SettingsLinkRow(
                       key: const ValueKey('log-open-folder'),

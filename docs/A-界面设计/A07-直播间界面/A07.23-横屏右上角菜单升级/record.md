@@ -27,7 +27,7 @@
 ## 改了哪些文件
 
 - `apps/pure_live/lib/features/live_play/buttons/room_menu_button.dart`：新 `RoomMenuItem`、`roomMenuItems`（小菜单和面板共用的行）、`roomMenuOpensPanel`；`RoomMenuButton` 在画面上且有直播间面板时开面板（再点一次关）。
-- `apps/pure_live/lib/features/live_play/buttons/room_menu_panel.dart`（新）：`RoomMenuPanel`、`RoomMenuRow`、`roomMenuRowHeight`（52）、`roomMenuGroupGap`（8）。
+- `apps/pure_live/lib/features/live_play/buttons/room_menu_panel.dart`（新）：`RoomMenuPanel`、`RoomMenuRow`、`roomMenuRowHeight`（52）、`roomMenuGroupGap`（8）；行的按下效果按卡片的圆角画，不裁剪（规范第 9.3 节）。
 - `apps/pure_live/lib/features/live_play/layout/room_panel.dart`：`RoomPanelKind.menu`。
 - `apps/pure_live/lib/features/live_play/live_play_page.dart`：`_panelOf` 加菜单面板（横屏、竖屏全屏各传栏上已有的项）。
 - `apps/pure_live/lib/features/iptv/iptv_cards.dart`：“更多”换成 `AppMenuButton`，右键在按钮处打开同一个菜单；去掉 `_MenuRow`、`showMenu`。
@@ -56,7 +56,7 @@
 
 ## 门禁
 
-- （运行后填）
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `b22738930`，三个 `[A07.23]` 提交的内容）：`gate: passed (all, 14 members)`。
 
 ## 真机上要看的
 

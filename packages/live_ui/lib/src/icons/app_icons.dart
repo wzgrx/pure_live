@@ -283,8 +283,10 @@ abstract final class AppIcons {
   /// longer looks like [openExternal] next to it.
   static const IconData newWindow = Icons.add_to_photos_outlined;
 
-  /// The local interaction sheet (3.x's room menu).
-  static const IconData localInteraction = Icons.auto_awesome_rounded;
+  /// The local interaction sheet (the room menu and the settings page's
+  /// header): its own glyph since 2026-10-09, so the star only means the
+  /// local danmaku style ([localStyle], A08.13 c2, one meaning one icon).
+  static const IconData localInteraction = Icons.interests_rounded;
 
   /// Save the danmaku look as the user's template (3.x's danmaku settings).
   static const IconData templateSave = Icons.save_outlined;
@@ -799,8 +801,8 @@ abstract final class AppIcons {
   /// The app's language (3.x used the network globe, A01.4 c4).
   static const IconData settingsLanguage = Remix.translate_2;
 
-  /// Local interaction.
-  static const IconData settingsLocalInteraction = Icons.auto_awesome_rounded;
+  /// Local interaction: the same glyph as [localInteraction].
+  static const IconData settingsLocalInteraction = Icons.interests_rounded;
 
   /// Cache and data.
   static const IconData settingsCache = Remix.database_2_line;

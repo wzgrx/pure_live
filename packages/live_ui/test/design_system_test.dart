@@ -50,7 +50,7 @@ void main() {
       // A16.1 c12: the room menu's new window is the home menu's stacked
       // pages, not the ↗ of opening the platform next to it.
       (AppIcons.newWindow, Icons.add_to_photos_outlined),
-      (AppIcons.localInteraction, Icons.auto_awesome_rounded),
+      (AppIcons.localInteraction, Icons.interests_rounded),
       (AppIcons.templateSave, Icons.save_outlined),
       (AppIcons.templateRestore, Icons.restore_rounded),
       // U.2b-U.2d: 3.x's glyphs of the portrait room and the window

@@ -40,6 +40,7 @@
 | c5 | P16 | **“粗体”开 = 字重加 200（至少 700），关 = 字重减 200（最多 600）**：500 ⇄ 700，600 ⇄ 800；六个模板的字重（500～800）来回切换都回到原来的值；不加新设置 | B：新加一个设置记住“打开粗体前的字重”；C：放出字重滑块 | A 不用新键（D-018 只加不改也要进备份、设置清单）就能让面板能做出来的所有字重来回不丢；字重滑块是新功能，V03.6 没列进 E2。限制：400（面板做不出来，只可能来自手改的备份）开再关是 500 |
 | c6 | P17 | **本地弹幕、本地礼物的长按面板去掉“屏蔽关键词…”**，只留“复制”（本来就没有“屏蔽此用户”） | B：让关键词屏蔽也过滤本地消息 | 本地消息是自己发的，只有自己看得到，屏蔽自己的话没有意义；B 还会让“本地互动”和平台屏蔽搅在一起（屏蔽词改了，自己发的也看不到）。去掉以后面板说的都做得到。V03.6 的 E3、E6 以后会在这里加“再发一次”“存为常用语” |
 | c7 | P15 | `holdDanmakuOnPress` 的注释改成“默认开（D-039，D-036 的例外）；关掉和 3.x 一样”；D03.4 README 和 D03 子分类 README 里的“默认关”改成“默认开” | — | 只是文字；登记表 D03.4 的 `note` 由登记的人改（任务书要求，避免两边改同一段） |
+| c8 | 补充（2026-10-09，用户“你自己决定”） | **“本地互动体验”入口（直播间菜单、设置页的“本地用户与互动”）换成自己的图形 `interests_rounded`**（`AppIcons.localInteraction`、`settingsLocalInteraction`），星形只表示本地弹幕样式 | B：保留星形 | 同 c2：一个意思一个图形（A01.3）；入口和样式按钮常在同一个面板里出现，同一个星形会让人以为点了是改样式；`interests` 没有别的意思在用（`celebration` 已是礼物特效） |
 
 - 不变的：各处的位置、大小、颜色、顺序、键名；`localInteraction.*` 设置键和默认值（D-018）；平台弹幕的长按面板。
 - 测试里的键名 `local-composer-star`、`local-composer-chat-star`、类名 `LocalComposerChatStar` 是 A07.17 起的名字，没有跟着改（改名会碰很多别的测试，只是名字，用户看不到）。
@@ -54,5 +55,6 @@
   - c5：`LocalCatalog.boldWeight`、`regularWeight`（`logic/local_catalog.dart:593`、`:597`），`local_style_panel.dart:398`。
   - c6：`danmaku/message_panel.dart:211`。
   - c7：`packages/live_store/lib/src/settings/settings.dart:584`。
+  - c8：`packages/live_ui/lib/src/icons/app_icons.dart` 的 `localInteraction`、`settingsLocalInteraction`。
 - 测试：`apps/pure_live/test/features/live_play/local_interaction_test.dart` 新增 4 个、改了 5 个；`live_play_layouts_test.dart`、`room_on_phone_test.dart` 各补图标的断言；`packages/live_ui/test/design_system_test.dart` 图标对照表加一行。
 - 真机：见 [record.md](record.md)“真机上要看的”。

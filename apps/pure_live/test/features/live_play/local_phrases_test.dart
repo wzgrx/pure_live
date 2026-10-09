@@ -126,9 +126,7 @@ void main() {
     });
 
     test('phrases: changed, moved, removed and put back; stored in the setting', () async {
-      for (final text in ['一', '二', '三']) {
-        local.addPhrase(text);
-      }
+      ['一', '二', '三'].forEach(local.addPhrase);
       expect(local.editPhrase(1, '贰'), isTrue);
       expect(local.editPhrase(1, '一'), isFalse, reason: 'a repeat');
       local.movePhrase(0, 2);
@@ -150,7 +148,7 @@ void main() {
     });
   });
 
-  group('the composer\'s chips (c1, c2)', () {
+  group("the composer's chips (c1, c2)", () {
     testWidgets('portrait: none without the focus or without anything; then the recent 5 and the phrases', (
       tester,
     ) async {
@@ -211,7 +209,7 @@ void main() {
       await closeLocalRoom(tester, room);
     });
 
-    testWidgets('the local interaction panel\'s composer: the same chips', (tester) async {
+    testWidgets("the local interaction panel's composer: the same chips", (tester) async {
       final room = await pumpLocalRoom(tester);
       _sendAll(tester, ['晚上好']);
       await tester.tap(_key('live-play-menu'));
@@ -365,7 +363,7 @@ void main() {
       await tester.longPress(find.textContaining('别人的话', findRichText: true).first);
       await tester.pumpAndSettle();
       expect(_key('live-play-send-local-again'), findsOneWidget);
-      expect(save, findsNothing, reason: 'only one\'s own words');
+      expect(save, findsNothing, reason: "only one's own words");
       await closeLocalRoom(tester, room);
     });
 

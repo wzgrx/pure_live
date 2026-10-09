@@ -34,8 +34,9 @@ List<Widget> danmakuListAndPipGroups() => [
 ];
 
 /// "弹幕列表": the room's chat list look (U.2a, v4), whether it names the
-/// senders (A08.10) and whether gifts show in it (B-21). Both are settings of every room (A08.6 c3), so a change
-/// here applies to the rooms already open.
+/// senders (A08.10), whether gifts show in it (B-21) and which ones and
+/// with what value (A08.12). All are settings of every room (A08.6 c3), so
+/// a change here applies to the rooms already open.
 class ChatListSettings extends ConsumerWidget {
   /// Creates the group.
   const new({super.key});
@@ -45,6 +46,7 @@ class ChatListSettings extends ConsumerWidget {
     final settings = ref.read(storeProvider).settings;
     void set<T extends Object>(Setting<T> setting, T value) => unawaited(settings.set(setting, value));
     final listStyle = ChatListStyle.of(watchSetting(ref, Settings.danmakuListStyle));
+    final gifts = watchSetting(ref, Settings.showChatGifts);
     return PanelCard(
       children: [
         SettingRow(
@@ -77,8 +79,24 @@ class ChatListSettings extends ConsumerWidget {
           settingKey: 'gifts',
           title: i18n('live_play_show_gifts'),
           subtitle: i18n('live_play_show_gifts_desc'),
-          value: watchSetting(ref, Settings.showChatGifts),
+          value: gifts,
           onChanged: (value) => set(Settings.showChatGifts, value),
+        ),
+        // A08.12: what the gift lines show, right under the switch that
+        // shows them; greyed out while it is off (D4).
+        SettingSwitchRow(
+          settingKey: 'valuableGifts',
+          title: i18n('danmaku_list_valuable_gifts'),
+          subtitle: i18n('danmaku_list_valuable_gifts_desc'),
+          value: watchSetting(ref, Settings.chatGiftsAboveTier),
+          onChanged: gifts ? (value) => set(Settings.chatGiftsAboveTier, value) : null,
+        ),
+        SettingSwitchRow(
+          settingKey: 'giftYuan',
+          title: i18n('danmaku_list_gift_yuan'),
+          subtitle: i18n('danmaku_list_gift_yuan_desc'),
+          value: watchSetting(ref, Settings.giftValueInYuan),
+          onChanged: gifts ? (value) => set(Settings.giftValueInYuan, value) : null,
         ),
       ],
     );

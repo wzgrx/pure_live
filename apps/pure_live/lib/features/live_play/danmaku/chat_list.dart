@@ -369,12 +369,19 @@ class _ChatListState extends ConsumerState<ChatList> {
     if (_scroll.hasClients) _scroll.jumpTo(0);
   }
 
-  ChatLineView _view(ChatLine line, ChatListStyle style, {required bool names, required GiftLineRoom room}) {
+  ChatLineView _view(
+    ChatLine line,
+    ChatListStyle style, {
+    required bool names,
+    required GiftLineRoom room,
+    required bool yuan,
+  }) {
     if (_views[line] case (final made, final message)
         when identical(message, line.message) &&
             made.style == style &&
             made.showName == names &&
             made.giftRoom == room &&
+            made.giftValueInYuan == yuan &&
             identical(made.emotes, _emotes)) {
       return made;
     }
@@ -386,6 +393,7 @@ class _ChatListState extends ConsumerState<ChatList> {
       showName: names,
       emotes: _emotes,
       giftRoom: room,
+      giftValueInYuan: yuan,
       onActions: message == null ? null : () => unawaited(_actions(line)),
       onCopy: message == null ? null : () => unawaited(_copy(message)),
     );
@@ -438,6 +446,8 @@ class _ChatListState extends ConsumerState<ChatList> {
     // A08.10: one switch for every layout's list (portrait, the phone held
     // sideways, the wide chat column are this one component).
     final names = watchSetting(ref, Settings.showChatNames);
+    // A08.12: "礼物价值换算成元".
+    final yuan = watchSetting(ref, Settings.giftValueInYuan);
     final hint = _nameHint();
     // B06 c1: the hint stays above the lines (and the empty states); the
     // list keeps its place in the tree, so its scroll position, when the
@@ -450,14 +460,14 @@ class _ChatListState extends ConsumerState<ChatList> {
           key: const ValueKey('live-play-chat-body'),
           child: ValueListenableBuilder<List<ChatLine>>(
             valueListenable: _shown,
-            builder: (context, lines, _) => _content(style, lines, names: names),
+            builder: (context, lines, _) => _content(style, lines, names: names, yuan: yuan),
           ),
         ),
       ],
     );
   }
 
-  Widget _content(ChatListStyle style, List<ChatLine> lines, {required bool names}) {
+  Widget _content(ChatListStyle style, List<ChatLine> lines, {required bool names, required bool yuan}) {
     if (!lines.any((line) => line.kind != ChatLineKind.system)) {
       // U.2e c2, U.2g c7: until the first message the list says where the
       // danmaku is (3.x: blank, or a few "系统消息" cards).
@@ -492,7 +502,8 @@ class _ChatListState extends ConsumerState<ChatList> {
                 final at = _indexOfId(lines, key.value);
                 return at < 0 ? null : count - 1 - at;
               },
-              itemBuilder: (context, index) => _view(lines[count - 1 - index], style, names: names, room: room),
+              itemBuilder: (context, index) =>
+                  _view(lines[count - 1 - index], style, names: names, room: room, yuan: yuan),
             ),
           ),
           if (!_following)
@@ -643,6 +654,7 @@ class ChatLineView extends StatelessWidget {
     this.onCopy,
     this.tag,
     this.giftRoom = GiftLineRoom.none,
+    this.giftValueInYuan = false,
     super.key,
   });
 
@@ -669,6 +681,9 @@ class ChatLineView extends StatelessWidget {
 
   /// The room's platform and streamer, for a gift line (A08.11).
   final GiftLineRoom giftRoom;
+
+  /// A gift line writes its value in yuan ("礼物价值换算成元", A08.12).
+  final bool giftValueInYuan;
 
   @override
   Widget build(BuildContext context) {
@@ -730,6 +745,7 @@ class ChatLineView extends StatelessWidget {
           showName: showName,
           room: giftRoom,
           lead: _lead(Theme.of(context), line.message!),
+          valueInYuan: giftValueInYuan,
           onActions: onActions,
           onCopy: onCopy,
         );

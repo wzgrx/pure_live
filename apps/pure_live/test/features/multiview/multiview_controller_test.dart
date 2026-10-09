@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_media/live_media.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
@@ -287,6 +288,42 @@ void main() {
     controller.setDanmakuEnabled(enabled: false);
     await _settle();
     expect(danmaku.last.closes, 1);
+    controller.dispose();
+    await store.close();
+  });
+
+  test('A08.12: "飞行弹幕显示礼物" flies the selected cell\'s valuable gifts (dropped before); off, none', () async {
+    final store = await memoryStore();
+    await store.blockLists.add(BlockKind.user, '捣乱的');
+    final site = RoomsSite();
+    final danmaku = <FakeDanmaku>[];
+    final controller = multiviewController(store, site, danmaku: danmaku);
+    await controller.start();
+    await controller.assign(0, pickRoom('1'));
+    final flying = <String>[];
+    controller.flying.listen((message) => flying.add(message.message));
+    controller.setDanmakuEnabled(enabled: true);
+    await _settle();
+    LiveMessage gift(String user, String name, int goldSeeds, String id) => LiveMessage(
+      type: LiveMessageType.gift,
+      userName: user,
+      userId: user,
+      message: '$name ×1',
+      color: LiveMessageColor.white,
+      messageId: id,
+      data: LiveGift(name: name, totalValue: goldSeeds, unit: LiveGiftUnit.goldSeed),
+    );
+    void emit(LiveMessage message) => danmaku.single.emit(DanmakuReceived(message));
+
+    emit(gift('甲', '火箭', 500000, '1'));
+    expect(flying, isEmpty, reason: 'off by default');
+
+    await store.settings.set(Settings.danmakuShowGifts, true);
+    emit(gift('乙', '小心心', 1000, '2'));
+    emit(gift('捣乱的', '火箭', 500000, '3'));
+    emit(gift('丙', '火箭', 500000, '4'));
+    danmaku.single.chat('聊天');
+    expect(flying, ['丙 送出 火箭 ×1', '聊天'], reason: 'cheap and blocked ones do not fly');
     controller.dispose();
     await store.close();
   });

@@ -194,4 +194,81 @@ void main() {
     final page = pageRoutes[RoutePath.kDanmakuSettings]!(const RouteArgs(RoutePath.kDanmakuSettings));
     expect(page, isA<DanmakuSettingsPage>());
   });
+
+  group('A08.12: the gift switches', () {
+    Finder row(String key) => find.byKey(ValueKey('danmaku-setting-$key'));
+
+    testWidgets('"只显示值钱的礼物" and "礼物价值换算成元" under "在聊天列表显示礼物", greyed while it is off; all off', (tester) async {
+      final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+      final list = find.byType(ChatListSettings);
+      for (final key in ['gifts', 'valuableGifts', 'giftYuan']) {
+        expect(
+          find.descendant(of: list, matching: row(key)),
+          findsOneWidget,
+          reason: key,
+        );
+      }
+      expectInOrder(tester, [row('gifts'), row('valuableGifts'), row('giftYuan')]);
+      expect(find.text('只显示值钱的礼物'), findsOneWidget);
+      expect(find.text('礼物价值换算成元'), findsOneWidget);
+      for (final key in ['valuableGifts', 'giftYuan', 'showGifts']) {
+        expect(tester.widget<Switch>(_switch(key)).value, isFalse, reason: '$key: off by default (D-040)');
+      }
+      await tapSettings(tester, _switch('valuableGifts'));
+      expect(h.settings.get(Settings.chatGiftsAboveTier), isTrue);
+      await tapSettings(tester, _switch('giftYuan'));
+      expect(h.settings.get(Settings.giftValueInYuan), isTrue);
+
+      // The gifts off: the two grey out (D4), keeping their values.
+      await tapSettings(tester, _switch('gifts'));
+      for (final key in ['valuableGifts', 'giftYuan']) {
+        final control = tester.widget<Switch>(_switch(key));
+        expect(control.value, isTrue, reason: key);
+        expect(control.onChanged, isNull, reason: key);
+      }
+      await tapSettings(tester, _switch('valuableGifts'));
+      expect(h.settings.get(Settings.chatGiftsAboveTier), isTrue, reason: 'a grey row does nothing');
+    });
+
+    testWidgets('"飞行弹幕显示礼物" is in "显示范围", after "暂停时的弹幕"; the same content the room and multi-view show', (
+      tester,
+    ) async {
+      final h = await pumpSettings(tester, height: 6000, arguments: 'danmaku');
+      final content = find.byType(DanmakuSettingsContent);
+      expect(find.descendant(of: content, matching: row('showGifts')), findsOneWidget);
+      expect(find.descendant(of: find.byType(ChatListSettings), matching: row('showGifts')), findsNothing);
+      expectInOrder(tester, [
+        find.text('显示范围'),
+        find.byKey(const ValueKey('danmaku-paused-behavior')),
+        row('showGifts'),
+        find.text('样式'),
+      ]);
+      expect(find.text('飞行弹幕显示礼物'), findsOneWidget);
+      await tapSettings(tester, _switch('showGifts'));
+      expect(h.settings.get(Settings.danmakuShowGifts), isTrue);
+    });
+
+    testWidgets('large text (2x) in a 360 wide page: the rows wrap, nothing overflows', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await pumpSettings(tester, width: 360, height: 9000, arguments: 'danmaku');
+      for (final key in ['valuableGifts', 'giftYuan', 'showGifts']) {
+        expect(row(key), findsOneWidget, reason: key);
+        expect(tester.getRect(row(key)).right, lessThanOrEqualTo(360), reason: key);
+      }
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('search finds the three: two under "弹幕 › 弹幕列表", one under "弹幕 › 显示范围"', (tester) async {
+      await pumpSettings(tester);
+      await searchSettingsFor(tester, '值钱');
+      expect(settingsRow('danmaku_valuable_gifts'), findsOneWidget);
+      expect(find.text('弹幕 › 弹幕列表'), findsOneWidget);
+      await searchSettingsFor(tester, '换算成元');
+      expect(settingsRow('danmaku_gift_yuan'), findsOneWidget);
+      await searchSettingsFor(tester, '飞行 礼物');
+      expect(settingsRow('danmaku_fly_gifts'), findsOneWidget);
+      expect(find.text('弹幕 › 显示范围'), findsOneWidget);
+    });
+  });
 }

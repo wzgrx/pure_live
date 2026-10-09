@@ -10,6 +10,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/danmaku/gift_words.dart';
 import 'package:pure_live/shared/images.dart';
 
 /// How the flying danmaku look (3.x's danmaku settings).
@@ -154,6 +155,16 @@ int danmakuFrameDivisor({required double refreshRate, int? cap}) {
 /// enters and flies on while the video is paused (c10). One danmaku can be
 /// pinned under a finger ([DanmakuOverlayState.pinAt], V01.3): it stands,
 /// drawn over the others, while they fly on.
+///
+/// A platform's gift (A08.12, "飞行弹幕显示礼物": the room's `GiftFlights` send
+/// only the valuable ones) flies in a look of its own, recorded once like
+/// any message: the gift's picture (when it has loaded; the gift icon
+/// until then, not recorded again) and "名字 送出 礼物 ×N" in
+/// [LivePalettes.danmakuGift] with the danmaku's outline and opacity, in a
+/// frame of the same gold (thicker for a precious one). It waits, counts
+/// and takes lanes as the chat does, but only the lanes clear of
+/// [giftClearance] (the controls' bars) while there are any; a precious
+/// one stands at the top, centred, for [DanmakuOverlayState.giftHold].
 class DanmakuOverlay extends StatefulWidget {
   /// Creates the overlay.
   const new({
@@ -168,6 +179,7 @@ class DanmakuOverlay extends StatefulWidget {
     this.running = true,
     this.held = false,
     this.emotes = EmoteTable.empty,
+    this.giftClearance = EdgeInsets.zero,
     super.key,
   });
 
@@ -210,6 +222,11 @@ class DanmakuOverlay extends StatefulWidget {
   /// The platform's bundled emoticons: their codes fly as pictures.
   final EmoteTable emotes;
 
+  /// What a flying gift keeps clear of at the top and bottom (the bars of
+  /// the controls over this picture, A08.12): it takes only the lanes in
+  /// between, and stands below the top one; all lanes when none is left.
+  final EdgeInsets giftClearance;
+
   @override
   State<DanmakuOverlay> createState() => DanmakuOverlayState();
 }
@@ -229,6 +246,9 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
 
   /// A lane takes the next message once the last one is this far in.
   static const double laneGap = 40;
+
+  /// How long a precious gift stands at the top (A08.12, V03.5 §6.6).
+  static const Duration giftHold = Duration(seconds: 4);
 
   late final Ticker _ticker = createTicker(_tick);
   final List<_Flying> _items = [];
@@ -410,13 +430,22 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     if (!mounted || !widget.visible || message.message.trim().isEmpty) return;
     final local = message.isLocal && message.style != null;
     if (!local && (!widget.running || widget.held)) return;
-    final segments = _segments(message);
+    final gift = _giftTierOf(message);
+    final segments = gift == null ? _segments(message) : [ChatTextSegment(message.message.trim())];
     if (segments == null) return;
-    _pending.addLast(_Waiting(message, segments, _free, local: local));
+    _pending.addLast(_Waiting(message, segments, _free, local: local, gift: gift));
     while (_pending.length > maxPending) {
       _pending.removeFirst();
     }
     _wake();
+  }
+
+  /// The tier of [message] when it is a platform's gift (A08.12), drawn in
+  /// the gift look; null for anything else.
+  static LiveGiftTier? _giftTierOf(LiveMessage message) {
+    if (message.type != LiveMessageType.gift || message.isLocal) return null;
+    final gift = message.gift;
+    return gift == null ? null : giftShownTier(gift);
   }
 
   /// The pieces of [message] to draw: text and emoticons, without the
@@ -521,6 +550,17 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     final usable = (_size.height * look.area.clamp(0, 1)).clamp(0, _size.height - top - look.bottomMargin).toDouble();
     final lanes = (usable / lane).floor();
     if (lanes <= 0) return false;
+    final gift = waiting.gift;
+    if (gift == LiveGiftTier.precious) return _placeHeld(waiting, top: top, lanes: lanes);
+    // A08.12: a gift takes the lanes clear of the bars while there are any.
+    var firstLane = 0;
+    var lastLane = lanes - 1;
+    if (gift != null) {
+      final clear = widget.giftClearance;
+      final from = math.max(0, ((clear.top - top) / lane).ceil());
+      final until = math.min(lanes - 1, ((_size.height - clear.bottom - top) / lane).floor() - 1);
+      if (from <= until) (firstLane, lastLane) = (from, until);
+    }
     final now = _media;
     final width = _size.width;
     var speed = look.speed;
@@ -530,7 +570,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     _Flying? ahead;
     var room = double.infinity;
     final pinned = _pinned;
-    for (var i = 0; i < lanes; i++) {
+    for (var i = firstLane; i <= lastLane; i++) {
       // D03.4: a pinned danmaku's lane waits until it flies on.
       if (pinned != null && !pinned.local && pinned.fixed == null && pinned.lane == i) continue;
       final last = _items.lastWhereOrNull((item) => item.lane == i && !item.local && item.fixed == null);
@@ -552,11 +592,46 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     if (ahead != null && speed > ahead.speed && room > 0) {
       speed = math.min(speed, ahead.speed * width / room);
     }
-    final color =
-        widget.color ?? Color.fromARGB(255, waiting.message.color.r, waiting.message.color.g, waiting.message.color.b);
-    final picture = _render(waiting.segments, _Ink.of(look, color), look.emoteSize);
+    final _Rendered picture;
+    if (gift != null) {
+      picture = _renderGift(waiting);
+    } else {
+      final color =
+          widget.color ??
+          Color.fromARGB(255, waiting.message.color.r, waiting.message.color.g, waiting.message.color.b);
+      picture = _render(waiting.segments, _Ink.of(look, color), look.emoteSize);
+    }
     final y = top + chosen * lane + (lane - picture.height) / 2;
     _items.add(_Flying(waiting.message, picture, chosen, y, speed, now));
+    return true;
+  }
+
+  /// A precious gift (A08.12): it stands centred in the first free place
+  /// from the top, below the top bar ([DanmakuOverlay.giftClearance]) while
+  /// that leaves a place, for [giftHold]; it waits while every place is
+  /// taken. The places are the lanes' height, inside the display range.
+  bool _placeHeld(_Waiting waiting, {required double top, required int lanes}) {
+    final lane = widget.look.lane;
+    final end = top + lanes * lane;
+    var start = math.max(top, widget.giftClearance.top);
+    var places = ((end - start) / lane).floor();
+    if (places <= 0) {
+      start = top;
+      places = lanes;
+    }
+    int? chosen;
+    for (var i = 0; i < places; i++) {
+      if (!_items.any((item) => !item.local && item.fixed != null && item.lane == i)) {
+        chosen = i;
+        break;
+      }
+    }
+    if (chosen == null) return false;
+    final picture = _renderGift(waiting);
+    final y = start + chosen * lane + (lane - picture.height) / 2;
+    _items.add(
+      _Flying(waiting.message, picture, chosen, y, widget.look.speed, _media, fixed: LiveMessagePlacement.top),
+    );
     return true;
   }
 
@@ -710,6 +785,118 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
     return _Rendered(recorder.endRecording(), width, height);
   }
 
+  /// A gift in the gift look (A08.12), from the cache when the same words
+  /// and picture were recorded in the same look. Its picture is drawn when
+  /// it has loaded (the load starts here); until then the gift icon is,
+  /// and the recording is not made again when it comes (D03.1 c6).
+  _Rendered _renderGift(_Waiting waiting) {
+    final look = widget.look;
+    final message = waiting.message;
+    final text = message.message.trim();
+    final url = message.gift?.iconUrl?.toString() ?? '';
+    ui.Image? image;
+    if (url.isNotEmpty) {
+      final icon = ChatEmoteSegment(url: url);
+      if (_images.ready([icon])) image = _images.imageOf(icon);
+    }
+    final ink = _Ink.gift(look);
+    final tier = waiting.gift ?? LiveGiftTier.valuable;
+    final key = (#gift, text, image == null ? '' : url, tier, ink, look.emoteSize);
+    return _pictures.take(key, () => _recordGift(text, image, ink, look.emoteSize, tier));
+  }
+
+  _Rendered _recordGift(String text, ui.Image? image, _Ink ink, double iconSize, LiveGiftTier tier) {
+    _records++;
+    final style = ink.style();
+    _lastStyle = style;
+    final strokeColor = ink.strokeWidth > 0 && ink.strokeColor != null ? Color(ink.strokeColor!) : null;
+    Paint outlinePaint(double width) => Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width
+      ..strokeJoin = StrokeJoin.round
+      ..color = strokeColor!;
+    TextPainter layout(InlineSpan span) =>
+        TextPainter(text: span, textDirection: TextDirection.ltr, maxLines: 1)..layout();
+    final fill = layout(TextSpan(text: text, style: style));
+    final outline = strokeColor == null
+        ? null
+        : layout(
+            TextSpan(
+              text: text,
+              style: ink.style(outline: outlinePaint(ink.strokeWidth)),
+            ),
+          );
+    // The gift icon (as the chat list's gift line) while the picture is not
+    // there.
+    const glyph = AppIcons.chatGift;
+    final code = String.fromCharCode(glyph.codePoint);
+    TextStyle glyphStyle({Paint? outline}) => TextStyle(
+      fontFamily: glyph.fontFamily,
+      package: glyph.fontPackage,
+      fontSize: iconSize,
+      height: 1,
+      color: outline == null ? Color(ink.color) : null,
+      foreground: outline,
+    );
+    final glyphFill = image == null ? layout(TextSpan(text: code, style: glyphStyle())) : null;
+    final glyphOutline = image == null && strokeColor != null
+        ? layout(
+            TextSpan(
+              text: code,
+              style: glyphStyle(outline: outlinePaint(ink.strokeWidth)),
+            ),
+          )
+        : null;
+    final iconWidth = image == null
+        ? glyphFill!.width
+        : math.min(iconSize * 2, iconSize * image.width / math.max(1, image.height));
+    final fontSize = ink.fontSize;
+    final padX = fontSize * 0.5;
+    final padY = fontSize * 0.1;
+    final gap = fontSize * 0.3;
+    final frame = giftFrameWidth(tier);
+    final content = math.max(fill.height, iconSize);
+    final width = padX * 2 + iconWidth + gap + fill.width;
+    final height = content + padY * 2;
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    final box = RRect.fromRectAndRadius(
+      Rect.fromLTWH(frame / 2, frame / 2, width - frame, height - frame),
+      Radius.circular(height / 2),
+    );
+    // The frame in the gift's gold, on the danmaku's outline so it reads on
+    // a bright picture too.
+    if (strokeColor != null) canvas.drawRRect(box, outlinePaint(frame + ink.strokeWidth * 2));
+    canvas.drawRRect(
+      box,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = frame
+        ..color = Color(ink.color),
+    );
+    if (image != null) {
+      canvas.drawImageRect(
+        image,
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
+        Rect.fromLTWH(padX, (height - iconSize) / 2, iconWidth, iconSize),
+        Paint()
+          ..filterQuality = FilterQuality.medium
+          ..color = Color.fromRGBO(0, 0, 0, ink.emoteAlpha),
+      );
+    } else {
+      final at = Offset(padX, (height - glyphFill!.height) / 2);
+      glyphOutline?.paint(canvas, at);
+      glyphFill.paint(canvas, at);
+    }
+    final at = Offset(padX + iconWidth + gap, (height - fill.height) / 2);
+    outline?.paint(canvas, at);
+    fill.paint(canvas, at);
+    for (final painter in [fill, ?outline, ?glyphFill, ?glyphOutline]) {
+      painter.dispose();
+    }
+    return _Rendered(recorder.endRecording(), width, height);
+  }
+
   @override
   void dispose() {
     _ticker.dispose();
@@ -738,7 +925,7 @@ class DanmakuOverlayState extends State<DanmakuOverlay> with SingleTickerProvide
 
 /// A message waiting for a lane.
 final class _Waiting {
-  new(this.message, this.segments, this.at, {required this.local});
+  new(this.message, this.segments, this.at, {required this.local, this.gift});
 
   final LiveMessage message;
   final List<ChatSegment> segments;
@@ -748,6 +935,9 @@ final class _Waiting {
 
   /// Composed on this device.
   final bool local;
+
+  /// A platform's gift of this tier (A08.12); null for anything else.
+  final LiveGiftTier? gift;
 }
 
 /// The colours and font of a recorded message; equal inks share pictures.
@@ -783,6 +973,21 @@ final class _Ink {
           : null,
       strokeWidth: look.stroke ? look.strokeWidth : 0,
       emoteAlpha: opacity,
+    );
+  }
+
+  /// A platform's gift (A08.12): [LivePalettes.danmakuGift] at least
+  /// semibold, with [look]'s outline, size, font and opacity.
+  factory gift(DanmakuLook look) {
+    final ink = _Ink.of(look, LivePalettes.danmakuGift);
+    return _Ink(
+      fontSize: ink.fontSize,
+      fontWeight: math.max(600, ink.fontWeight),
+      fontFamily: ink.fontFamily,
+      color: ink.color,
+      strokeColor: ink.strokeColor,
+      strokeWidth: ink.strokeWidth,
+      emoteAlpha: ink.emoteAlpha,
     );
   }
 
@@ -1006,7 +1211,7 @@ final class _Flying {
     this.start, {
     this.local = false,
     this.fixed,
-    this.stay = const Duration(seconds: 4),
+    this.stay = DanmakuOverlayState.giftHold,
   });
 
   final LiveMessage message;
@@ -1068,8 +1273,12 @@ class _DanmakuPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     state._paints++;
     final pinned = state._pinned;
+    // A08.12: a gift standing at the top over the ones flying past.
     for (final item in state._items) {
-      if (!identical(item, pinned)) _draw(canvas, size, item);
+      if (!identical(item, pinned) && (item.local || item.fixed == null)) _draw(canvas, size, item);
+    }
+    for (final item in state._items) {
+      if (!identical(item, pinned) && !item.local && item.fixed != null) _draw(canvas, size, item);
     }
     // D03.4: the pinned one over the ones passing under it.
     if (pinned != null) _draw(canvas, size, pinned);
@@ -1097,6 +1306,11 @@ extension<T> on List<T> {
     return null;
   }
 }
+
+/// The width of a flying gift's frame (A08.12): a precious one's is
+/// thicker, so the tiers differ without their colour (as the gift line's
+/// marks, A08.11 c3).
+double giftFrameWidth(LiveGiftTier tier) => tier == LiveGiftTier.precious ? 2 : 1.2;
 
 /// Whether [message] is taken back by [retraction] (the flying layer).
 bool retracts(LiveRetraction retraction, LiveMessage message) {

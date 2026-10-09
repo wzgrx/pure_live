@@ -1621,6 +1621,15 @@ List<SettingsEntry> _build() {
       desc: 'danmaku_paused_behavior_desc',
       keywords: ['暂停', '弹幕'],
     )
+    // A08.12.
+    ..toggle(
+      'danmaku_fly_gifts',
+      'danmaku_show_gifts',
+      Settings.danmakuShowGifts,
+      null,
+      desc: 'danmaku_show_gifts_desc',
+      keywords: ['礼物', '飞行', '画面', '横屏', '全屏', '弹幕', 'gift'],
+    )
     ..group = 'style'
     ..slider(
       'danmaku_opacity',
@@ -1804,6 +1813,25 @@ List<SettingsEntry> _build() {
       null,
       desc: 'live_play_show_gifts_desc',
       keywords: ['礼物', '聊天', 'gift'],
+    )
+    // A08.12.
+    ..toggle(
+      'danmaku_valuable_gifts',
+      'danmaku_list_valuable_gifts',
+      Settings.chatGiftsAboveTier,
+      null,
+      desc: 'danmaku_list_valuable_gifts_desc',
+      requires: () => [needsOn(Settings.showChatGifts, 'live_play_show_gifts')],
+      keywords: ['礼物', '值钱', '贵', '过滤', '聊天', 'gift'],
+    )
+    ..toggle(
+      'danmaku_gift_yuan',
+      'danmaku_list_gift_yuan',
+      Settings.giftValueInYuan,
+      null,
+      desc: 'danmaku_list_gift_yuan_desc',
+      requires: () => [needsOn(Settings.showChatGifts, 'live_play_show_gifts')],
+      keywords: ['礼物', '价值', '元', '人民币', '金瓜子', '钻石', '抖币', 'gift'],
     )
     ..group = 'more'
     ..toggle(

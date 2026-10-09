@@ -13,6 +13,7 @@ import 'package:pure_live/features/multiview/logic/multiview_session.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/danmaku/gift_flights.dart';
 import 'package:pure_live/shared/rooms/platform_texts.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -215,6 +216,16 @@ class MultiviewController extends ChangeNotifier {
   final List<StreamSubscription<Object?>> _subscriptions = [];
   final StreamController<LiveMessage> _flying = StreamController.broadcast(sync: true);
   final StreamController<LiveRetraction> _retractions = StreamController.broadcast(sync: true);
+
+  /// The selected cell's gifts that fly ("飞行弹幕显示礼物", A08.12; 3.x's cells
+  /// and v4 before it dropped gifts).
+  late final GiftFlights _giftFlights = GiftFlights(
+    clock: _now,
+    emit: (message) {
+      if (!_disposed && store.settings.get(Settings.danmakuShowGifts)) _flying.add(message);
+    },
+    streamer: () => _cells.isEmpty ? '' : _cells[selectedIndex].room?.nick ?? '',
+  );
   int _nextCellId = 0;
   MultiviewLayout _layout = MultiviewLayout.quad;
   int _focused = 0;
@@ -983,6 +994,7 @@ class MultiviewController extends ChangeNotifier {
     _danmakuEvents = null;
     _danmakuKey = null;
     final epoch = ++_danmakuEpoch;
+    _giftFlights.clear();
     if (old != null) {
       unawaited(oldEvents?.cancel());
       unawaited(_guard(old.close, 'danmaku close'));
@@ -1013,7 +1025,10 @@ class MultiviewController extends ChangeNotifier {
         if (_filter.accepts(message)) _flying.add(message);
       case LiveMessageType.retraction:
         if (message.data case final LiveRetraction retraction) _retractions.add(retraction);
-      case LiveMessageType.online || LiveMessageType.superChat || LiveMessageType.notice || LiveMessageType.gift:
+      case LiveMessageType.gift:
+        // A08.12: the same switch, filters and gate as the room's picture.
+        if (store.settings.get(Settings.danmakuShowGifts) && _filter.accepts(message)) _giftFlights.add(message);
+      case LiveMessageType.online || LiveMessageType.superChat || LiveMessageType.notice:
         return;
     }
   }
@@ -1040,6 +1055,7 @@ class MultiviewController extends ChangeNotifier {
       final session = _clear(cell);
       if (session != null) unawaited(session.dispose());
     }
+    _giftFlights.dispose();
     unawaited(_flying.close());
     unawaited(_retractions.close());
     super.dispose();

@@ -6,7 +6,7 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 205 条；设置 231 个（分节默认 23 条、单独指定 79 个）；来源 35 个；通道 15 个。
+路径规则 205 条；设置 234 个（分节默认 23 条、单独指定 82 个）；来源 35 个；通道 15 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
@@ -16,7 +16,7 @@
 | A04 尺寸和适配 | 1 |  |  |  |  |
 | A06 首页和全局 | 3 |  |  |  |  |
 | A07 直播间界面 | 1 | 12 |  |  |  |
-| A08 弹幕界面 | 5 | 6 |  |  |  |
+| A08 弹幕界面 | 5 | 9 |  |  |  |
 | A09 浏览界面 | 9 | 9 |  |  |  |
 | A10 录制界面 | 6 |  |  |  |  |
 | A11 设置界面 | 1 |  |  |  |  |
@@ -125,7 +125,7 @@
 ## A08 弹幕界面
 
 - 代码：`apps/pure_live/lib/features/live_play/danmaku/`、`apps/pure_live/lib/features/live_play/local_interaction/`、`apps/pure_live/lib/features/settings/danmaku_page.dart`、`apps/pure_live/lib/features/shield/`、`apps/pure_live/lib/shared/danmaku/`
-- 设置：`danmakuListStyle`、`showChatGifts`、`showChatNames`、`enableDanmakuTapInteraction`、`enableDanmakuLongPressInteraction`、`holdDanmakuOnPress`
+- 设置：`danmakuListStyle`、`showChatGifts`、`chatGiftsAboveTier`、`giftValueInYuan`、`danmakuShowGifts`、`showChatNames`、`enableDanmakuTapInteraction`、`enableDanmakuLongPressInteraction`、`holdDanmakuOnPress`
 
 ## A09 浏览界面
 

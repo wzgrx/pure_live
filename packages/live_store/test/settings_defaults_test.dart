@@ -284,6 +284,9 @@ const Map<String, Object> newInV4 = {
   'danmakuListStyle': 'compact', // A07.1
   'showChatGifts': true, // A08.6
   'showChatNames': true, // A08.10: names shown, as 3.x
+  'chatGiftsAboveTier': false, // A08.12 (every gift, as before; D-040)
+  'giftValueInYuan': false, // A08.12 (the platform's units, as before)
+  'danmakuShowGifts': false, // A08.12 (no gift flies, as before)
   'danmakuPausedBehavior': 'pause', // A07.10
   'danmakuMaxVisibleCount': 48, // D05.2 (V01.4; 3.x's fixed 48)
   'holdDanmakuOnPress': true, // D03.4 (V01.3), on by default (D-039)

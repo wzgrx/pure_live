@@ -16,6 +16,7 @@ import 'package:pure_live/features/live_play/logic/gift_combiner.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
+import 'package:pure_live/shared/danmaku/gift_flights.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
 
@@ -187,6 +188,15 @@ class LiveRoomController extends ChangeNotifier {
   /// Merges and limits the platform's gifts into [chat] (D07.1).
   late final GiftCombiner _gifts = GiftCombiner(feed: chat, clock: _now);
 
+  /// The gifts that fly over the picture ("飞行弹幕显示礼物", A08.12).
+  late final GiftFlights _giftFlights = GiftFlights(
+    clock: _now,
+    emit: (message) {
+      if (!_disposed && flyGifts) _flying.add(message);
+    },
+    streamer: () => _room.nick,
+  );
+
   /// The messages of this room the user's blocks hid ("本场已屏蔽 N 条",
   /// D02.2 c4).
   final BlockedCount blocked = BlockedCount();
@@ -283,6 +293,10 @@ class LiveRoomController extends ChangeNotifier {
   /// Gifts appear in the chat list (B-21): the `showChatGifts` setting
   /// (A08.6 c3; the room kept it in `meta` before).
   bool get showGifts => store.settings.get(Settings.showChatGifts);
+
+  /// The platform's valuable gifts fly over the picture (A08.12: the
+  /// `danmakuShowGifts` setting, whether or not the list shows gifts).
+  bool get flyGifts => store.settings.get(Settings.danmakuShowGifts);
 
   /// Video is off: only the sound plays (3.x's headphone button).
   bool get audioOnly => _audioOnly;
@@ -435,6 +449,8 @@ class LiveRoomController extends ChangeNotifier {
     }
     // A08.6 c3: the settings page changes it for the rooms already open.
     _subscriptions.add(store.settings.watch(Settings.showChatGifts).skip(1).listen(_onShowGifts));
+    // A08.12: "只显示值钱的礼物" takes the cheap gift lines away at once.
+    _subscriptions.add(store.settings.watch(Settings.chatGiftsAboveTier).skip(1).listen(_onGiftTier));
     // B-7 (E06.2 c4): the platform refused the stored cookie and plays on
     // anonymously; it reports each cookie once, and the room says so.
     if (site case final LiveSiteCookieRefusals refusals) {
@@ -844,6 +860,18 @@ class LiveRoomController extends ChangeNotifier {
     _notify();
   }
 
+  /// A08.12: on, the platform's gift lines below "值钱" go (local gifts
+  /// stay); off, the next gifts show whatever they are worth.
+  void _onGiftTier(bool valuableOnly) {
+    if (_disposed || !valuableOnly) return;
+    chat.removeWhere(
+      (line) =>
+          line.kind == ChatLineKind.gift &&
+          !(line.message?.isLocal ?? true) &&
+          (line.message?.gift?.tier ?? LiveGiftTier.normal) == LiveGiftTier.normal,
+    );
+  }
+
   /// Starts (or restarts) the sleep timer for [minutes], or stops it (3.x
   /// `applyRoomPlaybackTimer`): when it ends the room pauses.
   void setSleepTimer({required bool enabled, required int minutes}) {
@@ -1183,8 +1211,11 @@ class LiveRoomController extends ChangeNotifier {
         // B-21: a line in the chat list, not on the video; the switch hides
         // them, and then nothing is filtered or merged (D07.1 c5). D07.1:
         // blocked viewers and words and the duplicate gate apply; a combo is
-        // one line, and the lines are limited.
-        if (!showGifts || message.message.trim().isEmpty) return;
+        // one line, and the lines are limited. A08.12: the valuable ones fly
+        // too with "飞行弹幕显示礼物", which does not need the list's switch.
+        final list = showGifts;
+        final fly = flyGifts;
+        if ((!list && !fly) || message.message.trim().isEmpty) return;
         switch (_filter.judge(message)) {
           case DanmakuVerdict.shown:
             break;
@@ -1195,7 +1226,13 @@ class LiveRoomController extends ChangeNotifier {
           case DanmakuVerdict.duplicate || DanmakuVerdict.repeated || DanmakuVerdict.similar:
             return;
         }
-        _gifts.add(message);
+        if (list) {
+          _gifts.minTier = store.settings.get(Settings.chatGiftsAboveTier)
+              ? LiveGiftTier.valuable
+              : LiveGiftTier.normal;
+          _gifts.add(message);
+        }
+        if (fly) _giftFlights.add(message);
     }
   }
 
@@ -1336,6 +1373,7 @@ class LiveRoomController extends ChangeNotifier {
     }
     unawaited(_qualityScope.close());
     unawaited(danmaku.close());
+    _giftFlights.dispose();
     unawaited(_flying.close());
     unawaited(_retractions.close());
     chat.dispose();

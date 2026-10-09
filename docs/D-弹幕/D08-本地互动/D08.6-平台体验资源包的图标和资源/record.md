@@ -59,7 +59,7 @@
 
 ## 门禁
 
-- `tools/gate/gate.sh --all`：见提交说明（日志在会话的临时目录）。
+- `tools/gate/gate.sh --all`（提交 `81c7b2187`）：`gate: passed (all, 14 members)`。
 
 ## 真机上要看的
 

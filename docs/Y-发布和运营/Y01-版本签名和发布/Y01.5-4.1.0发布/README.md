@@ -27,7 +27,7 @@
 | versionCode | arm64 7001、v7a 6001、x86_64 9001 | arm64 7002、v7a 6002、x86_64 9002 |
 | 签名 | 维护者调试密钥，证书 SHA-256 `1e832295…7ff7b9` | 同一把密钥（D-006），能覆盖安装 3.2.11 和 4.0.0 |
 | 标签 | `v4.0.0` 在 `4b039e0c7` | 新标签 `v4.1.0`（附注标签，信息“Pure Live 4.1.0 (Android), build 5002”），`v4.0.0` 不动 |
-| 安装包 | `PureLive-4.0.0-5001-debug-signed-android-<ABI>-release.apk` | `PureLive-4.1.0-5002-debug-signed-android-<ABI>-release.apk`，本机留在 `~/ref/release/v4.1.0/` |
+| 安装包 | `PureLive-4.0.0-5001-debug-signed-android-<ABI>-release.apk` | `PureLive-4.1.0-5002-debug-signed-android-<ABI>-release.apk`，本机留在 `~/ref/release/v4.1.0-5002/` |
 | 发布说明 | `releases/v4.0.0.md` | `releases/v4.1.0.md`：主要变化分十组，另有升级说明、已知问题、下载哪个和 SHA-256 |
 | 应用内更新 | 3.x 提示 4.0.0；装了 5000 的不提示（版本号没变） | 版本号变了，3.x 和 4.0.0 都会提示；4.x 从 Y02.1 起还会比较构建号 |
 | 数据 | 数据库 `schemaVersion` 1 | `schemaVersion` 2（D08.1 加了 `local_events` 表）：4.0.0 打不开 4.1.0 写过的库，发布说明写明不要装回 4.0.0；3.x 用 Hive，不受影响 |

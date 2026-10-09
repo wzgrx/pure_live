@@ -72,6 +72,11 @@ List<ReleaseInfo> _historyWith9() => [
         ),
     ],
   ),
+  // The installed version as the newest one the repository lists: the
+  // version bump comes before the update files (PROCESS §11.7), so between
+  // them the repository's list does not have it yet.
+  if (!parseReleases(_releasesJson()).any((release) => release.version == appVersion))
+    const ReleaseInfo(version: appVersion, date: '2026-10-09', changelog: '# v$appVersion'),
   ...parseReleases(_releasesJson()),
 ];
 

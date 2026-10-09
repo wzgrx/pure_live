@@ -355,6 +355,8 @@ setting = [
   { key = "roomSwitcherLayout", sub = "A07" },
   # danmaku 分节（默认 D05）
   { key = "danmakuListStyle", sub = "A08" },
+  { key = "danmakuListFontSize", sub = "A08" },
+  { key = "danmakuListLineSpacing", sub = "A08" },
   { key = "showChatGifts", sub = "A08" },
   { key = "chatGiftsAboveTier", sub = "A08" },
   { key = "giftValueInYuan", sub = "A08" },

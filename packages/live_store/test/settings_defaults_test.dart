@@ -284,6 +284,8 @@ const Map<String, Object> newInV4 = {
   'danmakuListStyle': 'compact', // A07.1
   'showChatGifts': true, // A08.6
   'showChatNames': true, // A08.10: names shown, as 3.x
+  'danmakuListFontSize': 0, // A08.15: the theme's body size, as before (D-040)
+  'danmakuListLineSpacing': 'standard', // A08.15: the gaps as before
   'chatGiftsAboveTier': false, // A08.12 (every gift, as before; D-040)
   'giftValueInYuan': false, // A08.12 (the platform's units, as before)
   'danmakuShowGifts': false, // A08.12 (no gift flies, as before)
@@ -332,6 +334,7 @@ const Map<String, (num?, num?)> ranges = {
   'danmakuOpacity': (0, 1),
   'danmakuFps': (30, 240),
   'danmakuMaxVisibleCount': (10, 120), // D05.2: out of range reads as 48
+  'danmakuListFontSize': (12, 22), // A08.15: out of range (and 0) reads as 0, the theme's size
   'repeatedDanmakuWindowSeconds': (1, 30),
   'pipDanmakuColor': (null, null),
   'pipDanmakuFontSize': (8, 24),

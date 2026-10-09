@@ -1324,11 +1324,14 @@ note = "在 A08.13 之后做（同一个 message_panel.dart）；“复制”下
 id = "A08.15"
 title = "聊天列表字号和行距（接 A08.10）"
 type = "界面"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "小"
 tier = 2
+stages = ["两个设置（列表文字大小、行间距），列表的各种行、标签和间距跟它"]
+done = 1
 from = "V03.6 第 4 节 E4、第 5.2 节；用户 2026-10-09（D-040）"
-note = "依赖 A08.10（行样式和 ChatText）；两个新设置默认 = 现在的样子（D-040）"
+note = "依赖 A08.10（行样式和 ChatText）；新设置 danmakuListFontSize（默认 0 = 主题正文字号，12～22）、danmakuListLineSpacing（默认 standard）默认和以前像素一致（D-040）；设计选择（D-003，维护者定）S1～S10 写在任务 README；真机步骤见 verify.md"
 
 [[task]]
 id = "A09.1"

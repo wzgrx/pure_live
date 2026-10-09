@@ -532,6 +532,30 @@ abstract final class Settings {
   /// the store opens.
   static const showChatGifts = BoolSetting('showChatGifts', section: 'danmaku', defaultValue: true);
 
+  /// New (docs/A-界面设计/A08-弹幕界面/A08.15-聊天列表字号和行距; 3.x drew its cards at a fixed 14):
+  /// the size of the room's chat list text ("列表文字大小"), 12..22; 0, the
+  /// default, keeps the theme's body size as before (D-040). The marks of a
+  /// line (chips, badges, the gift's picture, the avatar) follow it; the
+  /// system text scale still applies on top. Out of range reads as 0.
+  static const danmakuListFontSize = IntSetting(
+    'danmakuListFontSize',
+    section: 'danmaku',
+    defaultValue: 0,
+    min: 12,
+    max: 22,
+    resetOutOfRange: true,
+  );
+
+  /// New (A08.15): how far apart the chat list's lines sit ("行间距"):
+  /// `compact` (half the gaps, the text 1.4 high), `standard` (the default,
+  /// as before) or `loose` (1.5 times the gaps, the text 1.7 high).
+  static const danmakuListLineSpacing = StringSetting(
+    'danmakuListLineSpacing',
+    section: 'danmaku',
+    defaultValue: 'standard',
+    allowed: {'compact', 'standard', 'loose'},
+  );
+
   /// New (docs/A-界面设计/A08-弹幕界面/A08.12-礼物开关和飞行弹幕里的礼物; 3.x had no gift lines): the
   /// chat list keeps only the platform's gifts worth a mark ("只显示值钱的礼物":
   /// `LiveGiftTier.valuable` and up, about 10 yuan); free and cheap ones
@@ -1734,6 +1758,8 @@ abstract final class Settings {
     enableDanmakuDisplay,
     enableDanmakuStroke,
     danmakuListStyle,
+    danmakuListFontSize,
+    danmakuListLineSpacing,
     showChatGifts,
     chatGiftsAboveTier,
     giftValueInYuan,

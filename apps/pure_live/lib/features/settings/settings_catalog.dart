@@ -1798,6 +1798,28 @@ List<SettingsEntry> _build() {
       desc: 'danmaku_list_style_desc',
       keywords: ['聊天', '列表', '卡片', '紧凑'],
     )
+    // A08.15: the slider's left end is the theme's size (stored as 0).
+    ..slider(
+      'danmaku_list_font_size',
+      'danmaku_list_font_size',
+      Settings.danmakuListFontSize,
+      null,
+      min: chatListFontSizeDefaultStop.toDouble(),
+      max: 22,
+      step: 1,
+      format: (value) => chatListFontSizeText(value.round()),
+      desc: 'danmaku_list_font_size_desc',
+      keywords: ['字号', '文字大小', '字体大小', '字大', '聊天', '列表'],
+    )
+    ..choice(
+      'danmaku_list_spacing',
+      'danmaku_list_spacing',
+      Settings.danmakuListLineSpacing,
+      null,
+      () => _keyed({for (final spacing in ChatSpacing.values) spacing.name: spacing.labelKey}),
+      desc: 'danmaku_list_spacing_desc',
+      keywords: ['行距', '行间距', '间距', '间隔', '密度', '聊天', '列表'],
+    )
     ..toggle(
       'danmaku_show_names',
       'danmaku_list_show_names',

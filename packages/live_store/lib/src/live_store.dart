@@ -5,6 +5,7 @@ import 'package:live_store/src/accounts.dart';
 import 'package:live_store/src/block_lists.dart';
 import 'package:live_store/src/database.dart';
 import 'package:live_store/src/legacy/legacy_rules.dart';
+import 'package:live_store/src/local_events.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets.dart';
 import 'package:live_store/src/settings/settings.dart';
@@ -90,6 +91,7 @@ final class LiveStore {
       blockLists = BlockListStore(database),
       webdav = WebDavStore(database, secrets),
       accounts = AccountRoster(secrets, now: now),
+      localEvents = LocalEventStore(database),
       meta = MetaStore(database);
 
   /// Opens (or creates) the store in [directory] (`<directory>/pure_live.db`)
@@ -210,6 +212,9 @@ final class LiveStore {
 
   /// WebDAV servers.
   final WebDavStore webdav;
+
+  /// The local interaction's history (D08.1).
+  final LocalEventStore localEvents;
 
   /// Internal records.
   final MetaStore meta;

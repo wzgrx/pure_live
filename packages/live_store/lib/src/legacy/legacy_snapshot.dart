@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/src/accounts.dart';
 import 'package:live_store/src/legacy/legacy_rules.dart';
+import 'package:live_store/src/local_events.dart';
 import 'package:live_store/src/rooms.dart';
 import 'package:live_store/src/secrets.dart';
 import 'package:live_store/src/settings/setting.dart';
@@ -110,6 +111,9 @@ final class LegacySnapshot {
           strict: true,
         );
       if (sections['cookie'] case final cookie?) snapshot._readSecrets(cookie);
+      // D08.1: a device sync of only the local history (`BackupService`
+      // restores it).
+      if (sections.containsKey(LocalEventStore.backupSection)) snapshot._recognized = true;
       snapshot.favoritesOnly = json['backupScope'] == 'favorites';
     }
     // 3.x's files (version 3 and older) carry its default blue; v4's own

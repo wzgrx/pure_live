@@ -14,6 +14,7 @@ export 'src/legacy/legacy_import.dart'
 export 'src/legacy/legacy_rules.dart' show LegacyRules;
 export 'src/legacy/legacy_snapshot.dart' show LegacySnapshot;
 export 'src/live_store.dart' show LiveStore, MetaStore;
+export 'src/local_events.dart' show LocalEvent, LocalEventKind, LocalEventStore;
 export 'src/rooms.dart' show FollowAreaStore, FollowStore, HistoryStore, fillEmptyFields, isStorableRoom, uniqueRooms;
 export 'src/secrets.dart' show SecretCipher, SecretRefs, SecretStore, normalizeCookie;
 export 'src/settings/setting.dart'

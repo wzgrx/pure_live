@@ -30,12 +30,20 @@ enum SyncPart {
   webdav('backup_part_webdav'),
 
   /// Platform sign-ins (only with "同步账号 Cookie").
-  accounts('remote_sync_part_accounts');
+  accounts('remote_sync_part_accounts'),
+
+  /// The local interaction's history (D08.1 c4): offered, not ticked
+  /// ([optIn]).
+  localEvents('backup_part_local_events');
 
   new(this.labelKey);
 
   /// Translation key of the name.
   final String labelKey;
+
+  /// Whether its box starts unticked (D08.1 c4: the local history is this
+  /// device's own unless asked for).
+  bool get optIn => this == localEvents;
 
   /// The sync part of a restore preview's [kind]; null for the parts device
   /// sync does not carry (search words, IPTV playlists, multi-view).
@@ -47,6 +55,7 @@ enum SyncPart {
     RestorePartKind.keywords => keywords,
     RestorePartKind.users => users,
     RestorePartKind.webdav => webdav,
+    RestorePartKind.localEvents => localEvents,
     RestorePartKind.search || RestorePartKind.iptv || RestorePartKind.multiview => null,
   };
 }
@@ -60,6 +69,7 @@ const Map<String, SyncPart> _wholeSections = {
   'tags': SyncPart.tags,
   'webdav': SyncPart.webdav,
   'cookie': SyncPart.accounts,
+  LocalEventStore.backupSection: SyncPart.localEvents,
 };
 
 /// Lists inside a section that are one part each; the rest of those
@@ -174,5 +184,6 @@ Map<SyncPart, int> syncPartCounts(Map<String, Object?> data) {
     if (snapshot.blockedUsers case final users?) SyncPart.users: users.length,
     if (snapshot.webdav case final servers?) SyncPart.webdav: servers.length,
     if (snapshot.secrets != null || snapshot.savedAccounts != null) SyncPart.accounts: accountEntriesIn(snapshot),
+    if (LocalEventStore.inBackup(data) case final events?) SyncPart.localEvents: events.length,
   };
 }

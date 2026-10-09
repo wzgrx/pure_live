@@ -92,4 +92,5 @@
 - `9b597392b` [D07.6] Name, price and picture AcFun gifts from the room's gift table（阶段 2）
 - `38fa3f2c1` [D07.6] Report 17LIVE (type 13) and BIGO (760969) gifts（阶段 3）
 - `e8a8ecc11` [D07.6] Twitch Bits and community gifts, CHZZK subscriptions, YouTube Super Stickers（阶段 4）
-- 之后一次文档提交：本记录、verify.md、README、登记表和生成的文档。
+- `826cdf116` [D07.6] Record the gift sources, the design choices and the real-device steps（本记录、verify.md、README、登记表和生成的文档）
+- `bash tools/gate/gate.sh --all` 在 `826cdf116` 上通过（`gate: passed (all, 14 members)`，日志 `scratchpad/d076-1791522400/gate.log`）。第一次运行（`d076-1791520538`）只有 `live_danmaku` 的 `block_benchmark_test.dart`“手工检查一个规则花的时间”超时一次（机器上同时有别的任务在跑测试），和礼物无关，单独跑通过，重跑整个门禁通过。合并后要再运行一次 `python3 tools/docs/docs.py`。

@@ -90,6 +90,38 @@ void main() {
     expect(session.state.status, PlaybackStatus.playing);
   });
 
+  test('O01.3: while a call holds the room the background is told so, from the paused event on', () async {
+    final seen = <bool>[];
+    final watch = session.states.listen((state) {
+      if (state.status == PlaybackStatus.paused) seen.add(focus.pausedUntilInterruptionEnds);
+    });
+    addTearDown(watch.cancel);
+    expect(focus.pausedUntilInterruptionEnds, isFalse);
+    port.begin(AudioInterruptionType.pause);
+    await settle();
+    expect(seen, [true], reason: 'already when the session says "paused"');
+    expect(focus.pausedUntilInterruptionEnds, isTrue);
+    port.end(AudioInterruptionType.pause);
+    await settle();
+    expect(session.state.status, PlaybackStatus.playing);
+    expect(focus.pausedUntilInterruptionEnds, isFalse);
+    // Lost for good to another app: nothing to wait for.
+    port.begin(AudioInterruptionType.unknown);
+    await settle();
+    expect(session.state.status, PlaybackStatus.paused);
+    expect(focus.pausedUntilInterruptionEnds, isFalse);
+  });
+
+  test('O01.3: a pause from the notification during a call: its end leaves the room paused', () async {
+    port.begin(AudioInterruptionType.pause);
+    await settle();
+    focus.forgetResume();
+    expect(focus.pausedUntilInterruptionEnds, isFalse);
+    port.end(AudioInterruptionType.pause);
+    await settle();
+    expect(session.state.status, PlaybackStatus.paused);
+  });
+
   test('the user played or paused during the interruption: nothing resumes', () async {
     port.begin(AudioInterruptionType.pause);
     await settle();

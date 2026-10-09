@@ -20,6 +20,20 @@ abstract final class Settings {
   /// Keep playing in the background.
   static const enableBackgroundPlay = BoolSetting('enableBackgroundPlay', section: 'app', defaultValue: false);
 
+  /// Away from the app with background play on, only the sound plays (the
+  /// video decoder stops); back, the picture returns (O01.3). New in v4,
+  /// off: the video goes on decoding as before.
+  static const backgroundAudioOnly = BoolSetting('backgroundAudioOnly', section: 'app', defaultValue: false);
+
+  /// Away from the app the room's danmaku connection closes; back, it
+  /// connects again (O01.3). New in v4, off: connected as before.
+  static const backgroundPauseDanmaku = BoolSetting('backgroundPauseDanmaku', section: 'app', defaultValue: false);
+
+  /// Closing the system picture-in-picture window pauses a room that would
+  /// play on in the background (O01.3). New in v4, off: it plays on as
+  /// before.
+  static const pauseOnPipClose = BoolSetting('pauseOnPipClose', section: 'app', defaultValue: false);
+
   /// Sleep timer for audio streams.
   static const enableAsmrSleepMode = BoolSetting('enableAsmrSleepMode', section: 'app', defaultValue: false);
 
@@ -1732,6 +1746,9 @@ abstract final class Settings {
     autoRefreshTime,
     enableDenseFavorites,
     enableBackgroundPlay,
+    backgroundAudioOnly,
+    backgroundPauseDanmaku,
+    pauseOnPipClose,
     enableAsmrSleepMode,
     asmrSleepMinutes,
     enableRotateScreen,

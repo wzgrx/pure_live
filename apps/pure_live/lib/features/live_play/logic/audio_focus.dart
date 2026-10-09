@@ -102,6 +102,21 @@ class RoomAudioFocus with WidgetsBindingObserver {
   /// The focus paused the room; the end of the interruption resumes it.
   bool _pausedByFocus = false;
 
+  /// A pause that the end of the interruption undoes is under way (the
+  /// session reports "paused" before [_pausedByFocus] is set).
+  bool _pausingToResume = false;
+
+  /// Whether the room is paused by a call or another app and resumes when
+  /// it ends (O01.3: the background keeps its foreground service meanwhile).
+  bool get pausedUntilInterruptionEnds => _pausingToResume || _pausedByFocus || _resumeWhenBack;
+
+  /// The user paused or stopped from the notification during an
+  /// interruption: its end leaves the room paused (O01.3).
+  void forgetResume() {
+    _pausedByFocus = false;
+    _resumeWhenBack = false;
+  }
+
   /// The interruption ended where the room may not play: resume once the
   /// app is back.
   bool _resumeWhenBack = false;
@@ -169,7 +184,12 @@ class RoomAudioFocus with WidgetsBindingObserver {
   Future<void> _pauseForFocus({required bool resume}) async {
     _resumeWhenBack = false;
     if (!_sounding) return;
-    await session.pause();
+    _pausingToResume = resume;
+    try {
+      await session.pause();
+    } finally {
+      _pausingToResume = false;
+    }
     _pausedByFocus = resume && session.state.status == PlaybackStatus.paused;
   }
 

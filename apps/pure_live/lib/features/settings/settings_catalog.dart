@@ -4,6 +4,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/settings/appearance_pages.dart';
 import 'package:pure_live/features/settings/audience_pages.dart';
+import 'package:pure_live/features/settings/background_guide_tiles.dart';
 import 'package:pure_live/features/settings/data_tools.dart';
 import 'package:pure_live/features/settings/live_alert_tiles.dart';
 import 'package:pure_live/features/settings/playback_tiles.dart';
@@ -74,6 +75,30 @@ bool _windows(SettingsEnv env) => env.isWindows;
 bool _mobile(SettingsEnv env) => env.isMobile;
 bool _desktop(SettingsEnv env) => !env.isMobile;
 bool _refreshRate(SettingsEnv env) => env.hasRefreshRate;
+
+/// What finds "后台播放设置" (O01.3): the vendors' and their systems' names too.
+const List<String> _backgroundGuideWords = [
+  '后台',
+  '保活',
+  '自启动',
+  '省电',
+  '电池',
+  '冻结',
+  '小米',
+  'HyperOS',
+  'MIUI',
+  'OPPO',
+  '一加',
+  'ColorOS',
+  'vivo',
+  'OriginOS',
+  '华为',
+  '荣耀',
+  '鸿蒙',
+  '三星',
+  'background',
+  'battery',
+];
 
 /// Hardware decoding is taken over by the compatibility mode (Android) and
 /// by custom mpv drivers (U.6c c5, P8).
@@ -302,6 +327,7 @@ const Map<String, (String?, String?)> settingsGroupNotes = {
   'audience_display_mode': (null, 'audience_ranking_rule_desc'),
   'settings_group_audience_heat_only': (null, 'audience_metric_fallback_desc'),
   'settings_group_download': (null, 'settings_download_note'),
+  'background_guide_group': ('background_guide_intro', null),
 };
 
 /// Something under a group other than a line of text, by group title key
@@ -816,6 +842,16 @@ List<SettingsEntry> _build() {
       // iOS too (U.17a).
       when: _mobile,
     )
+    // O01.3: the phone's checks, the vendor's pages and the away switches.
+    ..add(
+      'background_guide',
+      'background_play_settings',
+      (context, entry) => BackgroundGuideLinkTile(entry: entry),
+      desc: 'background_play_settings_desc',
+      keywords: _backgroundGuideWords,
+      when: _android,
+      opens: true,
+    )
     ..add(
       'asmr_sleep',
       'asmr_sleep_mode',
@@ -1127,6 +1163,45 @@ List<SettingsEntry> _build() {
       page: (_) => const AudienceInfoPage(),
       desc: 'settings_audience_info_desc',
       keywords: ['人数', '口径', '来源'],
+    )
+    // ---- background play (O01.3, a page of the video page) ----
+    ..subpage = SettingsSubpage.backgroundPlay
+    ..group = 'background_guide_group'
+    ..add(
+      'background_guide_checks',
+      'background_guide_checks',
+      (context, entry) => BackgroundGuideTile(entry: entry),
+      desc: 'background_guide_checks_desc',
+      keywords: _backgroundGuideWords,
+      when: _android,
+    )
+    ..group = 'background_away_group'
+    ..toggle(
+      'background_audio_only',
+      'background_audio_only',
+      Settings.backgroundAudioOnly,
+      AppIcons.settingsBackgroundAudioOnly,
+      desc: 'background_audio_only_desc',
+      keywords: ['后台', '纯音频', '声音', '省电', 'audio'],
+      when: _android,
+    )
+    ..toggle(
+      'background_pause_danmaku',
+      'background_pause_danmaku',
+      Settings.backgroundPauseDanmaku,
+      AppIcons.settingsBackgroundDanmaku,
+      desc: 'background_pause_danmaku_desc',
+      keywords: ['后台', '弹幕', '省电', '流量', 'danmaku'],
+      when: _android,
+    )
+    ..toggle(
+      'pause_on_pip_close',
+      'pause_on_pip_close',
+      Settings.pauseOnPipClose,
+      AppIcons.settingsPipClosePause,
+      desc: 'pause_on_pip_close_desc',
+      keywords: ['画中画', '小窗', '关闭', '暂停', 'PiP'],
+      when: _android,
     )
     ..subpage = null
     // ---- floating-window danmaku (U.6c c14; the page has a preview) ----

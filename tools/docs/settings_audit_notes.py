@@ -52,6 +52,21 @@ NOTES: dict[str, dict] = {
     'enableRotateScreen': {'verdict': '3.x 也没有读取它的代码，只存、只进备份'},
     'enableDenseFavorites': {'verdict': '3.x 也没有改它的界面（只有备份能改），v4 同样'},
     'skippedUpdateVersion': _new('A06.3 c4，本机记录'),
+    'backgroundAudioOnly': {
+        **_new('O01.3'),
+        'verdict': 'v4 新加（O01.3，D-040）：默认关，后台播放时照旧解码视频；开了以后离开应用 1.5 秒（不在画中画）关掉视频输出只放声音，回来恢复画面；用户自己开的“纯音频”不受影响',
+        'when': '下一次离开应用',
+    },
+    'backgroundPauseDanmaku': {
+        **_new('O01.3'),
+        'verdict': 'v4 新加（O01.3，D-040）：默认关，后台照旧连着弹幕；开了以后离开应用 1.5 秒（不在画中画）断开弹幕，回来重新连接（这段时间的弹幕不补）',
+        'when': '下一次离开应用',
+    },
+    'pauseOnPipClose': {
+        **_new('O01.3'),
+        'verdict': 'v4 新加（O01.3，D-040）：默认关，开着后台播放时关掉系统画中画窗口照旧在后台出声；开了以后关掉画中画就暂停，回到应用再继续',
+        'when': '下一次关掉画中画',
+    },
     'refreshRateMode': {
         'v3': "'powerSaving'",
         'v3src': 'app_settings_controller.dart:36-40、:53',

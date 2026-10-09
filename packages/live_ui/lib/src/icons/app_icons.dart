@@ -1102,6 +1102,44 @@ abstract final class AppIcons {
   /// Background play.
   static const IconData settingsBackgroundPlay = Remix.music_2_line;
 
+  /// "后台播放设置": this phone's checks and pages for background play
+  /// (O01.3).
+  static const IconData settingsBackgroundGuide = Remix.shield_star_line;
+
+  /// "后台只播声音" (O01.3; the headphones of "纯音频").
+  static const IconData settingsBackgroundAudioOnly = Remix.headphone_line;
+
+  /// "后台断开弹幕" (O01.3).
+  static const IconData settingsBackgroundDanmaku = Remix.chat_off_line;
+
+  /// "关闭画中画时暂停" (O01.3).
+  static const IconData settingsPipClosePause = Remix.picture_in_picture_exit_line;
+
+  /// The background check's phone row: maker, system, Android (O01.3).
+  static const IconData backgroundGuideDevice = Remix.smartphone_line;
+
+  /// The background check: notifications and the media notification.
+  static const IconData backgroundGuideNotifications = Remix.notification_badge_line;
+
+  /// The background check: Android's battery optimisation.
+  static const IconData backgroundGuideBattery = Remix.battery_2_charge_line;
+
+  /// The background check: the vendor's power saving for the app (省电策略,
+  /// 耗电管理, 后台高耗电, 休眠应用, 后台管理).
+  static const IconData backgroundGuidePowerSaving = Remix.battery_saver_line;
+
+  /// The background check: Android's "受限" background restriction.
+  static const IconData backgroundGuideRestricted = Remix.forbid_line;
+
+  /// The background check: the Data Saver.
+  static const IconData backgroundGuideDataSaver = Remix.arrow_up_down_line;
+
+  /// The background check: starting by itself (自启动, 应用启动管理).
+  static const IconData backgroundGuideAutostart = Remix.restart_line;
+
+  /// The background check: locked in the recent apps.
+  static const IconData backgroundGuideLockRecents = Remix.lock_2_line;
+
   /// Automatic sleep in new rooms (the moon is the theme mode, A01.4 c4).
   static const IconData settingsAutoSleep = Remix.zzz_line;
 

@@ -1107,7 +1107,22 @@ class LiveRoomController extends ChangeNotifier {
   // ---- danmaku ----
 
   bool get _wantsDanmaku =>
-      store.settings.get(Settings.enableDanmakuDisplay) || store.settings.get(Settings.enablePipDanmaku);
+      !_danmakuSuspended &&
+      (store.settings.get(Settings.enableDanmakuDisplay) || store.settings.get(Settings.enablePipDanmaku));
+
+  bool _danmakuSuspended = false;
+
+  /// Whether the danmaku is closed while the app is away ([setDanmakuSuspended]).
+  bool get danmakuSuspended => _danmakuSuspended;
+
+  /// "后台断开弹幕" (O01.3 R8): away from the app the danmaku connection
+  /// closes; back, it connects again (what was said meanwhile is not
+  /// fetched; no platform offers it).
+  Future<void> setDanmakuSuspended({required bool suspended}) async {
+    if (_disposed || _danmakuSuspended == suspended) return;
+    _danmakuSuspended = suspended;
+    await _syncDanmaku();
+  }
 
   /// The room has a stream, or is on air and only its stream is withheld
   /// (U.2g c11), and the platform gave danmaku arguments: its danmaku

@@ -39,7 +39,7 @@
 - `packages/live_store/lib/src/settings/settings.dart`：两个新设置，加进 `Settings.all`。
 - `packages/live_ui/lib/src/icons/app_icons.dart`：`localGrowth`（`trending_up_rounded`）。
 - 翻译（zh、en，按键名排序）18 个：`local_growth`、`local_growth_desc`、`local_growth_checked_in`、`local_growth_not_checked_in`、`local_growth_watch`、`local_growth_chat`、`local_level_next`、`local_level_up`、`local_level_tier_0`～`local_level_tier_9`。没有删键（D-024）。
-- 测试：新 `apps/pure_live/test/features/live_play/local_growth_test.dart`、`packages/live_store/test/local_growth_test.dart`；改 `local_interaction_test.dart`（进房签到后是 1100 电池；加币在“更多”里）、`local_interaction_support.dart`（可以换一个带假时钟的 `LocalInteraction`）、`test/shared/sync_parts_test.dart`、`packages/live_store/test/settings_defaults_test.dart`（`newInV4`）、`packages/live_ui/test/design_system_test.dart`（图标对照）。
+- 测试：新 `apps/pure_live/test/features/live_play/local_growth_test.dart`、`packages/live_store/test/local_growth_test.dart`；改 `local_interaction_test.dart`（进房签到后是 1100 电池；加币在“更多”里）、`local_interaction_support.dart`（可以换一个带假时钟的 `LocalInteraction`）、`test/shared/sync_parts_test.dart`、`packages/live_store/test/settings_defaults_test.dart`（`newInV4`）、`packages/live_ui/test/design_system_test.dart`（图标对照）、`test/i18n_runtime_keys.dart`（`local_experience_coins` 留着不用，D-024）。
 - 文档：本文件夹 README（g1～g15、实现）、本记录；D08 子分类 README（代码地图、已知问题、测试）；A08.2 README“实现和验证”补一条；`tools/docs/settings_audit_notes.py` 和生成的 J01.2 `settings.md`；`docs/tasks.toml`。
 - 没改：`room_controller.dart`、`live_play_page.dart`（播放器从 `room.session` 拿到）、`super_chats.dart` 和各平台适配器、等级公式、3.x 键的含义、版本号。
 
@@ -61,7 +61,7 @@
 
 ## 门禁
 
-- 见下一节补记。
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `e4898cdca`，D08.3 的全部代码提交）：`gate: passed (all, 14 members)`。第一次跑在 `apps/pure_live test` 停下：`i18n_test.dart` 的“每个键都用到”发现 `local_experience_coins`（面板里那一行加币按钮的标题）没人用了；D-024 不删键，加进 `test/i18n_runtime_keys.dart` 的 `keptUnusedKeys`，重跑通过。
 
 ## 真机上要看的
 

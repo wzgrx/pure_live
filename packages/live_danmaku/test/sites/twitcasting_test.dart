@@ -45,6 +45,9 @@ LiveResponse _body(String body, {int status = 200}) =>
 String _url(int n, {int movie = _movie}) =>
     'wss://node$n.twitcasting.tv/event.pubsub/v1/streams/$movie/events?token=tok$n%3A%3A%3A1790000000%3Asig$n&n=r$n';
 
+/// [url] as the connection opens it: with the player's `gift=1` (D07.7).
+Uri _gifts(String url) => Uri.parse('$url&gift=1');
+
 const _args = TwitcastingDanmakuArgs(channel: 'c:abzou_sub', movieId: _movie);
 
 /// No watchdog and a short backoff: only what the test does happens.
@@ -344,9 +347,11 @@ void main() {
         null,
         [_comment(message: 'nested')],
       ];
+      // D07.7: the gift is reported (its `message` is the player's caption,
+      // not the sender's words).
       expect(
         texts(jsonEncode([...others, _comment(message: 'one'), _comment(message: ''), _comment(message: 'two')])),
-        ['one', 'two'],
+        ['Tea ×1', 'one', 'two'],
       );
       expect(texts(utf8.encode(jsonEncode([_comment(message: '弾き語り')]))), ['弾き語り']);
       expect(texts([0xFF, ...utf8.encode('[]')]), isEmpty);
@@ -388,7 +393,7 @@ void main() {
       final connection = TwitcastingDanmakuConnection(http: http, connector: connector.call, policy: _quiet);
       final events = _record(connection);
       await connection.connect(_args);
-      expect(connector.endpoints, [_signed]);
+      expect(connector.endpoints, [TwitcastingDanmakuProtocol.withGifts(_signed)]);
       for (final frame in _recording.skip(1)) {
         await connector.channels.single.receive(frame.text);
       }
@@ -401,6 +406,113 @@ void main() {
       expect([for (final message in _messages(events)) _project(message)], expected);
       expect(connector.channels.single.sent, isEmpty);
       expect(http.requests, hasLength(1));
+      await connection.close();
+    });
+  });
+
+  group('gifts (D07.7, S09-gifts)', () {
+    final lines = [
+      for (final line in File('../../fixtures/twitcasting/danmaku/S09-gifts/frames.jsonl').readAsLinesSync())
+        (jsonDecode(line) as Map<String, Object?>)['text']! as String,
+    ];
+
+    test('S09: every recorded gift event as the player draws it; its words as chat; notices are not gifts', () {
+      final messages = [for (final line in lines) ...TwitcastingDanmakuProtocol.decode(line)];
+      expect(
+        [for (final m in messages) (m.type, m.userName, m.message)],
+        [
+          (LiveMessageType.gift, '視聴者1', 'おもいで日記10 ×1'),
+          (LiveMessageType.gift, '視聴者2', 'お茶 ×1'),
+          (LiveMessageType.gift, '視聴者3', 'おもいで日記10 ×1'),
+          (LiveMessageType.gift, '視聴者4', 'おもいで日記10 ×1'),
+          (LiveMessageType.gift, '視聴者5', '応援スター ×1'),
+          (LiveMessageType.gift, '視聴者6', 'お茶ｘ10 ×1'),
+          (LiveMessageType.gift, '視聴者7', 'おもいで日記10 ×1'),
+          (LiveMessageType.chat, '視聴者7', 'これ何'),
+          for (final words in ['むねきゅんとキスちたい', 'むねきゅんとキスちたい', 'むねきゅんに頭ポンポンされたい']) ...[
+            (LiveMessageType.gift, '視聴者8', 'お茶 ×1'),
+            (LiveMessageType.chat, '視聴者8', words),
+          ],
+          (LiveMessageType.gift, '視聴者9', 'おもいで日記爆100 ×1'),
+          (LiveMessageType.chat, '視聴者9', '大沼湖何も見れなかったからありがとうね🚗💨'),
+          (LiveMessageType.gift, '視聴者10', 'コンティニューコイン ×1'),
+        ],
+        reason: "the two score notices of the broadcasters' own accounts are left out",
+      );
+      final first = messages.first;
+      expect(
+        (first.userId, first.messageId, first.sentAt),
+        ('c:viewer1', '79a5ebd5.6ac89120724bd7.85525283', DateTime.fromMillisecondsSinceEpoch(1791529248000)),
+      );
+      expect(
+        first.data,
+        TwitcastingGift(
+          name: 'おもいで日記10',
+          iconUrl: Uri.parse('https://s01.twitcasting.tv/img/cp/calendar2026/calendar2026_item10.png'),
+        ),
+      );
+      final paid = messages.firstWhere((m) => m.message == 'おもいで日記爆100 ×1');
+      expect((paid.data! as TwitcastingGift).paid, isTrue);
+      expect(messages[messages.indexOf(paid) + 1].messageId, '${paid.messageId}:words');
+      final gifts = [
+        for (final m in messages)
+          if (m.data case final LiveGift gift) gift,
+      ];
+      expect(gifts.map((g) => (g.unit, g.totalValue, g.free)), everyElement((LiveGiftUnit.other, null, false)));
+      expect(gifts.map((g) => g.kind), everyElement(LiveGiftKind.gift));
+    });
+
+    test('gift boundaries: no name, no sender info, a bad picture, a missing sender', () {
+      List<LiveMessage> read(Map<String, Object?> event) => TwitcastingDanmakuProtocol.gift(event);
+      const item = {'name': 'お茶', 'image': 'https://s01.twitcasting.tv/img/item_tea.png', 'showsSenderInfo': true};
+      expect(
+        read({
+          'type': 'gift',
+          'item': {...item, 'name': ''},
+        }),
+        isEmpty,
+      );
+      expect(
+        read({
+          'type': 'gift',
+          'item': {...item, 'showsSenderInfo': false},
+        }),
+        isEmpty,
+      );
+      expect(read({'type': 'comment', 'item': item}), isEmpty);
+      final bare = read({
+        'type': 'gift',
+        'item': {...item, 'image': 'http://x/a.png'},
+        'plainMessage': '  ',
+        'createdAt': -1,
+      }).single;
+      expect((bare.userName, bare.userId, bare.messageId, bare.sentAt), ('', '', '', null));
+      expect((bare.data! as LiveGift).iconUrl, isNull, reason: 'https only');
+      final screenName = read({
+        'type': 'gift',
+        'id': 'g',
+        'item': item,
+        'sender': {'id': 'c:x', 'screenName': 'X'},
+        'plainMessage': 'hi',
+      });
+      expect([for (final m in screenName) (m.userName, m.messageId)], [('X', 'g'), ('X', 'g:words')]);
+    });
+
+    test('the connection reports the recorded gifts and their words', () async {
+      final connector = _Connector();
+      final connection = TwitcastingDanmakuConnection(
+        http: _Http([_answer(_url(1))]),
+        connector: connector.call,
+        policy: _quiet,
+      );
+      final events = _record(connection);
+      await connection.connect(_args);
+      for (final line in lines) {
+        await connector.channels.single.receive(line);
+      }
+      final messages = _messages(events);
+      expect(messages.where((m) => m.type == LiveMessageType.gift), hasLength(12));
+      expect(messages.where((m) => m.type == LiveMessageType.chat), hasLength(5));
       await connection.close();
     });
   });
@@ -439,7 +551,7 @@ void main() {
       expect(http.requests.single.url, TwitcastingDanmakuProtocol.pubsubUrl);
       expect(utf8.decode(http.requests.single.body!), 'movie_id=841529001');
       expect(http.requests.single.timeout, const Duration(seconds: 10));
-      expect(connector.endpoints, [Uri.parse(_url(1))]);
+      expect(connector.endpoints, [_gifts(_url(1))]);
       expect(connector.headers.single, TwitcastingDanmakuProtocol.socketHeaders);
       expect(connector.routes.single, route);
       expect(events, [const DanmakuReady()]);
@@ -478,7 +590,7 @@ void main() {
       await connector.channels.first.incoming.close();
       await _until(() => connector.channels.length == 2);
       await _until(() => events.whereType<DanmakuReady>().length == 2);
-      expect(connector.endpoints, [Uri.parse(_url(1)), Uri.parse(_url(2))]);
+      expect(connector.endpoints, [_gifts(_url(1)), _gifts(_url(2))]);
       expect(http.requests, hasLength(2));
       expect(events, [
         const DanmakuReady(),
@@ -504,7 +616,7 @@ void main() {
       expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected)]);
       await _until(() => connection.isConnected);
       expect(http.requests, hasLength(4));
-      expect(connector.endpoints, [Uri.parse(_url(4))]);
+      expect(connector.endpoints, [_gifts(_url(4))]);
       expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
       await connection.close();
     });
@@ -516,7 +628,7 @@ void main() {
       final events = _record(connection);
       await connection.connect(_args);
       await _until(() => connection.isConnected);
-      expect(connector.endpoints, [Uri.parse(_url(1)), Uri.parse(_url(2))]);
+      expect(connector.endpoints, [_gifts(_url(1)), _gifts(_url(2))]);
       expect(events, [const DanmakuReconnecting(DanmakuInterruption.disconnected), const DanmakuReady()]);
       await connection.close();
     });
@@ -598,7 +710,7 @@ void main() {
       // Then silence: replaced with a newly signed URL.
       await _until(() => connector.channels.length == 2);
       expect(connector.channels.first.closed, isTrue);
-      expect(connector.endpoints.last, Uri.parse(_url(2)));
+      expect(connector.endpoints.last, _gifts(_url(2)));
       await _until(() => events.whereType<DanmakuReady>().length == 2);
       expect(events[1], const DanmakuReconnecting(DanmakuInterruption.disconnected));
       await connection.close();
@@ -644,7 +756,7 @@ void main() {
       expect(connector.channels.first.closed, isTrue);
       expect(http.requests.first.cancel!.isCancelled, isTrue);
       expect(utf8.decode(http.requests.last.body!), 'movie_id=900');
-      expect(connector.endpoints.last, Uri.parse(_url(2, movie: 900)));
+      expect(connector.endpoints.last, _gifts(_url(2, movie: 900)));
       await connector.channels.first.receive(jsonEncode([_comment(message: 'old room')]));
       await connector.channels.last.receive(jsonEncode([_comment(message: 'new room')]));
       expect([for (final m in _messages(events)) m.message], ['new room']);
@@ -709,7 +821,7 @@ void main() {
       await connection.connect(_args);
       await _until(() => _messages(events).isNotEmpty);
       expect(posts, ['POST application/x-www-form-urlencoded movie_id=841529001 https://twitcasting.tv/']);
-      final signed = Uri.parse(_url(1));
+      final signed = _gifts(_url(1));
       expect(handshake['path'], '${signed.path}?${signed.query}');
       expect(handshake['origin'], 'https://twitcasting.tv');
       // dart:io's handshake keeps its own user agent in front of the one given.

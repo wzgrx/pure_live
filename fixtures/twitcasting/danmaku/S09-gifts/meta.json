@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "platform": "twitcasting",
+  "case": "S09-gifts",
+  "capturedAt": "2026-10-09T06:59:00Z",
+  "route": "proxy",
+  "handshakes": [
+    {
+      "url": "wss://202-218-171-223.twitcasting.tv/event.pubsub/v1/streams/842033018/events?token=…&n=…&gift=1",
+      "headers": {
+        "origin": "https://twitcasting.tv",
+        "user-agent": "Mozilla/5.0"
+      }
+    }
+  ],
+  "frames": 14,
+  "sources": [
+    {
+      "room": "chobitsuki",
+      "movieId": "842033018",
+      "sha256": "77e60e0eba0db6905fde1590119db0d0cd932f400fd5d7159dc4420db42537f1",
+      "length": 54504
+    },
+    {
+      "room": "c:nodazori2525",
+      "movieId": "842035669",
+      "sha256": "39354702a9502fda1499ceb001d1e8aadc6e5f29c984378d1b51056aafc55d9e",
+      "length": 49159
+    },
+    {
+      "room": "niko_yumepirika",
+      "movieId": "842031052",
+      "sha256": "f583a5ce1d1a99f74cac409e65e21a0e52b509ea2ba181f91eb9a1f3f7ba6691",
+      "length": 123390
+    },
+    {
+      "room": "c:bandan",
+      "movieId": "842034695",
+      "sha256": "db86854baa3c4f22955029fe89113584d66f594906fcb9d326ad418b5bae95d0",
+      "length": 38674
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "url.token, url.n (the signature, not kept)",
+      "rule": "secret"
+    },
+    {
+      "where": "$[*].sender.id, name, screenName of viewers (the broadcasters' own notices keep theirs: public)",
+      "rule": "person"
+    },
+    {
+      "where": "$[*].sender.profileImage of viewers",
+      "rule": "person"
+    },
+    {
+      "where": "every event but gift, every frame without one, and the eventpubsuburl.php answers",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running TwitcastingDanmakuConnection with a connector that tees the frames; anonymous and read-only: the form POST of eventpubsuburl.php, the socket URL with gift=1 as the player asks for it; nothing is sent on the socket)",
+  "note": "15 minutes in the five busiest broadcasts of the recommended list at 15:59 Japan time, through the PC's HTTP proxy: 497 comments and 14 gifts in four of them (mille_tomo had none). All 14 kept, each its own frame [event], re-encoded as the server writes it (non-ASCII as \\u escapes, slashes as \\/): お茶, お茶ｘ10, おもいで日記10 (a campaign's item), 応援スター from an anonymous viewer (匿名さん), コンティニューコイン, one おもいで日記爆100 marked isPaidGift with the sender's words (plainMessage), three お茶 with words, and two of the campaign's score notices that the broadcaster's own account sends (item without a name, showsSenderInfo false). Viewers became c:viewerN and 視聴者N with a placeholder picture (one person keeps one set). t is milliseconds after the room's first gift (each next room after a 60 s gap). No IPv4 address, cookie or token is left."
+}

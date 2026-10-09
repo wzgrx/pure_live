@@ -778,6 +778,145 @@ void main() {
     });
   });
 
+  group('balloons and subscriptions (D07.7, S10-balloons)', () {
+    final frames = [
+      for (final line in File('../../fixtures/soop/danmaku/S10-balloons/frames.jsonl').readAsLinesSync())
+        base64.decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String),
+    ];
+    List<int> packet(int service, List<String> fields) {
+      final body = utf8.encode('\f${fields.join('\f')}');
+      return [...utf8.encode('\x1b\t${'$service'.padLeft(4, '0')}${'${body.length}'.padLeft(6, '0')}00'), ...body];
+    }
+
+    test('S10: every recorded packet as the web player reads it', () {
+      final messages = [for (final frame in frames) ...SoopDanmakuProtocol.decode(frame)];
+      expect(messages, hasLength(22));
+      expect(
+        [
+          for (final m in messages)
+            (m.type, m.userName, m.userId, m.data is LiveGift ? (m.data! as LiveGift).count : m.message),
+        ],
+        [
+          (LiveMessageType.gift, '시청자1', 'viewer001', 10),
+          for (final (n, count) in [(2, 10), (3, 10), (4, 10), (2, 33), (5, 10), (6, 10), (3, 10), (7, 100)])
+            (LiveMessageType.gift, '시청자$n', 'viewer00$n', count),
+          (LiveMessageType.notice, '시청자8', 'viewer008', '시청자8 订阅了频道，已订阅 33 个月'),
+          (LiveMessageType.notice, '시청자9', 'viewer009', '시청자9 订阅了频道'),
+          (LiveMessageType.notice, '시청자10', 'viewer010', '시청자10 订阅了频道，已订阅 62 个月'),
+          (LiveMessageType.notice, '시청자11', 'viewer011', '시청자11 订阅了频道，已订阅 32 个月'),
+          (LiveMessageType.notice, '시청자12', 'viewer012', '시청자12 订阅了频道，已订阅 52 个月'),
+          for (final (n, count) in [(13, 100), (14, 100), (15, 10), (16, 19), (17, 10), (18, 10), (17, 10), (19, 10)])
+            (LiveMessageType.gift, '시청자$n', 'viewer0$n', count),
+        ],
+      );
+      final adBalloon = messages.first;
+      expect(adBalloon.messageId, matches(RegExp('^[0-9a-f]{8}-[0-9a-f]{4}-')));
+      expect(
+        adBalloon.data,
+        LiveGift(
+          name: '애드벌룬',
+          count: 10,
+          kind: LiveGiftKind.tip,
+          iconUrl: Uri.parse('https://res.sooplive.com/new_player/items/img_adballoon.png'),
+        ),
+        reason: 'ad balloons have no value this app can place',
+      );
+      expect(
+        messages[1].data,
+        const LiveGift(
+          name: '별풍선',
+          count: 10,
+          kind: LiveGiftKind.tip,
+          unitPrice: 1,
+          totalValue: 10,
+          unit: LiveGiftUnit.starBalloon,
+        ),
+      );
+      expect(messages[1].message, '별풍선 ×10');
+      expect(messages[1].messageId, matches(RegExp('^[0-9a-f]{8}-')));
+      expect(messages.map((m) => m.messageId).toSet(), hasLength(22));
+      final notices = [
+        for (final m in messages)
+          if (m.type == LiveMessageType.notice) m,
+      ];
+      expect(notices.map((m) => m.data), everyElement(LiveNoticeKind.subscription));
+      expect(notices.map((m) => m.messageId), everyElement(startsWith('subscription:')));
+      expect((messages[8].data! as LiveGift).tier, LiveGiftTier.valuable, reason: '100 star balloons, about 59 yuan');
+    });
+
+    test('relayed and video balloons, as the web player reads them; what is not a balloon', () {
+      final relayed = SoopDanmakuProtocol.decode(
+        packet(33, [
+          '1',
+          'bj',
+          '2',
+          'fan(2)',
+          '팬',
+          '5',
+          '0',
+          '0',
+          'x',
+          '0',
+          '0',
+          '',
+          'f00d0000-0000-4000-8000-000000000000',
+        ]),
+      ).single;
+      expect(
+        (relayed.userId, relayed.userName, relayed.messageId),
+        ('fan', '팬', 'f00d0000-0000-4000-8000-000000000000'),
+      );
+      expect((relayed.data! as LiveGift).totalValue, 5);
+      final video = SoopDanmakuProtocol.decode(packet(105, ['4650', 'bj', 'fan', '팬', '200', '0'])).single;
+      expect(
+        video.data,
+        const LiveGift(
+          name: '영상풍선',
+          count: 200,
+          kind: LiveGiftKind.tip,
+          unitPrice: 1,
+          totalValue: 200,
+          unit: LiveGiftUnit.starBalloon,
+        ),
+      );
+      expect(video.messageId, '');
+      expect(SoopDanmakuProtocol.decode(packet(18, ['bj', 'fan', '팬', '0'])), isEmpty, reason: 'no count');
+      expect(SoopDanmakuProtocol.decode(packet(18, ['bj', '', '팬', '10'])), isEmpty, reason: 'no sender');
+      expect(SoopDanmakuProtocol.decode(packet(18, ['bj', 'fan', '팬', 'x'])), isEmpty);
+      expect(SoopDanmakuProtocol.decode(packet(18, ['bj', 'fan'])), isEmpty, reason: 'short');
+      expect(
+        SoopDanmakuProtocol.decode(packet(18, ['bj', 'fan', '팬', '3', '0', '0', '0', '0', '0', '0', '0', 'no uuid']))
+            .single
+            .messageId,
+        '',
+      );
+      expect(SoopDanmakuProtocol.decode(packet(91, ['90', 'bj', '', '팬'])), isEmpty);
+      expect(
+        SoopDanmakuProtocol.decode(packet(108, ['x', 'fan', '팬', 'bj', 'bj'])),
+        isEmpty,
+        reason: 'gift subscriptions: not recorded',
+      );
+      // A frame of several packets: chat and a balloon in order.
+      final chat = _chat('안녕');
+      final mixed = SoopDanmakuProtocol.decode([
+        ...chat,
+        ...packet(18, ['bj', 'fan', '팬', '1']),
+      ]);
+      expect(mixed.map((m) => m.type), [LiveMessageType.chat, LiveMessageType.gift]);
+    });
+
+    test('the connection reports the recorded balloons and subscriptions in order', () async {
+      final connector = _Connector();
+      final connection = SoopDanmakuConnection(connector: connector.call);
+      final events = _record(connection);
+      await connection.connect(_args);
+      frames.forEach(connector.channels.single.incoming.add);
+      await _until(() => _messages(events).length == 22);
+      expect(_messages(events).where((m) => m.type == LiveMessageType.gift), hasLength(17));
+      await connection.close();
+    });
+  });
+
   group('connection', () {
     test(
       'opens the TLS port with the chat subprotocol and 3.x headers, is ready at once, logs in, joins 200 ms later',

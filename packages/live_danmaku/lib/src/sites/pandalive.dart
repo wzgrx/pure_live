@@ -206,8 +206,9 @@ abstract final class PandaLiveDanmakuProtocol {
   ///   the subscription is a [PandaLiveDanmakuFrame.refusal]; the connect
   ///   reply says when the token lapses. Ping replies say nothing.
   /// - A publication on [channel] (a push without `type`) whose message is
-  ///   chat ([chat]) is reported; other channels, other pushes (join, leave,
-  ///   unsubscribe) and other messages give nothing.
+  ///   chat ([chat]) or hearts ([hearts], D07.7) is reported; other
+  ///   channels, other pushes (join, leave, unsubscribe) and other messages
+  ///   give nothing.
   /// - A line that is not a JSON object is skipped.
   static PandaLiveDanmakuFrame decode(Object? data, {required String channel}) {
     final text = switch (data) {
@@ -245,6 +246,7 @@ abstract final class PandaLiveDanmakuProtocol {
       final result = reply['result'];
       if (result is! Map || result['type'] != null || jsonString(result['channel']) != channel) continue;
       if (chat(result['data'], channel: channel) case final LiveMessage message) messages.add(message);
+      messages.addAll(hearts(result['data'], channel: channel));
     }
     return PandaLiveDanmakuFrame(messages: messages, joined: joined, refusal: refusal, expiresIn: expiresIn);
   }
@@ -288,6 +290,80 @@ abstract final class PandaLiveDanmakuProtocol {
     );
   }
 
+  /// The platform's name of its currency (하트), as a [LiveGift.name].
+  static const String heartName = '하트';
+
+  /// Hearts sent to the broadcast (`SponCoin`, 후원; D07.7) as a
+  /// [LiveMessageType.gift] message with a [LiveGift] of kind
+  /// [LiveGiftKind.tip], then the words sent with them as chat; nothing for
+  /// another message or one without a sender or hearts:
+  ///
+  /// - the publication's `message` is a JSON object in text: `nick` the
+  ///   sender's name, `id` the login id, `coin` the hearts (their own
+  ///   value: [LiveGift.unitPrice] 1, [LiveGift.totalValue] `coin`,
+  ///   [LiveGiftUnit.heart]); in a show of several broadcasters (엑셀방송)
+  ///   `excelNick` names the one who receives them
+  ///   ([LiveGift.receiverName]);
+  /// - the id and time as [chat]'s;
+  /// - the words (`heartMessage.message`, which no chat publication
+  ///   repeats) are a white chat line of the sender after the hearts, with
+  ///   the id `<channel>:<offset>:words`.
+  ///
+  /// `ItemCoin` (특별 하트) came in no recording and is not read.
+  static List<LiveMessage> hearts(Object? publication, {required String channel}) {
+    if (publication is! Map) return const [];
+    final message = publication['data'];
+    if (message is! Map || message['type'] != 'SponCoin') return const [];
+    final Object? sponsor;
+    try {
+      sponsor = jsonDecode(_text(message['message']));
+    } on FormatException {
+      return const [];
+    }
+    if (sponsor is! Map) return const [];
+    final coin = sponsor['coin'];
+    final name = _text(sponsor['nick']);
+    if (coin is! int || coin <= 0 || name.isEmpty) return const [];
+    final gift = LiveGift(
+      name: heartName,
+      count: coin,
+      kind: LiveGiftKind.tip,
+      unitPrice: 1,
+      totalValue: coin,
+      unit: LiveGiftUnit.heart,
+      receiverName: _text(sponsor['excelNick']),
+    );
+    final offset = publication['offset'];
+    final created = message['created_at'];
+    final id = offset is int && offset >= 0 ? '$channel:$offset' : '';
+    final sentAt = created is int && created > 0 && created <= _maxEpochSeconds
+        ? DateTime.fromMillisecondsSinceEpoch(created * 1000)
+        : null;
+    final words = sponsor['heartMessage'] is Map ? _text((sponsor['heartMessage'] as Map)['message']) : '';
+    return [
+      LiveMessage(
+        type: LiveMessageType.gift,
+        userName: name,
+        userId: _text(sponsor['id']),
+        message: gift.plainText,
+        messageId: id,
+        sentAt: sentAt,
+        color: LiveMessageColor.white,
+        data: gift,
+      ),
+      if (words.isNotEmpty)
+        LiveMessage(
+          type: LiveMessageType.chat,
+          userName: name,
+          userId: _text(sponsor['id']),
+          message: words,
+          messageId: id.isEmpty ? '' : '$id:words',
+          sentAt: sentAt,
+          color: LiveMessageColor.white,
+        ),
+    ];
+  }
+
   /// The first named emoticon of `emoticon` (`{"block": {name, img, …},
   /// "inline": […]}`) in brackets, or empty.
   static String _emoticon(Object? emoticon) {
@@ -324,7 +400,7 @@ abstract final class PandaLiveDanmakuProtocol {
 ///   connect reply's `ttl`, 30 minutes): a new token, then a new socket, with
 ///   no notice and no second [DanmakuReady].
 /// - Command 7 pings every 25 s; the server answers each.
-/// - Only chat is reported.
+/// - Chat and hearts (D07.7) are reported.
 ///
 /// The app registers it as `SiteIds.pandaLive: () =>
 /// PandaLiveDanmakuConnection(http: …, proxy: …)`, with the `LiveHttp` it

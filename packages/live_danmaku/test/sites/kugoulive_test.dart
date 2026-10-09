@@ -1224,52 +1224,55 @@ void main() {
       expect(read(gzipped.bytes).messages, isEmpty);
     });
 
-    test('gifts: never reported; acknowledged (211) when the envelope asks, as the page does', () {
-      final frame = KugouLiveDanmakuProtocol.decode(_gift(), roomId: _room);
-      expect(frame.messages, isEmpty);
-      final ack = frame.ack!;
-      expect(
-        ack,
-        KugouLiveDanmakuProtocol.ack(roomId: _room, offset: '14215147132598579', msgId: '2216677664281887088'),
-      );
-      expect(ack.sublist(0, 14), [100, 0, 3, 1, 0, 12, 0, 0, 0, 211, 0, 0, 0, ack.length - 18]);
-      final request = ProtoMessage.decode(ProtoMessage.decode(ack.sublist(18)).bytes(7)!);
-      expect(
-        [
-          for (final field in request.fields)
-            (field.number, field.value is List<int> ? utf8.decode(field.value as List<int>) : field.value),
-        ],
-        [(1, 211), (2, 51049168), (3, 0), (4, '14215147132598579'), (5, '2216677664281887088'), (6, 0)],
-      );
-      final repeated = KugouLiveDanmakuProtocol.decode(
-        _gift(repeat: 2, msgId: 'm', offset: ''),
-        roomId: _room,
-      ).ack!;
-      expect(repeated, KugouLiveDanmakuProtocol.ack(roomId: _room, offset: '', msgId: 'm', repeat: 2));
-      expect(KugouLiveDanmakuProtocol.decode(_gift(ack: 0), roomId: _room).ack, isNull);
-      expect(KugouLiveDanmakuProtocol.decode(_gift(ack: 2), roomId: _room).ack, isNull);
-      expect(
-        KugouLiveDanmakuProtocol.decode(_chat(msgId: 'x'), roomId: _room).ack,
-        isNull,
-        reason: 'only gifts',
-      );
-      final broken = _gift();
-      expect(KugouLiveDanmakuProtocol.decode(broken.sublist(0, broken.length - 2), roomId: _room).ack, isNull);
-      // A gift in JSON asks the same way (the envelope's ack).
-      final json = _server(
-        601,
-        (ProtoWriter()
-              ..string(1, '7')
-              ..integer(2, 1)
-              ..string(4, 'j')
-              ..bytes(7, utf8.encode('{"cmd":601,"content":{}}')))
-            .toBytes(),
-      );
-      expect(
-        KugouLiveDanmakuProtocol.decode(json, roomId: _room).ack,
-        KugouLiveDanmakuProtocol.ack(roomId: _room, offset: '7', msgId: 'j'),
-      );
-    });
+    test(
+      'a gift frame without a gift reports nothing; acknowledged (211) when the envelope asks, as the page does',
+      () {
+        final frame = KugouLiveDanmakuProtocol.decode(_gift(), roomId: _room);
+        expect(frame.messages, isEmpty);
+        final ack = frame.ack!;
+        expect(
+          ack,
+          KugouLiveDanmakuProtocol.ack(roomId: _room, offset: '14215147132598579', msgId: '2216677664281887088'),
+        );
+        expect(ack.sublist(0, 14), [100, 0, 3, 1, 0, 12, 0, 0, 0, 211, 0, 0, 0, ack.length - 18]);
+        final request = ProtoMessage.decode(ProtoMessage.decode(ack.sublist(18)).bytes(7)!);
+        expect(
+          [
+            for (final field in request.fields)
+              (field.number, field.value is List<int> ? utf8.decode(field.value as List<int>) : field.value),
+          ],
+          [(1, 211), (2, 51049168), (3, 0), (4, '14215147132598579'), (5, '2216677664281887088'), (6, 0)],
+        );
+        final repeated = KugouLiveDanmakuProtocol.decode(
+          _gift(repeat: 2, msgId: 'm', offset: ''),
+          roomId: _room,
+        ).ack!;
+        expect(repeated, KugouLiveDanmakuProtocol.ack(roomId: _room, offset: '', msgId: 'm', repeat: 2));
+        expect(KugouLiveDanmakuProtocol.decode(_gift(ack: 0), roomId: _room).ack, isNull);
+        expect(KugouLiveDanmakuProtocol.decode(_gift(ack: 2), roomId: _room).ack, isNull);
+        expect(
+          KugouLiveDanmakuProtocol.decode(_chat(msgId: 'x'), roomId: _room).ack,
+          isNull,
+          reason: 'only gifts',
+        );
+        final broken = _gift();
+        expect(KugouLiveDanmakuProtocol.decode(broken.sublist(0, broken.length - 2), roomId: _room).ack, isNull);
+        // A gift in JSON asks the same way (the envelope's ack).
+        final json = _server(
+          601,
+          (ProtoWriter()
+                ..string(1, '7')
+                ..integer(2, 1)
+                ..string(4, 'j')
+                ..bytes(7, utf8.encode('{"cmd":601,"content":{}}')))
+              .toBytes(),
+        );
+        expect(
+          KugouLiveDanmakuProtocol.decode(json, roomId: _room).ack,
+          KugouLiveDanmakuProtocol.ack(roomId: _room, offset: '7', msgId: 'j'),
+        );
+      },
+    );
 
     test('snappy: literals and copies as snappyjs reads them; anything malformed throws', () {
       Uint8List snappy(List<int> bytes) => KugouLiveDanmakuProtocol.snappy(Uint8List.fromList(bytes));
@@ -1297,6 +1300,172 @@ void main() {
       ]) {
         expect(() => snappy(bytes), throwsFormatException, reason: name);
       }
+    });
+  });
+
+  group('gifts (D07.7, S12-gifts)', () {
+    const room = '3249275';
+    final frames = [
+      for (final line in File('$_root/S12-gifts/frames.jsonl').readAsLinesSync())
+        base64.decode((jsonDecode(line) as Map<String, Object?>)['b64']! as String),
+    ];
+    const icon = 'https://s4fx.kgimg.com/fxstatic/images/giftres';
+
+    test('S12: every recorded gift (601) as the page reads GiftEffectSocketMsg.Content', () {
+      final decoded = [for (final frame in frames) KugouLiveDanmakuProtocol.decode(frame, roomId: room)];
+      expect(decoded.map((frame) => frame.messages.length), everyElement(1));
+      expect(decoded.map((frame) => frame.ack), everyElement(isNotNull), reason: 'each one asks for its 211');
+      final messages = [for (final frame in decoded) frame.messages.single];
+      expect(messages.map((m) => m.type), everyElement(LiveMessageType.gift));
+      final gifts = [for (final m in messages) m.data! as LiveGift];
+      expect(
+        [for (final (i, g) in gifts.indexed) (messages[i].userName, g.name, g.count, g.unitPrice, g.receiverName)],
+        [
+          ('观众1', '灵羽仙珠', 1, 20, 'v范可欣'),
+          ('观众2', '灵羽仙珠', 10, 20, 'v范可欣'),
+          ('v范可欣', '生日派对', 1, 52000, '观众3'),
+          for (var n = 4; n <= 13; n++) ('v范可欣', '亲亲', 1, 10, '观众$n'),
+          ('观众14', '爱恋相机', 1, 500, 'v范可欣'),
+          ('观众14', '玫瑰', 1, 5, 'v范可欣'),
+          ('观众14', '心心', 1, 10, 'v范可欣'),
+          ('观众14', '水晶玫瑰', 1, 10, 'v范可欣'),
+        ],
+      );
+      expect(gifts.map((g) => g.unit), everyElement(LiveGiftUnit.starCoin));
+      expect(gifts.map((g) => g.kind), everyElement(LiveGiftKind.gift));
+      expect(gifts.map((g) => g.free), everyElement(isFalse));
+      expect([for (final g in gifts) g.totalValue], [for (final g in gifts) g.unitPrice! * g.count]);
+      expect(messages.map((m) => m.messageId).toSet(), hasLength(17));
+
+      final first = messages.first;
+      expect(
+        (first.userId, first.userLevel, first.messageId, first.sentAt, first.message),
+        ('100007919', '14', '2219847333498574312', DateTime.fromMillisecondsSinceEpoch(1791528047000), '灵羽仙珠 ×1'),
+      );
+      expect(
+        first.data,
+        LiveGift(
+          id: '31329',
+          name: '灵羽仙珠',
+          comboKey: '1000079191791528047207',
+          comboTotal: 1,
+          unitPrice: 20,
+          totalValue: 20,
+          unit: LiveGiftUnit.starCoin,
+          iconUrl: Uri.parse('$icon/31329/38453a1d40a94e6e61c65684f8f52d79.png'),
+          receiverName: 'v范可欣',
+        ),
+      );
+      // ×10 of one send: the combo's gifts so far (comboGiftSum).
+      expect((gifts[1].comboKey, gifts[1].comboTotal, gifts[1].totalValue), ('1000158381791528105358', 10, 200));
+      // No combo id (comboIdV2 and comboId "0"): no key, no running count.
+      expect((gifts[2].comboKey, gifts[2].comboTotal), ('', null));
+      expect(gifts[2].tier, LiveGiftTier.precious, reason: '52000 star coins, 520 yuan');
+      expect(messages[2].userId, '1053093410');
+      // comboIdV2 before comboId.
+      expect(gifts[13].comboKey, '1001108661791528420751');
+      expect(gifts[14].iconUrl, Uri.parse('$icon/1/c27e941a62d3a5378267267453c7d8d8.png'));
+    });
+
+    test('what is not a gift of this room; the picture; a gift in JSON; a free one', () {
+      Uint8List gift(Map<int, Object> fields, {int roomId = 3249275}) {
+        final content = ProtoWriter();
+        for (final MapEntry(:key, :value) in fields.entries) {
+          if (value is int) content.integer(key, value);
+          if (value is String) content.string(key, value);
+        }
+        final message = ProtoWriter()
+          ..integer(1, 601)
+          ..bytes(2, content.toBytes())
+          ..integer(3, roomId)
+          ..integer(6, 7)
+          ..integer(11, 1791528047)
+          ..integer(16, 1);
+        return _server(
+          601,
+          (ProtoWriter()
+                ..string(4, 'm')
+                ..integer(6, 1)
+                ..bytes(7, message.toBytes()))
+              .toBytes(),
+        );
+      }
+
+      LiveGift? decoded(Uint8List frame) =>
+          KugouLiveDanmakuProtocol.decode(frame, roomId: room).messages.singleOrNull?.data as LiveGift?;
+
+      expect(decoded(gift({3: '玫瑰', 4: 1, 5: 5})), isNull, reason: 'no gift id');
+      expect(decoded(gift({2: 1, 3: '玫瑰', 12: 51049168})), isNull, reason: 'the gift names another room');
+      expect(decoded(gift({2: 1, 3: '玫瑰'}, roomId: 51049168)), isNull, reason: 'the envelope names another room');
+      final bare = KugouLiveDanmakuProtocol.decode(gift({2: 1}), roomId: room).messages.single;
+      expect((bare.userId, bare.userName, bare.message), ('7', '', '1 ×1'), reason: "the envelope's sender");
+      expect(
+        bare.data,
+        const LiveGift(id: '1', name: '', unitPrice: 0, totalValue: 0, unit: LiveGiftUnit.starCoin, free: true),
+        reason: 'price 0 is free; no combo; num 0 counts 1',
+      );
+      expect(
+        decoded(gift({2: 1, 8: 'http://p1.fx.kgimg.com/a.png'}))!.iconUrl,
+        Uri.parse('https://p1.fx.kgimg.com/a.png'),
+      );
+      expect(decoded(gift({2: 1, 8: 'javascript:x'}))!.iconUrl, isNull);
+      expect(decoded(gift({2: 1, 26: '9', 28: '0', 75: 3}))!.comboKey, '9', reason: 'comboId without comboIdV2');
+      expect(
+        KugouLiveDanmakuProtocol.decode(gift({2: 1, 15: '\u202e名字\u2027 '}), roomId: room).messages.single.userName,
+        '名字',
+        reason: 'without the marks the page takes out',
+      );
+      final json = _server(
+        601,
+        (ProtoWriter()
+              ..string(4, 'j')
+              ..bytes(
+                7,
+                utf8.encode(
+                  jsonEncode({
+                    'cmd': 601,
+                    'roomid': 3249275,
+                    'time': 1791528047,
+                    'content': {
+                      'giftid': 1978,
+                      'giftname': '心心',
+                      'num': 2,
+                      'price': 10,
+                      'sendername': 'a',
+                      'senderid': 5,
+                    },
+                  }),
+                ),
+              ))
+            .toBytes(),
+      );
+      final fromJson = KugouLiveDanmakuProtocol.decode(json, roomId: room).messages.single;
+      expect((fromJson.userName, fromJson.userId, fromJson.messageId), ('a', '5', 'j'));
+      expect(
+        fromJson.data,
+        const LiveGift(id: '1978', name: '心心', count: 2, unitPrice: 10, totalValue: 20, unit: LiveGiftUnit.starCoin),
+      );
+    });
+
+    test('the connection reports each gift once, acknowledges each, and drops what the server repeats', () async {
+      final connector = _Connector();
+      final connection = _connection(connector, _Http([_granted('t')]));
+      final events = _record(connection);
+      await connection.connect(const KugouLiveDanmakuArgs(roomId: room));
+      final channel = connector.channels.single;
+      await channel.join();
+      for (final frame in frames) {
+        await channel.receive(frame);
+      }
+      // Unacknowledged gifts come twice more with the same msgId.
+      await channel.receive(frames[0]);
+      await channel.receive(frames[2]);
+      final gifts = _messages(events).where((m) => m.type == LiveMessageType.gift).toList();
+      expect(gifts, hasLength(17));
+      expect(gifts.map((m) => m.messageId).toSet(), hasLength(17));
+      final acks = channel.sent.whereType<Uint8List>().where((frame) => frame.length > 18 && frame[9] == 211);
+      expect(acks, hasLength(19), reason: 'every frame that asks is answered, repeats too');
+      await connection.close();
     });
   });
 

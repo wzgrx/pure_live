@@ -651,7 +651,8 @@ void main() {
         }),
         _pub({'type': 'MediaUpdate', 'created_at': 1790536599}),
         _pub({'type': 'Recommend', 'created_at': 1790536599}),
-        _pub({'type': 'SponCoin', 'message': '{"coin":10,"nick":"a","id":"b"}'}),
+        // Hearts are gifts (D07.7, the hearts group); special hearts are not read.
+        _pub({'type': 'ItemCoin', 'message': '{"coin":10,"nick":"a","id":"b"}'}),
       ]) {
         expect(texts(frame), isEmpty, reason: frame);
       }
@@ -750,6 +751,89 @@ void main() {
       ];
       expect([for (final message in _messages(events)) _project(message)], expected);
       await connection.close();
+    });
+  });
+
+  group('hearts (D07.7, S08-hearts)', () {
+    final lines = [
+      for (final line in File('$_fixtures/danmaku/S08-hearts/frames.jsonl').readAsLinesSync())
+        (jsonDecode(line) as Map<String, Object?>)['text']! as String,
+    ];
+    String channelOf(String line) => ((jsonDecode(line) as Map)['result'] as Map)['channel'] as String;
+
+    test('S08: every recorded SponCoin as hearts, the receiving member, the words as chat', () {
+      final messages = [
+        for (final line in lines) ...PandaLiveDanmakuProtocol.decode(line, channel: channelOf(line)).messages,
+      ];
+      expect(
+        [for (final m in messages) (m.type, m.userName, m.data is LiveGift ? (m.data! as LiveGift).count : m.message)],
+        [
+          for (final coin in [1063, 1063, 1063, 1050]) (LiveMessageType.gift, '시청자1', coin),
+          (LiveMessageType.gift, '시청자2', 4444),
+          (LiveMessageType.gift, '시청자2', 4444),
+          (LiveMessageType.gift, '시청자3', 1599),
+          (LiveMessageType.gift, '시청자3', 1599),
+          for (final coin in [999, 1009, 1015, 1062]) (LiveMessageType.gift, '시청자4', coin),
+          (LiveMessageType.gift, '시청자5', 1001),
+          (LiveMessageType.chat, '시청자5', '갓조개'),
+          (LiveMessageType.gift, '시청자6', 10666),
+          (LiveMessageType.chat, '시청자6', '노느라 깜빡했네 상처뿐인시그보여줘'),
+          (LiveMessageType.gift, '시청자7', 2222),
+        ],
+      );
+      final first = messages.first;
+      expect(
+        (first.userId, first.messageId, first.message, first.sentAt?.isUtc),
+        ('viewer01', '29619030:7954', '하트 ×1063', false),
+      );
+      expect(
+        first.data,
+        const LiveGift(
+          name: '하트',
+          count: 1063,
+          kind: LiveGiftKind.tip,
+          unitPrice: 1,
+          totalValue: 1063,
+          unit: LiveGiftUnit.heart,
+          receiverName: '진하늘',
+        ),
+      );
+      final words = messages.firstWhere((m) => m.message == '갓조개');
+      expect(words.messageId, '27472604:12527:words');
+      expect((messages[messages.length - 3].data! as LiveGift).tier, LiveGiftTier.precious, reason: '10666 hearts');
+    });
+
+    test('what is not hearts: other types, broken messages, no sender or no hearts', () {
+      Map<String, Object?> push(Object? message, {String type = 'SponCoin'}) => {
+        'result': {
+          'channel': '1',
+          'data': {
+            'data': {'type': type, 'message': message, 'created_at': 1791530463},
+            'offset': 5,
+          },
+        },
+      };
+      List<LiveMessage> read(Map<String, Object?> push) =>
+          PandaLiveDanmakuProtocol.decode(jsonEncode(push), channel: '1').messages;
+      expect(read(push(jsonEncode({'nick': 'a', 'id': 'a', 'coin': 10}), type: 'ItemCoin')), isEmpty);
+      expect(read(push('{broken')), isEmpty);
+      expect(read(push(jsonEncode({'nick': '', 'id': 'a', 'coin': 10}))), isEmpty);
+      expect(read(push(jsonEncode({'nick': 'a', 'id': 'a', 'coin': 0}))), isEmpty);
+      expect(read(push(jsonEncode({'nick': 'a', 'id': 'a', 'coin': '10'}))), isEmpty);
+      final plain = read(
+        push(
+          jsonEncode({
+            'nick': 'a',
+            'id': 'a',
+            'coin': 10,
+            'heartMessage': {'message': ' '},
+          }),
+        ),
+      );
+      expect(
+        [for (final m in plain) (m.type, m.messageId, (m.data! as LiveGift).receiverName)],
+        [(LiveMessageType.gift, '1:5', '')],
+      );
     });
   });
 

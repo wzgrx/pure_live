@@ -43,6 +43,7 @@ const Set<LiveGiftUnit> giftYuanUnits = {
   LiveGiftUnit.diamond,
   LiveGiftUnit.douyinCoin,
   LiveGiftUnit.acCoin,
+  LiveGiftUnit.starCoin,
 };
 
 /// The value as the line writes it ("100 元", "2000 金瓜子", "79 Kicks"),
@@ -82,6 +83,9 @@ String? giftUnitText(LiveGiftUnit unit, int value) {
     LiveGiftUnit.douyinCoin => 'gift_value_douyin_coin',
     LiveGiftUnit.sixCoin => 'gift_value_six_coin',
     LiveGiftUnit.acCoin => 'gift_value_ac_coin',
+    LiveGiftUnit.starCoin => 'gift_value_star_coin',
+    LiveGiftUnit.heart => 'gift_value_heart',
+    LiveGiftUnit.note => 'gift_value_note',
     LiveGiftUnit.silverSeed || LiveGiftUnit.banana || LiveGiftUnit.other => null,
   };
   if (key == null) return null;

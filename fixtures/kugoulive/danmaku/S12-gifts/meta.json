@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "platform": "kugoulive",
+  "case": "S12-gifts",
+  "room": "kugoulive:3249275",
+  "danmakuKeys": {
+    "roomId": "3249275"
+  },
+  "capturedAt": "2026-10-09T06:40:40Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://chatwss146107.kugou.com/acksocket",
+      "headers": {
+        "origin": "https://fanxing.kugou.com",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 17,
+  "raw": {
+    "sha256": "af09f3198c21547731a72ee23db95bbb528c2a316fefc1aa77794865f1324e3b",
+    "length": 721543
+  },
+  "scrubbed": [
+    {
+      "where": "in 601 GiftEffectSocketMsg.Content senderid, senderkgid, sendername (13, 14, 15); ContentMessage.senderid, senderkugouid (6, 7)",
+      "rule": "person"
+    },
+    {
+      "where": "in 601 GiftEffectSocketMsg.Content receiverid, receivername, receiverkgid (18, 19, 20) of the broadcaster's own gifts to viewers",
+      "rule": "person"
+    },
+    {
+      "where": "in 601 GiftEffectSocketMsg.Content comboId, comboIdV2 (26, 28): the sender's id at their start",
+      "rule": "person"
+    },
+    {
+      "where": "in 601 GiftEffectSocketMsg.Content every field but 2, 3, 4, 5, 8, 9, 12-15, 17-21, 25-29, 38, 66, 75, 78, 79 (the sender's avatar 16, labels and their pictures 77, 83, 86, extension data)",
+      "rule": "dropped"
+    },
+    {
+      "where": "in 601 ContentMessage ext (14) and field 9 (the sender's badges, nameplates, fan club)",
+      "rule": "dropped"
+    },
+    {
+      "where": "every frame but the gifts (601): the scheduler, the login, status, chat, audience, entries, headlines, songs, PK, and the client's acknowledgements and heartbeats",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running KugouLiveDanmakuConnection with a connector that tees the frames; anonymous and read-only: the scheduler, the guest login, the heartbeat and the page's acknowledgements of gifts)",
+  "note": "Direct, 15 minutes in room 3249275 (broadcaster 1053093410, v范可欣, public), the busiest of six rooms recorded at the same time (the five others had no gift). 17 gifts (601), each acknowledged (211) and none repeated: 灵羽仙珠 ×1 and ×10 (20 star coins each), the broadcaster's own 生日派对 (52000) to a viewer and 亲亲 (10) to ten viewers within 300 ms, and one viewer's 爱恋相机 (500), 玫瑰 (5), 心心 (10) and 水晶玫瑰 (10). Each sender and receiver other than the broadcaster became a synthetic one (ids 1000xxxxx, Kugou ids 9000xxxxx, names 观众N; one person keeps one set; the combo ids keep their time after the new id). Each frame was re-encoded with the kept fields (protobuf in the recorded field order; the envelope was uncompressed as received) and a new length in its header. t is milliseconds after the first gift; capturedAt is the recording's start (to the second). No IPv4 address, cookie, token or avatar path is left."
+}

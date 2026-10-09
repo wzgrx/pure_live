@@ -281,6 +281,23 @@ void main() {
       expect((unnamed.message, unnamed.gift?.totalValue), ('Kicks ×1', null));
     });
 
+    test('D07.7: Kicks come on channel_<channelId>, as the web client listens; nothing else there', () {
+      expect(KickDanmakuProtocol.kicksChannel(_room), 'channel_3862536');
+      final kicks = {
+        'gift_transaction_id': 't2',
+        'sender': {'id': 5, 'username': 'patron'},
+        'gift': {'gift_id': 'hype', 'name': 'Hype', 'amount': 100},
+      };
+      expect(_read(_frame('KicksGifted', kicks, channel: 'channel_3862536')).single.message, 'Hype ×1');
+      expect(_read(_frame('KicksGifted', kicks, channel: 'channel_1')), isEmpty, reason: 'another channel');
+      expect(_read(_frame('KicksGiftedDeleted', {'gifted_transaction_id': 't2'}, channel: 'channel_3862536')), isEmpty);
+      expect(
+        _read(_frame(r'App\Events\ChatMessageEvent', _chat(), channel: 'channel_3862536')),
+        isEmpty,
+        reason: 'chat is read on the chat channel only',
+      );
+    });
+
     test('Pusher errors and refused subscriptions ask for a reconnect', () {
       expect(
         KickDanmakuProtocol.read(
@@ -313,6 +330,8 @@ void main() {
       expect(socket.sent, [
         KickDanmakuProtocol.subscribe('chatrooms.3852600.v2'),
         KickDanmakuProtocol.subscribe('channel.3862536'),
+        // D07.7: the web client hears Kicks on channel_<channelId>.
+        KickDanmakuProtocol.subscribe('channel_3862536'),
       ]);
       await socket.receive(_frame(r'App\Events\ChatMessageEvent', _chat()));
       expect(_messages(events), isEmpty, reason: 'not joined yet');

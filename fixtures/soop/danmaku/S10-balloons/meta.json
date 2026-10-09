@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "platform": "soop",
+  "case": "S10-balloons",
+  "capturedAt": "2026-10-09T06:48:30Z",
+  "route": "proxy",
+  "frames": 22,
+  "sources": [
+    {
+      "room": "devil0108",
+      "socket": "ws://chat-76dbfcc7.sooplive.com:9000/Websocket/devil0108",
+      "sha256": "08cf27cf2273cb325c61525e10eaef1b3ea3a9ee2ac267564fe151d7e9e02685",
+      "length": 1986457
+    },
+    {
+      "room": "gosegu2",
+      "socket": "ws://chat-6e0a4c54.sooplive.com:9000/Websocket/gosegu2",
+      "sha256": "b6af3bffb1005d7071f9d677b9e96ed7b12388c6723901e46279e353036a365e",
+      "length": 1393205
+    },
+    {
+      "room": "lshooooo",
+      "socket": "ws://chat-6e0a4c4f.sooplive.com:9000/Websocket/lshooooo",
+      "sha256": "bd538b54553b75edc37d286d424b01ad21c6a24c7f562e6b598165c021482303",
+      "length": 3642984
+    },
+    {
+      "room": "ioioiobb",
+      "socket": "ws://chat-76dbfcce.sooplive.com:9000/Websocket/ioioiobb",
+      "sha256": "1d9a92f0c344cb22506b1ab823e48e8d1b7c023dda84f8d85a5e7528febd4311",
+      "length": 738098
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "18 (SVC_SENDBALLOON) packet[1], packet[2]; 87 (SVC_ADCON_EFFECT) packet[2], packet[3]; 91 (SVC_FOLLOW_ITEM) packet[2], packet[3]; 93 (SVC_FOLLOW_ITEM_EFFECT) packet[1], packet[2]: the sender's id and nick",
+      "rule": "person"
+    },
+    {
+      "where": "the uuid of each packet (18 packet[11], 87 packet[15], 91 and 93 packet[8])",
+      "rule": "secret"
+    },
+    {
+      "where": "every packet but 18, 87, 91 and 93 (chat, viewer lists, flags, emoticons, the login and join answers), and the client's packets",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running SoopDanmakuConnection with a connector that tees the frames; anonymous and read-only: the login and join packets and the 20 s keep-alive; through the PC's HTTP proxy)",
+  "note": "10 minutes in the four busiest rooms of the recommended list at 15:48 Korean time, all at once; the TLS port refused, so every socket was the plain port. Balloon and subscription services seen: 18 star balloons 33 times (10, 19, 33 or 100 at once, some with the room's own balloon image, lshooooo_100), 87 ad balloons once, 91 a subscription once, 93 subscription ceremonies 4 times; no 33, 105 or 108. Kept, each packet its own frame with its service and flag bytes and a new length: devil0108's ad balloon and first 7 star balloons, gosegu2's star balloon, subscription and four ceremonies (33, 62, 32, 52 months), lshooooo's first 4 star balloons (custom images) and ioioiobb's first 4 (one with a fan order, 90960). The broadcasters' ids are public and kept. Each sender became viewerNNN and 시청자N (one person keeps one set), each uuid a name-based uuid of the original. t is milliseconds after the room's first kept packet (each next room after a 60 s gap); capturedAt is the start (to the minute). No IPv4 address, cookie or token was in these packets."
+}

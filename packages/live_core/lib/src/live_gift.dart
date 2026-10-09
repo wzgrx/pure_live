@@ -87,6 +87,18 @@ enum LiveGiftUnit {
   /// them is free (D07.6).
   banana,
 
+  /// Kugou Live's star coins (星币), a hundred to a yuan (the gift panel
+  /// prices gifts in them, D07.7).
+  starCoin,
+
+  /// PandaTV's hearts (하트), about 110 won each like a SOOP star balloon
+  /// (D07.7).
+  heart,
+
+  /// LOOK's notes (音符), the currency its gifts are priced in (D07.7). Its
+  /// rate in yuan is not checked, so it is not ranked.
+  note,
+
   /// A unit the platform does not document (Huya's `lPayTotal`), or no
   /// value at all.
   other,
@@ -95,9 +107,10 @@ enum LiveGiftUnit {
 /// How many of each unit make about one yuan, for [giftTierOf] (V03.5
 /// §6.1, §6.5). The domestic rates are fixed by the platforms; the overseas
 /// ones are rough (100 Bits or 100 Kicks about a US dollar, cheese one won,
-/// a star balloon about 110 won, a niconico point about a yen) and only
+/// a star balloon or a PandaTV heart about 110 won, a niconico point about a
+/// yen) and only
 /// rank gifts, never convert a value shown. A unit missing here (red beans,
-/// six coins, silver seeds, bananas, [LiveGiftUnit.other]) is never ranked
+/// six coins, LOOK's notes, silver seeds, bananas, [LiveGiftUnit.other]) is never ranked
 /// above [LiveGiftTier.normal].
 ///
 /// The table and the [giftValuableYuan], [giftPreciousYuan] thresholds were
@@ -111,10 +124,12 @@ const Map<LiveGiftUnit, double> giftUnitsPerYuan = {
   LiveGiftUnit.diamond: 10,
   LiveGiftUnit.douyinCoin: 10,
   LiveGiftUnit.acCoin: 10,
+  LiveGiftUnit.starCoin: 100,
   LiveGiftUnit.bits: 14,
   LiveGiftUnit.kicks: 14,
   LiveGiftUnit.cheese: 190,
   LiveGiftUnit.starBalloon: 1.7,
+  LiveGiftUnit.heart: 1.7,
   LiveGiftUnit.point: 21,
 };
 

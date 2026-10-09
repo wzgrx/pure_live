@@ -354,6 +354,7 @@ const Set<LiveGiftUnit> recordYuanUnits = {
   LiveGiftUnit.diamond,
   LiveGiftUnit.douyinCoin,
   LiveGiftUnit.acCoin,
+  LiveGiftUnit.starCoin,
 };
 
 /// The platforms whose `LiveSuperChatMessage.price` is in yuan: Bilibili's

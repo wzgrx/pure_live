@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' show GZipCodec;
 import 'dart:math';
@@ -26,7 +27,7 @@ final class KugouLiveDanmakuFrame {
     this.ack,
   });
 
-  /// Chat and audience updates, in order.
+  /// Chat, audience updates and gifts, in order.
   final List<LiveMessage> messages;
 
   /// The acknowledgement to send (command 211), or null: the page answers
@@ -167,8 +168,13 @@ abstract final class KugouLiveDanmakuProtocol {
   /// Chat of the room.
   static const int chatCommand = 501;
 
-  /// A gift in the room (`SENDGIFT`): not reported, but acknowledged.
+  /// A gift in the room (`SENDGIFT`, `GiftEffectSocketMsg.Content`):
+  /// reported ([gift], D07.7) and acknowledged.
   static const int giftCommand = 601;
+
+  /// The page's image host (`ServiceHost.imgHost`), before a gift's picture
+  /// path (`image`, `/fxstatic/images/giftres/…`).
+  static const String imageHost = 'https://s4fx.kgimg.com';
 
   /// The acknowledgement of a message (`ACKCMD`, `Ack.AckRequest`).
   static const int ackCommand = 211;
@@ -402,8 +408,8 @@ abstract final class KugouLiveDanmakuProtocol {
   ///   (4 comes first) say nothing.
   /// - Chat (501) and the PK partner room's chat (400305) as [chat]; the
   ///   audience (301005) as [audience].
-  /// - A gift (601) whose envelope asks for it is acknowledged
-  ///   ([KugouLiveDanmakuFrame.ack]); gifts are not reported.
+  /// - A gift (601) as [gift] (D07.7); one whose envelope asks for it is
+  ///   acknowledged ([KugouLiveDanmakuFrame.ack]) as well.
   /// - Anything else, text frames, frames that cannot be read (a short
   ///   header, bad protobuf, JSON or compression) give nothing.
   static KugouLiveDanmakuFrame decode(Object? data, {required String roomId}) {
@@ -433,14 +439,17 @@ abstract final class KugouLiveDanmakuProtocol {
         return KugouLiveDanmakuFrame(messages: [?message]);
       case audienceCommand:
         return KugouLiveDanmakuFrame(messages: audience(packet, roomId: roomId));
-      case giftCommand when jsonInt(packet['ack']) == 1:
+      case giftCommand:
         return KugouLiveDanmakuFrame(
-          ack: ack(
-            roomId: roomId,
-            offset: _text(packet['offset']),
-            msgId: _text(packet['msgId']),
-            repeat: jsonInt(packet['rpt']) ?? 0,
-          ),
+          messages: [?gift(packet, roomId: roomId)],
+          ack: jsonInt(packet['ack']) == 1
+              ? ack(
+                  roomId: roomId,
+                  offset: _text(packet['offset']),
+                  msgId: _text(packet['msgId']),
+                  repeat: jsonInt(packet['rpt']) ?? 0,
+                )
+              : null,
         );
     }
     return const KugouLiveDanmakuFrame();
@@ -518,6 +527,9 @@ abstract final class KugouLiveDanmakuProtocol {
       'senderkugouid': message.integer(7) ?? 0,
       'time': message.integer(11) ?? 0,
     };
+    if (command == giftCommand && (message.integer(16) ?? 0) == 1) {
+      return {...packet, 'content': _giftContent(ProtoMessage.decode(message.bytes(2) ?? Uint8List(0)))};
+    }
     if ((command != chatCommand && command != otherRoomChatCommand) || (message.integer(16) ?? 0) != 1) {
       return packet;
     }
@@ -546,6 +558,31 @@ abstract final class KugouLiveDanmakuProtocol {
       if (source != null) 'source': {'roomid': source.integer(1) ?? 0, 'tags': source.integer(2) ?? 0},
     };
   }
+
+  /// The fields of `GiftEffectSocketMsg.Content` (the page's schema, module
+  /// 80965) that a gift line reads: `giftid 2, giftname 3, num 4, price 5,
+  /// image 8, roomid 12, senderid 13, sendername 15, senderrichlevel 17,
+  /// receiverid 18, receivername 19, comboId 26, comboIdV2 28, comboSumV2
+  /// 29, mysticStatus 38, comboGiftSum 75, senderrichlevelV2 78`.
+  static Map<String, Object?> _giftContent(ProtoMessage gift) => {
+    'giftid': gift.integer(2) ?? 0,
+    'giftname': gift.string(3) ?? '',
+    'num': gift.integer(4) ?? 0,
+    'price': gift.integer(5) ?? 0,
+    'image': gift.string(8) ?? '',
+    'roomid': gift.integer(12) ?? 0,
+    'senderid': gift.integer(13) ?? 0,
+    'sendername': gift.string(15) ?? '',
+    'senderrichlevel': gift.integer(17) ?? 0,
+    'receiverid': gift.integer(18) ?? 0,
+    'receivername': gift.string(19) ?? '',
+    'comboId': gift.string(26) ?? '',
+    'comboIdV2': gift.string(28) ?? '',
+    'comboSumV2': gift.integer(29) ?? 0,
+    'mysticStatus': gift.integer(38) ?? 0,
+    'comboGiftSum': gift.integer(75) ?? 0,
+    'senderrichlevelV2': gift.integer(78) ?? 0,
+  };
 
   /// `Chat.ChatResponse{chatmsg 1, senderid 2, senderkugouid 3, sendername
   /// 4, senderrichlevel 5, receiverid 6, receivername 8, seq 13,
@@ -632,6 +669,81 @@ abstract final class KugouLiveDanmakuProtocol {
       sentAt: _time(packet['time']),
       sourceRoomId: sourceRoom,
     );
+  }
+
+  /// A gift (601, `SENDGIFT`) of room [roomId] as a [LiveMessageType.gift]
+  /// message with a [LiveGift] (D07.7), or null when it is not one: no
+  /// gift id, or the gift names another room (`roomid` of the gift or the
+  /// envelope, when given).
+  ///
+  /// - [LiveGift.id] `giftid`, [LiveGift.name] `giftname`, [LiveGift.count]
+  ///   `num`; [LiveGift.unitPrice] `price` in star coins
+  ///   ([LiveGiftUnit.starCoin], the gift panel's "N星币"),
+  ///   [LiveGift.totalValue] `price × num`; a price of 0 is [LiveGift.free];
+  /// - [LiveGift.comboKey] the combo's id, `comboIdV2` (the sender's id and
+  ///   the combo's first millisecond), else `comboId` unless it is `0`;
+  ///   [LiveGift.comboTotal] `comboGiftSum`, the combo's gifts so far;
+  /// - [LiveGift.iconUrl] `image` on [imageHost] (an `http:` address made
+  ///   `https:`); [LiveGift.receiverName] `receivername`;
+  /// - the sender is `sendername` (without the marks the page takes out),
+  ///   `senderid` (the envelope's without one) and the wealth level
+  ///   `senderrichlevelV2`, else `senderrichlevel`; the id is the envelope's
+  ///   `msgId` (the same on the server's repeats); the time its `time`.
+  ///
+  /// Read from the content of a protobuf envelope (`codec` 1, [_giftContent])
+  /// or of a JSON one, which uses the same names.
+  static LiveMessage? gift(Map<String, Object?> packet, {required String roomId}) {
+    final content = packet['content'];
+    if (content is! Map) return null;
+    for (final room in [jsonInt(content['roomid']) ?? 0, jsonInt(packet['roomid']) ?? 0]) {
+      if (room != 0 && '$room' != roomId) return null;
+    }
+    final id = _id(content['giftid']);
+    if (id == null) return null;
+    final count = max(1, jsonInt(content['num']) ?? 1);
+    final price = jsonInt(content['price']) ?? 0;
+    final comboV2 = _text(content['comboIdV2']).trim();
+    final combo = _text(content['comboId']).trim();
+    final comboSum = jsonInt(content['comboGiftSum']) ?? 0;
+    final level = _positive(content['senderrichlevelV2']) ?? _positive(content['senderrichlevel']);
+    final gift = LiveGift(
+      id: id,
+      name: _clean(content['giftname']),
+      count: count,
+      comboKey: comboV2.isNotEmpty && comboV2 != '0'
+          ? comboV2
+          : combo.isNotEmpty && combo != '0'
+          ? combo
+          : '',
+      comboTotal: comboSum > 0 ? comboSum : null,
+      unitPrice: price < 0 ? null : price,
+      totalValue: price < 0 ? null : price * count,
+      unit: LiveGiftUnit.starCoin,
+      free: price == 0,
+      iconUrl: _image(_text(content['image'])),
+      receiverName: _clean(content['receivername']),
+    );
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: _clean(content['sendername']),
+      userId: _id(content['senderid']) ?? _id(packet['senderid']) ?? '',
+      message: gift.plainText,
+      color: LiveMessageColor.white,
+      userLevel: level == null ? '' : '$level',
+      messageId: _text(packet['msgId']),
+      sentAt: _time(packet['time']),
+      data: gift,
+    );
+  }
+
+  /// A gift picture's address: a path on [imageHost], or an `http(s)`
+  /// address as `https`; null for anything else.
+  static Uri? _image(String path) {
+    final text = path.trim();
+    if (text.isEmpty) return null;
+    final uri = Uri.tryParse(text.startsWith('/') && !text.startsWith('//') ? '$imageHost$text' : text);
+    if (uri == null || uri.host.isEmpty || (uri.scheme != 'https' && uri.scheme != 'http')) return null;
+    return uri.replace(scheme: 'https');
   }
 
   /// The audience of room [roomId] (`HEAT_NUM` with `actionId`
@@ -894,8 +1006,10 @@ final class _BoundedSink implements Sink<List<int>> {
 ///   connection.
 /// - Refused logins reconnect; more than three in a row end the connection.
 /// - The binary heartbeat goes every 10 s; the server answers each.
-/// - Chat of the room and its audience are reported; gifts are not, but
-///   acknowledged as the page does.
+/// - Chat of the room, its audience and its gifts are reported (D07.7);
+///   gifts are acknowledged as the page does, and a gift the server sends
+///   again (the same `msgId`: it repeats an unacknowledged one twice, about
+///   2 s apart) is reported once.
 ///
 /// The app registers it as `SiteIds.kugouLive: () =>
 /// KugouLiveDanmakuConnection(http: …, proxy: …)`, with the `LiveHttp` it
@@ -1022,6 +1136,7 @@ final class KugouLiveDanmakuConnection extends DanmakuSocketConnection<KugouLive
     }
     for (final message in frame.messages) {
       if (!session.isActive) return;
+      if (message.type == LiveMessageType.gift && !chat.firstGift(message.messageId)) continue;
       session.message(message);
     }
   }
@@ -1162,6 +1277,20 @@ final class _Chat {
 
   /// Logins refused in a row.
   int refusals = 0;
+
+  /// The `msgId`s of the last [_giftsKept] gifts reported.
+  final LinkedHashSet<String> _gifts = LinkedHashSet();
+
+  static const int _giftsKept = 256;
+
+  /// Whether the gift [messageId] was not reported yet in this run (and
+  /// marks it); a gift without one always is.
+  bool firstGift(String messageId) {
+    if (messageId.isEmpty) return true;
+    if (!_gifts.add(messageId)) return false;
+    if (_gifts.length > _giftsKept) _gifts.remove(_gifts.first);
+    return true;
+  }
 
   void dispose() => cancel.cancel();
 }

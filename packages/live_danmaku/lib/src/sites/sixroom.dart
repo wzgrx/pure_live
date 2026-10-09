@@ -123,8 +123,26 @@ abstract final class SixRoomDanmakuProtocol {
   /// "飞屏，价格：1000个六币" (`data-sug`), and its script sends one
   /// (`prop_flymsg`) after asking "“飞屏”等同于礼物，价值1000六币" (checked
   /// 2026-10-09). The 2000-coin "跟风飞屏" is a gift (`gid` 1516) whose words
-  /// come in another message (324), not a 108.
+  /// come in another message ([followFlyScreen]), not a 108.
   static const int flyScreenPrice = 1000;
+
+  /// A gift (`Room.present.parseGet`, D07.7): read with [gift].
+  static const String gift = '201';
+
+  /// A follow fly-screen (跟风飞屏, `Room.GiftFlyFollow`): `content.type` 1
+  /// starts one with its words (`msg`), from `alias` (`uid`); other types
+  /// count a viewer who followed it. Read with [followFly] (D07.7).
+  static const String followFlyScreen = '324';
+
+  /// What a follow fly-screen costs: "“跟风飞屏”等同于礼物，价值2000六币" (the
+  /// page's `GiftFlyFollow.send`, checked 2026-10-09).
+  static const int followFlyScreenPrice = 2000;
+
+  /// The gift items that are a fly-screen's purchase (`106` 飞屏, `1516`
+  /// 跟风飞屏, in the page's own gift table): their words come as a super
+  /// chat ([flyScreen], [followFlyScreen]), so the gift itself is not
+  /// reported a second time.
+  static const Set<String> flyScreenGifts = {'106', '1516'};
 
   /// How long a fly-screen stays among the super chats: the page flies it
   /// across the video once and keeps no list, so the shortest step of
@@ -288,12 +306,14 @@ abstract final class SixRoomDanmakuProtocol {
   /// shows it to a guest:
   ///
   /// - public chat ([publicChat]) is read with [chat], fly-screen messages
-  ///   ([flyScreen]) with [fly] (super chats, D07.2);
+  ///   ([flyScreen]) with [fly] (super chats, D07.2), gifts ([gift]) with
+  ///   [giftMessage] and follow fly-screens ([followFlyScreen]) with
+  ///   [followFly] (D07.7);
   /// - a list of public chat ([publicChatList]) gives each entry's [chat];
   /// - a list of messages ([batch]) gives each entry's messages, at most
   ///   [maxDepth] lists deep;
   /// - a message the page hides from a guest ([shownToGuests]) and every
-  ///   other type (entries, gifts, rankings, PK states, room notices) give
+  ///   other type (entries, rankings, PK states, room notices) give
   ///   nothing.
   static List<LiveMessage> messages(Object? message) {
     final found = <LiveMessage>[];
@@ -308,6 +328,10 @@ abstract final class SixRoomDanmakuProtocol {
         if (chat(message) case final LiveMessage line) found.add(line);
       case flyScreen:
         if (fly(message) case final LiveMessage line) found.add(line);
+      case gift:
+        if (giftMessage(message) case final LiveMessage line) found.add(line);
+      case followFlyScreen:
+        if (followFly(message) case final LiveMessage line) found.add(line);
       case publicChatList:
         for (final entry in _list(message['content'])) {
           if (entry is! Map) continue;
@@ -408,6 +432,105 @@ abstract final class SixRoomDanmakuProtocol {
     );
   }
 
+  /// A gift (typeID 201) as a [LiveMessageType.gift] message with a
+  /// [LiveGift] (D07.7), as the page's chat list writes it
+  /// (`Room.present.chatMsg`: `<from> 送N个<title>`), or null:
+  ///
+  /// - not without a sender (`fid` empty or 0: the page writes a game's
+  ///   prize, `<to> 参与 <from> 获得…`, not a gift), without an item, or for
+  ///   a fly-screen's purchase ([flyScreenGifts]);
+  /// - [LiveGift.id] `content.item`, [LiveGift.name] `content.itemName`
+  ///   (the page's table title), [LiveGift.count] `content.num`;
+  /// - [LiveGift.totalValue] `content.giftCoin`, the six coins the send
+  ///   cost ([LiveGiftUnit.sixCoin]; 0, a gift from the viewer's stock, has
+  ///   no value), [LiveGift.unitPrice] that over the count when it divides;
+  /// - a combo (`content.isContinue` 1 with `content.keep.tmp_id`, which the
+  ///   page folds into one line for 6 s) has [LiveGift.comboKey]
+  ///   `<fid>:<tmp_id>` and [LiveGift.comboTotal] `num × groupnum`, the
+  ///   count the folded line shows;
+  /// - [LiveGift.iconUrl] only for a picture the message carries
+  ///   (`content.aiGiftPic`): the page's gift table, which has the others,
+  ///   is an 8 MB script; [LiveGift.receiverName] `to`;
+  /// - the sender `from` and `fid`, the time `tm`, the id `askId`.
+  static LiveMessage? giftMessage(Map<Object?, Object?> message) {
+    final sender = _text(message['fid']);
+    if (sender.isEmpty || sender == '0') return null;
+    final content = message['content'];
+    if (content is! Map) return null;
+    final item = _text(content['item']);
+    if (item.isEmpty || item == '0' || flyScreenGifts.contains(item)) return null;
+    final count = max(1, jsonInt(content['num']) ?? 1);
+    final coins = jsonInt(content['giftCoin']) ?? 0;
+    final keep = content['keep'];
+    final combo = keep is Map ? _text(keep['tmp_id']) : '';
+    final continued = _text(content['isContinue']) == '1' && combo.isNotEmpty && combo != '0';
+    final hits = max(1, jsonInt(content['groupnum']) ?? 1);
+    final picture = Uri.tryParse(_text(content['aiGiftPic']));
+    final data = LiveGift(
+      id: item,
+      name: _html(content['itemName']),
+      count: count,
+      comboKey: continued ? '$sender:$combo' : '',
+      comboTotal: continued ? count * hits : null,
+      unitPrice: coins > 0 && coins % count == 0 ? coins ~/ count : null,
+      totalValue: coins > 0 ? coins : null,
+      unit: LiveGiftUnit.sixCoin,
+      iconUrl: picture != null && picture.host.isNotEmpty && (picture.isScheme('https') || picture.isScheme('http'))
+          ? picture.replace(scheme: 'https')
+          : null,
+      receiverName: _text(message['to']),
+    );
+    final line = _line(_text(message['from']), message, data.plainText);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: line.userName,
+      userId: line.userId,
+      message: data.plainText,
+      color: LiveMessageColor.white,
+      messageId: _text(message['askId']),
+      sentAt: line.sentAt,
+      data: data,
+    );
+  }
+
+  /// A follow fly-screen (typeID 324, `content.type` 1) as a super chat
+  /// like [fly]'s (D07.7): the name `alias`, the user id `uid`, the words
+  /// `msg` (read like [chat]'s), [followFlyScreenPrice] six coins, shown
+  /// from `tm` (else [now]) for [flyScreenDuration]; the id
+  /// `follow-fly:<id>`. Null without words, and for the other types (a
+  /// viewer who followed: the page only counts them).
+  static LiveMessage? followFly(Map<Object?, Object?> message, {DateTime? now}) {
+    final content = message['content'];
+    if (content is! Map || _text(content['type']) != '1') return null;
+    final text = _html(content['msg']);
+    if (text.isEmpty) return null;
+    final name = _text(content['alias']);
+    final line = _line(name, {'tm': message['tm'], 'fid': content['uid']}, text);
+    final start = line.sentAt ?? now ?? DateTime.now();
+    final id = _text(content['id']);
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: name,
+      userId: line.userId,
+      message: text,
+      sentAt: line.sentAt,
+      messageId: id.isEmpty ? '' : 'follow-fly:$id',
+      color: LiveMessageColor.white,
+      data: LiveSuperChatMessage(
+        userName: name,
+        face: '',
+        message: text,
+        price: followFlyScreenPrice,
+        unit: LiveGiftUnit.sixCoin,
+        messageId: id.isEmpty ? '' : 'follow-fly:$id',
+        startTime: start,
+        endTime: start.add(flyScreenDuration),
+        backgroundColor: '',
+        backgroundBottomColor: '',
+      ),
+    );
+  }
+
   static LiveMessage _line(String name, Map<Object?, Object?> message, String text) {
     final time = jsonInt(message['tm']);
     return LiveMessage(
@@ -450,8 +573,8 @@ abstract final class SixRoomDanmakuProtocol {
 ///   login has 6 s; a refused login reconnects, more than three in a row end
 ///   the connection. A flag on which the page stops its socket ends it too.
 /// - The page's `noop` heartbeat every 16 s; the server answers each.
-/// - Only chat is reported: public chat, and fly-screen messages as super
-///   chats (D07.2).
+/// - Public chat, fly-screen messages as super chats (D07.2; follow
+///   fly-screens too, D07.7) and gifts (D07.7) are reported.
 ///
 /// The app registers it as `SiteIds.sixRoom: () =>
 /// SixRoomDanmakuConnection(http: …, proxy: …)`, with the `LiveHttp` it

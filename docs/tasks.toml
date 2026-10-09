@@ -2340,13 +2340,16 @@ next = "K90 上按 verify.md 看"
 id = "D07.7"
 title = "要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick"
 type = "平台"
-status = "未开始"
+status = "开发中"
+date = "2026-10-09"
 size = "大"
 tier = 3
 stages = ["国内：酷狗 601、六间房 201、LOOK 102", "韩国：SOOP 星气球和订阅、PandaTV 후원", "日本：SHOWROOM 礼物、TwitCasting gift=1", "其他：FC2 打赏和礼物、Kick Kicks"]
-done = 0
+done = 3
+next = "K90 按 verify.md 看前三个阶段（酷狗、六间房、LOOK、SOOP、PandaTV、SHOWROOM、TwitCasting）；阶段 4：Kick 已修订阅（channel_<频道号>），等有人送 Kicks 时录样本核对字段；FC2 30 分钟录不到打赏和礼物，等人多时或有登录态再录"
+branch = "worktree-agent-aa187e4b8b348505a"
 from = "V03.5 第 2、3 节、第 7 节；用户 2026-10-09（D-040）"
-note = "依赖 E05.5；每个平台先录真实样本（海外开代理，按 fixtures/README.md 脱敏），字段确认了再写解析；可以按阶段拆成单独的任务"
+note = "依赖 E05.5；前三个阶段都录到样本并解了：酷狗 601（星币，新单位 starCoin）、六间房 201 和跟风飞屏 324（醒目留言，飞屏的购买不再报礼物）、LOOK 102（音符 note）、SOOP 18/33/87/105 打赏和 91/93 订阅通知、PandaTV SponCoin（心 heart）、SHOWROOM t 2 和礼物表（AcfunSite 式缓存）、TwitCasting gift=1；Kick 的 Kicks 以前订错频道收不到，已修，没录到样本；FC2 没做。设计选择（D-003）和字段表写在 record.md"
 
 [[task]]
 id = "D08.1"

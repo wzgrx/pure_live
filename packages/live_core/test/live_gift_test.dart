@@ -116,6 +116,7 @@ void main() {
         (LiveGiftUnit.diamond, 10),
         (LiveGiftUnit.douyinCoin, 10),
         (LiveGiftUnit.acCoin, 10),
+        (LiveGiftUnit.starCoin, 100),
       ]) {
         expect(giftUnitsPerYuan[unit], perYuan, reason: unit.name);
         LiveGiftTier tierAt(double yuan) => giftTierOf(unit, (yuan * perYuan).round());

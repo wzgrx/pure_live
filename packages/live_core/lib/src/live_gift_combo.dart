@@ -15,7 +15,10 @@ import 'package:live_core/src/live_message.dart';
 String giftComboKey(LiveMessage message, LiveGift gift) => gift.comboKey.isNotEmpty
     ? 'combo:${gift.comboKey}'
     : 'sender:${gift.kind.name}:${message.userId}\u0000${message.userName}\u0000'
-          '${gift.id.isNotEmpty ? gift.id : gift.name}';
+          '${gift.id.isNotEmpty ? gift.id : gift.name}'
+          // A gift to someone else is another combo (D07.7: Kugou's streamer
+          // sends 亲亲 to ten viewers in turn); no receiver keeps the old key.
+          '${gift.receiverName.isEmpty ? '' : '\u0000→${gift.receiverName}'}';
 
 /// The count of a combo that showed [shown] once [gift] counts on it: the
 /// platform's running count when it has one ([LiveGift.comboTotal];

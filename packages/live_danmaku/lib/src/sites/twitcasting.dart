@@ -8,6 +8,26 @@ import 'package:live_danmaku/src/socket_connection.dart';
 import 'package:live_net/live_net.dart';
 import 'package:meta/meta.dart';
 
+/// A TwitCasting gift (アイテム, D07.7): an item with a name and a picture;
+/// the event gives no price.
+final class TwitcastingGift extends LiveGift {
+  /// Creates the gift.
+  const new({required super.name, super.iconUrl, this.paid = false});
+
+  /// `isPaidGift`: the platform marks the item as paid for (its words are
+  /// then highlighted by the player).
+  final bool paid;
+
+  @override
+  bool operator ==(Object other) => super == other && other is TwitcastingGift && other.paid == paid;
+
+  @override
+  int get hashCode => Object.hash(super.hashCode, paid);
+
+  @override
+  String toString() => 'TwitcastingGift($displayName${paid ? ', paid' : ''})';
+}
+
 /// TwitCasting's comment stream: the web player's `eventpubsuburl.php` and
 /// `event.pubsub` socket (the archived v4's spec/sites/twitcasting.md §7,
 /// checked against the recording `fixtures/twitcasting/danmaku/S08-live` and
@@ -19,8 +39,9 @@ import 'package:meta/meta.dart';
 ///   with the query `token=…&n=…`; the token is signed for about an hour.
 /// - The client sends nothing. The server pushes JSON arrays of events, and
 ///   an empty array when nothing else went out for 10 s.
-/// - Only `comment` events are chat. Gifts come only to a URL with `gift=1`
-///   (the player adds it), which this client does not ask for.
+/// - `comment` events are chat. Gifts (`gift` events) come only to a URL
+///   with `gift=1`, which the player adds and so does this client
+///   ([withGifts], D07.7).
 abstract final class TwitcastingDanmakuProtocol {
   /// Where a broadcast's socket URL is asked for.
   static final Uri pubsubUrl = Uri.parse('https://twitcasting.tv/eventpubsuburl.php');
@@ -71,6 +92,14 @@ abstract final class TwitcastingDanmakuProtocol {
     return uri;
   }
 
+  /// [socket] with `gift=1` added to its query, as the player asks for it
+  /// (`eventpubsuburl.php`'s answer `+ "&gift=1"`), so `gift` events come
+  /// too (D07.7). The signature (`token`, `n`) is kept as signed.
+  static Uri withGifts(Uri socket) {
+    final query = socket.query;
+    return socket.replace(query: query.isEmpty ? 'gift=1' : '$query&gift=1');
+  }
+
   static bool _isSiteHost(String host) => host == 'twitcasting.tv' || host.endsWith('.twitcasting.tv');
 
   /// The address a [TwitcastingDanmakuConnection]'s socket is given for
@@ -91,10 +120,11 @@ abstract final class TwitcastingDanmakuProtocol {
   /// left out: `dart:io` names the whole URL in a failed handshake.
   static String redact(String text) => text.replaceAllMapped(_signed, (match) => '${match[1]}=…');
 
-  /// The chat of one pushed frame (text, or UTF-8 bytes): every `comment`
-  /// event in order ([comment]). A frame that is not JSON, the keep-alive
-  /// `[]` and every other event give nothing; a single event outside an
-  /// array is read like a one-event array (as the archived v4 did).
+  /// The chat and gifts of one pushed frame (text, or UTF-8 bytes): every
+  /// `comment` event ([comment]) and `gift` event ([gift], D07.7) in order. A
+  /// frame that is not JSON, the keep-alive `[]` and every other event give
+  /// nothing; a single event outside an array is read like a one-event array
+  /// (as the archived v4 did).
   static List<LiveMessage> decode(Object? data) {
     final text = switch (data) {
       final String text => text,
@@ -109,8 +139,66 @@ abstract final class TwitcastingDanmakuProtocol {
       return const [];
     }
     return [
-      for (final event in root is List ? root : [root])
-        if (comment(event) case final LiveMessage message) message,
+      for (final event in root is List ? root : [root]) ...[?comment(event), ...gift(event)],
+    ];
+  }
+
+  /// A `gift` event (アイテム, D07.7) as a [LiveMessageType.gift] message with
+  /// a [TwitcastingGift], then its words as chat; nothing for any other
+  /// event, and for a notice the player draws without a sender
+  /// (`item.showsSenderInfo` false: the campaign's score notices) or an item
+  /// without a name.
+  ///
+  /// - [LiveGift.name] `item.name` as the platform writes it (`お茶ｘ10`:
+  ///   the number is part of the item), [LiveGift.count] 1;
+  ///   [LiveGift.iconUrl] `item.image`; no price or value (the event has
+  ///   none; the 🍡 of `score_items` is the broadcast's score, not money);
+  ///   [TwitcastingGift.paid] `isPaidGift`;
+  /// - the sender as a [comment]'s author (`sender`), the id `id` (text),
+  ///   the time `createdAt`;
+  /// - the sender's words (`plainMessage`, which no `comment` repeats) are a
+  ///   white chat line after the gift, with the id `<id>:words`.
+  static List<LiveMessage> gift(Object? event) {
+    if (event is! Map || event['type'] != 'gift') return const [];
+    final item = event['item'] is Map ? event['item'] as Map : const <Object?, Object?>{};
+    final name = _text(item['name']);
+    if (name.isEmpty || item['showsSenderInfo'] == false) return const [];
+    final sender = event['sender'] is Map ? event['sender'] as Map : const <Object?, Object?>{};
+    final senderName = _text(sender['name']);
+    final image = Uri.tryParse(_text(item['image']));
+    final data = TwitcastingGift(
+      name: name,
+      iconUrl: image != null && image.isScheme('https') && image.host.isNotEmpty ? image : null,
+      paid: event['isPaidGift'] == true,
+    );
+    final created = event['createdAt'];
+    final sentAt = created is int && created > 0 && created <= _maxEpochMilliseconds
+        ? DateTime.fromMillisecondsSinceEpoch(created)
+        : null;
+    final id = _id(event['id']);
+    final userName = senderName.isNotEmpty ? senderName : _text(sender['screenName']);
+    final words = _text(event['plainMessage']);
+    return [
+      LiveMessage(
+        type: LiveMessageType.gift,
+        userName: userName,
+        userId: _id(sender['id']),
+        message: data.plainText,
+        messageId: id,
+        sentAt: sentAt,
+        color: LiveMessageColor.white,
+        data: data,
+      ),
+      if (words.isNotEmpty)
+        LiveMessage(
+          type: LiveMessageType.chat,
+          userName: userName,
+          userId: _id(sender['id']),
+          message: words,
+          messageId: id.isEmpty ? '' : '$id:words',
+          sentAt: sentAt,
+          color: LiveMessageColor.white,
+        ),
     ];
   }
 
@@ -265,7 +353,7 @@ final class _Resolver {
 
   Future<Uri> _resolve(int movie, Duration timeout) async {
     final response = await _http.send(TwitcastingDanmakuProtocol.request(movie, timeout: timeout, cancel: _cancel));
-    return TwitcastingDanmakuProtocol.socketUrl(response);
+    return TwitcastingDanmakuProtocol.withGifts(TwitcastingDanmakuProtocol.socketUrl(response));
   }
 }
 

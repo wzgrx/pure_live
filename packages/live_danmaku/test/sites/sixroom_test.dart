@@ -742,6 +742,170 @@ void main() {
     });
   });
 
+  group('gifts (D07.7, S08-gifts)', () {
+    final lines = [
+      for (final line in File('../../fixtures/sixroom/danmaku/S08-gifts/frames.jsonl').readAsLinesSync())
+        (jsonDecode(line) as Map<String, Object?>)['text']! as String,
+    ];
+
+    test('S08: every recorded gift (201) as the chat list writes it', () {
+      final frames = [for (final line in lines) SixRoomDanmakuProtocol.decode(line)];
+      expect(frames.map((frame) => frame.messages.length), everyElement(1));
+      final messages = [for (final frame in frames) frame.messages.single];
+      expect(messages.map((m) => m.type), everyElement(LiveMessageType.gift));
+      final data = [for (final m in messages) m.data! as LiveGift];
+      expect(
+        [
+          for (final (i, g) in data.indexed)
+            (messages[i].userName, g.id, g.name, g.count, g.totalValue, g.unitPrice, g.comboKey, g.comboTotal),
+        ],
+        [
+          ('观众1', '22774', '御风铃', 1, 1000, 1000, '110001013:1791528256567', 1),
+          ('观众2', '1736', '无限火力', 1, null, null, '', null),
+          ('观众3', '22353', '心动电池', 1, 100, 100, '10003039:1791528881947', 1),
+          ('观众3', '22353', '心动电池', 1, 100, 100, '10003039:1791528881947', 2),
+          ('观众3', '22353', '心动电池', 1, 100, 100, '10003039:1791528881947', 3),
+          ('观众3', '2430', '蓝宝石钻戒', 1, 100, 100, '10003039:1791528894225', 1),
+          ('观众3', '2430', '蓝宝石钻戒', 1, 100, 100, '10003039:1791528894225', 2),
+          ('观众4', '1419', '喜欢你', 1, null, null, '', null),
+          ('神秘人', '22353', '心动电池', 3, 300, 100, '1900000047:1791528172753', 3),
+        ],
+      );
+      expect(data.map((g) => g.unit), everyElement(LiveGiftUnit.sixCoin));
+      expect(data.map((g) => g.free), everyElement(isFalse));
+      expect(data.map((g) => g.iconUrl), everyElement(isNull), reason: "the table is the page's 8 MB script");
+      expect(data.take(7).map((g) => g.receiverName), everyElement('︶薀昕下午播ぃ'));
+      final first = messages.first;
+      expect(
+        (first.userId, first.message, first.messageId, first.sentAt),
+        ('110001013', '御风铃 ×1', '', DateTime.fromMillisecondsSinceEpoch(1791528256000)),
+      );
+      expect(messages[1].messageId, 'D60DFF829C755C8797AE394508F70FDA');
+      expect(messages[8].userId, '1900000047');
+    });
+
+    test("what is not a gift: a prize without a sender, no item, a fly-screen's purchase; stock gifts; pictures", () {
+      Map<String, Object?> gift({Object? fid = '5', Map<String, Object?> content = const {}}) => {
+        'typeID': 201,
+        'tm': 1791528256,
+        'fid': fid,
+        'from': '观众',
+        'to': '主播',
+        'content': {'item': 7, 'num': 2, 'giftCoin': 10, 'itemName': '花&amp;草', ...content},
+      };
+      List<LiveMessage> read(Map<String, Object?> message) => SixRoomDanmakuProtocol.messages(message);
+      expect(read(gift(fid: '')), isEmpty, reason: 'a game prize, written "<to> 参与 <from> 获得…"');
+      expect(read(gift(fid: 0)), isEmpty);
+      expect(read(gift(content: {'item': ''})), isEmpty);
+      expect(read(gift(content: {'item': 106})), isEmpty, reason: '飞屏: its words are the 108 super chat');
+      expect(read(gift(content: {'item': '1516'})), isEmpty, reason: '跟风飞屏: its words are the 324 super chat');
+      expect(read({...gift(), 'newLimitLevel': 3}), isEmpty, reason: 'hidden from guests');
+      expect(
+        read(gift()).single.data,
+        const LiveGift(
+          id: '7',
+          name: '花&草',
+          count: 2,
+          unitPrice: 5,
+          totalValue: 10,
+          unit: LiveGiftUnit.sixCoin,
+          receiverName: '主播',
+        ),
+      );
+      expect((read(gift(content: {'giftCoin': 3})).single.data! as LiveGift).unitPrice, isNull, reason: '3 over 2');
+      final combo = read(gift(content: {'isContinue': '1', 'keep': <String, Object?>{}, 'groupnum': 4})).single;
+      expect(
+        ((combo.data! as LiveGift).comboKey, (combo.data! as LiveGift).comboTotal),
+        ('', null),
+        reason: 'no tmp_id',
+      );
+      final picture = read(gift(content: {'aiGiftPic': 'http://vi0.6rooms.com/a.png'})).single.data! as LiveGift;
+      expect(picture.iconUrl, Uri.parse('https://vi0.6rooms.com/a.png'));
+      // Inside a 1413 list, as most of the recorded ones came.
+      expect(
+        read({
+          'typeID': 1413,
+          'content': [gift(), gift(fid: '')],
+        }),
+        hasLength(1),
+      );
+    });
+
+    test('324: a follow fly-screen (跟风飞屏) is a super chat of 2000 six coins; followers say nothing', () {
+      // Synthetic, as the page's GiftFlyFollow.parse reads it: no 324 came in
+      // 15 minutes of five rooms.
+      final now = DateTime(2026, 10, 9, 15);
+      final follow = SixRoomDanmakuProtocol.followFly({
+        'typeID': 324,
+        'tm': 1791528300,
+        'content': {
+          'type': 1,
+          'id': 88,
+          'uid': 10000007,
+          'alias': '观众7',
+          'avatar': 'https://vi0.6rooms.com/x.jpg',
+          'msg': '主播 &amp; 大家晚上好',
+          'countDownTm': 30,
+          'isFollow': 0,
+        },
+      }, now: now)!;
+      expect(
+        (follow.type, follow.userName, follow.userId, follow.message, follow.messageId),
+        (LiveMessageType.superChat, '观众7', '10000007', '主播 & 大家晚上好', 'follow-fly:88'),
+      );
+      final paid = follow.data! as LiveSuperChatMessage;
+      expect((paid.price, paid.unit, paid.messageId), (2000, LiveGiftUnit.sixCoin, 'follow-fly:88'));
+      expect(paid.startTime, DateTime.fromMillisecondsSinceEpoch(1791528300000));
+      expect(paid.endTime.difference(paid.startTime), SixRoomDanmakuProtocol.flyScreenDuration);
+      expect(SixRoomDanmakuProtocol.followFlyScreenPrice, 2000);
+      final untimed = SixRoomDanmakuProtocol.followFly({
+        'typeID': 324,
+        'content': {'type': '1', 'alias': 'a', 'msg': 'hi'},
+      }, now: now)!;
+      expect(((untimed.data! as LiveSuperChatMessage).startTime, untimed.messageId), (now, ''));
+      expect(
+        SixRoomDanmakuProtocol.followFly({
+          'typeID': 324,
+          'content': {'type': 2, 'alias': '观众8', 'uid': 9},
+        }),
+        isNull,
+        reason: 'a viewer who followed: the page only counts them',
+      );
+      expect(
+        SixRoomDanmakuProtocol.followFly({
+          'typeID': 324,
+          'content': {'type': 1, 'alias': '观众8', 'msg': ' '},
+        }),
+        isNull,
+      );
+      expect(
+        SixRoomDanmakuProtocol.messages({
+          'typeID': '324',
+          'content': {'type': 1, 'alias': 'a', 'msg': 'hi'},
+        }).single.type,
+        LiveMessageType.superChat,
+      );
+    });
+
+    test('the connection reports the recorded gifts in order', () async {
+      final http = _Http([_body(_recording.first.text)]);
+      final connector = _Connector();
+      final connection = _connection(http, connector);
+      final events = _record(connection);
+      await connection.connect(_args);
+      final channel = connector.channels.single;
+      await channel.receive(_loginSuccess);
+      for (final line in lines) {
+        await channel.receive(line);
+      }
+      expect(
+        [for (final m in _messages(events)) m.message],
+        ['御风铃 ×1', '无限火力 ×1', '心动电池 ×1', '心动电池 ×1', '心动电池 ×1', '蓝宝石钻戒 ×1', '蓝宝石钻戒 ×1', '喜欢你 ×1', '心动电池 ×3'],
+      );
+      await connection.close();
+    });
+  });
+
   group('connection', () {
     test('timing and registration', () {
       const policy = SixRoomDanmakuConnection.defaultPolicy;

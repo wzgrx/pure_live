@@ -371,6 +371,9 @@ abstract final class LookLiveDanmakuProtocol {
               if (chat(answer.body.firstOrNull, anonymousMode: anonymousMode) case final message?) {
                 messages.add(message);
               }
+              if (gift(answer.body.firstOrNull, anonymousMode: anonymousMode) case final message?) {
+                messages.add(message);
+              }
           }
       }
     }
@@ -503,6 +506,68 @@ abstract final class LookLiveDanmakuProtocol {
       fansName: fansName,
       messageId: _text(message['1']),
       sentAt: time != null && time > 0 && time <= _maxEpochMillis ? DateTime.fromMillisecondsSinceEpoch(time) : null,
+    );
+  }
+
+  /// `custom.type` of a gift ([gift], D07.7).
+  static const int giftType = 102;
+
+  /// A gift (D07.7): a custom message (`2` is 100) whose `custom.type` is
+  /// [giftType] with a gift id (`content.giftId`), as a
+  /// [LiveMessageType.gift] message with a [LiveGift]; null otherwise.
+  ///
+  /// - [LiveGift.id] `giftId`, [LiveGift.name] `giftName`,
+  ///   [LiveGift.count] `number`, [LiveGift.iconUrl] `giftIconUrl` (made
+  ///   https);
+  /// - [LiveGift.unitPrice] `giftWorth` and [LiveGift.totalValue] `giftWorth
+  ///   × number` in [LiveGiftUnit.note] (inferred from the recording: 1 for
+  ///   the cheapest items, 100 for 旋转木马; `giftValue` and
+  ///   `giftCharmRankScore` are the broadcaster's charm points);
+  /// - [LiveGift.receiverName] `receiver.nickName` when the gift names one;
+  /// - the sender, id and time as [chat]'s.
+  static LiveMessage? gift(Object? message, {bool anonymousMode = false}) {
+    if (message is! Map || _int(message['2']) != 100) return null;
+    final custom = _custom(message['4']);
+    if (custom == null || _int(custom['type']) != giftType) return null;
+    final content = custom['content'];
+    if (content is! Map) return null;
+    final id = _int(content['giftId']);
+    if (id == null || id <= 0) return null;
+    final count = _int(content['number']) ?? 1;
+    final worth = _int(content['giftWorth']);
+    final icon = Uri.tryParse(_text(content['giftIconUrl']));
+    final receiver = content['receiver'];
+    final data = LiveGift(
+      id: '$id',
+      name: _text(content['giftName']),
+      count: count,
+      unitPrice: worth != null && worth >= 0 ? worth : null,
+      totalValue: worth != null && worth >= 0 ? worth * max(count, 1) : null,
+      unit: LiveGiftUnit.note,
+      iconUrl: icon != null && icon.host.isNotEmpty && (icon.isScheme('http') || icon.isScheme('https'))
+          ? icon.replace(scheme: 'https')
+          : null,
+      receiverName: receiver is Map ? _text(receiver['nickName']) : '',
+    );
+    final user = content['user'] is Map ? content['user'] as Map : const <Object?, Object?>{};
+    var name = _text(user['nickname']);
+    if (name.isEmpty) name = _text(user['nickName']);
+    if (anonymousMode && name.isNotEmpty) name = '${String.fromCharCode(name.runes.first)}***';
+    var userId = _text(user['userId']);
+    if (userId.isEmpty) userId = _text(message['21']);
+    final time = _int(message['20']);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: name,
+      userId: userId,
+      message: data.plainText,
+      color: LiveMessageColor.white,
+      userLevel: _level(user['liveLevel']),
+      fansLevel: _level(user['fanClubLevel']),
+      fansName: _text(user['fanClubName']),
+      messageId: _text(message['1']),
+      sentAt: time != null && time > 0 && time <= _maxEpochMillis ? DateTime.fromMillisecondsSinceEpoch(time) : null,
+      data: data,
     );
   }
 

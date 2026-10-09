@@ -317,37 +317,42 @@ class _Overview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return ListView(
-      key: const ValueKey('settings-overview'),
-      physics: const PureLiveScrollPhysics(),
-      padding: EdgeInsets.fromLTRB(twoPane ? 12 : 16, 0, twoPane ? 12 : 16, 32),
-      children: [
-        for (final (index, area) in SettingsArea.values.indexed)
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 720),
-              child: SettingsGroup(
-                first: index == 0,
-                title: i18n(area.titleKey),
-                children: [
-                  for (final section in SettingsSection.values)
-                    if (section.area == area)
-                      SettingsLinkRow(
-                        key: ValueKey('settings-section-${section.name}'),
-                        icon: section.icon,
-                        leading: section.icon == null
-                            ? DanmakuIcon(DanmakuIconKind.settings, size: 24, color: colors.primary)
-                            : null,
-                        title: i18n(section.titleKey),
-                        subtitle: i18n(section.descriptionKey),
-                        selected: twoPane && section == selected,
-                        onTap: () => onOpen(section),
-                      ),
-                ],
+    // On phones a page opens in place of the overview, and crossing 840
+    // builds it anew: it comes back where it was (A11.6).
+    return KeepScrollPosition(
+      id: 'settings-overview',
+      child: ListView(
+        key: const ValueKey('settings-overview'),
+        physics: const PureLiveScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(twoPane ? 12 : 16, 0, twoPane ? 12 : 16, 32),
+        children: [
+          for (final (index, area) in SettingsArea.values.indexed)
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: SettingsGroup(
+                  first: index == 0,
+                  title: i18n(area.titleKey),
+                  children: [
+                    for (final section in SettingsSection.values)
+                      if (section.area == area)
+                        SettingsLinkRow(
+                          key: ValueKey('settings-section-${section.name}'),
+                          icon: section.icon,
+                          leading: section.icon == null
+                              ? DanmakuIcon(DanmakuIconKind.settings, size: 24, color: colors.primary)
+                              : null,
+                          title: i18n(section.titleKey),
+                          subtitle: i18n(section.descriptionKey),
+                          selected: twoPane && section == selected,
+                          onTap: () => onOpen(section),
+                        ),
+                  ],
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -378,24 +383,29 @@ class _SearchResults extends StatelessWidget {
     }
     return SettingsHighlight(
       words: searchWords(query),
-      child: ListView(
-        key: const ValueKey('settings-search-results'),
-        physics: const PureLiveScrollPhysics(),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        padding: EdgeInsets.fromLTRB(twoPane ? 12 : 16, 0, twoPane ? 12 : 16, 32),
-        children: [
-          for (final (index, MapEntry(key: crumb, value: entries)) in byCrumb.entries.indexed)
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 720),
-                child: SettingsGroup(
-                  first: index == 0,
-                  title: crumb,
-                  children: [for (final entry in entries) entry.build(context, entry)],
+      // Back from a result's page the results are where they were; another
+      // search starts at the top (A11.6).
+      child: KeepScrollPosition(
+        id: 'settings-search:$query',
+        child: ListView(
+          key: const ValueKey('settings-search-results'),
+          physics: const PureLiveScrollPhysics(),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(twoPane ? 12 : 16, 0, twoPane ? 12 : 16, 32),
+          children: [
+            for (final (index, MapEntry(key: crumb, value: entries)) in byCrumb.entries.indexed)
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 720),
+                  child: SettingsGroup(
+                    first: index == 0,
+                    title: crumb,
+                    children: [for (final entry in entries) entry.build(context, entry)],
+                  ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

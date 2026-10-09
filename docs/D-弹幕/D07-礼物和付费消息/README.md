@@ -100,7 +100,7 @@
 属于 [D 弹幕](../README.md)。
 
 - 代码：`logic/room_controller.dart` 的礼物分支、`packages/live_danmaku/lib/src/sites/` 的礼物部分
-- 进度：`████████████░░░░░░░░` 60%
+- 进度：`███████████████░░░░░` 75%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -111,7 +111,7 @@
 | D07.4 | 哔哩哔哩礼物补全：游客的 SEND_GIFT_V2、图标、舰长等级 | 平台 | 待真机 | 2026-10-09 | — | [设计或说明](D07.4-哔哩哔哩礼物补全/README.md)、[任务书](D07.4-哔哩哔哩礼物补全/brief.md)、[记录](D07.4-哔哩哔哩礼物补全/record.md) |
 | D07.5 | 抖音礼物（受阻：先确认登录后能不能收到） | 平台 | 受阻 | — | — | [设计或说明](D07.5-抖音礼物/README.md)、[任务书](D07.5-抖音礼物/brief.md) |
 | D07.6 | 已有样本的平台补礼物：AcFun 目录、17LIVE、BIGO、连击键、Twitch Bits、CHZZK 订阅、YouTube 贴纸 | 平台 | 待真机 | 2026-10-09 | — | [设计或说明](D07.6-已有样本的平台补礼物/README.md)、[任务书](D07.6-已有样本的平台补礼物/brief.md)、[记录](D07.6-已有样本的平台补礼物/record.md)、[真机验证](D07.6-已有样本的平台补礼物/verify.md) |
-| D07.7 | 要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick | 平台 | 未开始 | — | — | [设计或说明](D07.7-要先录样本的平台补礼物/README.md)、[任务书](D07.7-要先录样本的平台补礼物/brief.md) |
+| D07.7 | 要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick | 平台 | 开发中 | 2026-10-09 | — | [设计或说明](D07.7-要先录样本的平台补礼物/README.md)、[任务书](D07.7-要先录样本的平台补礼物/brief.md)、[记录](D07.7-要先录样本的平台补礼物/record.md)、[真机验证](D07.7-要先录样本的平台补礼物/verify.md) |
 
 ## 还没完成的
 
@@ -119,9 +119,11 @@
   - 阶段：确认登录后会不会推 WebcastGiftMessage（录样本） → 按 3.x 的字段号解礼物和连击
   - 说明：受阻：匿名网页端收不到 WebcastGiftMessage（E01.4 实测约 2000 条消息、D01 录的 5 个房间 150 秒都没有）；要登录态的样本才能开工；依赖 E05.5
   - 来源：V03.5 第 2、3 节抖音、第 7 节；用户 2026-10-09（D-040）
-- **D07.7 要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick**（未开始，第三档，规模 大）
-  - 阶段：国内：酷狗 601、六间房 201、LOOK 102 → 韩国：SOOP 星气球和订阅、PandaTV 후원 → 日本：SHOWROOM 礼物、TwitCasting gift=1 → 其他：FC2 打赏和礼物、Kick Kicks
-  - 说明：依赖 E05.5；每个平台先录真实样本（海外开代理，按 fixtures/README.md 脱敏），字段确认了再写解析；可以按阶段拆成单独的任务
+- **D07.7 要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick**（开发中，第三档，规模 大）
+  - 阶段：✓ 国内：酷狗 601、六间房 201、LOOK 102 → ✓ 韩国：SOOP 星气球和订阅、PandaTV 후원 → ✓ 日本：SHOWROOM 礼物、TwitCasting gift=1 → 其他：FC2 打赏和礼物、Kick Kicks
+  - 接着做：K90 按 verify.md 看前三个阶段（酷狗、六间房、LOOK、SOOP、PandaTV、SHOWROOM、TwitCasting）；阶段 4：Kick 已修订阅（channel_<频道号>），等有人送 Kicks 时录样本核对字段；FC2 30 分钟录不到打赏和礼物，等人多时或有登录态再录
+  - 分支：worktree-agent-aa187e4b8b348505a
+  - 说明：依赖 E05.5；前三个阶段都录到样本并解了：酷狗 601（星币，新单位 starCoin）、六间房 201 和跟风飞屏 324（醒目留言，飞屏的购买不再报礼物）、LOOK 102（音符 note）、SOOP 18/33/87/105 打赏和 91/93 订阅通知、PandaTV SponCoin（心 heart）、SHOWROOM t 2 和礼物表（AcfunSite 式缓存）、TwitCasting gift=1；Kick 的 Kicks 以前订错频道收不到，已修，没录到样本；FC2 没做。设计选择（D-003）和字段表写在 record.md
   - 来源：V03.5 第 2、3 节、第 7 节；用户 2026-10-09（D-040）
 
 <!-- docs:生成结束 -->

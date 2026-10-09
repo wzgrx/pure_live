@@ -288,7 +288,8 @@ void main() {
         ],
       );
       expect(_in('local-identity-card', find.text('听众 · Pure Live')), findsOneWidget);
-      expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1000 电池')), findsOneWidget);
+      // D08.3: entering checked in for the day (+100 coins, +20 experience).
+      expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1100 电池')), findsOneWidget);
       // c11: the gift the coins do not cover is faded; prices with the coin.
       expect(tester.widget<Opacity>(_key('local-gift-bili_voyage')).opacity, 0.45);
       expect(tester.widget<Opacity>(_key('local-gift-bili_snack')).opacity, 1);
@@ -332,8 +333,8 @@ void main() {
       expect((tester.getCenter(banner) - video.center).distance, lessThan(1));
       expect(_in('local-gift-banner', find.text('Pure Live 送出 辣条 ×1')), findsOneWidget);
       expect(_in('local-gift-banner', find.text('📺 舰队等级 Lv.1 · 听众')), findsOneWidget);
-      expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 990 电池')), findsOneWidget);
-      expect(room.settings.get(Settings.localInteractionCoins), anyOf(990, 1000), reason: 'written behind');
+      expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1090 电池')), findsOneWidget);
+      expect(room.settings.get(Settings.localInteractionCoins), anyOf(1090, 1100), reason: 'written behind');
       await tester.pump(const Duration(seconds: 3));
       await tester.pump();
       expect(banner, findsNothing);

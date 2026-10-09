@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_growth.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 /// Who sent a local message: what the chat line, the gift banner and the
@@ -450,6 +451,181 @@ final class LocalInteraction extends ChangeNotifier {
 
   void _record(LocalEvent event) => _keep([event, ..._entries], (store) => store.add(event));
 
+  // ---- local growth (D08.3) ----
+
+  /// Local growth is on: watching, the first room of the day and local
+  /// danmaku earn experience and coins (on by default, D-040); off, only
+  /// gifts earn experience, as in 3.x.
+  bool get growthEnabled => _get(Settings.localInteractionGrowthEnabled);
+
+  /// Turns local growth on or off; the time watched until now is kept.
+  set growthEnabled(bool value) {
+    if (!value) settleWatch();
+    _set(Settings.localInteractionGrowthEnabled, value);
+  }
+
+  /// Whether anything grows now: the local interaction and local growth on.
+  bool get growing => enabled && growthEnabled;
+
+  /// The time now (the clock the interaction was given; a fake one in
+  /// tests).
+  DateTime now() => _now();
+
+  /// The time watched that is not stored yet, and its day ([settleWatch]
+  /// stores it: when a room stops counting, or with a step earned).
+  Duration _unsaved = Duration.zero;
+  String _unsavedDay = '';
+
+  /// What growth gave today, the time watched not stored yet included.
+  LocalGrowthDay get today => _dayState(LocalGrowthDay.dayOf(_now()));
+
+  LocalGrowthDay _dayState(String day) {
+    final stored = LocalGrowthDay.read(_get(Settings.localInteractionGrowthDay), day);
+    return _unsavedDay == day ? stored.copyWith(watched: stored.watched + _unsaved) : stored;
+  }
+
+  /// Stores the time watched so far (the clock stopped counting: paused,
+  /// in the background, the room left). Time of a day older than the one
+  /// stored is let go (the clock was set back).
+  void settleWatch() {
+    final day = _unsavedDay;
+    final unsaved = _unsaved;
+    _unsaved = Duration.zero;
+    _unsavedDay = '';
+    if (_disposed || day.isEmpty || unsaved <= Duration.zero) return;
+    final stored = LocalGrowthDay.parse(_get(Settings.localInteractionGrowthDay));
+    if (stored != null && stored.day.compareTo(day) > 0) return;
+    final state = stored != null && stored.day == day ? stored : LocalGrowthDay(day: day);
+    _set(Settings.localInteractionGrowthDay, state.copyWith(watched: state.watched + unsaved).encode());
+  }
+
+  /// Settles the time watched on a day other than [day] before [day]'s
+  /// counts are written.
+  void _settleOther(String day) {
+    if (_unsavedDay.isNotEmpty && _unsavedDay != day) settleWatch();
+  }
+
+  /// The first room of the day (D08.3 c3): [LocalCatalog.checkInExperience]
+  /// and [LocalCatalog.checkInCoins], once a local day. False when given
+  /// already or nothing grows.
+  bool checkIn({LocalPlace? place}) {
+    if (_disposed || !growing) return false;
+    final day = LocalGrowthDay.dayOf(_now());
+    _settleOther(day);
+    final state = _dayState(day);
+    if (state.checkedIn) return false;
+    _grow(
+      state.copyWith(checkedIn: true),
+      experience: LocalCatalog.checkInExperience,
+      coins: LocalCatalog.checkInCoins,
+      place: place,
+    );
+    return true;
+  }
+
+  /// A room played from [from] to [to] (D08.3 c2): every
+  /// [LocalCatalog.watchStep] of a day's playing earns
+  /// [LocalCatalog.watchExperience] and [LocalCatalog.watchCoins], up to
+  /// [LocalCatalog.watchExperienceDailyLimit] a day. Time over midnight
+  /// counts for the day it fell in. The time is kept in memory and stored
+  /// only when a step is earned or [settleWatch] runs, so watching writes
+  /// once in ten minutes, not every minute.
+  void watched(DateTime from, DateTime to, {LocalPlace? place}) {
+    if (_disposed || !growing || !to.isAfter(from)) return;
+    var start = from;
+    while (start.isBefore(to)) {
+      final midnight = LocalGrowthDay.endOfDay(start);
+      final end = midnight.isBefore(to) ? midnight : to;
+      _watchedOn(LocalGrowthDay.dayOf(start), end.difference(start), place);
+      start = end;
+    }
+  }
+
+  void _watchedOn(String day, Duration piece, LocalPlace? place) {
+    _settleOther(day);
+    final state = _dayState(day);
+    final watched = state.watched + piece;
+    const step = LocalCatalog.watchExperience;
+    final earned = (watched.inMilliseconds ~/ LocalCatalog.watchStep.inMilliseconds).clamp(
+      0,
+      LocalCatalog.watchExperienceDailyLimit ~/ step,
+    );
+    final steps = earned - state.watchExperience ~/ step;
+    if (steps <= 0) {
+      _unsavedDay = day;
+      _unsaved += piece;
+      return;
+    }
+    _grow(
+      state.copyWith(watched: watched, watchExperience: state.watchExperience + steps * step),
+      experience: steps * step,
+      coins: steps * LocalCatalog.watchCoins,
+      place: place,
+    );
+  }
+
+  /// A local danmaku was sent (D08.3 c4): [LocalCatalog.chatExperience], up
+  /// to [LocalCatalog.chatExperienceDailyLimit] a day. False when nothing
+  /// was given.
+  bool rewardChat({LocalPlace? place}) {
+    if (_disposed || !growing) return false;
+    final day = LocalGrowthDay.dayOf(_now());
+    _settleOther(day);
+    final state = _dayState(day);
+    if (state.chatExperience >= LocalCatalog.chatExperienceDailyLimit) return false;
+    _grow(
+      state.copyWith(chatExperience: state.chatExperience + LocalCatalog.chatExperience),
+      experience: LocalCatalog.chatExperience,
+      coins: 0,
+      place: place,
+    );
+    return true;
+  }
+
+  /// Stores [state] (today's counts, the time not stored yet included) with
+  /// [experience] and [coins] added, in one write; a level reached is
+  /// recorded.
+  void _grow(LocalGrowthDay state, {required int experience, required int coins, LocalPlace? place}) {
+    final before = level;
+    if (_unsavedDay == state.day) {
+      _unsaved = Duration.zero;
+      _unsavedDay = '';
+    }
+    _setAll({
+      Settings.localInteractionGrowthDay: state.encode(),
+      if (experience != 0) Settings.localInteractionExperience: this.experience + experience,
+      if (coins != 0) Settings.localInteractionCoins: this.coins + coins,
+    });
+    _recordLevel(before, place);
+  }
+
+  /// Records the level reached when it is above [before] (D08.3: one
+  /// `level` entry, "升到 Lv.N", however many levels one gain passed), while
+  /// growth is on; off, sending is as before.
+  void _recordLevel(int before, LocalPlace? place) {
+    final reached = level;
+    if (reached <= before || !growing) return;
+    _record(
+      LocalEvent(
+        at: _now(),
+        kind: LocalEventKind.level,
+        platform: place?.platform ?? '',
+        roomId: place?.roomId ?? '',
+        roomName: place?.roomName ?? '',
+        count: reached,
+      ),
+    );
+  }
+
+  /// "Lv.3 · 新人": the level now and its tier's name.
+  String get levelLabel => 'Lv.$level · ${i18n(LocalCatalog.tierKeyFor(level))}';
+
+  /// "还差 120 经验到 Lv.4".
+  String get nextLevelLabel {
+    final progress = LocalCatalog.progressFor(experience);
+    return i18n('local_level_next', args: {'exp': '${progress.missing}', 'level': '${progress.level + 1}'});
+  }
+
   /// The style local danmaku are sent with, as the stored settings
   /// (`localInteraction.danmaku*`), JSON.
   String get _styleJson => jsonEncode({
@@ -586,6 +762,7 @@ final class LocalInteraction extends ChangeNotifier {
     final profile = profileFor(platform);
     final giftName = i18n(gift.nameKey);
     final sent = i18n('local_sent_gift');
+    final before = level;
     _setAll({
       Settings.localInteractionCoins: coins - gift.price,
       Settings.localInteractionExperience: experience + gift.price,
@@ -605,6 +782,7 @@ final class LocalInteraction extends ChangeNotifier {
         coins: gift.price,
       ),
     );
+    _recordLevel(before, place);
     return LiveMessage(
       type: LiveMessageType.gift,
       userName: profile.name,

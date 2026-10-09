@@ -1543,6 +1543,29 @@ abstract final class Settings {
   /// The most phrases kept (D08.2).
   static const int localPhraseLimit = 20;
 
+  /// Local growth (D08.3): watching a room, the first room of the day and
+  /// local danmaku earn experience and coins, a little a day (the app's
+  /// `LocalCatalog` holds the rules). New in v4: on by default, the
+  /// exception D-040 names; off is 3.x's rules (only gifts earn experience,
+  /// coins only from the buttons).
+  static const localInteractionGrowthEnabled = BoolSetting(
+    'localInteraction.growthEnabled',
+    section: 'localInteraction',
+    defaultValue: true,
+  );
+
+  /// What local growth gave today (D08.3), JSON kept by the app
+  /// (`LocalGrowthDay`): the local date, the time watched, the experience
+  /// from watching and from local danmaku, whether today's check-in was
+  /// given. Empty until the first growth; another day's counts read as none.
+  /// Synced with the other settings, so a restore or device sync carries
+  /// today's limits with the coins and experience.
+  static const localInteractionGrowthDay = StringSetting(
+    'localInteraction.growthDay',
+    section: 'localInteraction',
+    defaultValue: '',
+  );
+
   /// The local interaction's settings, in 3.x's order.
   static const List<Setting<Object>> localInteraction = [
     localInteractionEnabled,
@@ -1849,6 +1872,8 @@ abstract final class Settings {
     ...localInteraction,
     localInteractionReplayOnEnter,
     localInteractionPhrases,
+    localInteractionGrowthEnabled,
+    localInteractionGrowthDay,
     backupDirectory,
     downloadDirectoryPath,
     downloadDirectoryDecisionMade,

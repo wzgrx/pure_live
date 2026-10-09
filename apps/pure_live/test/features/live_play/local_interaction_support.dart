@@ -1,4 +1,6 @@
 // The live room for the local interaction's tests (U.2k).
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +10,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/live_play_page.dart';
+import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
@@ -39,7 +42,8 @@ final class LocalRoom {
 /// Opens a live Bilibili room [width] × [height] wide, with [settings]
 /// stored first and [prepare] run on the store (D08.1: what was sent
 /// before). [reuse] enters again with the services of an earlier room
-/// (left with [leaveLocalRoom]).
+/// (left with [leaveLocalRoom]). [interaction] makes the app's local
+/// interaction (D08.3: one with a fake clock).
 Future<LocalRoom> pumpLocalRoom(
   WidgetTester tester, {
   double width = 400,
@@ -49,6 +53,7 @@ Future<LocalRoom> pumpLocalRoom(
   Widget Function(Widget child)? wrap,
   Future<void> Function(LiveStore store)? prepare,
   AppServices? reuse,
+  LocalInteraction Function(LiveStore store)? interaction,
 }) async {
   tester.view
     ..physicalSize = Size(width, height)
@@ -82,6 +87,13 @@ Future<LocalRoom> pumpLocalRoom(
         sitesProvider.overrideWithValue(SiteRegistry({SiteIds.bilibili: () => platform})),
         danmakuProvider.overrideWithValue(DanmakuRegistry({SiteIds.bilibili: () => danmaku})),
         playbackSessionFactoryProvider.overrideWithValue(({config}) => fakeSession(engine)),
+        if (interaction != null)
+          localInteractionProvider.overrideWith((ref) {
+            final local = interaction(services.store);
+            unawaited(local.start());
+            ref.onDispose(local.dispose);
+            return local;
+          }),
       ],
       child: MaterialApp(
         theme: theme ?? const LiveTheme().light,

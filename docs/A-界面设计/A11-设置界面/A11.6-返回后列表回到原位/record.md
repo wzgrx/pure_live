@@ -90,7 +90,7 @@
 
 ## 门禁
 
-见下面“门禁结果”。
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `8a3381264`，四个 `[A11.6]` 提交的内容）：`gate: passed (all, 14 members)`。第一次跑时新测试里有 7 条分析提示（多余的 `unawaited`、和默认值一样的参数）、`KeepScrollPosition` 注释里一处引用，改掉后通过。
 
 ## 真机上要看的
 

@@ -2269,13 +2269,15 @@ next = "K90 上按 record.md“真机上要看的”看"
 id = "D07.2"
 title = "醒目留言的平台表和价格单位；舰长、会员进醒目留言；六间房飞屏"
 type = "功能"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "中"
 tier = 2
 stages = ["superChatPlatforms 补 7 个平台、价格按平台单位", "上舰、会员、订阅进醒目留言（新开关，默认开）；六间房飞屏改成醒目留言"]
-done = 0
+done = 2
 from = "V03.5 第 6.5、6.6 节（F-6、F-7）；用户 2026-10-09（D-040）"
-note = "依赖 E05.5（kind、unit）；“上舰和开会员进醒目留言”默认开，是任务书写明的例外（D-040）"
+note = "依赖 E05.5（kind、unit）；“上舰和开会员进醒目留言”默认开，是任务书写明的例外（D-040）；平台表 superChatUnits 11 个（加了六间房）；卡片只进醒目留言页，列表照旧一行；Twitch 社区礼包里分到的那份是新的 giftedSubscription 通知；六间房 108 没录到样本（网页脚本为据）；设计选择（D-003）在 README“定稿”"
+next = "K90 上按 verify.md 看（CHZZK 或 YouTube、哔哩哔哩登录后上舰、六间房飞屏）"
 
 [[task]]
 id = "D07.3"

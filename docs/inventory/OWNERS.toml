@@ -359,6 +359,7 @@ setting = [
   { key = "chatGiftsAboveTier", sub = "A08" },
   { key = "giftValueInYuan", sub = "A08" },
   { key = "danmakuShowGifts", sub = "A08" },
+  { key = "superChatIncludesMembership", sub = "D07" },
   { key = "showChatNames", sub = "A08" },
   { key = "enableDanmakuTapInteraction", sub = "A08" },
   { key = "enableDanmakuLongPressInteraction", sub = "A08" },

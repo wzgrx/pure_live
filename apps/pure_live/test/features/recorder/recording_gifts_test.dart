@@ -134,7 +134,10 @@ void main() {
   test('settings search finds the switch, in the recording settings', () {
     for (final query in ['礼物 录制', '醒目留言', 'xml']) {
       final found = searchSettings(settingsCatalog, query);
-      final entry = found.singleWhere((entry) => entry.id == 'record_danmaku_gifts', orElse: () => throw query);
+      final entry = found.singleWhere(
+        (entry) => entry.id == 'record_danmaku_gifts',
+        orElse: () => fail('not found: $query'),
+      );
       expect(entry.section, SettingsSection.recording);
       expect(entry.settings, [Settings.recordDanmakuGifts]);
       expect(entry.crumb, '录制 › 基础配置');

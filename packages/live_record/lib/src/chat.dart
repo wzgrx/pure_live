@@ -63,7 +63,8 @@ typedef RecordChatConnector = Future<RecordChatConnection?> Function(
 ///   seconds the platform shows it; `price` is in thousandths of a yuan on
 ///   the platforms whose super chat price is in yuan
 ///   ([recordYuanSuperChats]), elsewhere the platform's number is kept as
-///   `value` (and its own text as `pricetext`). A replayed super chat (a
+///   `value` (and its own text as `pricetext`, blanks again no-break
+///   spaces). A replayed super chat (a
 ///   board shown on joining) happened before the recording and is left
 ///   out; the same one twice is written once.
 ///
@@ -205,7 +206,8 @@ final class RecordChatWriter {
     if (inYuan) attributes.write(' price="${price * 1000}"');
     attributes.write(' time="${shown < 0 ? 0 : shown}"');
     if (!inYuan && price > 0) attributes.write(' value="$price"');
-    final priceText = escape(superChat.priceText);
+    // A blank would end the value for DanmakuFactory, as in a gift's name.
+    final priceText = escape(superChat.priceText).replaceAll(_blank, '\u00A0');
     if (priceText.isNotEmpty) attributes.write(' pricetext="$priceText"');
     _entry(at, '<sc $attributes>${escape(superChat.message)}</sc>\n');
     _paidCount++;

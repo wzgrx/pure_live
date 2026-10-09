@@ -41,7 +41,7 @@ Recorder.startTask → _start → RecordScheduler.enqueue → _run（recorder.da
 | `lib/src/metrics.dart`（110） | `SegmentMeter`（读分段文件算大小，只看当前和下一段）、`hasSegments`（有非空分段才记为待合并）、`BitrateWindow`（5 秒窗口码率）、`reconcileFinalizedBytes` |
 | `lib/src/naming.dart`（44） | `safePathComponent`、`safePinyinComponent`（拼音目录）、`attemptDirectory`（`<平台>/<主播>/<日期>/<时间>`） |
 | `lib/src/diagnostics.dart`（38） | `sanitizeRecordDiagnostic`、`sanitizeFfmpegLog`：去掉媒体地址、Cookie、签名参数 |
-| `lib/src/chat.dart`（644） | `RecordChatRecorder` 只看 `Recorder.changes`：录制中的任务保持一个弹幕连接，每次尝试写一个同名 B 站 XML（`RecordChatWriter`，每 2 秒写入并重写 `</i>`）；开了“录制弹幕时包含礼物”时同一个文件里也有录播姬格式的 `<gift>`（连击一条，规则是 `live_core` 的 `live_gift_combo.dart`）和 `<sc>`（H01.8）；连接器是接口 `RecordChatConnector`，应用用 `live_danmaku` 实现 |
+| `lib/src/chat.dart`（646） | `RecordChatRecorder` 只看 `Recorder.changes`：录制中的任务保持一个弹幕连接，每次尝试写一个同名 B 站 XML（`RecordChatWriter`，每 2 秒写入并重写 `</i>`）；开了“录制弹幕时包含礼物”时同一个文件里也有录播姬格式的 `<gift>`（连击一条，规则是 `live_core` 的 `live_gift_combo.dart`）和 `<sc>`（H01.8）；连接器是接口 `RecordChatConnector`，应用用 `live_danmaku` 实现 |
 | `lib/src/recorder.dart`（1362） | `Recorder`：任务、一次尝试（`_run` :377-537）、事件处理（`_onCapture` :562-644）、结束和重连（`_doFinalize` :713-769、`_scheduleReconnect` :896-933）、合并（`_mergePending` :821-839、`_mergeAttempts` :841-885）、租期预取（:935-979）、停止和删除、持久化（2 秒合并写一次）；`RecordNotice` 四种提示 |
 
 测试（`packages/live_record/test/`，`dart test`，共 43 个）：

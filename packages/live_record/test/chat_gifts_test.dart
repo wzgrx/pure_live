@@ -378,7 +378,7 @@ void main() {
     ]);
     expect(bilibili.paidCount, 1);
     expect(_entries(await huya.file.readAsString()), [
-      '<sc ts="0.100" user="甲" time="60" value="1000" pricetext="1,000 虎粮">加油</sc>',
+      '<sc ts="0.100" user="甲" time="60" value="1000" pricetext="1,000\u00A0虎粮">加油</sc>',
       '<sc ts="0.200" user="乙" time="60"></sc>',
     ]);
   });

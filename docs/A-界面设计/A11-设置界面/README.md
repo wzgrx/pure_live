@@ -29,6 +29,7 @@
   - 目录驱动：`SettingsArea`（五组，`settings_model.dart:10`）→ `SettingsSection`（17 个入口，`:35`，有的带 `route:`，例如网络电视、录制设置、本地互动、备份、日志）→ `SettingsSubpage`（分页设置、竖屏、观看数据三个子页，`:145`）；每一页有哪些行由 `settingsCatalog`（`settings_catalog.dart:321`，`_build()` 一个大表）给出，行是 `SettingsEntry`（`settings_model.dart:212`：标题、说明、图标、搜索词、平台条件 `when`、依赖、怎么画）。平台条件来自 `SettingsEnv`（`:170`：平台、高刷屏）。
   - 行组件：`live_ui` 的 `SettingsRow` 一族（`settings_row.dart:261` 起）只管样子；应用侧 `settings_tiles.dart` 把它们绑到 `live_store` 的设置上（`writeSetting` `:16`、开关 `:75`、滑块 `:132`〔拖动时只改显示，松手才写〕、选项 `:260`、数字 `:352`、计数 `:442`、跳转 `:517`、动作 `:585`），用 `watchSetting` 只重建用到的行。依赖项用 `SettingRequirement`（`needsOn` / `needsOff`，`:22-45`）变灰并写原因。
   - 两栏和搜索：`SettingsPage`（`settings_page.dart:31`）用 `LayoutBuilder` 按自己的宽度判断（分界 `settingsTwoPaneBreakpoint` 840 `:19`、左栏 `settingsOverviewWidth` 360 `:22`），右栏是嵌套导航器（`_contentNavigator` `:132`）；搜索 `searchSettings`（`settings_model.dart:291`）；跳转高亮 `SettingsReveal` / `openOrReveal`（`settings_tiles.dart:49`、`:64`）和 `_Flash`（`settings_section_view.dart:85`，1.5 秒）。
+  - 返回后的位置（A11.6）：手机一栏打开的页在原地换掉总览（不是新页面），总览和搜索结果包着 `KeepScrollPosition`（`live_ui`），返回、跨 840 后回到原来的位置；分页里的子页是嵌套导航器 `push`，下面的页一直在。
   - 主题：`apps/pure_live/lib/app/app.dart:160-246` 读 `themeColorSwitch`、`pureBlackTheme`、`textScaleFactor` 生成主题（`DynamicSchemeVariant.fidelity`、`LivePureBlack`、`AppTextScaler`）。
 - 完成度（和 3.x 对照）：
   - 一致的：3.x 的设置项一项不少、键名一个没改；每页的入口、行的图标、子页、平台差异、说明文字；返回链（先关子页再回总览）。
@@ -78,6 +79,7 @@
 | `.../settings/settings_general_test.dart`（10） | 通用页各组、刷新率对话框、定时退出、Windows 的窗口项、iOS 高刷、平台页、刷新页、计数按住、网络页窄屏和宽屏 |
 | `.../settings/settings_data_test.dart`（7） | 缓存页、清空确认、下载目录、配置预览、日志入口 |
 | `.../settings/settings_danmaku_test.dart`（6）、`match_frame_rate_test.dart`（1）、`refresh_rate_limited_test.dart`（2） | 弹幕页和直播间同一组件（A08.5）；刷新率的帧率声明和 60 Hz 限速提示（R02.1、R02.2） |
+| `.../settings/settings_scroll_position_test.dart`（9） | 返回后列表回到原位（A11.6）：手机一栏的总览、两层子页、路由页、弹幕页 → 屏蔽、搜索结果；宽屏 1280 和横屏手机两栏；跨 840 的总览和打开的页 |
 | `.../settings/settings_harness.dart` | 共用测试台（provider 覆盖、减少动态效果） |
 | `packages/live_ui/test/settings_row_test.dart`（18）、`settings_playback_widgets_test.dart`（5） | 行的五种类型、对比度（四个种子色、深浅两套）、不能用和处理中、窄屏和 1.5 倍字体换行、电视样式；颜色选择器；主题（fidelity、纯黑、文字大小相乘）；长值、按住连续变、预览、JSON 树 |
 | `packages/live_store/test/theme_color_test.dart`（4） | 品牌蓝默认值和 3.x 默认蓝迁移只做一次 |
@@ -139,7 +141,7 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：`features/settings/`
-- 进度：`████████████████████` 100%
+- 进度：`████████████████████` 98%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -149,5 +151,6 @@
 | A11.3 | 设置：播放 | 界面 | 完成 | 2026-10-02 | e9e41d557 | [设计或说明](A11.3-播放/README.md)、[记录](A11.3-播放/record.md)、[评审页](A11.3-播放/page/01-说明.jpg) |
 | A11.4 | 设置：通用和网络 | 界面 | 完成 | 2026-10-02 | e9e41d557 | [设计或说明](A11.4-通用和网络/README.md)、[记录](A11.4-通用和网络/record.md)、[评审页](A11.4-通用和网络/page/01-说明.jpg) |
 | A11.5 | 设置：数据 | 界面 | 完成 | 2026-10-02 | e9e41d557 | [设计或说明](A11.5-数据/README.md)、[记录](A11.5-数据/record.md)、[评审页](A11.5-数据/page/01-说明.jpg) |
+| A11.6 | 从子页面返回后列表回到原来的位置（设置和同类页面） | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A11.6-返回后列表回到原位/README.md)、[任务书](A11.6-返回后列表回到原位/brief.md)、[记录](A11.6-返回后列表回到原位/record.md)、[真机验证](A11.6-返回后列表回到原位/verify.md) |
 
 <!-- docs:生成结束 -->

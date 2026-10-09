@@ -214,11 +214,11 @@ v4 的 242 个设置（`Settings.all`），每个一行，和 3.x（`v3.2.11`）
 
 | 键 | 类型 | v4 默认 | 3.x 默认 | v4 范围 | 3.x 范围 | 设置页 | 读取 | 生效 | 目录 | 结论 |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `page_show_size_selector` | Bool | `true` | `true`（`page_settings_controller.dart:14`） |  |  |  | `features/areas/platform_areas_view.dart:236`、`features/favorite/favorite_page.dart:400`、`shared/rooms/room_grid.dart:511` | 立即 | `page_size_selector` | 一样 |
-| `page_show_goto_button` | Bool | `true` | `true`（`page_settings_controller.dart:15`） |  |  |  | `features/areas/platform_areas_view.dart:237`、`features/favorite/favorite_page.dart:401`、`shared/rooms/room_grid.dart:512` | 立即 | `page_goto` | 一样 |
+| `page_show_size_selector` | Bool | `true` | `true`（`page_settings_controller.dart:14`） |  |  |  | `features/areas/platform_areas_view.dart:245`、`features/favorite/favorite_page.dart:400`、`shared/rooms/room_grid.dart:511` | 立即 | `page_size_selector` | 一样 |
+| `page_show_goto_button` | Bool | `true` | `true`（`page_settings_controller.dart:15`） |  |  |  | `features/areas/platform_areas_view.dart:246`、`features/favorite/favorite_page.dart:401`、`shared/rooms/room_grid.dart:512` | 立即 | `page_goto` | 一样 |
 | `page_show_scroll_top` | Bool | `true` | `true`（`page_settings_controller.dart:16`） |  |  |  | `features/favorite/favorite_page.dart:399`、`shared/rooms/room_grid.dart:510` | 立即 | `page_scroll_top` | 一样 |
-| `page_default_size` | Int | `0` | `12`（`page_settings_controller.dart:17、:23-34（宽于 960 逻辑像素是 20）`） | 0～100 | 1～100 且必须是可选的条数之一，否则取第一个（`page_settings_controller.dart:9-10`、:51-62） | 数字框，预设 `[0, 12, 20, 30, 40, 60]` | `features/areas/platform_areas_view.dart:238`、`shared/rooms/paging.dart:30`、`shared/rooms/room_grid.dart:513` | 立即 | `page_default_size` | 确认改动：v4 默认 0 = 由界面按宽度定（`shared/rooms/paging.dart` 的 `pageSizesOf`，结果和 3.x 一样是 12 或 20），J02.1 有意差异（纯 Dart 包拿不到屏幕宽度）；3.x 读到 v4 备份里的 0 时取可选条数的第一个，同样是 12 或 20 |
-| `page_size_options_raw` | String | `''` | `''`（`page_settings_controller.dart:19`） |  |  |  | `features/areas/platform_areas_view.dart:239`、`shared/rooms/paging.dart:24`、`shared/rooms/room_grid.dart:514` 等 5 处 | 立即 | `page_size_options` | 一样：空 = 按宽度用 3.x 的默认可选条数（12/24/36/48 或 20/40/60/80），和 3.x 一样 |
+| `page_default_size` | Int | `0` | `12`（`page_settings_controller.dart:17、:23-34（宽于 960 逻辑像素是 20）`） | 0～100 | 1～100 且必须是可选的条数之一，否则取第一个（`page_settings_controller.dart:9-10`、:51-62） | 数字框，预设 `[0, 12, 20, 30, 40, 60]` | `features/areas/platform_areas_view.dart:247`、`shared/rooms/paging.dart:30`、`shared/rooms/room_grid.dart:513` | 立即 | `page_default_size` | 确认改动：v4 默认 0 = 由界面按宽度定（`shared/rooms/paging.dart` 的 `pageSizesOf`，结果和 3.x 一样是 12 或 20），J02.1 有意差异（纯 Dart 包拿不到屏幕宽度）；3.x 读到 v4 备份里的 0 时取可选条数的第一个，同样是 12 或 20 |
+| `page_size_options_raw` | String | `''` | `''`（`page_settings_controller.dart:19`） |  |  |  | `features/areas/platform_areas_view.dart:248`、`shared/rooms/paging.dart:24`、`shared/rooms/room_grid.dart:514` 等 5 处 | 立即 | `page_size_options` | 一样：空 = 按宽度用 3.x 的默认可选条数（12/24/36/48 或 20/40/60/80），和 3.x 一样 |
 
 ## 刷新（refresh）
 

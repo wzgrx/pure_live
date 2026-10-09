@@ -1816,7 +1816,7 @@ List<SettingsEntry> _build() {
       'danmaku_list_spacing',
       Settings.danmakuListLineSpacing,
       null,
-      () => _keyed({for (final spacing in ChatSpacing.values) spacing.name: 'danmaku_list_spacing_${spacing.name}'}),
+      () => _keyed({for (final spacing in ChatSpacing.values) spacing.name: spacing.labelKey}),
       desc: 'danmaku_list_spacing_desc',
       keywords: ['行距', '行间距', '间距', '间隔', '密度', '聊天', '列表'],
     )

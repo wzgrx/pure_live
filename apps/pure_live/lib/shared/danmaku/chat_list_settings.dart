@@ -46,6 +46,13 @@ enum ChatSpacing {
     loose => base * 1.5,
   };
 
+  /// The translation key of the spacing's name ("紧密", "标准", "宽松").
+  String get labelKey => switch (this) {
+    compact => 'danmaku_list_spacing_compact',
+    standard => 'danmaku_list_spacing_standard',
+    loose => 'danmaku_list_spacing_loose',
+  };
+
   /// The height of the text's lines, or null for the theme's.
   double? get textHeight => switch (this) {
     compact => 1.4,
@@ -141,8 +148,7 @@ class ChatListSettings extends ConsumerWidget {
           child: SegmentedButton<ChatSpacing>(
             key: const ValueKey('danmaku-list-spacing'),
             segments: [
-              for (final value in ChatSpacing.values)
-                ButtonSegment(value: value, label: Text(i18n('danmaku_list_spacing_${value.name}'))),
+              for (final value in ChatSpacing.values) ButtonSegment(value: value, label: Text(i18n(value.labelKey))),
             ],
             selected: {spacing},
             onSelectionChanged: (selection) => set(Settings.danmakuListLineSpacing, selection.first.name),

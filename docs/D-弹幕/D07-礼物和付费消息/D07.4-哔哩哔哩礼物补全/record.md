@@ -126,5 +126,7 @@
 
 - `23920a6dd` [D07.4] Fetch Bilibili's public gift table once and keep it for every room（礼物表）
 - `ad7027eb1` [D07.4] Parse guests' SEND_GIFT_V2; fill Bilibili gift prices, pictures, medals and guard levels（解析、访客样本、合并窗口）
-- 之后一次提交加本记录、登记表和生成的文档。
+- `1e99a0a15` [D07.4] Record the SEND_GIFT_V2 field table, design choices, samples and real-device steps; mark it 待真机
+- `ed20c0209` [D07.4] Use a cascade in the combo summary test（第一次门禁只有 `apps/pure_live analyze` 的一条 `cascade_invocations` 提示没过，测试全过）
+- `bash tools/gate/gate.sh --all` 在 `ed20c0209` 上通过：`gate: passed (all, 14 members)`。
 - 和别的任务可能冲突的文件：`gift_combiner.dart`（D07.1 的文件，本任务只加 `summaryWindow`、`isSummary` 和 `add` 里的一行判断；A08.12 如果改合并会碰到）、`gift_line_test.dart`、`gift_combiner_test.dart`（只在中间加用例和一个 `_pb` 小函数）、`bilibili.dart`（D01 的哔哩哔哩任务）、`docs/tasks.toml` 和生成的文档（合并后重新运行 docs.py）。

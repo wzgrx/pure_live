@@ -364,17 +364,13 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
     );
   }
 
-  /// A piece of the line that moves to the next line whole: laid out at the
-  /// base size, which the text's own scaling then enlarges (a text inside a
-  /// [WidgetSpan] would otherwise be scaled twice).
+  /// A piece of the line that moves to the next line whole ([chatInline]).
   WidgetSpan _piece(Widget child, {bool pulse = false}) {
     final scale = _scale;
-    return WidgetSpan(
+    return chatInline(
+      pulse && scale != null ? ScaleTransition(scale: scale, child: child) : child,
       alignment: PlaceholderAlignment.baseline,
       baseline: TextBaseline.alphabetic,
-      child: MediaQuery.withNoTextScaling(
-        child: pulse && scale != null ? ScaleTransition(scale: scale, child: child) : child,
-      ),
     );
   }
 }

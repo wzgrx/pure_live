@@ -24,3 +24,31 @@ abstract final class ChatText {
   static TextStyle? name(ThemeData theme, [Color? colour]) =>
       theme.textTheme.bodyLarge?.emphasis.copyWith(color: colour ?? theme.colorScheme.onSurfaceVariant);
 }
+
+/// A widget inside a chat line's text (a mark before the name, the words
+/// with their emoticons, a gift's count and value): laid out at the base
+/// size and enlarged by the text's own scaling, like the text around it. A
+/// [Text] in a plain [WidgetSpan] also reads the system scale itself and
+/// came out scaled twice (A08.11: with 2x system text the words were four
+/// times their size next to a name twice its size).
+WidgetSpan chatInline(
+  Widget child, {
+  PlaceholderAlignment alignment = PlaceholderAlignment.middle,
+  TextBaseline? baseline,
+}) => WidgetSpan(alignment: alignment, baseline: baseline, child: ChatInline(child));
+
+/// What [chatInline] puts in its span: [child] without the system's text
+/// scaling (the span applies it).
+class ChatInline extends StatelessWidget {
+  /// Wraps [child].
+  const new(this.child, {super.key});
+
+  /// The widget in the line.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      // MediaQuery.withNoTextScaling, without its Builder (one widget less
+      // for each piece of each line).
+      MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling), child: child);
+}

@@ -768,15 +768,11 @@ class ChatLineView extends StatelessWidget {
 
   /// G5: what comes before the name, in one order on both styles.
   List<InlineSpan> _lead(ThemeData theme, LiveMessage message) => [
-    if (tag case final mark?) ...[
-      WidgetSpan(alignment: PlaceholderAlignment.middle, child: mark),
-      const TextSpan(text: ' '),
-    ],
+    if (tag case final mark?) ...[chatInline(mark), const TextSpan(text: ' ')],
     // B-16 (E06.2 c3): a PK partner room's viewer, in the block of "本地".
     if (message.isFromOtherRoom)
-      WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: ChatChip(
+      chatInline(
+        ChatChip(
           key: const ValueKey('live-play-chat-other-room'),
           text: i18n('danmaku_other_room'),
           background: theme.colorScheme.tertiaryContainer,
@@ -790,10 +786,7 @@ class ChatLineView extends StatelessWidget {
   List<InlineSpan> _badges(LiveMessage message) => [
     for (final (index, badge) in message.badges.indexed)
       if (badge.url.trim().isNotEmpty)
-        WidgetSpan(
-          alignment: PlaceholderAlignment.middle,
-          child: ChatBadge(key: ValueKey('live-play-chat-badge-$index'), url: badge.url.trim()),
-        ),
+        chatInline(ChatBadge(key: ValueKey('live-play-chat-badge-$index'), url: badge.url.trim())),
   ];
 
   /// B06 c2: the fan medal ("粉丝牌 等级"), in the same block as the other
@@ -804,9 +797,8 @@ class ChatLineView extends StatelessWidget {
     final level = message.fansLevel.trim();
     final scheme = theme.colorScheme;
     return [
-      WidgetSpan(
-        alignment: PlaceholderAlignment.middle,
-        child: ChatChip(
+      chatInline(
+        ChatChip(
           key: const ValueKey('live-play-chat-fans'),
           text: level.isEmpty ? fans : '$fans $level',
           background: scheme.primary,
@@ -829,10 +821,10 @@ class ChatLineView extends StatelessWidget {
   }
 
   /// What was said, with the platform's emoticons, in the content role.
-  InlineSpan _words(ThemeData theme) => WidgetSpan(
+  InlineSpan _words(ThemeData theme) => chatInline(
+    EmoteText(line.segments(emotes), style: ChatText.content(theme)),
     alignment: PlaceholderAlignment.baseline,
     baseline: TextBaseline.alphabetic,
-    child: EmoteText(line.segments(emotes), style: ChatText.content(theme)),
   );
 
   /// U.2a change 11, A08.10: "用户名：" in the name role (readable on the

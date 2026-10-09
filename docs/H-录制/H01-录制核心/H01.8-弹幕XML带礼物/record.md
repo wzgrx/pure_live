@@ -88,4 +88,8 @@
 ## 提交和门禁
 
 - `165d7b607` [H01.8] Recorded chat XML can carry gifts and super chats (new switch, off)
-- 之后一次提交加本记录、verify.md、README 定稿、登记表和生成的文档。
+- `6b96914d7` [H01.8] Record the format research, the design choices and the real-device steps; mark it 待真机
+- `05aada7a2` [H01.8] No-break spaces in a super chat's price text too (DanmakuFactory ends a value at a blank)
+- `618c5ac3a` [H01.8] fail() in the settings search test (analyzer)
+- 之后一次提交写门禁结果（本节）。
+- `bash tools/gate/gate.sh --all` 在 `618c5ac3a` 上通过：日志最后是 `gate: passed (all, 14 members)`（日志在本机 scratchpad 的 `h018-1791527747/gate.log`）。

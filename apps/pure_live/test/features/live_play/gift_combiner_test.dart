@@ -454,8 +454,9 @@ void main() {
         _bilibiliMessages(send('a')).forEach(room.gifts.add);
         room.wait(4);
         _bilibiliMessages(send('a')).forEach(room.gifts.add);
-        room.wait(6);
-        room.chat(30);
+        room
+          ..wait(6)
+          ..chat(30);
         _bilibiliMessages(summary('a', 2)).forEach(room.gifts.add);
         expect(room.giftLines.single.text, '薯条 ×2', reason: '6 s later and 30 lines up: still its line');
         room.wait(9);

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/gift_count_pulse.dart';
 import 'package:pure_live/features/live_play/layout/room_panel.dart';
+import 'package:pure_live/features/live_play/local_interaction/effects/local_gift_flyer.dart';
+import 'package:pure_live/features/live_play/local_interaction/effects/local_gift_vehicle.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
@@ -14,7 +16,7 @@ typedef LocalGiftPresenter = Widget Function(BuildContext context, LocalGiftShow
 /// never rebuilds the room (3.x wrapped the whole page). Two lines ("Pure
 /// Live 送出 大航海", then badge, level and title) beside the gift and its
 /// "×N"; a solid ring instead of 3.x's blurred glow; a high-value gift's
-/// banner is bigger. It grows in from 72 % unless the system asks for less
+/// banner is bigger (D08.5: a gift of the big tier). It grows in from 72 % unless the system asks for less
 /// motion, and leaves after 3 s (the session's queue).
 ///
 /// D08.4: one banner at a time, the next one when it leaves
@@ -22,13 +24,22 @@ typedef LocalGiftPresenter = Widget Function(BuildContext context, LocalGiftShow
 /// jumps. It keeps clear of [clearance], the controls' bars (A08.12's flying
 /// gifts keep clear of the same) and a landscape cut-out, and shrinks to
 /// fit what is left (large system text, the small inline picture).
+///
+/// D08.5: three effects by the gift's tier ([tiered], the default): a small
+/// gift's line flies over the top, a medium gift has the banner, a big one
+/// the bigger banner with a vehicle crossing behind it. All of them stay in
+/// this layer (not the danmaku's) and inside what it keeps clear of; with
+/// less motion every tier is the still banner. The layer is not in the
+/// mini window or picture-in-picture (`PlayerView` shows the mini surface
+/// there): the gifts are sent from the room's panel, and a picture that
+/// small would be covered by them.
 class LocalGiftLayer extends StatelessWidget {
   /// Creates the layer of [session].
   const new({
     required this.session,
     required this.fullscreen,
     this.clearance = EdgeInsets.zero,
-    this.presenter = LocalGiftLayer.banner,
+    this.presenter = LocalGiftLayer.tiered,
     super.key,
   });
 
@@ -41,7 +52,7 @@ class LocalGiftLayer extends StatelessWidget {
   /// What the banner keeps clear of at each edge.
   final EdgeInsets clearance;
 
-  /// Draws a banner ([banner] by default).
+  /// Draws a banner ([tiered] by default).
   final LocalGiftPresenter presenter;
 
   /// The banner, centred, shrunk to fit.
@@ -51,6 +62,33 @@ class LocalGiftLayer extends StatelessWidget {
       child: LocalGiftBanner(key: ValueKey(show.serial), show: show),
     ),
   );
+
+  /// The effect of [show]'s tier (D08.5): the flying line, the banner, or
+  /// the vehicle behind the banner; the banner alone with less motion. The
+  /// line and the vehicle are keyed by the serial, so a combo's new count
+  /// keeps them going.
+  static Widget tiered(BuildContext context, LocalGiftShow show) {
+    if (MediaQuery.disableAnimationsOf(context)) return banner(context, show);
+    return switch (show.tier) {
+      LocalGiftTier.small => LocalGiftFlyer(
+        key: ValueKey(show.serial),
+        show: show,
+        duration: LocalGiftTier.small.duration,
+      ),
+      LocalGiftTier.medium => banner(context, show),
+      LocalGiftTier.big => Stack(
+        fit: StackFit.expand,
+        children: [
+          LocalGiftVehicleView(
+            key: ValueKey(show.serial),
+            vehicle: LocalGiftVehicle.of(show.gift?.id ?? ''),
+            seed: show.serial * 0.618034 % 1,
+          ),
+          banner(context, show),
+        ],
+      ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +134,7 @@ class LocalGiftBanner extends StatelessWidget {
     final gift = LocalGiftData.of(message);
     final profile = LocalProfile.of(message);
     if (gift == null || profile == null) return const SizedBox.shrink();
-    final big = gift.big;
+    final big = gift.tier == LocalGiftTier.big;
     final color = Color.fromARGB(255, gift.color.r, gift.color.g, gift.color.b);
     final theme = Theme.of(context);
     final second = [if (profile.badgeLabel.isNotEmpty) profile.badgeLabel, profile.title].join(' · ');

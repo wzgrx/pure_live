@@ -125,7 +125,7 @@
 
 ## 六、门禁
 
-- 见文末“门禁结果”。
+- `tools/gate/gate.sh --all`：`gate: passed (all, 14 members)`（2026-10-09，代码提交 `cda30314d` 的工作区）；`apps/pure_live` 全部测试 1543 个通过。`docs.py --check`、`owners.py --check` 通过；`settings_audit.py` 重写了 J01.2 的设置表（245 个设置）。
 
 ## 七、真机上要看的（K90，HyperOS，Android 17，测试包 `com.mystyle.purelive.v4dev`）
 
@@ -154,4 +154,6 @@
 
 ## 九、提交
 
-- 见下（合并审查时补全）。
+- `cda30314d` [O01.3] Keep background play alive on every vendor build（代码、测试、翻译、设置、图标、归属）
+- `da13995de` [O01.3] Register the task（登记表、任务文件夹、O01 说明、生成的文档）
+- 之后一个提交：本记录补门禁结果和提交号

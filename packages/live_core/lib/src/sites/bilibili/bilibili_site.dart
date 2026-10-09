@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:crypto/crypto.dart';
 import 'package:live_core/src/links.dart';
@@ -66,6 +67,11 @@ final class BilibiliSite extends LiveSite
   final Future<void> Function(Duration) _sleep;
   _Session? _session;
   final Map<String, String> _longIds = {};
+  ({BilibiliGiftCatalog catalog, DateTime at})? _gifts;
+  Future<BilibiliGiftCatalog>? _giftsFetch;
+
+  /// How long the gift table ([giftCatalog]) is reused.
+  static const Duration giftCatalogLifetime = Duration(hours: 6);
 
   @override
   String get id => _site;
@@ -514,6 +520,7 @@ final class BilibiliSite extends LiveSite
           buvid: _cookieField(result.cookie, 'buvid3') ?? '',
           headers: BilibiliApi.mediaHeaders(longId, cookie: result.cookie),
           refresh: () => danmakuArgs(longId),
+          giftCatalog: giftCatalog,
         );
       } on SiteError catch (error) {
         last = error;
@@ -534,10 +541,43 @@ final class BilibiliSite extends LiveSite
       buvid: _cookieField(cookie, 'buvid3') ?? '',
       headers: BilibiliApi.mediaHeaders(longId, cookie: cookie),
       refresh: () => danmakuArgs(longId),
+      giftCatalog: giftCatalog,
     );
   }
 
   int _uid(_Session session) => session.verifiedUid > 0 ? session.verifiedUid : _storedUid();
+
+  // Gifts ---------------------------------------------------------------------
+
+  /// The gift table (D07.4, [BilibiliApi.giftCatalog]) every room's danmaku
+  /// connection reads pictures and prices from: asked for without a cookie
+  /// (it is public), once for concurrent callers, reused for
+  /// [giftCatalogLifetime] across rooms, and parsed off the calling isolate
+  /// (1.5 MB). A failure gives [BilibiliGiftCatalog.empty] and is not kept:
+  /// the next room asks again.
+  Future<BilibiliGiftCatalog> giftCatalog() {
+    final cached = _gifts;
+    if (cached != null && !_now().isBefore(cached.at) && _now().difference(cached.at) < giftCatalogLifetime) {
+      return Future.value(cached.catalog);
+    }
+    return _giftsFetch ??= () async {
+      try {
+        final response = await _get(BilibiliApi.giftConfigUrl, '');
+        final catalog = await _parseGifts(response.bytes, response.status);
+        _gifts = (catalog: catalog, at: _now());
+        return catalog;
+      } on Object {
+        // Gifts then go without the table's pictures and prices.
+        return BilibiliGiftCatalog.empty;
+      } finally {
+        _giftsFetch = null;
+      }
+    }();
+  }
+
+  /// Static, so the isolate is handed only the response, not the site.
+  static Future<BilibiliGiftCatalog> _parseGifts(List<int> bytes, int status) =>
+      Isolate.run(() => BilibiliApi.giftCatalog(utf8.decode(bytes, allowMalformed: true), status: status));
 
   // Account -------------------------------------------------------------------
 

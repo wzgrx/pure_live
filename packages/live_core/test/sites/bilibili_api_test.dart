@@ -606,4 +606,64 @@ void main() {
     expect(chats.single.face, 'https://i0.hdslb.com/f.jpg@200w.jpg');
     expect(chats.single.endTime.difference(chats.single.startTime), const Duration(minutes: 1));
   });
+
+  group('D07.4 gift table', () {
+    test('S18-gift-config: the gifts by id, the guards by level, pictures https', () {
+      final fixture = _sample('S18-gift-config');
+      final table = BilibiliApi.giftCatalog(fixture.body, status: fixture.status);
+      expect(fixture.url, BilibiliApi.giftConfigUrl);
+      expect(table.gifts.keys, unorderedEquals(['31164', '1', '31036', '31039', '35969', '3', '30607', '34315']));
+      expect(
+        table['31039'],
+        BilibiliGiftInfo(
+          id: '31039',
+          name: '牛哇牛哇',
+          price: 100,
+          icon: Uri.parse('https://s1.hdslb.com/bfs/live/91ac8e35dd93a7196325f1e2052356e71d135afb.png'),
+        ),
+      );
+      expect((table['30607']!.name, table['30607']!.price, table['30607']!.silver), ('小心心', 0, true));
+      expect((table['1']!.price, table['1']!.silver), (100, true));
+      expect(table['34315']!.price, 9900);
+      expect({for (final MapEntry(:key, :value) in table.guards.entries) key: value.name}, {1: '总督', 2: '提督', 3: '舰长'});
+      expect(table.guards.values.every((guard) => guard.icon!.scheme == 'https'), isTrue);
+      expect(table.isEmpty, isFalse);
+      expect(BilibiliGiftCatalog.empty.isEmpty, isTrue);
+    });
+
+    test('entries without an id or a name are left out; a bad envelope is a SiteError', () {
+      final table = BilibiliApi.giftCatalog(
+        jsonEncode({
+          'code': 0,
+          'data': {
+            'list': [
+              {'id': 0, 'name': 'x'},
+              {'id': 5, 'name': ''},
+              {'id': 6, 'name': 'ok', 'price': -1, 'img_basic': 'http://i0.hdslb.com/a.png'},
+              'not a gift',
+            ],
+            'guard_resources': [
+              {'level': 0, 'name': 'none'},
+              {'level': 3, 'name': '舰长'},
+            ],
+          },
+        }),
+      );
+      expect(table.gifts.values, [
+        BilibiliGiftInfo(id: '6', name: 'ok', icon: Uri.parse('https://i0.hdslb.com/a.png')),
+      ]);
+      expect(table.guards.keys, [3]);
+      expect(() => BilibiliApi.giftCatalog('{"code":-400,"message":"bad"}'), throwsA(isA<SiteError>()));
+      expect(() => BilibiliApi.giftCatalog('{"code":0}'), throwsA(isA<ApiChanged>()));
+      expect(() => BilibiliApi.giftCatalog('<html>', status: 502), throwsA(isA<NetworkFailure>()));
+    });
+
+    test('guard names and gift pictures', () {
+      expect([for (var level = 0; level <= 4; level++) BilibiliApi.guardName(level)], ['', '总督', '提督', '舰长', '']);
+      expect(BilibiliApi.giftIcon('//s1.hdslb.com/a.png'), Uri.parse('https://s1.hdslb.com/a.png'));
+      expect(BilibiliApi.giftIcon('http://example.com/a.png'), Uri.parse('http://example.com/a.png'));
+      expect(BilibiliApi.giftIcon(''), isNull);
+      expect(BilibiliApi.giftIcon(null), isNull);
+    });
+  });
 }

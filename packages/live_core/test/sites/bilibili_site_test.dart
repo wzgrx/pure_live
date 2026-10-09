@@ -226,6 +226,7 @@ void main() {
       expect(args.headers['referer'], 'https://live.bilibili.com/42062');
       expect(args.headers['cookie'], _guestCookie());
       expect(args.refresh, isNotNull);
+      expect(args.giftCatalog, isNotNull, reason: 'D07.4: the gift table for the connection');
     });
 
     test('when discovery fails the room still opens: empty token, gateway only, refresh for later', () async {
@@ -547,6 +548,48 @@ void main() {
       );
       expect(await setup.site.account(), (uid: 55, name: 'me'));
       expect((await setup.site.danmakuArgs('42062')).uid, 55);
+    });
+  });
+
+  group('D07.4 gift table', () {
+    const config = '/xlive/web-room/v1/giftPanel/giftConfig';
+
+    test('asked for once without a cookie for concurrent callers, kept 6 hours for every room', () async {
+      var now = _now;
+      final http = ReplayHttp([ReplaySample.load('$_root/S18-gift-config')], ignoredQuery: _ignored);
+      final site = BilibiliSite(
+        http,
+        cookies: MemoryCookieVault()..set('bilibili', 'buvid3=own; SESSDATA=s'),
+        now: () => now,
+      );
+      final (first, second) = await (site.giftCatalog(), site.giftCatalog()).wait;
+      expect(identical(first, second), isTrue);
+      expect(first.gifts, hasLength(8));
+      expect(http.requests.single.url.toString(), 'https://api.live.bilibili.com$config?platform=pc');
+      expect(http.requests.single.headers['cookie'], anyOf(isNull, isEmpty), reason: 'public: no login cookie');
+      now = now.add(const Duration(hours: 5, minutes: 59));
+      expect(identical(await site.giftCatalog(), first), isTrue);
+      expect(http.requests, hasLength(1));
+      now = now.add(const Duration(minutes: 2));
+      await site.giftCatalog();
+      expect(http.requests, hasLength(2), reason: 'after 6 hours it is asked for again');
+    });
+
+    test('a failure gives the empty table and is not kept: the next room asks again', () async {
+      final setup = _setup(
+        const [],
+        extra: [ReplaySample.load('$_root/S18-gift-config')],
+        script: {
+          config: [
+            _synthetic('https://api.live.bilibili.com$config?platform=pc', 'bad gateway', status: 502),
+            _synthetic('https://api.live.bilibili.com$config?platform=pc', {'code': -400, 'message': 'x'}),
+          ],
+        },
+      );
+      expect(await setup.site.giftCatalog(), same(BilibiliGiftCatalog.empty));
+      expect(await setup.site.giftCatalog(), same(BilibiliGiftCatalog.empty));
+      expect((await setup.site.giftCatalog()).gifts, hasLength(8));
+      expect(_count(setup.http, config), 3);
     });
   });
 

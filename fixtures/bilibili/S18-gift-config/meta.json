@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "platform": "bilibili",
+  "sample": "S18-gift-config",
+  "capturedAt": "2026-10-09T02:05:04Z",
+  "route": "direct",
+  "request": {
+    "method": "GET",
+    "url": "https://api.live.bilibili.com/xlive/web-room/v1/giftPanel/giftConfig?platform=pc",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+      "Referer": "https://live.bilibili.com/"
+    }
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "content-type": "application/json; charset=utf-8"
+    }
+  },
+  "raw": {
+    "sha256": "951252aa0294b8728e9ee4cdd4d3a161dfdf9e643766980ee895ede272d07fe5",
+    "length": 1545655
+  },
+  "body": "body.json",
+  "kept": {
+    "of": 905,
+    "list": "the gifts of S13-guest-gifts (31039 牛哇牛哇, 31164 粉丝团灯牌, 35969 薯条, 34315 喜欢你) and 1 辣条, 3 B坷垃, 30607 小心心, 31036 小花花, in the recorded order",
+    "combo_resources": "the first 2 of the list"
+  },
+  "scrubbed": [],
+  "note": "No cookie, no account (D07.4). The answer is the same for every room: with room_id=5050, room_id=545068 or none, the same 905 gifts. None of the kept gifts is bound to a streamer (bind_ruid, bind_roomid 0).",
+  "tool": "curl, by hand (D07.4)"
+}

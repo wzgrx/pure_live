@@ -43,6 +43,7 @@ final class BilibiliDanmakuArgs {
     required this.buvid,
     required this.headers,
     this.refresh,
+    this.giftCatalog,
   });
 
   /// Long room id.
@@ -66,6 +67,78 @@ final class BilibiliDanmakuArgs {
   /// Fetches fresh credentials with the full retry schedule (after an auth
   /// rejection, or when room entry had to go on without a token).
   final Future<BilibiliDanmakuArgs> Function()? refresh;
+
+  /// The platform's gift table ([BilibiliGiftCatalog], D07.4), for the
+  /// gifts whose packet has no picture or price; the site keeps it for
+  /// every room. Null in tests and when there is none.
+  final Future<BilibiliGiftCatalog> Function()? giftCatalog;
+}
+
+/// One gift of [BilibiliGiftCatalog] (`giftPanel/giftConfig`'s
+/// `data.list[]`): `id`, `name`, `price` (in gold seeds, or silver seeds
+/// when [silver]: `coin_type` `silver`, which the gift line counts as free)
+/// and the picture `img_basic` (https).
+@immutable
+final class BilibiliGiftInfo {
+  /// Creates the entry.
+  const new({required this.id, required this.name, this.price = 0, this.silver = false, this.icon});
+
+  /// The gift's id (`id`).
+  final String id;
+
+  /// The gift's name (`name`).
+  final String name;
+
+  /// The price of one (`price`), in gold seeds, or silver seeds when
+  /// [silver]; 0 when missing.
+  final int price;
+
+  /// Whether it costs silver seeds (`coin_type` `silver`).
+  final bool silver;
+
+  /// The picture (`img_basic`), https.
+  final Uri? icon;
+
+  @override
+  bool operator ==(Object other) =>
+      other is BilibiliGiftInfo &&
+      other.id == id &&
+      other.name == name &&
+      other.price == price &&
+      other.silver == silver &&
+      other.icon == icon;
+
+  @override
+  int get hashCode => Object.hash(id, name, price, silver, icon);
+
+  @override
+  String toString() => 'BilibiliGiftInfo($id $name, $price ${silver ? 'silver' : 'gold'})';
+}
+
+/// Bilibili's gift table (D07.4): `xlive/web-room/v1/giftPanel/giftConfig`,
+/// public and anonymous, the same for every room (about 900 gifts,
+/// 1.5 MB). The danmaku connection reads a gift's picture and price here
+/// when the packet has none ([gifts] by id), and the guard pictures
+/// ([guards], `guard_resources[]`: `level` 1 总督, 2 提督, 3 舰长).
+@immutable
+final class BilibiliGiftCatalog {
+  /// Creates the table.
+  const new({this.gifts = const {}, this.guards = const {}});
+
+  /// No table (not fetched yet, or the fetch failed).
+  static const BilibiliGiftCatalog empty = BilibiliGiftCatalog();
+
+  /// The gifts by id.
+  final Map<String, BilibiliGiftInfo> gifts;
+
+  /// The guard levels' names and pictures by `level`.
+  final Map<int, ({String name, Uri? icon})> guards;
+
+  /// Whether it holds nothing.
+  bool get isEmpty => gifts.isEmpty && guards.isEmpty;
+
+  /// The gift [id], or null.
+  BilibiliGiftInfo? operator [](String id) => gifts[id];
 }
 
 /// Pure parsing of Bilibili responses (3.x's `BiliBiliSite`, with the
@@ -338,6 +411,61 @@ abstract final class BilibiliApi {
             ),
     ];
   }
+
+  // Gifts ---------------------------------------------------------------------
+
+  /// The gift table ([BilibiliGiftCatalog], D07.4): public, anonymous and
+  /// the same for every room (no room id).
+  static final Uri giftConfigUrl = Uri.https('api.live.bilibili.com', '/xlive/web-room/v1/giftPanel/giftConfig', {
+    'platform': 'pc',
+  });
+
+  /// `giftPanel/giftConfig`: `data.list[]` by `id` (an entry without an id
+  /// or a name is left out) and `data.guard_resources[]` by `level`.
+  static BilibiliGiftCatalog giftCatalog(String body, {int status = 200}) {
+    final data = _object(_checked(body, status: status, what: 'giftPanel/giftConfig')['data']);
+    if (data == null) throw ApiChanged(_site, 'giftPanel/giftConfig: no data (${_snippet(body)})');
+    final gifts = <String, BilibiliGiftInfo>{};
+    for (final raw in _list(data['list'])) {
+      final gift = _object(raw);
+      final id = jsonString(gift?['id']) ?? '';
+      final name = jsonString(gift?['name'])?.trim() ?? '';
+      if (gift == null || id.isEmpty || id == '0' || name.isEmpty) continue;
+      final price = jsonInt(gift['price']) ?? 0;
+      gifts[id] = BilibiliGiftInfo(
+        id: id,
+        name: name,
+        price: price > 0 ? price : 0,
+        silver: gift['coin_type'] == 'silver',
+        icon: giftIcon(gift['img_basic']),
+      );
+    }
+    final guards = <int, ({String name, Uri? icon})>{
+      for (final raw in _list(data['guard_resources']))
+        if (_object(raw) case final guard? when (jsonInt(guard['level']) ?? 0) > 0)
+          jsonInt(guard['level'])!: (name: jsonString(guard['name'])?.trim() ?? '', icon: giftIcon(guard['img'])),
+    };
+    return BilibiliGiftCatalog(gifts: gifts, guards: guards);
+  }
+
+  /// A gift's picture: a web address ([normalizeImageUrl]), `hdslb.com`'s
+  /// made https; null when there is none.
+  static Uri? giftIcon(Object? value) {
+    final url = normalizeImageUrl(value);
+    final uri = url.isEmpty ? null : Uri.tryParse(url);
+    if (uri == null) return null;
+    final bilibili = uri.host == 'hdslb.com' || uri.host.endsWith('.hdslb.com');
+    return bilibili && uri.scheme == 'http' ? uri.replace(scheme: 'https') : uri;
+  }
+
+  /// The name of guard `level` (`guard_level`): 1 总督, 2 提督, 3 舰长; empty
+  /// for any other.
+  static String guardName(int level) => switch (level) {
+    1 => '总督',
+    2 => '提督',
+    3 => '舰长',
+    _ => '',
+  };
 
   // Streams -------------------------------------------------------------------
 

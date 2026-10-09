@@ -302,6 +302,8 @@ void main() {
       final detail = tester.widget<Text>(_key('local-history-detail-1')).data!;
       expect(detail, matches(RegExp(r'^(\d{4}-)?(\d\d-\d\d )?\d\d:\d\d · 主播$')));
       expect(_in('local-history-row-0', find.text('那边的话')), findsOneWidget);
+      await tester.ensureVisible(_key('local-history-room'));
+      await tester.pumpAndSettle();
       await tester.tap(_key('local-history-room'));
       await tester.pumpAndSettle();
       expect(_count(tester), '1 条');
@@ -334,6 +336,8 @@ void main() {
       await tester.tap(_key('local-history-filter-coins'));
       await tester.pumpAndSettle();
       expect(_count(tester), '0 条', reason: 'coins are added in no room');
+      await tester.ensureVisible(_key('local-history-room'));
+      await tester.pumpAndSettle();
       await tester.tap(_key('local-history-room'));
       await tester.pumpAndSettle();
       expect(_count(tester), '1 条');

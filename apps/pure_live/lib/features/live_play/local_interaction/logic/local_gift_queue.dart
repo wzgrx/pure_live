@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_gift_tier.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_interaction.dart';
 
 /// Starts a one-shot timer (a fake one in tests).
@@ -31,6 +32,10 @@ final class LocalGiftShow {
 
   /// How many: the combo's count so far.
   int get count => gift?.count ?? 1;
+
+  /// The effect's tier (D08.5 c1; the banner when the message is not a
+  /// local gift's).
+  LocalGiftTier get tier => gift?.tier ?? LocalGiftTier.medium;
 
   /// The same banner saying [next] (the combo's new count).
   LocalGiftShow grown(LiveMessage next) => LocalGiftShow(next, serial, revision: revision + 1);

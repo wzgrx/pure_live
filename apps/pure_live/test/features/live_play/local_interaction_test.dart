@@ -307,7 +307,9 @@ void main() {
       await closeLocalRoom(tester, room);
     });
 
-    testWidgets('#8: a gift costs coins, joins the list and shows its banner on the picture for 3 s', (tester) async {
+    testWidgets('#8: a gift costs coins, joins the list and shows its banner on the picture for its time', (
+      tester,
+    ) async {
       final room = await pumpLocalRoom(tester);
       await _openPanel(tester);
       await tester.tap(_key('local-gift-bili_voyage'));
@@ -328,7 +330,8 @@ void main() {
       expect(_in('local-gift-banner', find.text('📺 舰队等级 Lv.1 · 听众')), findsOneWidget);
       expect(_in('local-identity-card', find.text('哔哩哔哩 · 用户等级 Lv.1 · 1090 电池')), findsOneWidget);
       expect(room.settings.get(Settings.localInteractionCoins), anyOf(1090, 1100), reason: 'written behind');
-      await tester.pump(const Duration(seconds: 3));
+      // D08.5: a small gift's time (3.x's 3 s is a medium gift's).
+      await tester.pump(LocalGiftTier.small.duration);
       await tester.pump();
       expect(banner, findsNothing);
       // The gift line: "送出 🌶 辣条 ×1", the name once (c10).
@@ -632,6 +635,8 @@ void main() {
       final before = local.history;
       expect(before, hasLength(2));
       await tester.drag(_key('local-panel-list'), const Offset(0, -1200));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(_key('local-history-clear'));
       await tester.pumpAndSettle();
       await tester.tap(_key('local-history-clear'));
       await tester.pump();

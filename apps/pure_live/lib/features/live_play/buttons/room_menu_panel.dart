@@ -98,17 +98,23 @@ class RoomMenuPanel extends ConsumerWidget {
                 PanelCard(
                   key: ValueKey('room-menu-group-$index'),
                   children: [
+                    // The rows' ink over the card (rounded by the rows, no
+                    // clipping: docs/specs/UI.md §9.3).
                     Material(
                       type: MaterialType.transparency,
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
-                      clipBehavior: Clip.antiAlias,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          for (final item in group)
+                          for (final (row, item) in group.indexed)
                             Builder(
-                              builder: (row) =>
-                                  RoomMenuRow(item: item, onTap: () => unawaited(_choose(row, ref, item.entry))),
+                              builder: (context) => RoomMenuRow(
+                                item: item,
+                                borderRadius: BorderRadius.vertical(
+                                  top: row == 0 ? const Radius.circular(16) : Radius.zero,
+                                  bottom: row == group.length - 1 ? const Radius.circular(16) : Radius.zero,
+                                ),
+                                onTap: () => unawaited(_choose(context, ref, item.entry)),
+                              ),
                             ),
                         ],
                       ),
@@ -130,10 +136,13 @@ class RoomMenuPanel extends ConsumerWidget {
 /// greyed and not tappable when the item is not `enabled`.
 class RoomMenuRow extends StatelessWidget {
   /// Creates the row.
-  const new({required this.item, required this.onTap, super.key});
+  const new({required this.item, required this.onTap, this.borderRadius, super.key});
 
   /// What the row shows.
   final RoomMenuItem item;
+
+  /// The corners of the ink (the card's at the first and last rows).
+  final BorderRadius? borderRadius;
 
   /// Chooses it.
   final VoidCallback onTap;
@@ -151,6 +160,7 @@ class RoomMenuRow extends StatelessWidget {
         child: InkWell(
           key: ValueKey('room-menu-${item.entry.name}'),
           onTap: enabled ? onTap : null,
+          borderRadius: borderRadius,
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: roomMenuRowHeight),
             child: Padding(

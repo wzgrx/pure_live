@@ -100,7 +100,7 @@
 属于 [D 弹幕](../README.md)。
 
 - 代码：`logic/room_controller.dart` 的礼物分支、`packages/live_danmaku/lib/src/sites/` 的礼物部分
-- 进度：`████░░░░░░░░░░░░░░░░` 20%
+- 进度：`████████░░░░░░░░░░░░` 40%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -110,7 +110,7 @@
 | D07.3 | 斗鱼礼物目录（betard）和礼物字段 | 平台 | 待真机 | 2026-10-09 | — | [设计或说明](D07.3-斗鱼礼物目录和字段/README.md)、[任务书](D07.3-斗鱼礼物目录和字段/brief.md)、[记录](D07.3-斗鱼礼物目录和字段/record.md)、[真机验证](D07.3-斗鱼礼物目录和字段/verify.md) |
 | D07.4 | 哔哩哔哩礼物补全：游客的 SEND_GIFT_V2、图标、舰长等级 | 平台 | 未开始 | — | — | [设计或说明](D07.4-哔哩哔哩礼物补全/README.md)、[任务书](D07.4-哔哩哔哩礼物补全/brief.md) |
 | D07.5 | 抖音礼物（受阻：先确认登录后能不能收到） | 平台 | 受阻 | — | — | [设计或说明](D07.5-抖音礼物/README.md)、[任务书](D07.5-抖音礼物/brief.md) |
-| D07.6 | 已有样本的平台补礼物：AcFun 目录、17LIVE、BIGO、连击键、Twitch Bits、CHZZK 订阅、YouTube 贴纸 | 平台 | 未开始 | — | — | [设计或说明](D07.6-已有样本的平台补礼物/README.md)、[任务书](D07.6-已有样本的平台补礼物/brief.md) |
+| D07.6 | 已有样本的平台补礼物：AcFun 目录、17LIVE、BIGO、连击键、Twitch Bits、CHZZK 订阅、YouTube 贴纸 | 平台 | 待真机 | 2026-10-09 | — | [设计或说明](D07.6-已有样本的平台补礼物/README.md)、[任务书](D07.6-已有样本的平台补礼物/brief.md)、[记录](D07.6-已有样本的平台补礼物/record.md)、[真机验证](D07.6-已有样本的平台补礼物/verify.md) |
 | D07.7 | 要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick | 平台 | 未开始 | — | — | [设计或说明](D07.7-要先录样本的平台补礼物/README.md)、[任务书](D07.7-要先录样本的平台补礼物/brief.md) |
 
 ## 还没完成的
@@ -127,10 +127,6 @@
   - 阶段：确认登录后会不会推 WebcastGiftMessage（录样本） → 按 3.x 的字段号解礼物和连击
   - 说明：受阻：匿名网页端收不到 WebcastGiftMessage（E01.4 实测约 2000 条消息、D01 录的 5 个房间 150 秒都没有）；要登录态的样本才能开工；依赖 E05.5
   - 来源：V03.5 第 2、3 节抖音、第 7 节；用户 2026-10-09（D-040）
-- **D07.6 已有样本的平台补礼物：AcFun 目录、17LIVE、BIGO、连击键、Twitch Bits、CHZZK 订阅、YouTube 贴纸**（未开始，第二档，规模 大）
-  - 阶段：连击键：虎牙 lComboSeqId、猫耳 combo、克拉克拉 no → AcFun 礼物表 gift/list、礼物和香蕉 → 17LIVE 礼物 13、BIGO 760969 → Twitch Bits 和送订阅合并、CHZZK 订阅、YouTube 贴纸
-  - 说明：依赖 E05.5；连击键要在 D07.1 之前或同时合并，合并才有平台的连击号可用；每个阶段一个平台组、一次合并
-  - 来源：V03.5 第 2、3 节、第 7 节；用户 2026-10-09（D-040）
 - **D07.7 要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick**（未开始，第三档，规模 大）
   - 阶段：国内：酷狗 601、六间房 201、LOOK 102 → 韩国：SOOP 星气球和订阅、PandaTV 후원 → 日本：SHOWROOM 礼物、TwitCasting gift=1 → 其他：FC2 打赏和礼物、Kick Kicks
   - 说明：依赖 E05.5；每个平台先录真实样本（海外开代理，按 fixtures/README.md 脱敏），字段确认了再写解析；可以按阶段拆成单独的任务

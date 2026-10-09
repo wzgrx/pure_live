@@ -45,6 +45,10 @@ enum RoomPanelKind {
   /// A long-pressed (or tapped flying) danmaku (U.2n c1; UI_PLAN §7):
   /// [RoomPanelController.message].
   message,
+
+  /// The room menu from the picture's bars (docs/A-界面设计/A07-直播间界面/A07.23-横屏右上角菜单升级):
+  /// its rows open their panels in its place.
+  menu,
 }
 
 /// The panel open in the room, or null.

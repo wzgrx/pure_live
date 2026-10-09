@@ -16,6 +16,7 @@ import 'package:live_ui/live_ui.dart';
 import 'package:path/path.dart' as p;
 import 'package:pure_live/app/iptv_library.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/iptv/iptv_cards.dart';
 import 'package:pure_live/features/iptv/iptv_data.dart';
 import 'package:pure_live/features/iptv/iptv_page.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -321,6 +322,24 @@ void main() {
     await _tap(tester, find.byKey(ValueKey('iptv-more-${playlist.id}')));
     expect(find.text('在浏览器中打开'), findsOneWidget);
     expect(find.text('复制地址'), findsOneWidget);
+    // The app's small menu (A07.23; Material's showMenu before): 3.x's
+    // icons in the variant ink, next to the button.
+    expect(find.byType(PopupMenuItem<IptvCardAction>), findsNWidgets(2));
+    expect(
+      find.descendant(
+        of: find.byKey(ValueKey('iptv-open-${playlist.id}')),
+        matching: find.byIcon(AppIcons.openExternal),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: find.byKey(ValueKey('iptv-copy-${playlist.id}')), matching: find.byIcon(AppIcons.copy)),
+      findsOneWidget,
+    );
+    final more = tester.getRect(find.byKey(ValueKey('iptv-more-${playlist.id}')));
+    final menu = tester.getRect(find.byKey(ValueKey('iptv-open-${playlist.id}')));
+    expect(menu.top, greaterThanOrEqualTo(more.bottom), reason: 'under the button');
+    expect(menu.right, moreOrLessEquals(more.right, epsilon: 1), reason: "lined up with the button's right edge");
     expect(_top(tester, find.text('在浏览器中打开')), lessThan(_top(tester, find.text('复制地址'))));
     await _tap(tester, find.text('复制地址'));
     expect(copied, _playlistUrl);

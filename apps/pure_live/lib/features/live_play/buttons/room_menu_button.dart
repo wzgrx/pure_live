@@ -191,11 +191,91 @@ Set<RoomMenuEntry> menuEntriesOnBars({required bool landscape, required bool cas
   if (landscape) RoomMenuEntry.videoFit,
 };
 
-/// The room menu of the bar (3.x `LivePlayMenuButton`, its four-square
-/// icon kept, U.2a choice B): the app's small menu next to the button
-/// ([AppMenuButton], docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c7, B-7), grouped (U.2f), with
-/// 3.x's icons; the sleep timer's time left and the picture's fit on a
-/// second line.
+/// One row of the room menu as the small menu and the panel show it.
+typedef RoomMenuItem = ({RoomMenuEntry entry, IconData icon, String label, String? description, bool enabled});
+
+/// Whether [entry] opens a panel of its own in the room: the panel's row
+/// ends in › (docs/A-界面设计/A07-直播间界面/A07.23-横屏右上角菜单升级).
+bool roomMenuOpensPanel(RoomMenuEntry entry) => switch (entry) {
+  RoomMenuEntry.switchRoom ||
+  RoomMenuEntry.timer ||
+  RoomMenuEntry.volume ||
+  RoomMenuEntry.cast ||
+  RoomMenuEntry.streamLink ||
+  RoomMenuEntry.localInteraction => true,
+  RoomMenuEntry.videoFit || RoomMenuEntry.share || RoomMenuEntry.external || RoomMenuEntry.newWindow => false,
+};
+
+/// The room menu's rows for [controller] now, in their groups
+/// ([roomMenuGroups]; an empty group is left out): 3.x's icons, the sleep
+/// timer's time left and the picture's fit on a second line; cast and the
+/// stream address only while playing. The small menu and the panel
+/// (`RoomMenuPanel`) both show these.
+List<List<RoomMenuItem>> roomMenuItems(
+  LiveRoomController controller,
+  SettingsStore settings, {
+  Set<RoomMenuEntry> onBars = const {},
+}) {
+  final playing = controller.stage == RoomStage.playing;
+  final deadline = controller.sleepDeadline;
+  RoomMenuItem item(RoomMenuEntry entry) {
+    final (icon, label, description) = switch (entry) {
+      RoomMenuEntry.switchRoom => (AppIcons.switchRoom, i18n('switch_live_room'), null),
+      RoomMenuEntry.timer => (
+        AppIcons.sleepTimer,
+        i18n('sleep_timer'),
+        deadline == null
+            ? null
+            : i18n('live_play_timer_left', args: {'minutes': '${deadline.difference(controller.now()).inMinutes + 1}'}),
+      ),
+      RoomMenuEntry.volume => (AppIcons.roomVolume, i18n('room_volume'), null),
+      RoomMenuEntry.videoFit => (
+        AppIcons.aspectRatio,
+        i18n('settings_video_fit'),
+        videoFitName(videoFitIndexOf(settings)),
+      ),
+      RoomMenuEntry.cast => (AppIcons.cast, i18n('cast_screen'), null),
+      RoomMenuEntry.streamLink => (AppIcons.streamLink, i18n('toolbox_get_direct_link'), null),
+      RoomMenuEntry.share => (AppIcons.share, i18n('share'), null),
+      RoomMenuEntry.external => (
+        AppIcons.openExternal,
+        i18n('live_play_open_in', args: {'platform': platformName(controller.room.platform)}),
+        null,
+      ),
+      RoomMenuEntry.newWindow => (AppIcons.newWindow, i18n('open_in_new_window'), null),
+      RoomMenuEntry.localInteraction => (AppIcons.localInteraction, i18n('local_interaction_title'), null),
+    };
+    return (
+      entry: entry,
+      icon: icon,
+      label: label,
+      description: description,
+      // Cast and the stream address need a stream (as before).
+      enabled: playing || (entry != RoomMenuEntry.cast && entry != RoomMenuEntry.streamLink),
+    );
+  }
+
+  return [
+    for (final group in roomMenuGroups(
+      iptv: controller.site.id == SiteIds.iptv,
+      newWindow: DesktopWindow.offersNewWindow(settings),
+      local: settings.get(Settings.localInteractionEnabled),
+      cast: castSupported(defaultTargetPlatform),
+      onBars: onBars,
+    ))
+      if (group.isNotEmpty) [for (final entry in group) item(entry)],
+  ];
+}
+
+/// The room menu (3.x `LivePlayMenuButton`, its four-square icon kept,
+/// U.2a choice B), grouped (U.2f), with 3.x's icons ([roomMenuItems]). On
+/// the room page's bar it is the app's small menu next to the button
+/// ([AppMenuButton], docs/A-界面设计/A07-直播间界面/A07.12-直播间子弹窗统一 c7, B-7). On the
+/// picture (the fullscreen bars, [onVideo]) it is the room's panel
+/// ([RoomPanelKind.menu], `RoomMenuPanel`;
+/// docs/A-界面设计/A07-直播间界面/A07.23-横屏右上角菜单升级): on the right in landscape,
+/// along the bottom in portrait fullscreen, where the panels its rows open
+/// come too; a second tap on the button closes it.
 class RoomMenuButton extends ConsumerWidget {
   /// Creates the menu.
   const new({required this.controller, this.onVideo = false, this.onBars = const {}, this.onMenu, super.key});
@@ -203,18 +283,21 @@ class RoomMenuButton extends ConsumerWidget {
   /// The room.
   final LiveRoomController controller;
 
-  /// On the picture (the fullscreen bars, U.2c change 2): a white icon.
+  /// On the picture (the fullscreen bars, U.2c change 2): a white icon, and
+  /// the menu is the room's panel.
   final bool onVideo;
 
-  /// What the bars around the button already show, left out of the menu
-  /// ([menuEntriesOnBars], U.2m c12).
+  /// What the bars around the button already show, left out of the small
+  /// menu ([menuEntriesOnBars], U.2m c12); the page gives the panel the
+  /// same set.
   final Set<RoomMenuEntry> onBars;
 
-  /// Told when the menu opens (true) and closes: the controls stay up.
+  /// Told when the small menu opens (true) and closes: the controls stay up
+  /// (an open panel holds them by itself).
   final ValueChanged<bool>? onMenu;
 
-  /// Runs [entry] for [controller]; [context] is the menu's button, which
-  /// the picture's fit menu opens next to (U.2n c5).
+  /// Runs [entry] for [controller]; [context] is the menu's button or the
+  /// panel's row, which the picture's fit menu opens next to (U.2n c5).
   static Future<void> run(
     BuildContext context,
     WidgetRef ref,
@@ -249,80 +332,42 @@ class RoomMenuButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final iptv = controller.site.id == SiteIds.iptv;
-    AppMenuEntry<RoomMenuEntry> item(
-      RoomMenuEntry entry, {
-      required bool playing,
-      required bool divider,
-      DateTime? deadline,
-    }) {
-      final (icon, text, description) = switch (entry) {
-        RoomMenuEntry.switchRoom => (AppIcons.switchRoom, i18n('switch_live_room'), null),
-        RoomMenuEntry.timer => (
-          AppIcons.sleepTimer,
-          i18n('sleep_timer'),
-          deadline == null
-              ? null
-              : i18n(
-                  'live_play_timer_left',
-                  args: {'minutes': '${deadline.difference(controller.now()).inMinutes + 1}'},
-                ),
-        ),
-        RoomMenuEntry.volume => (AppIcons.roomVolume, i18n('room_volume'), null),
-        RoomMenuEntry.videoFit => (
-          AppIcons.aspectRatio,
-          i18n('settings_video_fit'),
-          videoFitName(videoFitIndexOf(ref.read(storeProvider).settings)),
-        ),
-        RoomMenuEntry.cast => (AppIcons.cast, i18n('cast_screen'), null),
-        RoomMenuEntry.streamLink => (AppIcons.streamLink, i18n('toolbox_get_direct_link'), null),
-        RoomMenuEntry.share => (AppIcons.share, i18n('share'), null),
-        RoomMenuEntry.external => (
-          AppIcons.openExternal,
-          i18n('live_play_open_in', args: {'platform': platformName(controller.room.platform)}),
-          null,
-        ),
-        RoomMenuEntry.newWindow => (AppIcons.newWindow, i18n('open_in_new_window'), null),
-        RoomMenuEntry.localInteraction => (AppIcons.localInteraction, i18n('local_interaction_title'), null),
-      };
-      return AppMenuEntry(
-        key: ValueKey('room-menu-${entry.name}'),
-        value: entry,
+    final icon = Icon(AppIcons.roomMenu, color: onVideo ? OnVideoColors.foreground : null);
+    final panels = onVideo ? RoomPanelScope.maybeOf(context) : null;
+    if (panels != null) {
+      return IconButton(
+        key: const ValueKey('live-play-menu'),
+        tooltip: i18n('menu'),
+        onPressed: () => panels.value == RoomPanelKind.menu ? panels.close() : panels.open(RoomPanelKind.menu),
         icon: icon,
-        label: text,
-        description: description,
-        divider: divider,
-        // Cast and the stream address need a stream (as before).
-        enabled: playing || (entry != RoomMenuEntry.cast && entry != RoomMenuEntry.streamLink),
       );
     }
-
     return Builder(
       builder: (anchor) => AppMenuButton<RoomMenuEntry>(
         key: const ValueKey('live-play-menu'),
         tooltip: i18n('menu'),
-        icon: Icon(AppIcons.roomMenu, color: onVideo ? OnVideoColors.foreground : null),
+        icon: icon,
         onMenu: onMenu,
         onSelected: (entry) => unawaited(run(anchor, ref, controller, entry)),
         // Read when the menu opens: the bar does not rebuild for the room's
         // changes.
-        entries: () {
-          final playing = controller.stage == RoomStage.playing;
-          final deadline = controller.sleepDeadline;
-          final local = ref.read(storeProvider).settings.get(Settings.localInteractionEnabled);
-          final groups = roomMenuGroups(
-            iptv: iptv,
-            newWindow: DesktopWindow.offersNewWindow(ref.read(storeProvider).settings),
-            local: local,
-            cast: castSupported(defaultTargetPlatform),
+        entries: () => [
+          for (final (index, group) in roomMenuItems(
+            controller,
+            ref.read(storeProvider).settings,
             onBars: onBars,
-          ).where((group) => group.isNotEmpty).toList();
-          return [
-            for (final (index, group) in groups.indexed)
-              for (final (row, entry) in group.indexed)
-                item(entry, playing: playing, deadline: deadline, divider: index > 0 && row == 0),
-          ];
-        },
+          ).indexed)
+            for (final (row, item) in group.indexed)
+              AppMenuEntry(
+                key: ValueKey('room-menu-${item.entry.name}'),
+                value: item.entry,
+                icon: item.icon,
+                label: item.label,
+                description: item.description,
+                divider: index > 0 && row == 0,
+                enabled: item.enabled,
+              ),
+        ],
       ),
     );
   }

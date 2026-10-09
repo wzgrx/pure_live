@@ -13,6 +13,8 @@ import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/app/services.dart';
+import 'package:pure_live/features/live_play/buttons/room_menu_button.dart';
+import 'package:pure_live/features/live_play/buttons/room_menu_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_panel.dart';
 import 'package:pure_live/features/live_play/danmaku/danmaku_settings_panel.dart';
@@ -900,6 +902,14 @@ class _LivePlayPageState extends ConsumerState<LivePlayPage> with SingleTickerPr
       key: ValueKey(_panels.message),
       controller: controller,
       message: _panels.message!,
+      onClose: _panels.close,
+      dragToClose: portrait,
+    ),
+    // A07.23: the room menu from the picture's bars, less what they show.
+    RoomPanelKind.menu => RoomMenuPanel(
+      key: const ValueKey('panel-menu'),
+      controller: controller,
+      onBars: menuEntriesOnBars(landscape: !portrait, cast: castSupported(_platform.platform)),
       onClose: _panels.close,
       dragToClose: portrait,
     ),

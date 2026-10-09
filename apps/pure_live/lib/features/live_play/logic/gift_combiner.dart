@@ -1,9 +1,12 @@
 import 'dart:collection';
-import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/shared/danmaku/gift_combo.dart';
+
+// Moved to shared/ for the flying gifts (A08.12); the room and the tests
+// still read it from here.
+export 'package:pure_live/shared/danmaku/gift_combo.dart' show CombinedGift;
 
 /// What [GiftCombiner.add] did with a gift.
 enum GiftOutcome {
@@ -16,49 +19,11 @@ enum GiftOutcome {
   /// Not shown: over the line limit with no line to count it on, or free
   /// (counted in [GiftCombiner.dropped]).
   dropped,
-}
 
-/// A gift line's gift once more than one message counted on it (D07.1):
-/// [count] is the combo's total so far, the rest is [last]'s, the newest
-/// message's gift, which keeps the platform's own fields.
-@immutable
-final class CombinedGift extends LiveGift {
-  /// [last] counted as [count] in all, over [sends] messages.
-  new(this.last, {required super.count, required this.sends})
-    : super(
-        name: last.name,
-        id: last.id,
-        kind: last.kind,
-        comboKey: last.comboKey,
-        comboTotal: last.comboTotal,
-        unitPrice: last.unitPrice,
-        totalValue: _value(last, count),
-        unit: last.unit,
-        free: last.free,
-        iconUrl: last.iconUrl,
-        receiverName: last.receiverName,
-      );
-
-  /// The newest message's gift.
-  final LiveGift last;
-
-  /// How many messages counted on the line.
-  final int sends;
-
-  /// The value of [count] like [gift]: its unit price times [count], or its
-  /// value scaled from its own count; null when it has neither.
-  static int? _value(LiveGift gift, int count) {
-    if (gift.unitPrice case final price?) return price * count;
-    final value = gift.totalValue;
-    return value == null ? null : (value * count / gift.count).round();
-  }
-
-  @override
-  bool operator ==(Object other) =>
-      super == other && other is CombinedGift && other.last == last && other.sends == sends;
-
-  @override
-  int get hashCode => Object.hash(super.hashCode, last, sends);
+  /// Not shown yet: its combo is below [GiftCombiner.minTier] ("只显示值钱的
+  /// 礼物", A08.12); it is counted, and the combo gets its line once its
+  /// total reaches the tier.
+  belowTier,
 }
 
 /// Puts a room's platform gifts into its [ChatFeed] (D07.1; V03.5 §6.4,
@@ -82,6 +47,10 @@ final class CombinedGift extends LiveGift {
 ///   the same.
 /// - The feed keeps at most [maxGiftLines] gift lines
 ///   ([ChatFeed.giftCapacity]), dropping the oldest gift line first.
+/// - **Tier** (A08.12, "只显示值钱的礼物"): with [minTier] above
+///   [LiveGiftTier.normal] a combo gets a line only once its total is
+///   worth that tier; until then its gifts are counted out of sight
+///   ([GiftOutcome.belowTier]), and the line it gets shows the whole total.
 ///
 /// The controller hands it only gifts that passed the filter, and none
 /// while the gift switch is off.
@@ -113,30 +82,32 @@ final class GiftCombiner {
 
   final DateTime Function() _clock;
   final LinkedHashMap<String, _Combo> _combos = LinkedHashMap();
+  final LinkedHashMap<String, _Unseen> _unseen = LinkedHashMap();
+  LiveGiftTier _minTier = LiveGiftTier.normal;
   final ListQueue<DateTime> _newLines = ListQueue();
   int _dropped = 0;
 
   /// Gifts not shown so far (over the limit).
   int get dropped => _dropped;
 
+  /// The least a combo must be worth for a line (A08.12): normal shows
+  /// every gift; a change forgets the combos counted out of sight.
+  LiveGiftTier get minTier => _minTier;
+  set minTier(LiveGiftTier tier) {
+    if (tier == _minTier) return;
+    _minTier = tier;
+    _unseen.clear();
+  }
+
   /// What the gifts of one combo share: the platform's combo key, or the
   /// sender (id and name) and the gift (its id, else its name) of that kind.
-  static String comboKeyOf(LiveMessage message, LiveGift gift) => gift.comboKey.isNotEmpty
-      ? 'combo:${gift.comboKey}'
-      : 'sender:${gift.kind.name}:${message.userId}\u0000${message.userName}\u0000'
-            '${gift.id.isNotEmpty ? gift.id : gift.name}';
+  static String comboKeyOf(LiveMessage message, LiveGift gift) => giftComboKey(message, gift);
 
   /// The count of a line that showed [shown] once [gift] counts on it: the
   /// platform's running count when it has one ([LiveGift.comboTotal];
   /// Douyu's `hits` counts gifts, Huya's `iItemGroup` sends, Bilibili's
   /// `COMBO_SEND` is the whole combo so far), else the sum of the counts.
-  static int totalOf(int shown, LiveGift gift) {
-    final running = gift.comboTotal;
-    if (running == null) return shown + gift.count;
-    // The message counts the whole combo (Bilibili's COMBO_SEND).
-    if (running == gift.count) return math.max(shown, running);
-    return math.max(running, shown + gift.count);
-  }
+  static int totalOf(int shown, LiveGift gift) => giftComboTotal(shown, gift);
 
   /// Puts [message], a platform gift, into the feed.
   GiftOutcome add(LiveMessage message) {
@@ -149,6 +120,7 @@ final class GiftCombiner {
       final near = feed.linesAfter(combo.line) < comboLines && now.difference(combo.at) <= comboWindow;
       if (near && !combo.restartedBy(gift)) return _merge(key, combo, message, gift, now);
     }
+    if (_minTier != LiveGiftTier.normal) return _addAboveTier(key, message, gift, now);
     if (_mayAddLine(now) || (gift != null && gift.tier != LiveGiftTier.normal)) {
       return _addLine(key, message, gift, now);
     }
@@ -164,7 +136,26 @@ final class GiftCombiner {
   /// Forgets the combos and the limit (the gift lines went).
   void clear() {
     _combos.clear();
+    _unseen.clear();
     _newLines.clear();
+  }
+
+  /// A gift that needs a new line while [minTier] holds: the line comes
+  /// when its combo's total is worth the tier (it is, so the limit lets it
+  /// in, as any valuable gift), else the gift is counted out of sight.
+  GiftOutcome _addAboveTier(String? key, LiveMessage message, LiveGift? gift, DateTime now) {
+    if (key == null || gift == null) return GiftOutcome.belowTier;
+    final before = _unseen.remove(key);
+    final going =
+        before != null && now.difference(before.at) <= comboWindow && !giftComboRestarted(before.running, gift);
+    final total = going ? giftComboTotal(before.total, gift) : giftComboStart(gift);
+    final sends = going ? before.sends + 1 : 1;
+    if (CombinedGift(gift, count: total, sends: sends).tier.index >= _minTier.index) {
+      return _addLine(key, message, gift, now, total: total, sends: sends);
+    }
+    _unseen[key] = _Unseen(at: now, total: total, running: gift.comboTotal ?? before?.running, sends: sends);
+    if (_unseen.length > _maxCombos) _unseen.remove(_unseen.keys.first);
+    return GiftOutcome.belowTier;
   }
 
   bool _mayAddLine(DateTime now) {
@@ -174,19 +165,22 @@ final class GiftCombiner {
     return _newLines.length < linesPerSecond;
   }
 
-  GiftOutcome _addLine(String? key, LiveMessage message, LiveGift? gift, DateTime now) {
+  GiftOutcome _addLine(String? key, LiveMessage message, LiveGift? gift, DateTime now, {int? total, int sends = 1}) {
     _newLines.addLast(now);
     if (key == null || gift == null) {
       feed.add(ChatLine.gift(message));
       return GiftOutcome.added;
     }
-    // Joined during a combo: the platform's count so far.
-    final total = math.max(gift.comboTotal ?? 0, gift.count);
+    // Joined during a combo: the platform's count so far (or the count of
+    // the gifts seen below the tier).
+    final count = total ?? giftComboStart(gift);
     final line = ChatLine.gift(
-      total == gift.count ? message : _withGift(message, CombinedGift(gift, count: total, sends: 1)),
+      count == gift.count && sends == 1
+          ? message
+          : giftMessageWith(message, CombinedGift(gift, count: count, sends: sends)),
     );
     feed.add(line);
-    _remember(key, _Combo(line, at: now, total: total, running: gift.comboTotal, sends: 1));
+    _remember(key, _Combo(line, at: now, total: count, running: gift.comboTotal, sends: sends));
     return GiftOutcome.added;
   }
 
@@ -207,7 +201,7 @@ final class GiftCombiner {
     }
     final sends = combo.sends + 1;
     final line = ChatLine.gift(
-      _withGift(message, CombinedGift(gift, count: total, sends: sends)),
+      giftMessageWith(message, CombinedGift(gift, count: total, sends: sends)),
       revision: combo.line.revision + 1,
     );
     feed.replace(combo.line, line);
@@ -219,28 +213,6 @@ final class GiftCombiner {
     _combos[key] = combo;
     if (_combos.length > _maxCombos) _combos.remove(_combos.keys.first);
   }
-
-  /// [message] holding [gift], its text the gift's.
-  static LiveMessage _withGift(LiveMessage message, LiveGift gift) => LiveMessage(
-    type: message.type,
-    userName: message.userName,
-    message: gift.plainText,
-    color: message.color,
-    userId: message.userId,
-    data: gift,
-    userLevel: message.userLevel,
-    fansLevel: message.fansLevel,
-    fansName: message.fansName,
-    isLocal: message.isLocal,
-    messageId: message.messageId,
-    sentAt: message.sentAt,
-    style: message.style,
-    replayed: message.replayed,
-    emotes: message.emotes,
-    sourceRoomId: message.sourceRoomId,
-    nameColor: message.nameColor,
-    badges: message.badges,
-  );
 }
 
 /// One combo's line, when its last gift came, the count it shows, the
@@ -255,9 +227,16 @@ final class _Combo {
   final int sends;
 
   /// Whether [gift]'s platform count went back: a new combo of the same key.
-  bool restartedBy(LiveGift gift) {
-    final next = gift.comboTotal;
-    final last = running;
-    return next != null && last != null && next <= last;
-  }
+  bool restartedBy(LiveGift gift) => giftComboRestarted(running, gift);
+}
+
+/// A combo counted out of sight below [GiftCombiner.minTier]: when its last
+/// gift came, its count, the platform's running count, how many messages.
+final class _Unseen {
+  new({required this.at, required this.total, required this.running, required this.sends});
+
+  final DateTime at;
+  final int total;
+  final int? running;
+  final int sends;
 }

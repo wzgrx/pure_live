@@ -39,8 +39,8 @@ String danmakuTemplateDescription(String? preset) => switch (preset) {
 /// Every danmaku setting of 3.x's `DanmakuSettingsContent`
 /// (`pages/danmaku_settings_page.dart:195-420`), with its ranges and keys,
 /// grouped as U.2f confirmed: 观看模板, 显示范围, 样式, 重复弹幕, 画面弹幕交互,
-/// 流畅度 (显示范围 also holds "暂停时的弹幕", B02 c3, and 流畅度 "同屏最大弹幕条数",
-/// D05.2, both new in v4); then the
+/// 流畅度 (显示范围 also holds "暂停时的弹幕", B02 c3, and "飞行弹幕显示礼物",
+/// A08.12, 流畅度 "同屏最大弹幕条数", D05.2, all new in v4); then the
 /// groups of [extra] (the live room's chat list and
 /// picture-in-picture danmaku). Settings that depend on a switch grey out
 /// instead of vanishing (D4, D5). Everything applies at once. The live
@@ -131,6 +131,15 @@ class DanmakuSettingsContent extends ConsumerWidget {
                 selected: {paused},
                 onSelectionChanged: (selection) => set(Settings.danmakuPausedBehavior, selection.first),
               ),
+            ),
+            // A08.12: the platform's valuable gifts over the picture (the
+            // room, fullscreen, the mini windows, the multi-view, the TV).
+            SettingSwitchRow(
+              settingKey: 'showGifts',
+              title: i18n('danmaku_show_gifts'),
+              subtitle: i18n('danmaku_show_gifts_desc'),
+              value: watchSetting(ref, Settings.danmakuShowGifts),
+              onChanged: (value) => set(Settings.danmakuShowGifts, value),
             ),
           ],
         ),

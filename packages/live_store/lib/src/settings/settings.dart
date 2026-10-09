@@ -532,6 +532,28 @@ abstract final class Settings {
   /// the store opens.
   static const showChatGifts = BoolSetting('showChatGifts', section: 'danmaku', defaultValue: true);
 
+  /// New (docs/A-界面设计/A08-弹幕界面/A08.12-礼物开关和飞行弹幕里的礼物; 3.x had no gift lines): the
+  /// chat list keeps only the platform's gifts worth a mark ("只显示值钱的礼物":
+  /// `LiveGiftTier.valuable` and up, about 10 yuan); free and cheap ones
+  /// are left out, a combo shows once its total gets there. Off by default
+  /// (D-040: nothing changes for old users); it acts only while
+  /// [showChatGifts] is on. Local gifts always show.
+  static const chatGiftsAboveTier = BoolSetting('chatGiftsAboveTier', section: 'danmaku', defaultValue: false);
+
+  /// New (A08.12): a gift line writes the value of the platforms whose rate
+  /// is fixed in yuan ("礼物价值换算成元": 1000 gold seeds, 10 Missevan
+  /// diamonds, 10 Douyin coins are 1 yuan); other units stay the platform's.
+  /// Off by default (D-040).
+  static const giftValueInYuan = BoolSetting('giftValueInYuan', section: 'danmaku', defaultValue: false);
+
+  /// New (A08.12): the platform's gifts worth a mark fly over the picture
+  /// as danmaku of their own look ("飞行弹幕显示礼物"; the room, fullscreen,
+  /// the mini windows, the multi-view and the TV): a precious one stands at
+  /// the top for 4 s, a combo flies when it starts and once more with its
+  /// total, at most 3 a second. Off by default (D-040); independent of
+  /// [showChatGifts].
+  static const danmakuShowGifts = BoolSetting('danmakuShowGifts', section: 'danmaku', defaultValue: false);
+
   /// New (docs/A-界面设计/A08-弹幕界面/A08.10-弹幕列表名字和内容分开; 3.x has no such setting): the
   /// room's chat list names who sent each line ("显示用户名"); off, it shows
   /// only what was said. On by default, as 3.x and before. The flying
@@ -1686,6 +1708,9 @@ abstract final class Settings {
     enableDanmakuStroke,
     danmakuListStyle,
     showChatGifts,
+    chatGiftsAboveTier,
+    giftValueInYuan,
+    danmakuShowGifts,
     showChatNames,
     danmakuPausedBehavior,
     danmakuFps,

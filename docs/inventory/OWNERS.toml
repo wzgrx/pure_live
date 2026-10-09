@@ -356,6 +356,9 @@ setting = [
   # danmaku 分节（默认 D05）
   { key = "danmakuListStyle", sub = "A08" },
   { key = "showChatGifts", sub = "A08" },
+  { key = "chatGiftsAboveTier", sub = "A08" },
+  { key = "giftValueInYuan", sub = "A08" },
+  { key = "danmakuShowGifts", sub = "A08" },
   { key = "showChatNames", sub = "A08" },
   { key = "enableDanmakuTapInteraction", sub = "A08" },
   { key = "enableDanmakuLongPressInteraction", sub = "A08" },

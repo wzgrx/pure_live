@@ -511,8 +511,19 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
     final box = flying?.context.findRenderObject();
     if (flying == null || box is! RenderBox || !box.hasSize) return null;
     final local = box.globalToLocal(global);
+    final (top, bottom) = _bars();
+    if (!danmakuTapAllowed(local: local, size: box.size, controlsVisible: _controls, top: top, bottom: bottom)) {
+      return null;
+    }
+    return (flying, local);
+  }
+
+  /// How far the controls' bars reach into the picture at the top and the
+  /// bottom in this arrangement (the danmaku under them cannot be tapped;
+  /// the flying gifts keep clear of them, A08.12).
+  (double, double) _bars() {
     final padding = MediaQuery.paddingOf(context);
-    final (top, bottom) = switch (widget.arrangement) {
+    return switch (widget.arrangement) {
       ControlsArrangement.inline => (controlBarHeight, controlBarHeight),
       ControlsArrangement.landscape => (padding.top + controlBarHeight, padding.bottom + controlBarHeight),
       ControlsArrangement.portraitFullscreen => (
@@ -520,10 +531,11 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
         padding.bottom + 8 + portraitRowHeight * 2,
       ),
     };
-    if (!danmakuTapAllowed(local: local, size: box.size, controlsVisible: _controls, top: top, bottom: bottom)) {
-      return null;
-    }
-    return (flying, local);
+  }
+
+  EdgeInsets _giftClearance() {
+    final (top, bottom) = _bars();
+    return EdgeInsets.only(top: top, bottom: bottom);
   }
 
   /// The message's actions (U.2f 长按弹幕); the danmaku stand meanwhile
@@ -577,6 +589,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
               running: danmakuRunning((snapshot.data ?? _room.session.state).status, pausedBehavior),
               held: _danmakuHeld,
               emotes: _emotes,
+              // A08.12: gifts fly clear of the bars (fullscreen, landscape).
+              giftClearance: _giftClearance(),
             ),
           );
         },

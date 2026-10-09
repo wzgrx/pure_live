@@ -344,6 +344,37 @@ void main() {
       expect(find.descendant(of: panel, matching: find.text('弹幕列表样式')), findsOneWidget);
       await _close(tester, room);
     });
+
+    testWidgets('A08.12: the tab and the picture panel have the three gift switches, at the same places', (
+      tester,
+    ) async {
+      final room = await _pump(tester, height: 6000);
+      List<String> order() => _topDown(tester, ['暂停时的弹幕', '飞行弹幕显示礼物', '样式', '在聊天列表显示礼物', '只显示值钱的礼物', '礼物价值换算成元']);
+      const expected = ['暂停时的弹幕', '飞行弹幕显示礼物', '样式', '在聊天列表显示礼物', '只显示值钱的礼物', '礼物价值换算成元'];
+      await tester.tap(_in('live-play-tabs', find.text('弹幕设置')));
+      await tester.pumpAndSettle();
+      expect(order(), expected, reason: 'the tab');
+      await tester.tap(find.byKey(const ValueKey('danmaku-switch-showGifts')));
+      await _settle(tester);
+      expect(room.services.store.settings.get(Settings.danmakuShowGifts), isTrue);
+
+      // The picture's button (the tab's list has the same key).
+      await tester.tap(
+        find.byWidgetPredicate((w) => w.key == const ValueKey('live-play-danmaku-settings') && w is! ListView),
+      );
+      await tester.pumpAndSettle();
+      final panel = find.byKey(const ValueKey('panel-danmaku'));
+      for (final text in expected) {
+        expect(
+          find.descendant(of: panel, matching: find.text(text)),
+          findsOneWidget,
+          reason: text,
+        );
+      }
+      final shown = find.descendant(of: panel, matching: find.byKey(const ValueKey('danmaku-switch-showGifts')));
+      expect(tester.widget<Switch>(shown).value, isTrue, reason: 'one setting, both places');
+      await _close(tester, room);
+    });
   });
 
   group('block list (c11-c16, E3, E4)', () {

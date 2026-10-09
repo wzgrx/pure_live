@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
@@ -138,7 +139,10 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
               style: ChatText.name(theme, chatNameInk(message, scheme.surfaceContainerLowest, scheme)),
             ),
           // A08.11 c7: a platform's gift as its line says it, with the value.
-          TextSpan(text: _words(message), style: ChatText.content(theme)),
+          TextSpan(
+            text: _words(message, inYuan: widget.controller.store.settings.get(Settings.giftValueInYuan)),
+            style: ChatText.content(theme),
+          ),
         ],
       ),
       maxLines: 6,
@@ -227,9 +231,9 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
 
 /// What the card says after the name: [chatMessageWords], and a gift's
 /// value ("送出 小心心 ×3 · 3 元").
-String _words(LiveMessage message) {
+String _words(LiveMessage message, {required bool inYuan}) {
   final gift = message.gift;
-  final value = gift == null || message.isLocal ? null : giftValueText(gift);
+  final value = gift == null || message.isLocal ? null : giftValueText(gift, inYuan: inYuan);
   final words = chatMessageWords(message);
   return value == null ? words : '$words · $value';
 }

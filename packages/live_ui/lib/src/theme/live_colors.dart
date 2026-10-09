@@ -364,6 +364,12 @@ abstract final class LivePalettes {
   /// danmaku's opacity (3.x `resolveBarrageStrokeOpacity`).
   static const Color danmakuStroke = Color(0xFF000000);
 
+  /// A platform gift flying over the video (docs/A-界面设计/A08-弹幕界面/A08.12-礼物开关和飞行弹幕里的礼物): its
+  /// words and the frame around them, a warm gold that stays readable with
+  /// [danmakuStroke] on any picture and is none of the [danmaku] colours a
+  /// viewer's message can have (the gold of the controls' active state).
+  static const Color danmakuGift = Color(0xFFFFD166);
+
   /// The app's colours, first in the picker (3.x's "自定义" tab, renamed
   /// "推荐" in U.6b): the brand blue, then 3.x's fourteen in its order.
   static const List<(String name, Color color)> recommended = [

@@ -6,6 +6,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
+import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/image_cache.dart';
 import 'package:pure_live/shared/danmaku/danmaku_overlay.dart';
 import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
@@ -79,6 +80,8 @@ final class _Layer {
     bool held = false,
     int? maxVisible = 48,
     EmoteTable emotes = EmoteTable.empty,
+    EdgeInsets giftClearance = EdgeInsets.zero,
+    Color? color,
   }) => tester.pumpWidget(
     Directionality(
       textDirection: TextDirection.ltr,
@@ -97,6 +100,8 @@ final class _Layer {
             held: held,
             maxVisible: maxVisible,
             emotes: emotes,
+            giftClearance: giftClearance,
+            color: color,
           ),
         ),
       ),
@@ -546,4 +551,178 @@ void main() {
     expect(layer.state.flyingCount, 1);
     await layer.close();
   });
+
+  group('A08.12: gifts over the picture', () {
+    testWidgets('a gift flies in the gift look, recorded once; frames only move it; the one colour does not touch it', (
+      tester,
+    ) async {
+      final layer = _Layer(tester);
+      await layer.pump(color: const Color(0xFF00FF00));
+      final gift = _flyingGift('甲 送出 告白气球 ×1');
+      layer.messages.add(gift);
+      await tester.pump();
+      expect(layer.state.recordCount, 1);
+      final style = layer.state.lastTextStyle!;
+      expect(style.color, LivePalettes.danmakuGift, reason: 'gold, whatever the one colour is');
+      expect(style.fontWeight!.value, greaterThanOrEqualTo(600));
+      // The frame and the icon around the words: wider than the words alone.
+      final chat = _chat('甲 送出 告白气球 ×1');
+      layer.messages.add(chat);
+      await tester.pump();
+      expect(layer.rect(gift).width, greaterThan(layer.rect(chat).width + 16));
+      expect(layer.rect(gift).height, lessThanOrEqualTo(const DanmakuLook().lane));
+      expect(layer.state.lastTextStyle!.color, const Color(0xFF00FF00));
+      final records = layer.state.recordCount;
+      final painted = layer.state.paintCount;
+      layer.messages.add(_flyingGift('甲 送出 告白气球 ×1'));
+      await layer.run(60, 1);
+      expect(layer.state.recordCount, records, reason: 'the same gift again: from the cache');
+      expect(layer.state.paintCount - painted, inInclusiveRange(59, 61), reason: 'one painting a frame, as for chat');
+      expect(layer.rect(gift).left, closeTo(400 - 120 * 61 / 60, 3), reason: 'it scrolls at the look speed');
+      await layer.close();
+    });
+
+    testWidgets('the danmaku outline and opacity apply to it (readable on the video)', (tester) async {
+      final layer = _Layer(tester);
+      await layer.pump(look: const DanmakuLook(opacity: 0.5, strokeWidth: 2));
+      layer.messages.add(_flyingGift('乙 送出 飞机 ×1'));
+      await tester.pump();
+      final style = layer.state.lastTextStyle!;
+      expect(style.color!.a, closeTo(0.5, 0.01));
+      expect(style.color!.withValues(alpha: 1), LivePalettes.danmakuGift);
+      await layer.pump(look: const DanmakuLook(stroke: false));
+      layer.messages.add(_flyingGift('丙 送出 飞机 ×1'));
+      await tester.pump();
+      expect(layer.state.recordCount, 2, reason: 'another look, another recording');
+      await layer.close();
+    });
+
+    testWidgets('a precious one stands at the top, centred, for 4 s, over the chat flying past', (tester) async {
+      final layer = _Layer(tester);
+      await layer.pump();
+      final gift = _flyingGift('丁 送出 火箭 ×1', tier: LiveGiftTier.precious);
+      layer.messages.add(gift);
+      await tester.pump();
+      final rect = layer.rect(gift);
+      expect(rect.center.dx, closeTo(200, 0.5));
+      expect(rect.top, lessThan(const DanmakuLook().lane));
+      final second = _flyingGift('戊 送出 火箭 ×1', tier: LiveGiftTier.precious);
+      layer.messages.add(second);
+      await tester.pump();
+      expect(layer.rect(second).top, closeTo(rect.top + const DanmakuLook().lane, 0.5), reason: 'the next place');
+      await layer.run(60, 3.5);
+      expect(layer.rect(gift), rect, reason: 'it stands');
+      await layer.run(60, 1);
+      expect(layer.state.rectOf(gift), isNull, reason: 'gone after 4 s');
+      expect(DanmakuOverlayState.giftHold, const Duration(seconds: 4));
+      await layer.close();
+    });
+
+    testWidgets('fullscreen bars: gifts keep clear of them; the chat does not change', (tester) async {
+      final layer = _Layer(tester);
+      const clear = EdgeInsets.only(top: 60, bottom: 60);
+      await layer.pump(giftClearance: clear);
+      final held = _flyingGift('甲 送出 火箭 ×1', tier: LiveGiftTier.precious);
+      final gifts = [for (var i = 0; i < 6; i++) _flyingGift('观众$i 送出 告白气球 ×1')];
+      final chat = _chat('聊天');
+      layer.messages
+        ..add(chat)
+        ..add(held);
+      gifts.forEach(layer.messages.add);
+      // Four enter a frame.
+      await tester.pump();
+      await layer.run(60, 0.1);
+      expect(layer.rect(chat).top, lessThan(26), reason: 'the chat takes the first lane as before');
+      expect(layer.rect(held).top, greaterThanOrEqualTo(60));
+      for (final gift in gifts) {
+        final rect = layer.rect(gift);
+        expect(rect.top, greaterThanOrEqualTo(60), reason: '${gift.message}: below the top bar');
+        expect(rect.bottom, lessThanOrEqualTo(300 - 60), reason: '${gift.message}: above the bottom bar');
+      }
+      await layer.close();
+    });
+
+    testWidgets('the display range and the bars leave no lane: a gift takes the lanes there are', (tester) async {
+      final layer = _Layer(tester);
+      await layer.pump(look: const DanmakuLook(area: 0.2), giftClearance: const EdgeInsets.only(top: 120));
+      final gift = _flyingGift('甲 送出 告白气球 ×1');
+      layer.messages.add(gift);
+      await tester.pump();
+      expect(layer.rect(gift).bottom, lessThanOrEqualTo(300 * 0.2), reason: 'inside the display range');
+      await layer.close();
+    });
+
+    testWidgets('"同屏最大弹幕条数" counts gifts with the chat; a gift over it waits in the same line', (tester) async {
+      final layer = _Layer(tester);
+      await layer.pump(maxVisible: 2);
+      final gift = _flyingGift('甲 送出 告白气球 ×1');
+      layer.messages
+        ..add(_chat('一'))
+        ..add(_chat('二'))
+        ..add(gift);
+      await tester.pump();
+      expect(layer.state.flyingCount, 2);
+      expect(layer.state.rectOf(gift), isNull);
+      expect(layer.state.pendingCount, 1);
+      await layer.pump(maxVisible: 3);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+      expect(layer.state.rectOf(gift), isNotNull);
+      await layer.close();
+    });
+
+    testWidgets('its picture: the icon until it has loaded, not recorded again; the next one has it', (tester) async {
+      final previous = AppImageCache.manager;
+      addTearDown(() => AppImageCache.manager = previous);
+      final png = File('assets/emo/images/bilibili/dog.png').readAsBytesSync();
+      final service = _ImageService(png);
+      AppImageCache.manager = CacheManager(
+        Config('gift', repo: NonStoringObjectProvider(), fileSystem: MemoryCacheSystem(), fileService: service),
+      );
+      const url = 'https://gifts.example/rocket.png';
+      final layer = _Layer(tester);
+      await layer.pump();
+      final first = _flyingGift('甲 送出 火箭 ×1', icon: url);
+      layer.messages.add(first);
+      await tester.pump();
+      expect(layer.state.rectOf(first), isNotNull, reason: 'it does not wait for its picture');
+      final width = layer.rect(first).width;
+      for (var i = 0; i < 20 && service.urls.isEmpty; i++) {
+        await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+        await tester.pump();
+      }
+      await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 200)));
+      await tester.pump();
+      expect(service.urls, [url]);
+      expect(layer.state.recordCount, 1, reason: 'the one on screen is not recorded again');
+      expect(layer.rect(first).width, width);
+      layer.messages.add(_flyingGift('甲 送出 火箭 ×1', icon: url));
+      await tester.pump();
+      expect(layer.state.recordCount, 2, reason: 'the next one is recorded with the picture');
+      await layer.close();
+      await tester.pump(const Duration(seconds: 11));
+    });
+
+    test('the frame: thicker for a precious gift, so the tiers differ without their colour', () {
+      expect(giftFrameWidth(LiveGiftTier.precious), greaterThan(giftFrameWidth(LiveGiftTier.valuable)));
+    });
+  });
+}
+
+/// A gift as the room's gate hands it to the flying layer: its words, a
+/// value of the [tier].
+LiveMessage _flyingGift(String words, {LiveGiftTier tier = LiveGiftTier.valuable, String? icon}) {
+  final gift = LiveGift(
+    name: '礼物',
+    totalValue: tier == LiveGiftTier.precious ? 500000 : 52000,
+    unit: LiveGiftUnit.goldSeed,
+    iconUrl: icon == null ? null : Uri.parse(icon),
+  );
+  return LiveMessage(
+    type: LiveMessageType.gift,
+    userName: words.split(' ').first,
+    message: words,
+    color: LiveMessageColor.white,
+    data: gift,
+  );
 }

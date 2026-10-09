@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
-import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
@@ -10,7 +9,11 @@ import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/shared/danmaku/chat_list_settings.dart';
-import 'package:pure_live/shared/rooms/room_texts.dart';
+import 'package:pure_live/shared/danmaku/gift_words.dart';
+
+// The words and numbers moved to shared/ for the flying gifts (A08.12); the
+// list's code and its tests still read them from here.
+export 'package:pure_live/shared/danmaku/gift_words.dart';
 
 // A08.11 (docs/A-界面设计/A08-弹幕界面/A08.11-礼物行的样子): one gift line for every
 // platform, read from the shared LiveGift (E05.5) and never from a
@@ -39,112 +42,6 @@ final class GiftLineRoom {
 
   @override
   int get hashCode => Object.hash(platform, streamer);
-}
-
-/// The count a gift line shows after "×": the platform's running combo
-/// count when it gives one (Douyu `hits`, Huya `iItemGroup`) and it is
-/// more than this message's count, else the count. D07.1's merging hands
-/// the line a message with a new count; the line only shows it.
-int giftShownCount(LiveGift gift) => math.max(gift.count, gift.comboTotal ?? 0);
-
-/// What the shown count is worth, in the gift's unit: none for a free gift;
-/// the unit price times the shown count when a combo count is shown and the
-/// price is known; else the message's [LiveGift.totalValue].
-int? giftShownValue(LiveGift gift) {
-  if (gift.free) return null;
-  final shown = giftShownCount(gift);
-  final price = gift.unitPrice;
-  if (shown != gift.count && price != null && price > 0) return price * shown;
-  return gift.totalValue;
-}
-
-/// The tier the line marks: [giftTierOf] the shown value (a combo climbs
-/// tiers as it grows; for one message it is [LiveGift.tier]).
-LiveGiftTier giftShownTier(LiveGift gift) => giftTierOf(gift.unit, giftShownValue(gift), free: gift.free);
-
-/// The value as the line writes it ("100 元", "2000 金瓜子", "79 Kicks"),
-/// in the platform's own unit (V03.5 §6.5; converting to yuan is A08.12's
-/// switch); null when it has none to show: free, unknown, zero, or a unit
-/// nobody has checked ([LiveGiftUnit.other], Huya's `lPayTotal`; silver
-/// seeds are free).
-String? giftValueText(LiveGift gift) {
-  final value = giftShownValue(gift);
-  if (value == null || value <= 0) return null;
-  final key = switch (gift.unit) {
-    LiveGiftUnit.fen => 'gift_value_yuan',
-    LiveGiftUnit.goldSeed => 'gift_value_gold_seed',
-    LiveGiftUnit.diamond => 'gift_value_diamond',
-    LiveGiftUnit.redBean => 'gift_value_red_bean',
-    LiveGiftUnit.point => 'gift_value_point',
-    LiveGiftUnit.bits => 'gift_value_bits',
-    LiveGiftUnit.kicks => 'gift_value_kicks',
-    LiveGiftUnit.cheese => 'gift_value_cheese',
-    LiveGiftUnit.starBalloon => 'gift_value_star_balloon',
-    LiveGiftUnit.douyinCoin => 'gift_value_douyin_coin',
-    LiveGiftUnit.silverSeed || LiveGiftUnit.other => null,
-  };
-  if (key == null) return null;
-  final amount = gift.unit == LiveGiftUnit.fen ? _yuan(value) : _amount(value);
-  return i18n(key, args: {'value': amount});
-}
-
-/// A large amount the way the app writes counts ("19.8万", "2万"; "198k"
-/// in English).
-String _amount(int value) => readableAudience('$value').replaceFirst(RegExp(r'\.0(?=\D*$)'), '');
-
-/// Fen as yuan: "5", "0.1", "12.5".
-String _yuan(int fen) {
-  if (fen % 100 == 0) return _amount(fen ~/ 100);
-  final text = (fen / 100).toStringAsFixed(2);
-  return text.endsWith('0') ? text.substring(0, text.length - 1) : text;
-}
-
-/// What a platform's gift adds after the value (E05.5 took it out of the
-/// text): niconico's giver rank ("贡献第 3 名").
-List<String> giftNotes(LiveGift gift) => [
-  if (gift case NiconicoGift(:final contributionRank?) when contributionRank > 0)
-    i18n('gift_line_rank', args: {'rank': '$contributionRank'}),
-];
-
-/// The verb before the gift's name, by kind: "送出" (or "送给 嘉宾" when the
-/// platform names a receiver other than [streamer]), "开通" a membership,
-/// "赠送" subscriptions, "打赏" a tip.
-String giftVerb(LiveGift gift, {String streamer = ''}) {
-  final receiver = gift.receiverName.trim();
-  return switch (gift.kind) {
-    LiveGiftKind.gift when receiver.isNotEmpty && receiver != streamer.trim() => i18n(
-      'gift_line_sent_to',
-      args: {'name': receiver},
-    ),
-    LiveGiftKind.gift => i18n('gift_line_sent'),
-    LiveGiftKind.membership => i18n('gift_line_bought'),
-    LiveGiftKind.subscription => i18n('gift_line_gifted'),
-    LiveGiftKind.tip => i18n('gift_line_tipped'),
-  };
-}
-
-/// The gift's name, never empty.
-String giftName(LiveGift gift) {
-  final name = gift.displayName.trim();
-  return name.isEmpty ? i18n('gift_line_unnamed') : name;
-}
-
-/// "×N" ("×1 个月" for a membership); empty for a tip of one, whose value
-/// says it.
-String giftCountText(LiveGift gift) {
-  final count = giftShownCount(gift);
-  return switch (gift.kind) {
-    LiveGiftKind.membership => i18n('gift_line_months', args: {'count': '$count'}),
-    LiveGiftKind.tip when count == 1 => '',
-    _ => i18n('gift_line_count', args: {'count': '$count'}),
-  };
-}
-
-/// The gift in words, without the sender: "送出 小心心 ×3" (what a double
-/// tap copies after "名字: ", c7).
-String giftSentence(LiveGift gift, {String streamer = ''}) {
-  final count = giftCountText(gift);
-  return '${giftVerb(gift, streamer: streamer)} ${giftName(gift)}${count.isEmpty ? '' : ' $count'}';
 }
 
 /// The colour of a precious gift's name and mark on [ground] (G3): the
@@ -192,6 +89,7 @@ class GiftLine extends StatefulWidget {
     this.room = GiftLineRoom.none,
     this.lead = const [],
     this.merged = false,
+    this.valueInYuan = false,
     super.key,
   });
 
@@ -219,6 +117,10 @@ class GiftLine extends StatefulWidget {
   /// a new [ChatLine] (a new id, so a new widget), and its ×N pulses once
   /// when it is first built (`ChatLine.revision > 0`).
   final bool merged;
+
+  /// Writes the value in yuan where the platform fixes the rate
+  /// ("礼物价值换算成元", A08.12; [giftValueText]).
+  final bool valueInYuan;
 
   /// The picture's size.
   static const double iconSize = GiftIcon.size;
@@ -285,7 +187,9 @@ class _GiftLineState extends State<GiftLine> with SingleTickerProviderStateMixin
     final secondary = body?.copyWith(color: scheme.onSurfaceVariant);
     final named = body?.emphasis.copyWith(color: giftInk);
     final name = widget.showName ? message.userName.trim() : '';
-    final notes = gift == null ? const <String>[] : [?giftValueText(gift), ...giftNotes(gift)];
+    final notes = gift == null
+        ? const <String>[]
+        : [?giftValueText(gift, inYuan: widget.valueInYuan), ...giftNotes(gift)];
     final count = gift == null ? '' : giftCountText(gift);
     final text = Text.rich(
       key: const ValueKey('live-play-gift-text'),
@@ -443,6 +347,7 @@ Widget giftLineOf(
   required bool showName,
   required GiftLineRoom room,
   required List<InlineSpan> lead,
+  bool valueInYuan = false,
   VoidCallback? onActions,
   VoidCallback? onCopy,
 }) => GestureDetector(
@@ -459,5 +364,6 @@ Widget giftLineOf(
     room: room,
     lead: lead,
     merged: line.revision > 0,
+    valueInYuan: valueInYuan,
   ),
 );

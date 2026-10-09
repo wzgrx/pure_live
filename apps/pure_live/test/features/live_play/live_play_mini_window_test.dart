@@ -685,6 +685,43 @@ void main() {
       await _close(tester, app);
     });
 
+    testWidgets('A08.12: the mini window follows "飞行弹幕显示礼物"; a gift keeps its gold under the one colour', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await tester.runAsync(() => app.services.store.settings.set(Settings.pipDanmakuUseOriginalColor, false));
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      DanmakuOverlayState layer() => tester.state<DanmakuOverlayState>(_inWindow(find.byType(DanmakuOverlay)));
+      LiveMessage gift(String user, {String id = ''}) => LiveMessage(
+        type: LiveMessageType.gift,
+        userName: user,
+        userId: user,
+        message: '火箭 ×1',
+        color: LiveMessageColor.white,
+        messageId: id,
+        data: const LiveGift(name: '火箭', totalValue: 500000, unit: LiveGiftUnit.goldSeed),
+      );
+      List<String> gifts() => [
+        for (final (message, _) in layer().debugFlying)
+          if (message.type == LiveMessageType.gift) message.message,
+      ];
+      // Off (the default): as before, no gift flies.
+      app.danmaku.emit(DanmakuReceived(gift('甲', id: 'g1')));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(gifts(), isEmpty);
+
+      await tester.runAsync(() => app.services.store.settings.set(Settings.danmakuShowGifts, true));
+      await _settle(tester);
+      app.danmaku.emit(DanmakuReceived(gift('乙', id: 'g2')));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(gifts(), ['乙 送出 火箭 ×1']);
+      // The mini window's opacity goes into it, as into the chat.
+      expect(layer().lastTextStyle?.color?.withValues(alpha: 1), LivePalettes.danmakuGift);
+      expect(tester.widget<DanmakuOverlay>(_inWindow(find.byType(DanmakuOverlay))).color, isNotNull);
+      await _close(tester, app);
+    });
+
     testWidgets('D03.3 c2: bundled emoticons fly as pictures in the mini window; text only drops them', (tester) async {
       // The app's lists read from the files, as the room's library does.
       final library = EmoteLibrary(bundle: FileAssetBundle());

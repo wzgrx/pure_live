@@ -67,7 +67,7 @@
 
 ## 门禁
 
-- （见下面“门禁结果”）
+- 2026-10-09 本机 `bash tools/gate/gate.sh --all`（提交 `a2d573dbf`，D08.4 的全部代码和文档）：`gate: passed (all, 14 members)`，一次通过。
 
 ## 真机上要看的
 

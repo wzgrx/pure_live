@@ -472,6 +472,10 @@ abstract final class AppIcons {
   /// "进房放回之前发的本地弹幕" (D08.1 c6; 3.x had no such switch).
   static const IconData localReplay = Icons.history_toggle_off_rounded;
 
+  /// Send a danmaku's words once more as a local danmaku: "+1（本地）" on a
+  /// platform's, "再发一次" on one's own (A08.14; 3.x had neither).
+  static const IconData localSendAgain = Icons.plus_one_rounded;
+
   // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
   // desktop mini window; 3.x player_manager.dart) ----
 

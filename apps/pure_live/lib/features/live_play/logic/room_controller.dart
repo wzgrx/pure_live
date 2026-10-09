@@ -11,6 +11,7 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/app/app_log.dart';
 import 'package:pure_live/app/network.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
+import 'package:pure_live/features/live_play/logic/gift_combiner.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/rooms/play_quality.dart';
@@ -171,8 +172,12 @@ class LiveRoomController extends ChangeNotifier {
   late final DanmakuNoticeThrottle _statusLines;
 
   /// The chat list; it tells its own listeners of new lines, at most once a
-  /// frame (B08: the controller no longer notifies for each message).
-  final ChatFeed chat = ChatFeed();
+  /// frame (B08: the controller no longer notifies for each message); at
+  /// most [GiftCombiner.maxGiftLines] of its lines are gifts (D07.1).
+  final ChatFeed chat = ChatFeed(giftCapacity: GiftCombiner.maxGiftLines);
+
+  /// Merges and limits the platform's gifts into [chat] (D07.1).
+  late final GiftCombiner _gifts = GiftCombiner(feed: chat, clock: _now);
   final StreamController<LiveMessage> _flying = StreamController.broadcast(sync: true);
   final StreamController<LiveRetraction> _retractions = StreamController.broadcast(sync: true);
   final List<StreamSubscription<Object?>> _subscriptions = [];
@@ -814,7 +819,10 @@ class LiveRoomController extends ChangeNotifier {
 
   void _onShowGifts(bool show) {
     if (_disposed) return;
-    if (!show) chat.removeWhere((line) => line.kind == ChatLineKind.gift);
+    if (!show) {
+      chat.removeWhere((line) => line.kind == ChatLineKind.gift);
+      _gifts.clear();
+    }
     _notify();
   }
 
@@ -1147,11 +1155,12 @@ class LiveRoomController extends ChangeNotifier {
         chat.add(ChatLine.notice(message));
       case LiveMessageType.gift:
         // B-21: a line in the chat list, not on the video; the switch hides
-        // them, and then nothing is filtered (D07.1 c5). D07.1: blocked
-        // viewers and words and the duplicate gate apply.
+        // them, and then nothing is filtered or merged (D07.1 c5). D07.1:
+        // blocked viewers and words and the duplicate gate apply; a combo is
+        // one line, and the lines are limited.
         if (!showGifts || message.message.trim().isEmpty) return;
         if (!_filter.accepts(message)) return;
-        chat.add(ChatLine.gift(message));
+        _gifts.add(message);
     }
   }
 

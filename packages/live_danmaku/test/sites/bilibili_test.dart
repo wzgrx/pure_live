@@ -867,7 +867,7 @@ void main() {
         expect(messages({'cmd': 'SEND_GIFT', 'data': <String, Object?>{}}), isEmpty);
       });
 
-      test('C-2: a combo is reported once per connect', () async {
+      test('D07.1: every message of a combo is reported; COMBO_SEND carries the combo so far', () async {
         Uint8List send(String combo, {String cmd = 'SEND_GIFT'}) => _notice({
           'cmd': cmd,
           'data': {
@@ -885,14 +885,23 @@ void main() {
             if (effect case {'message': {'type': 'gift', 'message': final String text}}) text,
         ];
 
+        // It used to report only the first message of a combo (C-2), so the
+        // app's count stayed at the first send's.
         expect(await gifts(send('a')), ['小心心 ×1']);
-        expect(await gifts(send('a')), isEmpty);
-        expect(await gifts(send('a', cmd: 'COMBO_SEND')), isEmpty);
-        expect(await gifts(send('b', cmd: 'COMBO_SEND')), ['小心心 ×5'], reason: 'joined during the combo');
+        expect(await gifts(send('a')), ['小心心 ×1']);
+        expect(await gifts(send('a', cmd: 'COMBO_SEND')), ['小心心 ×5']);
         expect(await gifts(send('')), ['小心心 ×1']);
-        expect(await gifts(send('')), ['小心心 ×1'], reason: 'no combo id: every message');
-        await replay.connection.connect(replay.args());
-        expect(await gifts(send('a')), ['小心心 ×1'], reason: 'a new connect forgets the combos');
+
+        final summary = messages({
+          'cmd': 'COMBO_SEND',
+          'data': {'gift_name': '小心心', 'gift_id': 30607, 'total_num': 5, 'uname': '观众', 'batch_combo_id': 'a'},
+        }).single;
+        expect((summary.gift?.count, summary.gift?.comboTotal, summary.gift?.comboKey), (5, 5, 'a'));
+        final single = messages({
+          'cmd': 'SEND_GIFT',
+          'data': {'giftName': '小心心', 'num': 1, 'uname': '观众', 'batch_combo_id': 'a'},
+        }).single;
+        expect((single.gift?.count, single.gift?.comboTotal), (1, null), reason: 'no running count in SEND_GIFT');
         await replay.connection.close();
       });
     });

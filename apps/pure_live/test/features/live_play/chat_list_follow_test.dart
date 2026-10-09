@@ -296,6 +296,67 @@ void main() {
     await _close(tester, room);
   });
 
+  testWidgets('D07.1: a merged gift comes to the bottom while following, and changes in place while held', (
+    tester,
+  ) async {
+    final room = await _pump(tester);
+    final controller = _controller(tester);
+    void gift(int total) {
+      final present = LiveGift(name: '小心心', id: '1', comboKey: 'k', comboTotal: total);
+      room.danmaku.emit(
+        DanmakuReceived(
+          LiveMessage(
+            type: LiveMessageType.gift,
+            userName: '送礼人',
+            userId: 'g',
+            message: present.plainText,
+            color: LiveMessageColor.white,
+            data: present,
+          ),
+        ),
+      );
+    }
+
+    Finder giftLine(int count) => find.text('送礼人 小心心 ×$count', findRichText: true);
+
+    _chats(room, 0, 40);
+    gift(1);
+    _chats(room, 40, 44);
+    await tester.pump();
+    var added = controller.chat.added;
+    gift(2);
+    await _frames(tester, 1);
+    expect(giftLine(1), findsNothing);
+    expect(giftLine(2), findsOneWidget);
+    expect(tester.getRect(giftLine(2)).top, greaterThan(tester.getRect(_line(43)).top), reason: 'now the newest');
+    expect(controller.chat.added, added, reason: 'a merge is not a new message');
+
+    _chats(room, 44, 52);
+    await tester.pump();
+    await tester.drag(_list, const Offset(0, 120));
+    await _frames(tester, 3);
+    expect(find.byKey(const ValueKey('live-play-new-messages')), findsOneWidget);
+    expect(giftLine(2), findsOneWidget);
+    final rect = tester.getRect(giftLine(2));
+    added = controller.chat.added;
+    gift(3);
+    await _frames(tester, 1);
+    expect(giftLine(3), findsOneWidget, reason: 'the new count where it was');
+    expect(tester.getRect(giftLine(3)), rect);
+    expect(giftLine(2), findsNothing);
+    expect(find.text('回到底部'), findsOneWidget, reason: 'no new messages counted');
+
+    await tester.tap(find.byKey(const ValueKey('live-play-new-messages')));
+    await _frames(tester, 2);
+    expect(
+      tester.getRect(giftLine(3)).top,
+      greaterThan(tester.getRect(_line(51)).top),
+      reason: 'following: the newest',
+    );
+    expect(controller.chat.added, added);
+    await _close(tester, room);
+  });
+
   testWidgets('a drag that ends back at the bottom follows again', (tester) async {
     final room = await _pump(tester);
     _chats(room, 0, 60);

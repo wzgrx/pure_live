@@ -26,26 +26,31 @@ enum ChatLineKind {
 /// One line of the chat list.
 final class ChatLine {
   /// A viewer's message.
-  new chat(LiveMessage this.message) : kind = ChatLineKind.chat, text = message.message, superChat = null;
+  new chat(LiveMessage this.message) : kind = ChatLineKind.chat, text = message.message, superChat = null, revision = 0;
 
   /// A paid message.
   new superChat(LiveSuperChatMessage this.superChat)
     : kind = ChatLineKind.superChat,
       text = superChat.message,
-      message = null;
+      message = null,
+      revision = 0;
 
   /// A platform notice, in the interface language when the adapter wrote
   /// it (Z05.2).
   new notice(LiveMessage this.message)
     : kind = ChatLineKind.notice,
       text = platformNotice(message.message),
+      superChat = null,
+      revision = 0;
+
+  /// A gift; [revision] counts the merges that made it (D07.1).
+  new gift(LiveMessage this.message, {this.revision = 0})
+    : kind = ChatLineKind.gift,
+      text = message.message,
       superChat = null;
 
-  /// A gift.
-  new gift(LiveMessage this.message) : kind = ChatLineKind.gift, text = message.message, superChat = null;
-
   /// The app's status text.
-  new system(this.text) : kind = ChatLineKind.system, message = null, superChat = null;
+  new system(this.text) : kind = ChatLineKind.system, message = null, superChat = null, revision = 0;
 
   /// The kind.
   final ChatLineKind kind;
@@ -58,6 +63,26 @@ final class ChatLine {
 
   /// The paid message, for super chats.
   final LiveSuperChatMessage? superChat;
+
+  /// How many times a gift line's count went up before this line (D07.1):
+  /// 0 for a new line. A merged gift is a new line with one more, put in
+  /// the old one's stead ([ChatFeed.replace]); the line can tell a new count
+  /// by it (A08.11's "×N" bump).
+  final int revision;
+
+  /// The line that took this one's place ([ChatFeed.replace]); null while
+  /// it is the current one.
+  ChatLine? get replacement => _replacement;
+  ChatLine? _replacement;
+
+  /// The newest line in this one's place: itself unless it was replaced.
+  ChatLine get latest {
+    var line = this;
+    for (var next = line._replacement; next != null; next = line._replacement) {
+      line = next;
+    }
+    return line;
+  }
 
   /// A sequence number given by the feed (stable list keys).
   int id = 0;
@@ -98,7 +123,8 @@ void scheduleChatFlushForNextFrame(VoidCallback flush) {
 }
 
 /// The chat list: the last [capacity] lines (3.x kept 500), with the
-/// platform's retractions applied.
+/// platform's retractions applied; at most [giftCapacity] of them gifts
+/// (D07.1: a busy room's gifts do not push the chat out).
 ///
 /// The lines change at once; the listeners hear of it at most once a frame
 /// (B08: a busy room sends 200 messages a second, and the whole room page
@@ -106,14 +132,22 @@ void scheduleChatFlushForNextFrame(VoidCallback flush) {
 final class ChatFeed extends ChangeNotifier {
   /// Creates an empty feed; [schedule] decides when the listeners hear of
   /// changes ([scheduleChatFlushForNextFrame] by default).
-  new({this.capacity = 500, ChatFlushScheduler? schedule}) : _schedule = schedule ?? scheduleChatFlushForNextFrame;
+  new({this.capacity = 500, this.giftCapacity, ChatFlushScheduler? schedule})
+    : _schedule = schedule ?? scheduleChatFlushForNextFrame;
 
   /// The most lines kept.
   final int capacity;
 
+  /// The most gift lines kept: beyond it the oldest gift line goes, not a
+  /// chat line; null for no limit of their own.
+  final int? giftCapacity;
+
   final ChatFlushScheduler _schedule;
   final List<ChatLine> _lines = [];
   int _next = 0;
+  int _added = 0;
+  int _gifts = 0;
+  int _replacements = 0;
   int _removals = 0;
   final List<bool Function(ChatLine line)> _removalTests = [];
   static const int _keptRemovalTests = 64;
@@ -126,8 +160,15 @@ final class ChatFeed extends ChangeNotifier {
   /// Number of lines.
   int get length => _lines.length;
 
-  /// Lines added so far (the list's "new messages" count).
-  int get added => _next;
+  /// Lines added so far (the list's "new messages" count); a replaced
+  /// line ([replace]) is not a new one.
+  int get added => _added;
+
+  /// How many gift lines there are.
+  int get giftLines => _gifts;
+
+  /// How many lines were replaced so far ([replace]).
+  int get replacements => _replacements;
 
   /// How many removals there were (retractions, blocks, the gift switch),
   /// whether or not they found a line here.
@@ -146,12 +187,73 @@ final class ChatFeed extends ChangeNotifier {
   /// Whether a change waits for the listeners.
   bool get pending => _pending;
 
-  /// Adds [line] at the end, dropping the oldest beyond [capacity].
+  /// Adds [line] at the end, dropping the oldest beyond [capacity], and the
+  /// oldest gift line beyond [giftCapacity].
   void add(ChatLine line) {
     line.id = _next++;
+    _added++;
     _lines.add(line);
-    if (_lines.length > capacity) _lines.removeRange(0, _lines.length - capacity);
+    if (line.kind == ChatLineKind.gift) {
+      _gifts++;
+      final most = giftCapacity;
+      if (most != null && _gifts > most) {
+        // Off the old end, like the lines beyond the capacity (not a removal).
+        _lines.removeAt(_lines.indexWhere((old) => old.kind == ChatLineKind.gift));
+        _gifts--;
+      }
+    }
+    if (_lines.length > capacity) {
+      final over = _lines.length - capacity;
+      for (var i = 0; i < over; i++) {
+        if (_lines[i].kind == ChatLineKind.gift) _gifts--;
+      }
+      _lines.removeRange(0, over);
+    }
     _changed();
+  }
+
+  /// Puts [replacement] in the place of [line] (D07.1: a merged gift's new
+  /// count): [line] leaves and [replacement] comes in at the end, as the
+  /// newest line, without counting as added; [ChatLine.replacement] links
+  /// them, so a list holding [line] shows [replacement] where it was. The
+  /// listeners hear of it at the next frame, as of any change. Returns
+  /// false, changing nothing, when [line] is not in the feed.
+  bool replace(ChatLine line, ChatLine replacement) {
+    final at = _indexOf(line);
+    if (at < 0) return false;
+    _lines.removeAt(at);
+    if (line.kind == ChatLineKind.gift) _gifts--;
+    replacement.id = _next++;
+    _lines.add(replacement);
+    if (replacement.kind == ChatLineKind.gift) _gifts++;
+    line._replacement = replacement;
+    _replacements++;
+    _changed();
+    return true;
+  }
+
+  /// How many lines came after [line]: 0 for the newest, -1 when it is not
+  /// in the feed (removed, replaced or dropped off the old end).
+  int linesAfter(ChatLine line) {
+    final at = _indexOf(line);
+    return at < 0 ? -1 : _lines.length - 1 - at;
+  }
+
+  /// Where [line] is in the lines (in id order), or -1.
+  int _indexOf(ChatLine line) {
+    var low = 0;
+    var high = _lines.length - 1;
+    while (low <= high) {
+      final middle = (low + high) >> 1;
+      final at = _lines[middle];
+      if (at.id == line.id) return identical(at, line) ? middle : -1;
+      if (at.id < line.id) {
+        low = middle + 1;
+      } else {
+        high = middle - 1;
+      }
+    }
+    return -1;
   }
 
   /// Takes back what [retraction] names: one message by id, a user's
@@ -176,6 +278,7 @@ final class ChatFeed extends ChangeNotifier {
     _lines.removeWhere((line) {
       if (!test(line)) return false;
       line.removed = true;
+      if (line.kind == ChatLineKind.gift) _gifts--;
       return true;
     });
     _removals++;

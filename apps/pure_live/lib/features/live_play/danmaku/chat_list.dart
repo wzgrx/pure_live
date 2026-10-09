@@ -252,8 +252,12 @@ class _ChatListState extends ConsumerState<ChatList> {
       _seen = feed.added;
       return;
     }
-    // Held: taken-back and blocked lines still go, also those the feed has
-    // already let go of (3.x); new ones are counted.
+    // Held: a merged gift shows its new count where it is (D07.1); taken-back
+    // and blocked lines still go, also those the feed has already let go of
+    // (3.x); new ones are counted.
+    if (_shown.value.any((line) => line.replacement != null)) {
+      _shown.value = [for (final line in _shown.value) line.latest];
+    }
     if (feed.removals != _removals) {
       final tests = feed.removalsSince(_removals) ?? const [];
       _removals = feed.removals;

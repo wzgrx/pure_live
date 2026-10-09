@@ -183,6 +183,31 @@ void main() {
     controller.dispose();
   });
 
+  test('D07.1 c2: a combo is one line; c5: with the switch off nothing is filtered or merged', () async {
+    final controller = controllerFor(FakeSite(liveRoom()));
+    await controller.start();
+    await settle();
+    final added = controller.chat.added;
+    for (var i = 0; i < 3; i++) {
+      danmaku.emit(DanmakuReceived(platformGift('观众', '小心心', id: '1', messageId: 'g:c$i')));
+    }
+    expect(giftLines(controller), ['观众 小心心 ×3']);
+    expect(controller.chat.added, added + 1);
+
+    await controller.setShowGifts(show: false);
+    danmaku.emit(DanmakuReceived(platformGift('观众', '辣条', id: '2', messageId: 'g:2')));
+    expect(giftLines(controller), isEmpty);
+    await controller.setShowGifts(show: true);
+    danmaku
+      ..emit(DanmakuReceived(platformGift('观众', '辣条', id: '2', messageId: 'g:2')))
+      ..emit(DanmakuReceived(platformGift('观众', '小心心', id: '1')));
+    expect(giftLines(controller), [
+      '观众 辣条 ×1',
+      '观众 小心心 ×1',
+    ], reason: 'the gate never saw the gift sent while off; the combo was forgotten with its line');
+    controller.dispose();
+  });
+
   test('audio only keeps the stream; a sleep session starts audio only and its timer pauses the room', () async {
     final controller = controllerFor(FakeSite(liveRoom()));
     await controller.start();

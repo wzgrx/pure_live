@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_danmaku/live_danmaku.dart';
 import 'package:live_player/live_player.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
@@ -73,6 +74,37 @@ void main() {
     expect(chatTexts(controller), ['主播666', '你好']);
     expect(controller.blocked.value, 2, reason: 'the duplicate packet and the repeat are not blocks');
     expect(heard, 2, reason: 'without a frame scheduler each change is heard at once');
+    controller.dispose();
+  });
+
+  test("a blocked platform gift counts too (D07.1 gifts go through the block list)", () async {
+    await store.blockLists.add(BlockKind.keyword, '/^荧光棒/');
+    final controller = controllerFor();
+    await controller.start();
+    await settle();
+    void gift(String name, String id) => danmaku.emit(
+      DanmakuReceived(
+        LiveMessage(
+          type: LiveMessageType.gift,
+          userName: '观众',
+          userId: '观众',
+          message: '$name ×1',
+          color: LiveMessageColor.white,
+          messageId: id,
+          data: LiveGift(id: name, name: name),
+        ),
+      ),
+    );
+    gift('荧光棒', 'g1');
+    gift('火箭', 'g2');
+    expect(
+      [
+        for (final line in controller.chat.lines)
+          if (line.kind == ChatLineKind.gift) line.text,
+      ],
+      ['火箭 ×1'],
+    );
+    expect(controller.blocked.value, 1);
     controller.dispose();
   });
 

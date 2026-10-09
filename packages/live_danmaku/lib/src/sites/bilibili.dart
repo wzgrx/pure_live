@@ -25,7 +25,8 @@ final class BilibiliGift extends LiveGift {
   /// [id] is `giftId` (`SEND_GIFT`) or `gift_id`, empty when missing or 0;
   /// [name] `giftName` or `gift_name` (`小心心`, `舰长`); [count] how many
   /// this message gave, at least 1: `num`, a combo's `total_num`, the months
-  /// of a `GUARD_BUY`.
+  /// of a `GUARD_BUY`; [comboTotal] a `COMBO_SEND`'s `total_num`, the combo
+  /// so far (D07.1).
   const new({
     required super.id,
     required super.name,
@@ -33,6 +34,7 @@ final class BilibiliGift extends LiveGift {
     this.goldCoins = 0,
     this.comboId = '',
     super.kind,
+    super.comboTotal,
     super.unitPrice,
     super.free,
   }) : super(comboKey: comboId, totalValue: goldCoins > 0 ? goldCoins : null, unit: LiveGiftUnit.goldSeed);
@@ -43,7 +45,8 @@ final class BilibiliGift extends LiveGift {
   final int goldCoins;
 
   /// `batch_combo_id`, shared by every message of one combo; empty when
-  /// missing. The connection reports one message per combo.
+  /// missing. Every message of a combo is reported; the app counts them on
+  /// one line (D07.1).
   final String comboId;
 
   @override
@@ -71,8 +74,9 @@ final class BilibiliGift extends LiveGift {
 ///   [connect]) and reopens with them; when no new credentials come, the
 ///   connection ends with [DanmakuCloseReason.credentialsUnavailable].
 /// - Heartbeats every 30 s; notices that ask for it are acknowledged.
-/// - A combo's gifts are reported once: the first message with its
-///   [BilibiliGift.comboId] in this [connect], later ones are dropped.
+/// - Every gift of a combo is reported (D07.1: the app counts them on one
+///   line; it used to report only the first, so the count stayed at the
+///   first send's).
 final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDanmakuArgs> {
   /// Creates the connection. [proxy] routes the socket; `connector` replaces
   /// `dart:io`'s handshake. [policy], `credentialRetryDelay` (the step
@@ -100,15 +104,9 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
   /// Credential attempts when a start has no token.
   static const int startCredentialAttempts = 3;
 
-  /// Combo ids remembered per [connect], oldest dropped first.
-  static const int maxRememberedCombos = 512;
-
   final Duration _credentialRetryDelay;
   final Random _random;
   _Credentials? _credentials;
-
-  /// The combos already reported in this run (C-2), in insertion order.
-  final Set<String> _combos = <String>{};
 
   /// Whether Bilibili masked [name] (`**` or `＊＊`, guests see names like
   /// `观***`): the room page tells the user once per session that logging in
@@ -137,7 +135,6 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
       }
     }
     _credentials = _Credentials(run, current);
-    _combos.clear();
     return _target(current);
   }
 
@@ -167,7 +164,6 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
       if (!session.isActive) return;
       switch (item) {
         case BilibiliDanmakuMessage(:final message):
-          if (_isRepeatedCombo(message)) continue;
           session.message(message);
         case BilibiliDanmakuAck(:final packet):
           session.send(packet);
@@ -175,16 +171,6 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
           _authReply(session, code);
       }
     }
-  }
-
-  /// Whether [message] is a gift of a combo already reported; remembers the
-  /// combo otherwise.
-  bool _isRepeatedCombo(LiveMessage message) {
-    final data = message.data;
-    if (data is! BilibiliGift || data.comboId.isEmpty) return false;
-    if (!_combos.add(data.comboId)) return true;
-    if (_combos.length > maxRememberedCombos) _combos.remove(_combos.first);
-    return false;
   }
 
   void _authReply(DanmakuSocketSession session, int code) {
@@ -241,7 +227,6 @@ final class BilibiliDanmakuConnection extends DanmakuSocketConnection<BilibiliDa
   @protected
   Future<void> stop() async {
     _credentials = null;
-    _combos.clear();
     await super.stop();
   }
 }
@@ -754,7 +739,9 @@ abstract final class BilibiliDanmakuProtocol {
   /// `COMBO_SEND` (a combo's `gift_name`, `gift_id`, `total_num`,
   /// `combo_total_coin`), both with `uid`, `uname` and `batch_combo_id`: a
   /// [LiveMessageType.gift] holding a [BilibiliGift] (a silver `SEND_GIFT`
-  /// is free), text [LiveGift.plainText]. Without a name, nothing.
+  /// is free; a `COMBO_SEND`'s count, the combo so far, is also its
+  /// [LiveGift.comboTotal]), text [LiveGift.plainText]. Without a name,
+  /// nothing.
   static LiveMessage? _gift(Map<String, dynamic> notice, {required bool combo}) {
     final data = notice['data'];
     if (data is! Map) return null;
@@ -776,6 +763,7 @@ abstract final class BilibiliDanmakuProtocol {
         count: count > 0 ? count : 1,
         goldCoins: coins != null && coins > 0 ? coins : 0,
         comboId: jsonString(data['batch_combo_id']) ?? '',
+        comboTotal: combo && count > 0 ? count : null,
         free: !combo && data['coin_type'] == 'silver',
       ),
     );

@@ -96,7 +96,10 @@ enum DanmakuVerdict {
 /// 4. the similarity filter ([DanmakuSimilarityFilter]) when enabled, for
 ///    platform messages only.
 ///
-/// Other message types (audience figures, super chats) are not filtered.
+/// A platform gift goes through steps 1 and 2 only (D07.1: a gift repeats
+/// on purpose, so neither collapsing nor similarity applies; a blocked word
+/// in its text, `粉丝荧光棒 ×10`, blocks it). Local gifts and other message
+/// types (audience figures, super chats) are not filtered.
 final class DanmakuMessageFilter {
   /// Creates the filter with [settings]; [clock] times every step.
   new({DanmakuFilterSettings settings = const DanmakuFilterSettings(), DateTime Function()? clock})
@@ -148,6 +151,7 @@ final class DanmakuMessageFilter {
 
   /// Whether [message] should be shown, and what hid it.
   DanmakuVerdict judge(LiveMessage message) {
+    if (message.type == LiveMessageType.gift) return _judgeGift(message);
     if (message.type != LiveMessageType.chat) return DanmakuVerdict.shown;
     final now = _clock();
     if (!gate.accepts(message, now: now)) return DanmakuVerdict.duplicate;
@@ -168,6 +172,14 @@ final class DanmakuMessageFilter {
     final shape = shapeOf(message);
     return (settings.blockEmoteOnly && shape.emoteOnly) ||
         (settings.blockLong && shape.length > settings.blockLongLength.clamp(10, 100));
+  }
+
+  /// Steps 1 and 2 for a platform gift (D07.1): the duplicate gate and the
+  /// block list (D02.2's regexes too); the content blocks are for chat only.
+  DanmakuVerdict _judgeGift(LiveMessage message) {
+    if (message.isLocal) return DanmakuVerdict.shown;
+    if (!gate.accepts(message, now: _clock())) return DanmakuVerdict.duplicate;
+    return _blockList.blocks(message) ? DanmakuVerdict.blocked : DanmakuVerdict.shown;
   }
 
   /// Forgets everything seen (another room).

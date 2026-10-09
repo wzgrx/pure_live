@@ -2251,13 +2251,15 @@ note = "要补的 5 项都由别的任务做完了（V03.3 核对，D-029）：F
 id = "D07.1"
 title = "礼物过滤、连击合并、限速和行数上限（含基准）"
 type = "功能"
-status = "未开始"
+status = "待真机"
+date = "2026-10-09"
 size = "中"
 tier = 2
 stages = ["礼物过屏蔽用户、屏蔽词和去重闸门", "连击合并、每秒最多 10 条礼物行、500 行里礼物最多 150 行、基准加礼物"]
-done = 0
+done = 2
 from = "V03.5 第 6.4、6.8 节（F-4、F-5）；用户 2026-10-09（D-040）"
-note = "依赖 E05.5（comboKey、免费标记）；哔哩哔哩“连击只报第一条”改成每条都报在 D07.4，两边要一起合并；ChatFeed（D04）要能改一行的数字"
+note = "依赖 E05.5（comboKey、免费标记）；哔哩哔哩“连击只报第一条”改成每条都报也在本任务做了（V03.5 第 7 节）；ChatFeed.replace 换一行的数字（A08.11 看 ChatLine.revision）；设计选择（D-003）写在任务 README“定稿”"
+next = "K90 上按 record.md“真机上要看的”看"
 
 [[task]]
 id = "D07.2"
@@ -2293,7 +2295,7 @@ tier = 2
 stages = ["SEND_GIFT 每条都报，留单价、图标、粉丝牌、舰长；COMBO_SEND 的累计", "访客的 SEND_GIFT_V2（protobuf，先录样本）；礼物表 giftConfig"]
 done = 0
 from = "V03.5 第 2、3 节哔哩哔哩、第 7 节；用户 2026-10-09（D-040）"
-note = "依赖 E05.5、D07.1（每条都报以后靠合并）；第 2 阶段要先录未删内容的 SEND_GIFT_V2 样本"
+note = "依赖 E05.5、D07.1（每条都报以后靠合并）；第 1 阶段的“每条都报”和 COMBO_SEND 的累计（comboTotal = total_num）已在 D07.1 做了；第 2 阶段要先录未删内容的 SEND_GIFT_V2 样本"
 
 [[task]]
 id = "D07.5"

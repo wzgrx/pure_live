@@ -136,6 +136,78 @@ void main() {
     controller.dispose();
   });
 
+  LiveMessage platformGift(String user, String name, {String id = '', String messageId = ''}) {
+    final present = LiveGift(name: name, id: id);
+    return LiveMessage(
+      type: LiveMessageType.gift,
+      userName: user,
+      userId: user,
+      message: present.plainText,
+      color: LiveMessageColor.white,
+      messageId: messageId,
+      data: present,
+    );
+  }
+
+  List<String> giftLines(LiveRoomController controller) => [
+    for (final line in controller.chat.lines)
+      if (line.kind == ChatLineKind.gift) '${line.message!.userName} ${line.text}',
+  ];
+
+  test('D07.1 c1: blocked viewers and words, and the duplicate gate, apply to gifts', () async {
+    await store.blockLists.add(BlockKind.user, '捣乱的');
+    await store.blockLists.add(BlockKind.keyword, '荧光棒');
+    final controller = controllerFor(FakeSite(liveRoom()));
+    await controller.start();
+    await settle();
+    danmaku
+      ..emit(DanmakuReceived(platformGift('捣乱的', '小心心', id: '1')))
+      ..emit(DanmakuReceived(platformGift('观众', '粉丝荧光棒', id: '824')))
+      ..emit(DanmakuReceived(platformGift('观众', '辣条', id: '2', messageId: 'g:1')))
+      ..emit(DanmakuReceived(platformGift('观众', '辣条', id: '2', messageId: 'g:1')));
+    expect(giftLines(controller), ['观众 辣条 ×1'], reason: 'the replayed one is a duplicate');
+
+    // Blocking a word now takes its gift lines off too; a local gift stays.
+    controller.addLocal(
+      const LiveMessage(
+        type: LiveMessageType.gift,
+        userName: '我',
+        message: '辣条 ×1',
+        color: LiveMessageColor.white,
+        isLocal: true,
+      ),
+      fly: false,
+    );
+    await controller.blockKeyword('辣条');
+    expect(giftLines(controller), ['我 辣条 ×1']);
+    controller.dispose();
+  });
+
+  test('D07.1 c2: a combo is one line; c5: with the switch off nothing is filtered or merged', () async {
+    final controller = controllerFor(FakeSite(liveRoom()));
+    await controller.start();
+    await settle();
+    final added = controller.chat.added;
+    for (var i = 0; i < 3; i++) {
+      danmaku.emit(DanmakuReceived(platformGift('观众', '小心心', id: '1', messageId: 'g:c$i')));
+    }
+    expect(giftLines(controller), ['观众 小心心 ×3']);
+    expect(controller.chat.added, added + 1);
+
+    await controller.setShowGifts(show: false);
+    danmaku.emit(DanmakuReceived(platformGift('观众', '辣条', id: '2', messageId: 'g:2')));
+    expect(giftLines(controller), isEmpty);
+    await controller.setShowGifts(show: true);
+    danmaku
+      ..emit(DanmakuReceived(platformGift('观众', '辣条', id: '2', messageId: 'g:2')))
+      ..emit(DanmakuReceived(platformGift('观众', '小心心', id: '1')));
+    expect(giftLines(controller), [
+      '观众 辣条 ×1',
+      '观众 小心心 ×1',
+    ], reason: 'the gate never saw the gift sent while off; the combo was forgotten with its line');
+    controller.dispose();
+  });
+
   test('audio only keeps the stream; a sleep session starts audio only and its timer pauses the room', () async {
     final controller = controllerFor(FakeSite(liveRoom()));
     await controller.start();

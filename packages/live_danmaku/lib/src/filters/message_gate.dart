@@ -15,9 +15,10 @@ import 'package:live_core/live_core.dart';
 /// - A message with a [LiveMessage.messageId] passes once per
 ///   [stableIdWindow].
 /// - Without an id the key is the type, the user id and name (trimmed, lower
-///   case) and the trimmed text (and a retraction's target), once per
-///   [fallbackDuplicateWindow]: short on purpose, so a viewer who repeats a
-///   line is still seen.
+///   case) and the trimmed text (and a retraction's target, a gift's running
+///   combo count), once per [fallbackDuplicateWindow]: short on purpose, so a
+///   viewer who repeats a line is still seen. (D07.1: each hit of a Douyu
+///   combo has the same text, `粉丝荧光棒 ×10`, and a higher `hits`.)
 /// - A rejected duplicate keeps its first time: the window does not slide.
 /// - Keys older than [stableIdWindow] are forgotten; at most [maxEntries]
 ///   are kept.
@@ -67,7 +68,12 @@ final class DanmakuMessageGate {
         : 'text:${message.type.index}:${message.userId.trim().toLowerCase()}:'
               '${message.userName.trim().toLowerCase()}:${message.message.trim()}'
               // A retraction's target is its content.
-              '${message.data is LiveRetraction ? ':${message.data}' : ''}';
+              '${message.data is LiveRetraction ? ':${message.data}' : ''}'
+              // A combo's next hit is not the same gift again.
+              '${switch (message.gift?.comboTotal) {
+                final int total => ':combo:$total',
+                null => '',
+              }}';
     final window = hasStableId ? stableIdWindow : fallbackDuplicateWindow;
     final previous = _seen.remove(key);
     if (previous != null && receivedAt.difference(previous) <= window) {

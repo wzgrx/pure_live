@@ -67,8 +67,9 @@
 
 ## 门禁
 
-- 见下一次提交。
+- 第一次 `bash tools/gate/gate.sh --all` 在 `i18n_test.dart` 失败：“行间距”三档的翻译键是拼出来的（`danmaku_list_spacing_${name}`），检查认不出；改成 `ChatSpacing.labelKey` 的三个写死的键（`68f803744`）。
+- 第二次（提交 `68f803744`）：`gate: passed (all, 14 members)`；`apps/pure_live` 全部测试通过（1321 个）。`docs.py --check`、`owners.py --check` 通过，`settings_audit.py` 重新生成后没有变化。
 
 ## 提交
 
-- `bc6d9228e` 代码和测试；文档和登记表的提交；记录门禁结果的提交。合并提交由维护者补。
+- `bc6d9228e` 代码和测试；`b78f5a121` 文档和登记表；`68f803744` 翻译键改成写死的；本条记录门禁结果的提交。合并提交由维护者补。

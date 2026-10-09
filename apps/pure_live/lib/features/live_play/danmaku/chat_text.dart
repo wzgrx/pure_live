@@ -50,5 +50,8 @@ class ChatInline extends StatelessWidget {
   Widget build(BuildContext context) =>
       // MediaQuery.withNoTextScaling, without its Builder (one widget less
       // for each piece of each line).
-      MediaQuery(data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling), child: child);
+      MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+        child: child,
+      );
 }

@@ -476,6 +476,19 @@ abstract final class AppIcons {
   /// platform's, "再发一次" on one's own (A08.14; 3.x had neither).
   static const IconData localSendAgain = Icons.plus_one_rounded;
 
+  /// A chip over the local danmaku composer that is one of the local
+  /// danmaku sent last ("最近", D08.2; 3.x had no chips).
+  static const IconData localRecent = Icons.history_rounded;
+
+  /// "存为常用语" in a local danmaku's panel (D08.2).
+  static const IconData localPhraseSave = Icons.playlist_add_rounded;
+
+  /// "已在常用语里": the danmaku is one of the phrases already (D08.2).
+  static const IconData localPhraseSaved = Icons.playlist_add_check_rounded;
+
+  /// The phrases group on the local interaction settings page (D08.2).
+  static const IconData localPhrases = Icons.format_list_bulleted_rounded;
+
   // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
   // desktop mini window; 3.x player_manager.dart) ----
 

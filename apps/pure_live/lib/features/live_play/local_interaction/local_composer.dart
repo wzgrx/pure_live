@@ -49,6 +49,13 @@ void openLocalDanmakuStyle(BuildContext context) => RoomPanelScope.maybeOf(conte
 /// [localComposerCollapseWidth] it collapses into the compose button whose
 /// row opens above the bar (c14). [onHold] tells the bar to keep the controls up
 /// while the field has the focus or the row is open (3.x).
+///
+/// D08.2: while the field has the focus, a row of chips sits over it
+/// ([LocalComposerChips]): the local danmaku sent last, then the user's
+/// phrases; a tap sends one, a long press puts it in the field. Under the
+/// chat list and in the panel the row is part of the composer (the list
+/// above gives way); on the picture, whose bar has a fixed height, it floats
+/// above the field.
 class LocalDanmakuComposer extends ConsumerStatefulWidget {
   /// Creates a composer at [place].
   const new({
@@ -91,6 +98,8 @@ class LocalDanmakuComposer extends ConsumerStatefulWidget {
 class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
   final TextEditingController _text = TextEditingController();
   final FocusNode _focus = FocusNode(debugLabel: 'local-composer');
+  final OverlayPortalController _chipsAbove = OverlayPortalController(debugLabel: 'local-composer-chips');
+  final LayerLink _fieldLink = LayerLink();
   bool _holding = false;
 
   @override
@@ -112,6 +121,10 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
   void _onFocus() {
     if (!mounted) return;
     setState(() {});
+    if (widget.place == LocalComposerPlace.video) {
+      // The chips float above the field on the picture (D08.2 c1).
+      _focus.hasFocus ? _chipsAbove.show() : _chipsAbove.hide();
+    }
     final hold = _focus.hasFocus;
     if (hold == _holding) return;
     _holding = hold;
@@ -127,20 +140,41 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
     widget.onSent?.call();
   }
 
+  /// D08.2 c2: a chip's words sent as they are; what is typed stays.
+  void _sendChip(String words) {
+    final session = _session;
+    if (session == null || !session.sendChat(words)) return;
+    widget.onSent?.call();
+  }
+
+  /// D08.2 c2: a chip's words in the field to change, the cursor at the end.
+  void _fillChip(String words) {
+    _text.value = TextEditingValue(
+      text: words,
+      selection: TextSelection.collapsed(offset: words.length),
+    );
+    _focus.requestFocus();
+  }
+
+  /// The chips over the field while it has the focus, or nothing.
+  Widget _chips(LocalRoomSession session, {required bool onVideo}) => _focus.hasFocus
+      ? LocalComposerChips(interaction: session.interaction, onVideo: onVideo, onSend: _sendChip, onFill: _fillChip)
+      : const SizedBox.shrink();
+
   @override
   Widget build(BuildContext context) {
     final session = _session;
     if (session == null || !localInteractionAvailable(ref)) return const SizedBox.shrink();
     return switch (widget.place) {
       LocalComposerPlace.chat => _chatBar(context),
-      LocalComposerPlace.panel => _row(context, session),
+      LocalComposerPlace.panel => _withChips(session, _row(context, session)),
       // On the picture it may sit outside a page's Material (U.2c's bar).
       LocalComposerPlace.video => Material(
         type: MaterialType.transparency,
         child: LayoutBuilder(
           builder: (context, constraints) => constraints.maxWidth < localComposerCollapseWidth
               ? _LocalComposerButton(session: session, onHold: widget.onHold)
-              : _videoField(context, session),
+              : _videoField(context, session, constraints.maxWidth),
         ),
       ),
     };
@@ -155,9 +189,22 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
         color: scheme.surfaceContainerLow,
         border: Border(top: BorderSide(color: scheme.outlineVariant)),
       ),
-      child: Padding(padding: const EdgeInsets.fromLTRB(10, 8, 8, 8), child: _row(context, _session!)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+        child: _withChips(_session!, _row(context, _session!)),
+      ),
     );
   }
+
+  /// [row] under the chips (D08.2 c1: the list above gives way).
+  Widget _withChips(LocalRoomSession session, Widget row) => Column(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      if (_focus.hasFocus) Padding(padding: const EdgeInsets.only(bottom: 8), child: _chips(session, onVideo: false)),
+      row,
+    ],
+  );
 
   Widget _row(BuildContext context, LocalRoomSession session) {
     final theme = Theme.of(context);
@@ -210,73 +257,91 @@ class _LocalDanmakuComposerState extends ConsumerState<LocalDanmakuComposer> {
     );
   }
 
-  /// U.2k-b: the field on the picture.
-  Widget _videoField(BuildContext context, LocalRoomSession session) {
+  /// U.2k-b: the field on the picture; D08.2: the chips float above it, as
+  /// wide as it.
+  Widget _videoField(BuildContext context, LocalRoomSession session, double width) {
     final focused = _focus.hasFocus;
     final scheme = Theme.of(context).colorScheme;
+    final fieldWidth = math.min(width, widget.maxWidth);
     return Center(
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: widget.maxWidth),
-        child: AnimatedContainer(
-          key: const ValueKey('local-composer-video'),
-          duration: const Duration(milliseconds: 120),
-          height: 40,
-          decoration: BoxDecoration(color: OnVideoColors.dim, borderRadius: BorderRadius.circular(20)),
-          // The outline on top, so the buttons and the field take the whole
-          // height (A05.1).
-          foregroundDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: focused ? localVideoFocusColor(scheme) : OnVideoColors.fieldOutline,
-              width: focused ? 1.3 : 1,
+        child: OverlayPortal(
+          controller: _chipsAbove,
+          overlayChildBuilder: (context) => Positioned(
+            width: fieldWidth,
+            child: CompositedTransformFollower(
+              link: _fieldLink,
+              showWhenUnlinked: false,
+              followerAnchor: Alignment.bottomLeft,
+              offset: const Offset(0, -8),
+              child: _chips(session, onVideo: true),
             ),
           ),
-          child: ListenableBuilder(
-            listenable: session.interaction,
-            builder: (context, _) {
-              final local = session.interaction;
-              final ink = Color(local.color);
-              final theme = Theme.of(context);
-              return Row(
-                children: [
-                  _StarButton(color: ink, size: 18, width: 44, shadows: OnVideoColors.shadows),
-                  Expanded(
-                    child: _field(
-                      context,
-                      // 3.x: the words in the local style (colour, weight,
-                      // italic, spacing), with the picture's shadow.
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontSize: 14,
-                        color: ink.withValues(alpha: local.opacity.clamp(0.35, 1)),
-                        fontWeight: FontWeight.values[(local.fontWeight ~/ 100 - 1).clamp(0, 8)],
-                        fontStyle: local.italic ? FontStyle.italic : FontStyle.normal,
-                        letterSpacing: local.letterSpacing,
-                        shadows: OnVideoColors.shadows,
-                      ),
-                      hint: theme.textTheme.bodyMedium?.regular.copyWith(fontSize: 13, color: OnVideoColors.secondary),
-                      cursor: localVideoFocusColor(scheme),
-                      count: OnVideoColors.secondary,
-                    ),
-                  ),
-                  SizedBox(
-                    width: 44,
-                    child: IconButton(
-                      key: const ValueKey('local-composer-send'),
-                      tooltip: i18n('local_send_message'),
-                      iconSize: 18,
-                      color: OnVideoColors.foreground,
-                      onPressed: _send,
-                      icon: const Icon(AppIcons.localSend),
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
+          child: CompositedTransformTarget(link: _fieldLink, child: _videoBox(context, session, focused, scheme)),
         ),
       ),
     );
   }
+
+  Widget _videoBox(BuildContext context, LocalRoomSession session, bool focused, ColorScheme scheme) =>
+      AnimatedContainer(
+        key: const ValueKey('local-composer-video'),
+        duration: const Duration(milliseconds: 120),
+        height: 40,
+        decoration: BoxDecoration(color: OnVideoColors.dim, borderRadius: BorderRadius.circular(20)),
+        // The outline on top, so the buttons and the field take the whole
+        // height (A05.1).
+        foregroundDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: focused ? localVideoFocusColor(scheme) : OnVideoColors.fieldOutline,
+            width: focused ? 1.3 : 1,
+          ),
+        ),
+        child: ListenableBuilder(
+          listenable: session.interaction,
+          builder: (context, _) {
+            final local = session.interaction;
+            final ink = Color(local.color);
+            final theme = Theme.of(context);
+            return Row(
+              children: [
+                _StarButton(color: ink, size: 18, width: 44, shadows: OnVideoColors.shadows),
+                Expanded(
+                  child: _field(
+                    context,
+                    // 3.x: the words in the local style (colour, weight,
+                    // italic, spacing), with the picture's shadow.
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontSize: 14,
+                      color: ink.withValues(alpha: local.opacity.clamp(0.35, 1)),
+                      fontWeight: FontWeight.values[(local.fontWeight ~/ 100 - 1).clamp(0, 8)],
+                      fontStyle: local.italic ? FontStyle.italic : FontStyle.normal,
+                      letterSpacing: local.letterSpacing,
+                      shadows: OnVideoColors.shadows,
+                    ),
+                    hint: theme.textTheme.bodyMedium?.regular.copyWith(fontSize: 13, color: OnVideoColors.secondary),
+                    cursor: localVideoFocusColor(scheme),
+                    count: OnVideoColors.secondary,
+                  ),
+                ),
+                SizedBox(
+                  width: 44,
+                  child: IconButton(
+                    key: const ValueKey('local-composer-send'),
+                    tooltip: i18n('local_send_message'),
+                    iconSize: 18,
+                    color: OnVideoColors.foreground,
+                    onPressed: _send,
+                    icon: const Icon(AppIcons.localSend),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
 
   Widget _field(
     BuildContext context, {
@@ -610,4 +675,84 @@ class LocalComposerBelow extends StatelessWidget {
             const LocalDanmakuComposer(),
           ],
         );
+}
+
+/// D08.2 c1: the chips over a local danmaku composer while its field has
+/// the focus: the [LocalCatalog.recentCount] different local danmaku sent
+/// last (marked "最近"), then the user's phrases, in one row that scrolls
+/// sideways; nothing when there are none. A tap sends a chip ([onSend]), a
+/// long press puts its words in the field ([onFill]). On the picture
+/// ([onVideo]) the chips are the field's dark with white words and grow with
+/// the system's text 1.3 times at most (docs/specs/UI.md §8.2). The row
+/// counts as part of the field: a click on it does not take the focus (and
+/// the row) away.
+class LocalComposerChips extends StatelessWidget {
+  /// Creates the row.
+  const new({required this.interaction, required this.onSend, required this.onFill, this.onVideo = false, super.key});
+
+  /// The history and the phrases.
+  final LocalInteraction interaction;
+
+  /// Sends a chip's words.
+  final ValueChanged<String> onSend;
+
+  /// Puts a chip's words in the field.
+  final ValueChanged<String> onFill;
+
+  /// On the picture.
+  final bool onVideo;
+
+  /// The widest a chip grows; longer words end in "…".
+  static const double chipMaxWidth = 200;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: interaction,
+    builder: (context, _) {
+      final recent = interaction.recentChats();
+      final phrases = interaction.phrases;
+      if (recent.isEmpty && phrases.isEmpty) return const SizedBox.shrink();
+      final row = TextFieldTapRegion(
+        child: SingleChildScrollView(
+          key: const ValueKey('local-composer-chips'),
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            spacing: 8,
+            children: [
+              for (final (index, words) in recent.indexed)
+                _chip(context, ValueKey('local-chip-recent-$index'), words, recent: true),
+              for (final (index, words) in phrases.indexed) _chip(context, ValueKey('local-chip-phrase-$index'), words),
+            ],
+          ),
+        ),
+      );
+      return onVideo ? MediaQuery.withClampedTextScaling(maxScaleFactor: 1.3, child: row) : row;
+    },
+  );
+
+  Widget _chip(BuildContext context, Key key, String words, {bool recent = false}) {
+    final theme = Theme.of(context);
+    final ink = onVideo ? OnVideoColors.foreground : null;
+    return GestureDetector(
+      key: key,
+      onLongPress: () => onFill(words),
+      child: ActionChip(
+        avatar: recent
+            ? Icon(AppIcons.localRecent, size: 16, color: ink, semanticLabel: i18n('local_chip_recent'))
+            : null,
+        label: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: chipMaxWidth),
+          child: Text(
+            localEmojiText(words),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: localEmojiStyle(theme.chipTheme.labelStyle?.copyWith(color: ink)),
+          ),
+        ),
+        backgroundColor: onVideo ? OnVideoColors.dim : null,
+        side: onVideo ? const BorderSide(color: OnVideoColors.fieldOutline) : null,
+        onPressed: () => onSend(words),
+      ),
+    );
+  }
 }

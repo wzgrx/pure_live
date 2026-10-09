@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_core/live_core.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_list.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_text.dart';
@@ -213,8 +214,11 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
           },
         ),
         if (widget.session ?? LocalRoomScope.maybeOf(context) case final session?)
-          if (localSendAgainText(message) case final words?)
+          if (localSendAgainText(message) case final words?) ...[
             _SendAgainRow(session: session, message: message, words: words, onClose: widget.onClose, hint: hint),
+            // D08.2 c3: one's own words kept for the composer's chips.
+            if (message.isLocal) _SavePhraseRow(session: session, words: words, onClose: widget.onClose, hint: hint),
+          ],
         // 3.x: a local danmaku cannot block its sender. B-1: nor can a
         // masked name, which stands for many viewers.
         if (name.isNotEmpty && !message.isLocal && !isMaskedViewerName(name))
@@ -250,9 +254,8 @@ class _RoomMessagePanelState extends State<RoomMessagePanel> {
 /// a notice or a line without words.
 String? localSendAgainText(LiveMessage message) {
   if (message.type != LiveMessageType.chat || message.gift != null) return null;
-  final words = message.message.trim();
-  if (words.isEmpty) return null;
-  return words.characters.take(LocalCatalog.danmakuLimit).toString();
+  final words = LocalCatalog.clipDanmaku(message.message);
+  return words.isEmpty ? null : words;
 }
 
 /// "+1（本地）" (a platform's danmaku) or "再发一次" (a local one), while the
@@ -287,6 +290,48 @@ class _SendAgainRow extends StatelessWidget {
         onTap: () {
           onClose();
           if (session.sendChat(words)) session.toast(i18n('local_message_sent'));
+        },
+      );
+    },
+  );
+}
+
+/// D08.2 c3: "存为常用语" on one's own local danmaku, while the local
+/// interaction is on: closes the panel, keeps [words] as the last phrase
+/// and says so. A phrase already is "已在常用语里" and cannot be tapped; with
+/// the phrases full it says how many there may be.
+class _SavePhraseRow extends StatelessWidget {
+  const new({required this.session, required this.words, required this.onClose, required this.hint});
+
+  final LocalRoomSession session;
+  final String words;
+  final VoidCallback onClose;
+  final TextStyle? hint;
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: session.interaction,
+    builder: (context, _) {
+      final local = session.interaction;
+      if (!local.enabled) return const SizedBox.shrink();
+      final saved = local.hasPhrase(words);
+      final full = !saved && local.phrasesFull;
+      return ListTile(
+        key: const ValueKey('live-play-save-phrase'),
+        enabled: !saved && !full,
+        leading: Icon(saved ? AppIcons.localPhraseSaved : AppIcons.localPhraseSave),
+        title: Text(i18n(saved ? 'local_phrase_saved' : 'local_phrase_save')),
+        subtitle: Text(
+          withoutOrphan(
+            full
+                ? i18n(LocalPhraseProblem.full.messageKey, args: {'count': '${Settings.localPhraseLimit}'})
+                : i18n('local_phrase_save_desc'),
+          ),
+          style: hint,
+        ),
+        onTap: () {
+          onClose();
+          if (local.addPhrase(words)) session.toast(i18n('local_phrase_added'));
         },
       );
     },

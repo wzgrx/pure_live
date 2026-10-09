@@ -32,6 +32,23 @@
 - c4 礼物行、醒目留言、系统消息没有这一行（内容不是一句话）；内容只有表情时照样发（表情代码原样）。
 - 不选 B（画面上双击弹幕直接 +1）：双击画面是全屏或暂停的手势，会冲突（A07.14 的教训）。
 
-## 实现和验证（开发后补）
+## 定稿的选择（D-003，维护者定，2026-10-09）
 
-- 见 brief.md。
+c1～c4 照上面的设计做；任务书没写死、开发时定下的几条：
+
+| 编号 | 选择 | 理由 |
+|---|---|---|
+| s1 | 图标 `AppIcons.localSendAgain` = Material `plus_one_rounded`；“+1（本地）”和“再发一次”用同一个 | 同一个动作一个图标（UI.md 第 3 节第 6 条）；`localReplay`（进房放回）、`localSend`（纸飞机，发出输入框里的字）意思不同，不借用 |
+| s2 | 两行用同一句说明“用你的本地身份和样式再发一次，只有你看得到”，标题分别是“+1（本地）”和已有的“再发一次”（`local_history_again`，和 D08.1 记录里的按钮同一个词） | 本地弹幕再发也是用现在的身份和样式（改过样式就是新样式） |
+| s3 | 发出走 `LocalRoomSession.sendChat`：和输入框、D08.1 记录里的“再发一次”同一条路——立即进列表、按“本地弹幕在画面上飞过”飞、写一条 `local_events` 记录、画面弹幕关着时第一条照旧提示 | 不另开一条发送路径；逻辑（`logic/`）一行没改 |
+| s4 | 提示条“已发送本地弹幕”（新键 `local_message_sent`），经会话的 `toast`（和记录里的“已再发一次”同一个出口） | 面板已经关了，要让人知道发出去了；全屏时提示条在画面中下部 |
+| s5 | 超过 40 个字的平台弹幕截成前 40 个字（表情、emoji 各算一个字）再发 | 本地弹幕的上限是 40（A08.13 c3，`LocalCatalog.danmakuLimit`）；输入框粘贴时也是截掉多的，这里照做；不因为太长就不给这一行 |
+| s6 | 只给聊天行：`type == chat`、不带礼物、去掉首尾空白后有字；“之前发的”（D08.1 放回的）也是本地弹幕，给“再发一次” | c4；本地礼物的一句话以名字开头（“Pure Live 送出 辣条 ×1”），不是能跟的一句话 |
+| s7 | 会话从面板周围的 `LocalRoomScope` 找；没有直播间面板、弹成底部面板时（`showRoomMessageActions` 的退路）在打开的地方先找好传进去 | 多画面、电视没有 `LocalRoomScope`，自然没有这一行（c2） |
+| s8 | 面板开着时在别处关掉本地互动，这一行立刻消失（听 `LocalInteraction`） | 和输入框一样跟着开关走 |
+
+## 实现和验证
+
+- 代码：`apps/pure_live/lib/features/live_play/danmaku/message_panel.dart`（`localSendAgainText`、`_SendAgainRow`、`RoomMessagePanel.session`）；`packages/live_ui/lib/src/icons/app_icons.dart`（`localSendAgain`）；翻译 `local_message_sent`、`local_plus_one`、`local_plus_one_desc`。
+- 测试：`apps/pure_live/test/features/live_play/local_plus_one_test.dart`（7 个）；`packages/live_ui/test/design_system_test.dart` 对照表。
+- 记录：[record.md](record.md)；真机：[verify.md](verify.md)。

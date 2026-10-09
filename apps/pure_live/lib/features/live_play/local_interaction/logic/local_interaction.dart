@@ -120,6 +120,23 @@ typedef LocalPlace = ({String platform, String roomId, String roomName});
 /// 3.x's lines and the entries (D08.1).
 typedef LocalHistoryCleared = ({List<String> lines, List<LocalEvent> events});
 
+/// Why a text cannot be saved as a phrase (D08.2).
+enum LocalPhraseProblem {
+  /// Nothing but spaces.
+  empty('local_phrase_empty'),
+
+  /// The same phrase is there already.
+  exists('local_phrase_exists'),
+
+  /// [Settings.localPhraseLimit] are there already.
+  full('local_phrases_full');
+
+  new(this.messageKey);
+
+  /// What to tell the user.
+  final String messageKey;
+}
+
 /// A part of the history (D08.1 c5: "全部 / 弹幕 / 礼物 / 币").
 enum LocalHistoryFilter {
   /// Everything, the old lines and levels too.
@@ -277,6 +294,98 @@ final class LocalInteraction extends ChangeNotifier {
     if (name.isNotEmpty && name != userName) _set(Settings.localInteractionUserName, name);
   }
 
+  // ---- phrases and recent sends (D08.2) ----
+
+  /// The user's phrases in their order (at most [Settings.localPhraseLimit]),
+  /// each as a local danmaku may say it ([LocalCatalog.clipDanmaku]: a
+  /// restored backup may hold longer ones).
+  List<String> get phrases {
+    final seen = <String>{};
+    return List.unmodifiable([
+      for (final phrase in _get(Settings.localInteractionPhrases))
+        if (LocalCatalog.clipDanmaku(phrase) case final text when text.isNotEmpty && seen.add(text)) text,
+    ]);
+  }
+
+  /// Whether [text] is one of the [phrases] (as it would be saved).
+  bool hasPhrase(String text) => phrases.contains(LocalCatalog.clipDanmaku(text));
+
+  /// Whether no more phrases can be added.
+  bool get phrasesFull => phrases.length >= Settings.localPhraseLimit;
+
+  /// Why [text] cannot be saved as a phrase (in place of the one at
+  /// [replacing]): empty, there already, or the list full; null when it can.
+  LocalPhraseProblem? phraseProblem(String text, {int? replacing}) {
+    final words = LocalCatalog.clipDanmaku(text);
+    if (words.isEmpty) return LocalPhraseProblem.empty;
+    final list = phrases;
+    final at = list.indexOf(words);
+    if (at >= 0 && at != replacing) return LocalPhraseProblem.exists;
+    if (replacing == null && list.length >= Settings.localPhraseLimit) return LocalPhraseProblem.full;
+    return null;
+  }
+
+  /// Saves [text] as the last phrase; false (nothing saved) when
+  /// [phraseProblem] says why not.
+  bool addPhrase(String text) {
+    if (phraseProblem(text) != null) return false;
+    _set(Settings.localInteractionPhrases, [...phrases, LocalCatalog.clipDanmaku(text)]);
+    return true;
+  }
+
+  /// Puts [text] in place of the phrase at [index]; false when
+  /// [phraseProblem] says why not.
+  bool editPhrase(int index, String text) {
+    final list = [...phrases];
+    if (index < 0 || index >= list.length || phraseProblem(text, replacing: index) != null) return false;
+    list[index] = LocalCatalog.clipDanmaku(text);
+    _set(Settings.localInteractionPhrases, list);
+    return true;
+  }
+
+  /// Takes the phrase at [index] away and returns it (for [restorePhrase],
+  /// the undo), or null when there is none.
+  String? removePhrase(int index) {
+    final list = [...phrases];
+    if (index < 0 || index >= list.length) return null;
+    final removed = list.removeAt(index);
+    _set(Settings.localInteractionPhrases, list);
+    return removed;
+  }
+
+  /// Puts [text] back at [index] (or the end), unless it is there already.
+  void restorePhrase(int index, String text) {
+    final list = [...phrases];
+    final words = LocalCatalog.clipDanmaku(text);
+    if (words.isEmpty || list.contains(words)) return;
+    list.insert(index.clamp(0, list.length), words);
+    _set(Settings.localInteractionPhrases, list);
+  }
+
+  /// Moves the phrase at [from] to [to] (the index it ends at).
+  void movePhrase(int from, int to) {
+    final list = [...phrases];
+    if (from < 0 || from >= list.length) return;
+    final moved = list.removeAt(from);
+    list.insert(to.clamp(0, list.length), moved);
+    _set(Settings.localInteractionPhrases, list);
+  }
+
+  /// The words of the local danmaku sent last, newest first: [count]
+  /// different ones from the history (D08.1), leaving out the [phrases]
+  /// (their chips follow anyway).
+  List<String> recentChats({int count = LocalCatalog.recentCount}) {
+    final skip = {...phrases};
+    final recent = <String>[];
+    for (final event in _entries) {
+      if (recent.length >= count) break;
+      if (event.kind != LocalEventKind.chat) continue;
+      final words = LocalCatalog.clipDanmaku(event.text);
+      if (words.isNotEmpty && skip.add(words)) recent.add(words);
+    }
+    return recent;
+  }
+
   /// Entering a room puts the local danmaku sent there in the last day back
   /// at the top of its chat list (D08.1 c6).
   bool get replayOnEnter => _get(Settings.localInteractionReplayOnEnter);
@@ -324,7 +433,10 @@ final class LocalInteraction extends ChangeNotifier {
     if (store == null) return;
     _storing++;
     unawaited(
-      write(store).catchError((Object _) {}).whenComplete(() async {
+      // `then` with `onError`, not `catchError`: [write] may hand back a
+      // Future<int> (an entry's id), whose catchError handler would have to
+      // return an int, so a failed write threw again instead of being let go.
+      write(store).then((_) {}, onError: (Object _) {}).whenComplete(() async {
         if (--_storing > 0 || !_stale || _disposed) return;
         _stale = false;
         try {

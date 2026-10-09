@@ -301,6 +301,7 @@ const Map<String, Object> newInV4 = {
   'uiMode': 'auto', // X03.1
   'tvFocusZoom': true, // A17.1
   'localInteraction.replayOnEnter': true, // D08.1 c6, on by default (D-040)
+  'localInteraction.phrases': <String>[], // D08.2: none until one is saved (D-040)
 };
 
 /// The range of every number setting: 3.x's clamps on start and on a backup

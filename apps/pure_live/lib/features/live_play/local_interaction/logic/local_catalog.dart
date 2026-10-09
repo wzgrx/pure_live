@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:live_core/live_core.dart';
 
 /// A gift of the local interaction (3.x `LocalGift`): only simulated, it
@@ -280,6 +281,14 @@ abstract final class LocalCatalog {
   /// From this many characters on the composer shows its count (the last
   /// ten before [danmakuLimit]).
   static const int danmakuCountFrom = danmakuLimit - 10;
+
+  /// [text] as a local danmaku may say it: trimmed, the first
+  /// [danmakuLimit] characters (an emoji is one, as the composer counts).
+  static String clipDanmaku(String text) => text.trim().characters.take(danmakuLimit).toString();
+
+  /// How many of the local danmaku sent last show over a composer (D08.2
+  /// c1: "最近").
+  static const int recentCount = 5;
 
   /// The gifts of a platform without its own (3.x `gifts`).
   static const genericGifts = <LocalGift>[

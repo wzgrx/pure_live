@@ -439,6 +439,12 @@ NOTES: dict[str, dict] = {
         'v3range': '3.x 没有这个设置，离开直播间本地弹幕就没了',
         'verdict': 'v4 新加（D08.1，D-040 写明的例外）：默认开；重进同一个直播间时，24 小时内在这里发过的本地弹幕（最多 20 条）放在弹幕列表顶上、标“之前发的”、不飞过画面；关掉和 3.x 一样',
     },
+    'localInteraction.phrases': {
+        **_new('D08.2 c1～c5，V03.6 E6'),
+        'v3range': '3.x 没有常用语',
+        'ui': '设置 → 本地用户与互动 →“常用语”一组（加、改、删 4 秒撤销、拖动排序）；长按自己的本地弹幕“存为常用语”',
+        'verdict': 'v4 新加（D08.2）：默认空，老用户看不到变化（D-040）；最多 20 条（`StringListSetting.maxItems`），去掉首尾空白、空的和重复的（`tidy`）；每条最多 40 个字（本地弹幕的长度，应用读写时按字截，`LocalCatalog.clipDanmaku`）；跟设置一起进备份和设备同步',
+    },
     # ---- backup, cache, log, accounts, meta ----
     'downloadDirectoryPath': {
         'v3': "''",

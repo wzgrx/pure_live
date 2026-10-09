@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_interaction_scope.dart';
 import 'package:pure_live/features/live_play/local_interaction/local_style_panel.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_args.dart';
 
 /// The widest the settings content grows (UI_PLAN §5.3).
@@ -16,8 +18,9 @@ const double _contentMaxWidth = 720;
 /// 设置 → 本地用户与互动 (U.2k-g, 3.x `local_interaction_settings_page.dart`),
 /// grouped by use (c15): the switch with where it shows in the room; the
 /// profile with coins and level; what shows on the picture with the style
-/// (#14: the same style panel as the room's); the platform packs; coins and
-/// the history (c12). With the switch off only the first group stays.
+/// (#14: the same style panel as the room's); the phrases (D08.2 c4); the
+/// platform packs; coins and the history (c12). With the switch off only
+/// the first group stays.
 ///
 /// Routes: `RoutePath.kLocalInteraction` (the settings overview links here,
 /// U.6d; the room panel's "设置 ›" too).
@@ -130,6 +133,9 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
           ),
         ],
       ),
+      // D08.2 c4: the composer's chips.
+      _Title(i18n('local_phrases')),
+      _Card(children: [LocalPhrasesEditor(interaction: local)]),
       _Title(i18n('local_platform_pack')),
       _Card(
         padding: const EdgeInsets.all(14),
@@ -192,6 +198,197 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
         i18n('local_interaction_room_entry_desc'),
         key: const ValueKey('local-settings-entry-desc'),
         style: hint,
+      ),
+    );
+  }
+}
+
+/// D08.2 c4: the phrases, in the order of the composer's chips: a line on
+/// what they are, then one row each (the handle to drag it elsewhere, the
+/// words, a tap to change them, delete; a delete is undone from its toast
+/// for 4 s, docs/specs/UI.md §7) and "添加常用语" (a dialog; at most
+/// [Settings.localPhraseLimit], each a local danmaku's 40 characters, no
+/// repeats). Without any it says how to save one.
+class LocalPhrasesEditor extends StatelessWidget {
+  /// Creates the group's content.
+  const new({required this.interaction, super.key});
+
+  /// The phrases' owner.
+  final LocalInteraction interaction;
+
+  /// Asks for a phrase, [initial] to change one ([index]).
+  Future<void> _ask(BuildContext context, {int? index, String initial = ''}) async {
+    final local = interaction;
+    final words = await showAppInputDialog(
+      context: context,
+      title: i18n(index == null ? 'local_phrase_add' : 'local_phrase_edit'),
+      confirmLabel: i18n('save'),
+      initial: initial,
+      hint: i18n('local_phrase_hint'),
+      maxLength: LocalCatalog.danmakuLimit,
+      fieldKey: const ValueKey('local-phrase-input'),
+      confirmKey: const ValueKey('local-phrase-confirm'),
+      check: (text) => switch (local.phraseProblem(text, replacing: index)) {
+        final problem? => i18n(problem.messageKey, args: {'count': '${Settings.localPhraseLimit}'}),
+        null => null,
+      },
+    );
+    if (words == null) return;
+    if (index == null) {
+      local.addPhrase(words);
+    } else {
+      local.editPhrase(index, words);
+    }
+  }
+
+  void _delete(BuildContext context, int index) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final local = interaction;
+    final removed = local.removePhrase(index);
+    if (removed == null) return;
+    final toast = AppToast(
+      i18n('local_phrase_deleted', args: {'text': removed}),
+      key: const ValueKey('local-phrase-undo'),
+      actionLabel: i18n('room_undo'),
+      onAction: () => local.restorePhrase(index, removed),
+    );
+    if (messenger == null) {
+      AppNavigator.showToast(toast);
+    } else {
+      showAppToastOn(messenger, toast);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final hint = theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant, height: 1.45);
+    final phrases = interaction.phrases;
+    final full = phrases.length >= Settings.localPhraseLimit;
+    return Column(
+      key: const ValueKey('local-phrases'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(AppIcons.localPhrases, size: 22, color: scheme.primary),
+              const SizedBox(width: 14),
+              Expanded(child: Text(withoutOrphan(i18n('local_phrases_desc')), style: hint)),
+            ],
+          ),
+        ),
+        if (phrases.isEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+            child: Text(
+              withoutOrphan(i18n('local_phrases_empty')),
+              key: const ValueKey('local-phrases-empty'),
+              style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          )
+        else
+          ReorderableListView(
+            key: const ValueKey('local-phrases-list'),
+            shrinkWrap: true,
+            buildDefaultDragHandles: false,
+            physics: const NeverScrollableScrollPhysics(),
+            proxyDecorator: (child, _, _) => Material(color: scheme.surfaceContainerHigh, elevation: 2, child: child),
+            onReorderItem: interaction.movePhrase,
+            children: [
+              for (final (index, words) in phrases.indexed)
+                _PhraseRow(
+                  key: ValueKey('local-phrase-$words'),
+                  index: index,
+                  words: words,
+                  onEdit: () => unawaited(_ask(context, index: index, initial: words)),
+                  onDelete: () => _delete(context, index),
+                ),
+            ],
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 2, 16, 8),
+          child: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            children: [
+              TextButton.icon(
+                key: const ValueKey('local-phrase-add'),
+                onPressed: full ? null : () => unawaited(_ask(context)),
+                icon: const Icon(AppIcons.add, size: 18),
+                label: Text(i18n('local_phrase_add')),
+              ),
+              Text(
+                full
+                    ? i18n(LocalPhraseProblem.full.messageKey, args: {'count': '${Settings.localPhraseLimit}'})
+                    : '${phrases.length} / ${Settings.localPhraseLimit}',
+                key: const ValueKey('local-phrases-count'),
+                style: theme.textTheme.bodySmall?.tabular.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// One phrase: the handle, the words (a tap changes them), delete.
+class _PhraseRow extends StatelessWidget {
+  const new({required this.index, required this.words, required this.onEdit, required this.onDelete, super.key});
+
+  final int index;
+  final String words;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        key: ValueKey('local-phrase-row-$index'),
+        onTap: onEdit,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Row(
+            children: [
+              ReorderableDragStartListener(
+                index: index,
+                child: Tooltip(
+                  message: i18n('settings_nav_drag'),
+                  child: SizedBox(
+                    key: ValueKey('local-phrase-handle-$index'),
+                    width: 48,
+                    height: 48,
+                    child: Icon(AppIcons.dragHandle, size: 20, color: scheme.onSurfaceVariant),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    localEmojiText(words),
+                    style: localEmojiStyle(theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 15)),
+                  ),
+                ),
+              ),
+              IconButton(
+                key: ValueKey('local-phrase-delete-$index'),
+                tooltip: i18n('delete'),
+                onPressed: onDelete,
+                icon: Icon(AppIcons.delete, size: 20, color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(width: 4),
+            ],
+          ),
+        ),
       ),
     );
   }

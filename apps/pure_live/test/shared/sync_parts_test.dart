@@ -166,4 +166,19 @@ void main() {
     expect([for (final e in await target.localEvents.all()) e.text], ['晚上好']);
     expect([for (final room in await target.follows.all()) room.roomId], ['2'], reason: 'from the first restore');
   });
+
+  test('D08.2 c5: the phrases travel with the settings part, not with the local history', () async {
+    final source = await _filled(room: '2');
+    await source.settings.set(Settings.localInteractionPhrases, ['主播晚上好', '666']);
+    final target = await _filled();
+    await target.settings.set(Settings.localInteractionPhrases, ['这台的']);
+    final file = await BackupService(source).exportAll();
+
+    final noSettings = pickSyncParts(file, {SyncPart.follows, SyncPart.localEvents});
+    await BackupService(target).restoreAll(noSettings);
+    expect(target.settings.get(Settings.localInteractionPhrases), ['这台的'], reason: 'settings not picked');
+
+    await BackupService(target).restoreAll(pickSyncParts(file, {SyncPart.settings}));
+    expect(target.settings.get(Settings.localInteractionPhrases), ['主播晚上好', '666']);
+  });
 }

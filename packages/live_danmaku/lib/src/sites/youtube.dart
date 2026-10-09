@@ -565,7 +565,7 @@ abstract final class YouTubeDanmakuProtocol {
       return _notice(gift, _plain(header['authorName']), _plain(header['primaryText']).trim());
     }
     if (item['liveChatSponsorshipsGiftRedemptionAnnouncementRenderer'] case final Map<Object?, Object?> gift) {
-      return _notice(gift, _plain(gift['authorName']), _runs(gift['message']));
+      return _notice(gift, _plain(gift['authorName']), _runs(gift['message']), kind: LiveNoticeKind.giftedSubscription);
     }
     return null;
   }
@@ -587,8 +587,9 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// A paid message (Super Chat) as a super chat: the amount as the page
   /// shows it (`purchaseAmountText`, in the buyer's currency, not
-  /// converted) and a price of 0 (the answer has no number for it, only
-  /// that text); the header and body colours; shown from the platform time
+  /// converted) and as the price the whole number in that text
+  /// ([superChatAmount], D07.2: the answer has no number of its own; it
+  /// only orders and compares); the header and body colours; shown from the platform time
   /// (or [received]) for as long as the page pins it: the ticker item's
   /// `fullDurationSec`, else [tierDisplay] by the header colour, else
   /// [unpinnedDisplay]; or until [end] when given (a Super Chat still pinned
@@ -624,7 +625,7 @@ abstract final class YouTubeDanmakuProtocol {
         userName: name,
         face: _photo(paid['authorPhoto']),
         message: text,
-        price: 0,
+        price: superChatAmount(amount),
         priceText: amount,
         startTime: start,
         endTime: end ?? start.add(display),
@@ -636,7 +637,7 @@ abstract final class YouTubeDanmakuProtocol {
 
   /// A Super Sticker as a super chat (D07.6; was a notice): the page shows
   /// the name, the amount and the sticker. The amount is the page's
-  /// (`purchaseAmountText`, in the buyer's currency) with a price of 0, as a
+  /// (`purchaseAmountText`, in the buyer's currency) with as its price the whole number read from it ([superChatAmount], D07.2), as a
   /// Super Chat's; the text is the sticker's description
   /// (`sticker.accessibility`), the picture its largest thumbnail
   /// ([LiveSuperChatMessage.image]); both colours the card's
@@ -669,7 +670,7 @@ abstract final class YouTubeDanmakuProtocol {
         userName: name,
         face: _photo(sticker['authorPhoto']),
         message: label,
-        price: 0,
+        price: superChatAmount(amount),
         priceText: amount,
         startTime: start,
         endTime: start.add(display),
@@ -736,13 +737,15 @@ abstract final class YouTubeDanmakuProtocol {
     _ => '',
   };
 
-  /// A notice of kind [LiveNoticeKind.subscription]: [name] and [text] as
-  /// one line, the item's id, time and sender. Null without [text].
+  /// A notice of [kind] ([LiveNoticeKind.subscription] by default): [name]
+  /// and [text] as one line, the item's id, time and sender. Null without
+  /// [text].
   static LiveMessage? _notice(
     Map<Object?, Object?> renderer,
     String name,
     String text, {
     List<LiveEmote> emotes = const [],
+    LiveNoticeKind kind = LiveNoticeKind.subscription,
   }) {
     if (text.isEmpty) return null;
     return LiveMessage(
@@ -753,7 +756,7 @@ abstract final class YouTubeDanmakuProtocol {
       messageId: _string(renderer['id']),
       sentAt: _time(renderer['timestampUsec']),
       color: LiveMessageColor.white,
-      data: LiveNoticeKind.subscription,
+      data: kind,
       emotes: emotes,
     );
   }

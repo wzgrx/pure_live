@@ -86,6 +86,8 @@ Map<String, Object?> _asV4(LiveMessage message) {
       expect(data.messageId, message.messageId);
       expect(data.endTime.difference(data.startTime), PicartoDanmakuProtocol.tipDuration);
       expect(data.priceText, '${data.price} Kudos');
+      // D07.2: only the text says Kudos (superChatUnits).
+      expect(data.unit, superChatUnits[SiteIds.picarto]);
       expect([data.backgroundColor, data.backgroundBottomColor], ['', ''], reason: 'the frame names no colours');
       return {
         'kind': 'superChat',

@@ -89,7 +89,9 @@ List<Widget> danmakuListAndPipGroups() => [
 
 /// "弹幕列表": the room's chat list look (U.2a, v4), its text size and line
 /// spacing (A08.15), whether it names the senders (A08.10), whether gifts
-/// show in it (B-21) and which ones and with what value (A08.12). All are settings of every room (A08.6 c3), so
+/// show in it (B-21) and which ones and with what value (A08.12), and
+/// whether memberships are cards among the super chats too (D07.2). All
+/// are settings of every room (A08.6 c3), so
 /// a change here applies to the rooms already open.
 class ChatListSettings extends ConsumerWidget {
   /// Creates the group.
@@ -184,6 +186,15 @@ class ChatListSettings extends ConsumerWidget {
           subtitle: i18n('danmaku_list_gift_yuan_desc'),
           value: watchSetting(ref, Settings.giftValueInYuan),
           onChanged: gifts ? (value) => set(Settings.giftValueInYuan, value) : null,
+        ),
+        // D07.2: memberships among the super chats, after the gift lines'
+        // own rows: it does not depend on them, the list keeps its lines.
+        SettingSwitchRow(
+          settingKey: 'membershipCards',
+          title: i18n('super_chat_include_membership'),
+          subtitle: i18n('super_chat_include_membership_desc'),
+          value: watchSetting(ref, Settings.superChatIncludesMembership),
+          onChanged: (value) => set(Settings.superChatIncludesMembership, value),
         ),
       ],
     );

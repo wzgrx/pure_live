@@ -4,6 +4,7 @@ import 'package:live_core/src/hls_master.dart';
 import 'package:live_core/src/hls_source_query_policy.dart';
 import 'package:live_core/src/input_recipe.dart';
 import 'package:live_core/src/live_area.dart';
+import 'package:live_core/src/live_gift.dart';
 import 'package:live_core/src/live_message.dart';
 import 'package:live_core/src/live_room.dart';
 import 'package:live_core/src/play_line.dart';
@@ -67,10 +68,39 @@ abstract class LiveSite {
   bool get isVoiceLive => SiteIds.voiceLive.contains(id);
 }
 
-/// The platforms with super chats (3.x: Bilibili and Huya poll them and
-/// send them in the danmaku, Douyu sends them in the danmaku; every other
-/// adapter keeps `getSuperChatMessage`'s empty default).
-const Set<String> superChatPlatforms = {'bilibili', 'huya', 'douyu'};
+/// The platforms whose danmaku reports super chats or paid messages like
+/// them, and the unit of their [LiveSuperChatMessage.price] (D07.2, the
+/// table of docs/V-需求和反馈/V03-审查和调研/V03.5-全平台礼物、醒目留言和弹幕/README.md §2):
+///
+/// - 3.x's three: Bilibili `SUPER_CHAT_MESSAGE` (and its polled list) and
+///   Douyu `comm_chatmsg`, `voice_trlt` in yuan; Huya's head-line board,
+///   whose unit nobody has checked (V03.5 §8), in yuan as 3.x showed it;
+/// - Missevan's paid questions in diamonds, KilaKila's in red beans;
+///   Picarto's Kudos tips, YouTube's Super Chats in the buyer's currency
+///   (only [LiveSuperChatMessage.priceText] says either); CHZZK's donations
+///   in cheese; 17LIVE's paid barrage in points (`coins`); Kick's Kicks with
+///   a message; Six Rooms' fly-screens (`108`) in six coins.
+///
+/// Every other adapter keeps `getSuperChatMessage`'s empty default and
+/// reports none; memberships become cards of their own in the app
+/// ("上舰和开会员进醒目留言") wherever they come from.
+const Map<String, LiveGiftUnit> superChatUnits = {
+  'bilibili': LiveGiftUnit.yuan,
+  'douyu': LiveGiftUnit.yuan,
+  'huya': LiveGiftUnit.yuan,
+  'missevan': LiveGiftUnit.diamond,
+  'kilakila': LiveGiftUnit.redBean,
+  'picarto': LiveGiftUnit.other,
+  'chzzk': LiveGiftUnit.cheese,
+  'youtube': LiveGiftUnit.other,
+  '17live': LiveGiftUnit.point,
+  'kick': LiveGiftUnit.kicks,
+  'sixroom': LiveGiftUnit.sixCoin,
+};
+
+/// The platforms with super chats: the keys of [superChatUnits] (3.x had
+/// Bilibili, Huya and Douyu).
+final Set<String> superChatPlatforms = Set.unmodifiable(superChatUnits.keys);
 
 /// The stream sources for one requested quality, and the quality the
 /// platform actually applied.

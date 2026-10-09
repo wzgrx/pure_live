@@ -194,6 +194,11 @@ NOTES: dict[str, dict] = {
         'v3range': '3.x 没有平台礼物',
         'verdict': 'v4 新加（A08.12，D-040）：默认关，礼物价值照平台单位写；开着时金瓜子、钻石、抖币、分按平台固定比例写成元，海外币种不换算',
     },
+    'superChatIncludesMembership': {
+        **_new('D07.2'),
+        'v3range': '3.x 没有上舰和会员，醒目留言只有哔哩哔哩、斗鱼、虎牙',
+        'verdict': 'v4 新加（D07.2）：默认开，是 D-040 写明的例外：哔哩哔哩上舰、YouTube 会员，Twitch、CHZZK、Kick、Picarto 的订阅在醒目留言页多一张卡，到点移除；聊天列表里的行开关两种情况都不变；关掉和以前一样',
+    },
     'danmakuShowGifts': {
         **_new('A08.12'),
         'v3range': '3.x 没有平台礼物，飞行弹幕只有聊天',

@@ -317,15 +317,90 @@ void main() {
     expect(await site.getSuperChatMessage(roomId: '1'), isEmpty);
   });
 
-  test('super chats: only Bilibili, Huya and Douyu have them (3.x)', () {
+  test('super chats: the 10 platforms of V03.5 and Six Rooms, each in its unit (D07.2)', () {
     expect(_BareSite().hasSuperChats, isFalse);
-    expect(superChatPlatforms, {SiteIds.bilibili, SiteIds.huya, SiteIds.douyu});
-    for (final id in [SiteIds.bilibili, SiteIds.huya, SiteIds.douyu]) {
+    // 3.x's three, the seven V03.5 §2 found reporting them, and Six Rooms'
+    // fly-screens.
+    expect(superChatUnits, {
+      SiteIds.bilibili: LiveGiftUnit.yuan,
+      SiteIds.douyu: LiveGiftUnit.yuan,
+      SiteIds.huya: LiveGiftUnit.yuan,
+      SiteIds.missevan: LiveGiftUnit.diamond,
+      SiteIds.kilakila: LiveGiftUnit.redBean,
+      SiteIds.picarto: LiveGiftUnit.other,
+      SiteIds.chzzk: LiveGiftUnit.cheese,
+      SiteIds.youtube: LiveGiftUnit.other,
+      SiteIds.seventeenLive: LiveGiftUnit.point,
+      SiteIds.kick: LiveGiftUnit.kicks,
+      SiteIds.sixRoom: LiveGiftUnit.sixCoin,
+    });
+    expect(superChatPlatforms, superChatUnits.keys.toSet());
+    expect(() => superChatPlatforms.add(SiteIds.twitch), throwsUnsupportedError);
+    for (final id in superChatUnits.keys) {
       expect(_IdSite(id).hasSuperChats, isTrue, reason: id);
     }
-    for (final id in [SiteIds.douyin, SiteIds.kuaishou, SiteIds.cc, SiteIds.twitch, SiteIds.iptv]) {
+    for (final id in [
+      SiteIds.douyin,
+      SiteIds.kuaishou,
+      SiteIds.cc,
+      SiteIds.twitch,
+      SiteIds.soop,
+      SiteIds.acfun,
+      SiteIds.iptv,
+    ]) {
       expect(_IdSite(id).hasSuperChats, isFalse, reason: id);
     }
+  });
+
+  group('super chat prices (D07.2)', () {
+    String? words(LiveGiftUnit unit, int price) => switch (unit) {
+      LiveGiftUnit.yuan => '$price 元',
+      LiveGiftUnit.goldSeed => '$price 金瓜子',
+      LiveGiftUnit.diamond => '$price 钻石',
+      LiveGiftUnit.bits => '$price Bits',
+      LiveGiftUnit.sixCoin => '$price 六币',
+      _ => null,
+    };
+
+    test('the platform text first, then the unit, never ￥', () {
+      expect(superChatPriceLabel(30, LiveGiftUnit.yuan, '', unitText: words), '30 元');
+      expect(superChatPriceLabel(1000, LiveGiftUnit.goldSeed, '', unitText: words), '1000 金瓜子');
+      expect(superChatPriceLabel(50, LiveGiftUnit.diamond, '', unitText: words), '50 钻石');
+      expect(superChatPriceLabel(100, LiveGiftUnit.bits, '', unitText: words), '100 Bits');
+      expect(superChatPriceLabel(1000, LiveGiftUnit.sixCoin, '', unitText: words), '1000 六币');
+      // The platform's own words win over the unit.
+      expect(superChatPriceLabel(50, LiveGiftUnit.diamond, ' 50 钻 ', unitText: words), '50 钻');
+      expect(superChatPriceLabel(1000, LiveGiftUnit.cheese, '1,000 치즈', unitText: words), '1,000 치즈');
+      // YouTube: only the text says it.
+      expect(superChatPriceLabel(5, LiveGiftUnit.other, r'$5.00', unitText: words), r'$5.00');
+      // No words for the unit: the bare number; no price: nothing.
+      expect(superChatPriceLabel(79, LiveGiftUnit.other, '', unitText: words), '79');
+      expect(superChatPriceLabel(79, LiveGiftUnit.yuan, ''), '79');
+      expect(superChatPriceLabel(0, LiveGiftUnit.yuan, '', unitText: words), '');
+    });
+
+    test('the whole amount in a price only written', () {
+      final cases = {
+        r'$5.00': 5,
+        r'CA$2.79': 2,
+        'TRY 550.00': 550,
+        '₫1,000,000': 1000000,
+        '¥3,000': 3000,
+        '₹1,500.00': 1500,
+        '2,50 €': 2,
+        '1.000 kr': 1000,
+        r'NT$75.00': 75,
+        '₩10,000': 10000,
+        "CHF 1'000.00": 1000,
+        '10 000 ₽': 10000,
+        '1\u00a0234,56 €': 1234,
+        'free': 0,
+        '': 0,
+      };
+      for (final MapEntry(:key, :value) in cases.entries) {
+        expect(superChatAmount(key), value, reason: key);
+      }
+    });
   });
 
   test('a directory page is unmodifiable', () {

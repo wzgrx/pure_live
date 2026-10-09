@@ -1011,10 +1011,12 @@ Color? parsePlatformColor(String text) {
   return value == null ? null : Color(value);
 }
 
-/// The price as shown: the platform's text, else the number (3.x showed
-/// `￥price`, though only Bilibili and Douyu use yuan).
+/// The price as shown (D07.2, `superChatPriceLabel`): the platform's text,
+/// else the number in the platform's unit in the app's words ("30 元",
+/// "1000 六币"; [giftUnitText]), else the bare number. 3.x wrote `￥price`
+/// for every platform, though only Bilibili, Douyu and Huya count yuan.
 String superChatPrice(LiveSuperChatMessage superChat) =>
-    superChat.priceText.trim().isNotEmpty ? superChat.priceText.trim() : '￥${superChat.price}';
+    superChatPriceLabel(superChat.price, superChat.unit, superChat.priceText, unitText: giftUnitText);
 
 /// The chat list's state before its first message, and with the danmaku
 /// display off (docs/A-界面设计/A08-弹幕界面/A08.1-弹幕列表和弹幕设置页 c2, c3): an icon or a spinner, a line,

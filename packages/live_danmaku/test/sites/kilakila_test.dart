@@ -726,6 +726,9 @@ void main() {
       expect(superChat.message, 'bgm 从前说 小阿七 谢谢');
       expect(superChat.price, 1000);
       expect(superChat.priceText, '1,000红豆');
+      // D07.2: the unit of the platform table (superChatUnits).
+      expect(superChat.unit, LiveGiftUnit.redBean);
+      expect(superChatUnits[SiteIds.kilakila], superChat.unit);
       expect(superChat.startTime, DateTime.fromMillisecondsSinceEpoch(1790782866386));
       expect(superChat.endTime, DateTime.fromMillisecondsSinceEpoch(1790782866386 + 5 * 60 * 1000));
       expect((superChat.backgroundColor, superChat.backgroundBottomColor), ('', ''));

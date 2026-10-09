@@ -482,6 +482,7 @@ abstract final class ChzzkDanmakuProtocol {
         message: row.text,
         price: amount,
         priceText: amount > 0 ? cheeseText(amount) : '',
+        unit: LiveGiftUnit.cheese,
         startTime: start,
         endTime: start.add(superChatDuration(amount)),
         backgroundColor: '',

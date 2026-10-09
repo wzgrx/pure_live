@@ -253,6 +253,9 @@ void main() {
       expect(superChat.type, LiveMessageType.superChat);
       final data = superChat.data! as LiveSuperChatMessage;
       expect((data.userName, data.message, data.price, data.priceText), ('patron', 'great stream', 500, '500 Kicks'));
+      // D07.2: the unit of the platform table (superChatUnits).
+      expect(data.unit, LiveGiftUnit.kicks);
+      expect(superChatUnits[SiteIds.kick], data.unit);
       expect(data.endTime.difference(data.startTime), const Duration(minutes: 2));
       final gift = _read(
         _frame('KicksGifted', {

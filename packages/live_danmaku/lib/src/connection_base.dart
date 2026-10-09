@@ -215,6 +215,7 @@ LiveSuperChatMessage _cleanSuperChat(LiveSuperChatMessage chat) {
     backgroundBottomColor: chat.backgroundBottomColor,
     messageId: chat.messageId,
     priceText: chat.priceText,
+    unit: chat.unit,
     image: chat.image,
   );
 }

@@ -225,6 +225,7 @@ abstract final class KickDanmakuProtocol {
         message: text,
         price: amount,
         priceText: amount > 0 ? '$amount Kicks' : giftName,
+        unit: LiveGiftUnit.kicks,
         startTime: start,
         endTime: start.add(pinned > 0 && pinned <= 86400 ? Duration(seconds: pinned) : superChatDuration(amount)),
         backgroundColor: '',

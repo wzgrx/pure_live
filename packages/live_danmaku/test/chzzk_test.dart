@@ -955,6 +955,8 @@ void main() {
       );
       expect(anonymous.last.message, '싸이(PSY) - 예술이야 [가사/Lyrics]', reason: 'a video donation names its video');
       expect(anonymous.last.priceText, '1,820 치즈');
+      // D07.2: the unit of the platform table (superChatUnits).
+      expect(donations.map((data) => data.unit), everyElement(LiveGiftUnit.cheese));
       final named = donations.singleWhere((data) => data.message.startsWith('이번주 토요일'));
       expect(named.userName, '观众115');
       expect(named.messageId, '97faaf557acce48371affa77236380eb:1790632655370');

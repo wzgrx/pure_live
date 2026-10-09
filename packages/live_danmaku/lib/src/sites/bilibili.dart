@@ -1053,6 +1053,7 @@ abstract final class BilibiliDanmakuProtocol {
         face: face.isEmpty ? '' : '$face@200w.jpg',
         message: jsonString(data['message']) ?? '',
         price: jsonInt(data['price']) ?? 0,
+        unit: LiveGiftUnit.yuan,
         startTime: start,
         endTime: end,
         backgroundColor: jsonString(data['background_color']) ?? '',

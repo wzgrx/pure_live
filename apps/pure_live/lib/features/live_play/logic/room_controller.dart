@@ -13,6 +13,7 @@ import 'package:pure_live/app/network.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/logic/blocked_count.dart';
 import 'package:pure_live/features/live_play/logic/gift_combiner.dart';
+import 'package:pure_live/features/live_play/logic/membership_cards.dart';
 import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/platform/system_access.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
@@ -298,6 +299,10 @@ class LiveRoomController extends ChangeNotifier {
   /// `danmakuShowGifts` setting, whether or not the list shows gifts).
   bool get flyGifts => store.settings.get(Settings.danmakuShowGifts);
 
+  /// Memberships and subscriptions are also cards among the super chats
+  /// (D07.2: the `superChatIncludesMembership` setting, "上舰和开会员进醒目留言").
+  bool get membershipCards => store.settings.get(Settings.superChatIncludesMembership);
+
   /// Video is off: only the sound plays (3.x's headphone button).
   bool get audioOnly => _audioOnly;
 
@@ -451,6 +456,7 @@ class LiveRoomController extends ChangeNotifier {
     _subscriptions.add(store.settings.watch(Settings.showChatGifts).skip(1).listen(_onShowGifts));
     // A08.12: "只显示值钱的礼物" takes the cheap gift lines away at once.
     _subscriptions.add(store.settings.watch(Settings.chatGiftsAboveTier).skip(1).listen(_onGiftTier));
+    _subscriptions.add(store.settings.watch(Settings.superChatIncludesMembership).skip(1).listen(_onMembershipCards));
     // B-7 (E06.2 c4): the platform refused the stored cookie and plays on
     // anonymously; it reports each cookie once, and the room says so.
     if (site case final LiveSiteCookieRefusals refusals) {
@@ -872,6 +878,15 @@ class LiveRoomController extends ChangeNotifier {
     );
   }
 
+  /// D07.2: off, the membership cards leave the super chats at once (the
+  /// lines in the chat list stay); on, the next memberships get one.
+  void _onMembershipCards(bool on) {
+    if (_disposed || on || !_superChats.any(isMembershipCard)) return;
+    _superChats = List.unmodifiable(_superChats.where((superChat) => !isMembershipCard(superChat)));
+    _scheduleSuperChatExpiry();
+    _notify();
+  }
+
   /// Starts (or restarts) the sleep timer for [minutes], or stops it (3.x
   /// `applyRoomPlaybackTimer`): when it ends the room pauses.
   void setSleepTimer({required bool enabled, required int minutes}) {
@@ -1207,6 +1222,9 @@ class LiveRoomController extends ChangeNotifier {
       case LiveMessageType.notice:
         if (message.message.trim().isEmpty || !_notices.accepts(message.message)) return;
         chat.add(ChatLine.notice(message));
+        // D07.2: a subscription's notice stays the list's one line; with
+        // "上舰和开会员进醒目留言" it is a card among the super chats too.
+        _addMembershipCard(message);
       case LiveMessageType.gift:
         // B-21: a line in the chat list, not on the video; the switch hides
         // them, and then nothing is filtered or merged (D07.1 c5). D07.1:
@@ -1215,7 +1233,12 @@ class LiveRoomController extends ChangeNotifier {
         // too with "飞行弹幕显示礼物", which does not need the list's switch.
         final list = showGifts;
         final fly = flyGifts;
-        if ((!list && !fly) || message.message.trim().isEmpty) return;
+        // D07.2: a guard or another membership is also a card among the
+        // super chats (its own switch, whatever the list shows); the list
+        // keeps the gift line, so the event is one line there, never a gift
+        // line and a super chat line.
+        final card = membershipCards && _isMembership(message.gift);
+        if ((!list && !fly && !card) || message.message.trim().isEmpty) return;
         switch (_filter.judge(message)) {
           case DanmakuVerdict.shown:
             break;
@@ -1226,6 +1249,7 @@ class LiveRoomController extends ChangeNotifier {
           case DanmakuVerdict.duplicate || DanmakuVerdict.repeated || DanmakuVerdict.similar:
             return;
         }
+        if (card) _addMembershipCard(message);
         if (list) {
           _gifts.minTier = store.settings.get(Settings.chatGiftsAboveTier)
               ? LiveGiftTier.valuable
@@ -1297,6 +1321,19 @@ class LiveRoomController extends ChangeNotifier {
   }
 
   // ---- super chats ----
+
+  static bool _isMembership(LiveGift? gift) =>
+      gift != null && (gift.kind == LiveGiftKind.membership || gift.kind == LiveGiftKind.subscription);
+
+  /// D07.2: [message]'s card among the super chats ([membershipCard]) while
+  /// "上舰和开会员进醒目留言" is on; nothing for other messages.
+  void _addMembershipCard(LiveMessage message) {
+    if (!membershipCards) return;
+    final card = membershipCard(message, platform: _room.platform, now: _now());
+    if (card == null) return;
+    _addSuperChats([card]);
+    _notify();
+  }
 
   Future<void> _loadSuperChats(int epoch) async {
     try {

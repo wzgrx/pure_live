@@ -578,6 +578,19 @@ abstract final class Settings {
   /// [showChatGifts].
   static const danmakuShowGifts = BoolSetting('danmakuShowGifts', section: 'danmaku', defaultValue: false);
 
+  /// New (docs/D-弹幕/D07-礼物和付费消息/D07.2-醒目留言平台表和价格单位; 3.x had no
+  /// memberships): a membership or subscription the platform reports
+  /// (Bilibili's guards, YouTube's memberships, Twitch's, CHZZK's, Kick's
+  /// and Picarto's subscriptions) is also a card among the super chats
+  /// ("上舰和开会员进醒目留言"), for as long as a super chat of its price; the
+  /// chat list keeps its one line either way. On by default: the exception
+  /// D-040 names (V03.5 §6.6: only the super chats get more cards).
+  static const superChatIncludesMembership = BoolSetting(
+    'superChatIncludesMembership',
+    section: 'danmaku',
+    defaultValue: true,
+  );
+
   /// New (docs/A-界面设计/A08-弹幕界面/A08.10-弹幕列表名字和内容分开; 3.x has no such setting): the
   /// room's chat list names who sent each line ("显示用户名"); off, it shows
   /// only what was said. On by default, as 3.x and before. The flying
@@ -1764,6 +1777,7 @@ abstract final class Settings {
     chatGiftsAboveTier,
     giftValueInYuan,
     danmakuShowGifts,
+    superChatIncludesMembership,
     showChatNames,
     danmakuPausedBehavior,
     danmakuFps,

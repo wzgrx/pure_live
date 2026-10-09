@@ -116,8 +116,20 @@ abstract final class SixRoomDanmakuProtocol {
   static const String publicChatList = '110';
 
   /// A fly-screen message (飞屏, a paid message flying over the video;
-  /// `Room.GiftFly`).
+  /// `Room.GiftFly`): a super chat (D07.2).
   static const String flyScreen = '108';
+
+  /// What a fly-screen costs, in six coins: the room page's button says
+  /// "飞屏，价格：1000个六币" (`data-sug`), and its script sends one
+  /// (`prop_flymsg`) after asking "“飞屏”等同于礼物，价值1000六币" (checked
+  /// 2026-10-09). The 2000-coin "跟风飞屏" is a gift (`gid` 1516) whose words
+  /// come in another message (324), not a 108.
+  static const int flyScreenPrice = 1000;
+
+  /// How long a fly-screen stays among the super chats: the page flies it
+  /// across the video once and keeps no list, so the shortest step of
+  /// Bilibili's super chats (one minute), which Kick and CHZZK use too.
+  static const Duration flyScreenDuration = Duration(minutes: 1);
 
   /// A list of any messages (`content`), each dispatched by its own type.
   static const String batch = '1413';
@@ -275,8 +287,8 @@ abstract final class SixRoomDanmakuProtocol {
   /// The chat of one message (`content` of a `001` frame), as the page
   /// shows it to a guest:
   ///
-  /// - public chat ([publicChat]) and fly-screen messages ([flyScreen]) are
-  ///   read with [chat] and [fly];
+  /// - public chat ([publicChat]) is read with [chat], fly-screen messages
+  ///   ([flyScreen]) with [fly] (super chats, D07.2);
   /// - a list of public chat ([publicChatList]) gives each entry's [chat];
   /// - a list of messages ([batch]) gives each entry's messages, at most
   ///   [maxDepth] lists deep;
@@ -362,13 +374,38 @@ abstract final class SixRoomDanmakuProtocol {
     return _line(name, message, text);
   }
 
-  /// A fly-screen message (typeID 108) as white chat: the name `from`, the
-  /// text `content` (read like [chat]'s), the user id `fid` and the time
-  /// `tm` when given; null without text. The page flies it over the video
-  /// as `<from>说：<content>`.
-  static LiveMessage? fly(Map<Object?, Object?> message) {
+  /// A fly-screen message (typeID 108) as a super chat (D07.2; it was white
+  /// chat): the name `from`, the text `content` (read like [chat]'s), the
+  /// user id `fid` and the time `tm` when given; the price [flyScreenPrice]
+  /// six coins ([LiveGiftUnit.sixCoin], the app writes the unit); shown
+  /// from `tm` (else [now], default the current time) for
+  /// [flyScreenDuration]. The page draws it in its own look and names no
+  /// colours, and gives no avatar. Null without text. The page flies it
+  /// over the video as `<from>说：<content>`.
+  static LiveMessage? fly(Map<Object?, Object?> message, {DateTime? now}) {
     final text = _html(message['content']);
-    return text.isEmpty ? null : _line(_text(message['from']), message, text);
+    if (text.isEmpty) return null;
+    final line = _line(_text(message['from']), message, text);
+    final start = line.sentAt ?? now ?? DateTime.now();
+    return LiveMessage(
+      type: LiveMessageType.superChat,
+      userName: line.userName,
+      userId: line.userId,
+      message: text,
+      sentAt: line.sentAt,
+      color: LiveMessageColor.white,
+      data: LiveSuperChatMessage(
+        userName: line.userName,
+        face: '',
+        message: text,
+        price: flyScreenPrice,
+        unit: LiveGiftUnit.sixCoin,
+        startTime: start,
+        endTime: start.add(flyScreenDuration),
+        backgroundColor: '',
+        backgroundBottomColor: '',
+      ),
+    );
   }
 
   static LiveMessage _line(String name, Map<Object?, Object?> message, String text) {
@@ -413,7 +450,8 @@ abstract final class SixRoomDanmakuProtocol {
 ///   login has 6 s; a refused login reconnects, more than three in a row end
 ///   the connection. A flag on which the page stops its socket ends it too.
 /// - The page's `noop` heartbeat every 16 s; the server answers each.
-/// - Only chat is reported: public chat and fly-screen messages.
+/// - Only chat is reported: public chat, and fly-screen messages as super
+///   chats (D07.2).
 ///
 /// The app registers it as `SiteIds.sixRoom: () =>
 /// SixRoomDanmakuConnection(http: …, proxy: …)`, with the `LiveHttp` it

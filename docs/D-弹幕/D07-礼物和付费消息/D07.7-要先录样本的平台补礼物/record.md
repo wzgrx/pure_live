@@ -96,4 +96,13 @@
 
 ## 提交和门禁
 
-（见下一节，合并前补上）
+- `9f7b45f6b` [D07.7] Kugou (601) and Six Rooms (201) gifts from recorded samples; Six Rooms follow fly-screens
+- `34198ad10` [D07.7] SOOP star, relayed, video and ad balloons as tips; subscriptions as notices
+- `54051b0b7` [D07.7] TwitCasting gifts: ask for gift=1 as the player does, report gift events
+- `5f32f506a` [D07.7] SHOWROOM gifts (t 2) named, priced and pictured from the room's gift table
+- `92316b992` [D07.7] PandaTV hearts (SponCoin) as tips; the words sent with them as chat
+- `c566e2275` [D07.7] LOOK gifts (custom message 102) with their worth in notes
+- `eb1f49f8d` [D07.7] Kick: subscribe to channel_<channelId>, where the web client hears KicksGifted
+- `2396ddaf7` [D07.7] Record the recordings, the fields, the design choices and the real-device steps（本记录、verify.md、README、登记表和生成的文档）
+- 录样本用的脚本（经过真实连接、给连接一个记下每一帧的 connector）和脱敏脚本留在本机临时目录，原始录音脱敏后已删掉。Kick 第二次录了 20 分钟（订阅了 `channel_<频道号>`，6 个频道都订阅成功），仍是 0 个 `KicksGifted`；FC2 第二次 7 个房间 15 分钟，0 个 `system_comment`。
+- `bash tools/gate/gate.sh --all` 在 `2396ddaf7` 上通过（`gate: passed (all, 14 members)`，日志 `scratchpad/d077-1791532606/gate.log`）。合并后要再运行一次 `python3 tools/docs/docs.py`。

@@ -81,4 +81,4 @@
 
 - `5b0352d25` [D07.3] Price and picture Douyu gifts from the room's gift catalogue
 - 文档提交：本记录、verify.md、README、登记表和生成的文档。
-- `bash tools/gate/gate.sh --all`：见下一行。
+- `bash tools/gate/gate.sh --all` 在文档提交 `9e37d3e18` 上通过（`gate: passed (all, 14 members)`，日志 `scratchpad/d073-1791512427/gate.log`）。合并后要再运行一次 `python3 tools/docs/docs.py`（登记表和生成的文档）。

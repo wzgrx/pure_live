@@ -189,6 +189,9 @@ const keptUnusedKeys = {
   'settings_repeat_window',
   // A16.2: the room menu says "在新窗口打开" (open_in_new_window) now.
   'open_room_in_new_window',
+  // D08.3: the panel's coin row ("本地体验币 +500 …") moved into the
+  // identity card's "更多"; D-024 keeps its label.
+  'local_experience_coins',
   // 3.x keys with no page of their own in 4.x yet.
   'auto_close_time', // the 3.x auto-close dialog (i18n_test reads it)
   'bilibili_guest_name_masked', // 3.x's note for masked guest names

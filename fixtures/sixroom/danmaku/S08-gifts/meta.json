@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "platform": "sixroom",
+  "case": "S08-gifts",
+  "room": "sixroom:199411",
+  "danmakuKeys": {
+    "roomId": "199411",
+    "userId": "88017530"
+  },
+  "capturedAt": "2026-10-09T06:41:00Z",
+  "route": "direct",
+  "handshakes": [
+    {
+      "url": "wss://snbjh1.6rooms.com:5390",
+      "headers": {
+        "origin": "https://v.6.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    },
+    {
+      "url": "wss://snbjg2.6rooms.com:5190",
+      "headers": {
+        "origin": "https://v.6.cn",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+      }
+    }
+  ],
+  "frames": 9,
+  "raw": [
+    {
+      "room": "199411",
+      "sha256": "2e82bf3df0e2f43fb1b797a9ff93b3ae27801aa091b37ff479e1a8f5edec1e7f",
+      "length": 1039003
+    },
+    {
+      "room": "9818",
+      "sha256": "63b0ec777bad67fd74967c27e0c7614eeec888e0a1d9c698b54a016717ebdd24",
+      "length": 721405
+    }
+  ],
+  "scrubbed": [
+    {
+      "where": "$.content[201].fid, frid (the senders' user ids and room numbers)",
+      "rule": "person"
+    },
+    {
+      "where": "$.content[201].from",
+      "rule": "person"
+    },
+    {
+      "where": "$.content[201].askId (a hash of the sender, then a uuid)",
+      "rule": "secret"
+    },
+    {
+      "where": "$.content[201] fields other than typeID, tm, fid, frid, from, to, tid, trid, content, askId, supremeMystery, toSupMystery, limitLevel, newLimitLevel, isShowGiver (badges, avatars, rankings, nickname styles, effects)",
+      "rule": "reduced"
+    },
+    {
+      "where": "$.content[201].content fields other than item, num, msg, giftCoin, isShape, groupnum, keep, isInventory, isContinue, aiGiftPic, itemName, showItem",
+      "rule": "reduced"
+    },
+    {
+      "where": "every other message and frame (chat, entries, rankings, the login, results, heartbeats)",
+      "rule": "dropped"
+    }
+  ],
+  "tool": "D07.7 recorder (a dart:io program running SixRoomDanmakuConnection with a connector that tees the frames; anonymous and read-only: getChat.php, the guest login with an empty encpass and the page's noop heartbeat)",
+  "note": "Direct, 15 minutes in five of the hottest rooms at 14:41 Beijing time; 21 gifts (201) in all, no follow fly-screen (324). Kept: 7 gifts of room 199411 (broadcaster 88017530, ︶薀昕下午播ぃ, public): 御风铃 (1000 six coins), 无限火力 from stock (giftCoin 0) with words, 心动电池 sent three times as one combo (the same keep.tmp_id, groupnum 1, 2, 3; the first tmp_id a number, the next ones text, as received) and 蓝宝石钻戒 twice as one combo; then 2 of room 9818 (broadcaster 119223546, 蜜🍑桃少女团, public): 喜欢你 from stock (num as text) and 神秘人's 心动电池 ×3 (300). Each gift is its own frame {\"flag\":\"001\",\"content\":…} (they came alone or inside 1413 lists), re-encoded as the server writes it (PHP json_encode: non-ASCII as \\u escapes, slashes as \\/; raw DEFLATE level 6; the site's Base64; a new length line). Senders became 观众1…观众4 with same-length synthetic ids and room numbers; 神秘人's shared id 1900000047 and room 30000000 are the platform's, not a person's, and are kept. t is milliseconds after the room's first kept gift (room 9818's after a 60 s gap). No IPv4 address, cookie, token or avatar path is left."
+}

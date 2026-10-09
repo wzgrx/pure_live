@@ -87,6 +87,10 @@ enum LiveGiftUnit {
   /// them is free (D07.6).
   banana,
 
+  /// Kugou Live's star coins (星币), a hundred to a yuan (the gift panel
+  /// prices gifts in them, D07.7).
+  starCoin,
+
   /// A unit the platform does not document (Huya's `lPayTotal`), or no
   /// value at all.
   other,
@@ -111,6 +115,7 @@ const Map<LiveGiftUnit, double> giftUnitsPerYuan = {
   LiveGiftUnit.diamond: 10,
   LiveGiftUnit.douyinCoin: 10,
   LiveGiftUnit.acCoin: 10,
+  LiveGiftUnit.starCoin: 100,
   LiveGiftUnit.bits: 14,
   LiveGiftUnit.kicks: 14,
   LiveGiftUnit.cheese: 190,

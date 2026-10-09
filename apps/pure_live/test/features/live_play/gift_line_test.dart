@@ -537,6 +537,8 @@ void main() {
         LiveGiftUnit.diamond: 10,
         LiveGiftUnit.douyinCoin: 10,
         LiveGiftUnit.acCoin: 10,
+        // D07.7: Kugou's star coins, a hundred to a yuan.
+        LiveGiftUnit.starCoin: 100,
         LiveGiftUnit.bits: 14,
         LiveGiftUnit.kicks: 14,
         LiveGiftUnit.cheese: 190,

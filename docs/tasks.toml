@@ -3536,6 +3536,19 @@ done = 0
 note = "等 O01.1 在真机上用一段时间、用户还想更及时时再做；最短 15 分钟、系统决定实际时间，HyperOS 可能延后或不跑；不用精确闹钟（SCHEDULE_EXACT_ALARM 只给闹钟和日历类应用）"
 
 [[task]]
+id = "O01.3"
+title = "后台播放增强：适配各家 ROM（小米/HyperOS、OPPO/ColorOS、vivo/OriginOS、华为/荣耀、三星等），稳定可靠"
+type = "功能"
+status = "待真机"
+date = "2026-10-09"
+size = "大"
+tier = 1
+from = "用户 2026-10-09：“设置-后台播放 这个功能需要增强，适配各种rom，小米、oppo等手机系统，确保功能全面强大、稳定没有bug”（4.1.0）"
+stages = ["根因审查（record.md）", "后台保活：重连时不丢前台服务、按状态持锁、后台断流重试、网络切换", "后台播放设置页：各家 ROM 的检查和跳转、三个新开关", "真机验证（K90；其他品牌的机器）"]
+done = 3
+note = "根因：后台重连、等开播、来电时通知变“暂停”，audio_service 停掉 mediaPlayback 前台服务，Android 12+ 从后台起不来，HyperOS 冻结、Doze 断网；断流后后台没人重试。新设置 backgroundAudioOnly、backgroundPauseDanmaku、pauseOnPipClose 都默认关（D-040）；新通道 pure_live/background_guide；清单不用改；Kotlin 单独编译过，没构建 APK；K90 照 verify.md，其他品牌见 record.md 第八节"
+
+[[task]]
 id = "O02.1"
 title = "画中画复验：从画中画回来后控制条卡住的问题"
 type = "验证"

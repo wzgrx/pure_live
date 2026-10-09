@@ -1,12 +1,12 @@
 # D02.2 记录：正则屏蔽、屏蔽纯表情和超长弹幕、本场屏蔽计数
 
-- 任务书和设计：同一文件夹的 `brief.md`、`README.md`（登记提交 `68ceeeb44`，和这次的分支同时合并；这个分支里还没有这两个文件，所以这里只有记录）。来源 V03.6 第 3.3 节、第 4 节 E11、第 5.6 节做法 A；用户 2026-10-09（D-040）。
+- 任务书和设计：同一文件夹的 [brief.md](brief.md)、[README.md](README.md)（登记提交 `68ceeeb44`）。来源 V03.6 第 3.3 节、第 4 节 E11、第 5.6 节做法 A；用户 2026-10-09（D-040）。
 - 本机工作区任务：提交在当前分支，不推送、不合并。设计里要选的按 D-003 由维护者定（见“做法和理由”）。
-- 状态：阶段 1、2 都做完，自动测试和门禁通过，**待真机**。登记表（`docs/tasks.toml`）里 D02.2 的条目在登记分支上，这个分支没有它，所以没有改状态；合并后把 D02.2 改成“待真机”、阶段 1、2 记为完成。
+- 状态：阶段 1、2 都做完，自动测试和门禁通过，**待真机**（登记表 `docs/tasks.toml` 已改：待真机，`done = 2`）。分支开始时登记还没进 master；做完后把这个分支的两个提交挪到了已经合并登记的 master 上面（变基，没有合并提交）。
 
 ## 根因（现在为什么做不到）
 
-| 要做的 | 现在的代码（改动前，master `595a2385e`） | 为什么做不到 |
+| 要做的 | 现在的代码（改动前，master `595a2385e`，行号是那时的） | 为什么做不到 |
 |---|---|---|
 | 正则屏蔽 | `packages/live_danmaku/lib/src/filters/block_list.dart:35-40`（`DanmakuBlockList.blocks`：整名相同或 `text.toLowerCase().contains(word)`）；屏蔽词在构造时全部小写（`:23-26`） | 只有“包含”；就算按正则读，小写以后 `\D`、`\S`、`\W` 也会变成意思相反的 `\d`、`\s`、`\w` |
 | 添加时提示写法不对 | `apps/pure_live/lib/shared/danmaku/block_manager.dart:14`（`blockKeywordMaxLength = 40`）、`:243`（输入框 `maxLength`）、`_add` `:166-182`；长按面板第二页 `features/live_play/danmaku/message_panel.dart:74`、`:265`（`keywordMaxLength = 40`）、`_submit` `:250` | 两处都只判断空和重复，不知道正则；40 字放不下稍长的正则 |

@@ -6,7 +6,7 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 204 条；设置 227 个（分节默认 23 条、单独指定 76 个）；来源 35 个；通道 15 个。
+路径规则 204 条；设置 230 个（分节默认 23 条、单独指定 79 个）；来源 35 个；通道 15 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
@@ -29,7 +29,7 @@
 | C02 小窗、画中画、后台播放 | 3 | 8 |  |  | 1 |
 | C03 直播间工具 |  | 2 |  |  |  |
 | D01 平台弹幕协议 | 1 | 1 |  | 30 |  |
-| D02 过滤和屏蔽 | 2 | 7 |  |  |  |
+| D02 过滤和屏蔽 | 2 | 10 |  |  |  |
 | D03 飞行弹幕引擎 | 2 |  |  |  |  |
 | D04 数据流和性能 | 1 |  |  |  |  |
 | D05 弹幕设置生效 | 2 | 33 |  |  |  |
@@ -185,7 +185,7 @@
 ## D02 过滤和屏蔽
 
 - 代码：`apps/pure_live/lib/shared/danmaku/masked_blocks.dart`、`packages/live_danmaku/lib/src/filters/`
-- 设置：`collapseRepeatedDanmaku`、`repeatedDanmakuWindowSeconds`、`filterDouyuSuspectedAutomatedMessages`、`enableDanmakuSimilarityFilter`、`danmakuSimilarityThreshold`、`danmakuSimilarityCacheDuration`、`danmakuSimilarityMaxCacheSize`
+- 设置：`collapseRepeatedDanmaku`、`repeatedDanmakuWindowSeconds`、`filterDouyuSuspectedAutomatedMessages`、`enableDanmakuSimilarityFilter`、`danmakuSimilarityThreshold`、`danmakuSimilarityCacheDuration`、`danmakuSimilarityMaxCacheSize`、`blockEmoteOnlyDanmaku`、`blockLongDanmaku`、`blockLongDanmakuLength`
 
 ## D03 飞行弹幕引擎
 

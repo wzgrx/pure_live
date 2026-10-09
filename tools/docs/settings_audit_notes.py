@@ -478,6 +478,16 @@ NOTES: dict[str, dict] = {
         'ui': '没有单独的界面：身份卡和设置页“今天已签到 · 看直播 +N/300 · 弹幕 +N/50”读它',
         'verdict': 'v4 新加（D08.3）：当天的计数（本机日期、看了多久、看直播和弹幕各得了多少经验、签到过没有），JSON，应用读写（`LocalGrowthDay`）；不是今天的读成什么都没得；默认空；跟设置一起进备份和设备同步，恢复同一天的备份不会再签到一次',
     },
+    'localInteraction.enableGiftEffects': {
+        'ui': '设置 → 本地用户与互动 →“画面上”一组和直播间本地互动面板的“显示本地礼物特效”三选一（全部 / 只要大礼物 / 关），关 = 这个开关关',
+        'verdict': '键和含义不变（D-018）；D08.5 起它和 `localInteraction.giftEffectLevel` 一起写（关 = 关，其余 = 开），读的时候它先说了算：关着就是“关”，3.x 装回来改了它照样生效',
+    },
+    'localInteraction.giftEffectLevel': {
+        **_new('D08.5 c2，V03.6 E9'),
+        'v3range': '3.x 只有开关 `localInteraction.enableGiftEffects`，一种横幅',
+        'ui': '设置 → 本地用户与互动 →“画面上”一组和直播间本地互动面板的“显示本地礼物特效”三选一：全部 / 只要大礼物 / 关',
+        'verdict': 'v4 新加（D08.5）：默认 `all`，就是开关开着时的样子（D-040）；`all` 三档都有（小礼物顶部飘屏、中礼物横幅、大礼物横幅加座驾动效），`bigOnly` 只有大礼物有、其余只进列表，`off` 都没有；旧开关关着时一律按“关”读；跟设置一起进备份和设备同步',
+    },
     # ---- backup, cache, log, accounts, meta ----
     'downloadDirectoryPath': {
         'v3': "''",

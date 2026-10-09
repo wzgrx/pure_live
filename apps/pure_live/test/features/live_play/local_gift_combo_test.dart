@@ -287,8 +287,10 @@ void main() {
       expect(tester.widget<Text>(_key('live-play-local-gift-count')).data, '×2');
       expect(_pulseOf('live-play-local-gift-count'), findsNothing, reason: 'less motion');
       expect(_pulseOf('local-gift-banner-count'), findsNothing, reason: 'less motion');
-      // The time started again at the second send: up until 5 s.
-      await tester.pump(const Duration(milliseconds: 2900));
+      // The time started again at the second send: a small gift's (D08.5:
+      // 4 s, its line's flight; the still banner with less motion).
+      expect(session.giftEffect.value!.tier, LocalGiftTier.small);
+      await tester.pump(LocalGiftTier.small.duration - const Duration(milliseconds: 100));
       expect(_bannerCount(tester), '×2');
       await tester.pump(const Duration(milliseconds: 100));
       await tester.pump();
@@ -321,13 +323,17 @@ void main() {
       // A combo of a waiting one grows in its place.
       await _give(tester, session, clock, _voyage, after: const Duration(seconds: 1));
       expect([for (final show in session.giftEffect.waiting) show.count], [1, 2]);
-      await tester.pump(const Duration(seconds: 2));
+      // D08.5: each for its tier's time (the snack 4 s, the TV 3 s, the
+      // voyage 4 s).
+      await tester.pump(const Duration(seconds: 3));
       await tester.pump();
       expect(_bannerTitle(tester), 'Pure Live 送出 小电视');
       await tester.pump(const Duration(seconds: 3));
       await tester.pump();
       expect((_bannerTitle(tester), _bannerCount(tester)), ('Pure Live 送出 大航海', '×2'));
-      await tester.pump(const Duration(seconds: 3));
+      await tester.pump(const Duration(milliseconds: 3900));
+      expect(_bannerTitle(tester), 'Pure Live 送出 大航海');
+      await tester.pump(const Duration(milliseconds: 100));
       await tester.pump();
       expect(_key('local-gift-banner'), findsNothing);
 
@@ -343,10 +349,11 @@ void main() {
 
     testWidgets("c2: with motion the banner's ×N jumps to 1.8 and back, the line's to 1.2", (tester) async {
       final (room, session, clock) = await _room(tester, wrap: _moving);
-      await _give(tester, session, clock, _snack);
+      // A medium gift: the banner (D08.5; the snack's line jumps the same).
+      await _give(tester, session, clock, _tv);
       await tester.pump(const Duration(milliseconds: 500));
       expect(_pulseOf('local-gift-banner-count'), findsNothing, reason: 'nothing jumps before the count changes');
-      await _give(tester, session, clock, _snack, after: const Duration(milliseconds: 500));
+      await _give(tester, session, clock, _tv, after: const Duration(milliseconds: 500));
       final banner = _pulseOf('local-gift-banner-count');
       expect(banner, findsOneWidget);
       expect(tester.widget<ScaleTransition>(banner).scale.value, closeTo(1.8, 0.2));

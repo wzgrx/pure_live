@@ -114,13 +114,7 @@ class _LocalInteractionPanelState extends ConsumerState<LocalInteractionPanel> {
           value: local.showAsDanmaku,
           onChanged: (value) => local.showAsDanmaku = value,
         ),
-        _SwitchRow(
-          id: 'giftEffects',
-          title: i18n('local_gift_effects'),
-          subtitle: i18n('local_gift_effects_desc'),
-          value: local.enableGiftEffects,
-          onChanged: (value) => local.enableGiftEffects = value,
-        ),
+        LocalGiftEffectsChoice(interaction: local, id: 'local-panel-giftEffects'),
         InkWell(
           key: const ValueKey('local-panel-style'),
           onTap: () => setState(() => _style = true),
@@ -445,6 +439,83 @@ class _GiftTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// "显示本地礼物特效" as three choices (D08.5 c2): 全部 / 只要大礼物 / 关,
+/// under the line saying what the tiers look like; the same in the room's
+/// panel and on the settings page (with [icon] there). The chips wrap onto
+/// a second line when the text is large.
+class LocalGiftEffectsChoice extends StatelessWidget {
+  /// Creates the choice of [interaction], keyed [id] (its chips
+  /// `<id>-all`, `<id>-bigOnly`, `<id>-off`).
+  const new({required this.interaction, required this.id, this.icon, super.key});
+
+  /// The level's owner.
+  final LocalInteraction interaction;
+
+  /// The row's key.
+  final String id;
+
+  /// The settings page's icon before the title.
+  final IconData? icon;
+
+  static const Map<LocalGiftEffectLevel, String> _labels = {
+    LocalGiftEffectLevel.all: 'local_gift_effects_all',
+    LocalGiftEffectLevel.bigOnly: 'local_gift_effects_big_only',
+    LocalGiftEffectLevel.off: 'local_gift_effects_off',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final level = interaction.giftEffectLevel;
+    final icon = this.icon;
+    final indent = icon == null ? 16.0 : 52.0;
+    return Column(
+      key: ValueKey(id),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16, icon == null ? 8 : 10, 12, 4),
+          child: Row(
+            children: [
+              if (icon != null) ...[Icon(icon, size: 22, color: scheme.primary), const SizedBox(width: 14)],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(i18n('local_gift_effects'), style: theme.textTheme.bodyLarge?.regular.copyWith(fontSize: 15)),
+                    if (icon != null) const SizedBox(height: 2),
+                    Text(
+                      withoutOrphan(i18n('local_gift_effects_desc')),
+                      style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(indent, 0, 12, 8),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (final MapEntry(key: choice, value: label) in _labels.entries)
+                ChoiceChip(
+                  key: ValueKey('$id-${choice.id}'),
+                  label: Text(i18n(label)),
+                  selected: level == choice,
+                  onSelected: (_) => interaction.giftEffectLevel = choice,
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

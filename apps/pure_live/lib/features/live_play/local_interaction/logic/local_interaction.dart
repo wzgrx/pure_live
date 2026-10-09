@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_gift_tier.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_growth.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
@@ -131,8 +132,12 @@ final class LocalGiftData {
   /// The bigger banner.
   final bool big;
 
-  /// Whether the banner shows ("显示本地礼物特效" when it was sent).
+  /// Whether the banner shows ("显示本地礼物特效" when it was sent; D08.5:
+  /// and the level let this gift's tier show).
   final bool effect;
+
+  /// The effect's tier, by the price of one (D08.5 c1).
+  LocalGiftTier get tier => LocalGiftTier.of(price: price, big: big);
 }
 
 /// A run of one gift (D08.4 c1): the sends of the same gift in a room, each
@@ -312,10 +317,30 @@ final class LocalInteraction extends ChangeNotifier {
 
   set showLevelBadge(bool value) => _set(Settings.localInteractionShowLevelBadge, value);
 
-  /// The banner of a gift.
+  /// The banner of a gift (3.x's switch; D08.5: off is the level
+  /// [LocalGiftEffectLevel.off]).
   bool get enableGiftEffects => _get(Settings.localInteractionEnableGiftEffects);
 
   set enableGiftEffects(bool value) => _set(Settings.localInteractionEnableGiftEffects, value);
+
+  /// Which gifts show their effect (D08.5 c2). 3.x's switch decides first:
+  /// off is [LocalGiftEffectLevel.off] whatever the new key says (a 3.x
+  /// install over this one may have turned it off), on is the new key's
+  /// [LocalGiftEffectLevel.all] or [LocalGiftEffectLevel.bigOnly] (its
+  /// default, nothing stored, is all; an `off` stored there while 3.x
+  /// turned the switch back on reads as all).
+  LocalGiftEffectLevel get giftEffectLevel {
+    if (!enableGiftEffects) return LocalGiftEffectLevel.off;
+    final level = LocalGiftEffectLevel.parse(_get(Settings.localInteractionGiftEffectLevel));
+    return level == LocalGiftEffectLevel.off ? LocalGiftEffectLevel.all : level;
+  }
+
+  /// Stores [level] and 3.x's switch with it (off is off, the others on),
+  /// so 3.x reads the same choice.
+  set giftEffectLevel(LocalGiftEffectLevel level) => _setAll({
+    Settings.localInteractionGiftEffectLevel: level.id,
+    Settings.localInteractionEnableGiftEffects: level != LocalGiftEffectLevel.off,
+  });
 
   /// The pack previewed in the settings.
   String get previewPlatform => _get(Settings.localInteractionPreviewPlatform);
@@ -896,7 +921,12 @@ final class LocalInteraction extends ChangeNotifier {
         'count': total,
         'platform': platform,
         'big': gift.big,
-        'effect': enableGiftEffects ? (gift.big ? 'full' : 'ticker') : 'none',
+        // 3.x's values; D08.5: none also for a tier the level leaves out.
+        'effect': switch (LocalGiftTier.ofGift(gift)) {
+          final tier when !giftEffectLevel.shows(tier) => 'none',
+          LocalGiftTier.big => 'full',
+          _ => 'ticker',
+        },
       },
       isLocal: true,
       style: currentStyle,

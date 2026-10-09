@@ -154,6 +154,51 @@ abstract final class OnVideoColors {
   );
 }
 
+/// The paint of the local gifts' vehicles over the picture (D08.5: a
+/// rocket, a jet and a meteor drawn in code, after flame_barrage's motion
+/// effects, MIT): fixed like the picture's other colours, the same in every
+/// theme. Solid fills and gradients only, no blur (UI.md §9.3).
+abstract final class GiftEffectColors {
+  /// A vehicle's body (the rocket's hull, the jet's fuselage).
+  static const Color hull = Color(0xFFECEFF1);
+
+  /// The rocket's nose and fins, the jet's tail.
+  static const Color livery = Color(0xFFE53935);
+
+  /// Windows, the jet's wings.
+  static const Color trim = Color(0xFF546E7A);
+
+  /// The rocket's porthole glass.
+  static const Color glass = Color(0xFF4FC3F7);
+
+  /// The outer flame of the rocket.
+  static const Color flame = Color(0xFFFF6D00);
+
+  /// The flame's core.
+  static const Color flameCore = Color(0xFFFFEA00);
+
+  /// The rocket's smoke.
+  static const Color smoke = Color(0x66B0BEC5);
+
+  /// Sparks of the rocket and the meteor.
+  static const Color spark = Color(0xFFFFB74D);
+
+  /// The jet's contrail.
+  static const Color contrail = Color(0x59FFFFFF);
+
+  /// The jet's beacon.
+  static const Color beacon = Color(0xFFFF1744);
+
+  /// The meteor's embers.
+  static const Color ember = Color(0xFFFF7043);
+
+  /// The meteor's head, its glow and the clear end of its tail.
+  static const List<Color> meteorGlow = [Color(0xB3FFF59D), Color(0x66FF6D00), Color(0x00FF6D00)];
+
+  /// The meteor's tail, from the head out.
+  static const List<Color> meteorTail = [Color(0xE6FFE082), Color(0x5CFF6D00), Color(0x00FF6D00)];
+}
+
 /// Fixed semantic colours: they keep their meaning whatever the user's theme
 /// colour is (UI_PLAN §6.1; values and contrast from the archived v4 design
 /// tokens).

@@ -292,6 +292,14 @@ abstract final class LocalCatalog {
   /// long after the tap, so beyond them a gift only joins the chat list.
   static const int giftBannerLimit = 5;
 
+  /// The price of one from which a gift's effect is the banner (D08.5 c1):
+  /// below it a gift flies over the top of the picture.
+  static const int giftTierMedium = 100;
+
+  /// The price of one from which a gift's effect is the banner with a
+  /// vehicle (D08.5 c1); a gift marked [LocalGift.big] has it too.
+  static const int giftTierBig = 1000;
+
   /// The longest local danmaku, in characters (A08.13: the platforms let a
   /// viewer send 20 to 40; 40 still crosses a landscape phone in about one
   /// screen width at the default size).

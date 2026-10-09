@@ -1588,6 +1588,22 @@ abstract final class Settings {
     defaultValue: '',
   );
 
+  /// Which local gifts show their effect over the picture (D08.5 c2,
+  /// "显示本地礼物特效" as three choices): `all` (every gift: a small one
+  /// flies over the top, a medium one has the banner, a big one the banner
+  /// and a vehicle), `bigOnly` (only the big ones; the others only join the
+  /// chat list) or `off`. New in v4: `all`, what the switch on was. 3.x's
+  /// [localInteractionEnableGiftEffects] keeps its key and meaning (D-018)
+  /// and decides first: the app reads it off as `off`, and stores it with
+  /// this one (`off` is off, the others on), so a 3.x install over v4 reads
+  /// the same choice.
+  static const localInteractionGiftEffectLevel = StringSetting(
+    'localInteraction.giftEffectLevel',
+    section: 'localInteraction',
+    defaultValue: 'all',
+    allowed: {'all', 'bigOnly', 'off'},
+  );
+
   /// The local interaction's settings, in 3.x's order.
   static const List<Setting<Object>> localInteraction = [
     localInteractionEnabled,
@@ -1897,6 +1913,7 @@ abstract final class Settings {
     localInteractionPhrases,
     localInteractionGrowthEnabled,
     localInteractionGrowthDay,
+    localInteractionGiftEffectLevel,
     backupDirectory,
     downloadDirectoryPath,
     downloadDirectoryDecisionMade,

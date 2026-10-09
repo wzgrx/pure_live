@@ -130,14 +130,8 @@ class LocalInteractionSettingsPage extends ConsumerWidget {
             value: local.replayOnEnter,
             onChanged: (value) => local.replayOnEnter = value,
           ),
-          _Tile(
-            id: 'giftEffects',
-            icon: AppIcons.localGiftEffects,
-            title: i18n('local_gift_effects'),
-            subtitle: i18n('local_gift_effects_desc'),
-            value: local.enableGiftEffects,
-            onChanged: (value) => local.enableGiftEffects = value,
-          ),
+          // D08.5 c2: the three choices, as in the room's panel.
+          LocalGiftEffectsChoice(interaction: local, id: 'local-settings-giftEffects', icon: AppIcons.localGiftEffects),
           _Tile(
             id: 'style',
             icon: AppIcons.localStyle,

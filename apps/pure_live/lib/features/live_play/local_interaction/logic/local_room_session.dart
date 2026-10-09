@@ -7,12 +7,14 @@ import 'package:live_store/live_store.dart';
 import 'package:pure_live/features/live_play/danmaku/chat_feed.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_catalog.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_gift_queue.dart';
+import 'package:pure_live/features/live_play/local_interaction/logic/local_gift_tier.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_growth.dart';
 import 'package:pure_live/features/live_play/local_interaction/logic/local_interaction.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
 export 'package:pure_live/features/live_play/local_interaction/logic/local_gift_queue.dart';
+export 'package:pure_live/features/live_play/local_interaction/logic/local_gift_tier.dart';
 
 /// The local interaction inside one live room: sending local danmaku and
 /// gifts into the room's chat list and over its picture, and the gift banner
@@ -32,6 +34,11 @@ export 'package:pure_live/features/live_play/local_interaction/logic/local_gift_
 /// the last one's combo: its chat line, banner and history entry count up
 /// instead of a new one each; different gifts' banners wait their turn
 /// ([giftEffect]).
+///
+/// D08.5: each banner holds the gift layer for its tier's time (a small
+/// gift's line 4 s, a medium gift's banner [effectDuration], a big gift's
+/// banner and vehicle 4 s); the level of "显示本地礼物特效" decides when the
+/// gift is sent whether it gets one ([LocalGiftData.effect]).
 final class LocalRoomSession {
   /// Creates the session of [room] and starts putting back what was sent
   /// there before ([events]: the stored history; none in previews).
@@ -51,7 +58,11 @@ final class LocalRoomSession {
     LocalOneShotTimer? timer,
     this.effectDuration = const Duration(seconds: 3),
   }) : _now = now ?? interaction.now,
-       giftEffect = LocalGiftQueue(duration: effectDuration, timer: timer) {
+       giftEffect = LocalGiftQueue(
+         duration: effectDuration,
+         durationOf: (show) => show.tier == LocalGiftTier.medium ? effectDuration : show.tier.duration,
+         timer: timer,
+       ) {
     if (events != null) unawaited(_replay(events, _now()));
     LocalRoomWatch.of(interaction, room.session, periodic: periodic)
       ..place = (() => place)
@@ -80,7 +91,8 @@ final class LocalRoomSession {
   /// Shows a short message.
   final void Function(String message) toast;
 
-  /// How long a gift banner stays (3.x: 3 s).
+  /// How long a gift banner stays (3.x: 3 s); D08.5: a medium gift's, the
+  /// others hold the layer for their tier's [LocalGiftTier.duration].
   final Duration effectDuration;
 
   /// The gift banners: the one on the picture ([LocalGiftQueue.value], or

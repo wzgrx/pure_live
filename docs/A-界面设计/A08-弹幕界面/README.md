@@ -21,7 +21,7 @@
 
 - 用户看得到的（A08.1～A08.4 登记为完成，A08.5 待真机，A08.6、A08.7 未开始）：
   - **四个标签**：竖屏在画面和信息行下面，宽屏在右侧聊天栏，四个等宽 `TabLabel`“弹幕列表、醒目留言、弹幕设置、屏蔽管理”，左右滑切换（`chat_panel.dart:77-139`）；“醒目留言”带条数角标，房间详情打开期间“弹幕列表”记新弹幕数（超过 99 写“99+”，`:147-151`）；从全屏回来记住停在哪个标签（`RoomViewMemory.chatTab`，`:40-47`）。横屏全屏时没有这四个标签（照 3.x），弹幕设置走画面上的面板。
-  - **弹幕列表**：默认紧凑行“用户名：内容”，可在弹幕设置里换成 3.x 的卡片样式（`ChatListStyle`，设置键 `danmakuListStyle`）；两种样式里名字都是 600 + 次要色（平台名字颜色或弹幕颜色时用那个颜色，保证 4.5:1）、内容 400 + 主色字，名字前依次是“本地”/“对方”、徽章图、粉丝牌（`ChatText`、`chatNameInk`，A08.10）；“显示用户名”关掉时只显示内容（设置键 `showChatNames`，A08.10）；系统消息是居中小灰标签；礼物所有平台一种礼物行（`GiftLine`，A08.11）：16 的礼物图（没有时礼物图标）、名字、“送出”“开通”等动词、加粗的礼物名、“×N”、小一号的价值（平台单位，免费不写），值钱的左边 2 宽竖线、很值钱的 4 宽竖线加平台色，连击数变时“×N”跳一下，能长按、双击，“在聊天列表显示礼物”可关；醒目留言在列表里也有一条彩色行（`ChatLineView` `:572-711`）。第一条弹幕之前中间写状态：连接中、还没有弹幕、连接超时 +“重新连接”、连接失败 +“重新连接”、平台不提供弹幕（`_emptyState` `:253-296`）；“显示弹幕”关闭时写明并给“开启弹幕显示”（`:384-392`）。往上翻停止跟随，右下“N 条新弹幕”（主色底、`onPrimary` 字，`:450-472`），点了回到最新。长按、右键打开长按弹幕面板，双击复制“用户名: 内容”并提示“已复制到剪贴板”（`chatCopyText` `:80`、`:352-362`）。哔哩哔哩访客或登录过期时列表顶上一条“去登录”提示（`ChatNameHintBar` `:529`，D01.32）。没开播的房间整块换成主播公告和“开播后这里显示弹幕”（`RoomNoticeState` `:930`，A07.7）。
+  - **弹幕列表**：默认紧凑行“用户名：内容”，可在弹幕设置里换成 3.x 的卡片样式（`ChatListStyle`，设置键 `danmakuListStyle`）；两种样式里名字都是 600 + 次要色（平台名字颜色或弹幕颜色时用那个颜色，保证 4.5:1）、内容 400 + 主色字，名字前依次是“本地”/“对方”、徽章图、粉丝牌（`ChatText`、`chatNameInk`，A08.10）；“显示用户名”关掉时只显示内容（设置键 `showChatNames`，A08.10）；系统消息是居中小灰标签；礼物所有平台一种礼物行（`GiftLine`，A08.11）：16 的礼物图（没有时礼物图标）、名字、“送出”“开通”等动词、加粗的礼物名、“×N”、小一号的价值（平台单位，免费不写），值钱的左边 2 宽竖线、很值钱的 4 宽竖线加平台色，连击数变时“×N”跳一下，能长按、双击，“在聊天列表显示礼物”可关，“只显示值钱的礼物”只留 10 元以上（连击加起来够了再出来）、“礼物价值换算成元”把金瓜子、钻石、抖币写成元（A08.12，默认都关）；醒目留言在列表里也有一条彩色行（`ChatLineView` `:572-711`）。第一条弹幕之前中间写状态：连接中、还没有弹幕、连接超时 +“重新连接”、连接失败 +“重新连接”、平台不提供弹幕（`_emptyState` `:253-296`）；“显示弹幕”关闭时写明并给“开启弹幕显示”（`:384-392`）。往上翻停止跟随，右下“N 条新弹幕”（主色底、`onPrimary` 字，`:450-472`），点了回到最新。长按、右键打开长按弹幕面板，双击复制“用户名: 内容”并提示“已复制到剪贴板”（`chatCopyText` `:80`、`:352-362`）。哔哩哔哩访客或登录过期时列表顶上一条“去登录”提示（`ChatNameHintBar` `:529`，D01.32）。没开播的房间整块换成主播公告和“开播后这里显示弹幕”（`RoomNoticeState` `:930`，A07.7）。
   - **醒目留言**：新的在上；卡片头部平台色、内容第二色，字色按对比度选深浅墨（`InkOnColor.contrastOn`），没有阴影，价格前金色图标（`LiveSemanticColors.superChatGold` `#FFC107`）和“SC”小块，右侧倒计时；整个列表一个每秒的时钟（`super_chats.dart:75`）；栏窄于 280 或字体放大时头部竖排（`:227`）；内容可选中、双击复制。空时“暂无醒目留言”，平台不提供时写“{平台}的直播间没有醒目留言。”（`:88-93`，按 `LiveSite.hasSuperChats`，`packages/live_core/lib/src/live_site.dart:64`，只有哔哩哔哩、虎牙、斗鱼为真 `:70`）。
   - **弹幕设置**：标签和画面上的面板是同一份内容 `RoomDanmakuSettings`：先是共用的 `DanmakuSettingsContent`（观看模板、显示范围、样式、重复弹幕、画面弹幕交互、流畅度），后面“弹幕列表”（列表样式分段按钮、显示用户名、在聊天列表显示礼物）和“小窗弹幕”（3.x 的 12 项，“小窗显示弹幕”关闭时其余收起，数值带单位 px、px/s、秒）（`danmaku_settings_panel.dart:76-137`、`:143` 起）。标签里“改动立即生效”在第一组标题右边，面板里在标题栏。“统一弹幕颜色”点开是居中的颜色对话框（`showDanmakuColorDialog`，`shared/danmaku/danmaku_color_dialog.dart:66`），全屏时压在画面中间（A08.7 要改）。
   - **屏蔽管理**：一页四组，顺序是弹幕关键词屏蔽（输入框最多 40 字 + “添加”，下面是已加的词）→ 已屏蔽用户 → 平台弹幕过滤（斗鱼疑似自动弹幕）→ 相似弹幕过滤（开关 + 三个滑块，关着时变灰）（`block_manager.dart:212-388`）。词和用户都是小标签，只有 × 能删（点击区 40×48，悬停“点击移除: 词”，`BlockChip` `:402`），删除后 4 秒内可撤销且放回原位（`restoreBlockEntry` `:392`）；重复的词在输入框下面提示、不清空；两节为空时写说明。第一次打开时如果 D02.1 清理过打码昵称，顶上说一次（`_maskedNotice` `:90`）。直播间“屏蔽管理”标签和设置里的“弹幕屏蔽”页是这同一个组件、同一份存储。
@@ -48,7 +48,7 @@
 | `danmaku/chat_panel.dart`（151 行） | `ChatPanel`（`:21`）：四个标签和 `TabBarView`（`:77-139`），“弹幕列表”的新弹幕数、“醒目留言”条数（`_counted` `:147`），记住标签（`:40-47`） | A08.1、A07.1、A07.11 |
 | `danmaku/chat_list.dart`（1001） | `ChatListStyle`（`:24`）、`chatNameColor`（`:55`，名字 4.5:1）、`chatCopyText`（`:80`）、`ChatList`（`:97`，跟随、停住、“N 条新弹幕” `:450-472`、空状态 `_emptyState` `:253`、“显示弹幕”关闭 `:384`）、`ChatNameHintBar`（`:529`）、`ChatLineView`（`:572`，紧凑行、卡片、系统、提示、礼物、醒目留言、本地分支 `:609`）、`parsePlatformColor`（`:834`）、`superChatPrice`（`:842`）、`ChatListState`（`:848`，列表中间的状态）、`RoomNoticeState`（`:930`，未开播时的公告） | A08.1、A07.1、A07.7、D04.1 |
 | `danmaku/chat_text.dart`（54） | `ChatText`：聊天行的两个文字角色（名字 600 + 次要色或给的颜色、内容 400 + `onSurface`）和名字后的“：”，紧凑行、卡片、本地弹幕、礼物、醒目留言一行、长按卡片共用；`chatInline`（行里的小块随系统字号只放大一次） | A08.10、A08.11 G14 |
-| `danmaku/gift_line.dart`（435） | `GiftLine`（礼物行：紧凑和卡片、档位竖线、连击跳动）、`GiftIcon`（16 的礼物图）、`GiftLineRoom`、价值和文字（`giftValueText`、`giftSentence` 等）、`giftPlatformInk`（很值钱的平台色） | A08.11 |
+| `danmaku/gift_line.dart`（369） | `GiftLine`（礼物行：紧凑和卡片、档位竖线、连击跳动、`valueInYuan`）、`GiftIcon`（16 的礼物图）、`GiftLineRoom`、`giftPlatformInk`（很值钱的平台色）；礼物的文字和数字在 `shared/danmaku/gift_words.dart`，这里 `export` | A08.11、A08.12 |
 | `danmaku/chat_feed.dart`（206） | `ChatLineKind`（`:8`）、`ChatLine`（`:26`）、`ChatFeed`（`:101`，500 条、每帧最多通知一次） | D04.1（数据流，界面只读它） |
 | `danmaku/super_chats.dart`（302） | `superChatRemaining`（`:14`）、`SuperChatList`（`:25`，新的在上、一个时钟 `:75`、平台不提供 `:88-93`）、`_SuperChatEmpty`（`:111`）、`SuperChatCard`（`:148`，按对比度选墨、窄栏竖排 `:227`） | A08.1 c5～c7 |
 | `danmaku/danmaku_settings_panel.dart`（308） | `showRoomDanmakuSettings`（`:20`）、`RoomDanmakuSettingsPanel`（`:37`，画面上的面板）、`RoomDanmakuSettings`（`:76`，标签和面板共用：共用正文 + “弹幕列表” + “小窗弹幕”）、`PipDanmakuSettings`（`:143`，小窗弹幕 12 项，颜色对话框 `:193-209`） | A08.1 c8～c10、A07.6 |
@@ -72,7 +72,9 @@
 | `shared/danmaku/danmaku_settings_content.dart`（360） | `DanmakuSettingsContent`（`:48`，直播间面板、标签、设置弹幕页共用的正文）、`_Templates`（`:279`，观看模板芯片） | A07.6、A08.5 |
 | `shared/danmaku/setting_rows.dart`（322） | `PanelGroupTitle`（`:11`，可带右侧说明）、`PanelCard`（`:50`）、`SettingRow`（`:76`）、`SettingSwitchRow`（`:136`）、`SettingSliderRow`（`:179`）、`SettingCounterRow`（`:268`） | A07.6、A08.1 c16 |
 | `shared/danmaku/danmaku_color_dialog.dart`（168） | `danmakuColorSwatches`（`:8`，10 种）、`DanmakuColorChip`（`:26`）、`showDanmakuColorDialog`（`:66`，居中对话框：色块 + 十六进制） | A08.1 偏差 1；A08.7 要改 |
-| `shared/danmaku/danmaku_overlay.dart`（1022） | 飞行弹幕层：`DanmakuOverlay`（`:151`）；本任务组只关心 `rectOf`（`:283`）、`messageAt`（`:292`）、`held`、本地弹幕 `_placeLocal`（`:513`）；整层 `IgnorePointer`（`:673`），命中由手势层来问 | D03.1（引擎）、A08.4（命中）、A08.2（本地） |
+| `shared/danmaku/danmaku_overlay.dart`（1321） | 飞行弹幕层：`DanmakuOverlay`；本任务组只关心 `rectOf`、`messageAt`、`held`、本地弹幕 `_placeLocal`、平台礼物（`_renderGift` 金色带框、`_placeHeld` 很值钱的顶部停 4 秒、`giftClearance` 避开控制条，A08.12）；整层 `IgnorePointer`，命中由手势层来问 | D03.1（引擎）、A08.4（命中）、A08.2（本地）、A08.12（礼物） |
+| `shared/danmaku/gift_flights.dart`（173） | `GiftFlights`：哪些平台礼物飞（值钱以上、连击最多两次、每秒 3 条），直播间和多画面各一个；`flyingGiftWords` | A08.12 |
+| `shared/danmaku/gift_words.dart`（136）、`gift_combo.dart`（105） | 礼物的文字和数字（`giftSentence`、`giftValueText(inYuan:)`、`giftShownTier`）；连击规则（`CombinedGift`、`giftComboKey`、`giftComboTotal`），列表的合并器和飞行共用 | A08.11、D07.1、A08.12 |
 | `shared/danmaku/danmaku_settings.dart`（53）、`danmaku_templates.dart`（231）、`emotes.dart`（161）、`masked_blocks.dart`（49） | 设置到画法的换算、观看模板和 `resolvedDanmakuFps`（`danmaku_templates.dart:210`）、表情表、打码昵称判断 | D05.1、D03.2、D02.1 |
 | `features/settings/danmaku_page.dart`（184） | `DanmakuSettingsPage`（`:32`，正文 + “更多” `:62`）、`_More`（`:72`）；入口 `settings_section_view.dart:129`；路由 `routes/route_path.dart:72` | A08.5 c1 |
 | `features/shield/shield_page.dart`（47） | `ShieldPage`（`:21`，`DanmakuBlockManager` 加顶栏，最宽 720，矮窗口顶栏 48）；路由 `route_path.dart:68` | A08.3 |
@@ -149,7 +151,7 @@
 属于 [A 界面设计](../README.md)。
 
 - 代码：`features/live_play/danmaku/`、`shared/danmaku/`、`local_interaction/`
-- 进度：`████████████████░░░░` 80%
+- 进度：`█████████████████░░░` 87%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -165,17 +167,13 @@
 | A08.9 | 单击画面优先调出控制层：弹幕多时点画面总是打开长按弹幕面板 | 界面 | 完成 | 2026-10-08 | df901709a | [设计或说明](A08.9-单击画面优先调出控制层/README.md)、[任务书](A08.9-单击画面优先调出控制层/brief.md)、[记录](A08.9-单击画面优先调出控制层/record.md) |
 | A08.10 | 弹幕列表里用户名和内容分开显示，各平台一个样子；加“显示用户名”开关 | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A08.10-弹幕列表名字和内容分开/README.md)、[任务书](A08.10-弹幕列表名字和内容分开/brief.md)、[记录](A08.10-弹幕列表名字和内容分开/record.md)、[真机验证](A08.10-弹幕列表名字和内容分开/verify.md) |
 | A08.11 | 礼物行的样子：全平台统一（礼物图、名字、礼物名、×N、价值、档位线） | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A08.11-礼物行的样子/README.md)、[任务书](A08.11-礼物行的样子/brief.md)、[记录](A08.11-礼物行的样子/record.md)、[真机验证](A08.11-礼物行的样子/verify.md) |
-| A08.12 | 礼物开关和飞行弹幕里的礼物：只显示值钱的礼物、飞行弹幕显示礼物、价值换算成元 | 界面 | 未开始 | — | — | [设计或说明](A08.12-礼物开关和飞行弹幕里的礼物/README.md)、[任务书](A08.12-礼物开关和飞行弹幕里的礼物/brief.md) |
+| A08.12 | 礼物开关和飞行弹幕里的礼物：只显示值钱的礼物、飞行弹幕显示礼物、价值换算成元 | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A08.12-礼物开关和飞行弹幕里的礼物/README.md)、[任务书](A08.12-礼物开关和飞行弹幕里的礼物/brief.md)、[记录](A08.12-礼物开关和飞行弹幕里的礼物/record.md)、[真机验证](A08.12-礼物开关和飞行弹幕里的礼物/verify.md) |
 | A08.13 | 本地互动小问题修复：清空记录可撤销、星形只表示样式、输入框 40 字、礼物行能长按、粗体不丢字重、本地弹幕不给屏蔽关键词 | 界面 | 待真机 | 2026-10-09 | — | [设计或说明](A08.13-本地互动小问题修复/README.md)、[任务书](A08.13-本地互动小问题修复/brief.md)、[记录](A08.13-本地互动小问题修复/record.md) |
 | A08.14 | 长按弹幕面板加“+1（本地）”：用本地身份和样式再发一次 | 界面 | 未开始 | — | — | [设计或说明](A08.14-长按弹幕面板加一/README.md)、[任务书](A08.14-长按弹幕面板加一/brief.md) |
 | A08.15 | 聊天列表字号和行距（接 A08.10） | 界面 | 未开始 | — | — | [设计或说明](A08.15-聊天列表字号和行距/README.md)、[任务书](A08.15-聊天列表字号和行距/brief.md) |
 
 ## 还没完成的
 
-- **A08.12 礼物开关和飞行弹幕里的礼物：只显示值钱的礼物、飞行弹幕显示礼物、价值换算成元**（未开始，第二档，规模 中）
-  - 阶段：两个列表设置：只显示值钱的礼物、礼物价值换算成元 → 飞行弹幕显示礼物（直播间、小窗、多画面跟它）
-  - 说明：依赖 A08.11、D07.1；新设置默认关（D-040），“在聊天列表显示礼物”不变
-  - 来源：V03.5 第 6.6、6.7 节；用户 2026-10-09（D-040）
 - **A08.14 长按弹幕面板加“+1（本地）”：用本地身份和样式再发一次**（未开始，第二档，规模 小）
   - 说明：同一个面板 message_panel.dart 还有 A08.13（V03.6 E2 本地互动小修，另一个任务登记）在改，先后做；本地互动关着时没有这一行
   - 来源：V03.6 第 4 节 E3、第 5.1 节；用户 2026-10-09（D-040）

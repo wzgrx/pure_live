@@ -76,8 +76,8 @@
 
 ## 门禁
 
-- `bash tools/gate/gate.sh --all`：见文末。
+- `bash tools/gate/gate.sh --all`（提交 `7748430f7`）：`gate: passed (all, 14 members)`；`apps/pure_live` 全部 1285 个测试通过。`docs.py --check`、`owners.py --check`、`check_ui_structure.py` 通过。
 
 ## 提交
 
-- 见文末（合并时由维护者补合并提交）。
+- `f6870af2f` 代码和测试；`7748430f7` 文档和登记表；本条记录门禁结果的提交。合并提交由维护者补。

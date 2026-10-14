@@ -78,9 +78,9 @@ Dart PictureInPicture.enter(宽, 高)   → 通道 enter → enterPictureInPictu
 | 问题 | 位置 | 影响 | 处理 |
 |---|---|---|---|
 | 从画中画回来后控制条卡住（K90 第二轮出现过），S02.1 做了防御性修改（同一个播放器元素、回来时重新计时并强制出一帧），没复验 | `apps/pure_live/lib/features/live_play/player/player_view.dart:241-268` | 控制条不消失、按钮没反应，要退出直播间 | [O02.1](O02.1-画中画复验/README.md) |
-| 自动进画中画（Android 12+ 由系统进入）时页面不会先变成“只有画面”，按钮进入时才有 `preparing` | `mini/room_mini_window.dart:256-300` 对比 `:132-170` | 系统动画的第一帧可能截到整个直播间页面，画中画里一瞬间是缩小的整页 | O02.1 一起看；确认后在 C02 开任务 |
-| 画中画中画面比例变了（换清晰度、竖屏主播第一帧前后），只有开着“离开应用时自动画中画”时才通过 `setAutoEnter` 更新窗口比例；按钮进入的不更新 | `mini/room_mini_window.dart:286-290`；原生没有单独的“改比例”方法 | 窗口有黑边或画面被裁 | O02.1 复验时看；要改时通道加一个 `update`（`setPictureInPictureParams` 只改比例） |
-| 没传 `sourceRectHint`（3.x 有）、没关 `setSeamlessResizeEnabled` | `MainActivity.kt:450-453`、`:495-500` | 进入动画从整个窗口缩，而不是从画面那一块；Android 12+ 改窗口大小时视频可能闪一下 | 小，暂不做；O02.1 发现明显问题再开任务 |
+| 自动进画中画（Android 12+ 由系统进入）时页面不会先变成“只有画面”，按钮进入时才有 `preparing` | `mini/room_mini_window.dart:256-300` 对比 `:132-170` | 系统动画的第一帧可能截到整个直播间页面，画中画里一瞬间是缩小的整页 | [A07.24](../../A-界面设计/A07-直播间界面/A07.24-小窗重构和增强/README.md) 传了画面位置（`sourceRectHint`），系统从画面那块做动画；K90 上确认 |
+| 画中画中画面比例变了（换清晰度、竖屏主播第一帧前后），只有开着“离开应用时自动画中画”时才通过 `setAutoEnter` 更新窗口比例；按钮进入的不更新 | `mini/room_mini_window.dart:286-290`；原生没有单独的“改比例”方法 | 窗口有黑边或画面被裁 | [A07.24](../../A-界面设计/A07-直播间界面/A07.24-小窗重构和增强/README.md) 已做：画中画里比例变了发 `update` |
+| 没传 `sourceRectHint`（3.x 有）、没关 `setSeamlessResizeEnabled` | `MainActivity.kt:450-453`、`:495-500` | 进入动画从整个窗口缩，而不是从画面那一块；Android 12+ 改窗口大小时视频可能闪一下 | [A07.24](../../A-界面设计/A07-直播间界面/A07.24-小窗重构和增强/README.md) 已做：传画面位置，Android 12+ 关无缝缩放 |
 | 窗口按钮的接收器第一次绑定房间时注册，只在 `onDestroy` 注销 | `MainActivity.kt:549-557`、`:729-736` | 没有影响（只收本应用的广播）；记下来免得以为漏了 | 不做 |
 
 ## 相关决定和规范

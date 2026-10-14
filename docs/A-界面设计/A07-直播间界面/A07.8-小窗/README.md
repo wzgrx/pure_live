@@ -194,6 +194,6 @@
 - 自动测试：`apps/pure_live/test/features/live_play/live_play_mini_window_test.dart`（新，当时 22 个，现在 23 个）：规则 9 个（大小、位置、底部导航栏、夹回、弹幕字号和帧率、八种状态、什么时候转成小窗、J1、桌面小窗大小）；应用内小窗 7 个（右下角、直角阴影、同一个播放器、按钮顺序和底色、3 秒隐藏、再点回直播间不新建播放器、✕ 停止、暂停常显、断流、纯音频、弹幕、对话框时隐藏、进别的直播间或多画面时关掉、横屏和平板、旋转、加载、下播、鼠标悬停和双击）；桌面小窗 2 个；Android 画中画 3 个。附录 A 第 8 条、第 15 条写成了测试。当时 `apps/pure_live` 300 个全部通过。
 - 真机：[S02.3](../../../S-质量和验证/S02-真机验证/S02.3-K90验证主流程/record.md)（2026-10-02，K90）：上栏小窗按钮 → 系统画中画（任务 `mode=pinned`），画面在别的应用上方继续播，通过。应用内小窗（[CHECKLIST](../../../S-质量和验证/S02-真机验证/CHECKLIST.md) 第 1 节第 12 条）、系统关了画中画时的提示（第 11 条）、自动画中画、Windows 桌面小窗都没有在真机上看过；记录“没有在真机上看的”：系统画中画设置页能不能直接打开、Android 12 起自动进入的动画、8–11 用 `onUserLeaveHint` 时跳出的系统界面也会触发；Windows 的拉边改大小、隐藏后最小化、置顶切换、记住位置、Windows 11 是否自动加圆角。
 - 留下的问题和去向：
-  - 应用内小窗拖动时每次移动都整层重建、松手没有惯性（单元 2 发现，核对代码确认）：`mini/floating_window.dart:191-194` 的 `onDragStart`、`onDragUpdate`、`onDragEnd` 都是 `setState`，每次指针移动都让 `_FloatingWindowState.build` 整个重跑（`LayoutBuilder` → `ListenableBuilder` → `StreamBuilder` → `Stack` → `MiniPlayerSurface` 和 `LiveVideoView`，还重读 `watchSetting`）；松手时只把位置记成当前位置（`:194`），没有速度、不吸边、没有动画。应该只改位置（例如 `ValueNotifier<Offset>` 配 `Positioned` 或 `Transform`，画面那棵子树不动），松手按速度滑一段、贴近边缘时吸边。→ 无任务，建议在 R01 开新任务（拖动帧时间要在 K90 上量）或并进 A03.3 的手感；V01.5（小窗拖角改尺寸，提议）会改同一个文件，先做这条。
+  - 应用内小窗拖动时每次移动都整层重建、松手没有惯性：已由 [A07.24](../A07.24-小窗重构和增强/README.md) 解决（只动外框、松手贴边、可收边）。
   - Linux、macOS 的桌面小窗要等桌面外壳接上（X）；iOS 画中画在 A18.1。
   - 设置“退出小窗播放”字面意思反了等文字问题交给 A11.3（见上面“交给其他任务的”）。

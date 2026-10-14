@@ -1,10 +1,10 @@
 {
-  "version": "4.0.0",
-  "build_number": 5001,
-  "version_num": 400005001,
-  "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。\n- 2026-10-02 更新：修复暂停、录制图标、横屏菜单、哔哩哔哩昵称、暂停时弹幕、切换直播间等问题，详见发布页。",
+  "version": "4.1.0",
+  "build_number": 5003,
+  "version_num": 401005003,
+  "version_desc": "- 礼物全平台统一显示：连击合并，可以只看值钱的礼物、换算成元、上飞行弹幕；醒目留言按平台的单位标价。\n- 弹幕列表的名字和内容分开，可以关掉用户名、调字号和行距；屏蔽支持正则、纯表情和超长弹幕。\n- 本地互动加了记录、常用语、成长和三档礼物特效，平台体验资源包换上平台图标。\n- 后台播放更稳：断流自动重试，来电和重连时不被系统停掉，各家手机有“后台播放设置”说明；全屏右上角菜单换成右侧面板。\n- 新增开播提醒、哔哩哔哩多账号、小窗改大小，详见发布页。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.0.0",
+  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.1.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "4.0.0",
-      "build_number": 5001,
-      "version_num": 400005001,
-      "version_desc": "- 4.0 是全新重写的版本：全新界面，手机、平板一套设计，直播间、弹幕、录制、设置全部重做。\n- 直接覆盖安装 3.x，关注、历史、设置、账号自动导入。\n- 这一版只发布 Android；Windows 等平台以后发布。\n- 2026-10-02 更新：修复暂停、录制图标、横屏菜单、哔哩哔哩昵称、暂停时弹幕、切换直播间等问题，详见发布页。",
+      "version": "4.1.0",
+      "build_number": 5003,
+      "version_num": 401005003,
+      "version_desc": "- 礼物全平台统一显示：连击合并，可以只看值钱的礼物、换算成元、上飞行弹幕；醒目留言按平台的单位标价。\n- 弹幕列表的名字和内容分开，可以关掉用户名、调字号和行距；屏蔽支持正则、纯表情和超长弹幕。\n- 本地互动加了记录、常用语、成长和三档礼物特效，平台体验资源包换上平台图标。\n- 后台播放更稳：断流自动重试，来电和重连时不被系统停掉，各家手机有“后台播放设置”说明；全屏右上角菜单换成右侧面板。\n- 新增开播提醒、哔哩哔哩多账号、小窗改大小，详见发布页。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.0.0",
+      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.1.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",

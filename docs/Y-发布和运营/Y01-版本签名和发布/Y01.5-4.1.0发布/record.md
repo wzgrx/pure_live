@@ -20,10 +20,10 @@
 | 阶段 | 做了没有 | 结果 |
 |---|---|---|
 | 1 版本号和发布说明 | 文档做了 | 发布说明 `releases/v4.1.0.md` 补了四项、改成 5003；登记 Y01.5。填：版本号 `4.1.0+5003` 的提交（维护者） |
-| 2 构建和检查 | 没做（5003） | 填：提交、时间；结果写进下面“检查结果” |
-| 3 K90 冒烟 | 没做（5003） | 填：同一提交的 v4dev 测试包；除了 S02 CHECKLIST 第 1 节，看一眼四项：横屏全屏右上角菜单面板、设置往下翻进子页面再返回、平台体验资源包的图标、开着后台播放切到后台断网再恢复 |
-| 4 标签、发布页和安装包 | 没做 | 填：标签的提交、发布页地址、上传时间 |
-| 5 更新文件 | 没做 | 填：提交；文字照下面“应用内更新的文字” |
+| 2 构建和检查 | 做了 | `b2776992b`，结果见下面“检查结果”，全部通过 |
+| 3 K90 冒烟 | 做了（轻量） | 同一提交的 v4dev 测试包（4.1.0 / 5003），2026-10-09 22:30～22:38：冷启动 590 毫秒；设置翻到“数据”进“缓存与数据管理”再返回，位置不变（A11.6）；后台播放设置页认出 Xiaomi 25102RKBEC / HyperOS 4.0 / Android 17，通知和电池优化“已设置”，“自启动”跳到 `AutoStartManagementActivity`（O01.3）；直播间身份卡是哔哩哔哩图标和粉色底（D08.6）；横屏全屏右上角打开右侧“菜单”面板，三组卡片、不用滚动（A07.23）；按 Home 20 秒后 `AudioService` `isForeground=true`、类型 mediaPlayback；应用日志没有报错。没测：锁屏 30 分钟、后台断网恢复、其他品牌手机 |
+| 4 标签、发布页和安装包 | 做了 | 附注标签 `v4.1.0`（“Pure Live 4.1.0 (Android), build 5003”）在 `b2776992b`；发布页 https://github.com/wzgrx/pure_live/releases/tag/v4.1.0 ，2026-10-14 12:17（UTC）上线，三个 APK 和 `SHA256SUMS.txt`，正文是 `releases/v4.1.0.md` 填上哈希 |
+| 5 更新文件 | 做了 | `assets/version.json`（顶层和 android：4.1.0、5003、401005003、新的说明和链接）、`assets/releases.json`（最前面加 4.1.0，changelog 是发布说明去掉“下载哪个”“SHA-256”）、`version_page_test.dart` 跟着改 |
 
 ## 发布说明怎么写的
 
@@ -41,15 +41,15 @@
 
 | 项 | arm64-v8a | armeabi-v7a | x86_64 |
 |---|---|---|---|
-| 文件大小（字节） | `<大小-arm64>` | `<大小-v7a>` | `<大小-x86_64>` |
-| SHA-256 | `<SHA256-arm64>` | `<SHA256-v7a>` | `<SHA256-x86_64>` |
+| 文件大小（字节） | 111413930 | 98583846 | 123062928 |
+| SHA-256 | `852083f34ed681673fb7df2b610a4506e8c8621bfe52634a90bed52414230e6d` | `4798f7a2e77978d004307ad6a5397057ddb8685200d29053c2f803f501ecd6b5` | `1eed111e26390614430a16f8bd6a5ac97fb754ed79a830a5b3234906329cad84` |
 | `aapt2 dump badging`：包名、versionCode、versionName | `com.mystyle.purelive`、`7003`、`4.1.0` | `6003` | `9003` |
-| 证书 SHA-256（`apksigner verify --print-certs`） | 应为 `1e832295a696cf8210bca063e458bad0be12dfa64939d3362ff11b8f237ff7b9` | 同左 | 同左 |
-| 保留的资源（四个图标） | | | |
-| 16 KB 对齐（`zipalign -c -P 16`） | | | |
+| 证书 SHA-256（`apksigner verify --print-certs`） | `1e832295a696cf8210bca063e458bad0be12dfa64939d3362ff11b8f237ff7b9`（只有 v2） | 同左 | 同左 |
+| 保留的资源（四个图标） | 四个都在 | 四个都在 | 四个都在 |
+| 16 KB 对齐（`zipalign -c -P 16`） | 全部 `.so` OK | 全部 `.so` OK | 全部 `.so` OK |
 
-- 构建：填提交、时间；安装包和 `SHA256SUMS.txt` 本机留在 `~/ref/release/v4.1.0-5003/`。
-- `python3 tools/release/check_version.py`：填结果。
+- 构建：提交 `b2776992b`，2026-10-09 22:41，在单独的工作区 `release-410` 里 `flutter build apk --release --split-per-abi`（332 秒）；安装包和 `SHA256SUMS.txt` 本机留在 `~/ref/release/v4.1.0-5003/`。
+- `python3 tools/release/check_version.py`：“release: 4.1.0+5003 可以发布”。
 
 ## 5002（没有发布）
 

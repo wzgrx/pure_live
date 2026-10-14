@@ -190,12 +190,11 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
   /// window's place and size; the picture under it is not rebuilt.
   final ValueNotifier<int> _frame = ValueNotifier(0);
   final ValueNotifier<MiniGripCorner?> _grip = ValueNotifier(null);
-  late final AnimationController _settle = AnimationController(vsync: this, duration: _settleTime)..addListener(_moved);
-  Offset _settleFrom = Offset.zero;
-  Offset _settleTo = Offset.zero;
-  _Layout? _layout;
 
-  static const Duration _settleTime = Duration(milliseconds: 260);
+  /// The clock of the settling slide; [_slideRun] says where it is.
+  late final AnimationController _settle = AnimationController.unbounded(vsync: this)..addListener(_moved);
+  _SlideSimulation? _slideRun;
+  _Layout? _layout;
 
   /// Android's picture-in-picture is on this device (the window's button,
   /// and leaving the app turns the window into it; A07.24).
@@ -322,8 +321,9 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
   Rect _rect(_Layout layout) {
     final size = _size(layout);
     final Offset offset;
-    if (_settle.isAnimating) {
-      offset = Offset.lerp(_settleFrom, _settleTo, Curves.easeOutCubic.transform(_settle.value))!;
+    final run = _slideRun;
+    if (_settle.isAnimating && run != null) {
+      offset = run.at(_settle.value);
     } else if (_dragging) {
       offset = inAppMiniDragOffset(
         area: layout.area,
@@ -385,12 +385,13 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
       topClearance: layout.topClearance,
       bottomClearance: layout.bottomClearance,
     );
-    _slide(from: window.topLeft, to: settled.offset, dock: settled.dock);
+    _slide(from: window.topLeft, to: settled.offset, dock: settled.dock, velocity: velocity);
   }
 
-  /// Slides from [from] to [to] (no slide when the system asks for less
-  /// motion), tucked into [dock] or not, and remembers it.
-  void _slide({required Offset from, required Offset to, required MiniDock? dock}) {
+  /// Slides from [from] to [to] on a spring that leaves at [velocity] (no
+  /// slide when the system asks for less motion), tucked into [dock] or
+  /// not, and remembers it.
+  void _slide({required Offset from, required Offset to, required MiniDock? dock, Offset velocity = Offset.zero}) {
     _dock = dock;
     _dragged = to;
     widget.room.placement = (offset: to, dock: dock);
@@ -399,9 +400,16 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
       _settle.stop();
       _moved();
     } else {
-      _settleFrom = from;
-      _settleTo = to;
-      _settle.forward(from: 0);
+      final tolerance = AppMotion.tolerance(MediaQuery.devicePixelRatioOf(context));
+      ReleaseSpringSimulation axis(double start, double end, double speed) => ReleaseSpringSimulation(
+        spring: AppMotion.floatingSpring,
+        start: start,
+        end: end,
+        velocity: speed,
+        tolerance: tolerance,
+      );
+      final run = _slideRun = _SlideSimulation(axis(from.dx, to.dx, velocity.dx), axis(from.dy, to.dy, velocity.dy));
+      _settle.animateRelease(run, refreshRate: View.of(context).display.refreshRate);
     }
     _placeGrip();
     _syncAutoPipLater();
@@ -623,4 +631,26 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
       },
     );
   }
+}
+
+/// The floating window's settling slide (A07.24): a spring on each axis,
+/// each leaving at the finger's speed along it. Its value is the time, so
+/// one controller runs both.
+class _SlideSimulation extends Simulation {
+  new(this._x, this._y) : super(tolerance: _x.tolerance);
+
+  final Simulation _x;
+  final Simulation _y;
+
+  /// Where the window is [time] seconds in.
+  Offset at(double time) => Offset(_x.x(time), _y.x(time));
+
+  @override
+  double x(double time) => time;
+
+  @override
+  double dx(double time) => 1;
+
+  @override
+  bool isDone(double time) => _x.isDone(time) && _y.isDone(time);
 }

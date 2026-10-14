@@ -59,6 +59,11 @@ abstract final class AppMotion {
   /// ...after at least this far.
   static const double panelRestoreFlingDistance = 24;
 
+  /// The in-app floating window going to a side or tucking in after a drag
+  /// (A07.24): [panelSpring], leaving at the finger's speed on both axes.
+  /// It had a 260 ms ease-out that started from rest.
+  static final SpringDescription floatingSpring = panelSpring;
+
   /// Swiping between rooms in the portrait fullscreen: mass 1, stiffness
   /// 400, damping ratio 1 (about 0.33 s).
   static final SpringDescription roomSwipeSpring = SpringDescription.withDampingRatio(mass: 1, stiffness: 400);

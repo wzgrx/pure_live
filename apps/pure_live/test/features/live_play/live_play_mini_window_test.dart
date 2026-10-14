@@ -1146,6 +1146,42 @@ void main() {
       await _close(tester, app);
     });
 
+    testWidgets("A07.24: let go, it springs on at the finger's speed; caught on the way, it stays under the finger", (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      final home = tester.getRect(_window);
+      // Flung left from the right side: it goes on moving the very next
+      // frame, faster than a slide from rest would start.
+      await tester.flingFrom(home.topLeft + const Offset(70, 100), const Offset(-40, 0), 1200);
+      final released = tester.getRect(_window).left;
+      await tester.pump(const Duration(milliseconds: 16));
+      final next = tester.getRect(_window).left;
+      expect(next, lessThan(released - 15), reason: 'about 1200 px/s, 16 ms');
+      await tester.pump(const Duration(milliseconds: 40));
+      // Caught on the way: it follows the finger from where it is.
+      final caught = tester.getRect(_window);
+      expect(caught.left, lessThan(next), reason: 'still on the way');
+      final hold = await tester.startGesture(caught.topLeft + const Offset(70, 100));
+      await hold.moveBy(const Offset(0, 30));
+      await hold.moveBy(const Offset(0, 10));
+      await tester.pump(const Duration(milliseconds: 100));
+      final held = tester.getRect(_window);
+      expect(held.left, closeTo(caught.left, 0.5), reason: 'stopped under the finger');
+      expect(held.top, greaterThan(caught.top));
+      await hold.up();
+      await tester.pump();
+      await _settle(tester);
+      // Let go without a fling: back to the nearer side, at rest.
+      final rest = tester.getRect(_window);
+      expect(rest.left, anyOf(16, home.left));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(tester.getRect(_window), rest);
+      await _close(tester, app);
+    });
+
     testWidgets('A07.22: the grip on the bottom corner towards the middle pulls it larger, kept for next time', (
       tester,
     ) async {

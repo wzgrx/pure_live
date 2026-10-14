@@ -133,26 +133,23 @@ const Map<String, double> inAppMiniSizes = {'small': 0.8, 'medium': 1, 'large': 
 /// The shortest a resize makes the window's long side (A07.22).
 const double inAppMiniMinExtent = 160;
 
-/// A resize makes the window's long side at most the screen's short side ×
-/// this (A07.22: the window does not cover the page it floats over).
-const double inAppMiniMaxFraction = 0.9;
-
 /// Whether the window of a picture of [aspectRatio] is a portrait one: its
 /// height is its long side, and its resize is remembered apart (A07.22).
 bool inAppMiniPortrait(double aspectRatio) => _windowRatio(aspectRatio) < 1;
 
-/// The room the floating window may take in an [area]: [inAppMiniMargin]
-/// from the sides, the clearances from the top and the bottom
-/// ([inAppMiniOffset]'s).
+/// The room the floating window may take in an [area] (A07.24): the whole
+/// width, so a resize can make it as wide as the phone, and the height
+/// between the clearances from the top and the bottom ([inAppMiniOffset]'s).
 Size inAppMiniRoom({required Size area, required double topClearance, required double bottomClearance}) =>
-    Size(math.max(0, area.width - inAppMiniMargin * 2), math.max(0, area.height - topClearance - bottomClearance));
+    Size(math.max(0, area.width), math.max(0, area.height - topClearance - bottomClearance));
 
-/// The user's resize [scale] of the floating window, bounded (A07.22): the
-/// window of [size] ("小窗大小", a key of [inAppMiniSizes]) times the scale
-/// keeps its long side from [inAppMiniMinExtent] (a portrait picture's
-/// width from [inAppMiniMinPortraitWidth]) up to the [screen]'s short side
-/// × [inAppMiniMaxFraction] and inside the [room]; the size's own window is
-/// always allowed, so 1 is never changed.
+/// The user's resize [scale] of the floating window, bounded (A07.22,
+/// A07.24): the window of [size] ("小窗大小", a key of [inAppMiniSizes])
+/// times the scale keeps its long side from [inAppMiniMinExtent] (a
+/// portrait picture's width from [inAppMiniMinPortraitWidth]) up to what the
+/// [room] holds, stepless: a landscape picture as wide as the screen. Without
+/// a [room] the [screen] is the room. The size's own window is always
+/// allowed, so 1 is never changed.
 double inAppMiniScale({
   required Size screen,
   required double aspectRatio,
@@ -166,13 +163,8 @@ double inAppMiniScale({
   final portrait = ratio < 1;
   final long = portrait ? natural.height : natural.width;
   final smallest = math.max(inAppMiniMinExtent, portrait ? inAppMiniMinPortraitWidth / ratio : 0);
-  var largest = math.min(screen.width, screen.height) * inAppMiniMaxFraction;
-  if (room != null) {
-    largest = math.min(
-      largest,
-      portrait ? math.min(room.height, room.width / ratio) : math.min(room.width, room.height * ratio),
-    );
-  }
+  final space = room ?? screen;
+  final largest = portrait ? math.min(space.height, space.width / ratio) : math.min(space.width, space.height * ratio);
   final extent = (long * scale).clamp(math.min(long, smallest), math.max(long, largest));
   return extent / long;
 }
@@ -265,25 +257,116 @@ double inAppMiniBottomClearance({required String route, required double width, r
   return safeBottom + (bar ? bottomNavigationHeight : 0) + inAppMiniMargin;
 }
 
+/// Which side the floating window is tucked into (A07.24): flung past an
+/// edge, only [inAppMiniDockPeek] of it shows there, playing on; a tap
+/// brings it back.
+enum MiniDock {
+  /// The left edge.
+  left,
+
+  /// The right edge.
+  right,
+}
+
+/// How much of a tucked-away window shows (A07.24): enough to see it plays
+/// and to grab it.
+const double inAppMiniDockPeek = 40;
+
+/// The left of a window [width] wide in an [area] [width]-wide, kept
+/// [inAppMiniMargin] from the sides; a window too wide for both margins
+/// (A07.24: as wide as the phone) keeps none.
+({double min, double max}) _horizontal(double area, double width) {
+  if (area - width >= inAppMiniMargin * 2) return (min: inAppMiniMargin, max: area - width - inAppMiniMargin);
+  final room = math.max<double>(0, area - width);
+  return (min: 0, max: room);
+}
+
 /// The top-left of the floating window of [window] size in [area]: where the
 /// user dragged it ([dragged]), else the bottom-right corner; always inside
-/// [area], [inAppMiniMargin] from the sides, [topClearance] from the top and
-/// [bottomClearance] from the bottom (a rotation or a smaller window brings
-/// it back).
+/// [area], [inAppMiniMargin] from the sides (none when it is as wide as the
+/// area), [topClearance] from the top and [bottomClearance] from the bottom
+/// (a rotation or a smaller window brings it back). Tucked into a side
+/// ([dock]), only [inAppMiniDockPeek] of it shows there.
 Offset inAppMiniOffset({
   required Size area,
   required Size window,
   required double bottomClearance,
   required double topClearance,
   Offset? dragged,
+  MiniDock? dock,
 }) {
-  final maxLeft = math.max<double>(0, area.width - window.width - inAppMiniMargin);
+  final across = _horizontal(area.width, window.width);
   final maxTop = math.max(topClearance, area.height - window.height - bottomClearance);
-  final wanted = dragged ?? Offset(maxLeft, maxTop);
-  return Offset(
-    wanted.dx.clamp(math.min(inAppMiniMargin, maxLeft), maxLeft),
-    wanted.dy.clamp(math.min(topClearance, maxTop), maxTop),
+  final wanted = dragged ?? Offset(across.max, maxTop);
+  final top = wanted.dy.clamp(math.min(topClearance, maxTop), maxTop).toDouble();
+  return switch (dock) {
+    MiniDock.left => Offset(inAppMiniDockPeek - window.width, top),
+    MiniDock.right => Offset(area.width - inAppMiniDockPeek, top),
+    null => Offset(wanted.dx.clamp(across.min, across.max), top),
+  };
+}
+
+/// Where a dragged window shows (A07.24): the finger may pull it past the
+/// sides, as long as [inAppMiniDockPeek] of it stays on screen (released
+/// there, [inAppMiniSettle] tucks it in); the top and the bottom keep their
+/// clearances.
+Offset inAppMiniDragOffset({
+  required Size area,
+  required Size window,
+  required Offset wanted,
+  required double topClearance,
+  required double bottomClearance,
+}) {
+  final maxTop = math.max(topClearance, area.height - window.height - bottomClearance);
+  final left = math.min<double>(inAppMiniDockPeek - window.width, 0);
+  final right = math.max<double>(area.width - inAppMiniDockPeek, 0);
+  return Offset(wanted.dx.clamp(left, right), wanted.dy.clamp(math.min(topClearance, maxTop), maxTop));
+}
+
+/// How far a fling carries the window after the finger lifts (A07.24): its
+/// speed × this many seconds, slowing to a stop.
+const double inAppMiniFlingSeconds = 0.18;
+
+/// Where a released window settles (A07.24): carried on by the finger's
+/// [velocity], then against the nearer side (a window as wide as the area
+/// stays in the middle) and between the clearances; past an edge by more
+/// than half of it (or flung that way hard), it is tucked into that side
+/// ([MiniDock]).
+({Offset offset, MiniDock? dock}) inAppMiniSettle({
+  required Size area,
+  required Rect window,
+  required Offset velocity,
+  required double topClearance,
+  required double bottomClearance,
+}) {
+  final carried = window.topLeft + velocity * inAppMiniFlingSeconds;
+  final centre = carried.dx + window.width / 2;
+  final dock = centre < 0
+      ? MiniDock.left
+      : centre > area.width
+      ? MiniDock.right
+      : null;
+  if (dock != null) {
+    final offset = inAppMiniOffset(
+      area: area,
+      window: window.size,
+      bottomClearance: bottomClearance,
+      topClearance: topClearance,
+      dragged: carried,
+      dock: dock,
+    );
+    return (offset: offset, dock: dock);
+  }
+  final across = _horizontal(area.width, window.width);
+  final side = centre < area.width / 2 ? across.min : across.max;
+  final offset = inAppMiniOffset(
+    area: area,
+    window: window.size,
+    bottomClearance: bottomClearance,
+    topClearance: topClearance,
+    dragged: Offset(side, carried.dy),
   );
+  return (offset: offset, dock: null);
 }
 
 /// Whether the room's page hands its player to the in-app floating window

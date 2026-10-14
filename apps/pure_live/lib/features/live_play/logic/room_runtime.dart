@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -6,6 +7,7 @@ import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
 import 'package:pure_live/features/live_play/logic/audio_focus.dart';
 import 'package:pure_live/features/live_play/logic/background_playback.dart';
+import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/reconnect_watch.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
@@ -108,6 +110,11 @@ final class FloatingRoom extends ChangeNotifier {
   /// The room in the floating window, or null.
   RoomRuntime? get runtime => _runtime;
 
+  /// Where the last floating window settled (A07.24): the next one opens
+  /// there (dragged, or tucked into a side) instead of back in the corner,
+  /// for as long as the app runs.
+  ({Offset offset, MiniDock? dock})? placement;
+
   /// Whether a layer can show a floating window (the app's; tests and the
   /// TV interface have none, and a runtime nobody shows is closed at once).
   bool get canShow => _layers > 0;
@@ -121,7 +128,11 @@ final class FloatingRoom extends ChangeNotifier {
   /// See [attachLayer].
   void detachLayer() {
     _layers = (_layers - 1).clamp(0, 1 << 20);
-    if (_layers == 0) unawaited(close());
+    if (_layers == 0) {
+      // The app's pages went away: the next window starts in the corner.
+      placement = null;
+      unawaited(close());
+    }
   }
 
   void _attachRoutes() {
@@ -193,5 +204,6 @@ final class FloatingRoom extends ChangeNotifier {
   Future<void> reset() async {
     await close();
     _layers = 0;
+    placement = null;
   }
 }

@@ -96,6 +96,7 @@ class _FloatingRoomLayerState extends State<FloatingRoomLayer> {
         key: ObjectKey(runtime),
         runtime: runtime,
         route: liveRouteObserver.currentRoute.value,
+        room: _room,
         onBackToRoom: () => unawaited(AppNavigator.toLiveRoomDetail(liveRoom: runtime.controller.room)),
         onClose: () => unawaited(_room.close()),
       ),
@@ -104,10 +105,20 @@ class _FloatingRoomLayerState extends State<FloatingRoomLayer> {
 }
 
 class _FloatingWindow extends ConsumerStatefulWidget {
-  const new({required this.runtime, required this.route, required this.onBackToRoom, required this.onClose, super.key});
+  const new({
+    required this.runtime,
+    required this.route,
+    required this.room,
+    required this.onBackToRoom,
+    required this.onClose,
+    super.key,
+  });
 
   final RoomRuntime runtime;
   final String route;
+
+  /// Where the last window settled ([FloatingRoom.placement]).
+  final FloatingRoom room;
   final VoidCallback onBackToRoom;
   final VoidCallback onClose;
 
@@ -115,9 +126,48 @@ class _FloatingWindow extends ConsumerStatefulWidget {
   ConsumerState<_FloatingWindow> createState() => _FloatingWindowState();
 }
 
-class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
-  /// Where the user dragged it (top-left), or null for the corner.
+/// What the window is laid out by, from the last build: the area, the
+/// clearances, the picture's ratio and the size settings.
+final class _Layout {
+  const new({
+    required this.screen,
+    required this.area,
+    required this.ratio,
+    required this.topClearance,
+    required this.bottomClearance,
+    required this.sizeName,
+    required this.stored,
+    required this.portraitWindow,
+  });
+
+  final Size screen;
+  final Size area;
+  final double ratio;
+  final double topClearance;
+  final double bottomClearance;
+  final String sizeName;
+
+  /// The kept resize of this picture's kind (A07.22).
+  final double stored;
+  final bool portraitWindow;
+
+  Size get room => inAppMiniRoom(area: area, topClearance: topClearance, bottomClearance: bottomClearance);
+
+  double bounded(double wanted) =>
+      inAppMiniScale(screen: screen, aspectRatio: ratio, scale: wanted, size: sizeName, room: room);
+
+  Size sized(double scale) =>
+      inAppMiniWindowSize(screen: screen, aspectRatio: ratio, size: sizeName, scale: scale, room: room);
+}
+
+class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTickerProviderStateMixin {
+  /// Where the user left it (top-left), or null for the corner; and the
+  /// side it is tucked into (A07.24).
   Offset? _dragged;
+  MiniDock? _dock;
+
+  /// A finger is moving it: it may go past the sides then.
+  bool _dragging = false;
 
   /// A resize (A07.22): the window when it began, its scale then, which
   /// corner stays, and whether it is a portrait picture's window.
@@ -130,6 +180,207 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
   /// arrives (the store writes in the background).
   double? _scale;
 
+  /// A07.24: a drag, a resize or the settling slide changes only the
+  /// window's place and size; the picture under it is not rebuilt.
+  final ValueNotifier<int> _frame = ValueNotifier(0);
+  final ValueNotifier<MiniGripCorner?> _grip = ValueNotifier(null);
+  late final AnimationController _settle = AnimationController(vsync: this, duration: _settleTime)..addListener(_moved);
+  Offset _settleFrom = Offset.zero;
+  Offset _settleTo = Offset.zero;
+  _Layout? _layout;
+
+  static const Duration _settleTime = Duration(milliseconds: 260);
+
+  @override
+  void initState() {
+    super.initState();
+    final placement = widget.room.placement;
+    _dragged = placement?.offset;
+    _dock = placement?.dock;
+  }
+
+  @override
+  void dispose() {
+    _settle.dispose();
+    _frame.dispose();
+    _grip.dispose();
+    super.dispose();
+  }
+
+  void _moved() => _frame.value++;
+
+  /// The window's size now.
+  Size _size(_Layout layout) {
+    final scale = _resizePortrait == layout.portraitWindow ? _scale ?? layout.stored : layout.stored;
+    return layout.sized(scale);
+  }
+
+  /// The window's place and size now.
+  Rect _rect(_Layout layout) {
+    final size = _size(layout);
+    final Offset offset;
+    if (_settle.isAnimating) {
+      offset = Offset.lerp(_settleFrom, _settleTo, Curves.easeOutCubic.transform(_settle.value))!;
+    } else if (_dragging) {
+      offset = inAppMiniDragOffset(
+        area: layout.area,
+        window: size,
+        wanted: _dragged ?? Offset.zero,
+        topClearance: layout.topClearance,
+        bottomClearance: layout.bottomClearance,
+      );
+    } else {
+      offset = inAppMiniOffset(
+        area: layout.area,
+        window: size,
+        dragged: _dragged,
+        dock: _dock,
+        topClearance: layout.topClearance,
+        bottomClearance: layout.bottomClearance,
+      );
+    }
+    return offset & size;
+  }
+
+  /// Puts the grip on the corner towards the middle (after the frame: it
+  /// sits inside the surface).
+  void _placeGrip() {
+    final layout = _layout;
+    if (layout == null) return;
+    _grip.value = _dock != null ? null : inAppMiniGripCorner(window: _rect(layout), area: layout.area);
+  }
+
+  void _dragStart() {
+    final layout = _layout;
+    if (layout == null) return;
+    final from = _rect(layout).topLeft;
+    _settle.stop();
+    _dragging = true;
+    _dock = null;
+    _dragged = from;
+    _grip.value = null;
+    _moved();
+  }
+
+  void _dragUpdate(Offset delta) {
+    final layout = _layout;
+    if (layout == null || !_dragging) return;
+    // From where it shows: a drag past the limit does not pile up.
+    _dragged = _rect(layout).topLeft + delta;
+    _moved();
+  }
+
+  void _dragEnd(Offset velocity) {
+    final layout = _layout;
+    if (layout == null || !_dragging) return;
+    final window = _rect(layout);
+    _dragging = false;
+    final settled = inAppMiniSettle(
+      area: layout.area,
+      window: window,
+      velocity: velocity,
+      topClearance: layout.topClearance,
+      bottomClearance: layout.bottomClearance,
+    );
+    _slide(from: window.topLeft, to: settled.offset, dock: settled.dock);
+  }
+
+  /// Slides from [from] to [to] (no slide when the system asks for less
+  /// motion), tucked into [dock] or not, and remembers it.
+  void _slide({required Offset from, required Offset to, required MiniDock? dock}) {
+    _dock = dock;
+    _dragged = to;
+    widget.room.placement = (offset: to, dock: dock);
+    final still = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    if (still || (from - to).distance < 0.5) {
+      _settle.stop();
+      _moved();
+    } else {
+      _settleFrom = from;
+      _settleTo = to;
+      _settle.forward(from: 0);
+    }
+    _placeGrip();
+  }
+
+  /// A tap on a tucked-away window brings it back to its side.
+  void _undock() {
+    final layout = _layout;
+    if (layout == null || _dock == null) return;
+    final window = _rect(layout);
+    final inside = inAppMiniOffset(
+      area: layout.area,
+      window: window.size,
+      dragged: window.topLeft,
+      topClearance: layout.topClearance,
+      bottomClearance: layout.bottomClearance,
+    );
+    _slide(from: window.topLeft, to: inside, dock: null);
+  }
+
+  void _resizeStart({required bool pinch}) {
+    final layout = _layout;
+    if (layout == null) return;
+    final window = _rect(layout);
+    _settle.stop();
+    _resizeFrom = window;
+    _resizeFromScale = layout.bounded(_scale ?? layout.stored);
+    _resizePortrait = layout.portraitWindow;
+    _scale = _resizeFromScale;
+    _dragged = window.topLeft;
+    _dock = null;
+    final grip = _grip.value;
+    _anchor = pinch
+        ? MiniResizeAnchor.centre
+        : grip == MiniGripCorner.bottomLeft
+        ? MiniResizeAnchor.topRight
+        : MiniResizeAnchor.topLeft;
+  }
+
+  void _resizeTo(double wanted) {
+    final layout = _layout;
+    final from = _resizeFrom;
+    if (layout == null || from == null) return;
+    final next = layout.bounded(wanted);
+    _scale = next;
+    _dragged = inAppMiniResizedOffset(from: from, size: layout.sized(next), anchor: _anchor);
+    _moved();
+  }
+
+  void _gripMove(Offset moved) {
+    final from = _resizeFrom;
+    if (from == null) return;
+    final corner = _anchor == MiniResizeAnchor.topRight ? MiniGripCorner.bottomLeft : MiniGripCorner.bottomRight;
+    final long = from.width < from.height ? from.height : from.width;
+    final extent = inAppMiniGripExtent(from: from.size, corner: corner, moved: moved);
+    _resizeTo(_resizeFromScale * extent / long);
+  }
+
+  void _resizeEnd() {
+    final layout = _layout;
+    if (layout == null || _resizeFrom == null) return;
+    final window = _rect(layout);
+    final setting = _resizePortrait ? Settings.floatWindowPortraitScale : Settings.floatWindowLandscapeScale;
+    final kept = setting.normalize(_scale ?? layout.stored);
+    // Still in the corner (a grip pulled towards the middle grows it from
+    // there): it stays the corner one, following a turn or another page's
+    // bottom bar as before; elsewhere it stays where it is.
+    final corner = inAppMiniOffset(
+      area: layout.area,
+      window: window.size,
+      topClearance: layout.topClearance,
+      bottomClearance: layout.bottomClearance,
+    );
+    _scale = kept;
+    _resizeFrom = null;
+    _dragged = (window.topLeft - corner).distance < 0.5 ? null : window.topLeft;
+    widget.room.placement = _dragged == null ? null : (offset: _dragged!, dock: null);
+    _moved();
+    _placeGrip();
+    // Remembered for the next time (A07.22 c2).
+    unawaited(ref.read(storeProvider).settings.set(setting, kept));
+  }
+
   @override
   Widget build(BuildContext context) {
     final runtime = widget.runtime;
@@ -139,6 +390,29 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
     final sizeName = watchSetting(ref, Settings.floatWindowSize);
     final landscapeScale = watchSetting(ref, Settings.floatWindowLandscapeScale);
     final portraitScale = watchSetting(ref, Settings.floatWindowPortraitScale);
+    final keepOn = watchSetting(ref, Settings.enableScreenKeepOn);
+    // Built once per change of the room or the settings; a drag does not
+    // come here (A07.24).
+    final surface = MiniPlayerSurface(
+      controller: runtime.controller,
+      reconnect: runtime.reconnect,
+      kind: MiniKind.inApp,
+      // F.1a: kept on while it plays only with "屏幕常亮" on.
+      video: LiveVideoView(session: runtime.session, fit: fit, keepScreenOn: keepOn),
+      onBackToRoom: widget.onBackToRoom,
+      onClose: widget.onClose,
+      onDragStart: (_) => _dragStart(),
+      onDragUpdate: (details) => _dragUpdate(details.delta),
+      onDragEnd: (details) => _dragEnd(details.velocity.pixelsPerSecond),
+      // A07.22: the grip on the bottom corner towards the middle, and two
+      // fingers anywhere. Only the window's size changes: the player is not
+      // rebuilt.
+      resizeGrip: _grip,
+      onResizeStart: _resizeStart,
+      onGripMove: _gripMove,
+      onPinch: (factor) => _resizeTo(_resizeFromScale * factor),
+      onResizeEnd: _resizeEnd,
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
         final area = constraints.biggest;
@@ -157,135 +431,74 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> {
                 portrait: portrait,
                 followPortrait: follow,
               );
-              final topClearance = media.viewPadding.top + inAppMiniMargin;
-              final bottomClearance = inAppMiniBottomClearance(
-                route: widget.route,
-                width: area.width,
-                safeBottom: media.viewPadding.bottom,
-              );
-              final room = inAppMiniRoom(area: area, topClearance: topClearance, bottomClearance: bottomClearance);
               // A07.22: a portrait picture's window keeps a resize of its own.
               final portraitWindow = inAppMiniPortrait(ratio);
               final stored = portraitWindow ? portraitScale : landscapeScale;
               if (_resizeFrom == null && _scale != null && (_scale! - stored).abs() < 1e-9) _scale = null;
-              final scale = _resizePortrait == portraitWindow ? _scale ?? stored : stored;
-              double bounded(double wanted) =>
-                  inAppMiniScale(screen: media.size, aspectRatio: ratio, scale: wanted, size: sizeName, room: room);
-              Size sized(double scale) =>
-                  inAppMiniWindowSize(screen: media.size, aspectRatio: ratio, size: sizeName, scale: scale, room: room);
-              final size = sized(scale);
-              final offset = inAppMiniOffset(
+              _layout = _Layout(
+                screen: media.size,
                 area: area,
-                window: size,
-                dragged: _dragged,
-                topClearance: topClearance,
-                bottomClearance: bottomClearance,
+                ratio: ratio,
+                topClearance: media.viewPadding.top + inAppMiniMargin,
+                bottomClearance: inAppMiniBottomClearance(
+                  route: widget.route,
+                  width: area.width,
+                  safeBottom: media.viewPadding.bottom,
+                ),
+                sizeName: sizeName,
+                stored: stored,
+                portraitWindow: portraitWindow,
               );
-              // A drag past the edge does not pile up: the next one starts
-              // where the window shows.
-              if (_dragged != null) _dragged = offset;
-              final window = offset & size;
-              final grip = inAppMiniGripCorner(window: window, area: area);
-
-              void resizeTo(double wanted) {
-                final from = _resizeFrom;
-                if (from == null) return;
-                final next = bounded(wanted);
-                setState(() {
-                  _scale = next;
-                  _dragged = inAppMiniResizedOffset(from: from, size: sized(next), anchor: _anchor);
-                });
-              }
-
-              return Stack(
-                children: [
-                  Positioned(
-                    key: const ValueKey('floating-window'),
-                    left: offset.dx,
-                    top: offset.dy,
-                    width: size.width,
-                    height: size.height,
-                    // 3.x showed it at 80 % while dragged; the video stays
-                    // opaque now (P05): a see-through video is drawn
-                    // offscreen (saveLayer) every frame of the drag.
-                    child: DecoratedBox(
-                      // c10: square corners and a floating shadow; the
-                      // video is not clipped.
-                      decoration: const BoxDecoration(
-                        color: OnVideoColors.ground,
-                        boxShadow: OnVideoColors.floatingShadow,
-                      ),
-                      child: MiniPlayerSurface(
-                        controller: runtime.controller,
-                        reconnect: runtime.reconnect,
-                        kind: MiniKind.inApp,
-                        // F.1a: kept on while it plays only with "屏幕常亮" on.
-                        video: LiveVideoView(
-                          session: runtime.session,
-                          fit: fit,
-                          keepScreenOn: watchSetting(ref, Settings.enableScreenKeepOn),
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                if (mounted && !_dragging && _resizeFrom == null) _placeGrip();
+              });
+              return ValueListenableBuilder<int>(
+                valueListenable: _frame,
+                builder: (context, _, picture) {
+                  final window = _rect(_layout!);
+                  return Stack(
+                    children: [
+                      Positioned(
+                        key: const ValueKey('floating-window'),
+                        left: window.left,
+                        top: window.top,
+                        width: window.width,
+                        height: window.height,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            picture!,
+                            // A tucked-away window: a tap brings it back,
+                            // a drag pulls it out.
+                            if (_dock != null && !_settle.isAnimating)
+                              GestureDetector(
+                                key: const ValueKey('floating-window-tucked'),
+                                behavior: HitTestBehavior.opaque,
+                                onTap: _undock,
+                                onPanStart: (_) => _dragStart(),
+                                onPanUpdate: (details) => _dragUpdate(details.delta),
+                                onPanEnd: (details) => _dragEnd(details.velocity.pixelsPerSecond),
+                              ),
+                          ],
                         ),
-                        onBackToRoom: widget.onBackToRoom,
-                        onClose: widget.onClose,
-                        onDragStart: (_) => setState(() => _dragged = offset),
-                        onDragUpdate: (details) => setState(() => _dragged = (_dragged ?? offset) + details.delta),
-                        // Kept where it is, within the screen.
-                        onDragEnd: (_) => setState(() => _dragged = offset),
-                        // A07.22: the grip on the bottom corner towards the
-                        // middle, and two fingers anywhere. Only the
-                        // window's size changes: the player is not rebuilt.
-                        resizeGrip: grip,
-                        onResizeStart: ({required pinch}) => setState(() {
-                          _resizeFrom = window;
-                          _resizeFromScale = bounded(scale);
-                          _resizePortrait = portraitWindow;
-                          _scale = _resizeFromScale;
-                          _dragged = offset;
-                          _anchor = pinch
-                              ? MiniResizeAnchor.centre
-                              : grip == MiniGripCorner.bottomLeft
-                              ? MiniResizeAnchor.topRight
-                              : MiniResizeAnchor.topLeft;
-                        }),
-                        onGripMove: (moved) {
-                          final from = _resizeFrom;
-                          if (from == null) return;
-                          final corner = _anchor == MiniResizeAnchor.topRight
-                              ? MiniGripCorner.bottomLeft
-                              : MiniGripCorner.bottomRight;
-                          final long = from.width < from.height ? from.height : from.width;
-                          final extent = inAppMiniGripExtent(from: from.size, corner: corner, moved: moved);
-                          resizeTo(_resizeFromScale * extent / long);
-                        },
-                        onPinch: (factor) => resizeTo(_resizeFromScale * factor),
-                        onResizeEnd: () {
-                          if (_resizeFrom == null) return;
-                          final setting = _resizePortrait
-                              ? Settings.floatWindowPortraitScale
-                              : Settings.floatWindowLandscapeScale;
-                          final kept = setting.normalize(_scale ?? stored);
-                          // Still in the corner (a grip pulled towards the
-                          // middle grows it from there): it stays the corner
-                          // one, following a turn or another page's bottom
-                          // bar as before; elsewhere it stays where it is.
-                          final corner = inAppMiniOffset(
-                            area: area,
-                            window: size,
-                            topClearance: topClearance,
-                            bottomClearance: bottomClearance,
-                          );
-                          setState(() {
-                            _scale = kept;
-                            _resizeFrom = null;
-                            _dragged = (offset - corner).distance < 0.5 ? null : offset;
-                          });
-                          // Remembered for the next time (A07.22 c2).
-                          unawaited(ref.read(storeProvider).settings.set(setting, kept));
-                        },
                       ),
+                    ],
+                  );
+                },
+                // 3.x showed it at 80 % while dragged; the video stays opaque
+                // now (P05): a see-through video is drawn offscreen
+                // (saveLayer) every frame of the drag.
+                child: RepaintBoundary(
+                  child: DecoratedBox(
+                    // c10: square corners and a floating shadow; the video
+                    // is not clipped.
+                    decoration: const BoxDecoration(
+                      color: OnVideoColors.ground,
+                      boxShadow: OnVideoColors.floatingShadow,
                     ),
+                    child: surface,
                   ),
-                ],
+                ),
               );
             },
           ),

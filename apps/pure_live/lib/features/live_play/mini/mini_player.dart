@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
@@ -108,8 +109,10 @@ class MiniPlayerSurface extends StatefulWidget {
   final GestureDragEndCallback? onDragEnd;
 
   /// The corner of the resize grip, shown with the buttons (the in-app
-  /// floating window, A07.22); none when null.
-  final MiniGripCorner? resizeGrip;
+  /// floating window, A07.22); none when null. A listenable, so the window
+  /// moving from one half of the screen to the other moves the grip without
+  /// rebuilding the picture (A07.24).
+  final ValueListenable<MiniGripCorner?>? resizeGrip;
 
   /// A resize began: the grip (`pinch` false) or two fingers (`pinch`
   /// true).
@@ -455,21 +458,28 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                     ),
                   ),
                 ),
-              if (widget.resizeGrip case final corner?)
-                _fade(
-                  shown: shown,
-                  child: Align(
-                    alignment: corner == MiniGripCorner.bottomLeft ? Alignment.bottomLeft : Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: _ResizeGrip(
-                        corner: corner,
-                        onStart: _onGripStart,
-                        onUpdate: _onGripUpdate,
-                        onEnd: _onGripEnd,
-                      ),
-                    ),
-                  ),
+              if (widget.resizeGrip case final grip?)
+                ValueListenableBuilder<MiniGripCorner?>(
+                  valueListenable: grip,
+                  builder: (context, corner, _) => corner == null
+                      ? const SizedBox.shrink()
+                      : _fade(
+                          shown: shown,
+                          child: Align(
+                            alignment: corner == MiniGripCorner.bottomLeft
+                                ? Alignment.bottomLeft
+                                : Alignment.bottomRight,
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: _ResizeGrip(
+                                corner: corner,
+                                onStart: _onGripStart,
+                                onUpdate: _onGripUpdate,
+                                onEnd: _onGripEnd,
+                              ),
+                            ),
+                          ),
+                        ),
                 ),
               if (_desktop)
                 _fade(

@@ -272,28 +272,111 @@ void main() {
       );
     });
 
-    test('A07.22: a resize keeps the long side 160 (portrait 120 wide) to short side × 0.9, inside the room', () {
+    test('A07.24: a resize keeps the long side 160 (portrait 120 wide) and goes, stepless, up to the full width', () {
       const phone = Size(393, 852);
-      // 220 wide on a phone: up to 393 × 0.9, down to 160.
-      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 3), closeTo(393 * 0.9 / 220.08, 0.0001));
+      // 220 wide on a phone: up to the phone's width (A07.22 stopped at
+      // 393 × 0.9), down to 160, any size between.
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 3), closeTo(393 / 220.08, 0.0001));
       expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 0.1), closeTo(160 / 220.08, 0.0001));
       expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 1.2), 1.2);
+      expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 1.537), 1.537);
       expect(inAppMiniWindowSize(screen: phone, aspectRatio: 16 / 9, scale: 1.5).width, closeTo(330.12, 0.01));
-      // 9:16 is 264 high; the smallest is 120 wide (213 high).
+      final room = inAppMiniRoom(area: phone, topClearance: 40, bottomClearance: 120);
+      expect(room, const Size(393, 852 - 40 - 120));
+      expect(inAppMiniWindowSize(screen: phone, aspectRatio: 16 / 9, scale: 9, room: room).width, closeTo(393, 0.001));
+      // 9:16 is 264 high; the smallest is 120 wide (213 high); the largest
+      // as high as the room.
       final narrow = inAppMiniWindowSize(screen: const Size(360, 640), aspectRatio: 9 / 16, scale: 0.1);
       expect(narrow.width, closeTo(120, 0.001));
       expect(narrow.height, closeTo(213.33, 0.01));
+      expect(inAppMiniWindowSize(screen: phone, aspectRatio: 9 / 16, scale: 9, room: room).height, closeTo(692, 0.001));
       // A short room (a landscape phone's home) caps it; the size itself is
       // never cut, so 1 stays 1.
-      const room = Size(820, 150);
+      const short = Size(820, 150);
       expect(
-        inAppMiniWindowSize(screen: const Size(852, 393), aspectRatio: 16 / 9, scale: 2, room: room).height,
+        inAppMiniWindowSize(screen: const Size(852, 393), aspectRatio: 16 / 9, scale: 2, room: short).height,
         closeTo(150, 0.001),
       );
       expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 3, room: const Size(100, 50)), 1);
       expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: 1, size: 'small'), 1);
       expect(inAppMiniScale(screen: phone, aspectRatio: 16 / 9, scale: double.nan), 1);
-      expect(inAppMiniRoom(area: phone, topClearance: 40, bottomClearance: 120), const Size(393 - 32, 852 - 40 - 120));
+    });
+
+    test('A07.24: as wide as the area it keeps no side margin; tucked into a side, 40 of it shows', () {
+      const area = Size(393, 852);
+      const full = Size(393, 221);
+      expect(inAppMiniOffset(area: area, window: full, bottomClearance: 16, topClearance: 40).dx, 0);
+      const almost = Size(380, 214);
+      final left = inAppMiniOffset(
+        area: area,
+        window: almost,
+        bottomClearance: 16,
+        topClearance: 40,
+        dragged: const Offset(-30, 300),
+      );
+      expect(left.dx, 0);
+      expect(
+        inAppMiniOffset(
+          area: area,
+          window: almost,
+          bottomClearance: 16,
+          topClearance: 40,
+          dragged: const Offset(90, 300),
+        ).dx,
+        13,
+      );
+      const window = Size(220, 124);
+      expect(
+        inAppMiniOffset(area: area, window: window, bottomClearance: 16, topClearance: 40, dock: MiniDock.left).dx,
+        40 - 220,
+      );
+      expect(
+        inAppMiniOffset(area: area, window: window, bottomClearance: 16, topClearance: 40, dock: MiniDock.right).dx,
+        393 - 40,
+      );
+      // While a finger moves it, it may go past a side, 40 kept on screen.
+      expect(
+        inAppMiniDragOffset(
+          area: area,
+          window: window,
+          wanted: const Offset(-500, 300),
+          topClearance: 40,
+          bottomClearance: 16,
+        ),
+        const Offset(40 - 220, 300),
+      );
+      expect(
+        inAppMiniDragOffset(
+          area: area,
+          window: window,
+          wanted: const Offset(900, 2000),
+          topClearance: 40,
+          bottomClearance: 16,
+        ),
+        const Offset(393 - 40, 852 - 16 - 124),
+      );
+    });
+
+    test('A07.24: released, it carries on with the fling, then goes to the nearer side or tucks into one', () {
+      const area = Size(393, 852);
+      ({Offset offset, MiniDock? dock}) settle(Rect window, Offset velocity) =>
+          inAppMiniSettle(area: area, window: window, velocity: velocity, topClearance: 40, bottomClearance: 16);
+      // Let go a little left of the middle: to the left side, same height.
+      var settled = settle(const Rect.fromLTWH(60, 300, 220, 124), Offset.zero);
+      expect(settled, (offset: const Offset(16, 300), dock: null));
+      // A fling to the right carries it over the middle: the right side,
+      // 0.18 s of the speed lower down.
+      settled = settle(const Rect.fromLTWH(60, 300, 220, 124), const Offset(800, 500));
+      expect(settled, (offset: const Offset(393 - 16 - 220, 390), dock: null));
+      // More than half past the left edge: tucked in there.
+      settled = settle(const Rect.fromLTWH(-120, 300, 220, 124), Offset.zero);
+      expect(settled, (offset: const Offset(40 - 220, 300), dock: MiniDock.left));
+      // A hard fling to the right from the middle tucks it into the right.
+      settled = settle(const Rect.fromLTWH(150, 300, 220, 124), const Offset(2000, 0));
+      expect(settled.dock, MiniDock.right);
+      // As wide as the area: it stays in the middle.
+      settled = settle(const Rect.fromLTWH(0, 300, 393, 221), const Offset(300, 0));
+      expect(settled, (offset: const Offset(0, 300 + 0.18 * 0), dock: null));
     });
 
     test('A07.22: the grip on the bottom corner towards the middle; outwards grows; the far top corner stays', () {
@@ -880,6 +963,7 @@ void main() {
           );
         }
         await gesture.up();
+        await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         final moved = tester.getRect(_window);
         expect(moved.left, lessThan(rect.left - 200));
@@ -899,6 +983,103 @@ void main() {
         await _close(tester, wide);
       },
     );
+
+    testWidgets('A07.24: the grip pulls it, stepless, as wide as the phone; a drag never rebuilds the picture', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      final grip = tester.getRect(find.byKey(const ValueKey('mini-resize')));
+      final gesture = await tester.startGesture(grip.center);
+      await gesture.moveBy(const Offset(-40, 0));
+      for (var i = 0; i < 12; i++) {
+        await gesture.moveBy(const Offset(-30, 0));
+        await tester.pump();
+      }
+      await gesture.up();
+      await tester.pump();
+      await _settle(tester);
+      var rect = tester.getRect(_window);
+      expect(rect.width, closeTo(393, 0.01), reason: 'A07.22 stopped at 393 × 0.9');
+      expect(rect.left, 0);
+      expect(app.services.store.settings.get(Settings.floatWindowLandscapeScale), closeTo(393 / 220.08, 0.0001));
+
+      // Any size between: back to 250 wide (as wide as the phone, the grip
+      // is on the bottom-right corner; inwards shrinks it).
+      expect(_inKey('mini-resize', find.byIcon(AppIcons.miniResizeBottomRight)), findsOneWidget);
+      final grip2 = tester.getRect(find.byKey(const ValueKey('mini-resize')));
+      final shrink = await tester.startGesture(grip2.center);
+      await shrink.moveBy(const Offset(-40, 0));
+      await shrink.moveBy(const Offset(-143, 0));
+      await tester.pump();
+      await shrink.up();
+      await tester.pump();
+      await _settle(tester);
+      rect = tester.getRect(_window);
+      expect(rect.width, closeTo(250, 0.01));
+
+      // A drag moves the frame only: the same surface, the same player.
+      final surface = tester.widget<MiniPlayerSurface>(_inWindow(find.byType(MiniPlayerSurface)));
+      final drag = await tester.startGesture(rect.topLeft + const Offset(70, 100));
+      for (var i = 0; i < 10; i++) {
+        await drag.moveBy(const Offset(-8, -20));
+        await tester.pump();
+        expect(identical(tester.widget<MiniPlayerSurface>(_inWindow(find.byType(MiniPlayerSurface))), surface), isTrue);
+      }
+      await drag.up();
+      await tester.pump();
+      await _settle(tester);
+      expect(app.engines, hasLength(1));
+      expect(app.engine.opens, hasLength(1));
+      await _close(tester, app);
+    });
+
+    testWidgets('A07.24: let go, it slides to the nearer side; flung off a side it tucks in, a tap brings it back', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      var rect = tester.getRect(_window);
+      // Dropped left of the middle: slides to the left side (16 in).
+      var drag = await tester.startGesture(rect.topLeft + const Offset(70, 100));
+      await drag.moveBy(const Offset(-40, 0));
+      await drag.moveBy(const Offset(-200, -100));
+      await tester.pump(const Duration(seconds: 1));
+      await drag.up();
+      await tester.pump();
+      await _settle(tester);
+      rect = tester.getRect(_window);
+      expect(rect.left, 16);
+      // Pulled past the left edge and let go: tucked in, 40 shows.
+      drag = await tester.startGesture(rect.topLeft + const Offset(70, 100));
+      await drag.moveBy(const Offset(-40, 0));
+      await drag.moveBy(const Offset(-120, 0));
+      await tester.pump(const Duration(seconds: 1));
+      await drag.up();
+      await tester.pump();
+      await _settle(tester);
+      rect = tester.getRect(_window);
+      expect(rect.right, 40);
+      expect(find.byKey(const ValueKey('floating-window-tucked')), findsOneWidget);
+      expect(app.engine.opens, hasLength(1), reason: 'it plays on');
+      // A tap on the strip brings it back.
+      await tester.tapAt(Offset(20, rect.center.dy));
+      await tester.pump();
+      await _settle(tester);
+      rect = tester.getRect(_window);
+      expect(rect.left, 16);
+      expect(find.byKey(const ValueKey('floating-window-tucked')), findsNothing);
+      // The next floating window opens where this one was left.
+      await tester.tap(find.byKey(const ValueKey('mini-close')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      expect(tester.getRect(_window).left, 16);
+      await _close(tester, app);
+    });
 
     testWidgets('A07.22: the grip on the bottom corner towards the middle pulls it larger, kept for next time', (
       tester,

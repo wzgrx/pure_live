@@ -4290,6 +4290,19 @@ from = "用户 2026-10-09：开始测试，构建并发布新的 Android 版本 
 note = "改发构建号 5003：用户 2026-10-09 说 5002 不发布，补 A07.23、A11.6、D08.6、O01.3 后发新包；第 2～5 阶段对 5003 重做，5002（02f92af81）的检查和冒烟结果留在 record.md“5002（没有发布）”。versionCode arm64 7003、v7a 6003、x86_64 9003；发布说明 Y03 releases/v4.1.0.md 已补四项（SHA-256 留了占位）；应用内更新文字的草稿在 record.md，version.json、releases.json 最后改（PROCESS 第 11 节第 7 条）"
 
 [[task]]
+id = "Y01.6"
+title = "4.2.0 发布（Android，构建号 5004）"
+type = "发布"
+status = "开发中"
+date = "2026-10-14"
+size = "小"
+tier = 1
+stages = ["版本号和发布说明", "构建和检查", "K90 冒烟", "标签、发布页和安装包", "更新文件 version.json/releases.json"]
+done = 1
+from = "用户 2026-10-14：快速测试，更新"
+next = "构建 release 包和同一提交的 v4dev 测试包，K90 轻量冒烟"
+
+[[task]]
 id = "Y02.1"
 title = "同版本换包时应用内收不到更新提示：以后发布一律改版本号，或让比较带上构建号"
 type = "发布"

@@ -610,14 +610,22 @@ void main() {
       expect(style.backgroundColor!.resolve({}), OnVideoColors.button);
       expect(OnVideoColors.button.a, closeTo(0.45, 0.01));
 
-      // The buttons go after 3 s; a tap brings them, a tap while they show
-      // goes back to the room, which plays on (no new player).
+      // The buttons go after 3 s; a tap brings them and another hides them
+      // (A07.24: no longer back to the room); a double tap goes back to the
+      // room, which plays on (no new player).
       await tester.pump(const Duration(seconds: 4));
       await tester.pump(const Duration(milliseconds: 300));
       expect(_opacityOf(tester, 'mini-back'), 0);
       await tester.tapAt(rect.topLeft + const Offset(60, 100));
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 400));
       expect(_opacityOf(tester, 'mini-back'), 1);
+      await tester.tapAt(rect.topLeft + const Offset(60, 100));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(_opacityOf(tester, 'mini-back'), 0);
+      expect(_window, findsOneWidget, reason: 'a single tap stays in the window');
+      await tester.tapAt(rect.topLeft + const Offset(60, 100));
+      await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(rect.topLeft + const Offset(60, 100));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
@@ -1032,6 +1040,47 @@ void main() {
       await _settle(tester);
       expect(app.engines, hasLength(1));
       expect(app.engine.opens, hasLength(1));
+      await _close(tester, app);
+    });
+
+    testWidgets('A07.24: mute and close on top; larger, the name and the danmaku switch show', (tester) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      final controller = FloatingRoom.instance.runtime!.controller;
+      // 220 × 124: mute beside close, no name, no bottom buttons.
+      expect(_inKey('mini-mute', find.byIcon(AppIcons.volumeHigh)), findsOneWidget);
+      expect(find.byKey(const ValueKey('mini-title')), findsNothing);
+      expect(find.byKey(const ValueKey('mini-danmaku-switch')), findsNothing);
+      final volume = controller.volume;
+      await tester.tap(find.byKey(const ValueKey('mini-mute')));
+      await tester.pump();
+      expect(controller.volume, 0);
+      expect(_inKey('mini-mute', find.byIcon(AppIcons.volumeMuted)), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('mini-mute')));
+      await tester.pump();
+      expect(controller.volume, volume);
+      // As wide as the phone (393 × 221): the streamer's name and the
+      // danmaku switch, away from the grip.
+      final grip = tester.getRect(find.byKey(const ValueKey('mini-resize')));
+      final pull = await tester.startGesture(grip.center);
+      await pull.moveBy(const Offset(-40, 0));
+      await pull.moveBy(const Offset(-300, 0));
+      await tester.pump();
+      await pull.up();
+      await tester.pump();
+      await _settle(tester);
+      await tester.tapAt(tester.getRect(_window).topLeft + const Offset(150, 100));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.byKey(const ValueKey('mini-title')), findsOneWidget);
+      expect(tester.widget<Text>(find.byKey(const ValueKey('mini-title'))).data, controller.room.nick);
+      expect(find.byKey(const ValueKey('mini-danmaku-switch')), findsOneWidget);
+      expect(find.byKey(const ValueKey('mini-pip')), findsNothing, reason: 'not on this platform');
+      final settings = app.services.store.settings;
+      final on = settings.get(Settings.enablePipDanmaku);
+      await tester.tap(find.byKey(const ValueKey('mini-danmaku-switch')));
+      await tester.pump();
+      expect(settings.get(Settings.enablePipDanmaku), !on);
       await _close(tester, app);
     });
 

@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:live_core/live_core.dart';
 import 'package:live_player/live_player.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/desktop/desktop_window.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
@@ -19,15 +20,24 @@ import 'package:pure_live/shared/rooms/room_texts.dart';
 /// How long the buttons stay after a tap (3.x: 3 s).
 const Duration miniButtonsTimeout = Duration(seconds: 3);
 
-/// Two clicks closer than this are a double click (back to the room).
-const Duration miniDoubleClick = Duration(milliseconds: 300);
-
 /// The diameter of a mini window's corner buttons (U.2j: 48, a 45 % black
 /// disc).
 const double miniButtonSize = 48;
 
 /// The diameter of the centre button (3.x: a 42 icon with 8 around it).
 const double miniCentreSize = 58;
+
+/// A07.24: the room's name shows between the top buttons from this width.
+const double miniTitleMinWidth = 240;
+
+/// A07.24: the bottom buttons (danmaku, picture-in-picture) show from this
+/// height and width; smaller, the window is all picture.
+const double miniBottomRowMinHeight = 170;
+
+/// See [miniBottomRowMinHeight].
+const double miniBottomRowMinWidth = 240;
+
+final ValueListenable<MiniGripCorner?> _noGrip = ValueNotifier(null);
 
 /// The picture of a room in a mini window with its buttons (U.2j, 3.x
 /// `showAppFloating`, `buildPiPOverlay`): the same in the in-app floating
@@ -69,6 +79,7 @@ class MiniPlayerSurface extends StatefulWidget {
     this.onGripMove,
     this.onPinch,
     this.onResizeEnd,
+    this.onPip,
     super.key,
   });
 
@@ -129,6 +140,10 @@ class MiniPlayerSurface extends StatefulWidget {
   /// The resize ended.
   final VoidCallback? onResizeEnd;
 
+  /// Switches to Android's picture-in-picture (the in-app floating window,
+  /// A07.24); no button when null.
+  final VoidCallback? onPip;
+
   @override
   State<MiniPlayerSurface> createState() => _MiniPlayerSurfaceState();
 }
@@ -137,7 +152,9 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
   bool _hovered = false;
   bool _revealed = false;
   Timer? _hide;
-  DateTime? _lastClick;
+
+  /// The volume before the mute button (A07.24), given back by it.
+  double _unmuted = 1;
   bool _volumeShown = false;
   Timer? _volumeHide;
   Timer? _volumeSave;
@@ -270,26 +287,44 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
     _reveal();
   }
 
+  // A07.24: a tap shows or hides the buttons, a double tap (or click) goes
+  // back to the room; a tap while the buttons show no longer does (3.x did,
+  // and a tap next to a button took the user away).
   void _onTapUp(TapUpDetails details) {
     if (!_buttons) return;
     final mouse = details.kind == PointerDeviceKind.mouse || details.kind == PointerDeviceKind.trackpad;
-    if (mouse) {
-      final now = DateTime.now();
-      final last = _lastClick;
-      _lastClick = now;
-      if (last != null && now.difference(last) <= miniDoubleClick) {
-        _lastClick = null;
-        widget.onBackToRoom?.call();
-      }
-      return;
-    }
-    // Touch: the first tap shows the buttons, a tap while they show goes
-    // back to the room (3.x).
-    if (_shown) {
-      widget.onBackToRoom?.call();
+    // A mouse shows them while it hovers.
+    if (mouse) return;
+    if (_revealed) {
+      _hide?.cancel();
+      setState(() => _revealed = false);
     } else {
       _reveal();
     }
+  }
+
+  void _onDoubleTap() {
+    if (_buttons) widget.onBackToRoom?.call();
+  }
+
+  /// Mutes the player, or gives back the volume it had (A07.24); the room's
+  /// kept volume does not change.
+  void _toggleMute() {
+    _reveal();
+    final volume = _room.volume;
+    if (volume > 0) {
+      _unmuted = volume;
+      unawaited(_room.setVolume(0));
+    } else {
+      unawaited(_room.setVolume(_unmuted > 0 ? _unmuted : 1));
+    }
+  }
+
+  /// Shows or hides the mini windows' danmaku ("小窗显示弹幕", A07.24).
+  void _toggleDanmaku() {
+    _reveal();
+    final settings = _room.store.settings;
+    unawaited(settings.set(Settings.enablePipDanmaku, !settings.get(Settings.enablePipDanmaku)));
   }
 
   void _onScroll(PointerSignalEvent event) {
@@ -346,6 +381,7 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                     key: const ValueKey('mini-surface'),
                     behavior: HitTestBehavior.opaque,
                     onTapUp: _onTapUp,
+                    onDoubleTap: _onDoubleTap,
                     onPanStart: widget.onDragStart,
                     onPanUpdate: widget.onDragUpdate,
                     onPanEnd: widget.onDragEnd,
@@ -354,6 +390,7 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                     key: const ValueKey('mini-surface'),
                     behavior: HitTestBehavior.opaque,
                     onTapUp: _onTapUp,
+                    onDoubleTap: _onDoubleTap,
                     onScaleStart: _onScaleStart,
                     onScaleUpdate: _onScaleUpdate,
                     onScaleEnd: _onScaleEnd,
@@ -376,7 +413,10 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
     return _desktop ? DesktopWindow.resizeArea(hovered) : hovered;
   }
 
-  Widget _buttonsLayer(BuildContext context) => StreamBuilder<PlaybackState>(
+  Widget _buttonsLayer(BuildContext context) =>
+      LayoutBuilder(builder: (context, constraints) => _buttonsFor(context, constraints.biggest));
+
+  Widget _buttonsFor(BuildContext context, Size size) => StreamBuilder<PlaybackState>(
     stream: _room.session.states,
     initialData: _room.session.state,
     builder: (context, snapshot) {
@@ -418,15 +458,97 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                   alignment: Alignment.topRight,
                   child: Padding(
                     padding: const EdgeInsets.all(4),
-                    child: _MiniButton(
-                      key: const ValueKey('mini-close'),
-                      tooltip: i18n('close'),
-                      icon: AppIcons.close,
-                      onPressed: widget.onClose,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // A07.24: mute next to close.
+                        ListenableSelector<bool>(
+                          listenable: _room,
+                          selector: () => _room.volume <= 0,
+                          builder: (context, muted, _) => _MiniButton(
+                            key: const ValueKey('mini-mute'),
+                            tooltip: i18n(muted ? 'live_play_unmute' : 'live_play_mute'),
+                            icon: muted ? AppIcons.volumeMuted : AppIcons.volumeHigh,
+                            onPressed: _toggleMute,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        _MiniButton(
+                          key: const ValueKey('mini-close'),
+                          tooltip: i18n('close'),
+                          icon: AppIcons.close,
+                          onPressed: widget.onClose,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
+              // A07.24: whose room it is, between the top buttons, when the
+              // window is wide enough to say it.
+              if (size.width >= miniTitleMinWidth)
+                _fade(
+                  shown: shown,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(miniButtonSize + 12, 18, miniButtonSize * 2 + 16, 0),
+                      child: Text(
+                        _room.room.nick.isNotEmpty ? _room.room.nick : _room.room.title,
+                        key: const ValueKey('mini-title'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(color: OnVideoColors.foreground, shadows: OnVideoColors.shadows),
+                      ),
+                    ),
+                  ),
+                ),
+              // A07.24: the danmaku switch and picture-in-picture along the
+              // bottom, away from the grip, when the window is tall enough.
+              if (size.height >= miniBottomRowMinHeight && size.width >= miniBottomRowMinWidth)
+                ValueListenableBuilder<MiniGripCorner?>(
+                  valueListenable: widget.resizeGrip ?? _noGrip,
+                  builder: (context, grip, _) => _fade(
+                    shown: shown,
+                    child: Align(
+                      alignment: !_desktop && grip == MiniGripCorner.bottomLeft
+                          ? Alignment.bottomRight
+                          : Alignment.bottomLeft,
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            StreamBuilder<Object?>(
+                              stream: _room.store.settings.changes.where(
+                                (setting) => setting.key == Settings.enablePipDanmaku.key,
+                              ),
+                              builder: (context, _) {
+                                final on = _room.store.settings.get(Settings.enablePipDanmaku);
+                                return _MiniButton(
+                                  key: const ValueKey('mini-danmaku-switch'),
+                                  tooltip: i18n(on ? 'live_play_hide_danmaku' : 'show_danmaku'),
+                                  iconWidget: DanmakuIcon(on ? DanmakuIconKind.on : DanmakuIconKind.off, size: 22),
+                                  onPressed: _toggleDanmaku,
+                                );
+                              },
+                            ),
+                            if (widget.onPip != null) ...[
+                              const SizedBox(width: 4),
+                              _MiniButton(
+                                key: const ValueKey('mini-pip'),
+                                tooltip: i18n('mini_window_system_pip'),
+                                icon: AppIcons.floatWindow,
+                                onPressed: widget.onPip,
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               if (!centreBusy)
                 _fade(
                   shown: centreShown,
@@ -559,10 +681,14 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
 /// A corner button on the picture: white on a 45 % black disc (U.2j c2;
 /// the centre one is the room's [VideoCentreButton]).
 class _MiniButton extends StatelessWidget {
-  const new({required this.tooltip, required this.icon, required this.onPressed, super.key});
+  const new({required this.tooltip, required this.onPressed, this.icon, this.iconWidget, super.key})
+    : assert(icon != null || iconWidget != null, 'an icon');
 
   final String tooltip;
-  final IconData icon;
+  final IconData? icon;
+
+  /// A picture instead of [icon] (the danmaku switch's 3.x picture).
+  final Widget? iconWidget;
   final VoidCallback? onPressed;
 
   @override
@@ -581,7 +707,7 @@ class _MiniButton extends StatelessWidget {
         fixedSize: const Size.square(miniButtonSize),
         minimumSize: const Size.square(miniButtonSize),
       ),
-      icon: Icon(icon),
+      icon: iconWidget ?? Icon(icon),
     ),
   );
 }

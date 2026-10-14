@@ -8,12 +8,16 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/live_play/dialogs/player_dialogs.dart';
+import 'package:pure_live/features/live_play/logic/background_playback.dart';
 import 'package:pure_live/features/live_play/logic/mini_window.dart';
 import 'package:pure_live/features/live_play/logic/room_orientation.dart';
 import 'package:pure_live/features/live_play/logic/room_runtime.dart';
 import 'package:pure_live/features/live_play/mini/mini_player.dart';
+import 'package:pure_live/features/live_play/mini/room_mini_window.dart';
+import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_observer.dart';
+import 'package:pure_live/routes/route_path.dart';
 
 /// The in-app floating window (3.x `showAppFloating`, U.2j-b): the room that
 /// played when its page closed ("退出小窗播放" on), over every page, in the
@@ -48,6 +52,7 @@ class _FloatingRoomLayerState extends State<FloatingRoomLayer> {
       ..addListener(_changed);
     liveRouteObserver.openPopups.addListener(_changed);
     liveRouteObserver.currentRoute.addListener(_changed);
+    PictureInPicture.active.addListener(_changed);
   }
 
   @override
@@ -57,6 +62,7 @@ class _FloatingRoomLayerState extends State<FloatingRoomLayer> {
       ..detachLayer();
     liveRouteObserver.openPopups.removeListener(_changed);
     liveRouteObserver.currentRoute.removeListener(_changed);
+    PictureInPicture.active.removeListener(_changed);
     _entry?.remove();
     _entry?.dispose();
     super.dispose();
@@ -89,7 +95,7 @@ class _FloatingRoomLayerState extends State<FloatingRoomLayer> {
     if (runtime == null) return const SizedBox.shrink();
     // Hidden, not stopped, while a menu, dialog or sheet is open (3.x
     // `PopupAwareVisibility`).
-    final hidden = liveRouteObserver.openPopups.value > 0;
+    final hidden = liveRouteObserver.openPopups.value > 0 && !PictureInPicture.active.value;
     return Offstage(
       offstage: hidden,
       child: _FloatingWindow(
@@ -191,20 +197,117 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
 
   static const Duration _settleTime = Duration(milliseconds: 260);
 
+  /// Android's picture-in-picture is on this device (the window's button,
+  /// and leaving the app turns the window into it; A07.24).
+  bool _pipSupported = false;
+  StreamSubscription<PlaybackState>? _states;
+  bool? _armed;
+  (int, int)? _armedSize;
+  Rect? _armedRect;
+
+  /// The picture's width × height for picture-in-picture.
+  (int, int) _pictureSize = (16, 9);
+
   @override
   void initState() {
     super.initState();
     final placement = widget.room.placement;
     _dragged = placement?.offset;
     _dock = placement?.dock;
+    unawaited(
+      PictureInPicture.supported().then((supported) {
+        if (mounted && supported != _pipSupported) setState(() => _pipSupported = supported);
+      }),
+    );
+    _states = widget.runtime.session.states.listen((_) => _syncAutoPip());
+  }
+
+  @override
+  void didUpdateWidget(_FloatingWindow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.route != widget.route) _syncAutoPipLater();
   }
 
   @override
   void dispose() {
+    unawaited(_states?.cancel());
+    if (_armed ?? false) unawaited(PictureInPicture.setAutoEnter(enabled: false, owner: this));
     _settle.dispose();
     _frame.dispose();
     _grip.dispose();
     super.dispose();
+  }
+
+  void _syncAutoPipLater() => SchedulerBinding.instance.addPostFrameCallback((_) => _syncAutoPip());
+
+  /// Leaving the app turns the window into Android's picture-in-picture
+  /// (A07.24; before, the picture went away with the app): with
+  /// "离开应用时自动画中画" on, while it plays and no room page is on top
+  /// (a room page arms its own); it grows out of the window.
+  void _syncAutoPip() {
+    if (!mounted || !_pipSupported) return;
+    final runtime = widget.runtime;
+    final status = runtime.session.state.status;
+    final armed = shouldAutoEnterPip(
+      enabled: runtime.controller.store.settings.get(Settings.autoPipOnLeave),
+      onTop: widget.route != RoutePath.kLivePlay,
+      stage: runtime.controller.stage,
+      status: status,
+      audioOnly: runtime.controller.audioOnly,
+    );
+    final layout = _layout;
+    final rect = armed && layout != null && !PictureInPicture.active.value ? _rect(layout) : null;
+    if (armed == _armed && (!armed || (_armedSize == _pictureSize && _armedRect == rect))) return;
+    final titled = armed && !(_armed ?? false);
+    _armed = armed;
+    _armedSize = _pictureSize;
+    _armedRect = rect;
+    if (titled) {
+      unawaited(PictureInPicture.update(title: _title, subtitle: runtime.controller.room.title));
+    }
+    unawaited(
+      PictureInPicture.setAutoEnter(
+        enabled: armed,
+        width: _pictureSize.$1,
+        height: _pictureSize.$2,
+        picture: rect,
+        pixelRatio: View.maybeOf(context)?.devicePixelRatio ?? 1,
+        owner: this,
+      ),
+    );
+  }
+
+  String get _title {
+    final room = widget.runtime.controller.room;
+    return room.nick.isNotEmpty ? room.nick : room.title;
+  }
+
+  /// The window's picture-in-picture button (A07.24).
+  Future<void> _enterPip() async {
+    final layout = _layout;
+    final availability = await PictureInPicture.availability();
+    if (!mounted) return;
+    if (availability == PipAvailability.disabled) {
+      showPipDisabledToast();
+      return;
+    }
+    final entry = await PictureInPicture.enter(
+      width: _pictureSize.$1,
+      height: _pictureSize.$2,
+      picture: layout == null ? null : _rect(layout),
+      pixelRatio: View.maybeOf(context)?.devicePixelRatio ?? 1,
+      title: _title,
+      subtitle: widget.runtime.controller.room.title,
+    );
+    if (!mounted) return;
+    switch (entry) {
+      case PipEntry.entered:
+        break;
+      case PipEntry.disabled:
+        showPipDisabledToast();
+      case PipEntry.failed:
+        AppNavigator.toast(i18n('pip_enter_failed'));
+    }
   }
 
   void _moved() => _frame.value++;
@@ -301,6 +404,7 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
       _settle.forward(from: 0);
     }
     _placeGrip();
+    _syncAutoPipLater();
   }
 
   /// A tap on a tucked-away window brings it back to its side.
@@ -377,6 +481,7 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
     widget.room.placement = _dragged == null ? null : (offset: _dragged!, dock: null);
     _moved();
     _placeGrip();
+    _syncAutoPipLater();
     // Remembered for the next time (A07.22 c2).
     unawaited(ref.read(storeProvider).settings.set(setting, kept));
   }
@@ -391,12 +496,18 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
     final landscapeScale = watchSetting(ref, Settings.floatWindowLandscapeScale);
     final portraitScale = watchSetting(ref, Settings.floatWindowPortraitScale);
     final keepOn = watchSetting(ref, Settings.enableScreenKeepOn);
+    watchSetting(ref, Settings.autoPipOnLeave);
+    _syncAutoPipLater();
+    // A07.24: in Android's picture-in-picture the window is the whole
+    // screen, the picture alone (the system draws the buttons).
+    final pip = PictureInPicture.active.value;
     // Built once per change of the room or the settings; a drag does not
     // come here (A07.24).
     final surface = MiniPlayerSurface(
       controller: runtime.controller,
       reconnect: runtime.reconnect,
-      kind: MiniKind.inApp,
+      kind: pip ? MiniKind.systemPip : MiniKind.inApp,
+      onPip: _pipSupported ? () => unawaited(_enterPip()) : null,
       // F.1a: kept on while it plays only with "屏幕常亮" on.
       video: LiveVideoView(session: runtime.session, fit: fit, keepScreenOn: keepOn),
       onBackToRoom: widget.onBackToRoom,
@@ -431,6 +542,12 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
                 portrait: portrait,
                 followPortrait: follow,
               );
+              _pictureSize = miniPictureSize(
+                width: picture.width,
+                height: picture.height,
+                portrait: portrait,
+                followPortrait: follow,
+              );
               // A07.22: a portrait picture's window keeps a resize of its own.
               final portraitWindow = inAppMiniPortrait(ratio);
               final stored = portraitWindow ? portraitScale : landscapeScale;
@@ -455,7 +572,7 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
               return ValueListenableBuilder<int>(
                 valueListenable: _frame,
                 builder: (context, _, picture) {
-                  final window = _rect(_layout!);
+                  final window = pip ? Offset.zero & area : _rect(_layout!);
                   return Stack(
                     children: [
                       Positioned(
@@ -470,7 +587,7 @@ class _FloatingWindowState extends ConsumerState<_FloatingWindow> with SingleTic
                             picture!,
                             // A tucked-away window: a tap brings it back,
                             // a drag pulls it out.
-                            if (_dock != null && !_settle.isAnimating)
+                            if (_dock != null && !_settle.isAnimating && !pip)
                               GestureDetector(
                                 key: const ValueKey('floating-window-tucked'),
                                 behavior: HitTestBehavior.opaque,

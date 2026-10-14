@@ -13,6 +13,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Rect
 import android.graphics.drawable.Icon
 import android.hardware.display.DisplayManager
 import android.media.AudioManager
@@ -46,6 +47,7 @@ import android.window.OnBackInvokedDispatcher
 import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -101,6 +103,7 @@ class MainActivity : AudioServiceActivity() {
         private const val PIP_CHANNEL = "pure_live/pip"
         private const val DEVICE_CONTROLS_CHANNEL = "pure_live/device_controls"
         private const val PIP_TOGGLE = "com.mystyle.purelive.PIP_TOGGLE"
+        private const val PIP_MUTE = "com.mystyle.purelive.PIP_MUTE"
         private var playbackWakeLock: PowerManager.WakeLock? = null
         private var playbackWifiLock: WifiManager.WifiLock? = null
 
@@ -133,13 +136,23 @@ class MainActivity : AudioServiceActivity() {
     private var pipReceiverRegistered = false
     private val pipReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            pipChannel?.invokeMethod("togglePlay", null)
+            pipChannel?.invokeMethod(if (intent?.action == PIP_MUTE) "toggleMute" else "togglePlay", null)
         }
     }
 
+    // A07.24: the mute action (null: none), the window's title, the picture's
+    // ratio and where the picture sits on screen (the enter animation grows
+    // from there).
+    private var pipMuted: Boolean? = null
+    private var pipMuteLabel = "静音"
+    private var pipUnmuteLabel = "取消静音"
+    private var pipTitle: String? = null
+    private var pipSubtitle: String? = null
+    private var pipRatio = Rational(16, 9)
+    private var pipHint: Rect? = null
+
     // U.2j J1: leaving the app enters picture-in-picture while the room plays.
     private var autoEnterPip = false
-    private var autoEnterRatio = Rational(16, 9)
     private var predictiveBackEnabled = false
     private var predictiveBackRegistered = false
     private var displayListenerRegistered = false
@@ -306,9 +319,10 @@ class MainActivity : AudioServiceActivity() {
                 when (call.method) {
                     "isSupported" -> result.success(pictureInPictureSupported())
                     "status" -> result.success(pictureInPictureStatus())
-                    "enter" -> result.success(
-                        enterPictureInPicture(call.argument<Int>("width") ?: 16, call.argument<Int>("height") ?: 9),
-                    )
+                    "enter" -> {
+                        takePictureInPictureShape(call)
+                        result.success(enterPictureInPicture())
+                    }
 
                     "openSettings" -> result.success(openPictureInPictureSettings())
                     "setPlaying" -> {
@@ -316,15 +330,22 @@ class MainActivity : AudioServiceActivity() {
                             call.argument<Boolean>("playing"),
                             call.argument<String>("play"),
                             call.argument<String>("pause"),
+                            call.argument<Boolean>("muted"),
+                            call.argument<String>("mute"),
+                            call.argument<String>("unmute"),
                         )
                         result.success(null)
                     }
                     "setAutoEnter" -> {
-                        setAutoEnterPictureInPicture(
-                            call.argument<Boolean>("enabled") ?: false,
-                            call.argument<Int>("width") ?: 16,
-                            call.argument<Int>("height") ?: 9,
-                        )
+                        takePictureInPictureShape(call)
+                        setAutoEnterPictureInPicture(call.argument<Boolean>("enabled") ?: false)
+                        result.success(null)
+                    }
+                    "update" -> {
+                        takePictureInPictureShape(call)
+                        if (call.hasArgument("title")) pipTitle = call.argument<String>("title")
+                        if (call.hasArgument("subtitle")) pipSubtitle = call.argument<String>("subtitle")
+                        applyPictureInPictureParams()
                         result.success(null)
                     }
 
@@ -481,15 +502,61 @@ class MainActivity : AudioServiceActivity() {
         else -> "allowed"
     }
 
-    private fun enterPictureInPicture(width: Int, height: Int): String {
+    /**
+     * The picture's ratio and its place on screen (physical pixels, A07.24:
+     * the system grows the window from there) from a channel [call].
+     */
+    private fun takePictureInPictureShape(call: MethodCall) {
+        val width = call.argument<Int>("width")
+        val height = call.argument<Int>("height")
+        if (width != null && height != null) pipRatio = pictureInPictureRatio(width, height)
+        if (call.hasArgument("hint")) {
+            val hint = call.argument<List<Int>>("hint")
+            pipHint = if (hint != null && hint.size == 4 && hint[2] > hint[0] && hint[3] > hint[1]) {
+                Rect(hint[0], hint[1], hint[2], hint[3])
+            } else {
+                null
+            }
+        }
+    }
+
+    /**
+     * Everything the picture-in-picture window is told (A07.24): the ratio,
+     * where the picture is (a smooth enter), the actions, the title (13+),
+     * entering by itself and no cross-fade on a resize (12+: a video's
+     * frames would blur).
+     */
+    private fun pictureInPictureParams(): PictureInPictureParams {
+        val builder = PictureInPictureParams.Builder()
+            .setAspectRatio(pipRatio)
+            .setActions(pictureInPictureActions())
+        pipHint?.let { builder.setSourceRectHint(it) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setAutoEnterEnabled(autoEnterPip).setSeamlessResizeEnabled(false)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pipTitle?.let { builder.setTitle(it) }
+            pipSubtitle?.let { builder.setSubtitle(it) }
+        }
+        return builder.build()
+    }
+
+    private fun applyPictureInPictureParams() {
+        if (!pictureInPictureSupported()) return
+        try {
+            setPictureInPictureParams(pictureInPictureParams())
+        } catch (_: IllegalStateException) {
+            // The activity is going away.
+        } catch (_: IllegalArgumentException) {
+            // A ratio or a place the device refuses.
+        }
+    }
+
+    private fun enterPictureInPicture(): String {
         if (!pictureInPictureSupported()) return "failed"
         if (!pictureInPictureAllowed()) return "disabled"
-        val params = PictureInPictureParams.Builder()
-            .setAspectRatio(pictureInPictureRatio(width, height))
-            .setActions(pictureInPictureActions())
-            .build()
         return try {
-            if (enterPictureInPictureMode(params)) "entered" else "failed"
+            if (enterPictureInPictureMode(pictureInPictureParams())) "entered" else "failed"
         } catch (ignored: IllegalStateException) {
             "failed"
         } catch (ignored: IllegalArgumentException) {
@@ -524,23 +591,10 @@ class MainActivity : AudioServiceActivity() {
      * Android 12 and later enter picture-in-picture by themselves on the way
      * home (smoothly); 8-11 enter from [onUserLeaveHint].
      */
-    private fun setAutoEnterPictureInPicture(enabled: Boolean, width: Int, height: Int) {
+    private fun setAutoEnterPictureInPicture(enabled: Boolean) {
         autoEnterPip = enabled && pictureInPictureSupported()
-        autoEnterRatio = pictureInPictureRatio(width, height)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || !pictureInPictureSupported()) return
-        try {
-            setPictureInPictureParams(
-                PictureInPictureParams.Builder()
-                    .setAspectRatio(autoEnterRatio)
-                    .setAutoEnterEnabled(autoEnterPip)
-                    .setActions(pictureInPictureActions())
-                    .build(),
-            )
-        } catch (ignored: IllegalStateException) {
-            // The activity is going away.
-        } catch (ignored: IllegalArgumentException) {
-            // A ratio the device refuses.
-        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        applyPictureInPictureParams()
     }
 
     override fun onUserLeaveHint() {
@@ -548,12 +602,7 @@ class MainActivity : AudioServiceActivity() {
         if (!autoEnterPip || Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) return
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || isInPictureInPictureMode || !pictureInPictureAllowed()) return
         try {
-            enterPictureInPictureMode(
-                PictureInPictureParams.Builder()
-                    .setAspectRatio(autoEnterRatio)
-                    .setActions(pictureInPictureActions())
-                    .build(),
-            )
+            enterPictureInPictureMode(pictureInPictureParams())
         } catch (_: IllegalStateException) {
             // Refused; the room pauses as it would without it.
         } catch (ignored: IllegalArgumentException) {
@@ -562,12 +611,14 @@ class MainActivity : AudioServiceActivity() {
     }
 
     /**
-     * The pause / play action of the picture-in-picture window (U.14 c7; 3.x
-     * had none): shown while a room is bound ([playing] not null), the
-     * system draws it; a tap reaches Dart as `togglePlay`.
+     * The picture-in-picture window's actions, which the system draws: pause
+     * / play while a room is bound ([pipPlaying] not null; U.14 c7, 3.x had
+     * none) and mute / unmute (A07.24); a tap reaches Dart as `togglePlay`
+     * or `toggleMute`.
      */
     private fun pictureInPictureActions(): List<RemoteAction> {
         val playing = pipPlaying ?: return emptyList()
+        val actions = mutableListOf<RemoteAction>()
         val label = if (playing) pipPauseLabel else pipPlayLabel
         val tap = PendingIntent.getBroadcast(
             this,
@@ -576,31 +627,49 @@ class MainActivity : AudioServiceActivity() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val icon = Icon.createWithResource(this, if (playing) R.drawable.ic_pip_pause else R.drawable.ic_pip_play)
-        return listOf(RemoteAction(icon, label, label, tap))
+        actions.add(RemoteAction(icon, label, label, tap))
+        pipMuted?.let { muted ->
+            val muteLabel = if (muted) pipUnmuteLabel else pipMuteLabel
+            val muteTap = PendingIntent.getBroadcast(
+                this,
+                1,
+                Intent(PIP_MUTE).setPackage(packageName),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
+            val muteIcon = Icon.createWithResource(
+                this,
+                if (muted) R.drawable.ic_pip_volume_off else R.drawable.ic_pip_volume_up,
+            )
+            actions.add(RemoteAction(muteIcon, muteLabel, muteLabel, muteTap))
+        }
+        return actions
     }
 
-    private fun setPictureInPicturePlaying(playing: Boolean?, play: String?, pause: String?) {
+    private fun setPictureInPicturePlaying(
+        playing: Boolean?,
+        play: String?,
+        pause: String?,
+        muted: Boolean?,
+        mute: String?,
+        unmute: String?,
+    ) {
         pipPlaying = playing
+        pipMuted = if (playing == null) null else muted
         if (!play.isNullOrBlank()) pipPlayLabel = play
         if (!pause.isNullOrBlank()) pipPauseLabel = pause
+        if (!mute.isNullOrBlank()) pipMuteLabel = mute
+        if (!unmute.isNullOrBlank()) pipUnmuteLabel = unmute
         if (playing != null && !pipReceiverRegistered) {
+            val filter = IntentFilter(PIP_TOGGLE).apply { addAction(PIP_MUTE) }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(pipReceiver, IntentFilter(PIP_TOGGLE), Context.RECEIVER_NOT_EXPORTED)
+                registerReceiver(pipReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
             } else {
                 @Suppress("UnspecifiedRegisterReceiverFlag")
-                registerReceiver(pipReceiver, IntentFilter(PIP_TOGGLE))
+                registerReceiver(pipReceiver, filter)
             }
             pipReceiverRegistered = true
         }
-        if (!pictureInPictureSupported()) return
-        try {
-            // Merged into the window's current parameters.
-            setPictureInPictureParams(PictureInPictureParams.Builder().setActions(pictureInPictureActions()).build())
-        } catch (_: IllegalStateException) {
-            // The activity is going away.
-        } catch (_: IllegalArgumentException) {
-            // Refused.
-        }
+        applyPictureInPictureParams()
     }
 
     /** Android 13+: the next cold start's splash in the app's own light or dark (U.14 c9). */

@@ -40,7 +40,10 @@ class RoomMiniWindow extends ChangeNotifier {
     PictureInPicture.active.addListener(_changed);
     preparing.addListener(_changed);
     DesktopWindow.mini.addListener(_desktopChanged);
+    _states = controller.session.states.listen(_followPicture);
   }
+
+  StreamSubscription<PlaybackState>? _states;
 
   /// The room.
   final LiveRoomController controller;
@@ -119,6 +122,49 @@ class RoomMiniWindow extends ChangeNotifier {
     return width / height;
   }
 
+  BuildContext? _picture;
+
+  /// The page's picture (the player view) tells where it is, so Android's
+  /// picture-in-picture grows out of it rather than out of the whole page
+  /// (A07.24, `sourceRectHint`).
+  void attachPicture(BuildContext context) {
+    _picture = context;
+    _autoPip?.pictureMoved();
+  }
+
+  /// The picture's screen's physical pixels per logical one.
+  double get pixelRatio {
+    final context = _picture;
+    if (context == null || !context.mounted) return 1;
+    return View.maybeOf(context)?.devicePixelRatio ?? 1;
+  }
+
+  /// The picture's place on screen, or null when it is not laid out.
+  Rect? get pictureRect {
+    final context = _picture;
+    if (context == null || !context.mounted) return null;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
+  /// The window's title and subtitle (Android 13 and later): the streamer
+  /// and the room's title (A07.24).
+  String get _title => controller.room.nick.isNotEmpty ? controller.room.nick : controller.room.title;
+
+  (int, int)? _shownSize;
+
+  /// In picture-in-picture, the window follows the picture's shape (A07.24:
+  /// another quality, a portrait stream's first frame; before, only an
+  /// armed "离开应用时自动画中画" did).
+  void _followPicture(PlaybackState _) {
+    if (_disposed || !android || !PictureInPicture.active.value) return;
+    final size = _pictureSize;
+    if (size == _shownSize) return;
+    _shownSize = size;
+    unawaited(PictureInPicture.update(width: size.$1, height: size.$2));
+  }
+
   /// The mini window button.
   Future<void> enter(BuildContext context) async {
     if (preparing.value || compact) return;
@@ -140,12 +186,22 @@ class RoomMiniWindow extends ChangeNotifier {
       AppNavigator.toast(i18n('pip_enter_failed'));
       return;
     }
+    // Where the picture is before the page turns into it alone (A07.24).
+    final picture = pictureRect;
     // Android captures the window as the animation starts: draw the picture
     // alone first (3.x `isPipPreparing`).
     preparing.value = true;
     await SchedulerBinding.instance.endOfFrame;
     final (width, height) = _pictureSize;
-    final entry = await PictureInPicture.enter(width: width, height: height);
+    _shownSize = (width, height);
+    final entry = await PictureInPicture.enter(
+      width: width,
+      height: height,
+      picture: picture,
+      pixelRatio: pixelRatio,
+      title: _title,
+      subtitle: controller.room.title,
+    );
     if (entry == PipEntry.entered && !PictureInPicture.active.value) {
       // Hold the picture-only layout until the activity says it is in.
       final done = Completer<void>();
@@ -242,6 +298,7 @@ class RoomMiniWindow extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    unawaited(_states?.cancel());
     PictureInPicture.active.removeListener(_changed);
     DesktopWindow.mini.removeListener(_desktopChanged);
     _autoPip?.dispose();
@@ -284,10 +341,33 @@ final class _AutoPip {
       audioOnly: _room.audioOnly,
     );
     final (width, height) = mini._pictureSize;
-    if (armed == _armed && (!armed || _size == (width, height))) return;
+    final picture = armed ? mini.pictureRect : null;
+    if (armed == _armed && (!armed || (_size == (width, height) && _picture == picture))) return;
+    final titled = armed && !(_armed ?? false);
     _armed = armed;
     _size = (width, height);
-    unawaited(PictureInPicture.setAutoEnter(enabled: armed, width: width, height: height));
+    _picture = picture;
+    if (armed) mini._shownSize = (width, height);
+    if (titled) unawaited(PictureInPicture.update(title: mini._title, subtitle: _room.room.title));
+    unawaited(
+      PictureInPicture.setAutoEnter(
+        enabled: armed,
+        width: width,
+        height: height,
+        picture: picture,
+        pixelRatio: mini.pixelRatio,
+        owner: this,
+      ),
+    );
+  }
+
+  Rect? _picture;
+
+  /// The picture moved (fullscreen, a turn): the hint follows, after the
+  /// frame that laid it out.
+  void pictureMoved() {
+    if (!(_armed ?? false)) return;
+    SchedulerBinding.instance.addPostFrameCallback((_) => _sync());
   }
 
   void dispose() {
@@ -295,7 +375,7 @@ final class _AutoPip {
     unawaited(_settings?.cancel());
     _room.removeListener(_sync);
     liveRouteObserver.currentRoute.removeListener(_sync);
-    if (_armed ?? false) unawaited(PictureInPicture.setAutoEnter(enabled: false));
+    if (_armed ?? false) unawaited(PictureInPicture.setAutoEnter(enabled: false, owner: this));
   }
 }
 

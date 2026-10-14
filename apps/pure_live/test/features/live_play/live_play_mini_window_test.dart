@@ -1489,6 +1489,98 @@ void main() {
       await _close(tester, app);
     });
 
+    testWidgets('A07.24: the window grows out of the picture, says the streamer, follows a new ratio, mutes', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await _openRoom(tester);
+      await tester.tap(find.byKey(const ValueKey('live-play-pip')));
+      await _settle(tester);
+      final methods = calls.map((call) => call.method).toList();
+      expect(methods.indexOf('update'), lessThan(methods.indexOf('enter')), reason: 'the title first');
+      final title = calls.firstWhere((call) => call.method == 'update').arguments as Map;
+      final controller = FloatingRoomProbe.controllerOf(tester);
+      expect(title['title'], controller.room.nick);
+      final enter = calls.firstWhere((call) => call.method == 'enter').arguments as Map;
+      final hint = (enter['hint'] as List).cast<int>();
+      expect(hint, hasLength(4));
+      expect(hint[2] - hint[0], greaterThan(0), reason: 'the picture, not the page');
+      expect(hint[3] - hint[1], lessThan(852 / 2), reason: 'only the picture: the page is taller');
+      // A portrait first frame: the window follows (before, only an armed
+      // automatic picture-in-picture did).
+      calls.clear();
+      app.engine.emit(const EngineVideoSize(720, 1280));
+      await _settle(tester);
+      final update = calls.lastWhere((call) => call.method == 'update').arguments as Map;
+      expect((update['width'], update['height']), (720, 1280));
+      // The window's mute action (A07.24) is offered and mutes the player.
+      final volume = controller.volume;
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'pure_live/pip',
+        const StandardMethodCodec().encodeMethodCall(const MethodCall('toggleMute')),
+        (_) {},
+      );
+      await _settle(tester);
+      expect(controller.volume, 0);
+      expect((calls.lastWhere((call) => call.method == 'setPlaying').arguments as Map)['muted'], isTrue);
+      await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'pure_live/pip',
+        const StandardMethodCodec().encodeMethodCall(const MethodCall('toggleMute')),
+        (_) {},
+      );
+      await _settle(tester);
+      expect(controller.volume, volume);
+      PictureInPicture.active.value = false;
+      await _settle(tester);
+      await _close(tester, app);
+    });
+
+    testWidgets('A07.24: the floating window turns into picture-in-picture: its button, or leaving the app', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await tester.runAsync(() => app.services.store.settings.set(Settings.autoPipOnLeave, true));
+      await _openRoom(tester);
+      await _leaveRoom(tester, app);
+      await _settle(tester);
+      // Armed by the window (the room page has gone), out of its place.
+      final arm = calls.lastWhere((call) => call.method == 'setAutoEnter').arguments as Map;
+      expect(arm['enabled'], isTrue);
+      final window = tester.getRect(_window);
+      final hint = (arm['hint'] as List).cast<int>();
+      expect(hint, [window.left.round(), window.top.round(), window.right.round(), window.bottom.round()]);
+      // As wide as the phone, its button shows; it enters from there.
+      final grip = tester.getRect(find.byKey(const ValueKey('mini-resize')));
+      final pull = await tester.startGesture(grip.center);
+      await pull.moveBy(const Offset(-40, 0));
+      await pull.moveBy(const Offset(-300, 0));
+      await tester.pump();
+      await pull.up();
+      await tester.pump();
+      await _settle(tester);
+      await tester.tapAt(tester.getRect(_window).topLeft + const Offset(150, 100));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.byKey(const ValueKey('mini-pip')));
+      await _settle(tester);
+      expect(calls.where((call) => call.method == 'enter'), hasLength(1));
+      // In picture-in-picture: the whole screen, the picture alone.
+      expect(PictureInPicture.active.value, isTrue);
+      expect(tester.getRect(_window), Offset.zero & const Size(393, 852));
+      expect(tester.widget<MiniPlayerSurface>(_inWindow(find.byType(MiniPlayerSurface))).kind, MiniKind.systemPip);
+      expect(find.byKey(const ValueKey('mini-close')), findsNothing);
+      expect(app.engine.opens, hasLength(1), reason: 'the same player');
+      // Back: the window again, where it was.
+      PictureInPicture.active.value = false;
+      await _settle(tester);
+      expect(tester.getRect(_window).width, closeTo(393, 0.01));
+      expect(tester.widget<MiniPlayerSurface>(_inWindow(find.byType(MiniPlayerSurface))).kind, MiniKind.inApp);
+      // Closed: no longer armed.
+      await tester.tap(find.byKey(const ValueKey('mini-close')));
+      await _settle(tester);
+      expect((calls.lastWhere((call) => call.method == 'setAutoEnter').arguments as Map)['enabled'], isFalse);
+      await _close(tester, app);
+    });
+
     testWidgets('J1: "离开应用时自动小窗" arms leaving only while the picture plays', (tester) async {
       final app = await _app(tester);
       await _openRoom(tester);

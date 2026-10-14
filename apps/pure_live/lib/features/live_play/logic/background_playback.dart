@@ -62,45 +62,60 @@ abstract final class PictureInPicture {
       // The pause / play action of the system's picture-in-picture window
       // (docs/A-界面设计/A14-系统界面/A14.1-系统界面 c7).
       if (call.method == 'togglePlay') await _toggle?.call();
+      // A07.24: the mute action.
+      if (call.method == 'toggleMute') await _toggleMute?.call();
     });
   }
 
   static Object? _owner;
   static bool? _playing;
+  static bool? _muted;
   static Future<void> Function()? _toggle;
+  static Future<void> Function()? _toggleMute;
 
   /// Lets the picture-in-picture window of [owner] (the room playing) show
-  /// a pause or play action (U.14 c7); sent to Android only on a change.
+  /// a pause or play action (U.14 c7) and, with [toggleMute], a mute or
+  /// unmute one (A07.24); sent to Android only on a change.
   static void bindPlayback({
     required Object owner,
     required bool playing,
     required Future<void> Function() play,
     required Future<void> Function() pause,
+    bool? muted,
+    Future<void> Function()? toggleMute,
   }) {
     if (!_android) return;
     _owner = owner;
     _toggle = () => (_playing ?? false) ? pause() : play();
-    if (_playing == playing) return;
+    _toggleMute = toggleMute;
+    final mute = toggleMute == null ? null : muted ?? false;
+    if (_playing == playing && _muted == mute) return;
     _playing = playing;
+    _muted = mute;
     _listen();
-    unawaited(_setPlaying(playing));
+    unawaited(_setPlaying(playing, mute));
   }
 
-  /// Takes the action away when [owner] leaves.
+  /// Takes the actions away when [owner] leaves.
   static void unbindPlayback(Object owner) {
     if (!identical(_owner, owner)) return;
     _owner = null;
     _toggle = null;
+    _toggleMute = null;
     _playing = null;
-    unawaited(_setPlaying(null));
+    _muted = null;
+    unawaited(_setPlaying(null, null));
   }
 
-  static Future<void> _setPlaying(bool? playing) async {
+  static Future<void> _setPlaying(bool? playing, bool? muted) async {
     try {
       await _channel.invokeMethod<void>('setPlaying', {
         'playing': playing,
         'play': i18n('media_play'),
         'pause': i18n('media_pause'),
+        'muted': muted,
+        'mute': i18n('live_play_mute'),
+        'unmute': i18n('live_play_unmute'),
       });
     } on Object catch (error) {
       developer.log('Picture-in-picture action failed', name: 'LivePlay', error: error);
@@ -134,19 +149,74 @@ abstract final class PictureInPicture {
     }
   }
 
+  /// Where [rect] (logical pixels, [pixelRatio] physical ones each) is on
+  /// the screen in physical pixels, as the system's `sourceRectHint` takes
+  /// it; null when there is none.
+  static List<int>? _hint(Rect? rect, double pixelRatio) {
+    if (rect == null || rect.isEmpty || !rect.isFinite) return null;
+    return [
+      (rect.left * pixelRatio).round(),
+      (rect.top * pixelRatio).round(),
+      (rect.right * pixelRatio).round(),
+      (rect.bottom * pixelRatio).round(),
+    ];
+  }
+
   /// Enters picture-in-picture with the picture's [width]:[height] (the
-  /// system limits the ratio to 2.39:1).
-  static Future<PipEntry> enter({required int width, required int height}) async {
+  /// system limits the ratio to 2.39:1); the window grows out of [picture],
+  /// the picture's place on screen in logical pixels ([pixelRatio] physical
+  /// ones each; A07.24), and says [title].
+  static Future<PipEntry> enter({
+    required int width,
+    required int height,
+    Rect? picture,
+    double pixelRatio = 1,
+    String? title,
+    String? subtitle,
+  }) async {
     if (!_android) return PipEntry.failed;
     _listen();
     try {
-      return switch (await _channel.invokeMethod<Object>('enter', {'width': width, 'height': height})) {
+      if (title != null) await update(title: title, subtitle: subtitle);
+      final entry = await _channel.invokeMethod<Object>('enter', {
+        'width': width,
+        'height': height,
+        'hint': _hint(picture, pixelRatio),
+      });
+      return switch (entry) {
         'entered' || true => PipEntry.entered,
         'disabled' => PipEntry.disabled,
         _ => PipEntry.failed,
       };
     } on Object {
       return PipEntry.failed;
+    }
+  }
+
+  /// Tells the window (in picture-in-picture or about to be) what changed
+  /// (A07.24): the picture's [width]:[height] (another quality, a portrait
+  /// stream's first frame), its place on screen, the [title] and
+  /// [subtitle] (Android 13 and later show them).
+  static Future<void> update({
+    int? width,
+    int? height,
+    Rect? picture,
+    double pixelRatio = 1,
+    String? title,
+    String? subtitle,
+  }) async {
+    if (!_android) return;
+    _listen();
+    try {
+      await _channel.invokeMethod<void>('update', {
+        'width': ?width,
+        'height': ?height,
+        if (picture != null) 'hint': _hint(picture, pixelRatio),
+        'title': ?title,
+        'subtitle': ?subtitle,
+      });
+    } on Object catch (error) {
+      developer.log('Picture-in-picture update failed', name: 'LivePlay', error: error);
     }
   }
 
@@ -161,14 +231,40 @@ abstract final class PictureInPicture {
     }
   }
 
+  static Object? _autoOwner;
+
   /// Lets leaving the app (home, recents) enter picture-in-picture by itself
   /// with the picture's [width]:[height] (J1: Android 12 and later animate
-  /// it, 8-11 enter when the user leaves); [enabled] false stops that.
-  static Future<void> setAutoEnter({required bool enabled, int width = 16, int height = 9}) async {
+  /// it, 8-11 enter when the user leaves), growing out of [picture] (its
+  /// place on screen in logical pixels, [pixelRatio] physical ones each, A07.24);
+  /// [enabled] false stops that. [owner] is who
+  /// arms it (a room page, the floating window): only the one that armed it
+  /// last can disarm it, so a room page closing as the floating window takes
+  /// over does not undo the window's.
+  static Future<void> setAutoEnter({
+    required bool enabled,
+    int width = 16,
+    int height = 9,
+    Rect? picture,
+    double pixelRatio = 1,
+    Object? owner,
+  }) async {
     if (!_android) return;
+    if (enabled) {
+      _autoOwner = owner;
+    } else if (owner != null && !identical(owner, _autoOwner)) {
+      return;
+    } else {
+      _autoOwner = null;
+    }
     _listen();
     try {
-      await _channel.invokeMethod<void>('setAutoEnter', {'enabled': enabled, 'width': width, 'height': height});
+      await _channel.invokeMethod<void>('setAutoEnter', {
+        'enabled': enabled,
+        'width': width,
+        'height': height,
+        'hint': _hint(picture, pixelRatio),
+      });
     } on Object catch (error) {
       developer.log('Auto picture-in-picture failed', name: 'LivePlay', error: error);
     }
@@ -516,6 +612,21 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
 
   bool _notified = false;
 
+  /// The volume before the picture-in-picture window's mute (A07.24).
+  double _unmuted = 1;
+
+  /// The picture-in-picture window's mute action: the player's volume to 0
+  /// or back; the room's kept volume does not change.
+  Future<void> _toggleMute() async {
+    final volume = controller.volume;
+    if (volume > 0) {
+      _unmuted = volume;
+      await controller.setVolume(0);
+    } else {
+      await controller.setVolume(_unmuted > 0 ? _unmuted : 1);
+    }
+  }
+
   /// What the notification shows now; repeats are not sent again.
   bool? _shownPlaying;
 
@@ -538,7 +649,14 @@ class RoomBackgroundPolicy with WidgetsBindingObserver {
     final state = _session.state;
     final status = state.status;
     final active = status == PlaybackStatus.playing || status == PlaybackStatus.buffering;
-    PictureInPicture.bindPlayback(owner: this, playing: active, play: _session.resume, pause: _session.pause);
+    PictureInPicture.bindPlayback(
+      owner: this,
+      playing: active,
+      play: _session.resume,
+      pause: _session.pause,
+      muted: state.volume <= 0,
+      toggleMute: _toggleMute,
+    );
     final continues = _continues;
     final hold = _keeper.update(_keeperInput(state, continues: continues));
     final kept = _hidden && continues && hold != BackgroundHold.none;

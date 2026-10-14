@@ -696,6 +696,8 @@ class _RoomPlayerState extends ConsumerState<RoomPlayer> {
         onDragStart: desktop ? (_) => unawaited(DesktopWindow.startDragging()) : null,
       );
     }
+    // A07.24: picture-in-picture grows out of where the picture is.
+    RoomMiniScope.maybeOf(context)?.attachPicture(context);
     final arrangement = widget.arrangement;
     final portraitRows = arrangement == ControlsArrangement.portraitFullscreen;
     final lockable = arrangement != ControlsArrangement.inline;

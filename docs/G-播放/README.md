@@ -44,7 +44,7 @@
 |---|---|
 | `packages/live_media/lib/src/`（`source.dart`、`input.dart`、`transport.dart`、`fallback.dart`、`errors.dart`、`fence.dart`、`proxy.dart`、`relay/`、`inputs/recipes.dart`） | 取流管线，纯 Dart，只依赖 `live_core`、`live_net`；测试 40 个（`dart test`） |
 | `packages/live_player/lib/src/`（`session.dart`、`state.dart`、`engine.dart`、`mpv_engine.dart`、`mpv_options.dart`、`diagnostics.dart`、`frame_rate.dart`、`engine_profile.dart`、`video_view.dart`、`screen_wake.dart`、`policies.dart`） | 会话（纯 Dart 部分不引 Flutter）、mpv 引擎绑定、画面组件；测试 36 个 |
-| `third_party/media_kit`、`third_party/media_kit_video` | media_kit 1.1.11 / media_kit_video 1.2.5 的补丁分支（上游 Predidit/media-kit `803c4a27`），`hook/native_bundles.json` 列原生包和 SHA-256 |
+| `third_party/media_kit`、`third_party/media_kit_video` | media_kit 1.1.11 / media_kit_video 1.2.5 的补丁分支（上游 Predidit/media-kit `6b188ae9`；arm64、arm、x86_64 的 libmpv 是自己编的 mpv 0.41.0 + FFmpeg 9.0.2，只有 x86 用上游 v1.3.0），`hook/native_bundles.json` 列原生包和 SHA-256 |
 | `apps/pure_live/lib/app/bootstrap.dart:232-236`、`app/services.dart:78` | 应用里建共用的 `MediaOpener`（播放代理、引擎能力、配方打开器）和 `PlaybackSession` |
 | `apps/pure_live/lib/features/live_play/logic/`（`room_controller.dart` 的 `_openQuality`、`_plan`、`_refreshPlan`；`player_standby.dart`；`reconnect_watch.dart`；`background_playback.dart`） | 直播间怎么用会话；多画面在 `features/multiview/logic/multiview_controller.dart` |
 

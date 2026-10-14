@@ -23,8 +23,8 @@
       "library": "libmpv.so"
     },
     "android_ia32": {
-      "url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.2.7/default-x86.jar",
-      "sha256": "9269643264a1c9689116467f313d5e1b23ea56a68d338ab940c5e8fcf07061c6",
+      "url": "https://github.com/Predidit/libmpv-android-video-build/releases/download/v1.3.0/default-x86.jar",
+      "sha256": "a22e1d064bb596cc25285c3641225852f58a0fd235f940b78a9736780c2cbb5b",
       "format": "zip",
       "root": "lib/x86",
       "library": "libmpv.so"

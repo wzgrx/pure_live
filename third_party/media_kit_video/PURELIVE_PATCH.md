@@ -2,6 +2,7 @@
 
 - Upstream: `https://github.com/Predidit/media-kit.git`
 - Base commit: `803c4a27912091db6f839d48d1b984a0d9f588c7` (2026-09-26, "fix(native): handle unavailable mpv properties safely"; `media_kit` follows the same commit)
+- Synced to `6b188ae978808a63e5b58b7ce61f7725238c04c5` (2026-10-14): upstream's only change, "update libmpv video binaries to v1.3.0", applies to `media_kit/hook/native_bundles.json` alone; the arm64, arm and x86_64 bundles here are PureLive's own builds (mpv 0.41.0, FFmpeg 9.0.2), so only the x86 bundle moved to v1.3.0.
 - Package version: `media_kit_video 1.2.5`
 - License: MIT; the upstream `LICENSE` is retained in this directory.
 

@@ -6,7 +6,8 @@
 - 升了：Flutter 3.47.6 → 3.47.7（Dart 还是 3.13.5）；Kotlin 2.4.20 → 2.4.21：AGP 9.4.1 自带 Kotlin 2.4.20，`android.builtInKotlin=true` 下改用较新的版本要在 `apps/pure_live/android/settings.gradle.kts` 声明 `org.jetbrains.kotlin.android` 2.4.21（`apply false`），构建缓存里出现 `kotlin-compiler-embeddable/2.4.21`；sqlite3 ^3.7.1、hive_ce ^2.21.0（live_store）；全部成员 `test: ^1.33.0`。
 - `test_api` 的覆盖从 0.7.14 改成 0.7.15：test 1.33.0 和 test_core 0.6.21 锁死 0.7.15，第一次门禁纯 Dart 成员的 `dart test` 编译失败（`Suite`、`MessageType` 找不到）——pub get 时覆盖强行用了 0.7.14 没报错，根因在这里；3.47.7 的 flutter_test 还是锁 0.7.12，换成 0.7.15 后 `flutter test` 照常。
 - 验证：`flutter build apk --profile --target-platform android-arm64` 通过（146.7 MB）；`tools/gate/gate.sh --all` 通过。
-- 没升：media_kit 上游（只换了 Android 的 libmpv 1.3.0，单独一步，要在 K90 上看播放）；tray_manager 0.8.0、screen_retriever 0.3.0（桌面，现在只做 Android）。
+- media_kit 上游 803c4a2 → 6b188ae：上游只改了 `native_bundles.json` 里 Predidit 的 libmpv 包到 v1.3.0；我们的 arm64、arm、x86_64 早就换成自己编的 mpv 0.41.0 + FFmpeg 9.0.2，所以只有 x86 一项跟着换（SHA-256 下载核对过，和上游一致），K90 用的 arm64 不变，不用真机复测。
+- 没升：tray_manager 0.8.0、screen_retriever 0.3.0（桌面，现在只做 Android）。
 - 下次：2026-11 上旬。
 
 ## 2026-10-08

@@ -21,15 +21,15 @@
 
 | 键 | 值 | 用在哪 |
 |---|---|---|
-| `FLUTTER_VERSION`、`DART_VERSION` | 3.47.6、3.13.5 | 全部成员；根 `pubspec.yaml` 的 `sdk: ^3.13.0` |
-| `GRADLE_VERSION`、`AGP_VERSION`、`KOTLIN_VERSION` | 9.8.1、9.4.1、2.4.20 | `apps/pure_live/android/`（AGP 9 自带 Kotlin，`gradle.properties` 的 `android.builtInKotlin=true`） |
+| `FLUTTER_VERSION`、`DART_VERSION` | 3.47.7、3.13.5 | 全部成员；根 `pubspec.yaml` 的 `sdk: ^3.13.0` |
+| `GRADLE_VERSION`、`AGP_VERSION`、`KOTLIN_VERSION` | 9.8.1、9.4.1、2.4.21 | `apps/pure_live/android/`（AGP 9 自带 Kotlin，`gradle.properties` 的 `android.builtInKotlin=true`；`settings.gradle.kts` 声明 Kotlin Gradle 插件 2.4.21，比 AGP 9.4.1 自带的 2.4.20 新） |
 | `JDK_FEATURE_VERSION` | 27（本机 Temurin 27.0.0+35） | Gradle 运行时；字节码目标 17（`build.gradle.kts` 的 `JavaVersion.VERSION_17`） |
 | `ANDROID_COMPILE_SDK`、`ANDROID_BUILD_TOOLS`、`ANDROID_NDK_VERSION` | 37.2、37.0.0、30.0.16248370 | `android/build.gradle.kts` 读取 `toolchain.env`，给 app 和全部插件模块设 `compileSdk` 37、`compileSdkMinor` 2、`buildToolsVersion`、`ndkVersion`（之前 app 用 Flutter 默认的 NDK 28.2，插件用 AGP 默认的，2026-10-08 统一）；`targetSdk = 37`、`minSdk = 26` |
 | `ANDROID_PLATFORM_TOOLS`、`ANDROID_CMDLINE_TOOLS`、`ANDROID_CMAKE_VERSION` | 37.0.1、23.0、4.1.2 | 本机 Android SDK；CMake 给带 C/C++ 的插件（`jni`、`cnativeapi`、`ffmpeg_kit_extended_flutter`，之前用 AGP 默认的 3.22.1），并加 `-DCMAKE_POLICY_VERSION_MINIMUM=3.5`（CMake 4 不接受要求低于 3.5 的工程） |
 | `MPV_VERSION`、`FFMPEG_VERSION` | 0.41.0、9.0.2 | 播放内核（`third_party/media_kit` 的原生包）、录制的 FFmpeg（`tools/ffmpeg_kit/bundles.txt`） |
 | `MEDIA_KIT_UPSTREAM_REPO`、`MEDIA_KIT_UPSTREAM_COMMIT` | `Predidit/media-kit`、`803c4a27` | 自维护分支对应的上游提交 |
 
-- 依赖：13 个 workspace 成员（`apps/pure_live`、11 个 `packages/live_*`、`tools/check_latest`）直接依赖 63 个包，其中 46 个来自 pub.dev。`dependency_overrides` 7 项：`media_kit`、`media_kit_video`（指向 `third_party/`）、`wakelock_plus 1.8.1`、`xml 7.1.0`、`test_api 0.7.14`、`code_assets 2.1.0`、`nm 0.6.0`、`dbus 0.8.0`（根 `pubspec.yaml:26-64`，每项上面写了为什么、3.x 有没有同样的覆盖）。
+- 依赖：13 个 workspace 成员（`apps/pure_live`、11 个 `packages/live_*`、`tools/check_latest`）直接依赖 63 个包，其中 46 个来自 pub.dev。`dependency_overrides` 7 项：`media_kit`、`media_kit_video`（指向 `third_party/`）、`wakelock_plus 1.8.1`、`xml 7.1.0`、`test_api 0.7.15`、`code_assets 2.1.0`、`nm 0.6.0`、`dbus 0.8.0`（根 `pubspec.yaml:26-64`，每项上面写了为什么、3.x 有没有同样的覆盖）。
 - 检查最新版：`GITHUB_TOKEN=$(gh auth token) dart run tools/check_latest/bin/check_latest.dart`。`collect`（`tools/check_latest/lib/check_latest.dart:159`）依次查 Flutter（官方 releases JSON）、Gradle（`services.gradle.org`）、AGP、Kotlin、JDK（Adoptium）、NDK、compileSdk、build-tools（`dl.google.com` 的 `repository2-3.xml`）、mpv、FFmpeg（GitHub）、media_kit 上游最新提交，再对 workspace 里每个 pub.dev 依赖查 `pub.dev/api/packages/<名>`；输出 Markdown 表（落后的排前面，`renderMarkdown` `:241`），有落后的退出码 1（`--report-only` 改成 0），`--json`、`--skip-pub` 可选（`bin/check_latest.dart:8-12`）。不带令牌时 GitHub 接口会 403。
 - 升级的规矩（ENGINEERING 第 2 节第 4 条、第 3 节）：用最新稳定版；升级时连同本机环境（`~/tools/purelive-env.sh` 里的 Flutter、JDK、SDK 路径）一起改并验证，`toolchain.env` 只在验证过以后改。
 - 完成度：Z01.1（2026-09-28）把以上全部建好，`check_latest` 当天 16 项、落后 0；之后**没有再跑过**（Z01.2 每月一次，未开始）。`toolchain.env` 只在 `c613b73f9` 改过注释里的文档路径，版本没动。
@@ -102,6 +102,6 @@
 ## 还没完成的
 
 - **Z01.2 例行依赖升级检查（每月用 check_latest 查一次，升级后跑门禁）**（开发中，第三档，规模 小）
-  - 接着做：每月一次，下次 2026-11 上旬（10-08 已升 Flutter 3.47.6、Gradle 9.8.1，Android 构建改读 toolchain.env）
+  - 接着做：每月一次，下次 2026-11 上旬（10-14 已升 Flutter 3.47.7、Kotlin 2.4.21、sqlite3 3.7.1、hive_ce 2.21.0、test 1.33.0）
 
 <!-- docs:生成结束 -->

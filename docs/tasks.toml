@@ -4298,9 +4298,9 @@ date = "2026-10-14"
 size = "小"
 tier = 1
 stages = ["版本号和发布说明", "构建和检查", "K90 冒烟", "标签、发布页和安装包", "更新文件 version.json/releases.json"]
-done = 1
+done = 3
 from = "用户 2026-10-14：快速测试，更新"
-next = "构建 release 包和同一提交的 v4dev 测试包，K90 轻量冒烟"
+next = "门禁、推送，打标签 v4.2.0（0cbb1c33d）、建发布页上传，最后改 version.json 和 releases.json"
 
 [[task]]
 id = "Y02.1"

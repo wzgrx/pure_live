@@ -117,6 +117,11 @@ NOTES: dict[str, dict] = {
         'verdict': '品牌蓝 `FF2E6FE0`（A11.2 C-3）；3.x 默认的蓝色存过的老用户迁移一次（`themeColorMigration`）',
     },
     'pureBlackTheme': _new('A11.2 C-4'),
+    'liquidGlass': {
+        **_new('A01.5'),
+        'verdict': 'v4 新加（A01.5）：默认关，首页底栏照旧；开了以后手机首页底栏悬浮成毛玻璃胶囊，页面从下面透出来，内存 4 GB 及以下（或读不到）的安卓机只半透明不模糊；宽屏侧栏、直播间不变',
+        'when': '马上',
+    },
     'themeColorMigration': _new('A11.2，本机记录'),
     'crossAxisSpacing': {'v3range': '0～64（`theme_settings_controller.dart:10-12`、:109-113）', 'ui': '加减 0～64'},
     'mainAxisSpacing': {'v3range': '0～64（同上）', 'ui': '加减 0～64'},

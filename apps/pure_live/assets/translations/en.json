@@ -595,6 +595,8 @@
     "enable_dynamic_color_subtitle": "Enable Monet dynamic color",
     "enable_fullscreen_default": "Auto Full Screen",
     "enable_fullscreen_default_subtitle": "When enter live play, auto into full screen",
+    "enable_liquid_glass": "Liquid glass",
+    "enable_liquid_glass_subtitle": "The home bottom bar floats as frosted glass over the page; on phones with 4 GB of memory or less it is see-through without blur",
     "enable_local_log": "Enable Local Log",
     "enable_player_proxy": "Enable Player Proxy",
     "enable_player_proxy_desc": "Controls network settings when media_kit / mpv kernel fetches live stream video feeds",

@@ -384,4 +384,29 @@ void main() {
     }
     expect(contrast(QrColors.paper, QrColors.ink), greaterThan(15));
   });
+
+  testWidgets('A01.5: liquid glass blurs what is behind it, or is a plain tint; lists make room for its bar', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app(const Center(child: GlassSurface(child: SizedBox(width: 200, height: 68)))));
+    expect(find.byKey(const ValueKey('glass-blur')), findsOneWidget);
+    expect(find.byKey(const ValueKey('glass-pane')), findsOneWidget);
+    await tester.pumpWidget(
+      _app(const Center(child: GlassSurface(blur: false, child: SizedBox(width: 200, height: 68)))),
+    );
+    expect(find.byType(BackdropFilter), findsNothing);
+    expect(find.byKey(const ValueKey('glass-pane')), findsOneWidget);
+
+    EdgeInsets? padded;
+    Widget probe() => Builder(
+      builder: (context) {
+        padded = const EdgeInsets.all(6).withGlassBar(context);
+        return const SizedBox();
+      },
+    );
+    await tester.pumpWidget(_app(probe()));
+    expect(padded, const EdgeInsets.all(6));
+    await tester.pumpWidget(_app(GlassBarInset(inset: 80, child: probe())));
+    expect(padded, const EdgeInsets.fromLTRB(6, 6, 6, 86));
+  });
 }

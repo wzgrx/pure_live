@@ -219,6 +219,7 @@ path = [
   { glob = "packages/live_ui/lib/src/theme/motion.dart", sub = "A03" },
   { glob = "packages/live_ui/lib/src/theme/", sub = "A01" },
   { glob = "packages/live_ui/lib/src/icons/", sub = "A01" },
+  { glob = "packages/live_ui/lib/src/widgets/glass.dart", sub = "A01" },
   { glob = "packages/live_ui/lib/src/widgets/refresh_view.dart", sub = "A03" },
   { glob = "packages/live_ui/lib/src/widgets/scrolling.dart", sub = "A03" },
   { glob = "packages/live_ui/lib/src/widgets/refresh_rate.dart", sub = "R02" },

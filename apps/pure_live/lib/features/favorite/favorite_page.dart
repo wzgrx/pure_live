@@ -434,7 +434,7 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
             return GridView.builder(
               key: PageStorageKey('favorite-rows-${widget.platform}'),
               controller: _scroll,
-              padding: const EdgeInsets.all(roomGridPadding),
+              padding: const EdgeInsets.all(roomGridPadding).withGlassBar(context),
               physics: physics,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: columns,
@@ -471,7 +471,7 @@ class _FollowGridState extends ConsumerState<_FollowGrid> {
             return GridView.builder(
               key: PageStorageKey('favorite-grid-${widget.platform}-${group.name}'),
               controller: _scroll,
-              padding: const EdgeInsets.all(roomGridPadding),
+              padding: const EdgeInsets.all(roomGridPadding).withGlassBar(context),
               physics: physics,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),

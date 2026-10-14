@@ -35,6 +35,7 @@ export 'src/widgets/emote_text.dart';
 export 'src/widgets/escape_back.dart';
 export 'src/widgets/focus_ring.dart';
 export 'src/widgets/follow_pill.dart';
+export 'src/widgets/glass.dart';
 export 'src/widgets/json_tree.dart';
 export 'src/widgets/jump_buttons.dart';
 export 'src/widgets/listenable_selector.dart';

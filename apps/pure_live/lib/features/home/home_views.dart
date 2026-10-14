@@ -11,9 +11,21 @@ import 'package:pure_live/i18n/i18n.dart';
 
 /// The phone layout (3.x `HomeMobileView`): the page and a bottom bar; the
 /// bar is hidden with one destination.
+///
+/// With [glass] (A01.5) the bar floats over the page as a capsule of
+/// frosted glass, the page scrolling on under it; [glassBlur] off, the
+/// glass is a plain tint.
 class HomeMobileView extends StatelessWidget {
   /// Creates the layout.
-  const new({required this.menus, required this.selected, required this.onSelected, required this.body, super.key});
+  const new({
+    required this.menus,
+    required this.selected,
+    required this.onSelected,
+    required this.body,
+    this.glass = false,
+    this.glassBlur = true,
+    super.key,
+  });
 
   /// The destinations.
   final List<HomeMenu> menus;
@@ -27,26 +39,59 @@ class HomeMobileView extends StatelessWidget {
   /// The page.
   final Widget body;
 
+  /// The bar is liquid glass.
+  final bool glass;
+
+  /// The glass blurs the page behind it.
+  final bool glassBlur;
+
   @override
   Widget build(BuildContext context) {
     final index = selected == null ? 0 : menus.indexOf(selected!);
+    NavigationBar bar({double? height, Color? background}) => NavigationBar(
+      height: height,
+      backgroundColor: background,
+      elevation: background == null ? null : 0,
+      surfaceTintColor: background,
+      shadowColor: background,
+      selectedIndex: index < 0 ? 0 : index,
+      onDestinationSelected: (index) => onSelected(menus[index]),
+      destinations: [
+        for (final menu in menus)
+          NavigationDestination(
+            key: ValueKey('home-nav-${menu.id}'),
+            icon: Icon(menu.icon),
+            selectedIcon: Icon(menu.selectedIcon),
+            label: i18n(menu.titleKey),
+          ),
+      ],
+    );
+    if (menus.length <= 1) return Scaffold(body: body);
+    if (!glass) return Scaffold(bottomNavigationBar: bar(), body: body);
+    final safeBottom = MediaQuery.viewPaddingOf(context).bottom;
     return Scaffold(
-      bottomNavigationBar: menus.length <= 1
-          ? null
-          : NavigationBar(
-              selectedIndex: index < 0 ? 0 : index,
-              onDestinationSelected: (index) => onSelected(menus[index]),
-              destinations: [
-                for (final menu in menus)
-                  NavigationDestination(
-                    key: ValueKey('home-nav-${menu.id}'),
-                    icon: Icon(menu.icon),
-                    selectedIcon: Icon(menu.selectedIcon),
-                    label: i18n(menu.titleKey),
-                  ),
-              ],
-            ),
-      body: body,
+      extendBody: true,
+      bottomNavigationBar: Padding(
+        key: const ValueKey('home-glass-bar'),
+        padding: EdgeInsets.fromLTRB(
+          GlassMetrics.barMargin,
+          0,
+          GlassMetrics.barMargin,
+          safeBottom + GlassMetrics.barMargin,
+        ),
+        child: GlassSurface(
+          blur: glassBlur,
+          // The bar's safe area is outside the capsule (this context is
+          // above the Scaffold: the status bar's padding is still in it).
+          child: MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            removeBottom: true,
+            child: bar(height: GlassMetrics.barHeight, background: GlassMetrics.clear),
+          ),
+        ),
+      ),
+      body: GlassBarInset(inset: safeBottom + GlassMetrics.barOverlap, child: body),
     );
   }
 }

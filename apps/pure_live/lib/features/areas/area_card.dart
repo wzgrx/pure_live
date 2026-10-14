@@ -267,7 +267,7 @@ class AreaGrid extends ConsumerWidget {
           key: const ValueKey('area-grid'),
           controller: controller,
           physics: physics,
-          padding: EdgeInsets.fromLTRB(6, 6, 6, bottomPadding),
+          padding: EdgeInsets.fromLTRB(6, 6, 6, bottomPadding).withGlassBar(context),
           keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,

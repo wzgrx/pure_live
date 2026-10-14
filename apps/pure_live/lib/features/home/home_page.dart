@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:live_store/live_store.dart';
+import 'package:pure_live/app/bootstrap.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/areas/areas_page.dart';
 import 'package:pure_live/features/favorite/favorite_page.dart';
@@ -134,6 +135,7 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
   @override
   Widget build(BuildContext context) {
     final saved = watchSetting(ref, Settings.savedMenuIds);
+    final glass = watchSetting(ref, Settings.liquidGlass);
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: _onBack,
@@ -147,7 +149,14 @@ class _HomePageState extends ConsumerState<HomePage> with WidgetsBindingObserver
           final body = HomeLayoutScope(phone: !rail, child: _page(selected));
           return rail
               ? HomeTabletView(menus: menus, selected: selected, onSelected: _select, body: body)
-              : HomeMobileView(menus: menus, selected: selected, onSelected: _select, body: body);
+              : HomeMobileView(
+                  menus: menus,
+                  selected: selected,
+                  onSelected: _select,
+                  body: body,
+                  glass: glass,
+                  glassBlur: liquidGlassBlurs(android: Platform.isAndroid, totalMemoryBytes: deviceMemoryBytes),
+                );
         },
       ),
     );

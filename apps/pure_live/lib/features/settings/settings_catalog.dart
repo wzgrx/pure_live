@@ -386,6 +386,14 @@ List<SettingsEntry> _build() {
       keywords: ['Material You', 'monet', '壁纸'],
       when: _notIos,
     )
+    ..toggle(
+      'liquid_glass',
+      'enable_liquid_glass',
+      Settings.liquidGlass,
+      AppIcons.liquidGlass,
+      desc: 'enable_liquid_glass_subtitle',
+      keywords: ['Liquid Glass', 'glass', 'blur', '玻璃', '毛玻璃', '透明'],
+    )
     ..add(
       'loading_style',
       'change_loading_style',

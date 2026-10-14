@@ -550,7 +550,7 @@ class _RoomFeedViewState extends ConsumerState<RoomFeedView> {
                 semanticChildCount: rooms.length,
                 slivers: [
                   SliverPadding(
-                    padding: const EdgeInsets.all(roomGridPadding),
+                    padding: const EdgeInsets.all(roomGridPadding).withGlassBar(context),
                     sliver: SliverGrid.builder(
                       gridDelegate: geometry.delegate(spacing: spacing, mainSpacing: mainSpacing),
                       itemCount: rooms.length,

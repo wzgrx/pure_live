@@ -6,11 +6,11 @@
 
 路径规则按 OWNERS.toml 里的顺序第一条匹配的生效，所以一条目录规则只管前面的规则没拿走的文件。本页只随归属表、设置、来源和通道变化，加删代码文件不用重新生成。
 
-路径规则 209 条；设置 245 个（分节默认 23 条、单独指定 89 个）；来源 35 个；通道 16 个。
+路径规则 210 条；设置 246 个（分节默认 23 条、单独指定 89 个）；来源 35 个；通道 16 个。
 
 | 子分类 | 路径规则 | 设置 | 播放 | 弹幕 | 通道 |
 |---|---:|---:|---:|---:|---:|
-| A01 设计系统 | 3 | 17 |  |  |  |
+| A01 设计系统 | 4 | 18 |  |  |  |
 | A02 组件 | 3 |  |  |  |  |
 | A03 动效和手感 | 3 |  |  |  |  |
 | A04 尺寸和适配 | 1 |  |  |  |  |
@@ -98,8 +98,8 @@
 
 ## A01 设计系统
 
-- 代码：`apps/pure_live/lib/app/fonts.dart`、`packages/live_ui/lib/src/theme/`、`packages/live_ui/lib/src/icons/`
-- 设置：`themeMode`、`enableDynamicTheme`、`themeColorSwitch`、`pureBlackTheme`、`themeColorMigration`、`crossAxisSpacing`、`mainAxisSpacing`、`loadingStyle`、`loadingStyleColorSwitch`、`textScaleFactor`、`fontSizeBodySmall`、`fontSizeBodyMedium`、`fontSizeBodyLarge`、`fontSizeTitleMedium`、`fontSizeTitleLarge`、`fontFamilyName`、`fontFamilyFileName`
+- 代码：`apps/pure_live/lib/app/fonts.dart`、`packages/live_ui/lib/src/theme/`、`packages/live_ui/lib/src/icons/`、`packages/live_ui/lib/src/widgets/glass.dart`
+- 设置：`themeMode`、`enableDynamicTheme`、`liquidGlass`、`themeColorSwitch`、`pureBlackTheme`、`themeColorMigration`、`crossAxisSpacing`、`mainAxisSpacing`、`loadingStyle`、`loadingStyleColorSwitch`、`textScaleFactor`、`fontSizeBodySmall`、`fontSizeBodyMedium`、`fontSizeBodyLarge`、`fontSizeTitleMedium`、`fontSizeTitleLarge`、`fontFamilyName`、`fontFamilyFileName`
 
 ## A02 组件
 

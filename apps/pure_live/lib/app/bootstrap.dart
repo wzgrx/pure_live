@@ -59,6 +59,17 @@ const int largeImageBudgetAbove = 4 * 1024 * 1024 * 1024;
   return (count: 320, bytes: 128 * mebibyte);
 }
 
+/// The Android device's memory, read once at start (null: unknown, or not
+/// Android).
+int? deviceMemoryBytes;
+
+/// Whether liquid glass blurs what is behind it (A01.5 c4): not on an
+/// Android device with 4 GiB or less, or unknown, memory, where a blur
+/// redrawn every frame of a scroll costs too much; the glass is a plain
+/// tint there.
+bool liquidGlassBlurs({required bool android, int? totalMemoryBytes}) =>
+    !android || (totalMemoryBytes != null && totalMemoryBytes > largeImageBudgetAbove);
+
 /// The device's memory from Linux's `MemTotal` in [path] (Android lets apps
 /// read /proc/meminfo); null when it cannot be read. The figure is a little
 /// under the advertised size (the kernel keeps some), so a "4 GB" phone reads
@@ -251,10 +262,8 @@ abstract final class AppBootstrap {
     timing
       ?..step('binding')
       ..askProcess();
-    configureDecodedImageCache(
-      desktop: Platform.isWindows,
-      totalMemoryBytes: Platform.isAndroid ? readTotalMemoryBytes() : null,
-    );
+    deviceMemoryBytes = Platform.isAndroid ? readTotalMemoryBytes() : null;
+    configureDecodedImageCache(desktop: Platform.isWindows, totalMemoryBytes: deviceMemoryBytes);
     timing?.step('imageCache');
     // Which interface `auto` picks (M14.1): asked before the first frame.
     await TvDevice.detect();

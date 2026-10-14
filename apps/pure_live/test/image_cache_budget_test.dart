@@ -47,4 +47,12 @@ void main() {
     configureDecodedImageCache(desktop: false);
     expect(cache.maximumSizeBytes, 48 * mebibyte);
   });
+
+  test('A01.5 c4: liquid glass blurs except on an Android device with 4 GiB or less, or unknown, memory', () {
+    expect(liquidGlassBlurs(android: false), isTrue);
+    expect(liquidGlassBlurs(android: true), isFalse);
+    expect(liquidGlassBlurs(android: true, totalMemoryBytes: 3700 * mebibyte), isFalse);
+    expect(liquidGlassBlurs(android: true, totalMemoryBytes: 4 * gibibyte), isFalse);
+    expect(liquidGlassBlurs(android: true, totalMemoryBytes: 12 * gibibyte), isTrue);
+  });
 }

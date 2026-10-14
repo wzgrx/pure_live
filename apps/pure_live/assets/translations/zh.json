@@ -594,6 +594,8 @@
     "enable_dynamic_color_subtitle": "启用Monet壁纸动态取色",
     "enable_fullscreen_default": "自动全屏",
     "enable_fullscreen_default_subtitle": "当进入直播播放页，自动进入全屏",
+    "enable_liquid_glass": "液体玻璃",
+    "enable_liquid_glass_subtitle": "首页底栏悬浮成毛玻璃，页面从下面透出来；内存 4 GB 及以下的手机不模糊，只半透明",
     "enable_local_log": "启用本地日志",
     "enable_player_proxy": "启用播放代理",
     "enable_player_proxy_desc": "控制 media_kit / mpv 播放器内核拉取直播源视频流时的网络设置",

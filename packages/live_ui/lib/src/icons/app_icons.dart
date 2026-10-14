@@ -853,6 +853,9 @@ abstract final class AppIcons {
   /// Dynamic colour.
   static const IconData dynamicColor = Remix.magic_line;
 
+  /// Liquid glass (A01.5).
+  static const IconData liquidGlass = Remix.drop_line;
+
   /// Room card settings (3.x shared the multi-view grid; A01.4 c4 gives
   /// the cards their own).
   static const IconData roomCardSettings = Remix.gallery_view_2;

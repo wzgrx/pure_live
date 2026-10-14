@@ -651,7 +651,7 @@ class _TaskGrid extends StatelessWidget {
           key: const ValueKey('recorder-list'),
           controller: controller,
           physics: const PureLiveBoundedScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(gutter, top, gutter, 24),
+          padding: EdgeInsets.fromLTRB(gutter, top, gutter, 24).withGlassBar(context),
           itemCount: rows + (banner ? 1 : 0),
           itemBuilder: (context, index) {
             if (banner && index == 0) return _PollingOffBanner(onEnable: onEnablePolling);

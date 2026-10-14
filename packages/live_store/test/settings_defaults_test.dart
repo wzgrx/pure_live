@@ -272,6 +272,7 @@ const Map<String, Object> newInV4 = {
   'douyuForceRenew': false, // UPGRADES 2-1
   'twitchLanguages': <String>[], // UPGRADES 8-3
   'pureBlackTheme': false, // A11.2 C-4
+  'liquidGlass': false, // A01.5: the plain bottom bar as before
   'themeColorMigration': 0, // A11.2
   'preferH264': true, // UPGRADES 22-3
   'autoPipOnLeave': false, // A07.8

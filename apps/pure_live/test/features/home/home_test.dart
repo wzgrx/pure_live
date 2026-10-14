@@ -409,6 +409,53 @@ void main() {
     await tester.runAsync(services.close);
   });
 
+  testWidgets('A01.5: liquid glass: the bar floats as a glass capsule over the page; off, the plain bar', (
+    tester,
+  ) async {
+    // A status bar and a gesture area, as on a phone.
+    tester.view.padding = const FakeViewPadding(top: 40, bottom: 20);
+    tester.view.viewPadding = const FakeViewPadding(top: 40, bottom: 20);
+    final services = await _pump(tester, width: 400);
+    expect(find.byType(GlassSurface), findsNothing);
+    final plain = tester.getRect(find.byType(NavigationBar));
+    expect(plain, const Rect.fromLTRB(0, 800, 400, 900));
+
+    await tester.runAsync(() => services.store.settings.set(Settings.liquidGlass, true));
+    await tester.pumpAndSettle();
+    expect(find.byType(GlassSurface), findsOneWidget);
+    expect(find.byKey(const ValueKey('glass-blur')), findsOneWidget);
+    // A capsule 12 in from the sides and above the gesture area, 68 high.
+    expect(tester.getRect(find.byType(NavigationBar)), const Rect.fromLTRB(12, 800, 388, 868));
+    expect(find.byType(NavigationDestination), findsNWidgets(4));
+    // The page goes on under it, and its lists know how much it covers.
+    expect(tester.getRect(find.byType(FavoritePage)).bottom, 900);
+    final page = tester.element(find.byType(FavoritePage));
+    expect(GlassBarInset.of(page), 100);
+    await tester.tap(find.widgetWithText(NavigationDestination, '热门'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PopularPage), findsOneWidget);
+
+    // A larger system font: no overflow.
+    tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    tester.platformDispatcher.clearTextScaleFactorTestValue();
+
+    // The rail of a wide window has no glass.
+    tester.view.physicalSize = const Size(1280, 800);
+    await tester.pumpAndSettle();
+    expect(find.byType(GlassSurface), findsNothing);
+    tester.view.physicalSize = const Size(400, 900);
+    await tester.pumpAndSettle();
+
+    await tester.runAsync(() => services.store.settings.set(Settings.liquidGlass, false));
+    await tester.pumpAndSettle();
+    expect(find.byType(GlassSurface), findsNothing);
+    expect(tester.getRect(find.byType(NavigationBar)), plain);
+    await tester.runAsync(services.close);
+  });
+
   testWidgets('a larger system font: bar, menus and rail do not overflow', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 1.3;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

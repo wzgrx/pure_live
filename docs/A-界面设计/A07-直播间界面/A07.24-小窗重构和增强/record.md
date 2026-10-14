@@ -36,7 +36,8 @@
 
 ## 门禁
 
-（合并前跑，结果写在这里）
+- `tools/gate/gate.sh --all` 在 `d950836ce`：`gate: passed (all, 14 members)`。
+- profile 包（arm64）在 `beb3860c5` 构建通过（Kotlin 改动编译过）。
 
 ## 真机上要看的
 

@@ -146,8 +146,8 @@ void main() {
 
   test('reads the repository update files as 3.x does', () {
     final android = UpdateInfo.fromJson(_versionJson(), platform: 'android');
-    expect(android.version, '4.1.0');
-    expect(android.buildNumber, 5003);
+    expect(android.version, '4.2.0');
+    expect(android.buildNumber, 5004);
     expect(android.androidAbis, {'arm64-v8a', 'armeabi-v7a', 'x86_64'});
     expect(android.isNewer, isFalse);
     // A platform block overrides the top level.
@@ -155,7 +155,7 @@ void main() {
     expect(() => UpdateInfo.fromJson({'version': '1.0.0'}, platform: 'android'), throwsFormatException);
 
     final releases = parseReleases(_releasesJson());
-    expect(releases.first.version, '4.1.0');
+    expect(releases.first.version, '4.2.0');
     for (var i = 1; i < releases.length; i++) {
       expect(releases[i - 1].date.compareTo(releases[i].date), greaterThanOrEqualTo(0));
     }

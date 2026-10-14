@@ -4293,14 +4293,13 @@ note = "改发构建号 5003：用户 2026-10-09 说 5002 不发布，补 A07.23
 id = "Y01.6"
 title = "4.2.0 发布（Android，构建号 5004）"
 type = "发布"
-status = "开发中"
+status = "完成"
 date = "2026-10-14"
 size = "小"
 tier = 1
 stages = ["版本号和发布说明", "构建和检查", "K90 冒烟", "标签、发布页和安装包", "更新文件 version.json/releases.json"]
-done = 3
+done = 5
 from = "用户 2026-10-14：快速测试，更新"
-next = "门禁、推送，打标签 v4.2.0（0cbb1c33d）、建发布页上传，最后改 version.json 和 releases.json"
 
 [[task]]
 id = "Y02.1"

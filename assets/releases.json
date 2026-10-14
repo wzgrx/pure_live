@@ -1,5 +1,43 @@
 [
   {
+    "version": "4.2.0",
+    "title": "Pure Live v4.2.0",
+    "date": "2026-10-15",
+    "github": "https://github.com/wzgrx/pure_live/releases/tag/v4.2.0",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 4.2.0（Android）\n\n这是 4.1.0 之后的一次小更新。重点是应用内小窗重做：能无级拉到和手机一样宽，拖开松手会贴边或收进屏幕边缘，单击显示按钮、双击回直播间，还能一键变成系统画中画。另外加了可以开关的“液体玻璃”首页底栏，小窗松手的手感和面板、换台统一成带速度的弹簧，开发工具链升到最新。\n\n这一版只发布 Android（手机和平板），需要 Android 8.0 及以上。签名和 3.2.11、4.0.0、4.1.0 相同，可以直接覆盖安装。装了 4.1.0 的应用内会收到更新提示。\n\n下载：[Releases](https://github.com/wzgrx/pure_live/releases/latest)，不确定选哪个就下载文件名带 `arm64-v8a` 的 APK。\n\n## 主要变化\n\n### 小窗（应用内悬浮窗）\n\n- 拖右下角（或左下角）的把手可以无级拉大缩小，最大和手机一样宽；两指缩放也可以。横屏和竖屏画面各记各的大小。\n- 拖动时只移动窗口，画面不重新加载。松手后贴到近的一边；往边上甩出去会收进屏幕边缘，只露出一条，点一下回来。这次打开应用期间，下一个小窗出现在上次放的位置。\n- 单击画面显示或隐藏按钮，双击回到直播间。窗口够大时多出静音、主播名字和弹幕开关；窗口很小时按钮自动减少，不会挤在一起。\n- 新加“切到画中画”按钮，小窗直接变成系统画中画；开着“离开应用时自动画中画”（默认关）时，开着小窗回桌面也会自动变成画中画。画中画从画面的位置放大出来，换了画面比例会跟着变，显示主播名字，多了静音按钮。\n- “回到直播间”换了专用图标。\n\n### 手感\n\n- 小窗松手后顺着手指的速度滑到边上（和面板、换台一样的弹簧），不再从静止重新起步；滑动途中按住能接住。\n\n### 界面\n\n- 新加“液体玻璃”（设置 → 外观，默认关）：打开后手机首页的底栏变成悬浮的毛玻璃胶囊，页面从下面模糊透出来，列表滚到底时最后一行停在胶囊上方。内存 4 GB 及以下的手机只半透明、不模糊，免得滑动卡顿。宽屏侧栏和直播间不变。\n\n### 其他\n\n- 开发工具链升到 Flutter 3.47.7、Kotlin 2.4.21，数据库组件 sqlite3 3.7.1、hive_ce 2.21.0。手机上的播放内核没有变（还是 mpv 0.41.0 + FFmpeg 9.0.2）。\n\n## 从 4.1.0、4.0.0 或 3.x 升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库，4.1.0 的数据原样使用。从 4.0.0 升级的说明见 4.1.0 的发布说明（数据库会升级，升级后不要装回 4.0.0）。\n- 新设置“液体玻璃”默认关，首页和以前一样。\n\n## 已知问题\n\n- 这一版的新功能通过了自动测试，在 K90 上做了轻量测试：小窗拉到全宽和缩小、收进边缘再点回来、单击和双击、变成画中画和画中画静音、上下和左右甩的弹簧、液体玻璃（深色和浅色）。还没有逐项走过的：小窗位置记忆、小窗里的静音和弹幕开关、直播间画中画跟着比例变、大字号下的小窗、液体玻璃开关前后的帧时间。遇到问题请反馈。\n- 4.1.0 的已知问题仍然存在（礼物的平台限制、本地礼物特效的帧时间、各家系统的后台播放设置入口）。\n- 4.0.0 的已知问题仍然存在：\n  - HyperOS 从最近任务里划掉应用后，可能会结束录制和后台播放；\n  - Android 15 起，录制一天累计最多 6 小时；\n  - 平板上，Android 16 可能不让应用自己转屏。\n\n## 以后要做的\n\n- 在 K90 上把 4.1.0 和这一版的新功能逐项走完。\n- Windows：界面已经做好，补上 Windows 专属的功能后发布。之后是 Linux、电视（Android TV）和苹果平台。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/pure_live/issues) 反馈。\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/pure_live/releases/download/v4.2.0/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-4.2.0-5004-debug-signed-android-arm64-v8a-release.apk",
+        "size": "106.33mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/pure_live/releases/download/v4.2.0/PureLive-4.2.0-5004-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-4.2.0-5004-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "94.07mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/pure_live/releases/download/v4.2.0/PureLive-4.2.0-5004-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-4.2.0-5004-debug-signed-android-x86_64-release.apk",
+        "size": "117.50mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/pure_live/releases/download/v4.2.0/PureLive-4.2.0-5004-debug-signed-android-x86_64-release.apk"
+      }
+    ]
+  },
+  {
     "version": "4.1.0",
     "title": "Pure Live v4.1.0",
     "date": "2026-10-14",

@@ -1,10 +1,10 @@
 {
-  "version": "4.1.0",
-  "build_number": 5003,
-  "version_num": 401005003,
-  "version_desc": "- 礼物全平台统一显示：连击合并，可以只看值钱的礼物、换算成元、上飞行弹幕；醒目留言按平台的单位标价。\n- 弹幕列表的名字和内容分开，可以关掉用户名、调字号和行距；屏蔽支持正则、纯表情和超长弹幕。\n- 本地互动加了记录、常用语、成长和三档礼物特效，平台体验资源包换上平台图标。\n- 后台播放更稳：断流自动重试，来电和重连时不被系统停掉，各家手机有“后台播放设置”说明；全屏右上角菜单换成右侧面板。\n- 新增开播提醒、哔哩哔哩多账号、小窗改大小，详见发布页。",
+  "version": "4.2.0",
+  "build_number": 5004,
+  "version_num": 402005004,
+  "version_desc": "- 小窗重做：无级拉大到和手机一样宽，松手贴边或收进屏幕边缘，单击显示按钮、双击回直播间，能一键变成画中画。\n- 小窗松手顺着手指的速度滑走，和面板、换台一样的手感。\n- 新加“液体玻璃”（设置 → 外观，默认关）：首页底栏变成悬浮的毛玻璃。\n- 开发工具链升到最新，详见发布页。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.1.0",
+  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.2.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "4.1.0",
-      "build_number": 5003,
-      "version_num": 401005003,
-      "version_desc": "- 礼物全平台统一显示：连击合并，可以只看值钱的礼物、换算成元、上飞行弹幕；醒目留言按平台的单位标价。\n- 弹幕列表的名字和内容分开，可以关掉用户名、调字号和行距；屏蔽支持正则、纯表情和超长弹幕。\n- 本地互动加了记录、常用语、成长和三档礼物特效，平台体验资源包换上平台图标。\n- 后台播放更稳：断流自动重试，来电和重连时不被系统停掉，各家手机有“后台播放设置”说明；全屏右上角菜单换成右侧面板。\n- 新增开播提醒、哔哩哔哩多账号、小窗改大小，详见发布页。",
+      "version": "4.2.0",
+      "build_number": 5004,
+      "version_num": 402005004,
+      "version_desc": "- 小窗重做：无级拉大到和手机一样宽，松手贴边或收进屏幕边缘，单击显示按钮、双击回直播间，能一键变成画中画。\n- 小窗松手顺着手指的速度滑走，和面板、换台一样的手感。\n- 新加“液体玻璃”（设置 → 外观，默认关）：首页底栏变成悬浮的毛玻璃。\n- 开发工具链升到最新，详见发布页。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.1.0",
+      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.2.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",

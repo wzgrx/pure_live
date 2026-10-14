@@ -496,8 +496,10 @@ abstract final class AppIcons {
   // ---- the mini windows (U.2j: in-app floating window, picture-in-picture,
   // desktop mini window; 3.x player_manager.dart) ----
 
-  /// Back to the room from a mini window (new in U.2j).
-  static const IconData backToRoom = Icons.open_in_full_rounded;
+  /// Back to the room from a mini window (new in U.2j): a small window going
+  /// back into the big one (A07.24: the two diagonal arrows looked like the
+  /// resize grip's arrow next to it).
+  static const IconData backToRoom = Remix.picture_in_picture_exit_line;
 
   /// The desktop mini window stays on top (new in U.2j; Remix, as 3.x's
   /// "pinned" marks).
@@ -1112,8 +1114,9 @@ abstract final class AppIcons {
   /// "后台断开弹幕" (O01.3).
   static const IconData settingsBackgroundDanmaku = Remix.chat_off_line;
 
-  /// "关闭画中画时暂停" (O01.3).
-  static const IconData settingsPipClosePause = Remix.picture_in_picture_exit_line;
+  /// "关闭画中画时暂停" (O01.3): pause (A07.24 gave the picture-in-picture
+  /// exit glyph to [backToRoom]).
+  static const IconData settingsPipClosePause = Remix.pause_circle_line;
 
   /// The background check's phone row: maker, system, Android (O01.3).
   static const IconData backgroundGuideDevice = Remix.smartphone_line;

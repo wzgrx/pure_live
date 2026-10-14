@@ -117,7 +117,7 @@ void main() {
       (AppIcons.localGrowth, Icons.trending_up_rounded),
       // U.2j: the mini windows' buttons (3.x's play and pause; the new back
       // and pin).
-      (AppIcons.backToRoom, Icons.open_in_full_rounded),
+      (AppIcons.backToRoom, Remix.picture_in_picture_exit_line),
       (AppIcons.pinned, Remix.pushpin_fill),
       (AppIcons.unpinned, Remix.pushpin_line),
       // U.3a, U.3b: the home shell keeps 3.x's glyphs, except the areas tab

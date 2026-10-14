@@ -34,6 +34,11 @@
 - 画中画（模拟通道）：直播间页进入时先发标题再进入，位置是画面不是整页；竖屏首帧后发 `update` 改比例；系统静音动作让音量变 0 再还原，`setPlaying` 带 `muted`；小窗开着自动画中画由小窗布防、位置是小窗；小窗按钮进入后整屏、只有画面、同一个播放器；回来变回原大小；关掉小窗撤防。
 - 原有的 A07.8、A07.22、D03.3、A08.12、B02 等小窗测试改了三处：“按钮显示时再点回直播间”改成双击（c6）、拖动后等滑动动画结束、A07.22 的 0.9 上限测试换成 A07.24 的满宽。
 
+## K90 快速测试后的修改（2026-10-14）
+
+- 小窗口的按钮（c12）：`mini_player.dart` 的 `miniCompactMaxWidth`（260）、`miniCompactMaxHeight`（150），小窗口不放静音、中间按钮 48；测试在 220×124 时检查回到直播间、关闭、中间按钮、拖角两两不重叠，满宽时中间 58、有静音。
+- 图标（c13）：`AppIcons.backToRoom` 改成 `Remix.picture_in_picture_exit_line`，`settingsPipClosePause` 改成 `Remix.pause_circle_line`；`design_system_test` 跟着改。
+
 ## 门禁
 
 - `tools/gate/gate.sh --all` 在 `d950836ce`：`gate: passed (all, 14 members)`。

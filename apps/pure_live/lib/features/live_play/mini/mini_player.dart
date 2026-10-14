@@ -27,6 +27,14 @@ const double miniButtonSize = 48;
 /// The diameter of the centre button (3.x: a 42 icon with 8 around it).
 const double miniCentreSize = 58;
 
+/// A07.24: below this width or [miniCompactMaxHeight], the window is a
+/// small one: no mute button, a 48 centre button (the K90 check found them
+/// on top of each other at about 196 wide).
+const double miniCompactMaxWidth = 260;
+
+/// See [miniCompactMaxWidth].
+const double miniCompactMaxHeight = 150;
+
 /// A07.24: the room's name shows between the top buttons from this width.
 const double miniTitleMinWidth = 240;
 
@@ -416,7 +424,14 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
   Widget _buttonsLayer(BuildContext context) =>
       LayoutBuilder(builder: (context, constraints) => _buttonsFor(context, constraints.biggest));
 
-  Widget _buttonsFor(BuildContext context, Size size) => StreamBuilder<PlaybackState>(
+  Widget _buttonsFor(BuildContext context, Size size) {
+    // A07.24 (K90 check): a small window keeps back, close, the grip and a
+    // smaller centre button apart; mute waits for a larger one.
+    final compact = size.width < miniCompactMaxWidth || size.height < miniCompactMaxHeight;
+    return _buttonsLaidOut(context, size, compact: compact);
+  }
+
+  Widget _buttonsLaidOut(BuildContext context, Size size, {required bool compact}) => StreamBuilder<PlaybackState>(
     stream: _room.session.states,
     initialData: _room.session.state,
     builder: (context, snapshot) {
@@ -461,18 +476,21 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // A07.24: mute next to close.
-                        ListenableSelector<bool>(
-                          listenable: _room,
-                          selector: () => _room.volume <= 0,
-                          builder: (context, muted, _) => _MiniButton(
-                            key: const ValueKey('mini-mute'),
-                            tooltip: i18n(muted ? 'live_play_unmute' : 'live_play_mute'),
-                            icon: muted ? AppIcons.volumeMuted : AppIcons.volumeHigh,
-                            onPressed: _toggleMute,
+                        // A07.24: mute next to close; not on a small window,
+                        // where it crowded the centre button (K90 check).
+                        if (!compact) ...[
+                          ListenableSelector<bool>(
+                            listenable: _room,
+                            selector: () => _room.volume <= 0,
+                            builder: (context, muted, _) => _MiniButton(
+                              key: const ValueKey('mini-mute'),
+                              tooltip: i18n(muted ? 'live_play_unmute' : 'live_play_mute'),
+                              icon: muted ? AppIcons.volumeMuted : AppIcons.volumeHigh,
+                              onPressed: _toggleMute,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 4),
+                          const SizedBox(width: 4),
+                        ],
                         _MiniButton(
                           key: const ValueKey('mini-close'),
                           tooltip: i18n('close'),
@@ -560,7 +578,7 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                               key: const ValueKey('mini-retry'),
                               tooltip: i18n('retry'),
                               icon: AppIcons.refresh,
-                              size: miniCentreSize,
+                              size: compact ? miniButtonSize : miniCentreSize,
                               onPressed: _room.retry,
                             )
                           : VideoCentreButton(
@@ -574,7 +592,7 @@ class _MiniPlayerSurfaceState extends State<MiniPlayerSurface> {
                               ),
                               icon: paused ? AppIcons.play : AppIcons.pause,
                               busy: buffering,
-                              size: miniCentreSize,
+                              size: compact ? miniButtonSize : miniCentreSize,
                               onPressed: _togglePlay,
                             ),
                     ),

@@ -174,7 +174,7 @@ DanmakuConnection.events（同步广播流）
 属于 [D 弹幕](../README.md)。
 
 - 代码：`packages/live_danmaku/lib/src/sites/`
-- 进度：`███████████████████░` 97%
+- 进度：`████████████████████` 100%
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
@@ -196,8 +196,8 @@ DanmakuConnection.events（同步广播流）
 | D01.15 | niconico 弹幕 | 平台 | 完成 | 2026-09-29 | 67dba6d24 | [设计或说明](D01.15-niconico弹幕/README.md)、[记录](D01.15-niconico弹幕/record.md) |
 | D01.16 | SHOWROOM 弹幕 | 平台 | 完成 | 2026-09-29 | a30d7aedd | [设计或说明](D01.16-SHOWROOM弹幕/README.md)、[记录](D01.16-SHOWROOM弹幕/record.md) |
 | D01.17 | CHZZK 弹幕 | 平台 | 完成 | 2026-09-29 | 00da1b768 | [设计或说明](D01.17-CHZZK弹幕/README.md)、[记录](D01.17-CHZZK弹幕/record.md) |
-| D01.18 | LiveMe 弹幕 | 平台 | 受阻 | 2026-09-29 | 2d1994160 | [设计或说明](D01.18-LiveMe弹幕/README.md)、[任务书](D01.18-LiveMe弹幕/brief.md)、[记录](D01.18-LiveMe弹幕/record.md) |
-| D01.19 | TikTok 弹幕 | 平台 | 受阻 | 2026-09-29 | d1db5734e | [设计或说明](D01.19-TikTok弹幕/README.md)、[任务书](D01.19-TikTok弹幕/brief.md)、[记录](D01.19-TikTok弹幕/record.md) |
+| D01.18 | LiveMe 弹幕 | 平台 | 不做 | 2026-09-29 | 2d1994160 | [设计或说明](D01.18-LiveMe弹幕/README.md)、[任务书](D01.18-LiveMe弹幕/brief.md)、[记录](D01.18-LiveMe弹幕/record.md) |
+| D01.19 | TikTok 弹幕 | 平台 | 不做 | 2026-09-29 | d1db5734e | [设计或说明](D01.19-TikTok弹幕/README.md)、[任务书](D01.19-TikTok弹幕/brief.md)、[记录](D01.19-TikTok弹幕/record.md) |
 | D01.20 | YouTube 弹幕 | 平台 | 完成 | 2026-09-29 | da62d0146 | [设计或说明](D01.20-YouTube弹幕/README.md)、[记录](D01.20-YouTube弹幕/record.md) |
 | D01.21 | BIGO LIVE 弹幕 | 平台 | 完成 | 2026-09-30 | 51ca7deda | [设计或说明](D01.21-BIGOLIVE弹幕/README.md)、[记录](D01.21-BIGOLIVE弹幕/record.md) |
 | D01.22 | PandaTV 弹幕 | 平台 | 完成 | 2026-09-29 | 2a6b552b2 | [设计或说明](D01.22-PandaTV弹幕/README.md)、[记录](D01.22-PandaTV弹幕/record.md) |
@@ -210,13 +210,6 @@ DanmakuConnection.events（同步广播流）
 | D01.29 | LOOK 直播 弹幕 | 平台 | 完成 | 2026-09-30 | 3da78f071 | [设计或说明](D01.29-LOOK直播弹幕/README.md)、[记录](D01.29-LOOK直播弹幕/record.md) |
 | D01.30 | 17LIVE 弹幕 | 平台 | 完成 | 2026-09-30 | 447e34074 | [设计或说明](D01.30-17LIVE弹幕/README.md)、[记录](D01.30-17LIVE弹幕/record.md) |
 | D01.31 | Kick 弹幕 | 平台 | 完成 | 2026-10-01 | 96e032864 | [设计或说明](D01.31-Kick弹幕/README.md)、[记录](D01.31-Kick弹幕/record.md) |
-| D01.32 | 哔哩哔哩访客昵称提示和登录引导、粉丝牌和头像 | 功能 | 待真机 | 2026-10-02 | 2eea8022a | [设计或说明](D01.32-哔哩哔哩访客昵称和粉丝牌/README.md)、[任务书](D01.32-哔哩哔哩访客昵称和粉丝牌/brief.md)、[记录](D01.32-哔哩哔哩访客昵称和粉丝牌/record.md)、[真机验证](D01.32-哔哩哔哩访客昵称和粉丝牌/verify.md) |
-
-## 还没完成的
-
-- **D01.18 LiveMe 弹幕**（受阻，—，规模 中）
-  - 说明：要登录才能连弹幕，调查完成
-- **D01.19 TikTok 弹幕**（受阻，—，规模 中）
-  - 说明：要签名才能连弹幕，调查完成
+| D01.32 | 哔哩哔哩访客昵称提示和登录引导、粉丝牌和头像 | 功能 | 完成 | 2026-10-02 | 2eea8022a | [设计或说明](D01.32-哔哩哔哩访客昵称和粉丝牌/README.md)、[任务书](D01.32-哔哩哔哩访客昵称和粉丝牌/brief.md)、[记录](D01.32-哔哩哔哩访客昵称和粉丝牌/record.md)、[真机验证](D01.32-哔哩哔哩访客昵称和粉丝牌/verify.md) |
 
 <!-- docs:生成结束 -->

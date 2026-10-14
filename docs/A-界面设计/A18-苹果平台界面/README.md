@@ -104,17 +104,12 @@ iOS、iPadOS、macOS 的差异设计。
 属于 [A 界面设计](../README.md)。
 
 - 代码：—
-- 进度：`███████░░░░░░░░░░░░░` 35%
+- 进度：还没有任务
 
 
 | 编号 | 任务 | 类型 | 状态 | 日期 | 提交 | 资料 |
 |---|---|---|---|---|---|---|
-| A18.1 | iOS 和 iPadOS 差异设计 | 界面 | 已确认 | — | — | [设计或说明](A18.1-iOS和iPadOS差异设计/README.md)、[任务书](A18.1-iOS和iPadOS差异设计/brief.md)、[评审页](A18.1-iOS和iPadOS差异设计/page/01-说明.jpg) |
-| A18.2 | macOS 差异设计 | 界面 | 已确认 | — | — | [设计或说明](A18.2-macOS差异设计/README.md)、[任务书](A18.2-macOS差异设计/brief.md)、[评审页](A18.2-macOS差异设计/page/01-说明.jpg) |
-
-## 还没完成的
-
-- **A18.1 iOS 和 iPadOS 差异设计**（已确认，第三档，规模 中）
-- **A18.2 macOS 差异设计**（已确认，第三档，规模 中）
+| A18.1 | iOS 和 iPadOS 差异设计 | 界面 | 不做 | 2026-10-15 | — | [设计或说明](A18.1-iOS和iPadOS差异设计/README.md)、[任务书](A18.1-iOS和iPadOS差异设计/brief.md)、[评审页](A18.1-iOS和iPadOS差异设计/page/01-说明.jpg) |
+| A18.2 | macOS 差异设计 | 界面 | 不做 | 2026-10-15 | — | [设计或说明](A18.2-macOS差异设计/README.md)、[任务书](A18.2-macOS差异设计/brief.md)、[评审页](A18.2-macOS差异设计/page/01-说明.jpg) |
 
 <!-- docs:生成结束 -->

@@ -21,6 +21,7 @@ import 'package:pure_live/shared/danmaku/danmaku_settings.dart';
 import 'package:pure_live/shared/danmaku/emotes.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/tv/room/tv_room_overlays.dart';
+import 'package:pure_live/tv/room/tv_room_settings_panel.dart';
 import 'package:pure_live/tv/tv_navigation.dart';
 import 'package:pure_live/tv/tv_theme.dart';
 import 'package:pure_live/tv/widgets/tv_dialogs.dart';
@@ -80,6 +81,9 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
   String? _problem;
   bool _controls = false;
   bool _panel = false;
+
+  /// The play settings on the right (A17.4 c3, c7).
+  bool _settings = false;
   bool _banner = false;
   Timer? _hideControls;
   Timer? _hideBanner;
@@ -201,6 +205,7 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
     setState(() {
       _controls = false;
       _panel = false;
+      _settings = false;
     });
     _keys.requestFocus();
   }
@@ -209,6 +214,16 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
     _hideControls?.cancel();
     setState(() {
       _panel = true;
+      _settings = false;
+      _controls = false;
+    });
+  }
+
+  void _openSettings() {
+    _hideControls?.cancel();
+    setState(() {
+      _settings = true;
+      _panel = false;
       _controls = false;
     });
   }
@@ -259,13 +274,15 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
     if (event is KeyUpEvent) return KeyEventResult.ignored;
     final key = event.logicalKey;
     if (_panel) {
-      // The list walks by focus; Left closes it.
-      if (key == LogicalKeyboardKey.arrowLeft) {
+      // The list walks by focus; Right closes it (it is on the left).
+      if (key == LogicalKeyboardKey.arrowRight) {
         _hide();
         return KeyEventResult.handled;
       }
       return KeyEventResult.ignored;
     }
+    // The settings walk by focus; Back closes them.
+    if (_settings) return KeyEventResult.ignored;
     final up = key == LogicalKeyboardKey.arrowUp || key == LogicalKeyboardKey.channelUp;
     final down = key == LogicalKeyboardKey.arrowDown || key == LogicalKeyboardKey.channelDown;
     if (up || down) {
@@ -290,11 +307,16 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
       }
       return KeyEventResult.handled;
     }
-    if (key == LogicalKeyboardKey.arrowLeft ||
-        key == LogicalKeyboardKey.arrowRight ||
+    // A17.4 c3: Left opens the rooms on the left; Right, the menu key and
+    // the info key open the play settings on the right.
+    if (key == LogicalKeyboardKey.arrowLeft) {
+      _openPanel();
+      return KeyEventResult.handled;
+    }
+    if (key == LogicalKeyboardKey.arrowRight ||
         key == LogicalKeyboardKey.contextMenu ||
         key == LogicalKeyboardKey.info) {
-      _openPanel();
+      _openSettings();
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
@@ -357,7 +379,7 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
     // Back closes the list or the controls first, then leaves (the room
     // shown is already in `TvRoomArgs.shown` for the page below).
     return PopScope<Object?>(
-      canPop: !_panel && !_controls,
+      canPop: !_panel && !_settings && !_controls,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _hide();
       },
@@ -388,7 +410,7 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
                             TvRoomStatus(controller: controller, playback: snapshot.data ?? controller.session.state),
                       ),
                     ),
-                    if (_banner && !_controls && !_panel)
+                    if (_banner && !_controls && !_panel && !_settings)
                       Positioned(
                         left: 0,
                         top: 0,
@@ -437,9 +459,16 @@ class TvLivePlayPageState extends ConsumerState<TvLivePlayPage> {
                     if (_panel)
                       Positioned(
                         top: 0,
-                        right: 0,
+                        left: 0,
                         bottom: 0,
                         child: TvRoomList(rooms: _playlist, current: _index, onPick: switchTo),
+                      ),
+                    if (_settings)
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: TvRoomSettingsPanel(controller: controller, onClose: _hide),
                       ),
                   ],
                 ),

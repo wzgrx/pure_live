@@ -323,9 +323,25 @@ void main() {
     await _settle(tester);
     expect(find.byKey(const ValueKey('tv-room-controls')), findsNothing);
 
-    // Right: the room list with the room shown; OK on another switches.
+    // A17.4 c3, c7: Right opens the play settings on the right: the
+    // phone's danmaku settings, the block list and recording; Back closes.
     await _press(tester, LogicalKeyboardKey.arrowRight);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('tv-room-settings')), findsOneWidget);
+    expect(find.text('播放设置'), findsOneWidget);
+    expect(tester.getTopRight(find.byKey(const ValueKey('tv-room-settings'))).dx, 1920);
+    expect(tester.getTopLeft(find.byKey(const ValueKey('tv-room-settings'))).dx, greaterThan(960));
+    expect(find.byKey(const ValueKey('tv-room-settings-danmaku')), findsOneWidget);
+    expect(_focused, isNot('tv room keys'), reason: 'the focus is in the panel');
+    await tester.binding.handlePopRoute();
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('tv-room-settings')), findsNothing);
+
+    // Left: the room list on the left with the room shown; OK on another
+    // switches.
+    await _press(tester, LogicalKeyboardKey.arrowLeft);
     expect(find.byKey(const ValueKey('tv-room-panel')), findsOneWidget);
+    expect(tester.getTopLeft(find.byKey(const ValueKey('tv-room-panel'))).dx, 0);
     expect(_focused, 'tv room list current');
     await _press(tester, LogicalKeyboardKey.arrowDown);
     await _press(tester, LogicalKeyboardKey.select);

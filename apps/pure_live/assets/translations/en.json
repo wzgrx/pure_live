@@ -2756,6 +2756,8 @@
     "tv_ok": "OK",
     "tv_ok_refresh": "OK to refresh, Up/Down to switch rooms",
     "tv_ok_retry": "OK to retry, Up/Down to switch rooms",
+    "tv_play_settings": "Play settings",
+    "tv_play_settings_hint": "↑ ↓ select · OK change · ← → adjust · Back closes",
     "tv_proxy_desc": "App and player proxies",
     "tv_push_from_phone": "Sent from your phone",
     "tv_push_search": "Search for this text",

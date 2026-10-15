@@ -2755,6 +2755,8 @@
     "tv_ok": "确定",
     "tv_ok_refresh": "按 OK 刷新，上下键换台",
     "tv_ok_retry": "按 OK 重试，上下键换台",
+    "tv_play_settings": "播放设置",
+    "tv_play_settings_hint": "↑ ↓ 选择 · OK 修改 · ← → 调整数值 · 返回键关闭",
     "tv_proxy_desc": "应用代理和播放代理",
     "tv_push_from_phone": "从手机推送",
     "tv_push_search": "搜索这段文字",

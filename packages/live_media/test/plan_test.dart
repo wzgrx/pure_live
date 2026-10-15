@@ -101,7 +101,10 @@ void main() {
       const old = EngineProfile(rewriteLegacyHevcFlv: true);
       final file = _flv(Uri.file('/sdcard/Records/主播/a.flv').toString(), codec: 'hevc');
       expect(MediaRoute.of(file, engine: old, canRenew: true), MediaRoute.direct);
-      expect(MediaRoute.of(LivePlayLine('/sdcard/Records/a.flv'), engine: old, canRenew: true), MediaRoute.direct);
+      expect(
+        MediaRoute.of(const LivePlayLine('/sdcard/Records/a.flv'), engine: old, canRenew: true),
+        MediaRoute.direct,
+      );
     });
 
     test('FLV with a lease that cuts the connection is spliced only when it can be renewed', () {

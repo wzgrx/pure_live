@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:live_ui/src/icons/custom_icons.dart';
 import 'package:remixicon/remixicon.dart';
 
 /// The icons of the TV interface by what they are for (docs/A-界面设计/A17-电视界面/A17.1-电视设计系统和通用组件),
@@ -7,23 +8,23 @@ import 'package:remixicon/remixicon.dart';
 /// from `AppIcons`; these are the TV shell's own and the shared components
 /// the TV draws first (the card dialog, the status page, the tag dialog).
 abstract final class TvIcons {
-  // ---- the side menu (pure_live_TV `TvMenuType`; the glyphs of M14.1, U.15b
-  // redraws the menu) ----
+  // ---- the side menu (pure_live_TV `TvMenuType`); the phone's glyphs where
+  // the phone has the same destination (A17.2 c4) ----
 
   /// Follows.
-  static const IconData menuFavorites = Icons.favorite_rounded;
+  static const IconData menuFavorites = Remix.heart_3_line;
 
   /// Recommended rooms.
-  static const IconData menuPopular = Icons.local_fire_department_rounded;
+  static const IconData menuPopular = Remix.fire_line;
 
   /// Areas.
-  static const IconData menuAreas = Icons.grid_view_rounded;
+  static const IconData menuAreas = Remix.shapes_line;
 
   /// Watch history.
-  static const IconData menuHistory = Icons.history_rounded;
+  static const IconData menuHistory = Remix.history_line;
 
   /// Search.
-  static const IconData menuSearch = Icons.search_rounded;
+  static const IconData menuSearch = CustomIcons.search;
 
   /// Network TV.
   static const IconData menuIptv = Icons.live_tv_rounded;
@@ -38,7 +39,10 @@ abstract final class TvIcons {
   static const IconData menuWallpaper = Icons.wallpaper_rounded;
 
   /// Settings.
-  static const IconData menuSettings = Icons.settings_rounded;
+  static const IconData menuSettings = Remix.settings_5_line;
+
+  /// "导航栏始终展开" (A17.2 c2).
+  static const IconData menuExpand = Remix.side_bar_line;
 
   /// A part of the TV interface that is not built yet.
   static const IconData underConstruction = Icons.construction_rounded;

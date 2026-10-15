@@ -17,6 +17,7 @@ class TvNavItem extends StatelessWidget {
     this.onKey,
     this.focusNode,
     this.autofocus = false,
+    this.compact = false,
     super.key,
   });
 
@@ -44,6 +45,9 @@ class TvNavItem extends StatelessWidget {
   /// Takes the focus when first built.
   final bool autofocus;
 
+  /// Only the icon, centred: the collapsed side menu (A17.2 c2).
+  final bool compact;
+
   @override
   Widget build(BuildContext context) {
     final palette = TvTheme.of(context);
@@ -61,31 +65,38 @@ class TvNavItem extends StatelessWidget {
           color: selected ? palette.selected : null,
           borderRadius: BorderRadius.circular(scale.px(TvRadius.card)),
         ),
-        child: Row(
-          children: [
-            if (icon != null) ...[Icon(icon, color: foreground, size: scale.pxText(24)), SizedBox(width: scale.px(14))],
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
+        child: compact && icon != null
+            ? Center(
+                child: Icon(icon, color: foreground, size: scale.pxText(24)),
+              )
+            : Row(
                 children: [
-                  Text(
-                    label,
-                    maxLines: subtitle == null ? 1 : 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: scale.font(
-                      TvTextSize.body,
-                      weight: selected ? FontWeight.w600 : FontWeight.w400,
-                      color: selected ? palette.onSelected : palette.text,
+                  if (icon != null) ...[
+                    Icon(icon, color: foreground, size: scale.pxText(24)),
+                    SizedBox(width: scale.px(14)),
+                  ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          label,
+                          maxLines: subtitle == null ? 1 : 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: scale.font(
+                            TvTextSize.body,
+                            weight: selected ? FontWeight.w600 : FontWeight.w400,
+                            color: selected ? palette.onSelected : palette.text,
+                          ),
+                        ),
+                        if (subtitle case final subtitle?)
+                          Text(subtitle, style: scale.font(TvTextSize.small, color: foreground)),
+                      ],
                     ),
                   ),
-                  if (subtitle case final subtitle?)
-                    Text(subtitle, style: scale.font(TvTextSize.small, color: foreground)),
                 ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -1735,6 +1735,10 @@ abstract final class Settings {
   /// focus ring.
   static const tvFocusZoom = BoolSetting('tvFocusZoom', section: 'app', defaultValue: true);
 
+  /// The TV side menu always shows its names (A17.2 c2); off, it is a rail
+  /// of icons that opens over the page when the focus moves in.
+  static const tvMenuAlwaysExpanded = BoolSetting('tvMenuAlwaysExpanded', section: 'app', defaultValue: false);
+
   // ---- internal ----
 
   /// The LAN-sync device id 3.x generated (remote_sync_service.dart:134).
@@ -1946,6 +1950,7 @@ abstract final class Settings {
     remoteSyncDeviceId,
     uiMode,
     tvFocusZoom,
+    tvMenuAlwaysExpanded,
   ];
 
   static final Map<String, Setting<Object>> _byKey = {for (final setting in all) setting.key: setting};

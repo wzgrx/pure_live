@@ -331,6 +331,7 @@ setting = [
   { key = "twitchLanguages", sub = "E03" },
   { key = "uiMode", sub = "X03" },
   { key = "tvFocusZoom", sub = "A17" },
+  { key = "tvMenuAlwaysExpanded", sub = "A17" },
   # favorite 分节（默认 I03）
   { key = "preferPlatform", sub = "I02" },
   # theme、font、meta 分节

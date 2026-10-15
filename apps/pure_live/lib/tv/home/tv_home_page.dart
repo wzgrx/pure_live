@@ -4,13 +4,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/home/home_menu.dart';
 import 'package:pure_live/features/version/update_feed.dart';
 import 'package:pure_live/features/version/update_prompt.dart';
 import 'package:pure_live/i18n/i18n.dart';
-import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/tv/pages/tv_areas_pane.dart';
 import 'package:pure_live/tv/pages/tv_favorites_pane.dart';
 import 'package:pure_live/tv/pages/tv_history_pane.dart';
@@ -20,6 +20,7 @@ import 'package:pure_live/tv/pages/tv_search_page.dart';
 import 'package:pure_live/tv/pages/tv_settings_pane.dart';
 import 'package:pure_live/tv/tv_navigation.dart';
 import 'package:pure_live/tv/tv_theme.dart';
+import 'package:pure_live/tv/widgets/tv_dialogs.dart';
 import 'package:pure_live/tv/widgets/tv_nav_item.dart';
 import 'package:pure_live/tv/widgets/tv_status.dart';
 
@@ -117,13 +118,20 @@ class TvHomeScope extends InheritedWidget {
 ///   (one press less than pure_live_TV, where OK only switched); Right
 ///   enters it too, back on the item focused there last;
 /// - Back steps out one level at a time: the destination's own level (if it
-///   has one), then the side menu, then "press Back again to leave".
+///   has one), then the side menu, then the exit question (A17.2 c8).
+///
+/// The side menu is a rail of icons that opens over the page while the
+/// focus is in it, unless "导航栏始终展开" is on (A17.2 c2). The first start
+/// shows the notice once (A17.2 c10).
 ///
 /// Destinations visited stay alive (pure_live_TV's keep-alive stack), so
 /// coming back keeps their tab, scroll and focus.
 class TvHomePage extends ConsumerStatefulWidget {
   /// Creates the home.
   const new({super.key});
+
+  /// The meta key remembering that the notice was accepted (A17.2 c10).
+  static const String noticeKey = 'tv.noticeAccepted';
 
   @override
   ConsumerState<TvHomePage> createState() => _TvHomePageState();
@@ -136,12 +144,10 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
   final Map<TvPane, FocusNode> _paneNodes = {};
   final Map<TvPane, FocusNode> _memory = {};
   final Map<TvPane, bool Function()> _backHandlers = {};
-  DateTime? _backPressedAt;
   DateTime? _backgroundedAt;
   Timer? _updateTimer;
-
-  /// How long a second Back leaves the app.
-  static const Duration exitWindow = Duration(seconds: 2);
+  bool _menuFocused = false;
+  bool _asking = false;
 
   FocusNode _menuNode(TvPane pane) => _menuNodes[pane] ??= FocusNode(debugLabel: 'tv menu ${pane.name}');
 
@@ -156,10 +162,26 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _menuNode(_pane).requestFocus();
-      final launch = ref.read(appServicesProvider).launch;
-      if (launch.room case final room?) unawaited(openTvRoom(room));
-      if (launch.isPrimary) _updateTimer = Timer(startupUpdateCheckDelay, _checkForUpdate);
+      unawaited(_start());
     });
+  }
+
+  Future<void> _start() async {
+    final services = ref.read(appServicesProvider);
+    if (await services.store.meta.get(TvHomePage.noticeKey) != '1') {
+      if (!mounted) return;
+      final agreed = await showTvNotice(context);
+      if (!agreed) {
+        await SystemNavigator.pop();
+        return;
+      }
+      await services.store.meta.set(TvHomePage.noticeKey, '1');
+      if (!mounted) return;
+      _menuNode(_pane).requestFocus();
+    }
+    final launch = services.launch;
+    if (launch.room case final room?) unawaited(openTvRoom(room));
+    if (launch.isPrimary) _updateTimer = Timer(startupUpdateCheckDelay, _checkForUpdate);
   }
 
   @override
@@ -280,22 +302,20 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
       focusMenu();
       return;
     }
-    final now = DateTime.now();
-    final last = _backPressedAt;
-    if (last == null || now.difference(last) > exitWindow) {
-      _backPressedAt = now;
-      AppNavigator.toast(i18n('tv_press_back_again'));
+    if (_asking) return;
+    _asking = true;
+    final leave = await showTvConfirm(
+      context,
+      title: i18n('tv_exit_title'),
+      message: i18n('tv_exit_message'),
+      confirmLabel: i18n('tv_exit'),
+    );
+    _asking = false;
+    if (!leave) {
+      if (mounted) focusMenu();
       return;
     }
-    _backPressedAt = null;
-    if (!Platform.isAndroid) return;
-    try {
-      await const MethodChannel('pure_live/app').invokeMethod<bool>('moveToBack');
-    } on PlatformException {
-      // Stay in front.
-    } on MissingPluginException {
-      // No activity.
-    }
+    if (Platform.isAndroid) await SystemNavigator.pop();
   }
 
   KeyEventResult _menuKey(TvPane pane, KeyEvent event) {
@@ -321,6 +341,69 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     final palette = TvTheme.of(context);
     final scale = TvScale.of(context);
     const panes = TvPane.values;
+    final alwaysExpanded = watchSetting(ref, Settings.tvMenuAlwaysExpanded);
+    final expanded = alwaysExpanded || _menuFocused;
+    final railWidth = scale.pxText(84);
+    final expandedWidth = scale.pxText(200);
+    final menu = Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onFocusChange: (focused) {
+        if (focused != _menuFocused) setState(() => _menuFocused = focused);
+      },
+      child: FocusTraversalGroup(
+        child: Container(
+          key: const ValueKey('tv-home-menu'),
+          width: expanded ? expandedWidth : railWidth,
+          decoration: BoxDecoration(
+            color: palette.low,
+            border: Border(right: BorderSide(color: palette.divider)),
+          ),
+          padding: expanded
+              ? EdgeInsets.fromLTRB(scale.px(24), scale.px(28), scale.px(16), scale.px(28))
+              : EdgeInsets.symmetric(horizontal: scale.px(10), vertical: scale.px(28)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (expanded) ...[const _Clock(), SizedBox(height: scale.px(16))],
+              Expanded(
+                child: SingleChildScrollView(
+                  clipBehavior: Clip.none,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [for (final pane in TvPane.menu) _menuItem(pane, compact: !expanded)],
+                  ),
+                ),
+              ),
+              _menuItem(TvPane.settings, compact: !expanded),
+            ],
+          ),
+        ),
+      ),
+    );
+    final page = FocusTraversalGroup(
+      child: IndexedStack(
+        index: panes.indexOf(_pane),
+        sizing: StackFit.expand,
+        children: [
+          for (final pane in panes)
+            if (_visited.contains(pane))
+              Focus(
+                focusNode: _paneNode(pane),
+                skipTraversal: true,
+                canRequestFocus: false,
+                child: TvHomeScope(
+                  host: this,
+                  pane: pane,
+                  shown: pane == _pane,
+                  child: KeyedSubtree(key: ValueKey('tv-pane-${pane.name}'), child: _content(pane)),
+                ),
+              )
+            else
+              const SizedBox.shrink(),
+        ],
+      ),
+    );
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -329,62 +412,23 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
       child: Scaffold(
         backgroundColor: palette.background,
         body: TvBackground(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+          // One tree for both layouts, so switching keeps the pages: always
+          // expanded, the page sits beside the menu; else the rail opens over
+          // the page, which stays put and dims.
+          child: Stack(
             children: [
-              FocusTraversalGroup(
-                child: Container(
-                  key: const ValueKey('tv-home-menu'),
-                  width: scale.pxText(200),
-                  decoration: BoxDecoration(
-                    color: palette.low,
-                    border: Border(right: BorderSide(color: palette.divider)),
-                  ),
-                  padding: EdgeInsets.fromLTRB(scale.px(24), scale.px(28), scale.px(16), scale.px(28)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _Clock(),
-                      SizedBox(height: scale.px(16)),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          clipBehavior: Clip.none,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [for (final pane in TvPane.menu) _menuItem(pane)],
-                          ),
-                        ),
-                      ),
-                      _menuItem(TvPane.settings),
-                    ],
+              Positioned.fill(left: alwaysExpanded ? expandedWidth : railWidth, child: page),
+              if (_menuFocused && !alwaysExpanded)
+                Positioned.fill(
+                  left: railWidth,
+                  child: IgnorePointer(
+                    child: ColoredBox(
+                      key: const ValueKey('tv-home-menu-scrim'),
+                      color: palette.background.withValues(alpha: 0.6),
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: FocusTraversalGroup(
-                  child: IndexedStack(
-                    index: panes.indexOf(_pane),
-                    sizing: StackFit.expand,
-                    children: [
-                      for (final pane in panes)
-                        if (_visited.contains(pane))
-                          Focus(
-                            focusNode: _paneNode(pane),
-                            skipTraversal: true,
-                            canRequestFocus: false,
-                            child: TvHomeScope(
-                              host: this,
-                              pane: pane,
-                              shown: pane == _pane,
-                              child: KeyedSubtree(key: ValueKey('tv-pane-${pane.name}'), child: _content(pane)),
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                    ],
-                  ),
-                ),
-              ),
+              Positioned(left: 0, top: 0, bottom: 0, child: menu),
             ],
           ),
         ),
@@ -392,13 +436,14 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     );
   }
 
-  Widget _menuItem(TvPane pane) => Padding(
+  Widget _menuItem(TvPane pane, {required bool compact}) => Padding(
     padding: EdgeInsets.only(bottom: TvScale.of(context).px(4)),
     child: TvNavItem(
       key: ValueKey('tv-menu-${pane.name}'),
       focusNode: _menuNode(pane),
       icon: pane.icon,
       label: i18n(pane.labelKey),
+      compact: compact,
       selected: pane == _pane,
       onTap: () => _select(pane),
       onKey: (node, event) => _menuKey(pane, event),

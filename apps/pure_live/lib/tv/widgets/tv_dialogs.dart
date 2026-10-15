@@ -679,3 +679,113 @@ class TvInputField extends StatelessWidget {
     );
   }
 }
+
+/// The notice on the first start (A17.2 c10): the words in a light box at
+/// most 720 wide; Up and Down scroll them while the focus stays on the
+/// buttons ("退出", "已阅读并同意" focused). True when accepted; Back is
+/// "退出".
+Future<bool> showTvNotice(BuildContext context) async =>
+    await showDialog<bool>(
+      context: context,
+      barrierColor: TvColors.scrim,
+      barrierDismissible: false,
+      builder: (context) => const _TvNotice(),
+    ) ??
+    false;
+
+class _TvNotice extends StatefulWidget {
+  const new();
+
+  @override
+  State<_TvNotice> createState() => _TvNoticeState();
+}
+
+class _TvNoticeState extends State<_TvNotice> {
+  final ScrollController _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  KeyEventResult _key(FocusNode node, KeyEvent event) {
+    if (event is KeyUpEvent || !_scroll.hasClients) return KeyEventResult.ignored;
+    final step = switch (event.logicalKey) {
+      LogicalKeyboardKey.arrowDown => 80.0,
+      LogicalKeyboardKey.arrowUp => -80.0,
+      _ => null,
+    };
+    if (step == null) return KeyEventResult.ignored;
+    final position = _scroll.position;
+    _scroll.animateTo(
+      (position.pixels + step).clamp(0.0, position.maxScrollExtent),
+      duration: tvFocusDuration,
+      curve: Curves.easeOut,
+    );
+    return KeyEventResult.handled;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = TvTheme.of(context);
+    final scale = TvScale.of(context);
+    return PopScope<bool>(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) Navigator.pop(context, false);
+      },
+      child: Focus(
+        canRequestFocus: false,
+        skipTraversal: true,
+        onKeyEvent: _key,
+        child: TvDialog(
+          key: const ValueKey('tv-notice'),
+          title: i18n('tv_notice_title'),
+          width: 720,
+          actions: [
+            TvButton(
+              key: const ValueKey('tv-notice-exit'),
+              label: i18n('tv_exit'),
+              onTap: () => Navigator.pop(context, false),
+            ),
+            TvButton(
+              key: const ValueKey('tv-notice-agree'),
+              label: i18n('tv_notice_agree'),
+              kind: TvButtonKind.primary,
+              autofocus: true,
+              onTap: () => Navigator.pop(context, true),
+            ),
+          ],
+          child: Padding(
+            padding: EdgeInsets.only(top: scale.px(16)),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: palette.low,
+                borderRadius: BorderRadius.circular(scale.px(TvRadius.card)),
+              ),
+              child: ShaderMask(
+                // More below: the bottom fades out.
+                shaderCallback: (rect) => const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.white, Colors.white, Colors.transparent],
+                  stops: [0, 0.85, 1],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: SingleChildScrollView(
+                  controller: _scroll,
+                  padding: EdgeInsets.all(scale.px(20)),
+                  child: Text(
+                    i18n('tv_notice_body'),
+                    style: scale.font(TvTextSize.body, color: palette.text, height: 1.6),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

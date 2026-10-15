@@ -527,6 +527,11 @@ NOTES: dict[str, dict] = {
     },
     'uiMode': _new('X03.1（M14.1），本机记录'),
     'tvFocusZoom': _new('A17.1 c2'),
+    'tvMenuAlwaysExpanded': {
+        **_new('A17.2 c2'),
+        'verdict': 'v4 新加（A17.2 c2）：默认关，电视首页左边导航栏只显示图标，焦点移进去时展开盖在页面上；开了以后一直展开、页面右移（X03.1 原来的样子）',
+        'when': '马上',
+    },
 }
 
 V3_ONLY_NOTE = (

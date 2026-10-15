@@ -76,7 +76,13 @@ final List<String> _toasts = [];
 
 /// The app on a 1080p panel in [mode] (`uiMode`), on a device that is
 /// [television] or not.
-Future<AppServices> _pumpApp(WidgetTester tester, {String mode = 'tv', bool television = false, int rooms = 10}) async {
+Future<AppServices> _pumpApp(
+  WidgetTester tester, {
+  String mode = 'tv',
+  bool television = false,
+  int rooms = 10,
+  bool noticeAccepted = true,
+}) async {
   tester.view
     ..physicalSize = const Size(1920, 1080)
     ..devicePixelRatio = 1;
@@ -89,6 +95,7 @@ Future<AppServices> _pumpApp(WidgetTester tester, {String mode = 'tv', bool tele
     await settings.set(Settings.hotAreasList, [SiteIds.bilibili]);
     await settings.set(Settings.uiMode, mode);
     await settings.set(Settings.language, '简体中文');
+    if (noticeAccepted) await base.store.meta.set(TvHomePage.noticeKey, '1');
   });
   final site = _TvSite(rooms);
   final services = AppServices(
@@ -214,15 +221,54 @@ void main() {
     expect(_focused, 'tv menu popular');
     await _press(tester, LogicalKeyboardKey.arrowRight);
     expect(_focused, 'cell 0', reason: 'Right enters the destination on its last item');
+    // A17.2 c2: in the page the menu is a rail of icons, no scrim.
+    final rail = tester.getSize(find.byKey(const ValueKey('tv-home-menu'))).width;
+    expect(find.byKey(const ValueKey('tv-home-menu-scrim')), findsNothing);
+    expect(find.descendant(of: find.byKey(const ValueKey('tv-home-menu')), matching: find.text('热门')), findsNothing);
 
-    // Back steps out: the destination, then the menu, then a hint to leave.
+    // Back steps out: the destination, then the menu (opened over the
+    // dimmed page, with the names), then the exit question (A17.2 c8).
     await tester.binding.handlePopRoute();
     await _settle(tester);
     expect(_focused, 'tv menu popular');
+    expect(tester.getSize(find.byKey(const ValueKey('tv-home-menu'))).width, greaterThan(rail * 2));
+    expect(find.byKey(const ValueKey('tv-home-menu-scrim')), findsOneWidget);
+    expect(find.descendant(of: find.byKey(const ValueKey('tv-home-menu')), matching: find.text('热门')), findsOneWidget);
     await tester.binding.handlePopRoute();
     await _settle(tester);
-    expect(_toasts, ['再按一次返回键退出']);
+    expect(find.text('退出纯粹直播？'), findsOneWidget);
+    expect(_focused, isNot(startsWith('tv menu')), reason: 'the main button "退出" has the focus');
+    // Back is cancel: the home stays, the focus is back on the menu.
+    await tester.binding.handlePopRoute();
+    await _settle(tester);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('退出纯粹直播？'), findsNothing);
     expect(find.byType(TvHomePage), findsOneWidget);
+    expect(_focused, 'tv menu popular');
+
+    // "导航栏始终展开": the menu keeps its names beside the page.
+    await tester.runAsync(() => services.store.settings.set(Settings.tvMenuAlwaysExpanded, true));
+    await _settle(tester);
+    await _press(tester, LogicalKeyboardKey.arrowRight);
+    expect(_focused, startsWith('cell'));
+    expect(find.descendant(of: find.byKey(const ValueKey('tv-home-menu')), matching: find.text('热门')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tv-home-menu-scrim')), findsNothing);
+    await _close(tester, services);
+  });
+
+  testWidgets('A17.2 c10: the first start shows the notice once; agreeing opens the home', (tester) async {
+    final services = await _pumpApp(tester, noticeAccepted: false);
+    expect(find.byKey(const ValueKey('tv-notice')), findsOneWidget);
+    expect(find.text('已阅读并同意'), findsOneWidget);
+    // Down scrolls the words; the focus stays on the buttons.
+    await _press(tester, LogicalKeyboardKey.arrowDown);
+    expect(find.byKey(const ValueKey('tv-notice')), findsOneWidget);
+    await _press(tester, LogicalKeyboardKey.select);
+    await _settle(tester);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.byKey(const ValueKey('tv-notice')), findsNothing);
+    expect(_focused, 'tv menu favorites');
+    expect(await tester.runAsync(() => services.store.meta.get(TvHomePage.noticeKey)), '1');
     await _close(tester, services);
   });
 

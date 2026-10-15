@@ -101,6 +101,14 @@ class TvSettingsPane extends ConsumerWidget {
               value: watchSetting(ref, Settings.tvFocusZoom),
               onChanged: (value) => unawaited(settings.set(Settings.tvFocusZoom, value)),
             ),
+            TvSwitchRow(
+              id: 'menu_expanded',
+              icon: TvIcons.menuExpand,
+              title: i18n('tv_menu_always_expanded'),
+              subtitle: i18n('tv_menu_always_expanded_desc'),
+              value: watchSetting(ref, Settings.tvMenuAlwaysExpanded),
+              onChanged: (value) => unawaited(settings.set(Settings.tvMenuAlwaysExpanded, value)),
+            ),
           ],
         ),
         TvSettingsGroup(

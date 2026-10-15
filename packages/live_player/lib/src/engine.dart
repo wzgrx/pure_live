@@ -194,5 +194,12 @@ abstract interface class PlayerEngine {
   Future<void> dispose();
 }
 
+/// An engine that can play an on-demand source faster or slower (V01.8:
+/// recordings). Not every engine can; the session asks with `is`.
+abstract interface class PlaybackRate {
+  /// Sets the speed, 1 = normal.
+  Future<void> setRate(double rate);
+}
+
 /// Creates an engine on first need.
 typedef EngineFactory = Future<PlayerEngine> Function();

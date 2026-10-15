@@ -4049,11 +4049,12 @@ note = "3.x 和 4.x 退到后台都照常解码视频；4.x 已有纯音频模�
 id = "V01.8"
 title = "录像在应用内播放：按房间列出录像、记住每个文件看到哪、倍速、选集、小窗"
 type = "功能"
-status = "未开始"
+status = "完成"
+date = "2026-10-15"
 size = "大"
 tier = 3
 from = "上游 pure_live 0b23c32fa、796823afd、d8dc94af5 等 45 个提交（W01.3 对照）"
-note = "4.x 录制中心的“播放”交给系统里的其他应用；等用户决定做不做（D-026）"
+note = "4.x 录制中心的“播放”交给系统里的其他应用；等用户决定做不做（D-026）；2026-10-15 用户要求整个项目做完，做了：录制面板和录制中心的“播放”在应用里打开（RecordingPlayerPage，shared/record/recording_player_page.dart）：画面、播放暂停、进度条、倍速 0.5～3（live_player 新加可选接口 PlaybackRate，mpv 实现）、同一文件夹（一个房间一个文件夹）里的录像按文件名排成上一段/下一段、每个文件记住看到哪（meta，刚开始或快结束时从头）；小窗没做；测试 test/shared/recording_player_test.dart"
 
 [[task]]
 id = "V02.1"

@@ -44,7 +44,7 @@ MpvPlatform? mpvPlatformOf(TargetPlatform platform) => switch (platform) {
 ///   output off (the fork's `setVideoOutputEnabled`), desktop selects
 ///   `vid=no`; Android does not re-send `vid=auto` after an open.
 /// - Windows reports presented frames (the fork's `frameRevision`).
-final class MpvEngine implements PlayerEngine {
+final class MpvEngine implements PlayerEngine, PlaybackRate {
   new _(this.player, this.controller, this.config) {
     _gate = NativeDiagnosticGate(onError: (error) => _add(EngineError(error)));
     _bind();
@@ -254,6 +254,9 @@ final class MpvEngine implements PlayerEngine {
 
   @override
   Future<void> setVolume(double volume) => player.setVolume((volume * 100).clamp(0, 100).toDouble());
+
+  @override
+  Future<void> setRate(double rate) => player.setRate(rate.clamp(0.25, 4).toDouble());
 
   @override
   Future<void> setAudioOnly({required bool enabled}) => _applyAudioOnly(enabled: enabled);

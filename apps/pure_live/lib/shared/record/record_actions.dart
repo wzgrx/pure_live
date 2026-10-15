@@ -8,6 +8,7 @@ import 'package:pure_live/i18n/i18n.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/routes/route_path.dart';
 import 'package:pure_live/shared/record/record_state.dart';
+import 'package:pure_live/shared/record/recording_player_page.dart';
 
 // What the live room's record panel (U.2f) and the recording centre (U.7a)
 // do the same way: "开播自动录", the live check it needs, "再录一次",
@@ -73,8 +74,21 @@ Future<void> recordTaskAgain(AppRecording recording, Recorder recorder, RecordTa
 }
 
 /// "播放": the recording in the system's player.
+/// Plays the recording at [path] in the app (V01.8), with the other
+/// recordings of its folder before and after it; another app only when the
+/// app has no page to show it on.
 Future<void> playRecording(String path) async {
-  if (!await AppNavigator.openFile(path)) AppNavigator.toast(i18n('record_panel_play_failed'));
+  final context = AppNavigator.navigatorContext;
+  if (context == null || !context.mounted) {
+    if (!await AppNavigator.openFile(path)) AppNavigator.toast(i18n('record_panel_play_failed'));
+    return;
+  }
+  final files = recordingsBeside(path);
+  await Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => RecordingPlayerPage(files: files, index: files.indexOf(path)),
+    ),
+  );
 }
 
 /// "查看原因": the whole failure, selectable.

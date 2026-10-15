@@ -495,6 +495,15 @@ final class PlaybackSession {
     }
   }
 
+  /// Plays an on-demand source at [rate] (1 = normal) where the engine can
+  /// (V01.8); false when it cannot or the source is live.
+  Future<bool> setRate(double rate) async {
+    final engine = _engine;
+    if (_disposed || engine is! PlaybackRate || !(_plan?.onDemand ?? false)) return false;
+    await (engine! as PlaybackRate).setRate(rate);
+    return true;
+  }
+
   /// Turns video output off or on without reopening (3.x's audio-only mode).
   Future<void> setAudioOnly({required bool enabled}) async {
     if (_disposed) return;

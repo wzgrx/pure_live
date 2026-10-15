@@ -603,6 +603,12 @@ abstract final class AppIcons {
   /// `Icons.arrow_forward_ios_rounded`).
   static const IconData nextPage = Icons.arrow_forward_ios_rounded;
 
+  /// The recording before this one (V01.8).
+  static const IconData recordingPrevious = Icons.skip_previous_rounded;
+
+  /// The recording after this one (V01.8).
+  static const IconData recordingNext = Icons.skip_next_rounded;
+
   /// The desktop pager's rooms-per-page menu (3.x
   /// `Icons.arrow_drop_down_rounded`).
   static const IconData pageSize = Icons.arrow_drop_down_rounded;

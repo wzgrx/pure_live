@@ -1,10 +1,10 @@
 {
-  "version": "5.0.0",
-  "build_number": 5100,
-  "version_num": 500005100,
-  "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
+  "version": "5.1.0",
+  "build_number": 5101,
+  "version_num": 501005101,
+  "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.0.0",
-      "build_number": 5100,
-      "version_num": 500005100,
-      "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
+      "version": "5.1.0",
+      "build_number": 5101,
+      "version_num": 501005101,
+      "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,21 +25,21 @@
       ]
     },
     "windows": {
-      "version": "5.0.0",
-      "build_number": 5100,
-      "version_num": 500005100,
-      "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
+      "version": "5.1.0",
+      "build_number": 5101,
+      "version_num": 501005101,
+      "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.0.0",
-      "build_number": 5100,
-      "version_num": 500005100,
-      "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
+      "version": "5.1.0",
+      "build_number": 5101,
+      "version_num": 501005101,
+      "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0"
     },
     "macos": {
       "version": "3.2.10",

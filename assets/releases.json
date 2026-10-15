@@ -1,5 +1,61 @@
 [
   {
+    "version": "5.1.0",
+    "title": "Pure Live v5.1.0",
+    "date": "2026-10-16",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.1.0（Android、电视、Windows、Linux）\n\n5.1.0 把 5.0.0 说“以后再做”的电视功能补齐了：电视界面多了视频和音乐两个模式、壁纸、电视样式的设置，直播浏览页按新设计重做；开播提醒可以按主播单独开关，Android 上应用被系统清理后也会提醒。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 电视：三个模式\n\n导航栏最上面的模式按钮可以在“直播 / 视频 / 音乐”之间切换，切到哪个模式导航栏就换成那个模式的入口。\n\n- **视频**（哔哩哔哩点播，需要登录，没登录时可以扫码登录）：首页（动态、推荐、热门）、分区、影视（番剧、国创、电影、电视剧、纪录片、综艺）、我的（UP主、稍后再看、收藏夹、历史记录、追番、追剧）、搜索（视频、用户、番剧、影视）。详情页焦点在“播放”，看过的写“继续 P2 · 01:46”，可以点赞、投币、收藏、稍后再看，下面是相关视频。播放器：画质、倍速、弹幕（设置和直播间一样）、字幕、选集、评论都在右侧面板；←→ 快退快进，连按加大步长，↑↓ 换集；本机和云端都记进度。\n- **音乐**（哔哩哔哩音频和视频里的歌）：正在播放、搜索、歌单、推荐、我的五个入口。播放器有封面和滚动歌词、队列面板、列表循环 / 单曲循环 / 随机、纯音频或显示画面、标准 / 无损；离开播放器音乐继续放，通知栏和媒体键可以控制。歌单可以新建、重命名、同步收藏夹，也能从网易云、酷狗、QQ 音乐导入歌单（逐首匹配）。进直播间或看视频时音乐自动停。\n- 直播还是原来的直播模式。\n\n### 电视：壁纸\n\n- 电视界面的背景可以换成纯色、渐变、图片或视频：图片来自必应每日壁纸、Wallhaven（只要适合全家看的图）和随机壁纸，视频壁纸输入一个视频地址，下载后静音循环。\n- 可以调填充方式、遮罩深浅和模糊程度，先在预览里看效果，按“设为背景”才保存；进直播间、看视频时视频壁纸自动暂停。\n\n### 电视：设置\n\n- 电视样式的设置目录：电视自己的设置（界面模式、焦点放大、壁纸、导航栏）在最前面，手机的各个设置分节按电视的样子显示，选项用电视的选择框和颜色格子。\n- 导航栏显示控制：每个模式的入口可以排序、隐藏、换图标。\n- “扫码到手机”：要输入 Cookie、地址这类长文字，或看日志时，电视上显示二维码，用同一局域网的手机打开网页填写或查看；打开外部链接也改成显示二维码。\n\n### 电视：直播浏览按新设计重做\n\n- 关注：状态（已开播 / 录播 / 未开播）和平台放在一行并带个数；未开播的关注是两列紧凑行，不再是大封面。\n- 分区：关注的分区单独成一页；分区卡片长按弹出小窗（打开、关注 / 取消关注），不会一按就关注；分区房间页顶上有“＋ 关注”。\n- 热门：平台标签最后多了“全部平台”面板。\n- 观看记录：显示条数和保留数量，可以刷新是否在播、改保留数量，按日期筛选。\n- 搜索合成一页：直播间 / 主播、包含未开播、排序、搜索范围都在搜索框下面，结果在最下面；主播结果是紧凑行；可以“用手机输入”；清空最近搜索先确认。\n\n### 开播提醒\n\n- 每个主播可以单独开关开播提醒：关注页、直播间的关注按钮菜单里都能设，设置里能看到开了几个、一键清除。\n- Android：应用被系统冻结或从最近任务里划掉后，系统大约每 15 分钟让应用后台检查一次开播（新设置“后台检查”，默认开）。小米、红米手机需要在应用信息里允许“自启动”。\n\n### 修复\n\n- **Kick 恢复可用（Android）**：Kick 从 10 月起拒绝 HTTP/1.1 的请求，列表和搜索都报“被拒绝”，弹幕也换了连接密钥连不上；现在请求走 HTTP/2，弹幕用新的密钥，在 K90 上看过列表、播放和弹幕。\n- 哔哩哔哩：没登录也能看到完整的弹幕昵称了，直播间里“访客模式昵称打码”的横幅只在昵称真的被打码时才显示。\n- 录制：\n  - 第一次录制时允许通知权限后，通知栏马上出现“正在录制”（以前要等文字变化）。\n  - “开播自动录”检测到开播时开始新的一场，时长和大小不再接着上一场算。\n  - 录制中应用被杀，重启后能把录到的分段合成 MP4，最后一段被截断也只留下那一段，不再整场“录制失败”。\n  - 重启后已保存的卡片不再写“弹幕 0 条”。\n- 账号：退出一个本机读不了的 Cookie 后，账号页的提示马上消失。\n- 电视：\n  - 导航栏入口放不下时不再盖住“设置”；上下键按导航栏自己的顺序走。\n  - 长按改用遥控器的按键重复判断，更快更准。\n  - 二维码不再超出对话框；“热门”的全部平台面板可以滚动，选中的平台标签保持在中间。\n  - 搜索：按确定后焦点到第一个结果；“用手机输入”在所有电视页面都能用。\n  - 设置分组里放大的焦点行不再被裁掉边框；音乐模式的登录提示说的是音乐。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库，5.0.0 和 4.x 的数据原样使用；从 3.x 升级时第一次打开会自动导入 3.x 的数据。\n- 新设置都有默认值：电视模式默认“直播”，后台检查开播默认开，壁纸默认不换。\n\n## 已知问题\n\n- 新功能通过了自动测试，在 K90 手机上做了快速测试，Windows 便携版和 Linux 版做了启动测试（Windows 安装版没有在测试电脑上安装）；电视的视频、音乐、壁纸、设置只在手机的电视模式下测过，没有在电视真机上测。遇到问题请反馈。\n- 视频和音乐只接了哔哩哔哩；音乐的无损需要账号有对应权益。\n- 后台检查开播的时间由系统决定，可能晚于 15 分钟；省电模式下可能更久。\n- HLS 平台（如 AcFun）录制卡片上的时长比 MP4 长约 10%：卡片按录制的实际时间算，包括开头等第一批分段的时间，视频内容不缺。\n- 5.0.0 的其他已知问题照旧：Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时。\n\n## 以后要做的\n\n- iOS、iPadOS、macOS：需要 Mac 构建和签名，以后再做。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.1.0-5101-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.1.0-5101-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.1.0-5101-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.1.0-5101-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.1.0-5101-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.1.0-5101-linux-x64.tar.gz` | Linux x86_64 |\n\nAndroid 包的签名和 3.2.11、4.x、5.0.0 相同，可以直接覆盖安装。最低 Android 8.0。\n\n## SHA-256\n\n```\na77bcda738700a8a910b4d3a7115c75803234bd1ea951bd7fd773185ab58081e  PureLive-5.1.0-5101-debug-signed-android-arm64-v8a-release.apk\nfb77226a00813a430dec66413f32caa97e6b792dbf7f47b436965457c7beb75a  PureLive-5.1.0-5101-debug-signed-android-armeabi-v7a-release.apk\n1f6df063f3e6c468e608453afae08fc89a1364168699b34eeebaab80a59b39c1  PureLive-5.1.0-5101-debug-signed-android-x86_64-release.apk\n5c78c7495b01adf97268a1fef246ea33423453b1001b1fb5c5a03af10bedce32  PureLive-5.1.0-5101-linux-x64.tar.gz\n39ec4fd90138ef75749fa1b30fddf126100b7c9a4abf7cf2f14ad9a8a570f67f  PureLive-5.1.0-5101-windows-x64-portable.zip\n6d14a7a8c5e27f074465a9a3d5c4e5e6f97aa9db29c6051690a6421b8a283765  PureLive-5.1.0-5101-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.1.0-5101-debug-signed-android-arm64-v8a-release.apk",
+        "size": "107.46mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/PureLive-5.1.0-5101-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.1.0-5101-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "95.27mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/PureLive-5.1.0-5101-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.1.0-5101-debug-signed-android-x86_64-release.apk",
+        "size": "118.63mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/PureLive-5.1.0-5101-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.1.0-5101-linux-x64.tar.gz",
+        "size": "48.33mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/PureLive-5.1.0-5101-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.1.0-5101-windows-x64-portable.zip",
+        "size": "64.30mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/PureLive-5.1.0-5101-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.1.0-5101-windows-x64-setup.exe",
+        "size": "49.65mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.1.0/PureLive-5.1.0-5101-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.0.0",
     "title": "Pure Live v5.0.0",
     "date": "2026-10-15",

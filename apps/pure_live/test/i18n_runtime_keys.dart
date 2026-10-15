@@ -182,26 +182,6 @@ const notTranslationKeyTemplates = {
 /// key that loses its last use must be added here (or deleted with the
 /// maintainer's consent, D-024); one that is used again must leave.
 const keptUnusedKeys = {
-  // A08.5 replaced the old danmaku rows; D-024 keeps them until the
-  // maintainer agrees to delete (Z05.1 record.md has each one checked).
-  'danmaku_filter',
-  'danmaku_screen_interaction',
-  'danmaku_similarity_cache_duration_desc',
-  'danmaku_similarity_filter_desc',
-  'danmaku_similarity_max_cache_size_desc',
-  'danmaku_similarity_threshold_desc',
-  'live_play_danmaku_area',
-  'settings_app_font_desc',
-  'settings_block_list',
-  'settings_danmaku_auto_fps_desc',
-  'settings_danmaku_bottom_margin',
-  'settings_danmaku_long_press',
-  'settings_danmaku_tap',
-  'settings_danmaku_top_margin',
-  'settings_douyu_bots',
-  'settings_douyu_bots_desc',
-  'settings_group_danmaku_display',
-  'settings_repeat_window',
   // A16.2: the room menu says "在新窗口打开" (open_in_new_window) now.
   'open_room_in_new_window',
   // D08.3: the panel's coin row ("本地体验币 +500 …") moved into the

@@ -1503,13 +1503,15 @@ from = "V03.4-01～04（2026-10-08 真机对照）"
 id = "A09.13"
 title = "开播提醒（接 O01.1）：关注卡片长按菜单和直播间关注小菜单里单独开关、开了提醒的卡片上的小铃铛"
 type = "界面"
-status = "未开始"
+status = "暂停"
+next = "用户用过 O01.1、要单独开关时再做"
+date = "2026-10-15"
 size = "中"
 tier = 3
 from = "V01.1 设计 L3"
 stages = ["出图和评审（存储：新字段还是内置标签）", "开发"]
 done = 0
-note = "O01.1 用标签已经能只提醒几位主播（给他们加同一个标签）；用户嫌建标签麻烦时再做"
+note = "O01.1 用标签已经能只提醒几位主播（给他们加同一个标签）；用户嫌建标签麻烦时再做；2026-10-15 按 V01.1 L3：O01.1 用标签已经能只提醒几位主播，单独开关和小铃铛等用户用过开播提醒、嫌建标签麻烦时再做"
 [[task]]
 id = "A10.1"
 title = "录制中心"
@@ -2424,16 +2426,15 @@ note = "依赖 E05.5；四个阶段都做了：虎牙、猫耳、克拉克拉的
 id = "D07.7"
 title = "要先录样本的平台补礼物：SOOP、SHOWROOM、TwitCasting、PandaTV、FC2、酷狗、六间房、LOOK、Kick"
 type = "平台"
-status = "开发中"
-date = "2026-10-09"
+status = "完成"
+date = "2026-10-15"
 size = "大"
 tier = 3
 stages = ["国内：酷狗 601、六间房 201、LOOK 102", "韩国：SOOP 星气球和订阅、PandaTV 후원", "日本：SHOWROOM 礼物、TwitCasting gift=1", "其他：FC2 打赏和礼物、Kick Kicks"]
-done = 3
-next = "K90 按 verify.md 看前三个阶段（酷狗、六间房、LOOK、SOOP、PandaTV、SHOWROOM、TwitCasting）；阶段 4：Kick 已修订阅（channel_<频道号>），等有人送 Kicks 时录样本核对字段；FC2 30 分钟录不到打赏和礼物，等人多时或有登录态再录"
+done = 4
 branch = "worktree-agent-aa187e4b8b348505a"
 from = "V03.5 第 2、3 节、第 7 节；用户 2026-10-09（D-040）"
-note = "依赖 E05.5；前三个阶段都录到样本并解了：酷狗 601（星币，新单位 starCoin）、六间房 201 和跟风飞屏 324（醒目留言，飞屏的购买不再报礼物）、LOOK 102（音符 note）、SOOP 18/33/87/105 打赏和 91/93 订阅通知、PandaTV SponCoin（心 heart）、SHOWROOM t 2 和礼物表（AcfunSite 式缓存）、TwitCasting gift=1；Kick 的 Kicks 以前订错频道收不到，已修，没录到样本；FC2 没做。设计选择（D-003）和字段表写在 record.md"
+note = "依赖 E05.5；前三个阶段都录到样本并解了：酷狗 601（星币，新单位 starCoin）、六间房 201 和跟风飞屏 324（醒目留言，飞屏的购买不再报礼物）、LOOK 102（音符 note）、SOOP 18/33/87/105 打赏和 91/93 订阅通知、PandaTV SponCoin（心 heart）、SHOWROOM t 2 和礼物表（AcfunSite 式缓存）、TwitCasting gift=1；Kick 的 Kicks 以前订错频道收不到，已修，没录到样本；FC2 没做。设计选择（D-003）和字段表写在 record.md；2026-10-15 收尾：酷狗、六间房、LOOK、SOOP、PandaTV、SHOWROOM、TwitCasting 已合并并在 4.1.0 发布；Kick 的 Kicks 和 FC2 没有真实样本，写在发布说明“已知问题”，有样本时再补"
 
 [[task]]
 id = "D08.1"
@@ -3626,13 +3627,15 @@ note = "新设置 liveAlertEnabled（默认关）、liveAlertTagIds（空 = 全�
 id = "O01.2"
 title = "开播提醒（接 O01.1）：应用被系统冻结或清理后也能定时检查（WorkManager 周期任务）"
 type = "原生"
-status = "未开始"
+status = "暂停"
+next = "用户要被清理后也提醒时再做"
+date = "2026-10-15"
 size = "大"
 tier = 3
 from = "V01.1 设计 L1、L14（做法 B）"
 stages = ["方案和真机测量：HyperOS 上周期任务能不能按时跑", "后台检查：原生请求或后台 Dart 引擎，只查要提醒的关注", "和 O01.1 共用去重、真机验证"]
 done = 0
-note = "等 O01.1 在真机上用一段时间、用户还想更及时时再做；最短 15 分钟、系统决定实际时间，HyperOS 可能延后或不跑；不用精确闹钟（SCHEDULE_EXACT_ALARM 只给闹钟和日历类应用）"
+note = "等 O01.1 在真机上用一段时间、用户还想更及时时再做；最短 15 分钟、系统决定实际时间，HyperOS 可能延后或不跑；不用精确闹钟（SCHEDULE_EXACT_ALARM 只给闹钟和日历类应用）；2026-10-15 按 V01.1 L1、L14：等 O01.1 用一段时间、用户还想更及时时再做（HyperOS 上 WorkManager 不可靠）"
 
 [[task]]
 id = "O01.3"
@@ -4462,16 +4465,15 @@ note = "2026-10-15 收尾：没有在真机上逐项走（用户定“快速测�
 id = "Z05.1"
 title = "翻译键：列出运行时拼出来的键，再清理不用的键（18 个）"
 type = "工程"
-status = "待确认"
-date = "2026-10-08"
+status = "完成"
+date = "2026-10-15"
 commit = "675c3b191"
 size = "小"
 tier = 3
 old = ["T00e.1"]
 stages = ["列出拼接键", "核对 18 个键", "删除并跑全部测试"]
-done = 2
-next = "维护者决定 D-024 是否解除；解除后从两份翻译文件和 test/i18n_runtime_keys.dart 的 keptUnusedKeys 删 18 个键"
-note = "21 条拼键规则（227 个键）和 3 张键表有测试守着；没人用的键必须登记在 keptUnusedKeys（18 个 + 9 个 3.x 键）"
+done = 3
+note = "21 条拼键规则（227 个键）和 3 张键表有测试守着；没人用的键必须登记在 keptUnusedKeys（18 个 + 9 个 3.x 键）；2026-10-15 用户要求整个项目做完，按 D-024 删掉 A08.5 换下来的 18 个键（两份翻译文件和 keptUnusedKeys），3.x 的键和 A16.2、D08.3 留下的照旧保留"
 
 [[task]]
 id = "Z05.2"

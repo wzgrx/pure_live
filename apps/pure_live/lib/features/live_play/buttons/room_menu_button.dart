@@ -16,6 +16,7 @@ import 'package:pure_live/features/live_play/layout/room_panel.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/live_play/switch_room/room_switch_panel.dart';
 import 'package:pure_live/i18n/i18n.dart';
+import 'package:pure_live/platform/background_guide.dart';
 import 'package:pure_live/routes/app_navigator.dart';
 import 'package:pure_live/shared/rooms/room_menu.dart';
 import 'package:pure_live/shared/rooms/room_texts.dart';
@@ -81,8 +82,17 @@ String kuaishouAppLink(String stream) {
 }
 
 /// Opens [room] in its app or browser (3.x `openNaviteAPP`): on Android
-/// the platform's app first, then the web page.
-Future<void> openRoomExternally(LiveRoom room, {bool? android}) async {
+/// the platform's app first, then the web page. When both are refused on a
+/// Xiaomi, Redmi or POCO phone, HyperOS's "打开其他应用" permission is the
+/// usual reason (C03.2: the system sends the request to a security page
+/// that does not open), so a dialog says where to allow it and opens the
+/// app's info page; elsewhere a message as before.
+Future<void> openRoomExternally(
+  LiveRoom room, {
+  bool? android,
+  BackgroundGuideChannel guide = const BackgroundGuideChannel(),
+  BuildContext? Function()? contextOf,
+}) async {
   final target = externalRoomTarget(room);
   if (target == null) {
     AppNavigator.toast(i18n('open_room_external_unavailable'));
@@ -102,7 +112,27 @@ Future<void> openRoomExternally(LiveRoom room, {bool? android}) async {
     if (await attempt(native)) return;
     AppNavigator.toast(i18n('open_app_failed_fallback_browser'));
   }
-  if (!await attempt(target.web)) AppNavigator.toast(i18n('open_room_external_failed'));
+  if (await attempt(target.web)) return;
+  if (native != null && await _explainBlockedJump(guide, contextOf)) return;
+  AppNavigator.toast(i18n('open_room_external_failed'));
+}
+
+/// The HyperOS dialog of [openRoomExternally]; false when this is not a
+/// Xiaomi phone (or nothing can be shown).
+Future<bool> _explainBlockedJump(BackgroundGuideChannel guide, BuildContext? Function()? contextOf) async {
+  final status = await guide.status();
+  if (status == null || status.rom.family != RomFamily.xiaomi) return false;
+  final context = contextOf?.call() ?? AppNavigator.navigatorContext;
+  if (context == null || !context.mounted) return false;
+  final open = await showAppConfirmDialog(
+    context: context,
+    title: i18n('open_room_external_blocked_title'),
+    message: i18n('open_room_external_blocked_xiaomi'),
+    confirmLabel: i18n('open_app_details'),
+    confirmKey: const ValueKey('open-room-blocked-details'),
+  );
+  if (open) await guide.open(const [SystemPage.appDetails]);
+  return true;
 }
 
 /// The entries of the room menu, in its order (docs/A-界面设计/A07-直播间界面/A07.6-直播间弹窗, 右上角

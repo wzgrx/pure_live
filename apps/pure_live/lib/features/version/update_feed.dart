@@ -9,8 +9,10 @@ import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/version/app_version.dart';
 import 'package:pure_live/i18n/i18n.dart';
 
-/// The repository the update files are read from (3.x `AppConfig`).
-const GitHubMirror updateRepository = GitHubMirror(owner: 'wzgrx', repo: 'pure_live');
+/// The repository the update files are read from (3.x `AppConfig`). From
+/// 5.0.0 the app lives in its own repository; the old fork (`wzgrx/pure_live`)
+/// keeps its update files pointing here, so 3.x and 4.x still find 5.x.
+const GitHubMirror updateRepository = GitHubMirror(owner: 'wzgrx', repo: 'PureLive');
 
 /// The project page (3.x `VersionUtil.projectUrl`).
 final Uri projectUrl = Uri.parse('https://github.com/${updateRepository.owner}/${updateRepository.repo}');

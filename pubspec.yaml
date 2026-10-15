@@ -40,6 +40,10 @@ dependency_overrides:
   # Flutter 3.47.7's flutter_test pins test_api 0.7.12, below what test 1.33.0
   # (the pure Dart members) needs exactly 0.7.15; flutter_test runs on it.
   test_api: 0.7.15
+  # The Linux build offers no in-app browser (InAppWeb.available is false);
+  # this stand-in has no native code, so it does not need WPE WebKit (X02.1).
+  flutter_inappwebview_linux:
+    path: third_party/flutter_inappwebview_linux_stub
   # ffmpeg_kit_extended_flutter 0.6.2 (the recorder's FFmpeg) declares
   # code_assets ^1.2.1 while the media_kit fork needs ^2.1.0; its build hook
   # only uses APIs unchanged in 2.x (3.x shipped the same override).

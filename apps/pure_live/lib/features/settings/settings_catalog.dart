@@ -72,6 +72,9 @@ List<SettingsChoice<int>> _minutes(List<int> values) => [
 bool _notIos(SettingsEnv env) => !env.isIOS;
 bool _android(SettingsEnv env) => env.isAndroid;
 bool _windows(SettingsEnv env) => env.isWindows;
+
+/// Where the desktop shell runs (title bar, tray, closing, start-up; X02.1).
+bool _desktopShell(SettingsEnv env) => env.isWindows || env.isLinux;
 bool _mobile(SettingsEnv env) => env.isMobile;
 bool _desktop(SettingsEnv env) => !env.isMobile;
 bool _refreshRate(SettingsEnv env) => env.hasRefreshRate;
@@ -1512,7 +1515,7 @@ List<SettingsEntry> _build() {
       desc: 'settings_startup_desc',
       settings: [Settings.enableStartUp],
       keywords: ['开机', 'startup'],
-      when: _windows,
+      when: _desktopShell,
     )
     ..add(
       'window_size',
@@ -1520,7 +1523,7 @@ List<SettingsEntry> _build() {
       (context, entry) => WindowSizeTile(entry: entry),
       settings: [Settings.windowWidth, Settings.windowHeight],
       keywords: ['窗口', 'window'],
-      when: _windows,
+      when: _desktopShell,
     )
     ..toggle(
       'splash',
@@ -1553,7 +1556,7 @@ List<SettingsEntry> _build() {
       desc: 'settings_close_window_desc',
       settings: [Settings.dontAskExit, Settings.exitChoose],
       keywords: ['托盘', '关闭', 'close', '退出', '不再询问'],
-      when: _windows,
+      when: _desktopShell,
     )
     ..toggle(
       'new_window',
@@ -1562,7 +1565,7 @@ List<SettingsEntry> _build() {
       AppIcons.newPlayerWindow,
       desc: 'settings_new_window_desc',
       keywords: ['窗口', 'window'],
-      when: _windows,
+      when: _desktopShell,
     )
     ..group = 'settings_group_exit_timer'
     ..add(

@@ -292,7 +292,7 @@ class _UpdateDownloadDialogState extends ConsumerState<UpdateDownloadDialog> {
   }
 
   /// Android: the system installer (asks for "install unknown apps" first);
-  /// Windows: runs the installer; a ZIP opens its folder.
+  /// Windows: runs the installer; a ZIP or a Linux tarball opens its folder.
   Future<void> _install() async {
     final file = _file;
     if (file == null || _opening) return;
@@ -301,7 +301,8 @@ class _UpdateDownloadDialogState extends ConsumerState<UpdateDownloadDialog> {
       await SystemAccess.openInstallSettings();
       return;
     }
-    if (file.path.toLowerCase().endsWith('.zip')) {
+    final lower = file.path.toLowerCase();
+    if (lower.endsWith('.zip') || lower.endsWith('.tar.gz')) {
       await _openFolder();
       return;
     }

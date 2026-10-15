@@ -198,6 +198,9 @@ final class SettingsEnv {
   /// Windows.
   bool get isWindows => platform == TargetPlatform.windows;
 
+  /// Linux.
+  bool get isLinux => platform == TargetPlatform.linux;
+
   /// A phone or tablet OS.
   bool get isMobile => platform == TargetPlatform.android || platform == TargetPlatform.iOS;
 

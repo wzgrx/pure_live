@@ -36,6 +36,8 @@ List<(String, ReleaseFile)> platformPackages(String platform, UpdateInfo info, L
       add('exe_installer', PackageKind.windowsSetup);
       add('msix_installer', PackageKind.windowsMsix, offered: info.windowsMsixAvailable);
       add('portable_package', PackageKind.windowsPortable);
+    case 'linux':
+      add('linux_package', PackageKind.linuxTarball);
     case 'macos':
       add('macos_package', PackageKind.macosDmg, otherwise: PackageKind.macosZip);
   }
@@ -44,13 +46,15 @@ List<(String, ReleaseFile)> platformPackages(String platform, UpdateInfo info, L
 
 /// The title of this device's package among [platformPackages] (the "本机"
 /// mark, docs/A-界面设计/A15-小页面/A15.2-关于和版本 c7): the running app's architecture on
-/// Android, the EXE installer on Windows, the universal package on macOS;
+/// Android, the EXE installer on Windows, the tarball on Linux, the
+/// universal package on macOS;
 /// null elsewhere.
 String? nativePackageTitle([Abi? abi]) => switch (abi ?? Abi.current()) {
   Abi.androidArm64 => 'arch_arm64',
   Abi.androidArm => 'arch_arm32',
   Abi.androidX64 => 'arch_x86_64',
   Abi.windowsX64 || Abi.windowsArm64 => 'exe_installer',
+  Abi.linuxX64 => 'linux_package',
   Abi.macosArm64 || Abi.macosX64 => 'macos_package',
   _ => null,
 };

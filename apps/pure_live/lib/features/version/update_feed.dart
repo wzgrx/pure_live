@@ -253,6 +253,9 @@ enum PackageKind {
   /// Windows x64 portable ZIP.
   windowsPortable('windows-x64-portable.zip', ['windows', 'portable'], ['.zip'], preferred: ['x64']),
 
+  /// Linux x64 tarball (3.x's name; X02.1).
+  linuxTarball('linux-x64.tar.gz', ['linux', 'x64'], ['.tar.gz']),
+
   /// macOS universal disk image.
   macosDmg('macos-universal.dmg', ['macos', 'universal'], ['.dmg']),
 

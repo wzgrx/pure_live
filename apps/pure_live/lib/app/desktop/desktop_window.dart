@@ -250,11 +250,10 @@ final class DesktopShell with WindowListener {
   /// run.
   static DesktopShell? current;
 
-  /// Whether the shell runs here. Only Windows for now: the Linux desktop
-  /// build is paused (M12.6) and macOS is U.17b. Everything else checks
-  /// [current] and the window's abilities, not the platform, so Linux gets
-  /// the same title bar, tray and closing once it is on (c2).
-  static bool get supported => Platform.isWindows;
+  /// Whether the shell runs here: Windows and Linux (X02.1; macOS is not
+  /// built). Everything else checks [current] and the window's abilities,
+  /// not the platform, so Linux gets the same title bar, tray and closing.
+  static bool get supported => Platform.isWindows || Platform.isLinux;
 
   /// Smallest window (UI_PLAN §5.3, U.13 c6; 3.x 400 × 300): it falls to
   /// the phone layout.

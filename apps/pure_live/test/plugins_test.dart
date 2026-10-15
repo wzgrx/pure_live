@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -150,6 +152,21 @@ void main() {
     );
     expect(commandTargets(r'"D:\Soft\PureLive\pure_live.exe"', exe), isFalse);
     expect(commandTargets(null, exe), isFalse);
+  });
+
+  test('X02.1: Linux start-up is an XDG autostart entry, written and removed', () async {
+    final dir = Directory.systemTemp.createTempSync('autostart');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final autostart = Directory('${dir.path}/autostart');
+    const exe = '/opt/PureLive/pure_live';
+    expect(await applyStartupEntry(enabled: true, executable: exe, autostartDirectory: autostart), isTrue);
+    final entry = File('${autostart.path}/$linuxAutostartFile').readAsStringSync();
+    expect(entry, contains('[Desktop Entry]'));
+    expect(entry, contains('Exec="$exe"'));
+    expect(await applyStartupEntry(enabled: false, executable: exe, autostartDirectory: autostart), isTrue);
+    expect(File('${autostart.path}/$linuxAutostartFile').existsSync(), isFalse);
+    expect(linuxAutostartDirectory(environment: {'HOME': '/home/a'}).path, '/home/a/.config/autostart');
+    expect(linuxAutostartDirectory(environment: {'HOME': '/home/a', 'XDG_CONFIG_HOME': '/cfg'}).path, '/cfg/autostart');
   });
 
   testWidgets('Windows: the title bar sits above the app and hides in full screen', (tester) async {

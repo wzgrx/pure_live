@@ -12,3 +12,4 @@ analyzer:
     - build/**
     - android/**
     - windows/**
+    - linux/**

@@ -920,6 +920,7 @@
     "launch_failed_title": "Pure Live could not start",
     "legacy_import_relogin": "Some platforms need you to sign in again: the sign-ins and WebDAV passwords from 3.x could not be encrypted on this device.",
     "license": "License",
+    "linux_package": "Linux tarball",
     "live": "Live",
     "live_alert": "Live alerts",
     "live_alert_apply_failed": "Could not change live alerts, please try again",

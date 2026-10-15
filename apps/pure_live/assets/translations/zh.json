@@ -919,6 +919,7 @@
     "launch_failed_title": "纯粹直播没能启动",
     "legacy_import_relogin": "部分平台需要重新登录：从 3.x 导入的登录信息和 WebDAV 密码无法在本机加密保存。",
     "license": "开源许可证",
+    "linux_package": "Linux 压缩包",
     "live": "正在直播",
     "live_alert": "开播提醒",
     "live_alert_apply_failed": "更新开播提醒设置失败，请重试",

@@ -31,9 +31,41 @@ bool commandTargets(String? command, String executable) {
   return normal(path) == normal(executable);
 }
 
-/// Adds or removes this exe's start-up entry (`HKCU\...\Run\PureLiveV4`);
-/// true when the registry now matches [enabled]. Nothing off Windows.
-Future<bool> applyStartupEntry({required bool enabled, String? executable}) async {
+/// The Linux start-up entry's file name under `~/.config/autostart/`
+/// (XDG autostart).
+const String linuxAutostartFile = 'purelive.desktop';
+
+/// The XDG autostart entry that starts [executable].
+String linuxAutostartEntry(String executable) =>
+    '[Desktop Entry]\nType=Application\nName=PureLive\nExec="$executable"\nX-GNOME-Autostart-enabled=true\n';
+
+/// The folder of the current user's XDG autostart entries.
+Directory linuxAutostartDirectory({Map<String, String>? environment}) {
+  final env = environment ?? Platform.environment;
+  final config = env['XDG_CONFIG_HOME'];
+  final base = config != null && config.isNotEmpty ? config : '${env['HOME'] ?? ''}/.config';
+  return Directory('$base/autostart');
+}
+
+/// Adds or removes this exe's start-up entry (`HKCU\...\Run\PureLiveV4`
+/// on Windows, `~/.config/autostart/purelive.desktop` on Linux); true when
+/// the entry now matches [enabled]. Nothing elsewhere.
+Future<bool> applyStartupEntry({required bool enabled, String? executable, Directory? autostartDirectory}) async {
+  if (Platform.isLinux || autostartDirectory != null) {
+    final file = File('${(autostartDirectory ?? linuxAutostartDirectory()).path}/$linuxAutostartFile');
+    try {
+      if (enabled) {
+        await file.parent.create(recursive: true);
+        await file.writeAsString(linuxAutostartEntry(executable ?? Platform.resolvedExecutable));
+      } else if (file.existsSync()) {
+        await file.delete();
+      }
+      return true;
+    } on Object catch (error, stack) {
+      log('Start-up entry failed', name: 'Desktop', error: error, stackTrace: stack);
+      return false;
+    }
+  }
   if (!Platform.isWindows) return true;
   final exe = executable ?? Platform.resolvedExecutable;
   RegistryKey? key;

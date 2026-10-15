@@ -171,6 +171,25 @@ void main() {
       releases.firstWhere((release) => release.version == windowsInfo.version).files,
     );
     expect([for (final (title, _) in windows) title], containsAll(['exe_installer', 'portable_package']));
+    // X02.1: Linux gets 3.x's tarball name.
+    final linux = platformPackages('linux', windowsInfo, const [
+      ReleaseFile(
+        name: 'PureLive-5.0.0-5100-linux-x64.tar.gz',
+        size: '',
+        downloads: 0,
+        url: 'https://example.com/a.tar.gz',
+      ),
+      ReleaseFile(
+        name: 'PureLive-5.0.0-5100-windows-x64-portable.zip',
+        size: '',
+        downloads: 0,
+        url: 'https://example.com/a.zip',
+      ),
+    ]);
+    expect(
+      [for (final (title, file) in linux) '$title ${file.name}'],
+      ['linux_package PureLive-5.0.0-5100-linux-x64.tar.gz'],
+    );
 
     expect(isNewerVersion('3.2.12', '3.2.11'), isTrue);
     expect(isNewerVersion('v3.10.0', '3.9.9+1'), isTrue);
@@ -545,7 +564,8 @@ void main() {
     expect(nativePackageTitle(Abi.androidX64), 'arch_x86_64');
     expect(nativePackageTitle(Abi.windowsX64), 'exe_installer');
     expect(nativePackageTitle(Abi.macosArm64), 'macos_package');
-    expect(nativePackageTitle(Abi.linuxX64), isNull);
+    expect(nativePackageTitle(Abi.linuxX64), 'linux_package'); // X02.1
+    expect(nativePackageTitle(Abi.linuxArm64), isNull);
   });
 
   testWidgets('A01.2: the history and about follow the font settings, the same size by default', (tester) async {

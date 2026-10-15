@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,7 @@ import 'package:pure_live/app/app.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/app/ui_mode.dart';
 import 'package:pure_live/features/home/home_page.dart';
+import 'package:pure_live/features/live_play/logic/predictive_back.dart';
 import 'package:pure_live/features/live_play/logic/room_controller.dart';
 import 'package:pure_live/features/settings/settings_catalog.dart';
 import 'package:pure_live/routes/app_navigator.dart';
@@ -268,6 +271,34 @@ void main() {
     expect(find.text('支持各平台的直播间链接、短链接和纯粹直播的分享口令，按 OK 用遥控器输入'), findsOneWidget);
     // Nothing typed: "播放" waits.
     expect(tester.widget<TvButton>(find.byKey(const ValueKey('tv-link-play'))).onTap, isNull);
+    await _close(tester, services);
+  });
+
+  testWidgets("A17.2 c8: Android's Back (the native channel) asks before leaving; over a page it pops the page", (
+    tester,
+  ) async {
+    final services = await _pumpApp(tester);
+    addTearDown(RoomBackChannel.instance.reset);
+    // Not awaited: the handler waits while the exit question is open.
+    Future<void> nativeBack() async {
+      unawaited(
+        tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+          'pure_live/predictive_back',
+          const StandardMethodCodec().encodeMethodCall(const MethodCall('backInvoked')),
+          (_) {},
+        ),
+      );
+      await _settle(tester);
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    expect(RoomBackChannel.instance.held, isTrue, reason: 'the home takes Back from Android');
+    await nativeBack();
+    expect(find.text('退出纯粹直播？'), findsOneWidget);
+    // Over the dialog, Back closes it.
+    await nativeBack();
+    expect(find.text('退出纯粹直播？'), findsNothing);
+    expect(find.byType(TvHomePage), findsOneWidget);
     await _close(tester, services);
   });
 

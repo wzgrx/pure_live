@@ -8,6 +8,7 @@ import 'package:live_store/live_store.dart';
 import 'package:live_ui/live_ui.dart';
 import 'package:pure_live/app/services.dart';
 import 'package:pure_live/features/home/home_menu.dart';
+import 'package:pure_live/features/live_play/logic/predictive_back.dart';
 import 'package:pure_live/features/version/update_feed.dart';
 import 'package:pure_live/features/version/update_prompt.dart';
 import 'package:pure_live/i18n/i18n.dart';
@@ -165,6 +166,7 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     FocusManager.instance.addListener(_remember);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      unawaited(RoomBackChannel.instance.hold(this, _nativeBack));
       _menuNode(_pane).requestFocus();
       unawaited(_start());
     });
@@ -188,8 +190,24 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     if (launch.isPrimary) _updateTimer = Timer(startupUpdateCheckDelay, _checkForUpdate);
   }
 
+  /// Android's Back (key or gesture) on the TV (K90, 2026-10-15): the root
+  /// route's PopScope is not reached there (the home is the only route and
+  /// Android leaves the app), so the home takes Back the way the live room
+  /// does ([RoomBackChannel]): something open on top (a dialog, a page) is
+  /// popped as usual, its own PopScope deciding; on the home itself the
+  /// steps of [_back] run, and leaving ends the app.
+  Future<void> _nativeBack() async {
+    if (!mounted) return;
+    if (!(ModalRoute.of(context)?.isCurrent ?? true)) {
+      await Navigator.of(context).maybePop();
+      return;
+    }
+    if (await _back()) await SystemNavigator.pop();
+  }
+
   @override
   void dispose() {
+    unawaited(RoomBackChannel.instance.release(this));
     WidgetsBinding.instance.removeObserver(this);
     FocusManager.instance.removeListener(_remember);
     _updateTimer?.cancel();
@@ -299,14 +317,16 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     });
   }
 
-  Future<void> _back() async {
+  /// Back on the home: the destination's own level, then the menu, then
+  /// the exit question; true when the user chose to leave.
+  Future<bool> _back() async {
     final handler = _backHandlers[_pane];
-    if (handler != null && handler()) return;
+    if (handler != null && handler()) return false;
     if (_paneNode(_pane).hasFocus) {
       focusMenu();
-      return;
+      return false;
     }
-    if (_asking) return;
+    if (_asking) return false;
     _asking = true;
     final leave = await showTvConfirm(
       context,
@@ -315,11 +335,8 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
       confirmLabel: i18n('tv_exit'),
     );
     _asking = false;
-    if (!leave) {
-      if (mounted) focusMenu();
-      return;
-    }
-    if (Platform.isAndroid) await SystemNavigator.pop();
+    if (!leave && mounted) focusMenu();
+    return leave;
   }
 
   KeyEventResult _menuKey(TvPane pane, KeyEvent event) {
@@ -412,7 +429,13 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) unawaited(_back());
+        if (!didPop) {
+          unawaited(
+            _back().then((leave) async {
+              if (leave && Platform.isAndroid) await SystemNavigator.pop();
+            }),
+          );
+        }
       },
       child: Scaffold(
         backgroundColor: palette.background,

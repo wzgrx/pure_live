@@ -146,25 +146,27 @@ void main() {
 
   test('reads the repository update files as 3.x does', () {
     final android = UpdateInfo.fromJson(_versionJson(), platform: 'android');
-    expect(android.version, '4.2.0');
-    expect(android.buildNumber, 5004);
+    expect(android.version, '5.0.0');
+    expect(android.buildNumber, 5100);
     expect(android.androidAbis, {'arm64-v8a', 'armeabi-v7a', 'x86_64'});
     expect(android.isNewer, isFalse);
-    // A platform block overrides the top level.
-    expect(UpdateInfo.fromJson(_versionJson(), platform: 'linux').version, '3.2.10');
+    // A platform block overrides the top level; 5.0.0 is on Linux too, and
+    // macOS stays on 3.2.10.
+    expect(UpdateInfo.fromJson(_versionJson(), platform: 'linux').version, '5.0.0');
+    expect(UpdateInfo.fromJson(_versionJson(), platform: 'macos').version, '3.2.10');
     expect(() => UpdateInfo.fromJson({'version': '1.0.0'}, platform: 'android'), throwsFormatException);
 
     final releases = parseReleases(_releasesJson());
-    expect(releases.first.version, '4.2.0');
+    expect(releases.first.version, '5.0.0');
     for (var i = 1; i < releases.length; i++) {
       expect(releases[i - 1].date.compareTo(releases[i].date), greaterThanOrEqualTo(0));
     }
     final packages = platformPackages('android', android, releases.first.files);
     expect([for (final (title, _) in packages) title], ['arch_arm64', 'arch_arm32', 'arch_x86_64']);
     expect(packages.first.$2.name, contains('arm64-v8a'));
-    // 4.x is Android only; Windows stays on 3.2.11 and its packages.
+    // 5.0.0 is on Windows too, with the installer and the portable ZIP.
     final windowsInfo = UpdateInfo.fromJson(_versionJson(), platform: 'windows');
-    expect(windowsInfo.version, '3.2.11');
+    expect(windowsInfo.version, '5.0.0');
     final windows = platformPackages(
       'windows',
       windowsInfo,

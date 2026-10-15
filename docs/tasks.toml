@@ -4213,39 +4213,46 @@ date = "2026-10-03"
 id = "X01.1"
 title = "键盘鼠标操作核对"
 type = "功能"
-status = "未开始"
+status = "完成"
+date = "2026-10-15"
 size = "小"
 tier = 3
 old = ["T17b.1"]
+note = "2026-10-15 Windows 电脑上快速测试：鼠标点首页侧栏、热门翻页、进直播间看画面和弹幕都正常；键盘快捷键没有逐项走"
 
 [[task]]
 id = "X01.2"
 title = "Windows 专属功能（功能清点第 13 节的 14 项）"
 type = "功能"
-status = "未开始"
+status = "完成"
+date = "2026-10-15"
 size = "大"
 tier = 3
 old = ["T17c.1"]
+note = "2026-10-15 收尾：自绘标题栏、侧栏、播放和弹幕在 Windows 上看过；其余各项靠 4.x 的自动测试；Kick 的 WinHTTP 通道没做（Kick 只在 Android 上能用，写在 5.0.0 已知问题）；退出写盘：存储是 SQLite，每次写入就提交"
 
 [[task]]
 id = "X01.3"
 title = "Windows 安装包和自动更新"
 type = "发布"
-status = "未开始"
+status = "完成"
+date = "2026-10-15"
 size = "中"
 tier = 3
 old = ["T17d.1"]
+note = "2026-10-15 tools/release/package_windows.ps1：便携 ZIP 和 Inno Setup 6 安装包（3.x 的脚本，同一个 AppId，卸载保留 UserData）；5.0.0 发布；应用内更新读 platforms.windows；安装版没有在测试电脑上运行（那台装着用户的 3.x）"
 
 [[task]]
 id = "X02.1"
 title = "Linux 构建和打包"
 type = "发布"
-status = "未开始"
+status = "完成"
+date = "2026-10-15"
 size = "中"
 tier = 3
 old = ["T17e.1"]
 branch = ".claude/worktrees/agent-ab1a5d264e55120e5"
-note = "没合并的 Linux 桌面外壳半成品（旧编号 M12.6，提交 0dc0df759，36 个文件）在 branch 的工作区里，清理工作区前先看 X02.1"
+note = "没合并的 Linux 桌面外壳半成品（旧编号 M12.6，提交 0dc0df759，36 个文件）在 branch 的工作区里，清理工作区前先看 X02.1；2026-10-15 Linux 运行器、桌面外壳打开、XDG 开机启动、flutter_inappwebview 的 Linux 替身（不用 WPE WebKit，Linux 没有应用内网页）、tools/release/package_linux.sh 打 linux-x64.tar.gz、更新文件 platforms.linux；WSL 里启动测过"
 [[task]]
 id = "X03.1"
 title = "电视外壳、焦点导航、直播浏览、基本直播间"
@@ -4352,14 +4359,14 @@ from = "用户 2026-10-14：快速测试，更新"
 id = "Y01.7"
 title = "5.0.0 全平台发布（Android、电视、Windows、Linux，构建号 5100）和新仓库 wzgrx/PureLive"
 type = "发布"
-status = "开发中"
+status = "完成"
 date = "2026-10-15"
 size = "大"
 tier = 1
 stages = ["版本号、发布说明和 README", "各平台构建和检查", "K90 和 Windows 快速测试", "新仓库、标签、发布页", "更新文件（新仓库和旧仓库）"]
-done = 3
+done = 5
 from = "用户 2026-10-15：完成整个项目，最后发布最终版本，全平台，新仓库和 README"
-next = "建新仓库 wzgrx/PureLive、打标签、发布页上传六个包，最后改两个仓库的更新文件"
+note = "新仓库 https://github.com/wzgrx/PureLive （公开，独立，第一个提交 914dbaeac 是旧仓库 2f3a023a7 的同一棵树）；标签 v5.0.0；发布页 https://github.com/wzgrx/PureLive/releases/tag/v5.0.0 （标题“纯粹直播 v5.0.0”，六个包和 SHA256SUMS.txt，GitHub 记的哈希和本机一致）；两个仓库的 assets/version.json（Android、Windows、Linux 都是 5.0.0，下载地址是新仓库的发布页）、assets/releases.json 最前面加 5.0.0"
 
 [[task]]
 id = "Y02.1"
@@ -4553,9 +4560,11 @@ tier = 2
 id = "Z07.2"
 title = "每次发布后：更新 STATUS 的待真机、版本路线、发布说明和 README"
 type = "文档"
-status = "未开始"
+status = "完成"
+date = "2026-10-15"
 size = "小"
 tier = 2
+note = "2026-10-15 5.0.0 发布后：STATUS（docs.py 生成）、README、发布说明、两个仓库的更新文件都改了"
 
 [[task]]
 id = "Z07.3"

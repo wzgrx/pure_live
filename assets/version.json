@@ -1,10 +1,10 @@
 {
-  "version": "4.2.0",
-  "build_number": 5004,
-  "version_num": 402005004,
-  "version_desc": "- 小窗重做：无级拉大到和手机一样宽，松手贴边或收进屏幕边缘，单击显示按钮、双击回直播间，能一键变成画中画。\n- 小窗松手顺着手指的速度滑走，和面板、换台一样的手感。\n- 新加“液体玻璃”（设置 → 外观，默认关）：首页底栏变成悬浮的毛玻璃。\n- 开发工具链升到最新，详见发布页。",
+  "version": "5.0.0",
+  "build_number": 5100,
+  "version_num": 500005100,
+  "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.2.0",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "4.2.0",
-      "build_number": 5004,
-      "version_num": 402005004,
-      "version_desc": "- 小窗重做：无级拉大到和手机一样宽，松手贴边或收进屏幕边缘，单击显示按钮、双击回直播间，能一键变成画中画。\n- 小窗松手顺着手指的速度滑走，和面板、换台一样的手感。\n- 新加“液体玻璃”（设置 → 外观，默认关）：首页底栏变成悬浮的毛玻璃。\n- 开发工具链升到最新，详见发布页。",
+      "version": "5.0.0",
+      "build_number": 5100,
+      "version_num": 500005100,
+      "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v4.2.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,21 +25,21 @@
       ]
     },
     "windows": {
-      "version": "3.2.11",
-      "build_number": 4134,
-      "version_num": 302114134,
-      "version_desc": "- 斗鱼原画不再每 5 分钟断流：到期前在后台换链接并按关键帧无缝接上，没有卡顿。\n- Android armv7 与 x86_64 改用自编 FFmpeg 9 播放库。\n- 下线 Kick（Cloudflare 拦截），现支持 33 个平台 + IPTV。",
+      "version": "5.0.0",
+      "build_number": 5100,
+      "version_num": 500005100,
+      "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v3.2.11",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "3.2.10",
-      "build_number": 4133,
-      "version_num": 302104133,
-      "version_desc": "- 修复斗鱼直播间约 5 分钟后自动暂停，断流后自动换链接重连。\n- 新增斗鱼登录续期、局域网设备同步、应用内下载更新、平台图标。\n- 修复小窗挡住菜单、竖屏双击全屏、录制码率显示；安卓新增 armv7 与 x86_64 安装包。",
+      "version": "5.0.0",
+      "build_number": 5100,
+      "version_num": 500005100,
+      "version_desc": "- 第一个全平台版本：Android 手机和平板、Android 电视、Windows、Linux 同时发布。\n- 录像在应用里直接播放：进度条、倍速、上一段/下一段，记住看到哪。\n- 电视界面：可收起的导航栏、退出确认、直播间右侧播放设置、链接放映。\n- 项目搬到新仓库 wzgrx/PureLive，详见发布页。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v3.2.10"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.0.0"
     },
     "macos": {
       "version": "3.2.10",

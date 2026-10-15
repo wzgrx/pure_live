@@ -29,6 +29,9 @@ abstract final class TvIcons {
   /// Network TV.
   static const IconData menuIptv = Icons.live_tv_rounded;
 
+  /// Link playback (A17.5 c12).
+  static const IconData menuLink = Remix.links_line;
+
   /// Videos.
   static const IconData menuVideo = Icons.movie_rounded;
 

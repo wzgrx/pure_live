@@ -15,6 +15,7 @@ import 'package:pure_live/tv/pages/tv_areas_pane.dart';
 import 'package:pure_live/tv/pages/tv_favorites_pane.dart';
 import 'package:pure_live/tv/pages/tv_history_pane.dart';
 import 'package:pure_live/tv/pages/tv_iptv_pane.dart';
+import 'package:pure_live/tv/pages/tv_link_pane.dart';
 import 'package:pure_live/tv/pages/tv_popular_pane.dart';
 import 'package:pure_live/tv/pages/tv_search_page.dart';
 import 'package:pure_live/tv/pages/tv_settings_pane.dart';
@@ -36,11 +37,14 @@ enum TvPane {
   /// Areas per platform, followed areas first.
   areas('tv_menu_areas', TvIcons.menuAreas),
 
-  /// Watch history.
-  history('tv_menu_history', TvIcons.menuHistory),
+  /// Link playback (A17.5 c12).
+  link('tv_menu_link', TvIcons.menuLink),
 
   /// Search.
   search('tv_menu_search', TvIcons.menuSearch),
+
+  /// Watch history.
+  history('tv_menu_history', TvIcons.menuHistory),
 
   /// IPTV playlists and channels.
   iptv('tv_menu_iptv', TvIcons.menuIptv),
@@ -329,6 +333,7 @@ class _TvHomePageState extends ConsumerState<TvHomePage> with WidgetsBindingObse
     TvPane.areas => const TvAreasPane(),
     TvPane.history => const TvHistoryPane(),
     TvPane.search => const TvSearchPane(),
+    TvPane.link => const TvLinkPane(),
     TvPane.iptv => const TvIptvPane(),
     TvPane.settings => const TvSettingsPane(),
     TvPane.video ||

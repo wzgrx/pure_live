@@ -256,6 +256,21 @@ void main() {
     await _close(tester, services);
   });
 
+  testWidgets('A17.5 c12: 链接放映 sits between 分区 and 搜索; its field types with the remote', (tester) async {
+    final services = await _pumpApp(tester);
+    for (var i = 0; i < 3; i++) {
+      await _press(tester, LogicalKeyboardKey.arrowDown);
+    }
+    expect(_focused, 'tv menu link');
+    await _press(tester, LogicalKeyboardKey.select);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('tv-link-field')), findsOneWidget);
+    expect(find.text('支持各平台的直播间链接、短链接和纯粹直播的分享口令，按 OK 用遥控器输入'), findsOneWidget);
+    // Nothing typed: "播放" waits.
+    expect(tester.widget<TvButton>(find.byKey(const ValueKey('tv-link-play'))).onTap, isNull);
+    await _close(tester, services);
+  });
+
   testWidgets('A17.2 c10: the first start shows the notice once; agreeing opens the home', (tester) async {
     final services = await _pumpApp(tester, noticeAccepted: false);
     expect(find.byKey(const ValueKey('tv-notice')), findsOneWidget);

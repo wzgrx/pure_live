@@ -11,7 +11,23 @@ import '../features/live_play/live_play_support.dart';
 import '../support.dart';
 
 void main() {
-  test("V01.8: the recordings beside a file are its folder's videos in name order", () {
+  test("V01.8: the room's recordings: above the date and time folders, oldest first", () {
+    final dir = Directory.systemTemp.createTempSync('records');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final room = '${dir.path}/bilibili/老实憨厚的笑笑';
+    for (final file in ['2026-10-15/07-49-05/a.mp4', '2026-10-14/22-00-00/b.mp4', '2026-10-15/10-00-00/c.flv']) {
+      File('$room/$file').createSync(recursive: true);
+    }
+    File('${dir.path}/bilibili/other/2026-10-15/07-00-00/x.mp4').createSync(recursive: true);
+    final files = recordingsBeside('$room/2026-10-15/07-49-05/a.mp4');
+    expect(files.map((path) => path.substring(room.length + 1)), [
+      '2026-10-14/22-00-00/b.mp4',
+      '2026-10-15/07-49-05/a.mp4',
+      '2026-10-15/10-00-00/c.flv',
+    ]);
+  });
+
+  test('V01.8: a folder of another layout lists its own videos in name order', () {
     final dir = Directory.systemTemp.createTempSync('recordings');
     addTearDown(() => dir.deleteSync(recursive: true));
     for (final name in ['b_2.mp4', 'a_1.flv', 'notes.txt', 'c_3.ts']) {

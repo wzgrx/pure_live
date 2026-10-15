@@ -15,23 +15,30 @@ import 'package:pure_live/i18n/i18n.dart';
 /// The endings of the files the recorder writes (and that mpv plays).
 const Set<String> recordingExtensions = {'.mp4', '.flv', '.ts', '.mkv', '.m4a', '.aac', '.mp3'};
 
-/// The recordings beside [path]: the video files of its folder (the
-/// recorder writes one folder per room), oldest name first, so the
-/// segments of a recording follow each other (V01.8 选集).
-List<String> recordingsBeside(String path) {
-  final folder = Directory(p.dirname(path));
+/// The recordings of [path]'s room, oldest first (V01.8 选集). The recorder
+/// writes `<platform>/<streamer>/<date>/<time>/<file>`, so the room is the
+/// folder above the date and time folders; everything under it is listed
+/// (at most [limit] files), and a folder of another layout lists itself.
+List<String> recordingsBeside(String path, {int limit = 500}) {
+  var room = Directory(p.dirname(path));
+  final dated = RegExp(r'^\d{4}-\d{2}-\d{2}$|^\d{2}-\d{2}-\d{2}$');
+  for (var i = 0; i < 2 && dated.hasMatch(p.basename(room.path)); i++) {
+    room = room.parent;
+  }
   final files = <String>[];
   try {
-    for (final entity in folder.listSync()) {
+    for (final entity in room.listSync(recursive: true)) {
       if (entity is File && recordingExtensions.contains(p.extension(entity.path).toLowerCase())) {
         files.add(entity.path);
+        if (files.length >= limit) break;
       }
     }
   } on FileSystemException {
     // Unreadable: only the file itself.
   }
   if (!files.contains(path)) files.add(path);
-  files.sort((a, b) => p.basename(a).compareTo(p.basename(b)));
+  // The date and time folders sort as they were recorded.
+  files.sort((a, b) => p.relative(a, from: room.path).compareTo(p.relative(b, from: room.path)));
   return files;
 }
 

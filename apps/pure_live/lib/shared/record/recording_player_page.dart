@@ -35,6 +35,10 @@ List<String> recordingsBeside(String path) {
   return files;
 }
 
+/// What the engine opens for the recording at [path]: a `file://` URL
+/// (mpv decodes it), so folder names in any script survive.
+String recordingUrl(String path) => Uri.file(path).toString();
+
 /// The meta key of where [path] was left (V01.8).
 String recordingPositionKey(String path) => 'recording.position.${path.hashCode.toUnsigned(32)}';
 
@@ -97,7 +101,13 @@ class _RecordingPlayerPageState extends ConsumerState<RecordingPlayerPage> {
     await _session.open(
       PlaybackRequest(
         site: 'recording',
-        plan: PlaybackPlan.of(LivePlayUrlResolution.lines([LivePlayLine(_path)]), onDemand: true, start: start),
+        // A file URL: a bare path with Chinese folder names would reach mpv
+        // percent-encoded and not be found.
+        plan: PlaybackPlan.of(
+          LivePlayUrlResolution.lines([LivePlayLine(recordingUrl(_path))]),
+          onDemand: true,
+          start: start,
+        ),
       ),
     );
     if (_speed != 1) await _session.setRate(_speed);

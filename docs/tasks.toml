@@ -4349,6 +4349,19 @@ done = 5
 from = "用户 2026-10-14：快速测试，更新"
 
 [[task]]
+id = "Y01.7"
+title = "5.0.0 全平台发布（Android、电视、Windows、Linux，构建号 5100）和新仓库 wzgrx/PureLive"
+type = "发布"
+status = "开发中"
+date = "2026-10-15"
+size = "大"
+tier = 1
+stages = ["版本号、发布说明和 README", "各平台构建和检查", "K90 和 Windows 快速测试", "新仓库、标签、发布页", "更新文件（新仓库和旧仓库）"]
+done = 1
+from = "用户 2026-10-15：完成整个项目，最后发布最终版本，全平台，新仓库和 README"
+next = "构建 Android、Windows、Linux 包，K90 冒烟，建新仓库发布"
+
+[[task]]
 id = "Y02.1"
 title = "同版本换包时应用内收不到更新提示：以后发布一律改版本号，或让比较带上构建号"
 type = "发布"

@@ -97,6 +97,13 @@ void main() {
 
   group('MediaRoute.of', () {
     const engine = EngineProfile();
+    test('V01.8: a local file goes to the engine as it is, even an FLV the relay would rewrite', () {
+      const old = EngineProfile(rewriteLegacyHevcFlv: true);
+      final file = _flv(Uri.file('/sdcard/Records/主播/a.flv').toString(), codec: 'hevc');
+      expect(MediaRoute.of(file, engine: old, canRenew: true), MediaRoute.direct);
+      expect(MediaRoute.of(LivePlayLine('/sdcard/Records/a.flv'), engine: old, canRenew: true), MediaRoute.direct);
+    });
+
     test('FLV with a lease that cuts the connection is spliced only when it can be renewed', () {
       final douyu = _flv('https://hw.test/live.flv?expire=300', cuts: true);
       expect(MediaRoute.of(douyu, engine: engine, canRenew: true), MediaRoute.flvSplice);

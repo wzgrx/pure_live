@@ -28,6 +28,10 @@ void main() {
     expect(resumePosition(const Duration(seconds: 3), hour), Duration.zero);
     expect(resumePosition(const Duration(minutes: 20), hour), const Duration(minutes: 20));
     expect(resumePosition(hour - const Duration(seconds: 2), hour), Duration.zero);
+    // K90 2026-10-15: a bare path with a Chinese folder reached mpv
+    // percent-encoded; a file URL is decoded by mpv.
+    expect(recordingUrl('/sdcard/Records/老实憨厚的笑笑/a b.mp4'), startsWith('file:///sdcard/Records/'));
+    expect(Uri.parse(recordingUrl('/sdcard/Records/老实憨厚的笑笑/a b.mp4')).toFilePath(), '/sdcard/Records/老实憨厚的笑笑/a b.mp4');
     expect(recordingPositionKey('/a/b.mp4'), recordingPositionKey('/a/b.mp4'));
     expect(recordingPositionKey('/a/b.mp4'), isNot(recordingPositionKey('/a/c.mp4')));
   });

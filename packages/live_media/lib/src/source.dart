@@ -117,6 +117,10 @@ enum MediaRoute {
     HlsSourceQueryPolicy? queryPolicy,
     HlsVariantSelector? variantSelector,
   }) {
+    // A local file (a recording, V01.8) goes to the engine as it is: the
+    // relays fetch over HTTP.
+    final scheme = Uri.tryParse(line.url)?.scheme.toLowerCase() ?? '';
+    if (scheme != 'http' && scheme != 'https') return direct;
     final cuts = line.lease?.cutsConnection ?? false;
     final format = line.format ?? _formatOf(line.url);
     if (format == StreamFormat.flv) {

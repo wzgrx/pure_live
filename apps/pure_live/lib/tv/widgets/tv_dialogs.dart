@@ -766,11 +766,12 @@ class _TvNoticeState extends State<_TvNotice> {
               ),
               child: ShaderMask(
                 // More below: the bottom fades out.
-                shaderCallback: (rect) => const LinearGradient(
+                // Only the alpha counts (dstIn).
+                shaderCallback: (rect) => LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Colors.white, Colors.white, Colors.transparent],
-                  stops: [0, 0.85, 1],
+                  colors: [palette.text, palette.text, palette.text.withValues(alpha: 0)],
+                  stops: const [0, 0.85, 1],
                 ).createShader(rect),
                 blendMode: BlendMode.dstIn,
                 child: SingleChildScrollView(

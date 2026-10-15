@@ -43,9 +43,7 @@ void main() {
           appServicesProvider.overrideWithValue(services),
           playbackSessionFactoryProvider.overrideWithValue(({config}) => fakeSession(engine)),
         ],
-        child: const MaterialApp(
-          home: RecordingPlayerPage(files: ['/r/a_1.mp4', '/r/a_2.mp4'], index: 0),
-        ),
+        child: const MaterialApp(home: RecordingPlayerPage(files: ['/r/a_1.mp4', '/r/a_2.mp4'], index: 0)),
       ),
     );
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));

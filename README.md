@@ -10,14 +10,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wzgrx/pure_live/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/wzgrx/pure_live?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=2e6fe0"></a>
-  <a href="https://github.com/wzgrx/pure_live/releases"><img alt="下载次数" src="https://img.shields.io/github/downloads/wzgrx/pure_live/total?label=%E4%B8%8B%E8%BD%BD&color=2e6fe0"></a>
-  <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/wzgrx/pure_live?label=%E8%AE%B8%E5%8F%AF%E8%AF%81&color=555"></a>
+  <a href="https://github.com/wzgrx/PureLive/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/wzgrx/PureLive?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC&color=2e6fe0"></a>
+  <a href="https://github.com/wzgrx/PureLive/releases"><img alt="下载次数" src="https://img.shields.io/github/downloads/wzgrx/PureLive/total?label=%E4%B8%8B%E8%BD%BD&color=2e6fe0"></a>
+  <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/wzgrx/PureLive?label=%E8%AE%B8%E5%8F%AF%E8%AF%81&color=555"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/wzgrx/pure_live/releases/latest"><b>下载 4.1.0</b></a>
-  &nbsp;·&nbsp; <a href="docs/Y-发布和运营/Y03-发布说明和README/releases/v4.1.0.md">更新说明</a>
+  <a href="https://github.com/wzgrx/PureLive/releases/latest"><b>下载 5.0.0</b></a>
+  &nbsp;·&nbsp; <a href="docs/Y-发布和运营/Y03-发布说明和README/releases/v5.0.0.md">更新说明</a>
   &nbsp;·&nbsp; <a href="#功能详解">功能</a>
   &nbsp;·&nbsp; <a href="#支持的平台">支持的平台</a>
   &nbsp;·&nbsp; <a href="#从源码构建">从源码构建</a>
@@ -28,7 +28,9 @@
 
 纯粹直播是一个第三方直播聚合应用：把哔哩哔哩、斗鱼、虎牙、抖音、快手等国内平台，和 Twitch、YouTube、SOOP 等海外平台的直播放进同一个应用里看，再加上你自己导入的网络电视（IPTV）频道。关注、弹幕、录制、多画面都在一处完成，不需要为每个平台各装一个 App。
 
-**4.0 是一次整体重写。** 从网络层、平台适配、弹幕、播放、录制、存储到每一个界面都重新写过：功能以 3.x 为基础（只去掉了已停用的云账号，播放内核统一为 mpv），每个界面重新设计，3.x 的问题逐个修掉。这一版发布 **Android（手机和平板）**，可以直接覆盖安装 3.x，原来的关注、设置和历史都会保留。
+**5.0 是第一个全平台版本。** 从 4.0 起，网络层、平台适配、弹幕、播放、录制、存储和每一个界面都重新写过（功能以 3.x 为基础，播放内核统一为 mpv）；5.0 同时发布 **Android 手机和平板、Android 电视、Windows、Linux**，四个平台用同一套代码和界面设计。可以直接覆盖安装 3.x 和 4.x，原来的关注、设置和历史都会保留。
+
+> 从 5.0.0 起项目搬到这个独立仓库 [wzgrx/PureLive](https://github.com/wzgrx/PureLive)。原来的 [wzgrx/pure_live](https://github.com/wzgrx/pure_live)（[liuchuancong/pure_live](https://github.com/liuchuancong/pure_live) 的分支）保留不删，装着 3.x、4.x 的设备会照常收到更新提示并下载到这里的新版本。
 
 ## 亮点
 
@@ -305,39 +307,35 @@
 |---|:---:|:---:|---|:---:|---|
 | 网络电视（IPTV） | 支持 | — | 本机频道 | 按播放列表分组 | — |
 
-说明：没有弹幕的几个平台，是平台不提供公开的聊天接口，或者需要登录、签名才能接入；小红书和微博直播只能关注某一场直播，不能按主播关注。平台接口时常变化，遇到打不开的请到 [Issues](https://github.com/wzgrx/pure_live/issues) 反馈。
+说明：没有弹幕的几个平台，是平台不提供公开的聊天接口，或者需要登录、签名才能接入；小红书和微博直播只能关注某一场直播，不能按主播关注。平台接口时常变化，遇到打不开的请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。
 
 ## 下载和安装
 
-### 系统要求
+到 [Releases](https://github.com/wzgrx/PureLive/releases/latest) 下载对应平台的安装包。
 
-Android 8.0 及以上的手机和平板。
+| 平台 | 系统要求 | 安装包 |
+|---|---|---|
+| **Android 手机和平板** | Android 8.0 及以上 | `…-android-arm64-v8a-release.apk`（绝大多数设备，不确定就选它）；老的 32 位设备选 `armeabi-v7a`，模拟器选 `x86_64` |
+| **Android 电视、电视盒子** | Android 8.0 及以上 | 和手机是同一个 APK：在电视上自动进入遥控器操作的电视界面（也可以在 设置 → 外观 → 界面模式 里切换） |
+| **Windows** | Windows 10、11（64 位） | `…-windows-x64-setup.exe`（安装版）或 `…-windows-x64-portable.zip`（便携版，解压即用，数据保存在程序旁边的 UserData） |
+| **Linux** | x86_64，GTK 3 桌面 | `…-linux-x64.tar.gz`：解压后运行 `pure_live`，压缩包里的 README.txt 写了怎么加到应用菜单 |
+| iOS、iPadOS、macOS | — | 暂不提供（需要 Mac 构建和签名） |
 
-### 选择安装包
+- Android 安装时如果提示“安装未知应用”，在弹出的设置里允许当前的浏览器或文件管理器即可。
+- Linux 版没有应用内网页登录，账号可以在手机或 Windows 上登录后用“设备同步”带过来。
 
-到 [Releases](https://github.com/wzgrx/pure_live/releases/latest) 下载 APK，文件名里带有 CPU 架构：
+### 从 3.x 或 4.x 升级
 
-| 架构 | 适合的设备 |
-|---|---|
-| **arm64-v8a** | 近几年的绝大多数手机和平板，**不确定就选它** |
-| armeabi-v7a | 较老的 32 位设备；arm64-v8a 装不上时再试这个 |
-| x86_64 | 电脑上的安卓模拟器、少数 x86 平板 |
-
-安装时如果系统提示“安装未知应用”，在弹出的设置里允许当前的浏览器或文件管理器即可。
-
-### 从 3.x 升级
-
-- **直接覆盖安装，不要先卸载**：卸载会连同 3.x 的数据一起删掉。
-- 第一次打开 4.0 时自动导入 3.x 的设置、关注（含关注的分区）、观看历史、分组、屏蔽词、账号 Cookie、WebDAV 设置、录制任务和网络电视列表。导入只读取 3.x 的文件，不修改、不删除。
-- 保险起见，升级前可以在 3.x 的“备份与恢复”里做一次完整备份；4.0 可以直接恢复 3.x 的备份文件。
-- 3.x 的云账号登录已经停用，配置可以改用 WebDAV 或设备同步在设备之间转移。
+- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。Windows 安装版会装到原来的目录。
+- 从 3.x 升级时，第一次打开会自动导入 3.x 的设置、关注（含关注的分区）、观看历史、分组、屏蔽词、账号 Cookie、WebDAV 设置、录制任务和网络电视列表。导入只读取 3.x 的文件，不修改、不删除。
+- 保险起见，升级前可以在 3.x 的“备份与恢复”里做一次完整备份；新版可以直接恢复 3.x 的备份文件。
 
 ## 从源码构建
 
 需要 Linux 或 Windows 上的 Flutter 环境。工具链的版本统一写在 [`toolchain.env`](toolchain.env)（Flutter 3.47.7、Dart 3.13.5、Gradle 9.8.1、AGP 9.4.1、Kotlin 2.4.21、JDK 27、Android SDK 37.2、build-tools 37.0.0、platform-tools 37.0.1、cmdline-tools 23.0、NDK 30.0.16248370、CMake 4.1.2），升级时只改这一处（Android 构建直接读取其中的 compileSdk、build-tools、NDK、CMake；Gradle、AGP 另见 Z01）。
 
 ```bash
-git clone https://github.com/wzgrx/pure_live.git
+git clone https://github.com/wzgrx/PureLive.git
 cd pure_live
 
 # 1. 环境：按 toolchain.env 装好工具链，写一个环境脚本，每次构建前 source 一下
@@ -358,7 +356,9 @@ cd apps/pure_live
 flutter build apk --release --split-per-abi
 ```
 
-- 产物在 `apps/pure_live/build/app/outputs/flutter-apk/`，每个架构一个 APK。播放用的 libmpv 原生包由构建自动从本仓库 Releases 下载。
+- 产物在 `apps/pure_live/build/app/outputs/flutter-apk/`，每个架构一个 APK。播放用的 libmpv 原生包由构建自动下载。
+- **Windows**：在 Windows 上装好 Flutter、Visual Studio（C++ 桌面开发）和 NuGet，运行 `pwsh tools/release/package_windows.ps1`，得到便携 ZIP 和 Inno Setup 6 安装包。
+- **Linux**：装好 `clang cmake ninja-build pkg-config libgtk-3-dev`，运行 `bash tools/release/package_linux.sh`，得到 `linux-x64.tar.gz`。
 - 签名密钥不在仓库里：没有 `apps/pure_live/android/key.properties` 时，release 包用调试密钥签名。
 - debug 和 profile 包的包名带 `.v4dev`、应用名是“纯粹直播 v4dev”，和正式版互不影响，适合开发调试。
 - 提交前跑门禁：`bash tools/gate/gate.sh --all`，依次检查格式、包之间的依赖方向、`dart analyze` 和全部测试，输出 `gate: passed` 才算通过。开发中改了哪个包，只跑 `bash tools/gate/gate.sh` 即可。
@@ -368,7 +368,7 @@ flutter build apk --release --split-per-abi
 内核是纯 Dart 包，可以单独测试；Flutter 只出现在播放绑定、界面组件和应用里。依赖只能从上往下，由门禁检查。
 
 ```text
-apps/pure_live          Flutter 应用：页面、路由、Android 原生部分（Windows、电视外壳的代码也在这里，暂未发布）
+apps/pure_live          Flutter 应用：页面、路由，Android、Windows、Linux 的原生部分和电视界面
 packages/live_ui        主题、图标和通用组件
 packages/live_player    基于 media_kit（mpv）的播放器绑定
 packages/live_media     取流管线、本地中继、播放恢复
@@ -379,8 +379,8 @@ packages/live_cast      DLNA 投屏
 packages/live_store     存储（drift + SQLite）、设置、备份、3.x 数据迁移
 packages/live_core      数据模型、平台接口和 34 个平台的适配器
 packages/live_net       HTTP、WebSocket、代理和 Brotli 解码
-packages/live_vod       哔哩哔哩点播和音乐的核心（给电视版用，暂未发布）
-third_party/            自己维护的 media_kit 分支
+packages/live_vod       哔哩哔哩点播和音乐的核心（以后的电视视频、音乐模式用）
+third_party/            自己维护的 media_kit 分支、flutter_inappwebview 的 Linux 替身
 tools/                  门禁、工具链检查、FFmpeg 原生包、效果图工具
 docs/                   开发计划、模块记录、界面设计和功能清点
 ```
@@ -389,20 +389,18 @@ docs/                   开发计划、模块记录、界面设计和功能清�
 
 ## 路线图
 
-4.0 先把 Android 做扎实，其余客户端按这个顺序跟进，用的是同一套界面设计：
-
-| 客户端 | 现状 | 计划 |
+| 客户端 | 5.0.0 | 以后 |
 |---|---|---|
-| **Android 手机和平板** | 4.1.0 正式版 | 补齐余下的小功能（见[更新说明](docs/Y-发布和运营/Y03-发布说明和README/releases/v4.1.0.md)的“以后要做的”），持续修平台变化 |
-| **Windows** | 界面已按同一套设计做好，包括自绘标题栏、托盘、关闭时的选择、桌面小窗置顶 | 补上 Windows 专属的功能（开机启动、单实例、在新窗口打开直播间等），然后发布 Windows 版 |
-| **Linux** | 和 Windows 共用桌面界面 | 在 Windows 之后 |
-| **电视（Android TV）** | 遥控器操作的电视界面已经设计好；电视外壳、焦点导航、直播浏览和基本直播间已有代码 | 补全电视直播间、网络电视、设置，以及哔哩哔哩点播和音乐 |
-| **iOS、iPadOS、macOS** | 平台差异（安全区、滑动返回、系统画中画、菜单栏、Cmd 快捷键）已经设计好 | 需要 Mac 构建，以后再做 |
+| **Android 手机和平板** | 正式版 | 持续修平台变化；开播提醒的单独开关、被系统清理后也提醒 |
+| **Android 电视** | 正式版：遥控器操作的首页（可收起的导航栏）、关注、热门、分区、搜索、观看记录、链接放映、网络电视，直播间换台、房间列表、播放设置（弹幕设置、屏蔽、录制） | 电视样式的设置目录和网络电视设置；视频（哔哩哔哩点播）、音乐、壁纸三个模式 |
+| **Windows** | 正式版：自绘标题栏、托盘、关闭时的选择、开机启动、桌面小窗、在新窗口打开直播间 | Kick 在 Windows 上的原生网络通道 |
+| **Linux** | 正式版：和 Windows 同一套桌面外壳 | 应用内网页登录 |
+| **iOS、iPadOS、macOS** | 平台差异已设计好 | 需要 Mac 构建和签名 |
 
 ## 反馈和参与
 
-- 遇到问题或有建议，请到 [Issues](https://github.com/wzgrx/pure_live/issues) 反馈。报告播放问题时请写上平台、直播间链接、清晰度和线路，以及“设置 → 日志管理”里导出的日志。
-- 安全问题（例如可能泄露账号或 Cookie 的漏洞）请不要公开提 Issue，请用 GitHub 的 [Security Advisory](https://github.com/wzgrx/pure_live/security/advisories/new) 私密提交，修好之前只有维护者能看到。
+- 遇到问题或有建议，请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。报告播放问题时请写上平台、直播间链接、清晰度和线路，以及“设置 → 日志管理”里导出的日志。
+- 安全问题（例如可能泄露账号或 Cookie 的漏洞）请不要公开提 Issue，请用 GitHub 的 [Security Advisory](https://github.com/wzgrx/PureLive/security/advisories/new) 私密提交，修好之前只有维护者能看到。
 - 欢迎提交 Pull Request。改动请先跑通门禁；代码规范是 very_good_analysis、行宽 120，公开接口写文档注释。
 
 ## 开源许可
@@ -410,6 +408,8 @@ docs/                   开发计划、模块记录、界面设计和功能清�
 本项目以 [GNU Affero General Public License v3.0（AGPL-3.0）](LICENSE) 发布。你可以自由地使用、学习、修改和分发；如果分发修改后的版本，或者把修改后的版本作为网络服务提供给别人使用，需要以同样的许可证公开完整的源代码，并保留原有的版权和许可声明。本软件不附带任何担保。
 
 应用用到的第三方组件按各自的许可证使用，可以在应用的“关于”页查看。
+
+本项目源自 [liuchuancong/pure_live](https://github.com/liuchuancong/pure_live)（同为 AGPL-3.0），感谢原作者和所有贡献者。5.0.0 起在这个独立仓库继续开发，代码历史从这一版开始；之前的历史保留在 [wzgrx/pure_live](https://github.com/wzgrx/pure_live)。
 
 ## 免责声明
 

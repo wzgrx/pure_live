@@ -1,10 +1,10 @@
 {
-  "version": "5.1.0",
-  "build_number": 5101,
-  "version_num": 501005101,
-  "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
+  "version": "5.2.0",
+  "build_number": 5102,
+  "version_num": 502005102,
+  "version_desc": "- 更流畅：第一次翻到某个平台、进出直播间不再卡顿。\n- 所有列表和翻页到头有阻尼回弹，页面用弹簧推入。\n- 首页底栏换成液态玻璃：边缘折射，选中项是可以按住拖动的玻璃水滴（可在设置里关掉）。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.2.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.1.0",
-      "build_number": 5101,
-      "version_num": 501005101,
-      "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
+      "version": "5.2.0",
+      "build_number": 5102,
+      "version_num": 502005102,
+      "version_desc": "- 更流畅：第一次翻到某个平台、进出直播间不再卡顿。\n- 所有列表和翻页到头有阻尼回弹，页面用弹簧推入。\n- 首页底栏换成液态玻璃：边缘折射，选中项是可以按住拖动的玻璃水滴（可在设置里关掉）。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.2.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,21 +25,21 @@
       ]
     },
     "windows": {
-      "version": "5.1.0",
-      "build_number": 5101,
-      "version_num": 501005101,
-      "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
+      "version": "5.2.0",
+      "build_number": 5102,
+      "version_num": 502005102,
+      "version_desc": "- 更流畅：第一次翻到某个平台、进出直播间不再卡顿。\n- 所有列表和翻页到头有阻尼回弹，页面用弹簧推入。\n- 首页底栏换成液态玻璃：边缘折射，选中项是可以按住拖动的玻璃水滴（可在设置里关掉）。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.2.0",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.1.0",
-      "build_number": 5101,
-      "version_num": 501005101,
-      "version_desc": "- 电视界面新增视频、音乐两个模式（哔哩哔哩），可以换壁纸，设置改成电视样式。\n- 开播提醒可以按主播单独开关；Android 上应用被系统清理后也会提醒。\n- Kick 恢复可用；哔哩哔哩没登录也显示完整昵称；修复录制恢复和自动录制的几个问题。",
+      "version": "5.2.0",
+      "build_number": 5102,
+      "version_num": 502005102,
+      "version_desc": "- 更流畅：第一次翻到某个平台、进出直播间不再卡顿。\n- 所有列表和翻页到头有阻尼回弹，页面用弹簧推入。\n- 首页底栏换成液态玻璃：边缘折射，选中项是可以按住拖动的玻璃水滴（可在设置里关掉）。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.1.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.2.0"
     },
     "macos": {
       "version": "3.2.10",

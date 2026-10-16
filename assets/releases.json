@@ -1,5 +1,61 @@
 [
   {
+    "version": "5.2.0",
+    "title": "Pure Live v5.2.0",
+    "date": "2026-10-16",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.2.0",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.2.0（Android、电视、Windows、Linux）\n\n5.2.0 专门打磨流畅度：在真机上把常用操作的卡顿一个个量出来、找到原因再改，第一次翻到某个平台、进出直播间都更顺了；所有列表和翻页到头有了阻尼回弹，页面用弹簧推入；首页底栏换成了液态玻璃。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 更流畅（在红米 K90 上实测）\n\n| 操作 | 5.1.0 | 5.2.0 |\n|---|---|---|\n| 第一次翻到某个平台标签（左右翻 8 次的掉帧） | 21～30 帧 | 13～16 帧 |\n| 进出直播间 3 次的掉帧 | 57 帧 | 28～42 帧 |\n| 打开应用后第一次进直播间 | 顿一下（约 0.3 秒） | 不再停顿 |\n\n- 翻页时顶栏不再每一帧都重新排版（选中平台的字由细变粗是逐帧算的，牵动整个顶栏）。\n- 封面图片改在后台下载，加密连接和读数据不再占用界面线程；平台接口返回的数据一次收下，不再逐字节拼接。\n- 进直播间时播放器准备画面不再让界面等着。\n- 页面切换不再把两个整页做透明渐变（对显卡很重，尤其叠在视频上），进出直播间显卡来不及的帧少了一半。\n\n### 物理动画和阻尼\n\n- **所有列表**（手机、平板）：滑到头越拉越沉，松手弹回，和能下拉刷新的列表一样（以前设置、详情这类列表到头是硬停加安卓的拉伸）。电脑保持到头停住。\n- **左右翻页和标签条**：翻到第一页、最后一页，或标签条滑到头，也有同样的阻尼和回弹（以前硬停）。\n- **页面转场**：新页从右边带弹簧推入，开始快、到位前减速、不过头，下面的页向左退一点并稍微变暗；返回时反过来。直播间下面的页保持不动，关直播间的一瞬间点下面的标签照样生效。\n\n### 液态玻璃底栏\n\n- 首页底栏默认是悬浮的液态玻璃：页面从下面透出来，边缘像透镜一样把后面的内容往里弯，左上方向的光在边上打出一道细高光。\n- 选中项是一颗会放大下面内容的玻璃水滴：点别的项它带弹簧滑过去，跑得快会被拉长；按住底栏左右拖，水滴跟着手指走，每跨一项轻震一下，松手停在最近的一项。\n- 在“设置 → 外观 → 液体玻璃”可以关掉，回到原来的底栏。不支持的设备是毛玻璃；内存 4 GB 及以下的手机只半透明不模糊。\n- 代价很小：K90 上快速滑列表时显卡每帧多约 0.4 毫秒，没有掉帧。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库，5.x 和 4.x 的数据原样使用；从 3.x 升级时第一次打开会自动导入 3.x 的数据。\n- 液体玻璃默认打开：以前没动过这个开关的会看到新底栏；以前手动关掉的保持关。\n\n## 已知问题\n\n- 流畅度是在 K90（HyperOS，120 Hz）上量的；其他手机的提升幅度会不同。小米手机默认开着的“澎湃AI引擎”无障碍服务会让应用多做一些界面信息的工作，这部分还在想办法。\n- 液态玻璃在电视、平板和电脑的宽屏侧栏上不用（只有手机的底栏）。\n- Windows 便携版和 Linux 版做了启动测试；Windows 安装版没有在测试电脑上安装。\n- 5.1.0 的其他已知问题照旧：Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；HLS 平台录制卡片上的时长比 MP4 长约 10%。\n\n## 以后要做的\n\n- iOS、iPadOS、macOS：需要 Mac 构建和签名，以后再做。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.2.0-5102-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.2.0-5102-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.2.0-5102-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.2.0-5102-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.2.0-5102-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.2.0-5102-linux-x64.tar.gz` | Linux x86_64 |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。最低 Android 8.0。\n\n## SHA-256\n\n```\n44aec362426b5abf245acdfbeb4a965b94c142125bb61d6a9135f46b75d48a2e  PureLive-5.2.0-5102-debug-signed-android-arm64-v8a-release.apk\nf95ebbad4fc3468d8ca76e7eeaa2b3a3886b4006a6e6cf160deee5d2e99019bd  PureLive-5.2.0-5102-debug-signed-android-armeabi-v7a-release.apk\n7d5e3e7d90c24afa127c214b5143e9d77ccc708f6f53c92f099fa1e5acd7eae6  PureLive-5.2.0-5102-debug-signed-android-x86_64-release.apk\ndeabf1dad8809761d3c32d24ed1611b5b8f1d800731ae87ba31f8989f67bdbc0  PureLive-5.2.0-5102-linux-x64.tar.gz\n171b26a56a9063cbc098c40229f42dd1e32d6dddbc79629a8fe98fe5fe4603df  PureLive-5.2.0-5102-windows-x64-portable.zip\n9e9d9285857b80f9c3887c3430aaa3941e38cd7eacd08cbb34387554e8463b63  PureLive-5.2.0-5102-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.2.0-5102-debug-signed-android-arm64-v8a-release.apk",
+        "size": "107.53mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/PureLive-5.2.0-5102-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.2.0-5102-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "95.32mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/PureLive-5.2.0-5102-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.2.0-5102-debug-signed-android-x86_64-release.apk",
+        "size": "118.64mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/PureLive-5.2.0-5102-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.2.0-5102-linux-x64.tar.gz",
+        "size": "48.34mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/PureLive-5.2.0-5102-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.2.0-5102-windows-x64-portable.zip",
+        "size": "64.32mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/PureLive-5.2.0-5102-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.2.0-5102-windows-x64-setup.exe",
+        "size": "49.67mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.2.0/PureLive-5.2.0-5102-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.1.0",
     "title": "Pure Live v5.1.0",
     "date": "2026-10-16",

@@ -1,5 +1,61 @@
 [
   {
+    "version": "5.4.0",
+    "title": "Pure Live v5.4.0",
+    "date": "2026-10-16",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.0（Android、电视、Windows、Linux）\n\n5.4.0 的界面有了 15 种语言：简体中文、繁體中文、English、日本語、한국어、Español、Français、Deutsch、Português、Русский、Italiano、Tiếng Việt、ไทย、Bahasa Indonesia、Türkçe。另外新增“音量增强”，给声音比平台 App 小的直播间加几分贝。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 15 种界面语言\n\n- 设置 → 外观 → 语言，可以选上面 15 种。没选过时跟随系统语言；系统是台湾、香港、澳门的中文时用繁体。\n- 繁体中文由简体转换而来，用台湾的常用词（例如“影片”“資訊”）。\n- 中文以外的语言，人数用 K、M 表示（不用万、亿）。\n- 外语界面里平台名用拉丁字母写法（Bilibili、Douyin、Huya 等）。\n- 某个词还没有翻译时，外语界面显示英文，繁体界面显示简体。\n\n### 音量增强\n\n- 设置 → 视频 → 音量增强：关闭、+3、+6、+9、+12 dB。直播间、多画面、电视和音乐播放都生效。\n- 实测抖音、快手、虎牙、哔哩哔哩的直播流本身就比平台 App 的输出小，纯粹是原样播放，平台 App 自己调大了声音。觉得小声时打开；本来就响的直播间开太大会破音。\n\n### 修复\n\n- 本地弹幕的输入框：文字和提示现在在输入栏正中，不再偏上。\n- 在设置里切换界面语言后，首页等留在后面的页面立刻换成新语言，不用重启。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库，5.x 和 4.x 的数据原样使用；从 3.x 升级时第一次打开会自动导入 3.x 的数据。之前选过的语言（简体中文或 English）照旧。\n\n## 已知问题\n\n- 外语译文由 AI 翻译，没有母语者校对，可能有不自然的说法；欢迎在 Issues 里指出。\n- 平台自己给的文字（直播间标题、分区名、公告等）仍是平台原文。\n- 5.3.0 的其他已知问题照旧：官方登录没有用真实账号逐个登录过；Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；Windows 安装版没有在测试电脑上安装。\n\n## 以后要做的\n\n- iOS、iPadOS、macOS：需要 Mac 构建和签名，以后再做。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.4.0-5104-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.4.0-5104-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.4.0-5104-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.4.0-5104-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.4.0-5104-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.4.0-5104-linux-x64.tar.gz` | Linux x86_64 |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。最低 Android 8.0。\n\n## SHA-256\n\n```\nf7d3d26ece356cfac625751ae191b2f2151f57b56c5d558a19ad66f76a56bae2  PureLive-5.4.0-5104-debug-signed-android-arm64-v8a-release.apk\n5b80a17f82db07734d2a5ed692a35b9f7d62150316db58dac9782e9ca1c4f288  PureLive-5.4.0-5104-debug-signed-android-armeabi-v7a-release.apk\n83c166f39f026b552928650d8296cd5911bac0146f29c089f48667222db09722  PureLive-5.4.0-5104-debug-signed-android-x86_64-release.apk\n0bb3bacd488aaf1dda8b183cf01989f19559d432dcec5fcc45a02c3832d47521  PureLive-5.4.0-5104-linux-x64.tar.gz\nbe607945cb981b429ba30477dd1a475365a23ba785f3bde1e10aab814680b367  PureLive-5.4.0-5104-windows-x64-portable.zip\nc963360336d4a9dbedf7812bcb6a90dbeb0058446e90e1c8b69eeea46c1f33a4  PureLive-5.4.0-5104-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.0-5104-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.36mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/PureLive-5.4.0-5104-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.0-5104-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.16mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/PureLive-5.4.0-5104-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.0-5104-debug-signed-android-x86_64-release.apk",
+        "size": "119.47mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/PureLive-5.4.0-5104-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.0-5104-linux-x64.tar.gz",
+        "size": "49.17mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/PureLive-5.4.0-5104-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.0-5104-windows-x64-portable.zip",
+        "size": "65.16mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/PureLive-5.4.0-5104-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.0-5104-windows-x64-setup.exe",
+        "size": "50.22mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.0/PureLive-5.4.0-5104-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.3.0",
     "title": "Pure Live v5.3.0",
     "date": "2026-10-16",

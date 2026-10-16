@@ -1,10 +1,10 @@
 {
-  "version": "5.3.0",
-  "build_number": 5103,
-  "version_num": 503005103,
-  "version_desc": "- 斗鱼、虎牙、抖音、快手、YY、网易CC、Twitch、SOOP 支持官方登录：在应用里打开平台自己的登录页，登录后自动保存。\n- 宽屏直播间看竖屏直播流时，背景图不再压到右侧聊天栏上。\n- 项目首页换成 5.3.0 的真机截图，新增英文版 README。",
+  "version": "5.4.0",
+  "build_number": 5104,
+  "version_num": 504005104,
+  "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.3.0",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.3.0",
-      "build_number": 5103,
-      "version_num": 503005103,
-      "version_desc": "- 斗鱼、虎牙、抖音、快手、YY、网易CC、Twitch、SOOP 支持官方登录：在应用里打开平台自己的登录页，登录后自动保存。\n- 宽屏直播间看竖屏直播流时，背景图不再压到右侧聊天栏上。\n- 项目首页换成 5.3.0 的真机截图，新增英文版 README。",
+      "version": "5.4.0",
+      "build_number": 5104,
+      "version_num": 504005104,
+      "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.3.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,21 +25,21 @@
       ]
     },
     "windows": {
-      "version": "5.3.0",
-      "build_number": 5103,
-      "version_num": 503005103,
-      "version_desc": "- 斗鱼、虎牙、抖音、快手、YY、网易CC、Twitch、SOOP 支持官方登录：在应用里打开平台自己的登录页，登录后自动保存。\n- 宽屏直播间看竖屏直播流时，背景图不再压到右侧聊天栏上。\n- 项目首页换成 5.3.0 的真机截图，新增英文版 README。",
+      "version": "5.4.0",
+      "build_number": 5104,
+      "version_num": 504005104,
+      "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.3.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.3.0",
-      "build_number": 5103,
-      "version_num": 503005103,
-      "version_desc": "- 斗鱼、虎牙、抖音、快手、YY、网易CC、Twitch、SOOP 支持官方登录：在应用里打开平台自己的登录页，登录后自动保存。\n- 宽屏直播间看竖屏直播流时，背景图不再压到右侧聊天栏上。\n- 项目首页换成 5.3.0 的真机截图，新增英文版 README。",
+      "version": "5.4.0",
+      "build_number": 5104,
+      "version_num": 504005104,
+      "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.3.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0"
     },
     "macos": {
       "version": "3.2.10",

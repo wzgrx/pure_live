@@ -1,5 +1,61 @@
 [
   {
+    "version": "5.3.0",
+    "title": "Pure Live v5.3.0",
+    "date": "2026-10-16",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.3.0",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.3.0（Android、电视、Windows、Linux）\n\n5.3.0 给斗鱼、虎牙、抖音、快手、YY、网易CC、Twitch、SOOP 加上了官方登录：不用再去电脑浏览器里复制 Cookie，在应用里打开平台自己的登录页，用验证码、密码或平台 App 扫码登录，登录后自动保存。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 各平台官方登录\n\n- 设置 → 平台显示与授权 → 平台账号 → 点一个平台，最上面是“用××官方登录”。点开是平台自己的登录页：\n\n| 平台 | 怎么登录 |\n|---|---|\n| 斗鱼 | 手机号加密码、短信验证码，或昵称登录 |\n| 虎牙 | 点页面右上角“登录”：密码、短信、扫码、微信、QQ、微博 |\n| 抖音 | 点页面右上角“登录”：验证码或密码 |\n| 快手 | 打开就是验证码、密码登录 |\n| YY | YY 安全中心的账号密码登录 |\n| 网易CC | 点页面右上角“登录”：短信或邮箱密码 |\n| Twitch | 账号密码（国内网络需要代理） |\n| SOOP | ID 密码或第三方账号 |\n\n- 登录成功后自动回到账号页保存，和粘贴 Cookie 的规则一样：抖音先问平台是谁登录的，没登录上的不存；斗鱼续期要用的 LTP0 自动填好。没自动回来时点右上角“已登录，保存”（网易CC 要这样点）。\n- 电脑版的登录页整页缩放进屏幕，字小可以两指放大。\n- 每次打开前会清掉应用内浏览器里这个平台的旧登录，退出过的账号不会被直接带回来。\n- 哔哩哔哩还是原来的扫码和网页登录。没有应用内浏览器的设备（Linux、没装 WebView2 的 Windows）仍然粘贴 Cookie。\n\n### 修复\n\n- 宽屏直播间（平板、Windows、Linux）看竖屏直播流时，画面两边的背景图有一条压在右侧聊天栏上，现在只画在画面区域里。\n- 项目首页 README 换成 5.3.0 的真机截图，并新增英文版 README.en.md。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库，5.x 和 4.x 的数据原样使用；从 3.x 升级时第一次打开会自动导入 3.x 的数据。已经保存的 Cookie 照常使用。\n\n## 已知问题\n\n- 官方登录在 K90 上逐个打开了各平台的登录页，但没有用真实账号登录过（维护者没有这些平台的账号），遇到登录后没自动回来、或回来后显示没登录的，请反馈是哪个平台。\n- 平台可能改登录页的地址或方式；到时用粘贴 Cookie 的办法照样能登录。\n- 5.2.0 的其他已知问题照旧：Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；HLS 平台录制卡片上的时长比 MP4 长约 10%；Windows 安装版没有在测试电脑上安装。\n\n## 以后要做的\n\n- iOS、iPadOS、macOS：需要 Mac 构建和签名，以后再做。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.3.0-5103-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.3.0-5103-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.3.0-5103-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.3.0-5103-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.3.0-5103-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.3.0-5103-linux-x64.tar.gz` | Linux x86_64 |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。最低 Android 8.0。\n\n## SHA-256\n\n```\n6a47e9a07908cf1670cec89dbe5889ddbcb1657390b980189ec1ed16ed5c00ed  PureLive-5.3.0-5103-debug-signed-android-arm64-v8a-release.apk\nabc38b14eae4b9b1013ca1fb418f30a6185b6a6d048587c2ca8810c255774631  PureLive-5.3.0-5103-debug-signed-android-armeabi-v7a-release.apk\n53d3662da2ecc5f6d70831fa1c5f11a081d3330c25d3568e46a4ea6c3b98af69  PureLive-5.3.0-5103-debug-signed-android-x86_64-release.apk\nabb19994c53bf54b8866ceb5d969868a735c54747d87ac957f2bd2983ab3d010  PureLive-5.3.0-5103-linux-x64.tar.gz\n28fe8191aea29c8849231008825e048df7f723f7da59def56fd8ead37bc57d8b  PureLive-5.3.0-5103-windows-x64-portable.zip\n7f3b5002598b0d3118477d55e8fb188f18de561f9665a696f99101398be55c75  PureLive-5.3.0-5103-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.3.0-5103-debug-signed-android-arm64-v8a-release.apk",
+        "size": "107.53mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/PureLive-5.3.0-5103-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.3.0-5103-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "95.32mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/PureLive-5.3.0-5103-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.3.0-5103-debug-signed-android-x86_64-release.apk",
+        "size": "118.64mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/PureLive-5.3.0-5103-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.3.0-5103-linux-x64.tar.gz",
+        "size": "48.33mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/PureLive-5.3.0-5103-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.3.0-5103-windows-x64-portable.zip",
+        "size": "64.33mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/PureLive-5.3.0-5103-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.3.0-5103-windows-x64-setup.exe",
+        "size": "49.68mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.3.0/PureLive-5.3.0-5103-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.2.0",
     "title": "Pure Live v5.2.0",
     "date": "2026-10-16",

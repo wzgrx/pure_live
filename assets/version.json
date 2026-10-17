@@ -1,10 +1,10 @@
 {
-  "version": "5.4.0",
-  "build_number": 5104,
-  "version_num": 504005104,
-  "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
+  "version": "5.4.1",
+  "build_number": 5105,
+  "version_num": 504015105,
+  "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.0",
-      "build_number": 5104,
-      "version_num": 504005104,
-      "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
+      "version": "5.4.1",
+      "build_number": 5105,
+      "version_num": 504015105,
+      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.0",
-      "build_number": 5104,
-      "version_num": 504005104,
-      "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
+      "version": "5.4.1",
+      "build_number": 5105,
+      "version_num": 504015105,
+      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.0",
-      "build_number": 5104,
-      "version_num": 504005104,
-      "version_desc": "- 界面支持 15 种语言：简体中文、繁體中文、English、日本語、한국어 等，在 设置 → 外观 → 语言 切换，没选时跟随系统。\n- 新增“音量增强”（设置 → 视频）：直播声音比平台 App 小时可以加几分贝。\n- 本地弹幕输入框的文字居中；切换语言后各页面立即更新。",
+      "version": "5.4.1",
+      "build_number": 5105,
+      "version_num": 504015105,
+      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1"
     },
     "macos": {
-      "version": "3.2.10",
-      "build_number": 4133,
-      "version_num": 302104133,
-      "version_desc": "- 修复斗鱼直播间约 5 分钟后自动暂停，断流后自动换链接重连。\n- 新增斗鱼登录续期、局域网设备同步、应用内下载更新、平台图标。\n- 修复小窗挡住菜单、竖屏双击全屏、录制码率显示；安卓新增 armv7 与 x86_64 安装包。",
+      "version": "5.4.1",
+      "build_number": 5105,
+      "version_num": 504015105,
+      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v3.2.10"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1"
     },
     "ios": {
-      "version": "3.2.10",
-      "build_number": 4133,
-      "version_num": 302104133,
-      "version_desc": "- 修复斗鱼直播间约 5 分钟后自动暂停，断流后自动换链接重连。\n- 新增斗鱼登录续期、局域网设备同步、应用内下载更新、平台图标。\n- 修复小窗挡住菜单、竖屏双击全屏、录制码率显示；安卓新增 armv7 与 x86_64 安装包。",
+      "version": "5.4.1",
+      "build_number": 5105,
+      "version_num": 504015105,
+      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/pure_live/releases/tag/v3.2.10"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1"
     }
   },
   "windows_msix_available": false

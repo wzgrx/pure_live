@@ -1,5 +1,85 @@
 [
   {
+    "version": "5.4.4",
+    "title": "Pure Live v5.4.4",
+    "date": "2026-10-18",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.4（Android、电视、Windows、Linux、macOS、iOS、iPadOS）\n\n5.4.4 修了开播提醒的一个问题：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次开播提醒。其他功能和 5.4.3 相同。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 开播提醒（Android）\n\n- 应用和后台检查共用一份“哪些直播间已经提醒过”的记录。以前两边同时写这份记录时，后写的那次会失败，记录停在旧的样子，后台检查可能把已经知道的直播间当成第一次见到而不提醒。现在每次写互不干扰，按顺序生效。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库，也没有新设置。\n\n## 已知问题\n\n- macOS、iOS、iPadOS 版仍然只在 GitHub 的构建机和 iPhone 模拟器上打开过，没有在真机上用过：分享、锁屏正在播放、后台播放、快捷键列表要等有人在真机上用过才算确认；录制在苹果平台上暂时不可用；iPad 的系统画中画和台前调度还没做。\n- 小窗浮在其他应用上面时，小米 HyperOS 等系统在内存紧张时可能结束应用，小窗随之消失；可以在系统设置里给纯粹直播“无限制”的后台权限。\n- 5.4.1 的其他已知问题照旧：外语译文由 AI 翻译，没有母语者校对；官方登录没有用真实账号逐个登录过；Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；Windows 安装版没有在测试电脑上安装。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.4.4-5108-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.4.4-5108-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.4.4-5108-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.4.4-5108-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.4.4-5108-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.4.4-5108-linux-x64.tar.gz` | Linux x86_64 |\n| `PureLive-5.4.4-5108-macos-universal.dmg` | macOS（Intel 和 Apple 芯片） |\n| `PureLive-5.4.4-5108-macos-universal.zip` | macOS，同上，压缩包 |\n| `PureLive-5.4.4-5108-ios-unsigned.ipa` | iPhone、iPad，用 AltStore 或 SideStore 安装 |\n| `PureLive-5.4.4-5108-ios-trollstore.ipa` | 装了 TrollStore 的 iPhone、iPad |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。最低 Android 8.0。macOS 第一次打开如果提示“无法验证开发者”，到 系统设置 → 隐私与安全性 → 点“仍要打开”。\n\n## SHA-256\n\n```\n73c3e3181c183f798ccf854c862132c0bd7614d26851e02cb248197c12401785  PureLive-5.4.4-5108-debug-signed-android-arm64-v8a-release.apk\nb0451df68e645bdb18a17d79a4e8cf80982a8f8b43e7cbc10bbbdbd272764dc6  PureLive-5.4.4-5108-debug-signed-android-armeabi-v7a-release.apk\n43a85576fd6081e2e263f5008b33ecf6d9d26699ca1407217ac4583d661aa710  PureLive-5.4.4-5108-debug-signed-android-x86_64-release.apk\nbf7ca485e48814d5aeb5b0f84fd13db4f37af897a37050621cb05be7beaf12f3  PureLive-5.4.4-5108-ios-trollstore.ipa\ne2c1d83bf359dbc09ca3e79f8b32e3d0816a292bc4efb1a2a585b563a60aea16  PureLive-5.4.4-5108-ios-unsigned.ipa\n335203d23b6f0b7b1b155ac298da60d8cb969b88dfedcc592c0beb120cfbb538  PureLive-5.4.4-5108-linux-x64.tar.gz\nda16b4499d20bb2a52329a5ad40dcce799b4164b0f14f886e325a42d3c95be54  PureLive-5.4.4-5108-macos-universal.dmg\nc2e2c08ab60195760cfea209ecf2cf07257d4bdc6ab52e7359c3958ef2ee8841  PureLive-5.4.4-5108-macos-universal.zip\n554e88c5f11c838ccc8c422ff710285a4d0c8e575e9b1d663aa079ecb29596cf  PureLive-5.4.4-5108-windows-x64-portable.zip\n744aa847b084bc0ddeeccdd473d3f256c444c3e0b55e8e884936daf6e0cf53b4  PureLive-5.4.4-5108-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.43mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.25mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-debug-signed-android-x86_64-release.apk",
+        "size": "119.54mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-ios-trollstore.ipa",
+        "size": "45.17mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-ios-trollstore.ipa"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-ios-unsigned.ipa",
+        "size": "44.99mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-ios-unsigned.ipa"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-linux-x64.tar.gz",
+        "size": "54.61mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-macos-universal.dmg",
+        "size": "94.72mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-macos-universal.dmg"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-macos-universal.zip",
+        "size": "85.08mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-macos-universal.zip"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-windows-x64-portable.zip",
+        "size": "65.20mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.4-5108-windows-x64-setup.exe",
+        "size": "50.25mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.4/PureLive-5.4.4-5108-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.4.3",
     "title": "Pure Live v5.4.3",
     "date": "2026-10-18",

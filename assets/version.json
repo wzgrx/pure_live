@@ -1,10 +1,10 @@
 {
-  "version": "5.4.2",
-  "build_number": 5106,
-  "version_num": 504025106,
-  "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
+  "version": "5.4.3",
+  "build_number": 5107,
+  "version_num": 504035107,
+  "version_desc": "- iPhone、iPad：从别的应用分享直播间进来，后台和锁屏继续播放、锁屏显示正在播放。\n- iPad：接键盘时按住 ⌘ 列出快捷键。\n- 其他平台和 5.4.2 相同。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.3",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.2",
-      "build_number": 5106,
-      "version_num": 504025106,
-      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
+      "version": "5.4.3",
+      "build_number": 5107,
+      "version_num": 504035107,
+      "version_desc": "- iPhone、iPad：从别的应用分享直播间进来，后台和锁屏继续播放、锁屏显示正在播放。\n- iPad：接键盘时按住 ⌘ 列出快捷键。\n- 其他平台和 5.4.2 相同。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.3",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.2",
-      "build_number": 5106,
-      "version_num": 504025106,
-      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
+      "version": "5.4.3",
+      "build_number": 5107,
+      "version_num": 504035107,
+      "version_desc": "- iPhone、iPad：从别的应用分享直播间进来，后台和锁屏继续播放、锁屏显示正在播放。\n- iPad：接键盘时按住 ⌘ 列出快捷键。\n- 其他平台和 5.4.2 相同。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.3",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.2",
-      "build_number": 5106,
-      "version_num": 504025106,
-      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
+      "version": "5.4.3",
+      "build_number": 5107,
+      "version_num": 504035107,
+      "version_desc": "- iPhone、iPad：从别的应用分享直播间进来，后台和锁屏继续播放、锁屏显示正在播放。\n- iPad：接键盘时按住 ⌘ 列出快捷键。\n- 其他平台和 5.4.2 相同。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.3"
     },
     "macos": {
-      "version": "5.4.2",
-      "build_number": 5106,
-      "version_num": 504025106,
-      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
+      "version": "5.4.3",
+      "build_number": 5107,
+      "version_num": 504035107,
+      "version_desc": "- iPhone、iPad：从别的应用分享直播间进来，后台和锁屏继续播放、锁屏显示正在播放。\n- iPad：接键盘时按住 ⌘ 列出快捷键。\n- 其他平台和 5.4.2 相同。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.3"
     },
     "ios": {
-      "version": "5.4.2",
-      "build_number": 5106,
-      "version_num": 504025106,
-      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
+      "version": "5.4.3",
+      "build_number": 5107,
+      "version_num": 504035107,
+      "version_desc": "- iPhone、iPad：从别的应用分享直播间进来，后台和锁屏继续播放、锁屏显示正在播放。\n- iPad：接键盘时按住 ⌘ 列出快捷键。\n- 其他平台和 5.4.2 相同。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.3"
     }
   },
   "windows_msix_available": false

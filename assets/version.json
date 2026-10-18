@@ -1,10 +1,10 @@
 {
-  "version": "5.4.1",
-  "build_number": 5105,
-  "version_num": 504015105,
-  "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
+  "version": "5.4.2",
+  "build_number": 5106,
+  "version_num": 504025106,
+  "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.1",
-      "build_number": 5105,
-      "version_num": 504015105,
-      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
+      "version": "5.4.2",
+      "build_number": 5106,
+      "version_num": 504025106,
+      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.1",
-      "build_number": 5105,
-      "version_num": 504015105,
-      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
+      "version": "5.4.2",
+      "build_number": 5106,
+      "version_num": 504025106,
+      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.1",
-      "build_number": 5105,
-      "version_num": 504015105,
-      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
+      "version": "5.4.2",
+      "build_number": 5106,
+      "version_num": 504025106,
+      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2"
     },
     "macos": {
-      "version": "5.4.1",
-      "build_number": 5105,
-      "version_num": 504015105,
-      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
+      "version": "5.4.2",
+      "build_number": 5106,
+      "version_num": 504025106,
+      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2"
     },
     "ios": {
-      "version": "5.4.1",
-      "build_number": 5105,
-      "version_num": 504015105,
-      "version_desc": "- 修好 Linux 版打开后停在“没能启动”的问题（5.0.0～5.4.0 都受影响）。\n- 第一次提供 5.x 的 macOS、iOS、iPadOS 安装包（没有苹果签名，安装方法见发布页）。\n- macOS、iOS、Linux 第一次打开时导入 3.x 的关注、历史和设置。",
+      "version": "5.4.2",
+      "build_number": 5106,
+      "version_num": 504025106,
+      "version_desc": "- 小窗重做：应用里和离开应用后是同一个小窗，能拖到最上最下、收到边上、无级缩放，位置和大小都记住；系统画中画改成开关。\n- macOS：Mac 自己的标题栏、菜单栏和菜单栏图标，关窗口不退出。\n- iPhone、iPad：分享、剪贴板、全屏返回和 ⌘ 键盘快捷键。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.1"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2"
     }
   },
   "windows_msix_available": false

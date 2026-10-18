@@ -1,5 +1,85 @@
 [
   {
+    "version": "5.4.2",
+    "title": "Pure Live v5.4.2",
+    "date": "2026-10-18",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.2",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.2（Android、电视、Windows、Linux、macOS、iOS、iPadOS）\n\n5.4.2 重做了小窗：应用里和离开应用后是同一个小窗，可以拖到任意位置、收到边上、无级缩放；macOS 版有了 Mac 自己的标题栏、菜单栏和菜单栏图标；iPhone、iPad 版补上了分享、剪贴板、全屏返回和键盘快捷键。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 小窗（Android）\n\n- **一个小窗**：应用里和应用外是同一个窗口、同一个播放器，进出都不重新加载。\n- **点直播间的小窗按钮**：直播间缩成小窗，回到上一页，人还在应用里（以前是进系统画中画，应用退到后台）。\n- **离开应用继续看**：小窗开着时回到桌面或切到别的应用，同一个小窗留在其他应用上面，按钮、拖动、改大小、收边都和应用里一样；回到应用时，小窗就在刚才停的地方。这需要“显示在其他应用的上层”权限：设置 → 视频 → 小窗 →“在其他应用上层显示小窗”；没开时小窗先藏起来，回来还在，第一次会提示一次怎么打开。\n- **系统画中画改成开关**：设置 → 视频 → 小窗 →“改用系统画中画”（默认关）。以前打开过“离开应用时自动画中画”的，升级后自动打开这个开关，用法和以前一样。“离开应用时自动画中画”改名为“离开应用时自动小窗”。\n- **拖动**：能拖到屏幕最上面（状态栏下面）和最下面（手势条上面）；松手后滑到近的一边。\n- **收边**：甩到屏幕边上收起，露出一条（至少 56）照常播放，上面有白色竖条；点一下或往里拖就出来，不会触发全面屏的返回手势。\n- **改大小**：把手固定在右下角，往屏幕中间或往下拉变大，从 160 宽一直到和屏幕一样宽；两指缩放照旧。弹幕开关和画中画按钮固定在左下角，不再随小窗在屏幕左右换位置。\n- **记住位置**：小窗的位置和大小关掉应用再打开也还在。\n- **动画**：画面从直播间直接飞进小窗；关闭和回到直播间时先淡出；换页、转屏时平滑挪到新位置。系统里关了动画时都直接到位。\n\n### macOS\n\n- Mac 自己的标题栏（红黄绿按钮），点红色按钮或 ⌘W 只关窗口，应用留在程序坞，录制照常；点程序坞图标窗口回来。⌘Q 才退出，录制中会先问一句。\n- 完整的菜单栏：纯粹直播、文件、编辑、显示、播放、窗口、帮助，文字跟应用语言；“播放”菜单在直播间里能暂停、调音量、开关弹幕、纯音频、录制、窗口内全屏。快捷键 ⌘, ⌘F ⌘L ⌘Y ⌘1～⌘4 ⌘[ ⌘W ⌘R。\n- 菜单栏图标：平时是单色图标，录制中带红点；设置里可以关掉。\n- 用绿色按钮退出系统全屏时，直播间也一起退出全屏；更新下载完有“在访达中显示”。\n\n### iPhone、iPad\n\n- iPad 上的分享从点的按钮旁边弹出（以前会直接失败）。\n- 剪贴板：回到应用时只看有没有新内容，不读内容，所以不会弹“允许粘贴”；有新内容时底部提示，点“识别”才读。\n- 全屏或开着面板时，从左边缘右滑先退出全屏、关掉面板。\n- 新版本对话框里是“去下载页”。\n- iPad 接键盘时，⌘ 快捷键和 Mac 相同。\n\n### 其他\n\n- Windows、Linux、macOS 的窗口按保存的大小打开时，不会再比屏幕大。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库。新加的设置都有默认值，老用户的用法不变（打开过自动画中画的仍然用系统画中画）。\n\n## 已知问题\n\n- 小窗浮在其他应用上面时，小米 HyperOS 等系统在内存紧张时可能结束应用，小窗随之消失；可以在系统设置里给纯粹直播“无限制”的后台权限。\n- macOS、iOS、iPadOS 版仍然只在 GitHub 的构建机和 iPhone 模拟器上打开过，没有在真机上用过；录制在苹果平台上暂时不可用。\n- 5.4.1 的其他已知问题照旧：外语译文由 AI 翻译，没有母语者校对；官方登录没有用真实账号逐个登录过；Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；Windows 安装版没有在测试电脑上安装。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.4.2-5106-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.4.2-5106-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.4.2-5106-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.4.2-5106-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.4.2-5106-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.4.2-5106-linux-x64.tar.gz` | Linux x86_64 |\n| `PureLive-5.4.2-5106-macos-universal.dmg` | macOS（Intel 和 Apple 芯片） |\n| `PureLive-5.4.2-5106-macos-universal.zip` | macOS，同上，压缩包 |\n| `PureLive-5.4.2-5106-ios-unsigned.ipa` | iPhone、iPad，用 AltStore 或 SideStore 安装 |\n| `PureLive-5.4.2-5106-ios-trollstore.ipa` | 装了 TrollStore 的 iPhone、iPad |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。最低 Android 8.0。macOS 第一次打开如果提示“无法验证开发者”，到 系统设置 → 隐私与安全性 → 点“仍要打开”。\n\n## SHA-256\n\n```\naa6a5dd54ce6582a8bdde9d7a205a57b7d873d203744e7eaeee48513f43c6cf5  PureLive-5.4.2-5106-debug-signed-android-arm64-v8a-release.apk\nc473e89e501fb127c1f451b5631443e564ac52ab5fc1aeae2db853328b5178db  PureLive-5.4.2-5106-debug-signed-android-armeabi-v7a-release.apk\ndc8e5de3c95b66c3ef0c0a61b3c9422814a176570d3c594f07b6477f218f4886  PureLive-5.4.2-5106-debug-signed-android-x86_64-release.apk\n160500a3cb7539547a8d9489f35f639a1162e5c8e15b1aeb274e53813dd21530  PureLive-5.4.2-5106-ios-trollstore.ipa\n6cdd3c8be1a3aed56eefe66d6b2207b6a383fbbca1f9e82e8cc15e6748f6561f  PureLive-5.4.2-5106-ios-unsigned.ipa\n38a87fb99b7b94a2429b01522a7508fcbb27aecf974663650d9a9ad243703807  PureLive-5.4.2-5106-linux-x64.tar.gz\n3feb6af1de41f12159ba49c1045de947d96a4915d0fa50aed3efbd271df86e26  PureLive-5.4.2-5106-macos-universal.dmg\n20e838edac408953f7a9b4e04b5b6f536be95c7ca6ec549731492096582905bc  PureLive-5.4.2-5106-macos-universal.zip\n8e412cb15c4da0ff070fbbcdf4c0d990342cdda3224e9bddc2b531f0e963a429  PureLive-5.4.2-5106-windows-x64-portable.zip\n26dd1b94082cdefb723f00902ae845f340a88aa12b9622af5cfa34f882ec5002  PureLive-5.4.2-5106-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.43mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.25mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-debug-signed-android-x86_64-release.apk",
+        "size": "119.54mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-ios-trollstore.ipa",
+        "size": "45.06mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-ios-trollstore.ipa"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-ios-unsigned.ipa",
+        "size": "44.88mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-ios-unsigned.ipa"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-linux-x64.tar.gz",
+        "size": "54.61mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-macos-universal.dmg",
+        "size": "94.37mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-macos-universal.dmg"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-macos-universal.zip",
+        "size": "85.07mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-macos-universal.zip"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-windows-x64-portable.zip",
+        "size": "65.20mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.2-5106-windows-x64-setup.exe",
+        "size": "50.25mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.2/PureLive-5.4.2-5106-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.4.1",
     "title": "Pure Live v5.4.1",
     "date": "2026-10-17",

@@ -1,10 +1,10 @@
 {
-  "version": "5.4.4",
-  "build_number": 5108,
-  "version_num": 504045108,
-  "version_desc": "- 开播提醒：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次提醒，已修好。\n- 其他和 5.4.3 相同。",
+  "version": "5.4.5",
+  "build_number": 5109,
+  "version_num": 504045109,
+  "version_desc": "- 玻璃底栏：静止时是灰色药丸，按下、滑动时才变成玻璃透镜，动作全部换成弹簧动画。\n- 平板也可以用底栏：设置 → 外观 → 主题 →“平板也用底栏”。\n- 修复：平板退出直播间全屏后变成横着的竖屏；部分哔哩哔哩直播间打开后提示“播放器异常”。\n- 录制用的 FFmpeg 组件升级，五个平台都从源码重新编译。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.5",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.4",
-      "build_number": 5108,
-      "version_num": 504045108,
-      "version_desc": "- 开播提醒：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次提醒，已修好。\n- 其他和 5.4.3 相同。",
+      "version": "5.4.5",
+      "build_number": 5109,
+      "version_num": 504045109,
+      "version_desc": "- 玻璃底栏：静止时是灰色药丸，按下、滑动时才变成玻璃透镜，动作全部换成弹簧动画。\n- 平板也可以用底栏：设置 → 外观 → 主题 →“平板也用底栏”。\n- 修复：平板退出直播间全屏后变成横着的竖屏；部分哔哩哔哩直播间打开后提示“播放器异常”。\n- 录制用的 FFmpeg 组件升级，五个平台都从源码重新编译。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.5",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.4",
-      "build_number": 5108,
-      "version_num": 504045108,
-      "version_desc": "- 开播提醒：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次提醒，已修好。\n- 其他和 5.4.3 相同。",
+      "version": "5.4.5",
+      "build_number": 5109,
+      "version_num": 504045109,
+      "version_desc": "- 玻璃底栏：静止时是灰色药丸，按下、滑动时才变成玻璃透镜，动作全部换成弹簧动画。\n- 平板也可以用底栏：设置 → 外观 → 主题 →“平板也用底栏”。\n- 修复：平板退出直播间全屏后变成横着的竖屏；部分哔哩哔哩直播间打开后提示“播放器异常”。\n- 录制用的 FFmpeg 组件升级，五个平台都从源码重新编译。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.5",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.4",
-      "build_number": 5108,
-      "version_num": 504045108,
-      "version_desc": "- 开播提醒：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次提醒，已修好。\n- 其他和 5.4.3 相同。",
+      "version": "5.4.5",
+      "build_number": 5109,
+      "version_num": 504045109,
+      "version_desc": "- 玻璃底栏：静止时是灰色药丸，按下、滑动时才变成玻璃透镜，动作全部换成弹簧动画。\n- 平板也可以用底栏：设置 → 外观 → 主题 →“平板也用底栏”。\n- 修复：平板退出直播间全屏后变成横着的竖屏；部分哔哩哔哩直播间打开后提示“播放器异常”。\n- 录制用的 FFmpeg 组件升级，五个平台都从源码重新编译。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.5"
     },
     "macos": {
-      "version": "5.4.4",
-      "build_number": 5108,
-      "version_num": 504045108,
-      "version_desc": "- 开播提醒：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次提醒，已修好。\n- 其他和 5.4.3 相同。",
+      "version": "5.4.5",
+      "build_number": 5109,
+      "version_num": 504045109,
+      "version_desc": "- 玻璃底栏：静止时是灰色药丸，按下、滑动时才变成玻璃透镜，动作全部换成弹簧动画。\n- 平板也可以用底栏：设置 → 外观 → 主题 →“平板也用底栏”。\n- 修复：平板退出直播间全屏后变成横着的竖屏；部分哔哩哔哩直播间打开后提示“播放器异常”。\n- 录制用的 FFmpeg 组件升级，五个平台都从源码重新编译。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.5"
     },
     "ios": {
-      "version": "5.4.4",
-      "build_number": 5108,
-      "version_num": 504045108,
-      "version_desc": "- 开播提醒：打开“应用被清理后也检查”时，应用和后台检查同时记录直播间状态会互相覆盖，可能漏掉一次提醒，已修好。\n- 其他和 5.4.3 相同。",
+      "version": "5.4.5",
+      "build_number": 5109,
+      "version_num": 504045109,
+      "version_desc": "- 玻璃底栏：静止时是灰色药丸，按下、滑动时才变成玻璃透镜，动作全部换成弹簧动画。\n- 平板也可以用底栏：设置 → 外观 → 主题 →“平板也用底栏”。\n- 修复：平板退出直播间全屏后变成横着的竖屏；部分哔哩哔哩直播间打开后提示“播放器异常”。\n- 录制用的 FFmpeg 组件升级，五个平台都从源码重新编译。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.4"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.5"
     }
   },
   "windows_msix_available": false

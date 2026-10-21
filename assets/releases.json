@@ -1,5 +1,85 @@
 [
   {
+    "version": "5.4.6",
+    "title": "Pure Live v5.4.6",
+    "date": "2026-10-21",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.6（Android、电视、Windows、Linux、macOS、iOS、iPadOS）\n\n5.4.6 修了网络电视的一个问题：导入的直播源列表在热门里切换不过去，删掉的内置列表还会自己回来。其他功能和 5.4.5 相同。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 网络电视（[#6](https://github.com/wzgrx/PureLive/issues/6)）\n\n- **热门 → 网络可以切换列表**：以前这里只显示内置的“热门频道”，自己导入的列表只能在分区 → 网络里看到。现在热门 → 网络顶上有一排标签，“热门频道（内置）”和每个导入的列表，点哪个就显示哪个，下次打开还记得；只有一个列表时不显示这排标签。\n- **IPTV 设置**：播放列表里多了“热门里显示”，也可以在这里选；正在热门里显示的列表卡片上标“热门显示中”。\n- **删掉内置列表就真的删掉了**：以前删掉后，热门 → 网络一刷新就会重新下载回来。现在刷新、重开应用都不会再回来，热门 → 网络改为显示第一个导入的列表；以后想要的话，IPTV 设置里有“恢复内置热门频道”。电视版的网络电视页也一样。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库；热门 → 网络默认还是显示内置列表，原来的用法不变。\n\n## 已知问题\n\n- macOS、iOS、iPadOS 版仍然只在 GitHub 的构建机和 iPhone 模拟器上打开过，没有在真机上用过：分享、锁屏正在播放、后台播放、快捷键列表要等有人在真机上用过才算确认；录制在苹果平台上暂时不可用；iPad 的系统画中画和台前调度还没做。\n- 小窗浮在其他应用上面时，小米 HyperOS 等系统在内存紧张时可能结束应用，小窗随之消失；可以在系统设置里给纯粹直播“无限制”的后台权限。\n- 5.4.1 的其他已知问题照旧：外语译文由 AI 翻译，没有母语者校对；官方登录没有用真实账号逐个登录过；Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；Windows 安装版没有在测试电脑上安装。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 |\n|---|---|\n| `PureLive-5.4.6-5110-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 |\n| `PureLive-5.4.6-5110-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 |\n| `PureLive-5.4.6-5110-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 |\n| `PureLive-5.4.6-5110-windows-x64-setup.exe` | Windows 安装版 |\n| `PureLive-5.4.6-5110-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） |\n| `PureLive-5.4.6-5110-linux-x64.tar.gz` | Linux x86_64 |\n| `PureLive-5.4.6-5110-macos-universal.dmg` | macOS（Intel 和 Apple 芯片） |\n| `PureLive-5.4.6-5110-macos-universal.zip` | macOS，同上，压缩包 |\n| `PureLive-5.4.6-5110-ios-unsigned.ipa` | iPhone、iPad，用 AltStore 或 SideStore 安装 |\n| `PureLive-5.4.6-5110-ios-trollstore.ipa` | 装了 TrollStore 的 iPhone、iPad |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。最低 Android 8.0。macOS 第一次打开如果提示“无法验证开发者”，到 系统设置 → 隐私与安全性 → 点“仍要打开”。\n\n## SHA-256\n\n```\n2b6f67a86e5515abeed84f6692a147936c1b72ec4fffd0c4a694791b5f9470bf  PureLive-5.4.6-5110-debug-signed-android-arm64-v8a-release.apk\nbb40aff61ede1fa844ff7faeeb89c8aed3bab91fa35ff6c504193892c07d43a9  PureLive-5.4.6-5110-debug-signed-android-armeabi-v7a-release.apk\ncdfcd6e79642dfe632ac2c7d1b38344102132475baab43b825db6c6f2cc7dcb5  PureLive-5.4.6-5110-debug-signed-android-x86_64-release.apk\n2266255652ed48afb4b7ab6a165cb9b7def537f719b7536836bcd55b57688150  PureLive-5.4.6-5110-ios-trollstore.ipa\n20626ad805a6c49c55ce801f9bc67baaca8a1939c4ae428ce7a2bc50fad59fd2  PureLive-5.4.6-5110-ios-unsigned.ipa\n2b04bdd7f4f433db0c978fe16fb206d5c20a04ccf7b254bbcd4389c3a776960e  PureLive-5.4.6-5110-linux-x64.tar.gz\n8574f3d7b6463ad746b3f5b4b44b043012fc406e448578fce7fc0060cac7a6e6  PureLive-5.4.6-5110-macos-universal.dmg\nebb8e421ebdc48c39ecd340a202a713b3051ddd9e5ca64b69b1d9c5caecafd58  PureLive-5.4.6-5110-macos-universal.zip\nec116cf8633edc448275ce8a898fd78d9a8af55d60a85832d0111c1330c0565d  PureLive-5.4.6-5110-windows-x64-portable.zip\nf086cc7c89df6523d02bc090989040a01064d9610dd89fb17c358dfa0fd49fdf  PureLive-5.4.6-5110-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.30mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.44mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-debug-signed-android-x86_64-release.apk",
+        "size": "119.44mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-ios-trollstore.ipa",
+        "size": "44.99mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-ios-trollstore.ipa"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-ios-unsigned.ipa",
+        "size": "44.83mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-ios-unsigned.ipa"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-linux-x64.tar.gz",
+        "size": "54.86mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-macos-universal.dmg",
+        "size": "94.39mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-macos-universal.dmg"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-macos-universal.zip",
+        "size": "84.89mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-macos-universal.zip"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-windows-x64-portable.zip",
+        "size": "65.49mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.6-5110-windows-x64-setup.exe",
+        "size": "50.42mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.6/PureLive-5.4.6-5110-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.4.5",
     "title": "Pure Live v5.4.5",
     "date": "2026-10-21",

@@ -1,10 +1,10 @@
 {
-  "version": "5.4.6",
-  "build_number": 5110,
-  "version_num": 504065110,
-  "version_desc": "- 网络电视：热门 → 网络顶上可以在内置列表和自己导入的列表之间切换，也可以在 IPTV 设置的“热门里显示”里选。\n- 删掉的内置热门列表不会再自己回来；需要时在 IPTV 设置里“恢复内置热门频道”。\n- 其他和 5.4.5 相同。",
+  "version": "5.4.7",
+  "build_number": 5111,
+  "version_num": 504075111,
+  "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.6",
-      "build_number": 5110,
-      "version_num": 504065110,
-      "version_desc": "- 网络电视：热门 → 网络顶上可以在内置列表和自己导入的列表之间切换，也可以在 IPTV 设置的“热门里显示”里选。\n- 删掉的内置热门列表不会再自己回来；需要时在 IPTV 设置里“恢复内置热门频道”。\n- 其他和 5.4.5 相同。",
+      "version": "5.4.7",
+      "build_number": 5111,
+      "version_num": 504075111,
+      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.6",
-      "build_number": 5110,
-      "version_num": 504065110,
-      "version_desc": "- 网络电视：热门 → 网络顶上可以在内置列表和自己导入的列表之间切换，也可以在 IPTV 设置的“热门里显示”里选。\n- 删掉的内置热门列表不会再自己回来；需要时在 IPTV 设置里“恢复内置热门频道”。\n- 其他和 5.4.5 相同。",
+      "version": "5.4.7",
+      "build_number": 5111,
+      "version_num": 504075111,
+      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.6",
-      "build_number": 5110,
-      "version_num": 504065110,
-      "version_desc": "- 网络电视：热门 → 网络顶上可以在内置列表和自己导入的列表之间切换，也可以在 IPTV 设置的“热门里显示”里选。\n- 删掉的内置热门列表不会再自己回来；需要时在 IPTV 设置里“恢复内置热门频道”。\n- 其他和 5.4.5 相同。",
+      "version": "5.4.7",
+      "build_number": 5111,
+      "version_num": 504075111,
+      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7"
     },
     "macos": {
-      "version": "5.4.6",
-      "build_number": 5110,
-      "version_num": 504065110,
-      "version_desc": "- 网络电视：热门 → 网络顶上可以在内置列表和自己导入的列表之间切换，也可以在 IPTV 设置的“热门里显示”里选。\n- 删掉的内置热门列表不会再自己回来；需要时在 IPTV 设置里“恢复内置热门频道”。\n- 其他和 5.4.5 相同。",
+      "version": "5.4.7",
+      "build_number": 5111,
+      "version_num": 504075111,
+      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7"
     },
     "ios": {
-      "version": "5.4.6",
-      "build_number": 5110,
-      "version_num": 504065110,
-      "version_desc": "- 网络电视：热门 → 网络顶上可以在内置列表和自己导入的列表之间切换，也可以在 IPTV 设置的“热门里显示”里选。\n- 删掉的内置热门列表不会再自己回来；需要时在 IPTV 设置里“恢复内置热门频道”。\n- 其他和 5.4.5 相同。",
+      "version": "5.4.7",
+      "build_number": 5111,
+      "version_num": 504075111,
+      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.6"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7"
     }
   },
   "windows_msix_available": false

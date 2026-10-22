@@ -1,5 +1,85 @@
 [
   {
+    "version": "5.4.7",
+    "title": "Pure Live v5.4.7",
+    "date": "2026-10-22",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.7（Android、电视、Windows、Linux、macOS、iOS、iPadOS）\n\n5.4.7 修复电视对话框的遥控器操作和玻璃底栏拖动卡顿，调整底栏位置、尺寸与玻璃质感，加入已关注标记，并优化电脑调音量时的显示。\n\n下载：[Releases](https://github.com/wzgrx/PureLive/releases/latest)，选对应平台的安装包（见文末“下载哪个”）。\n\n## 主要变化\n\n### 电视遥控器（[#8](https://github.com/wzgrx/PureLive/issues/8)）\n\n- **对话框里的按钮能选中了**：电视上打开的对话框（设备同步的“发送配置”、更新提示、退出确认等）以前方向键选不到里面的选项和按钮，只能按返回关掉。现在方向键逐个选中，确认键勾选或按下；键盘的回车照旧。\n\n### 首页底栏（[#9](https://github.com/wzgrx/PureLive/issues/9)）\n\n- **玻璃底栏往下收**：以前胶囊下面是“整个手势条区域再加 12”，在 iPhone 上空出一大块。现在胶囊离屏幕底边 20，贴着 iPhone 的手势条，和 iOS 26 自带底栏的位置差不多；Android 有手势横条的手机也一样收紧，在横条上方留一点空隙。三键导航还是在按钮上方，没有底部横条的手机不变。\n- **新设置“紧凑底栏”**（设置 → 外观，默认关）：打开后普通底栏从 80 变成 64，玻璃底栏从 68 变成 56，小屏手机能多看到一点内容。\n\n### 玻璃底栏的质感与拖动（[#11](https://github.com/wzgrx/PureLive/issues/11)）\n\n- **拖动更跟手**：连续移动时接着当前弹簧调整目标，避免每次重新开始而停顿。\n- **玻璃质感**：调整背景漫射、边缘折射和高光，去掉底栏投影；深色玻璃更亮，按住时透镜内的图标一起放大。\n- **新设置“玻璃质感”**（设置 → 外观）：液体玻璃开启后可调，往左更通透，往右更磨砂，默认在中间。\n\n### 电脑调音量（[#12](https://github.com/wzgrx/PureLive/issues/12)）\n\n- **滚轮不再遮挡画面**：Windows、Linux、macOS 上用滚轮调音量时，不再弹出画面中间的音量条，改由底部控制栏显示。\n- **拖动时看得到百分比**：音量条右侧显示百分比，按住滑块期间保持可见；滚轮、方向键或静音键改变音量后，百分比短暂显示再淡出。滑块和滚轮混用时从当前音量继续调整。\n- 手机调系统音量的手势保持原样。\n\n### 已关注标记（[#10](https://github.com/wzgrx/PureLive/issues/10)）\n\n- **浏览时能看出关注过哪些直播间**：热门、分区、搜索和历史里，已经关注的直播间封面左上角（平台标签后面）有一个小红心，和电视版一样；读屏会念“已关注”。关注页本身不显示。卡片样式选“简洁”时，红心在右边的数字前面。\n\n## 从旧版本升级\n\n- **直接覆盖安装，不要先卸载**：卸载会把数据一起删掉。\n- 这一版没有改数据库；“紧凑底栏”和“液体玻璃”默认关，已有的外观设置保留。启用液体玻璃时会看到本次的质感调整。\n\n## 已知问题\n\n- iPhone、iPad 最低 iOS、iPadOS 15，Mac 最低 macOS 12。iOS 14 及更早的设备用 TrollStore 也能装上，但打不开：开发框架 Flutter 最低要 iOS 15，没办法支持（[#7](https://github.com/wzgrx/PureLive/issues/7)）。\n- macOS、iOS、iPadOS 版仍然只在 GitHub 的构建机和 iPhone 模拟器上打开过，没有在真机上用过：分享、锁屏正在播放、后台播放、快捷键列表要等有人在真机上用过才算确认；录制在苹果平台上暂时不可用；iPad 的系统画中画和台前调度还没做。\n- 小窗浮在其他应用上面时，小米 HyperOS 等系统在内存紧张时可能结束应用，小窗随之消失；可以在系统设置里给纯粹直播“无限制”的后台权限。\n- 5.4.1 的其他已知问题照旧：外语译文由 AI 翻译，没有母语者校对；官方登录没有用真实账号逐个登录过；Kick 只在 Android 上能用；HyperOS 划掉应用后可能结束录制和后台播放；Android 15 起录制一天累计最多 6 小时；Windows 安装版没有在测试电脑上安装。\n\n问题和建议请到 [Issues](https://github.com/wzgrx/PureLive/issues) 反馈。\n\n## 下载哪个\n\n| 文件 | 适用 | 最低系统 |\n|---|---|---|\n| `PureLive-5.4.7-5111-debug-signed-android-arm64-v8a-release.apk` | 绝大多数手机、平板和电视盒子（64 位 ARM），不确定就选这个 | Android 8.0 |\n| `PureLive-5.4.7-5111-debug-signed-android-armeabi-v7a-release.apk` | 老的 32 位 ARM 手机、电视 | Android 8.0 |\n| `PureLive-5.4.7-5111-debug-signed-android-x86_64-release.apk` | x86_64 模拟器和设备 | Android 8.0 |\n| `PureLive-5.4.7-5111-windows-x64-setup.exe` | Windows 安装版 | Windows 10（64 位） |\n| `PureLive-5.4.7-5111-windows-x64-portable.zip` | Windows 便携版（解压即用，数据在程序旁边的 UserData） | Windows 10（64 位） |\n| `PureLive-5.4.7-5111-linux-x64.tar.gz` | Linux x86_64 | GTK 3 桌面 |\n| `PureLive-5.4.7-5111-macos-universal.dmg` | macOS（Intel 和 Apple 芯片） | macOS 12 |\n| `PureLive-5.4.7-5111-macos-universal.zip` | macOS，同上，压缩包 | macOS 12 |\n| `PureLive-5.4.7-5111-ios-unsigned.ipa` | iPhone、iPad，用 AltStore 或 SideStore 安装 | iOS、iPadOS 15 |\n| `PureLive-5.4.7-5111-ios-trollstore.ipa` | 装了 TrollStore 的 iPhone、iPad | iOS、iPadOS 15 |\n\nAndroid 包的签名和 3.2.11、4.x、5.x 相同，可以直接覆盖安装。macOS 第一次打开如果提示“无法验证开发者”，到 系统设置 → 隐私与安全性 → 点“仍要打开”。\n\n## 本次验证范围\n\nK90 测试包已验证竖屏外观、玻璃质感、紧凑底栏和连续拖动性能；Windows 便携版已验证实际直播与滚轮、键盘、滑块、静音恢复。Linux、macOS 和 iPhone 模拟器已确认启动进入首页。真实电视遥控器、横屏完整流程、桌面持续长按，以及 Linux/macOS 音量交互尚未逐项验收。\n\n## SHA-256\n\n```\n8766f47256c57bde32eec6020b03479efa49d4e5d129a80f378931c84fd213d8  PureLive-5.4.7-5111-debug-signed-android-arm64-v8a-release.apk\n709edb47730c80c8027505e5f66ee0d4468c0dee2361e9982512306bf570fd83  PureLive-5.4.7-5111-debug-signed-android-armeabi-v7a-release.apk\n8126bad449f62731796ffe0c429c18a1738209ac82f99513c0ee43e7d7dace6d  PureLive-5.4.7-5111-debug-signed-android-x86_64-release.apk\n3a8f381e3a2781bb4f28dbc903ea67f36aa22bc72fad3c40a97949a7fb77d168  PureLive-5.4.7-5111-ios-trollstore.ipa\n7d63d91a1c1a552e494e717e8e3e83fc7497aebeddb5fb57ddd195d8fa65b688  PureLive-5.4.7-5111-ios-unsigned.ipa\n325e349ea82b971df1334fb1f30cd774a739f89571ee06e30af7b564ed890915  PureLive-5.4.7-5111-linux-x64.tar.gz\n924a75c5639d245b0a8f6da3fdc18dab5db16179b2d44f8e4d61903bfd5bd7ee  PureLive-5.4.7-5111-macos-universal.dmg\n737a3218a73ee3f1fd0792451fb94355aefda4246a05e15aed5d72f1ecad043c  PureLive-5.4.7-5111-macos-universal.zip\n2c9262b53dfdb8751ec4daa483ecd327bbfb4d0a1b590fe94cc9346f96a4aba9  PureLive-5.4.7-5111-windows-x64-portable.zip\n87929dd8517a95c85ce609584cacdc13cd8268008c930c18472a9769439be58b  PureLive-5.4.7-5111-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.30mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.44mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-debug-signed-android-x86_64-release.apk",
+        "size": "119.44mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-ios-trollstore.ipa",
+        "size": "45.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-ios-trollstore.ipa"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-ios-unsigned.ipa",
+        "size": "44.83mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-ios-unsigned.ipa"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-linux-x64.tar.gz",
+        "size": "54.86mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-macos-universal.dmg",
+        "size": "94.76mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-macos-universal.dmg"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-macos-universal.zip",
+        "size": "84.89mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-macos-universal.zip"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-windows-x64-portable.zip",
+        "size": "65.50mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.7-5111-windows-x64-setup.exe",
+        "size": "50.43mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.7/PureLive-5.4.7-5111-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.4.6",
     "title": "Pure Live v5.4.6",
     "date": "2026-10-21",

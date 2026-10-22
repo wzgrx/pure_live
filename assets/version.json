@@ -1,10 +1,10 @@
 {
-  "version": "5.4.7",
-  "build_number": 5111,
-  "version_num": 504075111,
-  "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
+  "version": "5.4.8",
+  "build_number": 5112,
+  "version_num": 504085112,
+  "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.7",
-      "build_number": 5111,
-      "version_num": 504075111,
-      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
+      "version": "5.4.8",
+      "build_number": 5112,
+      "version_num": 504085112,
+      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.7",
-      "build_number": 5111,
-      "version_num": 504075111,
-      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
+      "version": "5.4.8",
+      "build_number": 5112,
+      "version_num": 504085112,
+      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.7",
-      "build_number": 5111,
-      "version_num": 504075111,
-      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
+      "version": "5.4.8",
+      "build_number": 5112,
+      "version_num": 504085112,
+      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8"
     },
     "macos": {
-      "version": "5.4.7",
-      "build_number": 5111,
-      "version_num": 504075111,
-      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
+      "version": "5.4.8",
+      "build_number": 5112,
+      "version_num": 504085112,
+      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8"
     },
     "ios": {
-      "version": "5.4.7",
-      "build_number": 5111,
-      "version_num": 504075111,
-      "version_desc": "- 修复电视对话框遥控器操作和玻璃底栏拖动卡顿。\n- 调整底栏位置、加入紧凑底栏和已关注红心标记。\n- 改善玻璃质感，新增可调的“玻璃质感”滑块。\n- 电脑调音量改由底栏反馈，拖动时显示百分比，混用滑块和滚轮不再跳回旧值。\n- iOS/iPadOS 最低 15、macOS 最低 12。",
+      "version": "5.4.8",
+      "build_number": 5112,
+      "version_num": 504085112,
+      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.7"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8"
     }
   },
   "windows_msix_available": false

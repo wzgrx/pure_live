@@ -1,10 +1,10 @@
 {
-  "version": "5.4.8",
-  "build_number": 5112,
-  "version_num": 504085112,
-  "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
+  "version": "5.4.9",
+  "build_number": 5113,
+  "version_num": 504095113,
+  "version_desc": "- 多画面沉浸/全屏增加一键静音与 M 快捷键。\n- 电视首选平台支持遥控器选择。\n- 全屏支持活动醒目留言入口和会话历史。\n- iPad 音量亮度手势与防息屏恢复修复。\n- 补充斗鱼故障阶段日志。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.9",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.8",
-      "build_number": 5112,
-      "version_num": 504085112,
-      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
+      "version": "5.4.9",
+      "build_number": 5113,
+      "version_num": 504095113,
+      "version_desc": "- 多画面沉浸/全屏增加一键静音与 M 快捷键。\n- 电视首选平台支持遥控器选择。\n- 全屏支持活动醒目留言入口和会话历史。\n- iPad 音量亮度手势与防息屏恢复修复。\n- 补充斗鱼故障阶段日志。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.9",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.8",
-      "build_number": 5112,
-      "version_num": 504085112,
-      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
+      "version": "5.4.9",
+      "build_number": 5113,
+      "version_num": 504095113,
+      "version_desc": "- 多画面沉浸/全屏增加一键静音与 M 快捷键。\n- 电视首选平台支持遥控器选择。\n- 全屏支持活动醒目留言入口和会话历史。\n- iPad 音量亮度手势与防息屏恢复修复。\n- 补充斗鱼故障阶段日志。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.9",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.8",
-      "build_number": 5112,
-      "version_num": 504085112,
-      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
+      "version": "5.4.9",
+      "build_number": 5113,
+      "version_num": 504095113,
+      "version_desc": "- 多画面沉浸/全屏增加一键静音与 M 快捷键。\n- 电视首选平台支持遥控器选择。\n- 全屏支持活动醒目留言入口和会话历史。\n- iPad 音量亮度手势与防息屏恢复修复。\n- 补充斗鱼故障阶段日志。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.9"
     },
     "macos": {
-      "version": "5.4.8",
-      "build_number": 5112,
-      "version_num": 504085112,
-      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
+      "version": "5.4.9",
+      "build_number": 5113,
+      "version_num": 504095113,
+      "version_desc": "- 多画面沉浸/全屏增加一键静音与 M 快捷键。\n- 电视首选平台支持遥控器选择。\n- 全屏支持活动醒目留言入口和会话历史。\n- iPad 音量亮度手势与防息屏恢复修复。\n- 补充斗鱼故障阶段日志。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.9"
     },
     "ios": {
-      "version": "5.4.8",
-      "build_number": 5112,
-      "version_num": 504085112,
-      "version_desc": "- 增加醒目留言会话历史显示/隐藏。\n- 修复电视关注焦点返回与 TV 模式触屏控制。\n- 支持省略 https 的直播网址。\n- 停用自动录制后保留主播和选项，补充重启恢复说明。",
+      "version": "5.4.9",
+      "build_number": 5113,
+      "version_num": 504095113,
+      "version_desc": "- 多画面沉浸/全屏增加一键静音与 M 快捷键。\n- 电视首选平台支持遥控器选择。\n- 全屏支持活动醒目留言入口和会话历史。\n- iPad 音量亮度手势与防息屏恢复修复。\n- 补充斗鱼故障阶段日志。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.8"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.9"
     }
   },
   "windows_msix_available": false

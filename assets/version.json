@@ -1,10 +1,10 @@
 {
-  "version": "5.4.12",
-  "build_number": 5116,
-  "version_num": 504125116,
-  "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
+  "version": "5.4.13",
+  "build_number": 5117,
+  "version_num": 504135117,
+  "version_desc": "- 修正 Apple 端已附内核却提示不能录制的判断。\n- 修正原生回读期间丢失拖动和旧手势覆盖。\n- 调整 macOS 启动兼容性以缓解已观察到的渲染失败。\n- 修正电视升级弹窗：说明区可遥控滚动并离开到操作按钮。\n- 统一电视设置分组和整行焦点框边界，保留防裁切。\n- 壁纸重试立即显示加载，提高斗鱼有界签名轮数兼容性。\n- 壁纸连接、智慧屏播放、原 iPhone 手势、自签录制与受影响斗鱼账号仍待复测。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.13",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.12",
-      "build_number": 5116,
-      "version_num": 504125116,
-      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
+      "version": "5.4.13",
+      "build_number": 5117,
+      "version_num": 504135117,
+      "version_desc": "- 修正 Apple 端已附内核却提示不能录制的判断。\n- 修正原生回读期间丢失拖动和旧手势覆盖。\n- 调整 macOS 启动兼容性以缓解已观察到的渲染失败。\n- 修正电视升级弹窗：说明区可遥控滚动并离开到操作按钮。\n- 统一电视设置分组和整行焦点框边界，保留防裁切。\n- 壁纸重试立即显示加载，提高斗鱼有界签名轮数兼容性。\n- 壁纸连接、智慧屏播放、原 iPhone 手势、自签录制与受影响斗鱼账号仍待复测。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.13",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.12",
-      "build_number": 5116,
-      "version_num": 504125116,
-      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
+      "version": "5.4.13",
+      "build_number": 5117,
+      "version_num": 504135117,
+      "version_desc": "- 修正 Apple 端已附内核却提示不能录制的判断。\n- 修正原生回读期间丢失拖动和旧手势覆盖。\n- 调整 macOS 启动兼容性以缓解已观察到的渲染失败。\n- 修正电视升级弹窗：说明区可遥控滚动并离开到操作按钮。\n- 统一电视设置分组和整行焦点框边界，保留防裁切。\n- 壁纸重试立即显示加载，提高斗鱼有界签名轮数兼容性。\n- 壁纸连接、智慧屏播放、原 iPhone 手势、自签录制与受影响斗鱼账号仍待复测。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.13",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.12",
-      "build_number": 5116,
-      "version_num": 504125116,
-      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
+      "version": "5.4.13",
+      "build_number": 5117,
+      "version_num": 504135117,
+      "version_desc": "- 修正 Apple 端已附内核却提示不能录制的判断。\n- 修正原生回读期间丢失拖动和旧手势覆盖。\n- 调整 macOS 启动兼容性以缓解已观察到的渲染失败。\n- 修正电视升级弹窗：说明区可遥控滚动并离开到操作按钮。\n- 统一电视设置分组和整行焦点框边界，保留防裁切。\n- 壁纸重试立即显示加载，提高斗鱼有界签名轮数兼容性。\n- 壁纸连接、智慧屏播放、原 iPhone 手势、自签录制与受影响斗鱼账号仍待复测。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.13"
     },
     "macos": {
-      "version": "5.4.12",
-      "build_number": 5116,
-      "version_num": 504125116,
-      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
+      "version": "5.4.13",
+      "build_number": 5117,
+      "version_num": 504135117,
+      "version_desc": "- 修正 Apple 端已附内核却提示不能录制的判断。\n- 修正原生回读期间丢失拖动和旧手势覆盖。\n- 调整 macOS 启动兼容性以缓解已观察到的渲染失败。\n- 修正电视升级弹窗：说明区可遥控滚动并离开到操作按钮。\n- 统一电视设置分组和整行焦点框边界，保留防裁切。\n- 壁纸重试立即显示加载，提高斗鱼有界签名轮数兼容性。\n- 壁纸连接、智慧屏播放、原 iPhone 手势、自签录制与受影响斗鱼账号仍待复测。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.13"
     },
     "ios": {
-      "version": "5.4.12",
-      "build_number": 5116,
-      "version_num": 504125116,
-      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
+      "version": "5.4.13",
+      "build_number": 5117,
+      "version_num": 504135117,
+      "version_desc": "- 修正 Apple 端已附内核却提示不能录制的判断。\n- 修正原生回读期间丢失拖动和旧手势覆盖。\n- 调整 macOS 启动兼容性以缓解已观察到的渲染失败。\n- 修正电视升级弹窗：说明区可遥控滚动并离开到操作按钮。\n- 统一电视设置分组和整行焦点框边界，保留防裁切。\n- 壁纸重试立即显示加载，提高斗鱼有界签名轮数兼容性。\n- 壁纸连接、智慧屏播放、原 iPhone 手势、自签录制与受影响斗鱼账号仍待复测。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.13"
     }
   },
   "windows_msix_available": false

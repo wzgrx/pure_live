@@ -1,10 +1,10 @@
 {
-  "version": "5.4.10",
-  "build_number": 5114,
-  "version_num": 504105114,
-  "version_desc": "- 修复小屏横屏侧栏与电视设置焦点框。\n- 支持抖音自定义字母房间链接。\n- 开放 Windows KICK 播放与聊天。\n- 补齐斗鱼等级、粉丝牌与通知，修正身份缓存并细化诊断。",
+  "version": "5.4.11",
+  "build_number": 5115,
+  "version_num": 504115115,
+  "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.10",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.10",
-      "build_number": 5114,
-      "version_num": 504105114,
-      "version_desc": "- 修复小屏横屏侧栏与电视设置焦点框。\n- 支持抖音自定义字母房间链接。\n- 开放 Windows KICK 播放与聊天。\n- 补齐斗鱼等级、粉丝牌与通知，修正身份缓存并细化诊断。",
+      "version": "5.4.11",
+      "build_number": 5115,
+      "version_num": 504115115,
+      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.10",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.10",
-      "build_number": 5114,
-      "version_num": 504105114,
-      "version_desc": "- 修复小屏横屏侧栏与电视设置焦点框。\n- 支持抖音自定义字母房间链接。\n- 开放 Windows KICK 播放与聊天。\n- 补齐斗鱼等级、粉丝牌与通知，修正身份缓存并细化诊断。",
+      "version": "5.4.11",
+      "build_number": 5115,
+      "version_num": 504115115,
+      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.10",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.10",
-      "build_number": 5114,
-      "version_num": 504105114,
-      "version_desc": "- 修复小屏横屏侧栏与电视设置焦点框。\n- 支持抖音自定义字母房间链接。\n- 开放 Windows KICK 播放与聊天。\n- 补齐斗鱼等级、粉丝牌与通知，修正身份缓存并细化诊断。",
+      "version": "5.4.11",
+      "build_number": 5115,
+      "version_num": 504115115,
+      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.10"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11"
     },
     "macos": {
-      "version": "5.4.10",
-      "build_number": 5114,
-      "version_num": 504105114,
-      "version_desc": "- 修复小屏横屏侧栏与电视设置焦点框。\n- 支持抖音自定义字母房间链接。\n- 开放 Windows KICK 播放与聊天。\n- 补齐斗鱼等级、粉丝牌与通知，修正身份缓存并细化诊断。",
+      "version": "5.4.11",
+      "build_number": 5115,
+      "version_num": 504115115,
+      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.10"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11"
     },
     "ios": {
-      "version": "5.4.10",
-      "build_number": 5114,
-      "version_num": 504105114,
-      "version_desc": "- 修复小屏横屏侧栏与电视设置焦点框。\n- 支持抖音自定义字母房间链接。\n- 开放 Windows KICK 播放与聊天。\n- 补齐斗鱼等级、粉丝牌与通知，修正身份缓存并细化诊断。",
+      "version": "5.4.11",
+      "build_number": 5115,
+      "version_num": 504115115,
+      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.10"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11"
     }
   },
   "windows_msix_available": false

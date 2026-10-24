@@ -1,10 +1,10 @@
 {
-  "version": "5.4.11",
-  "build_number": 5115,
-  "version_num": 504115115,
-  "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
+  "version": "5.4.12",
+  "build_number": 5116,
+  "version_num": 504125116,
+  "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.11",
-      "build_number": 5115,
-      "version_num": 504115115,
-      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
+      "version": "5.4.12",
+      "build_number": 5116,
+      "version_num": 504125116,
+      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.11",
-      "build_number": 5115,
-      "version_num": 504115115,
-      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
+      "version": "5.4.12",
+      "build_number": 5116,
+      "version_num": 504125116,
+      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.11",
-      "build_number": 5115,
-      "version_num": 504115115,
-      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
+      "version": "5.4.12",
+      "build_number": 5116,
+      "version_num": 504125116,
+      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12"
     },
     "macos": {
-      "version": "5.4.11",
-      "build_number": 5115,
-      "version_num": 504115115,
-      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
+      "version": "5.4.12",
+      "build_number": 5116,
+      "version_num": 504125116,
+      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12"
     },
     "ios": {
-      "version": "5.4.11",
-      "build_number": 5115,
-      "version_num": 504115115,
-      "version_desc": "- 增加 1×4 竖排多画面，保留播放会话与布局记忆。\n- 补充播放器最终失败的安全分类日志。\n- 华为智慧屏和斗鱼登录问题继续跟踪。",
+      "version": "5.4.12",
+      "build_number": 5116,
+      "version_num": 504125116,
+      "version_desc": "- 修正电视关注页返回键层级：卡片先回筛选，再回侧栏。\n- 保留平台、直播状态和标签选择，兼容离线行及空列表。\n- 智慧屏播放和受影响斗鱼登录账号问题继续跟踪。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.11"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.12"
     }
   },
   "windows_msix_available": false

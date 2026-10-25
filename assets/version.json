@@ -1,10 +1,10 @@
 {
-  "version": "5.4.16",
-  "build_number": 5120,
-  "version_num": 504165120,
-  "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
+  "version": "5.4.17",
+  "build_number": 5121,
+  "version_num": 504175121,
+  "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.16",
-      "build_number": 5120,
-      "version_num": 504165120,
-      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
+      "version": "5.4.17",
+      "build_number": 5121,
+      "version_num": 504175121,
+      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.16",
-      "build_number": 5120,
-      "version_num": 504165120,
-      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
+      "version": "5.4.17",
+      "build_number": 5121,
+      "version_num": 504175121,
+      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.16",
-      "build_number": 5120,
-      "version_num": 504165120,
-      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
+      "version": "5.4.17",
+      "build_number": 5121,
+      "version_num": 504175121,
+      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17"
     },
     "macos": {
-      "version": "5.4.16",
-      "build_number": 5120,
-      "version_num": 504165120,
-      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
+      "version": "5.4.17",
+      "build_number": 5121,
+      "version_num": 504175121,
+      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17"
     },
     "ios": {
-      "version": "5.4.16",
-      "build_number": 5120,
-      "version_num": 504165120,
-      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
+      "version": "5.4.17",
+      "build_number": 5121,
+      "version_num": 504175121,
+      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17"
     }
   },
   "windows_msix_available": false

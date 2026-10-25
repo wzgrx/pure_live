@@ -1,5 +1,85 @@
 [
   {
+    "version": "5.4.17",
+    "title": "Pure Live v5.4.17",
+    "date": "2026-10-26",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.17（5121）\n\n- 修正macOS窗口被其他应用遮挡时误触发手机后台暂停策略的问题。桌面遮挡和失去焦点保持播放；“设置→视频”新增默认关闭的“最小化窗口时暂停播放”，仅原生最小化事件触发，恢复窗口只继续该策略暂停的会话，手动暂停保留。\n- 桌面主直播画面空白处右键可进入／退出窗口内全屏。飞行弹幕动作与控件优先，系统全屏、小窗和多画面原有右键保持。\n- 鼠标后退键沿现有返回链优先关闭弹窗、退出房间显示模式或返回页面；首页不请求退出。前进键不映射为返回。\n\n手机后台播放、音量亮度手势和录制内核未修改。原iPhone、Sony/华为电视、Windows偶发白屏与自签设备目录权限问题继续按原反馈取证，不计为本版已修复。正式包哈希及原生验证范围以发布交付回执为准。\n\n## 构建记录\n\n固定源码 `664447d389723cb38247e3e6aa4cad6a908d0a0a`，完整all/14与63项定向检查通过。十包及校验文件11项哈希、各端启动、Windows隔离正式包右键交互、K90同源v4dev冒烟分别核验。云端Mac以生成的loopback视频、真实mpv、独立遮挡窗口和生产后台策略检查遮挡持续播放及最小化开关，不外推M5原机与长期播放。鼠标Back的指针与返回链回归通过，不宣称所有实体鼠标均逐款验收。范围见Y01.28；未解决的原设备反馈继续开放。\n\n## SHA-256\n\n```\nefe9b0fc0e7c00cabda2cabc5e065c1d8c35393a2ee8bec877f5a999bdcb084e  PureLive-5.4.17-5121-debug-signed-android-arm64-v8a-release.apk\n00b6e09ec436a46ac5138bfc6eba2132d97fe32d6e43e7713ab34f668ebc565c  PureLive-5.4.17-5121-debug-signed-android-armeabi-v7a-release.apk\n02a16787f3010419b530e5da804b392d563b22694ac2f74d0d7d7a0c1869a073  PureLive-5.4.17-5121-debug-signed-android-x86_64-release.apk\ned8bd1cd2a5e21e73d52074648864c09d1b4c6eb275fecf3dd989cce54f793f5  PureLive-5.4.17-5121-ios-trollstore.ipa\n42c5de421a31e1c0920c313d7697e8e6d165cacedf3d718a9cbaf95c8034c6a8  PureLive-5.4.17-5121-ios-unsigned.ipa\na5284dbedaeecd5ef5fe01252be1c06e32f8ad09e3637209592f125734e4600c  PureLive-5.4.17-5121-linux-x64.tar.gz\na05b688d0c6a33eae16e1e8cd5b6c68c5b1efc237d6dd8b4f585bed0f1f43ab4  PureLive-5.4.17-5121-macos-universal.dmg\n61f431ac213df9cc2c05d4ab2610157f194160d0cbe5926d111cff9132702472  PureLive-5.4.17-5121-macos-universal.zip\na65837c413cbb6b9f5efe37970dc3e4721af37b60f9a9ea45ba9c2438bc77215  PureLive-5.4.17-5121-windows-x64-portable.zip\neb759cead5505617034622d1dd4863ae0317e03f4ada7c7ab733bd505b90288d  PureLive-5.4.17-5121-windows-x64-setup.exe\n```\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.38mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.55mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-debug-signed-android-x86_64-release.apk",
+        "size": "119.52mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-ios-trollstore.ipa",
+        "size": "45.41mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-ios-trollstore.ipa"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-ios-unsigned.ipa",
+        "size": "45.24mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-ios-unsigned.ipa"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-linux-x64.tar.gz",
+        "size": "54.92mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-macos-universal.dmg",
+        "size": "95.26mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-macos-universal.dmg"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-macos-universal.zip",
+        "size": "85.66mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-macos-universal.zip"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-windows-x64-portable.zip",
+        "size": "65.65mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.17-5121-windows-x64-setup.exe",
+        "size": "50.52mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.17/PureLive-5.4.17-5121-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.4.16",
     "title": "Pure Live v5.4.16",
     "date": "2026-10-25",

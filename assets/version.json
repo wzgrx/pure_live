@@ -1,10 +1,10 @@
 {
-  "version": "5.4.15",
-  "build_number": 5119,
-  "version_num": 504155119,
-  "version_desc": "- 电视菜单首末项焦点描边完整，保留放大开关和导航。\n- 电视代理关闭时跳过禁用输入框，方向键焦点保持可见。\n- IPTV节目单响应晚到详情、源变化及换台，隔离旧请求结果。\n- 补全RTP MPEG-TS导入与播放；组播依赖所在网络。\n- 新增默认关闭且不含账号的WebDAV前台自动备份。\n- iPhone增加固定阶段手势日志，原设备无提示问题继续跟踪。",
+  "version": "5.4.16",
+  "build_number": 5120,
+  "version_num": 504165120,
+  "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.15",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.15",
-      "build_number": 5119,
-      "version_num": 504155119,
-      "version_desc": "- 电视菜单首末项焦点描边完整，保留放大开关和导航。\n- 电视代理关闭时跳过禁用输入框，方向键焦点保持可见。\n- IPTV节目单响应晚到详情、源变化及换台，隔离旧请求结果。\n- 补全RTP MPEG-TS导入与播放；组播依赖所在网络。\n- 新增默认关闭且不含账号的WebDAV前台自动备份。\n- iPhone增加固定阶段手势日志，原设备无提示问题继续跟踪。",
+      "version": "5.4.16",
+      "build_number": 5120,
+      "version_num": 504165120,
+      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.15",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.15",
-      "build_number": 5119,
-      "version_num": 504155119,
-      "version_desc": "- 电视菜单首末项焦点描边完整，保留放大开关和导航。\n- 电视代理关闭时跳过禁用输入框，方向键焦点保持可见。\n- IPTV节目单响应晚到详情、源变化及换台，隔离旧请求结果。\n- 补全RTP MPEG-TS导入与播放；组播依赖所在网络。\n- 新增默认关闭且不含账号的WebDAV前台自动备份。\n- iPhone增加固定阶段手势日志，原设备无提示问题继续跟踪。",
+      "version": "5.4.16",
+      "build_number": 5120,
+      "version_num": 504165120,
+      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.15",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.15",
-      "build_number": 5119,
-      "version_num": 504155119,
-      "version_desc": "- 电视菜单首末项焦点描边完整，保留放大开关和导航。\n- 电视代理关闭时跳过禁用输入框，方向键焦点保持可见。\n- IPTV节目单响应晚到详情、源变化及换台，隔离旧请求结果。\n- 补全RTP MPEG-TS导入与播放；组播依赖所在网络。\n- 新增默认关闭且不含账号的WebDAV前台自动备份。\n- iPhone增加固定阶段手势日志，原设备无提示问题继续跟踪。",
+      "version": "5.4.16",
+      "build_number": 5120,
+      "version_num": 504165120,
+      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.15"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16"
     },
     "macos": {
-      "version": "5.4.15",
-      "build_number": 5119,
-      "version_num": 504155119,
-      "version_desc": "- 电视菜单首末项焦点描边完整，保留放大开关和导航。\n- 电视代理关闭时跳过禁用输入框，方向键焦点保持可见。\n- IPTV节目单响应晚到详情、源变化及换台，隔离旧请求结果。\n- 补全RTP MPEG-TS导入与播放；组播依赖所在网络。\n- 新增默认关闭且不含账号的WebDAV前台自动备份。\n- iPhone增加固定阶段手势日志，原设备无提示问题继续跟踪。",
+      "version": "5.4.16",
+      "build_number": 5120,
+      "version_num": 504165120,
+      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.15"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16"
     },
     "ios": {
-      "version": "5.4.15",
-      "build_number": 5119,
-      "version_num": 504155119,
-      "version_desc": "- 电视菜单首末项焦点描边完整，保留放大开关和导航。\n- 电视代理关闭时跳过禁用输入框，方向键焦点保持可见。\n- IPTV节目单响应晚到详情、源变化及换台，隔离旧请求结果。\n- 补全RTP MPEG-TS导入与播放；组播依赖所在网络。\n- 新增默认关闭且不含账号的WebDAV前台自动备份。\n- iPhone增加固定阶段手势日志，原设备无提示问题继续跟踪。",
+      "version": "5.4.16",
+      "build_number": 5120,
+      "version_num": 504165120,
+      "version_desc": "- 电视日志导出改用扫码查看完整日志，避开系统分享选择器。\n- 宽屏设置的网络电视、录制、本地互动、备份与日志保留左侧总览。\n- 桌面网格支持按窗口自动铺满及六档房间卡片大小。\n- 修复快速缩放时过期分页容量回调覆盖最新布局。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.15"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.16"
     }
   },
   "windows_msix_available": false

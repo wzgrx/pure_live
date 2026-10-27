@@ -1,10 +1,10 @@
 {
-  "version": "5.4.17",
-  "build_number": 5121,
-  "version_num": 504175121,
-  "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
+  "version": "5.4.18",
+  "build_number": 5122,
+  "version_num": 504185122,
+  "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.17",
-      "build_number": 5121,
-      "version_num": 504175121,
-      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
+      "version": "5.4.18",
+      "build_number": 5122,
+      "version_num": 504185122,
+      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.17",
-      "build_number": 5121,
-      "version_num": 504175121,
-      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
+      "version": "5.4.18",
+      "build_number": 5122,
+      "version_num": 504185122,
+      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.17",
-      "build_number": 5121,
-      "version_num": 504175121,
-      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
+      "version": "5.4.18",
+      "build_number": 5122,
+      "version_num": 504185122,
+      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18"
     },
     "macos": {
-      "version": "5.4.17",
-      "build_number": 5121,
-      "version_num": 504175121,
-      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
+      "version": "5.4.18",
+      "build_number": 5122,
+      "version_num": 504185122,
+      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18"
     },
     "ios": {
-      "version": "5.4.17",
-      "build_number": 5121,
-      "version_num": 504175121,
-      "version_desc": "- 修正桌面窗口被遮挡时直播误暂停。\n- 新增默认关闭的最小化窗口时暂停选项。\n- 直播主画面空白处右键切换窗口内全屏，保留弹幕和控件优先。\n- 鼠标后退键优先关闭弹窗或返回页面，首页不退出。",
+      "version": "5.4.18",
+      "build_number": 5122,
+      "version_num": 504185122,
+      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.17"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18"
     }
   },
   "windows_msix_available": false

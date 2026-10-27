@@ -1,5 +1,85 @@
 [
   {
+    "version": "5.4.18",
+    "title": "Pure Live v5.4.18",
+    "date": "2026-10-27",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 纯粹直播 5.4.18（5122）\n\n- 修正醒目留言的去重规则：内容相同但属于不同事件的留言会分别保留；直播间历史和录制使用一致规则。历史仍只保留当前直播间会话。\n- 醒目留言入口增加未读提示；隐藏面板或切换到其他标签时不会提前消除未读数。\n- 录制目录不可写、空间或文件操作失败时提示存储错误并保留任务，避免把存储故障当作网络问题反复重连。\n- 统一手机设置中 IPTV、录制、本地互动、备份和日志的即时切换与返回位置。\n- 统一电视设置页的页头、背景、焦点框和滚动。修正 IPTV 加载后首焦点丢失、本地互动焦点框缺失、昵称输入拦截方向键；纯信息行不再参与方向导航。\n- 电视配置预览使用完整电视页面，并支持方向键滚动；修正冷启动菜单已有焦点却不显示边框的问题。\n- 修正电视窄横屏中首项或底部操作移出可见区域，以及普通按钮在部分输入模式下缺少焦点边框的问题。\n- 分区平台标签增加图标。导航设置增加安卓滚动隐藏导航栏及手机底栏、桌面侧栏文字开关，新设置保留原有默认行为。\n- 导航栏隐藏后继续避让系统状态栏，避免分类标签与时间、电量区域重叠。\n- Windows 直播主画面空白处可用鼠标中键切换窗口内全屏，控件和弹幕保持各自操作。\n- iOS 识别备份中的旧容器默认录制目录并使用当前系统 Documents 解析；保留自定义目录和原配置，不搬移或删除文件。\n- 升级稳定工具链与依赖，纳入 Flutter 官方语义树修复，修正本轮实际观察到的 Windows 无障碍树崩溃。\n- 调整弹幕正则耗时检查，减少系统调度暂停导致的误拒，原有时间预算保留；增加播放缓冲状态诊断。\n\n原华为／Sony 电视播放、自签 iPhone 录制和 Windows 特定显示器白屏仍保留跟踪，尚无原设备复测结论。新增的自动换台需求 #68 已登记评估，本版未实现。\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.64mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-debug-signed-android-arm64-v8a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.80mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-debug-signed-android-armeabi-v7a-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-debug-signed-android-x86_64-release.apk",
+        "size": "119.75mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-debug-signed-android-x86_64-release.apk"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-ios-trollstore.ipa",
+        "size": "45.43mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-ios-trollstore.ipa"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-ios-unsigned.ipa",
+        "size": "45.27mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-ios-unsigned.ipa"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-linux-x64.tar.gz",
+        "size": "55.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-linux-x64.tar.gz"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-macos-universal.dmg",
+        "size": "96.13mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-macos-universal.dmg"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-macos-universal.zip",
+        "size": "85.17mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-macos-universal.zip"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-windows-x64-portable.zip",
+        "size": "65.72mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-windows-x64-portable.zip"
+      },
+      {
+        "name": "PureLive-5.4.18-5122-windows-x64-setup.exe",
+        "size": "50.57mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.18/PureLive-5.4.18-5122-windows-x64-setup.exe"
+      }
+    ]
+  },
+  {
     "version": "5.4.17",
     "title": "Pure Live v5.4.17",
     "date": "2026-10-26",

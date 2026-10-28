@@ -1,10 +1,10 @@
 {
-  "version": "5.4.18",
-  "build_number": 5122,
-  "version_num": 504185122,
-  "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
+  "version": "5.4.19",
+  "build_number": 5123,
+  "version_num": 504195123,
+  "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.18",
-      "build_number": 5122,
-      "version_num": 504185122,
-      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
+      "version": "5.4.19",
+      "build_number": 5123,
+      "version_num": 504195123,
+      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.18",
-      "build_number": 5122,
-      "version_num": 504185122,
-      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
+      "version": "5.4.19",
+      "build_number": 5123,
+      "version_num": 504195123,
+      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.18",
-      "build_number": 5122,
-      "version_num": 504185122,
-      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
+      "version": "5.4.19",
+      "build_number": 5123,
+      "version_num": 504195123,
+      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19"
     },
     "macos": {
-      "version": "5.4.18",
-      "build_number": 5122,
-      "version_num": 504185122,
-      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
+      "version": "5.4.19",
+      "build_number": 5123,
+      "version_num": 504195123,
+      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19"
     },
     "ios": {
-      "version": "5.4.18",
-      "build_number": 5122,
-      "version_num": 504185122,
-      "version_desc": "- 修正醒目留言去重与会话历史，增加未读提示。\n- 录制存储失败明确提示并保留任务，避免误触发网络重连。\n- 统一手机设置切换与电视焦点、输入和滚动。\n- 增加平台图标、导航显示开关及Windows中键窗口内全屏。\n- 升级稳定工具链，修正语义树崩溃并增加缓冲诊断。",
+      "version": "5.4.19",
+      "build_number": 5123,
+      "version_num": 504195123,
+      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.18"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19"
     }
   },
   "windows_msix_available": false

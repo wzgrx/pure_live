@@ -1,5 +1,106 @@
 [
   {
+    "version": "5.4.19",
+    "title": "Pure Live v5.4.19",
+    "date": "2026-10-28",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 5.4.19：自动换台与反馈修复\n\n- 新增关注列表自动换台，默认关闭。主播确认下播或现有恢复流程失败后选择下一位在线关注；多画面独立换台、避免重复、保留声音来源。暂停、断网恢复和睡眠定时优先，候选耗尽停止。\n- 修复播放会话迟到的停止和超时影响新房间、重试错误漏处理；设备发现遇到异步网络错误时保留其他同步路径。\n- 修复新装直接进入IPTV设置缺少默认列表、电视统计栏被滚动裁切；电视备份“更多”、平台选择器首焦点和完整描边可用。\n- 热门与分区统一平台图标和选择器；分区“网络”直接展示IPTV频道，手机分区图片更紧凑；电视房间列表优先显示频道/直播标题。\n- 弹幕字号上限提高到60；新增默认关闭的斗鱼贵宾人数通知开关；修复关闭长按交互后长按被当作点按。\n- 多画面选中直播间可直接打开录制面板，录制状态与单直播间一致；修复iOS直播间和多画面的右滑返回。\n- Windows中键切换系统全屏，右键保持窗口内全屏。\n- 更新页统一电视样式和遥控操作；修复版本与包信息不一致，增加安装包精确大小/SHA-256及严格续传检查。缺少摘要的历史包通过浏览器下载。\n\n自动换台首阶段仅使用关注列表，热门/分类候选暂不包括。原Sony/Huawei音视频异常与Windows特定显示器组合白屏尚无原机闭环，不将通用修复当作这些报告全部解决。\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.78mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-debug-signed-android-arm64-v8a-release.apk",
+        "size_bytes": 114062024,
+        "sha256": "ff6f06dc9833bc322f92375c82110dd9e4096ff23fbcba192ce4abc3ee9293ae"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.92mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-debug-signed-android-armeabi-v7a-release.apk",
+        "size_bytes": 101625162,
+        "sha256": "5995d63a48dbf59fc54758b653907a183aac91f3f25d899d09f5e28c80487cf0"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-debug-signed-android-x86_64-release.apk",
+        "size": "119.95mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-debug-signed-android-x86_64-release.apk",
+        "size_bytes": 125776555,
+        "sha256": "3bed3326b7b77a4aefd87527bac0681fd11f589267e4d43943a66eb9a0a63ce9"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-ios-trollstore.ipa",
+        "size": "45.49mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-ios-trollstore.ipa",
+        "size_bytes": 47701693,
+        "sha256": "11f8e8ec499cb1fee0e1f862dd953077f90accd3245c0e3755052ac0bde28e42"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-ios-unsigned.ipa",
+        "size": "45.33mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-ios-unsigned.ipa",
+        "size_bytes": 47535450,
+        "sha256": "be37b900da20d4b1fec4518df6d9447307223bc76a60b7da68c3227e18c66666"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-linux-x64.tar.gz",
+        "size": "55.06mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-linux-x64.tar.gz",
+        "size_bytes": 57737162,
+        "sha256": "810edf99e9bed775e2717ced25ae8cdd8cb2e8b44bddb72e7ab86166b0efef6f"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-macos-universal.dmg",
+        "size": "95.95mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-macos-universal.dmg",
+        "size_bytes": 100613706,
+        "sha256": "a115073547b7ca3f3bbcf02610abeb035a2488b77fbb27f3c86ceb45b022d6c0"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-macos-universal.zip",
+        "size": "85.28mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-macos-universal.zip",
+        "size_bytes": 89423080,
+        "sha256": "45d3d5464093b535cbe031b76d3c3a21fd299652bd0110a75e68b30c18611557"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-windows-x64-portable.zip",
+        "size": "65.79mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-windows-x64-portable.zip",
+        "size_bytes": 68985509,
+        "sha256": "68af258ef2dd1d1c054e42e127dd580a2ff4e164c26c9354f5a87bc033d3a771"
+      },
+      {
+        "name": "PureLive-5.4.19-5123-windows-x64-setup.exe",
+        "size": "50.60mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.19/PureLive-5.4.19-5123-windows-x64-setup.exe",
+        "size_bytes": 53058841,
+        "sha256": "cd51d54fd10b8a65a5711f3a295d5efddfab8796ecbffed37c1b99fca2a140d2"
+      }
+    ],
+    "build_number": 5123
+  },
+  {
     "version": "5.4.18",
     "title": "Pure Live v5.4.18",
     "date": "2026-10-27",

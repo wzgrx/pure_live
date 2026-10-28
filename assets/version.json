@@ -1,10 +1,10 @@
 {
-  "version": "5.4.19",
-  "build_number": 5123,
-  "version_num": 504195123,
-  "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
+  "version": "5.4.20",
+  "build_number": 5124,
+  "version_num": 504205124,
+  "version_desc": "- 多画面新增“多路声音”开关，默认关闭。开启后各格同时出声，仍可独立调节音量；全部静音、四行布局、沉浸/全屏和自动换台保持一致。\n- 微博直播增加可用清晰度探测：原画、蓝光、超清、高清按当前直播源实际情况展示，恢复播放时重新获取并验证所选档位。\n- IPTV节目单移除常驻选中边框，继续显示“使用中”状态。\n- 放大电视直播间列表的标题/主播名及播放控制栏的主播名，行高随文字大小适配。\n- 默认日志保留不含地址或账号的缓冲状态采样，方便继续定位部分旧Android设备跨平台切换后的黑屏问题。该设备问题仍在跟进，不在本版宣称彻底解决。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.20",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.4.19",
-      "build_number": 5123,
-      "version_num": 504195123,
-      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
+      "version": "5.4.20",
+      "build_number": 5124,
+      "version_num": 504205124,
+      "version_desc": "- 多画面新增“多路声音”开关，默认关闭。开启后各格同时出声，仍可独立调节音量；全部静音、四行布局、沉浸/全屏和自动换台保持一致。\n- 微博直播增加可用清晰度探测：原画、蓝光、超清、高清按当前直播源实际情况展示，恢复播放时重新获取并验证所选档位。\n- IPTV节目单移除常驻选中边框，继续显示“使用中”状态。\n- 放大电视直播间列表的标题/主播名及播放控制栏的主播名，行高随文字大小适配。\n- 默认日志保留不含地址或账号的缓冲状态采样，方便继续定位部分旧Android设备跨平台切换后的黑屏问题。该设备问题仍在跟进，不在本版宣称彻底解决。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.20",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.4.19",
-      "build_number": 5123,
-      "version_num": 504195123,
-      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
+      "version": "5.4.20",
+      "build_number": 5124,
+      "version_num": 504205124,
+      "version_desc": "- 多画面新增“多路声音”开关，默认关闭。开启后各格同时出声，仍可独立调节音量；全部静音、四行布局、沉浸/全屏和自动换台保持一致。\n- 微博直播增加可用清晰度探测：原画、蓝光、超清、高清按当前直播源实际情况展示，恢复播放时重新获取并验证所选档位。\n- IPTV节目单移除常驻选中边框，继续显示“使用中”状态。\n- 放大电视直播间列表的标题/主播名及播放控制栏的主播名，行高随文字大小适配。\n- 默认日志保留不含地址或账号的缓冲状态采样，方便继续定位部分旧Android设备跨平台切换后的黑屏问题。该设备问题仍在跟进，不在本版宣称彻底解决。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.20",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.4.19",
-      "build_number": 5123,
-      "version_num": 504195123,
-      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
+      "version": "5.4.20",
+      "build_number": 5124,
+      "version_num": 504205124,
+      "version_desc": "- 多画面新增“多路声音”开关，默认关闭。开启后各格同时出声，仍可独立调节音量；全部静音、四行布局、沉浸/全屏和自动换台保持一致。\n- 微博直播增加可用清晰度探测：原画、蓝光、超清、高清按当前直播源实际情况展示，恢复播放时重新获取并验证所选档位。\n- IPTV节目单移除常驻选中边框，继续显示“使用中”状态。\n- 放大电视直播间列表的标题/主播名及播放控制栏的主播名，行高随文字大小适配。\n- 默认日志保留不含地址或账号的缓冲状态采样，方便继续定位部分旧Android设备跨平台切换后的黑屏问题。该设备问题仍在跟进，不在本版宣称彻底解决。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.20"
     },
     "macos": {
-      "version": "5.4.19",
-      "build_number": 5123,
-      "version_num": 504195123,
-      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
+      "version": "5.4.20",
+      "build_number": 5124,
+      "version_num": 504205124,
+      "version_desc": "- 多画面新增“多路声音”开关，默认关闭。开启后各格同时出声，仍可独立调节音量；全部静音、四行布局、沉浸/全屏和自动换台保持一致。\n- 微博直播增加可用清晰度探测：原画、蓝光、超清、高清按当前直播源实际情况展示，恢复播放时重新获取并验证所选档位。\n- IPTV节目单移除常驻选中边框，继续显示“使用中”状态。\n- 放大电视直播间列表的标题/主播名及播放控制栏的主播名，行高随文字大小适配。\n- 默认日志保留不含地址或账号的缓冲状态采样，方便继续定位部分旧Android设备跨平台切换后的黑屏问题。该设备问题仍在跟进，不在本版宣称彻底解决。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.20"
     },
     "ios": {
-      "version": "5.4.19",
-      "build_number": 5123,
-      "version_num": 504195123,
-      "version_desc": "- 新增关注列表自动换台，默认关闭，多画面避免重复并保留声音来源。\n- 修复IPTV设置、电视备份与焦点导航，统一热门和分区入口。\n- 弹幕字号上限60，斗鱼贵宾人数提示可单独关闭。\n- 多画面提供录制入口，修复iOS右滑返回。\n- Windows中键系统全屏、右键窗口内全屏；更新包新增大小和SHA-256校验。",
+      "version": "5.4.20",
+      "build_number": 5124,
+      "version_num": 504205124,
+      "version_desc": "- 多画面新增“多路声音”开关，默认关闭。开启后各格同时出声，仍可独立调节音量；全部静音、四行布局、沉浸/全屏和自动换台保持一致。\n- 微博直播增加可用清晰度探测：原画、蓝光、超清、高清按当前直播源实际情况展示，恢复播放时重新获取并验证所选档位。\n- IPTV节目单移除常驻选中边框，继续显示“使用中”状态。\n- 放大电视直播间列表的标题/主播名及播放控制栏的主播名，行高随文字大小适配。\n- 默认日志保留不含地址或账号的缓冲状态采样，方便继续定位部分旧Android设备跨平台切换后的黑屏问题。该设备问题仍在跟进，不在本版宣称彻底解决。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.19"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.20"
     }
   },
   "windows_msix_available": false

@@ -1,5 +1,106 @@
 [
   {
+    "version": "5.4.23",
+    "title": "Pure Live v5.4.23",
+    "date": "2026-10-30",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.4.23",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 5.4.23：失败播放后的恢复与黑屏修复\n\n- 修复Android画面Surface先到、初始选项后到时把有效输出覆盖为空的问题。\n- 打开操作卡住或持续没有播放进度时，隔离失效内核并进行有上限的恢复；旧房间迟到的操作不会覆盖新房间。\n- 修复快速切房时音量命令排队导致打开超时失效，以及重建播放器后画面组件仍订阅旧播放器、内核播放但屏幕黑的问题。\n- 修复恢复和切房期间用户暂停被迟到操作覆盖的问题，暂停期间不自动打开替代播放器。\n- 原生状态读取改为有超时的异步请求，区分属性不可用、读取异常和超时；增加有限的恢复诊断信息。\n\n已用Android 9独立模拟器和生成媒体核对失败后返回、长停顿重建与手动换线，并检查实际屏幕画面。Sony与Honor原设备及真实平台取流波动尚未复验，#49继续跟进，不据模拟器结果宣称所有设备彻底修复。\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-debug-signed-android-arm64-v8a-release.apk",
+        "size": "108.84mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-debug-signed-android-arm64-v8a-release.apk",
+        "size_bytes": 114131300,
+        "sha256": "26950febe39daa483bcd91f2f8c92363e087ef026c5934bbb225c13a2744e9d0"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "96.98mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-debug-signed-android-armeabi-v7a-release.apk",
+        "size_bytes": 101694438,
+        "sha256": "e3604dc21ba007bfbf5492cb985babf504e0ee0d247df87c80945e3d36a22389"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-debug-signed-android-x86_64-release.apk",
+        "size": "119.95mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-debug-signed-android-x86_64-release.apk",
+        "size_bytes": 125780295,
+        "sha256": "dae21bf5b61270eb293fbafbb71a824848ad48fd786ca7c18c1b20ad24d9eba8"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-ios-trollstore.ipa",
+        "size": "45.52mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-ios-trollstore.ipa",
+        "size_bytes": 47727159,
+        "sha256": "0130adb1e169385ea0b52584c6401353a8e25f637231b6a1abf14b74fec928ab"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-ios-unsigned.ipa",
+        "size": "45.36mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-ios-unsigned.ipa",
+        "size_bytes": 47560904,
+        "sha256": "e580f7850109cdd8e5647d2f9a9e4d378dbbdeee5f957e11bc01fc8b90462325"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-linux-x64.tar.gz",
+        "size": "55.09mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-linux-x64.tar.gz",
+        "size_bytes": 57767124,
+        "sha256": "8d68df82edccfeae20c97eadc211cd7a7a6524d981bd326fc7b3e76c21e0929d"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-macos-universal.dmg",
+        "size": "95.88mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-macos-universal.dmg",
+        "size_bytes": 100538101,
+        "sha256": "a0f91b0a466c75798e4b38316202398c12e9ade7dfcc52379c13782f5edb2395"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-macos-universal.zip",
+        "size": "85.35mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-macos-universal.zip",
+        "size_bytes": 89495210,
+        "sha256": "7bd46cc7b165c5b1a380400e1e553374b5cf939b2dda9578ec93ec687101df1f"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-windows-x64-portable.zip",
+        "size": "65.81mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-windows-x64-portable.zip",
+        "size_bytes": 69005592,
+        "sha256": "887674b354c963a64e435a7bf3774ad07766aaafdc714ebba8c1c7d5336277ca"
+      },
+      {
+        "name": "PureLive-5.4.23-5127-windows-x64-setup.exe",
+        "size": "50.62mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.4.23/PureLive-5.4.23-5127-windows-x64-setup.exe",
+        "size_bytes": 53079782,
+        "sha256": "c62e02fa77c0d31e2763e8ec9d3054799c9b003767b775fd97755c1f24b1c523"
+      }
+    ],
+    "build_number": 5127
+  },
+  {
     "version": "5.4.22",
     "title": "Pure Live v5.4.22",
     "date": "2026-10-30",

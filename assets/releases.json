@@ -1,5 +1,106 @@
 [
   {
+    "version": "5.6.4",
+    "title": "Pure Live v5.6.4",
+    "date": "2026-11-05",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.6.4",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# 5.6.4\n\n- 竖屏全屏弹幕新增左下角向上滚动布局，可在设置选择；升级后默认保留原来的横向弹幕，沿用字体、透明度、屏蔽、表情及长按操作。#193\n- 回放列表接近底部自动继续加载，增加标题/主播关键词搜索、今天/昨天/近3天/7天/30天/90天/一年及自定义日期范围。搜索会逐步检索当前主播或选定合集，显示已检索数量；沿用原横竖屏播放器、小窗、续看、分段与倍速。\n- SOOP新增公开直播回放，在原直播间回放界面查看主播录像和实际分段，选择平台提供的画质，保存本地分段进度。#196\n- SOOP增加多个官方CDN线路，保留服务器分配顺序，移除重复地址；部分分配失败仍保留可用线路，并限制并发和等待时间；修复分配接口迟迟不结束响应导致的超时。#195\n- 网易CC接入原生游客文字弹幕和在线人数；补充按当前主播过滤的礼物消息解析。旧参考注册类型和浮点路由参数与当前官网不一致，本次按实际成功入房流程接入。#198\n- 修复Android应用内小窗绕过“离开应用自动小窗”开关；移除应用任务时清理播放、通知及外部窗口。补上退出时的画中画接收器泄漏、重复音频状态写入和缓存状态清理。#194\n- 小红书首次弹幕初始化与视频打开同时启动，减少两段等待叠加造成的连接延迟。#177\n- 补充抖音礼物消息及连击总量解析，保留快手接口明确返回的礼物文字；没有提供的价格、图标和元数据保持未知。#192\n\n安装包：Android按设备架构选择APK（常见手机arm64-v8a）；Windows提供安装包与便携版，Linux提供tar.gz，macOS提供dmg/zip，iOS提供unsigned/TrollStore IPA。SHA256SUMS记录同源包摘要。\n\n验证边界：SOOP此次支持公开回放，不代替私密、付费或年龄认证；搜索范围为当前主播/合集，非全站搜索。小红书TV微卡顿仍待原设备验证，平台仅返回原画的房间仍只显示原画。抖音/快手登录态真实礼物投递、快手完整价图目录，以及CC礼物真实投递与完整目录仍继续跟进，相关问题不冒充全部完成。Android任务清理已在独立API37模拟器验证，原Honor/MagicOS和Apple真机仍有各自复验边界。\n\n- 修复移除小窗任务时通知服务先停、视频纹理后释放导致Flutter引擎销毁竞态；真实原生退休完成后再清理通知。#194\n\n- 平板自定义壁纸下统一侧栏和顶栏表面，补齐侧栏安全区；无有效壁纸保留原主题。#200\n- 横屏/宽屏直播间侧面板可以点击外侧关闭，关闭点击不会穿透触发播放、切台或退出全屏。#202\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-debug-signed-android-arm64-v8a-release.apk",
+        "size": "122.08mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-debug-signed-android-arm64-v8a-release.apk",
+        "size_bytes": 128009702,
+        "sha256": "a1566842a98608e6812ddbf0054a304e5b7503123f0f46c47d9b7b786669150d"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "105.42mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-debug-signed-android-armeabi-v7a-release.apk",
+        "size_bytes": 110542958,
+        "sha256": "fe40f471d42f7ad76e10dfd418470935d9db78d53eb91927107e3286887b8cc2"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-debug-signed-android-x86_64-release.apk",
+        "size": "136.86mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-debug-signed-android-x86_64-release.apk",
+        "size_bytes": 143508934,
+        "sha256": "ce00de415a2567f7a776da24977e82833c047f5a6dff70a3ee9783f901c51fd4"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-ios-trollstore.ipa",
+        "size": "51.93mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-ios-trollstore.ipa",
+        "size_bytes": 54449639,
+        "sha256": "f46e8f21750da19f25a3f0fc6c1784d3084cb5bf78f082cb3bb2bffb03b235df"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-ios-unsigned.ipa",
+        "size": "51.67mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-ios-unsigned.ipa",
+        "size_bytes": 54180114,
+        "sha256": "51cae0095170a911fe2b926c8491f0084bae6bdd5e0054c3843bdaf441fe7a8d"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-linux-x64.tar.gz",
+        "size": "64.92mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-linux-x64.tar.gz",
+        "size_bytes": 68075561,
+        "sha256": "5eb4c88188e2c18ed7f9c96d98bf5b8f1b6b3d8636fe376b4c0ac25857066bf4"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-macos-universal.dmg",
+        "size": "111.68mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-macos-universal.dmg",
+        "size_bytes": 117107058,
+        "sha256": "464ff4a823310cc08af1f7249d73819f2ca5bd5937accd9956aef7c370975f23"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-macos-universal.zip",
+        "size": "99.89mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-macos-universal.zip",
+        "size_bytes": 104741758,
+        "sha256": "c4573b1ba14f3fe66fef7f97c2ed7e0915a7d4929b7d27356ef74db639b8716b"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-windows-x64-portable.zip",
+        "size": "75.15mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-windows-x64-portable.zip",
+        "size_bytes": 78804018,
+        "sha256": "a5bc409b056d2a9fbc72313a1d4116b45164c61eba4d9874775ff9ed0b3aac9b"
+      },
+      {
+        "name": "PureLive-5.6.4-5143-windows-x64-setup.exe",
+        "size": "56.40mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.6.4/PureLive-5.6.4-5143-windows-x64-setup.exe",
+        "size_bytes": 59139132,
+        "sha256": "9d95d7d455bd7db2d477c9b344d1c0d53507d5c7eb3f7a36d618ac773a85e87b"
+      }
+    ],
+    "build_number": 5143
+  },
+  {
     "version": "5.6.3",
     "title": "Pure Live v5.6.3",
     "date": "2026-11-04",

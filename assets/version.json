@@ -1,10 +1,10 @@
 {
-  "version": "5.7.1",
-  "build_number": 5147,
-  "version_num": 507015147,
-  "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
+  "version": "5.7.2",
+  "build_number": 5148,
+  "version_num": 507025148,
+  "version_desc": "- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.7.1",
-      "build_number": 5147,
-      "version_num": 507015147,
-      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
+      "version": "5.7.2",
+      "build_number": 5148,
+      "version_num": 507025148,
+      "version_desc": "- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.7.1",
-      "build_number": 5147,
-      "version_num": 507015147,
-      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
+      "version": "5.7.2",
+      "build_number": 5148,
+      "version_num": 507025148,
+      "version_desc": "- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.7.1",
-      "build_number": 5147,
-      "version_num": 507015147,
-      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
+      "version": "5.7.2",
+      "build_number": 5148,
+      "version_num": 507025148,
+      "version_desc": "- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2"
     },
     "macos": {
-      "version": "5.7.1",
-      "build_number": 5147,
-      "version_num": 507015147,
-      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
+      "version": "5.7.2",
+      "build_number": 5148,
+      "version_num": 507025148,
+      "version_desc": "- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2"
     },
     "ios": {
-      "version": "5.7.1",
-      "build_number": 5147,
-      "version_num": 507015147,
-      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
+      "version": "5.7.2",
+      "build_number": 5148,
+      "version_num": 507025148,
+      "version_desc": "- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2"
     }
   },
   "windows_msix_available": false

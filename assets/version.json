@@ -1,10 +1,10 @@
 {
-  "version": "5.7.0",
-  "build_number": 5146,
-  "version_num": 507005146,
-  "version_desc": "- Flutter3.50.1、Dart3.14、Gradle9.9.2、AGP9.5.2、JDK27.0.1.1+4；更新Clang、CMake、Visual Studio、Inno Setup、Android平台工具与Apple工具链。准确版本见toolchain.env。\n- 现有发布客户端统一使用mpv0.42；录制FFmpeg9.1。Windows播放使用官方mpv0.42包及其内置FFmpeg快照；自建播放包的版本和来源分别记录。\n- 适配Material/Cupertino分离、完整主题继承、Windows隐藏主窗口绑定、显式显示和首屏刷新，以及文件夹URI，保持小窗和窗口生命周期。播放器信息在精简内核没有长描述时使用实际编码短名。\n- Android和Linux接入系统证书信任，保持TLS验证；受信任HTTPS正常播放，未知证书拒绝，显式CA来源保留。\n- B站关注刷新保留主播身份，直播卡片优先当前关键帧；斗鱼批量确认普通未开播状态，保留不明确状态的逐房核对。#221 #224 #222\n- 画质和线路可选择放在播放器控制栏，默认关闭；宽屏回放折叠聊天时保留控制入口。#220\n- 增加独立房间列表及主动开启的轮播、默认关闭的画面长按切房、TV双画面和前台直播间预约；保留单音源与会话释放。\n- 直播缓存回看默认关闭，仅回看当前会话仍在内存中的连续范围；CHZZK公开回放使用校验过的VOD分段，改善续看和拖动。不是整场回放录制或应用退出后的定时拉起。\n- 修正过期醒目留言、斗鱼延迟实时聊天及预约替换；小红书访客初始化保留阶段、能力与原生清理回执。#177原设备差异继续追踪。",
+  "version": "5.7.1",
+  "build_number": 5147,
+  "version_num": 507015147,
+  "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
   "prerelease": false,
-  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.0",
+  "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1",
   "android_abis": [
     "arm64-v8a",
     "armeabi-v7a",
@@ -12,12 +12,12 @@
   ],
   "platforms": {
     "android": {
-      "version": "5.7.0",
-      "build_number": 5146,
-      "version_num": 507005146,
-      "version_desc": "- Flutter3.50.1、Dart3.14、Gradle9.9.2、AGP9.5.2、JDK27.0.1.1+4；更新Clang、CMake、Visual Studio、Inno Setup、Android平台工具与Apple工具链。准确版本见toolchain.env。\n- 现有发布客户端统一使用mpv0.42；录制FFmpeg9.1。Windows播放使用官方mpv0.42包及其内置FFmpeg快照；自建播放包的版本和来源分别记录。\n- 适配Material/Cupertino分离、完整主题继承、Windows隐藏主窗口绑定、显式显示和首屏刷新，以及文件夹URI，保持小窗和窗口生命周期。播放器信息在精简内核没有长描述时使用实际编码短名。\n- Android和Linux接入系统证书信任，保持TLS验证；受信任HTTPS正常播放，未知证书拒绝，显式CA来源保留。\n- B站关注刷新保留主播身份，直播卡片优先当前关键帧；斗鱼批量确认普通未开播状态，保留不明确状态的逐房核对。#221 #224 #222\n- 画质和线路可选择放在播放器控制栏，默认关闭；宽屏回放折叠聊天时保留控制入口。#220\n- 增加独立房间列表及主动开启的轮播、默认关闭的画面长按切房、TV双画面和前台直播间预约；保留单音源与会话释放。\n- 直播缓存回看默认关闭，仅回看当前会话仍在内存中的连续范围；CHZZK公开回放使用校验过的VOD分段，改善续看和拖动。不是整场回放录制或应用退出后的定时拉起。\n- 修正过期醒目留言、斗鱼延迟实时聊天及预约替换；小红书访客初始化保留阶段、能力与原生清理回执。#177原设备差异继续追踪。",
+      "version": "5.7.1",
+      "build_number": 5147,
+      "version_num": 507015147,
+      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1",
       "android_abis": [
         "arm64-v8a",
         "armeabi-v7a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "5.7.0",
-      "build_number": 5146,
-      "version_num": 507005146,
-      "version_desc": "- Flutter3.50.1、Dart3.14、Gradle9.9.2、AGP9.5.2、JDK27.0.1.1+4；更新Clang、CMake、Visual Studio、Inno Setup、Android平台工具与Apple工具链。准确版本见toolchain.env。\n- 现有发布客户端统一使用mpv0.42；录制FFmpeg9.1。Windows播放使用官方mpv0.42包及其内置FFmpeg快照；自建播放包的版本和来源分别记录。\n- 适配Material/Cupertino分离、完整主题继承、Windows隐藏主窗口绑定、显式显示和首屏刷新，以及文件夹URI，保持小窗和窗口生命周期。播放器信息在精简内核没有长描述时使用实际编码短名。\n- Android和Linux接入系统证书信任，保持TLS验证；受信任HTTPS正常播放，未知证书拒绝，显式CA来源保留。\n- B站关注刷新保留主播身份，直播卡片优先当前关键帧；斗鱼批量确认普通未开播状态，保留不明确状态的逐房核对。#221 #224 #222\n- 画质和线路可选择放在播放器控制栏，默认关闭；宽屏回放折叠聊天时保留控制入口。#220\n- 增加独立房间列表及主动开启的轮播、默认关闭的画面长按切房、TV双画面和前台直播间预约；保留单音源与会话释放。\n- 直播缓存回看默认关闭，仅回看当前会话仍在内存中的连续范围；CHZZK公开回放使用校验过的VOD分段，改善续看和拖动。不是整场回放录制或应用退出后的定时拉起。\n- 修正过期醒目留言、斗鱼延迟实时聊天及预约替换；小红书访客初始化保留阶段、能力与原生清理回执。#177原设备差异继续追踪。",
+      "version": "5.7.1",
+      "build_number": 5147,
+      "version_num": 507015147,
+      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.0",
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1",
       "windows_msix_available": false
     },
     "linux": {
-      "version": "5.7.0",
-      "build_number": 5146,
-      "version_num": 507005146,
-      "version_desc": "- Flutter3.50.1、Dart3.14、Gradle9.9.2、AGP9.5.2、JDK27.0.1.1+4；更新Clang、CMake、Visual Studio、Inno Setup、Android平台工具与Apple工具链。准确版本见toolchain.env。\n- 现有发布客户端统一使用mpv0.42；录制FFmpeg9.1。Windows播放使用官方mpv0.42包及其内置FFmpeg快照；自建播放包的版本和来源分别记录。\n- 适配Material/Cupertino分离、完整主题继承、Windows隐藏主窗口绑定、显式显示和首屏刷新，以及文件夹URI，保持小窗和窗口生命周期。播放器信息在精简内核没有长描述时使用实际编码短名。\n- Android和Linux接入系统证书信任，保持TLS验证；受信任HTTPS正常播放，未知证书拒绝，显式CA来源保留。\n- B站关注刷新保留主播身份，直播卡片优先当前关键帧；斗鱼批量确认普通未开播状态，保留不明确状态的逐房核对。#221 #224 #222\n- 画质和线路可选择放在播放器控制栏，默认关闭；宽屏回放折叠聊天时保留控制入口。#220\n- 增加独立房间列表及主动开启的轮播、默认关闭的画面长按切房、TV双画面和前台直播间预约；保留单音源与会话释放。\n- 直播缓存回看默认关闭，仅回看当前会话仍在内存中的连续范围；CHZZK公开回放使用校验过的VOD分段，改善续看和拖动。不是整场回放录制或应用退出后的定时拉起。\n- 修正过期醒目留言、斗鱼延迟实时聊天及预约替换；小红书访客初始化保留阶段、能力与原生清理回执。#177原设备差异继续追踪。",
+      "version": "5.7.1",
+      "build_number": 5147,
+      "version_num": 507015147,
+      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1"
     },
     "macos": {
-      "version": "5.7.0",
-      "build_number": 5146,
-      "version_num": 507005146,
-      "version_desc": "- Flutter3.50.1、Dart3.14、Gradle9.9.2、AGP9.5.2、JDK27.0.1.1+4；更新Clang、CMake、Visual Studio、Inno Setup、Android平台工具与Apple工具链。准确版本见toolchain.env。\n- 现有发布客户端统一使用mpv0.42；录制FFmpeg9.1。Windows播放使用官方mpv0.42包及其内置FFmpeg快照；自建播放包的版本和来源分别记录。\n- 适配Material/Cupertino分离、完整主题继承、Windows隐藏主窗口绑定、显式显示和首屏刷新，以及文件夹URI，保持小窗和窗口生命周期。播放器信息在精简内核没有长描述时使用实际编码短名。\n- Android和Linux接入系统证书信任，保持TLS验证；受信任HTTPS正常播放，未知证书拒绝，显式CA来源保留。\n- B站关注刷新保留主播身份，直播卡片优先当前关键帧；斗鱼批量确认普通未开播状态，保留不明确状态的逐房核对。#221 #224 #222\n- 画质和线路可选择放在播放器控制栏，默认关闭；宽屏回放折叠聊天时保留控制入口。#220\n- 增加独立房间列表及主动开启的轮播、默认关闭的画面长按切房、TV双画面和前台直播间预约；保留单音源与会话释放。\n- 直播缓存回看默认关闭，仅回看当前会话仍在内存中的连续范围；CHZZK公开回放使用校验过的VOD分段，改善续看和拖动。不是整场回放录制或应用退出后的定时拉起。\n- 修正过期醒目留言、斗鱼延迟实时聊天及预约替换；小红书访客初始化保留阶段、能力与原生清理回执。#177原设备差异继续追踪。",
+      "version": "5.7.1",
+      "build_number": 5147,
+      "version_num": 507015147,
+      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1"
     },
     "ios": {
-      "version": "5.7.0",
-      "build_number": 5146,
-      "version_num": 507005146,
-      "version_desc": "- Flutter3.50.1、Dart3.14、Gradle9.9.2、AGP9.5.2、JDK27.0.1.1+4；更新Clang、CMake、Visual Studio、Inno Setup、Android平台工具与Apple工具链。准确版本见toolchain.env。\n- 现有发布客户端统一使用mpv0.42；录制FFmpeg9.1。Windows播放使用官方mpv0.42包及其内置FFmpeg快照；自建播放包的版本和来源分别记录。\n- 适配Material/Cupertino分离、完整主题继承、Windows隐藏主窗口绑定、显式显示和首屏刷新，以及文件夹URI，保持小窗和窗口生命周期。播放器信息在精简内核没有长描述时使用实际编码短名。\n- Android和Linux接入系统证书信任，保持TLS验证；受信任HTTPS正常播放，未知证书拒绝，显式CA来源保留。\n- B站关注刷新保留主播身份，直播卡片优先当前关键帧；斗鱼批量确认普通未开播状态，保留不明确状态的逐房核对。#221 #224 #222\n- 画质和线路可选择放在播放器控制栏，默认关闭；宽屏回放折叠聊天时保留控制入口。#220\n- 增加独立房间列表及主动开启的轮播、默认关闭的画面长按切房、TV双画面和前台直播间预约；保留单音源与会话释放。\n- 直播缓存回看默认关闭，仅回看当前会话仍在内存中的连续范围；CHZZK公开回放使用校验过的VOD分段，改善续看和拖动。不是整场回放录制或应用退出后的定时拉起。\n- 修正过期醒目留言、斗鱼延迟实时聊天及预约替换；小红书访客初始化保留阶段、能力与原生清理回执。#177原设备差异继续追踪。",
+      "version": "5.7.1",
+      "build_number": 5147,
+      "version_num": 507015147,
+      "version_desc": "- 全部六项间接依赖升级：cli_util0.6.1、coverage1.16.2、package_config3.0.0、material_color_utilities0.13.1、vector_graphics_compiler1.3.7和cross_file0.4.0。\n- 为稳定版文件选择和系统分享插件移植cross_file0.4兼容代码；保留上游版本、许可证、可重放补丁和后续版本检查，不引入14.0开发分支的其他行为变化。\n- 文件和受限URI按实际资源类型读取；分享受限文件使用流式临时副本，保留文件名/MIME与取消结果，并清理读取失败的半截副本。\n- 同步isolate_channel0.6.3、AGP9.5.3和flutter_svg2.5.1；保持Flutter3.50.1/Dart3.14及已经验证的mpv0.42和录制FFmpeg9.1内核。\n- 原有关注、设置、历史及备份格式保持兼容。Android三架构、Windows便携/安装、Linux、iOS两包与macOSDMG/ZIP仍由同一冻结源码构建。\n- 修复Android共享存储可读性误判，以及完整/范围/取消读取后未关闭原生流的问题；真实混淆包连续20次读取的文件句柄保持稳定。",
       "prerelease": false,
-      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.0"
+      "download_url": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.1"
     }
   },
   "windows_msix_available": false

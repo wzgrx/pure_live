@@ -1,5 +1,106 @@
 [
   {
+    "version": "5.7.3",
+    "title": "Pure Live v5.7.3",
+    "date": "2026-11-26",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.3",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# Pure Live 5.7.3\n\n- 修复Linux自5.7.0起部分桌面环境直播画面正常但完全无声的问题：默认恢复内核音频设备探测，避免强制ALSA加载构建机插件目录。\n- 修复专家音频输出中的auto和空值处理，按各平台默认方式选择；明确选择的驱动、禁音及Android回退策略保留。\n- 补充Ubuntu24.04.5正式新旧库对照和真实应用音频回路验收，验证生成440Hz音频的非零PCM输出，避免仅凭视频画面判断声音正常。\n\n本版聚焦#266音频回归，关注、设置、历史及备份格式保持兼容。普通Linux用户可保留默认设置；此前为临时绕过而启用专家输出的用户可关闭该开关恢复自动选择，明确指定ALSA的用户仍按所选驱动运行。原用户物理声卡尚未远程实测，已在相同Ubuntu24.04.5用户态及独立音频服务中复现并验证修复。\n\nAndroid三架构、Windows便携与安装、Linux、iOS两包和macOS两包由同一冻结源码构建；现有5.7.2包不替换。\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-debug-signed-android-arm64-v8a-release.apk",
+        "size": "122.80mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-debug-signed-android-arm64-v8a-release.apk",
+        "size_bytes": 128761552,
+        "sha256": "b043e27d450692dfe0c28d18aac4ba1ab8e700f57a0216faf5cbf9c6528051b4"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "106.20mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-debug-signed-android-armeabi-v7a-release.apk",
+        "size_bytes": 111360340,
+        "sha256": "d930008c03eb6eb863b921c60f4091a2f2f2ec299ee561867656047241aa41ab"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-debug-signed-android-x86_64-release.apk",
+        "size": "137.41mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-debug-signed-android-x86_64-release.apk",
+        "size_bytes": 144080560,
+        "sha256": "d194c4661edba79bdc5f348907ff0b8b9d9c9978c58047f48353ce18b8576c9b"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-ios-trollstore.ipa",
+        "size": "57.95mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-ios-trollstore.ipa",
+        "size_bytes": 60763645,
+        "sha256": "f7fd8c51a56c6bc5bce3c22fde54243ca0364abaee639a8f56d21e50c153f716"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-ios-unsigned.ipa",
+        "size": "57.69mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-ios-unsigned.ipa",
+        "size_bytes": 60497046,
+        "sha256": "71130ed2df4759fc9c643c5c16038d4f56050b6efb32ada9adcd091b3cc09428"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-linux-x64.tar.gz",
+        "size": "72.57mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-linux-x64.tar.gz",
+        "size_bytes": 76090335,
+        "sha256": "d7c21342ae9c992edf8c382cd1b93cbc0145ef1bb4b333b6761013d16c430d73"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-macos-universal.dmg",
+        "size": "127.77mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-macos-universal.dmg",
+        "size_bytes": 133975009,
+        "sha256": "02d2eafadfcceb6095232e2e0ea28abc9190910cfc9692d1b32b6c44562ba017"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-macos-universal.zip",
+        "size": "113.68mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-macos-universal.zip",
+        "size_bytes": 119205240,
+        "sha256": "14b7e78992da6401661a9890d542ae36765cbd6f9cbd9a296cbb76dd07fc12ca"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-windows-x64-portable.zip",
+        "size": "113.50mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-windows-x64-portable.zip",
+        "size_bytes": 119017194,
+        "sha256": "79f9fb72b4853171bcc068a9736ab6812d4e90ad64d28dcd718a38812e4bdd17"
+      },
+      {
+        "name": "PureLive-5.7.3-5149-windows-x64-setup.exe",
+        "size": "83.86mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.3/PureLive-5.7.3-5149-windows-x64-setup.exe",
+        "size_bytes": 87928597,
+        "sha256": "ed05694a0102b8007796fd17ffb17ec53417faf2289ce0534ee7a79cf0ac8a38"
+      }
+    ],
+    "build_number": 5149
+  },
+  {
     "version": "5.7.2",
     "title": "Pure Live v5.7.2",
     "date": "2026-11-26",

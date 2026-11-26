@@ -1,5 +1,106 @@
 [
   {
+    "version": "5.7.2",
+    "title": "Pure Live v5.7.2",
+    "date": "2026-11-26",
+    "github": "https://github.com/wzgrx/PureLive/releases/tag/v5.7.2",
+    "author": {
+      "name": "wzgrx",
+      "avatar": "https://avatars.githubusercontent.com/u/39661556?v=4",
+      "profile": "https://github.com/wzgrx"
+    },
+    "changelog": "# Pure Live 5.7.2\n\n- 修复Windows多画面纹理注册并发崩溃，等待旧纹理完成退休再释放资源；分配失败保留有效画面，并同步真实纹理尺寸。\n- 修复多画面搜索时键盘出现导致输入框重建、焦点丢失；修复Windows中文输入法影响播放快捷键，编辑时恢复原输入上下文。\n- 修复抖音带末尾点号的合法直播间链接解析；斗鱼批量刷新更换为只读公开接口，未确认房间逐间回退，不修改平台账号关注。\n- 修复斗鱼原画HEVC线路识别，保留服务端实际提供的编码与清晰度，不虚构播放地址或8M档位。\n- 为电视回放补齐遥控暂停、快进后退、分集选择与返回焦点；保持同一播放会话和原小窗操作。\n- 修复强制取消录制后未落盘尾段的恢复与MP4转封装，保留未成功合成的原始数据。\n- 整合PR #235并补强弹幕解码队列的字节与帧数上限、输入背压、连接代际隔离和退出清理，避免高峰积压及旧连接消息混入。\n- 为SOOP、Twitch、YouTube直播HLS复用有界分段预取，保持平台代理和请求头；回放和录制各自原有策略保持兼容。\n- 改善小红书独立游客页面初始化与WebView能力错误提示，访客清理保持独立，不清除默认账号资料；复验旧B站关注首次补UID后的持久化批量刷新。\n\n本版优先处理bug与稳定性，新增需求暂缓。斗鱼8M缺少同房样本，当前游客接口样本没有返回该档位；原小红书电视盒子的慢动作、海外平台原账号/网络仍保留独立复验，相关问题不因候选修复自动关闭。Windows生成媒体原生压力、受控慢HLS、Android独立模拟器和Apple CI证据分别记录，不承诺所有实体硬件或账号均已覆盖。\n\n工具链与内核沿用5.7.1已验证版本；Android三架构、Windows便携与安装、Linux、iOS两个包和macOS两个包从同一冻结源码构建。关注、设置、历史和备份格式保持兼容。\n",
+    "files": [
+      {
+        "name": "SHA256SUMS.txt",
+        "size": "0.00mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/SHA256SUMS.txt"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-debug-signed-android-arm64-v8a-release.apk",
+        "size": "122.80mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-debug-signed-android-arm64-v8a-release.apk",
+        "size_bytes": 128761552,
+        "sha256": "30d9fd5be6d1e5695f037f5eb2c44db0d0c5c54ef478f7cd0bd48313f24a95bc"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-debug-signed-android-armeabi-v7a-release.apk",
+        "size": "106.20mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-debug-signed-android-armeabi-v7a-release.apk",
+        "size_bytes": 111360340,
+        "sha256": "5c48ebb2bf8f0216f0fbab18e31546c52e45cff76518d783616a82a335b293c3"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-debug-signed-android-x86_64-release.apk",
+        "size": "137.41mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-debug-signed-android-x86_64-release.apk",
+        "size_bytes": 144080560,
+        "sha256": "e986c827720f127918167c2334417cb906c5023302502a3dbcb97c1e77f4431c"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-ios-trollstore.ipa",
+        "size": "57.95mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-ios-trollstore.ipa",
+        "size_bytes": 60764086,
+        "sha256": "c0b25ed157063b05a473b8107b744ad0d3157e540b996bd18bdb52ce7b1068a9"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-ios-unsigned.ipa",
+        "size": "57.69mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-ios-unsigned.ipa",
+        "size_bytes": 60497487,
+        "sha256": "0ffebd5875a0aa96d9b9dd463f48406cc1e6ece6180242961ccd267c5a89ac3f"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-linux-x64.tar.gz",
+        "size": "72.57mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-linux-x64.tar.gz",
+        "size_bytes": 76090927,
+        "sha256": "85d362b04212a9eb8f15d495e95a22e34ef057dd19656710042e0e9293c59fbf"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-macos-universal.dmg",
+        "size": "126.33mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-macos-universal.dmg",
+        "size_bytes": 132469965,
+        "sha256": "db3f8d27229c584149b9467e08a663e1438b7cd94b87371d21f0b391f63ef2b1"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-macos-universal.zip",
+        "size": "113.68mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-macos-universal.zip",
+        "size_bytes": 119205220,
+        "sha256": "6bab56e1056a7c3351e178d3c0f3d9e05d7c559eab6772576d6d393e55cc4d59"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-windows-x64-portable.zip",
+        "size": "113.50mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-windows-x64-portable.zip",
+        "size_bytes": 119017074,
+        "sha256": "68cb50aaf322364071ca0b367d72e92150c79eff91edacd3f5a2ead4553ace76"
+      },
+      {
+        "name": "PureLive-5.7.2-5148-windows-x64-setup.exe",
+        "size": "83.85mb",
+        "downloads": 0,
+        "url": "https://github.com/wzgrx/PureLive/releases/download/v5.7.2/PureLive-5.7.2-5148-windows-x64-setup.exe",
+        "size_bytes": 87926670,
+        "sha256": "95b5a2e9c5536c767cebf7da51f8b5ba5fe41354692fccb87bf6cff0bb7af0fd"
+      }
+    ],
+    "build_number": 5148
+  },
+  {
     "version": "5.7.1",
     "title": "Pure Live v5.7.1",
     "date": "2026-11-26",
